@@ -1,0 +1,1584 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.model &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains base classes for models defined in the models subpackage.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="k">import</span> <span class="n">signature</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">f1_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">precision_recall_fscore_support</span> <span class="k">as</span> <span class="n">score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">GridSearchCV</span><span class="p">,</span>
+    <span class="n">GroupKFold</span><span class="p">,</span>
+    <span class="n">GroupShuffleSplit</span><span class="p">,</span>
+    <span class="n">KFold</span><span class="p">,</span>
+    <span class="n">ShuffleSplit</span><span class="p">,</span>
+    <span class="n">StratifiedKFold</span><span class="p">,</span>
+    <span class="n">StratifiedShuffleSplit</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.._version</span> <span class="k">import</span> <span class="n">get_mm_version</span>
+<span class="kn">from</span> <span class="nn">..tokenizer</span> <span class="k">import</span> <span class="n">Tokenizer</span>
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">ENABLE_STEMMING</span><span class="p">,</span>
+    <span class="n">ENTITIES_LABEL_TYPE</span><span class="p">,</span>
+    <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">entity_seqs_equal</span><span class="p">,</span>
+    <span class="n">get_feature_extractor</span><span class="p">,</span>
+    <span class="n">get_label_encoder</span><span class="p">,</span>
+    <span class="n">ingest_dynamic_gazetteer</span><span class="p">,</span>
+    <span class="n">register_label</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..system_entity_recognizer</span> <span class="k">import</span> <span class="n">SystemEntityRecognizer</span>
+<span class="kn">from</span> <span class="nn">.taggers.taggers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">BoundaryCounts</span><span class="p">,</span>
+    <span class="n">get_boundary_counts</span><span class="p">,</span>
+    <span class="n">get_entities_from_tags</span><span class="p">,</span>
+    <span class="n">get_tags_from_entities</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># model scoring type</span>
+<span class="n">LIKELIHOOD_SCORING</span> <span class="o">=</span> <span class="s2">&quot;log_loss&quot;</span>
+
+<span class="n">_NEG_INF</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span>
+
+
+<div class="viewcode-block" id="ModelConfig"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig">[docs]</a><span class="k">class</span> <span class="nc">ModelConfig</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A value object representing a model configuration.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        model_type (str): The name of the model type. Will be used to find the</span>
+<span class="sd">            model class to instantiate</span>
+<span class="sd">        example_type (str): The type of the examples which will be passed into</span>
+<span class="sd">            `fit()` and `predict()`. Used to select feature extractors</span>
+<span class="sd">        label_type (str): The type of the labels which will be passed into</span>
+<span class="sd">            `fit()` and returned by `predict()`. Used to select the label encoder</span>
+<span class="sd">        model_settings (dict): Settings specific to the model type specified</span>
+<span class="sd">        params (dict): Params to pass to the underlying classifier</span>
+<span class="sd">        param_selection (dict): Configuration for param selection (using cross</span>
+<span class="sd">            validation)</span>
+<span class="sd">            {&#39;type&#39;: &#39;shuffle&#39;,</span>
+<span class="sd">            &#39;n&#39;: 3,</span>
+<span class="sd">            &#39;k&#39;: 10,</span>
+<span class="sd">            &#39;n_jobs&#39;: 2,</span>
+<span class="sd">            &#39;scoring&#39;: &#39;&#39;,</span>
+<span class="sd">            &#39;grid&#39;: {}</span>
+<span class="sd">            }</span>
+<span class="sd">        features (dict): The keys are the names of feature extractors and the</span>
+<span class="sd">            values are either a kwargs dict which will be passed into the</span>
+<span class="sd">            feature extractor function, or a callable which will be used as to</span>
+<span class="sd">            extract features</span>
+<span class="sd">        train_label_set (regex pattern): The regex pattern for finding training</span>
+<span class="sd">            file names.</span>
+<span class="sd">        test_label_set (regex pattern): The regex pattern for finding testing</span>
+<span class="sd">            file names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;model_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;example_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;label_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;features&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;model_settings&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;param_selection&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;train_label_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;test_label_set&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">example_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">model_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">param_selection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">train_label_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">test_label_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="s2">&quot;model_type&quot;</span><span class="p">:</span> <span class="n">model_type</span><span class="p">,</span>
+            <span class="s2">&quot;example_type&quot;</span><span class="p">:</span> <span class="n">example_type</span><span class="p">,</span>
+            <span class="s2">&quot;label_type&quot;</span><span class="p">:</span> <span class="n">label_type</span><span class="p">,</span>
+            <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;__init__() missing required argument </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">param_selection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">param_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;__init__() One of &#39;params&#39; and &#39;param_selection&#39; is required&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">=</span> <span class="n">model_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">example_type</span> <span class="o">=</span> <span class="n">example_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_type</span> <span class="o">=</span> <span class="n">label_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_settings</span> <span class="o">=</span> <span class="n">model_settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_selection</span> <span class="o">=</span> <span class="n">param_selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_label_set</span> <span class="o">=</span> <span class="n">train_label_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_label_set</span> <span class="o">=</span> <span class="n">test_label_set</span>
+
+<div class="viewcode-block" id="ModelConfig.to_dict"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the model config object into a dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dict version of the config</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">args_str</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelConfig.to_json"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the model config object to JSON</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: JSON representation of the classifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ModelConfig.resolve_config"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig.resolve_config">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method resolves any config incompatibility issues by</span>
+<span class="sd">        loading the latest settings from the app config to the current config</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_config (ModelConfig): The ModelConfig representing the app&#39;s latest config</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_settings</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train_label_set&quot;</span><span class="p">,</span> <span class="s2">&quot;test_label_set&quot;</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Loading missing properties </span><span class="si">%s</span><span class="s2"> from app &quot;</span> <span class="s2">&quot;configuration file&quot;</span><span class="p">,</span> <span class="n">new_settings</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">new_settings</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">new_config</span><span class="p">,</span> <span class="n">setting</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ModelConfig.get_ngram_lengths_and_thresholds"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig.get_ngram_lengths_and_thresholds">[docs]</a>    <span class="k">def</span> <span class="nf">get_ngram_lengths_and_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the n-gram lengths and thresholds to extract to optimize resource collection</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rname (string): Name of the resource</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * lengths (list of int): list of n-gram lengths to be extracted</span>
+<span class="sd">                * thresholds (list of int): thresholds to be applied to corresponding n-gram lengths</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># if it&#39;s not the n-gram feature, we don&#39;t need length and threshold information</span>
+        <span class="k">if</span> <span class="n">rname</span> <span class="o">==</span> <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">:</span>
+            <span class="n">feature_name</span> <span class="o">=</span> <span class="s2">&quot;char-ngrams&quot;</span>
+        <span class="k">elif</span> <span class="n">rname</span> <span class="o">==</span> <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">:</span>
+            <span class="n">feature_name</span> <span class="o">=</span> <span class="s2">&quot;bag-of-words&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">thresholds</span>
+
+        <span class="c1"># feature name varies based on whether it&#39;s for a classifier or tagger</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">lengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">][</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span>
+                <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;thresholds&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;tagger&quot;</span><span class="p">:</span>
+            <span class="n">feature_name</span> <span class="o">=</span> <span class="n">feature_name</span> <span class="o">+</span> <span class="s2">&quot;-seq&quot;</span>
+            <span class="k">if</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">lengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">][</span>
+                    <span class="s2">&quot;ngram_lengths_to_start_positions&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;thresholds&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">thresholds</span></div>
+
+<div class="viewcode-block" id="ModelConfig.required_resources"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelConfig.required_resources">[docs]</a>    <span class="k">def</span> <span class="nf">required_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the resources this model requires</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            set: set of required resources for this model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get list of resources required by feature extractors</span>
+        <span class="n">required_resources</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">get_feature_extractor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">example_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">required_resources</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;requirements&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">return</span> <span class="n">required_resources</span></div></div>
+
+
+<div class="viewcode-block" id="EvaluatedExample"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EvaluatedExample">[docs]</a><span class="k">class</span> <span class="nc">EvaluatedExample</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span>
+        <span class="s2">&quot;EvaluatedExample&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;example&quot;</span><span class="p">,</span> <span class="s2">&quot;expected&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted&quot;</span><span class="p">,</span> <span class="s2">&quot;probas&quot;</span><span class="p">,</span> <span class="s2">&quot;label_type&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents the evaluation of a single example</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        example: The example being evaluated</span>
+<span class="sd">        expected: The expected label for the example</span>
+<span class="sd">        predicted: The predicted label for the example</span>
+<span class="sd">        proba (dict): Maps labels to their predicted probabilities</span>
+<span class="sd">        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># For entities compare just the type, span and text for each entity.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_type</span> <span class="o">==</span> <span class="n">ENTITIES_LABEL_TYPE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">entity_seqs_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span><span class="p">)</span>
+        <span class="c1"># For other label_types compare the full objects</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span></div>
+
+
+<div class="viewcode-block" id="RawResults"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.RawResults">[docs]</a><span class="k">class</span> <span class="nc">RawResults</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represents the raw results of a set of evaluated examples. Useful for generating</span>
+<span class="sd">    stats and graphs.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        predicted (list): A list of predictions. For sequences this is a list of lists, and for</span>
+<span class="sd">                          standard classifieris this is a 1d array. All classes are in their numeric</span>
+<span class="sd">                          representations for ease of use with evaluation libraries and graphing.</span>
+<span class="sd">        expected (list): Same as predicted but contains the true or gold values.</span>
+<span class="sd">        text_labels (list): A list of all the text label values, the index of the text label in</span>
+<span class="sd">                             this array is the numeric label</span>
+<span class="sd">        predicted_flat (list): (Optional): For sequence models this is a flattened list of all</span>
+<span class="sd">                                predicted tags (1d array)</span>
+<span class="sd">        expected_flat (list): (Optional): For sequence models this is a flattened list of all gold</span>
+<span class="sd">                              tags</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">predicted_flat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expected_flat</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span> <span class="o">=</span> <span class="n">predicted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span> <span class="o">=</span> <span class="n">expected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_labels</span> <span class="o">=</span> <span class="n">text_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_flat</span> <span class="o">=</span> <span class="n">predicted_flat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected_flat</span> <span class="o">=</span> <span class="n">expected_flat</span></div>
+
+
+<div class="viewcode-block" id="ModelEvaluation"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation">[docs]</a><span class="k">class</span> <span class="nc">ModelEvaluation</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ModelEvaluation&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">])):</span>
+    <span class="sd">&quot;&quot;&quot;Represents the evaluation of a model at a specific configuration</span>
+<span class="sd">    using a collection of examples and labels.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config (ModelConfig): The model config used during evaluation.</span>
+<span class="sd">        results (list of EvaluatedExample): A list of the evaluated examples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="n">get_label_encoder</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelEvaluation.get_accuracy"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.get_accuracy">[docs]</a>    <span class="k">def</span> <span class="nf">get_accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The accuracy represents the share of examples whose predicted labels</span>
+<span class="sd">        exactly matched their expected labels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The accuracy of the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_examples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+        <span class="n">num_correct</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">is_correct</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">num_correct</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">num_examples</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">num_examples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+        <span class="n">num_correct</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correct_results</span><span class="p">()))</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accuracy</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> score: </span><span class="si">{:.2%}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> of </span><span class="si">{}</span><span class="s2"> example</span><span class="si">{}</span><span class="s2"> correct&gt;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">accuracy</span><span class="p">,</span>
+            <span class="n">num_correct</span><span class="p">,</span>
+            <span class="n">num_examples</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">num_examples</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ModelEvaluation.correct_results"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.correct_results">[docs]</a>    <span class="k">def</span> <span class="nf">correct_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            iterable: Collection of the examples which were correct</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">is_correct</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ModelEvaluation.incorrect_results"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.incorrect_results">[docs]</a>    <span class="k">def</span> <span class="nf">incorrect_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            iterable: Collection of the examples which were incorrect</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_correct</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ModelEvaluation.get_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a structured stats object for evaluation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Structured dict containing evaluation statistics. Contains precision, \</span>
+<span class="sd">                  recall, f scores, support, etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ModelEvaluation.print_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.print_stats">[docs]</a>    <span class="k">def</span> <span class="nf">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints a useful stats table for evaluation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Structured dict containing evaluation statistics. Contains precision, \</span>
+<span class="sd">                  recall, f scores, support, etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ModelEvaluation.raw_results"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.ModelEvaluation.raw_results">[docs]</a>    <span class="k">def</span> <span class="nf">raw_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exposes raw vectors of expected and predicted for data scientists to use for any additional</span>
+<span class="sd">        evaluation metrics or to generate graphs of their choice.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * NamedTuple: RawResults named tuple containing</span>
+<span class="sd">                * expected: vector of predicted classes (numeric value)</span>
+<span class="sd">                * predicted: vector of gold classes (numeric value)</span>
+<span class="sd">                * text_labels: a list of all the text label values, the index of the text label in</span>
+<span class="sd">                * this array is the numeric label</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_update_raw_result</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper method for updating the text to numeric label vectors</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * text_labels: The updated text_labels array</span>
+<span class="sd">                * vec: The updated label vector with the given label appended</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text_labels</span><span class="p">:</span>
+            <span class="n">text_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span>
+
+    <span class="k">def</span> <span class="nf">_get_common_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_expected</span><span class="p">,</span> <span class="n">raw_predicted</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints a useful stats table and returns a structured stats object for evaluation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Structured dict containing evaluation statistics. Contains precision, \</span>
+<span class="sd">                  recall, f scores, support, etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text_labels</span><span class="p">))</span>
+
+        <span class="n">confusion_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_confusion_matrix_and_counts</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">raw_expected</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">raw_predicted</span>
+        <span class="p">)</span>
+        <span class="n">stats_overall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_overall_stats</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">raw_expected</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">raw_predicted</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
+        <span class="p">)</span>
+        <span class="n">counts_overall</span> <span class="o">=</span> <span class="n">confusion_stats</span><span class="p">[</span><span class="s2">&quot;counts_overall&quot;</span><span class="p">]</span>
+        <span class="n">stats_overall</span><span class="p">[</span><span class="s2">&quot;tp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_overall</span><span class="o">.</span><span class="n">tp</span>
+        <span class="n">stats_overall</span><span class="p">[</span><span class="s2">&quot;tn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_overall</span><span class="o">.</span><span class="n">tn</span>
+        <span class="n">stats_overall</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_overall</span><span class="o">.</span><span class="n">fp</span>
+        <span class="n">stats_overall</span><span class="p">[</span><span class="s2">&quot;fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_overall</span><span class="o">.</span><span class="n">fn</span>
+
+        <span class="n">class_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_class_stats</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">raw_expected</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">raw_predicted</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
+        <span class="p">)</span>
+        <span class="n">counts_by_class</span> <span class="o">=</span> <span class="n">confusion_stats</span><span class="p">[</span><span class="s2">&quot;counts_by_class&quot;</span><span class="p">]</span>
+
+        <span class="n">class_stats</span><span class="p">[</span><span class="s2">&quot;tp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_by_class</span><span class="o">.</span><span class="n">tp</span>
+        <span class="n">class_stats</span><span class="p">[</span><span class="s2">&quot;tn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_by_class</span><span class="o">.</span><span class="n">tn</span>
+        <span class="n">class_stats</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_by_class</span><span class="o">.</span><span class="n">fp</span>
+        <span class="n">class_stats</span><span class="p">[</span><span class="s2">&quot;fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_by_class</span><span class="o">.</span><span class="n">fn</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;stats_overall&quot;</span><span class="p">:</span> <span class="n">stats_overall</span><span class="p">,</span>
+            <span class="s2">&quot;class_labels&quot;</span><span class="p">:</span> <span class="n">text_labels</span><span class="p">,</span>
+            <span class="s2">&quot;class_stats&quot;</span><span class="p">:</span> <span class="n">class_stats</span><span class="p">,</span>
+            <span class="s2">&quot;confusion_matrix&quot;</span><span class="p">:</span> <span class="n">confusion_stats</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_class_stats</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for getting some basic statistics by class.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A structured dictionary containing precision, recall, f_beta, and support \</span>
+<span class="sd">                  vectors (1 x number of classes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">f_beta</span><span class="p">,</span> <span class="n">support</span> <span class="o">=</span> <span class="n">score</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
+        <span class="p">)</span>
+
+        <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="n">precision</span><span class="p">,</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">:</span> <span class="n">recall</span><span class="p">,</span>
+            <span class="s2">&quot;f_beta&quot;</span><span class="p">:</span> <span class="n">f_beta</span><span class="p">,</span>
+            <span class="s2">&quot;support&quot;</span><span class="p">:</span> <span class="n">support</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">stats</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_overall_stats</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for getting some overall statistics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A structured dictionary containing scalar values for f1 scores and overall \</span>
+<span class="sd">                  accuracy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f1_weighted</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;weighted&quot;</span>
+        <span class="p">)</span>
+        <span class="n">f1_macro</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span>
+        <span class="p">)</span>
+        <span class="n">f1_micro</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;micro&quot;</span>
+        <span class="p">)</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">)</span>
+
+        <span class="n">stats_overall</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;f1_weighted&quot;</span><span class="p">:</span> <span class="n">f1_weighted</span><span class="p">,</span>
+            <span class="s2">&quot;f1_macro&quot;</span><span class="p">:</span> <span class="n">f1_macro</span><span class="p">,</span>
+            <span class="s2">&quot;f1_micro&quot;</span><span class="p">:</span> <span class="n">f1_micro</span><span class="p">,</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">stats_overall</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_confusion_matrix_and_counts</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the confusion matrix where each element Cij is the number of observations known to</span>
+<span class="sd">        be in group i predicted to be in group j</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Contains 2d array of the confusion matrix, and an array of tp, tn, fp, fn values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">confusion_mat</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">tp_arr</span><span class="p">,</span> <span class="n">tn_arr</span><span class="p">,</span> <span class="n">fp_arr</span><span class="p">,</span> <span class="n">fn_arr</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">confusion_mat</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">class_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+            <span class="c1"># tp is C_classindex, classindex</span>
+            <span class="n">tp</span> <span class="o">=</span> <span class="n">confusion_mat</span><span class="p">[</span><span class="n">class_index</span><span class="p">][</span><span class="n">class_index</span><span class="p">]</span>
+            <span class="n">tp_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+
+            <span class="c1"># tn is the sum of Cij where i or j are not class_index</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">))</span>
+            <span class="n">mask</span><span class="p">[:,</span> <span class="n">class_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">class_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">tn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span> <span class="o">*</span> <span class="n">confusion_mat</span><span class="p">)</span>
+            <span class="n">tn_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tn</span><span class="p">)</span>
+
+            <span class="c1"># fp is the sum of Cij where j is class_index but i is not</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">))</span>
+            <span class="n">mask</span><span class="p">[:,</span> <span class="n">class_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">class_index</span><span class="p">,</span> <span class="n">class_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span> <span class="o">*</span> <span class="n">confusion_mat</span><span class="p">)</span>
+            <span class="n">fp_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+
+            <span class="c1"># fn is the sum of Cij where i is class_index but j is not</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">))</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">class_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">class_index</span><span class="p">,</span> <span class="n">class_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span> <span class="o">*</span> <span class="n">confusion_mat</span><span class="p">)</span>
+            <span class="n">fn_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+        <span class="n">Counts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Counts&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;tp&quot;</span><span class="p">,</span> <span class="s2">&quot;tn&quot;</span><span class="p">,</span> <span class="s2">&quot;fp&quot;</span><span class="p">,</span> <span class="s2">&quot;fn&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;confusion_matrix&quot;</span><span class="p">:</span> <span class="n">confusion_mat</span><span class="p">,</span>
+            <span class="s2">&quot;counts_by_class&quot;</span><span class="p">:</span> <span class="n">Counts</span><span class="p">(</span><span class="n">tp_arr</span><span class="p">,</span> <span class="n">tn_arr</span><span class="p">,</span> <span class="n">fp_arr</span><span class="p">,</span> <span class="n">fn_arr</span><span class="p">),</span>
+            <span class="s2">&quot;counts_overall&quot;</span><span class="p">:</span> <span class="n">Counts</span><span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">tp_arr</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tn_arr</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fp_arr</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fn_arr</span><span class="p">)</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_print_class_stats_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Statistics by class&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper for printing a human readable table for class statistics</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;20}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stats</span><span class="p">))</span>
+        <span class="n">common_stats</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;f_beta&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;support&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fn&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">stat_row_format</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{:&gt;20}</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12.3f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">3</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12.0f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">5</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12.3f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_stats</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">table_titles</span> <span class="o">=</span> <span class="n">common_stats</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="n">stat</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">stats</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">stat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">common_stats</span>
+        <span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title</span> <span class="o">+</span> <span class="s2">&quot;: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">table_titles</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">label_index</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">text_labels</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">table_titles</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="n">stat</span><span class="p">][</span><span class="n">label_index</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">stat_row_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_truncate_label</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span> <span class="o">*</span><span class="n">row</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_print_class_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper for printing a human readable class by class table for displaying</span>
+<span class="sd">        a confusion matrix</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Doesn&#39;t print if there isn&#39;t enough space to display the full matrix.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Not printing confusion matrix since it is too large. The full matrix is still&quot;</span>
+                <span class="s2">&quot; included in the dictionary returned from get_stats().&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text_labels</span><span class="p">))</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;15}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">stat_row_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;15}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">table_titles</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_truncate_label</span><span class="p">(</span><span class="n">text_labels</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span>
+        <span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Confusion matrix: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">table_titles</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">label_index</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">text_labels</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="n">stat_row_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_truncate_label</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="o">*</span><span class="n">matrix</span><span class="p">[</span><span class="n">label_index</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_print_overall_stats_table</span><span class="p">(</span><span class="n">stats_overall</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Overall statistics&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper for printing a human readable table for overall statistics</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;12}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stats_overall</span><span class="p">))</span>
+        <span class="n">common_stats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1_weighted&quot;</span><span class="p">,</span> <span class="s2">&quot;tp&quot;</span><span class="p">,</span> <span class="s2">&quot;tn&quot;</span><span class="p">,</span> <span class="s2">&quot;fp&quot;</span><span class="p">,</span> <span class="s2">&quot;fn&quot;</span><span class="p">]</span>
+        <span class="n">stat_row_format</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{:&gt;12.3f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12.0f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">4</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:&gt;12.3f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stats_overall</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_stats</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">table_titles</span> <span class="o">=</span> <span class="n">common_stats</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="n">stat</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">stats_overall</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">stat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">common_stats</span>
+        <span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title</span> <span class="o">+</span> <span class="s2">&quot;: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">table_titles</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">table_titles</span><span class="p">:</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_overall</span><span class="p">[</span><span class="n">stat</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stat_row_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_truncate_label</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">max_len</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">label</span><span class="p">[:</span><span class="n">max_len</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;..&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_len</span> <span class="k">else</span> <span class="n">label</span></div>
+
+
+<div class="viewcode-block" id="StandardModelEvaluation"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.StandardModelEvaluation">[docs]</a><span class="k">class</span> <span class="nc">StandardModelEvaluation</span><span class="p">(</span><span class="n">ModelEvaluation</span><span class="p">):</span>
+<div class="viewcode-block" id="StandardModelEvaluation.raw_results"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.StandardModelEvaluation.raw_results">[docs]</a>    <span class="k">def</span> <span class="nf">raw_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the raw results of the model evaluation&quot;&quot;&quot;</span>
+        <span class="n">text_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">predicted</span><span class="p">,</span> <span class="n">expected</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="n">text_labels</span><span class="p">,</span> <span class="n">predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_raw_result</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">predicted</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">predicted</span>
+            <span class="p">)</span>
+            <span class="n">text_labels</span><span class="p">,</span> <span class="n">expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_raw_result</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">expected</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">RawResults</span><span class="p">(</span>
+            <span class="n">predicted</span><span class="o">=</span><span class="n">predicted</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="n">expected</span><span class="p">,</span> <span class="n">text_labels</span><span class="o">=</span><span class="n">text_labels</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="StandardModelEvaluation.get_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.StandardModelEvaluation.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints model evaluation stats in a table to stdout&quot;&quot;&quot;</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_common_stats</span><span class="p">(</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">predicted</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span>
+        <span class="p">)</span>
+        <span class="c1"># Note can add any stats specific to the standard model to any of the tables here</span>
+
+        <span class="k">return</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="StandardModelEvaluation.print_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.StandardModelEvaluation.print_stats">[docs]</a>    <span class="k">def</span> <span class="nf">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints model evaluation stats to stdout&quot;&quot;&quot;</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_overall_stats_table</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;stats_overall&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_stats_table</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;class_stats&quot;</span><span class="p">],</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_matrix</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SequenceModelEvaluation"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.SequenceModelEvaluation">[docs]</a><span class="k">class</span> <span class="nc">SequenceModelEvaluation</span><span class="p">(</span><span class="n">ModelEvaluation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag_scheme</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tag_scheme&quot;</span><span class="p">,</span> <span class="s2">&quot;IOB&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SequenceModelEvaluation.raw_results"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.SequenceModelEvaluation.raw_results">[docs]</a>    <span class="k">def</span> <span class="nf">raw_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the raw results of the model evaluation&quot;&quot;&quot;</span>
+        <span class="n">text_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">predicted</span><span class="p">,</span> <span class="n">expected</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">predicted_flat</span><span class="p">,</span> <span class="n">expected_flat</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="n">raw_predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">predicted</span><span class="p">],</span> <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">example</span><span class="p">]</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">raw_expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">expected</span><span class="p">],</span> <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">example</span><span class="p">]</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">vec</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">raw_predicted</span><span class="p">:</span>
+                <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_raw_result</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+            <span class="n">predicted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+            <span class="n">predicted_flat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">raw_expected</span><span class="p">:</span>
+                <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_raw_result</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">text_labels</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+            <span class="n">expected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+            <span class="n">expected_flat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RawResults</span><span class="p">(</span>
+            <span class="n">predicted</span><span class="o">=</span><span class="n">predicted</span><span class="p">,</span>
+            <span class="n">expected</span><span class="o">=</span><span class="n">expected</span><span class="p">,</span>
+            <span class="n">text_labels</span><span class="o">=</span><span class="n">text_labels</span><span class="p">,</span>
+            <span class="n">predicted_flat</span><span class="o">=</span><span class="n">predicted_flat</span><span class="p">,</span>
+            <span class="n">expected_flat</span><span class="o">=</span><span class="n">expected_flat</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_sequence_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TODO: Generate additional sequence level stats</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sequence_accuracy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accuracy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;sequence_accuracy&quot;</span><span class="p">:</span> <span class="n">sequence_accuracy</span><span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_print_sequence_stats_table</span><span class="p">(</span><span class="n">sequence_stats</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper for printing a human readable table for sequence statistics</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;18}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence_stats</span><span class="p">))</span>
+        <span class="n">table_titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sequence_accuracy&quot;</span><span class="p">]</span>
+        <span class="n">stat_row_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;18.3f}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence_stats</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sequence-level statistics: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">table_titles</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">table_titles</span><span class="p">:</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sequence_stats</span><span class="p">[</span><span class="n">stat</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stat_row_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SequenceModelEvaluation.get_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.SequenceModelEvaluation.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints model evaluation stats in a table to stdout&quot;&quot;&quot;</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_common_stats</span><span class="p">(</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">expected_flat</span><span class="p">,</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">predicted_flat</span><span class="p">,</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">sequence_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sequence_stats</span><span class="p">()</span>
+        <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;sequence_stats&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sequence_stats</span>
+
+        <span class="c1"># Note: can add any stats specific to the sequence model to any of the tables here</span>
+        <span class="k">return</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="SequenceModelEvaluation.print_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.SequenceModelEvaluation.print_stats">[docs]</a>    <span class="k">def</span> <span class="nf">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints model evaluation stats to stdout&quot;&quot;&quot;</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_overall_stats_table</span><span class="p">(</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;stats_overall&quot;</span><span class="p">],</span> <span class="s2">&quot;Overall tag-level statistics&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_stats_table</span><span class="p">(</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;class_stats&quot;</span><span class="p">],</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">,</span>
+            <span class="s2">&quot;Tag-level statistics by class&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_matrix</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_sequence_stats_table</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;sequence_stats&quot;</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="EntityModelEvaluation"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityModelEvaluation">[docs]</a><span class="k">class</span> <span class="nc">EntityModelEvaluation</span><span class="p">(</span><span class="n">SequenceModelEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates some statistics specific to entity recognition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_get_entity_boundary_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate le, be, lbe, tp, tn, fp, fn as defined here:</span>
+<span class="sd">        https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">boundary_counts</span> <span class="o">=</span> <span class="n">BoundaryCounts</span><span class="p">()</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">expected_sequence</span><span class="p">,</span> <span class="n">predicted_sequence</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">predicted</span>
+        <span class="p">):</span>
+            <span class="n">expected_seq_labels</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">expected_sequence</span>
+            <span class="p">]</span>
+            <span class="n">predicted_seq_labels</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">predicted_sequence</span>
+            <span class="p">]</span>
+            <span class="n">boundary_counts</span> <span class="o">=</span> <span class="n">get_boundary_counts</span><span class="p">(</span>
+                <span class="n">expected_seq_labels</span><span class="p">,</span> <span class="n">predicted_seq_labels</span><span class="p">,</span> <span class="n">boundary_counts</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">boundary_counts</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_print_boundary_stats</span><span class="p">(</span><span class="n">boundary_counts</span><span class="p">):</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;12}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_counts</span><span class="p">))</span>
+        <span class="n">table_titles</span> <span class="o">=</span> <span class="n">boundary_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">stat_row_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;12}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_counts</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Segment-level statistics: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">table_titles</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">table_titles</span><span class="p">:</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">boundary_counts</span><span class="p">[</span><span class="n">stat</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stat_row_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EntityModelEvaluation.get_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityModelEvaluation.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_scheme</span> <span class="o">==</span> <span class="s2">&quot;IOB&quot;</span><span class="p">:</span>
+            <span class="n">boundary_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_entity_boundary_stats</span><span class="p">()</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;boundary_stats&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boundary_stats</span>
+        <span class="k">return</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="EntityModelEvaluation.print_stats"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityModelEvaluation.print_stats">[docs]</a>    <span class="k">def</span> <span class="nf">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">raw_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_results</span><span class="p">()</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_overall_stats_table</span><span class="p">(</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;stats_overall&quot;</span><span class="p">],</span> <span class="s2">&quot;Overall tag-level statistics&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_stats_table</span><span class="p">(</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;class_stats&quot;</span><span class="p">],</span>
+            <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">,</span>
+            <span class="s2">&quot;Tag-level statistics by class&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_class_matrix</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">text_labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_scheme</span> <span class="o">==</span> <span class="s2">&quot;IOB&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_print_boundary_stats</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;boundary_stats&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_sequence_stats_table</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;sequence_stats&quot;</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An abstract class upon which all models are based.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config (ModelConfig): The configuration for the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_version</span> <span class="o">=</span> <span class="n">get_mm_version</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">get_label_encoder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_loss_</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Model.fit"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_model_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tokenizer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tokenizer</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;The tokenizer resource has not been registered &quot;</span>
+                <span class="s2">&quot;to the model. Using default tokenizer.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">tokenizer</span>
+
+    <span class="k">def</span> <span class="nf">_fit_cv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selection_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called by the fit method when cross validation parameters are passed in. Runs cross</span>
+<span class="sd">        validation and returns the best estimator and parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list): A list of examples. Should be in the format expected by the \</span>
+<span class="sd">                             underlying estimator.</span>
+<span class="sd">            labels (list): The target output values.</span>
+<span class="sd">            groups (None, optional): Same length as examples and labels. Used to group \</span>
+<span class="sd">                                     examples when splitting the dataset into train/test</span>
+<span class="sd">            selection_settings (dict, optional): A dictionary containing the cross \</span>
+<span class="sd">                                                 validation selection settings.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selection_settings</span> <span class="o">=</span> <span class="n">selection_settings</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span>
+        <span class="n">cv_iterator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cv_iterator</span><span class="p">(</span><span class="n">selection_settings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">selection_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="n">cv_type</span> <span class="o">=</span> <span class="n">selection_settings</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+        <span class="n">num_splits</span> <span class="o">=</span> <span class="n">cv_iterator</span><span class="o">.</span><span class="n">get_n_splits</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Selecting hyperparameters using </span><span class="si">%s</span><span class="s2"> cross-validation with </span><span class="si">%s</span><span class="s2"> split</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">cv_type</span><span class="p">,</span>
+            <span class="n">num_splits</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">num_splits</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">scoring</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cv_scorer</span><span class="p">(</span><span class="n">selection_settings</span><span class="p">)</span>
+        <span class="n">n_jobs</span> <span class="o">=</span> <span class="n">selection_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">param_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_params</span><span class="p">(</span><span class="n">selection_settings</span><span class="p">[</span><span class="s2">&quot;grid&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">model_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_constructor</span><span class="p">()</span>
+        <span class="n">estimator</span><span class="p">,</span> <span class="n">param_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cv_estimator_and_params</span><span class="p">(</span>
+            <span class="n">model_class</span><span class="p">,</span> <span class="n">param_grid</span>
+        <span class="p">)</span>
+        <span class="c1"># set GridSearchCV&#39;s return_train_score attribute to False improves cross-validation</span>
+        <span class="c1"># runtime perf as it doesn&#39;t have to compute training scores and which we don&#39;t consume</span>
+        <span class="n">grid_cv</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">scoring</span><span class="p">,</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+            <span class="n">cv</span><span class="o">=</span><span class="n">cv_iterator</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">return_train_score</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">grid_cv</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Candidate parameters: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="n">std_err</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="mf">2.0</span>
+                <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s2">&quot;std_test_score&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">n_splits_</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">scoring</span> <span class="o">==</span> <span class="n">LIKELIHOOD_SCORING</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Candidate average log likelihood: </span><span class="si">{:.4}</span><span class="s2"> ± </span><span class="si">{:.4}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Candidate average accuracy: </span><span class="si">{:.2%}</span><span class="s2"> ± </span><span class="si">{:.2%}</span><span class="s2">&quot;</span>
+            <span class="c1"># pylint: disable=logging-format-interpolation</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s2">&quot;mean_test_score&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">std_err</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">scoring</span> <span class="o">==</span> <span class="n">LIKELIHOOD_SCORING</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Best log likelihood: </span><span class="si">{:.4}</span><span class="s2">, params: </span><span class="si">{}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cv_loss_</span> <span class="o">=</span> <span class="o">-</span><span class="n">model</span><span class="o">.</span><span class="n">best_score_</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Best accuracy: </span><span class="si">{:.2%}</span><span class="s2">, params: </span><span class="si">{}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cv_loss_</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">best_score_</span>
+
+        <span class="n">best_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_cv_best_params</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_params_</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=logging-format-interpolation</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_score_</span><span class="p">,</span> <span class="n">best_params</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">best_estimator_</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_params_</span>
+
+    <span class="k">def</span> <span class="nf">_get_cv_scorer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection_settings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the scorer to use based on the selection settings and classifier type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_clean_params</span><span class="p">(</span><span class="n">model_class</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make sure that the params to be passed into model construction meet the model&#39;s expected</span>
+<span class="sd">        params</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">expected_params</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">model_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s2">&quot;parameters&quot;</span> <span class="ow">in</span> <span class="n">expected_params</span><span class="p">:</span>
+            <span class="c1"># if there is only one key, this is our custom TaggerModel which is supposed to be a</span>
+            <span class="c1"># pass-through and pass everything to the actual sklearn model</span>
+            <span class="k">return</span> <span class="n">params</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected_params</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unexpected param `</span><span class="si">{param}</span><span class="s2">`, dropping it from model config.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">param</span><span class="o">=</span><span class="n">param</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_get_cv_estimator_and_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">):</span>
+        <span class="n">param_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_params</span><span class="p">(</span><span class="n">model_class</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;warm_start&quot;</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">model_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># Warm start helps speed up cross-validation for some models such as random forest</span>
+            <span class="k">return</span> <span class="n">model_class</span><span class="p">(</span><span class="n">warm_start</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">param_grid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model_class</span><span class="p">(),</span> <span class="n">param_grid</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_cv_best_params</span><span class="p">(</span><span class="n">best_params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">best_params</span>
+
+<div class="viewcode-block" id="Model.select_params"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.select_params">[docs]</a>    <span class="k">def</span> <span class="nf">select_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">selection_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Selects the best set of hyper-parameters for a given set of examples and true labels</span>
+<span class="sd">            through cross-validation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples: A list of example queries</span>
+<span class="sd">            labels: A list of labels associated with the queries</span>
+<span class="sd">            selection_settings: A dictionary of parameter lists to select from</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary of optimized parameters to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_convert_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert the params from the style given by the config to the style</span>
+<span class="sd">        passed in to the actual classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param_grid (dict): lists of classifier parameter values, keyed by \</span>
+<span class="sd">                parameter name</span>
+<span class="sd">            y (list): A list of labels</span>
+<span class="sd">            is_grid (bool, optional): Indicates whether param_grid is actually a grid \</span>
+<span class="sd">                or a params dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Model.predict"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predicts a list of class labels for the given list of queries using the trained</span>
+<span class="sd">            classification model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list): A list of queries to predict</span>
+<span class="sd">            dynamic_resource (dict): A dictionary containing dynamic resource keys like</span>
+<span class="sd">                dynamic gazetteers that is used to bias the NLP classifier</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of predicted labels per query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Model.predict_proba"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs prediction on each of the given queries and generates multiple hypotheses with their</span>
+<span class="sd">        associated probabilities using the trained classification model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries to train on</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \</span>
+<span class="sd">                with confidence scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Model.evaluate"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluates the predictions of each query against the labels provided.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list): A list of queries to predict</span>
+<span class="sd">            labels (list): A list of labels corresponding to each query</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list(ModelEvaluation): an list containing ModelEvaluation information about the \</span>
+<span class="sd">                evaluation for each query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_effective_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a model config object for the current effective config (after \</span>
+<span class="sd">        param selection)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ModelConfig</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">config_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;param_selection&quot;</span><span class="p">)</span>
+        <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span>
+        <span class="k">return</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="o">**</span><span class="n">config_dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.register_resources"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.register_resources">[docs]</a>    <span class="k">def</span> <span class="nf">register_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Registers resources which are accessible to feature extractors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: dictionary of resources to register</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Model.get_feature_matrix"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.get_feature_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets all features from an example.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example: An example object.</span>
+<span class="sd">            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference</span>
+<span class="sd">            tokenizer (Tokenizer): The component used to normalize entities in dynamic_resource</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict of str: number): A dict of feature names to their values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">example_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">example_type</span>
+        <span class="n">feat_set</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">workspace_resource</span> <span class="o">=</span> <span class="n">ingest_dynamic_gazetteer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span>
+        <span class="p">)</span>
+        <span class="n">workspace_features</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">workspace_features</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">workspace_features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="c1"># a feature extractor function was passed in directly</span>
+                <span class="n">feat_extractor</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">ENABLE_STEMMING</span><span class="p">]</span> <span class="o">=</span> <span class="n">enable_stemming</span>
+                <span class="n">feat_extractor</span> <span class="o">=</span> <span class="n">get_feature_extractor</span><span class="p">(</span><span class="n">example_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">feat_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feat_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">workspace_resource</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">feat_set</span>
+
+<div class="viewcode-block" id="Model.view_extracted_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.view_extracted_features">[docs]</a>    <span class="k">def</span> <span class="nf">view_extracted_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_cv_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">cv_type</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cv_iterator</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;k-fold&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_fold_iterator</span><span class="p">,</span>
+                <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle_iterator</span><span class="p">,</span>
+                <span class="s2">&quot;group-k-fold&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_k_fold_iterator</span><span class="p">,</span>
+                <span class="s2">&quot;group-shuffle&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_shuffle_iterator</span><span class="p">,</span>
+                <span class="s2">&quot;stratified-k-fold&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stratified_k_fold_iterator</span><span class="p">,</span>
+                <span class="s2">&quot;stratified-shuffle&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stratified_shuffle_iterator</span><span class="p">,</span>
+            <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv_type</span><span class="p">)(</span><span class="n">settings</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown param selection type: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cv_type</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">cv_iterator</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_k_fold_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_shuffle_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">test_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_groups_k_fold_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">GroupKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_groups_shuffle_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">test_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="n">GroupShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_stratified_k_fold_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_stratified_shuffle_iterator</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">test_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="n">StratifiedShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.get_resource"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.get_resource">[docs]</a>    <span class="k">def</span> <span class="nf">get_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Model.requires_resource"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.requires_resource">[docs]</a>    <span class="k">def</span> <span class="nf">requires_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">):</span>
+        <span class="n">example_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">example_type</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="c1"># a feature extractor function was passed in directly</span>
+                <span class="n">feature_extractor</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">feature_extractor</span> <span class="o">=</span> <span class="n">get_feature_extractor</span><span class="p">(</span><span class="n">example_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s2">&quot;requirements&quot;</span> <span class="ow">in</span> <span class="n">feature_extractor</span><span class="o">.</span><span class="vm">__dict__</span>
+                <span class="ow">and</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">feature_extractor</span><span class="o">.</span><span class="n">requirements</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Model.initialize_resources"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.Model.initialize_resources">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_loader</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load the required resources for feature extractors. Each feature extractor uses \</span>
+<span class="sd">        @requires decorator to declare required resources. Based on feature list in model config \</span>
+<span class="sd">        a list of required resources are compiled, and the passed in resource loader is then used \</span>
+<span class="sd">        to load the resources accordingly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_loader (ResourceLoader): application resource loader object</span>
+<span class="sd">            examples (list): Optional. A list of examples.</span>
+<span class="sd">            labels (list): Optional. A parallel list to examples. The gold labels \</span>
+<span class="sd">                           for each example.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get list of resources required by feature extractors</span>
+        <span class="n">required_resources</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">required_resources</span><span class="p">()</span>
+
+        <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">ENABLE_STEMMING</span> <span class="ow">in</span> <span class="n">required_resources</span>
+
+        <span class="c1"># load required resources if not present in model resources</span>
+        <span class="k">for</span> <span class="n">rname</span> <span class="ow">in</span> <span class="n">required_resources</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rname</span> <span class="o">==</span> <span class="n">ENABLE_STEMMING</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">rname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">:</span>
+                <span class="n">lengths</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_ngram_lengths_and_thresholds</span><span class="p">(</span>
+                    <span class="n">rname</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">[</span><span class="n">rname</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource_loader</span><span class="o">.</span><span class="n">load_feature_resource</span><span class="p">(</span>
+                    <span class="n">rname</span><span class="p">,</span>
+                    <span class="n">queries</span><span class="o">=</span><span class="n">examples</span><span class="p">,</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                    <span class="n">lengths</span><span class="o">=</span><span class="n">lengths</span><span class="p">,</span>
+                    <span class="n">thresholds</span><span class="o">=</span><span class="n">thresholds</span><span class="p">,</span>
+                    <span class="n">enable_stemming</span><span class="o">=</span><span class="n">enable_stemming</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Always initialize the global resource for tokenization, which is not a</span>
+        <span class="c1"># feature-specific resource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">[</span><span class="s2">&quot;tokenizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource_loader</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="LabelEncoder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.LabelEncoder">[docs]</a><span class="k">class</span> <span class="nc">LabelEncoder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The label encoder is responsible for converting between rich label</span>
+<span class="sd">    objects such as a ProcessedQuery and basic formats a model can interpret.</span>
+
+<span class="sd">    A MindMeld model uses its label encoder at fit time to encode labels into a</span>
+<span class="sd">    form it can deal with, and at predict time to decode predictions into</span>
+<span class="sd">    objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an encoder</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (ModelConfig): The model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+
+<div class="viewcode-block" id="LabelEncoder.encode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.LabelEncoder.encode">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a list of label objects into a vector of classes.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            labels (list): A list of labels to encode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="n">kwargs</span>
+        <span class="k">return</span> <span class="n">labels</span></div>
+
+<div class="viewcode-block" id="LabelEncoder.decode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.LabelEncoder.decode">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decodes a vector of classes into a list of labels</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            classes (list): A list of classes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The decoded labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="n">kwargs</span>
+        <span class="k">return</span> <span class="n">classes</span></div></div>
+
+
+<div class="viewcode-block" id="EntityLabelEncoder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityLabelEncoder">[docs]</a><span class="k">class</span> <span class="nc">EntityLabelEncoder</span><span class="p">(</span><span class="n">LabelEncoder</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an encoder</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (ModelConfig): The model configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_recognizer</span> <span class="o">=</span> <span class="n">SystemEntityRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_tag_scheme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tag_scheme&quot;</span><span class="p">,</span> <span class="s2">&quot;IOB&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EntityLabelEncoder.encode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityLabelEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;Gets a list of joint app and system IOB tags from each query&#39;s entities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            labels (list): A list of labels associated with each query</span>
+<span class="sd">            kwargs (dict): A dict containing atleast the &quot;examples&quot; key, which is a</span>
+<span class="sd">                list of queries to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of list of joint app and system IOB tags from each</span>
+<span class="sd">                query&#39;s entities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span>
+        <span class="n">scheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tag_scheme</span><span class="p">()</span>
+        <span class="c1"># Here each label is a list of entities for the corresponding example</span>
+        <span class="n">all_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">all_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_tags_from_entities</span><span class="p">(</span><span class="n">examples</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">label</span><span class="p">,</span> <span class="n">scheme</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">all_tags</span></div>
+
+<div class="viewcode-block" id="EntityLabelEncoder.decode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.model.html#mindmeld.models.EntityLabelEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags_by_example</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decodes the labels from the tags passed in for each query</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tags_by_example (list): A list of tags per query</span>
+<span class="sd">            kwargs (dict): A dict containing atleast the &quot;examples&quot; key, which is a</span>
+<span class="sd">                list of queries to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of decoded labels per query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: support decoding multiple queries at once</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">get_entities_from_tags</span><span class="p">(</span><span class="n">examples</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">tags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_recognizer</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">tags</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tags_by_example</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">labels</span></div></div>
+
+
+<span class="n">register_label</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="n">LabelEncoder</span><span class="p">)</span>
+<span class="n">register_label</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="n">EntityLabelEncoder</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

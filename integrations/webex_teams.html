@@ -1,0 +1,412 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Webex Teams Integration &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="WhatsApp Integration" href="whatsapp.html" />
+    <link rel="prev" title="Dealing with Voice Inputs" href="../userguide/voice.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Webex Teams Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#register-webex-bot">1. Register Webex Bot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#register-webex-webhook">2. Register Webex Webhook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-the-bot">3. Building the bot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-the-food-ordering-server">4. Start the food ordering server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-the-integration">5. Test the integration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Webex Teams Integration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/integrations/webex_teams.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="webex-teams-integration">
+<h1>Webex Teams Integration<a class="headerlink" href="#webex-teams-integration" title="Permalink to this headline">¶</a></h1>
+<p>A conversational app built using MindMeld can be integrated seamlessly with Webex Teams.
+In this tutorial, we will create a Webex Teams bot based on the <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">Food Ordering</span></a> blueprint. The food ordering app is an example of a deep-domain conversational agent that uses a knowledge base of restaurants and menu items to understand complex user queries that reference dishes from different restaurant menus.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please make sure to install the Webex Teams dependency by running in the shell: <code class="code docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bot]</span></code>.</p>
+</div>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<p>In this quick start guide, we will use a webhook and <cite>ngrok</cite> to integrate the food ordering application to Webex Teams. By setting up a publicly accessible server, one can register the server’s IP address to the webhook, thereby allowing Webex Teams to send messages to the food ordering application. This guide should take between five and fifteen minutes to complete.</p>
+<div class="section" id="register-webex-bot">
+<h3>1. Register Webex Bot<a class="headerlink" href="#register-webex-bot" title="Permalink to this headline">¶</a></h3>
+<p>Create a <a class="reference external" href="https://developer.webex.com/my-apps/new/bot">new Webex Bot integration</a> and store the Bot’s Access Token safely.</p>
+<a class="reference internal image-reference" href="../_images/create_bot.png"><img alt="../_images/create_bot.png" class="align-center" src="../_images/create_bot.png" style="width: 700px;" /></a>
+<p>Next, make sure you make the local server endpoint for port 8080 publicly accessible. This could be done through a system like Nginx.</p>
+</div>
+<div class="section" id="register-webex-webhook">
+<h3>2. Register Webex Webhook<a class="headerlink" href="#register-webex-webhook" title="Permalink to this headline">¶</a></h3>
+<p>Register a <a class="reference external" href="https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook">new webhook</a>. Set the <code class="docutils literal"><span class="pre">targetUrl</span></code> as ngrok’s public URL, set <code class="docutils literal"><span class="pre">resource</span></code> to <code class="docutils literal"><span class="pre">messages</span></code>, and set <code class="docutils literal"><span class="pre">event</span></code> to <code class="docutils literal"><span class="pre">created</span></code>. Once you click <cite>Run</cite>, store the <code class="docutils literal"><span class="pre">id</span></code> field in the response. This will be your webhook ID.</p>
+<a class="reference internal image-reference" href="../_images/webhook.png"><img alt="../_images/webhook.png" class="align-center" src="../_images/webhook.png" style="width: 700px;" /></a>
+</div>
+<div class="section" id="building-the-bot">
+<h3>3. Building the bot<a class="headerlink" href="#building-the-bot" title="Permalink to this headline">¶</a></h3>
+<p>You can import <cite>WebexBotServer</cite> to build a Webex bot application server with MindMeld.</p>
+<p>First, you need to install the specific dependencies for bot integration.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">pip install mindmeld[bot]</span>
+</pre></div>
+</div>
+<p>After that you can instantiate an WebexBotServer instance and pass your application logic and the Webhook ID and the Access Token into the server.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="kn">from</span> <span class="nn">mindmeld.bot</span> <span class="kn">import</span> <span class="n">WebexBotServer</span>
+<span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+   <span class="c1"># Create web hook here: https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook</span>
+   <span class="n">WEBHOOK_ID</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;WEBHOOK_ID&#39;</span><span class="p">)</span>
+
+   <span class="c1"># Create bot access token here: https://developer.webex.com/my-apps/new</span>
+   <span class="n">ACCESS_TOKEN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BOT_ACCESS_TOKEN&#39;</span><span class="p">)</span>
+
+   <span class="n">configure_logs</span><span class="p">()</span>
+   <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+   <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+   <span class="n">server</span> <span class="o">=</span> <span class="n">WebexBotServer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">webhook_id</span><span class="o">=</span><span class="n">WEBHOOK_ID</span><span class="p">,</span>
+                           <span class="n">access_token</span><span class="o">=</span><span class="n">ACCESS_TOKEN</span><span class="p">)</span>
+
+   <span class="n">port_number</span> <span class="o">=</span> <span class="mi">8080</span>
+   <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running server on port {}...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">port_number</span><span class="p">))</span>
+
+   <span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port_number</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can download the food ordering blueprint or HR blueprint for an example implementation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">bp_name</span> <span class="o">=</span> <span class="s1">&#39;food_ordering&#39;</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-the-food-ordering-server">
+<h3>4. Start the food ordering server<a class="headerlink" href="#start-the-food-ordering-server" title="Permalink to this headline">¶</a></h3>
+<p>Set the following environment variables and start the flask server.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">cd food_ordering</span>
+<span class="go">export WEBHOOK_ID=&lt;insert webhook id&gt;</span>
+<span class="go">export BOT_ACCESS_TOKEN=&lt;insert bot access token&gt;</span>
+<span class="go">python webex_bot_server.py</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-the-integration">
+<h3>5. Test the integration<a class="headerlink" href="#test-the-integration" title="Permalink to this headline">¶</a></h3>
+<p>Create a Webex Teams space and add the bot to the space. To trigger the webhook, simply &#64;mention the bot and converse with it.</p>
+<a class="reference internal image-reference" href="../_images/bot_interaction.png"><img alt="../_images/bot_interaction.png" class="align-center" src="../_images/bot_interaction.png" style="width: 700px;" /></a>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="whatsapp.html" class="btn btn-neutral float-right" title="WhatsApp Integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../userguide/voice.html" class="btn btn-neutral float-left" title="Dealing with Voice Inputs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

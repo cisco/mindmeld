@@ -1,0 +1,1670 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.dialogue &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.dialogue</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.dialogue</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the dialogue manager component of MindMeld&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">cmp_to_key</span><span class="p">,</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">immutables</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.request</span> <span class="k">import</span> <span class="n">FrozenParams</span><span class="p">,</span> <span class="n">Params</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">..core</span> <span class="k">import</span> <span class="n">Entity</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="k">import</span> <span class="n">entity_features</span><span class="p">,</span> <span class="n">query_features</span>
+<span class="kn">from</span> <span class="nn">..models.helpers</span> <span class="k">import</span> <span class="n">DEFAULT_SYS_ENTITIES</span>
+
+<span class="n">mod_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DirectiveNames"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DirectiveNames">[docs]</a><span class="k">class</span> <span class="nc">DirectiveNames</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A constants object for directive names.&quot;&quot;&quot;</span>
+
+    <span class="n">LIST</span> <span class="o">=</span> <span class="s2">&quot;list&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to display a list.&quot;&quot;&quot;</span>
+
+    <span class="n">LISTEN</span> <span class="o">=</span> <span class="s2">&quot;listen&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to listen (start speech recognition).&quot;&quot;&quot;</span>
+
+    <span class="n">REPLY</span> <span class="o">=</span> <span class="s2">&quot;reply&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to display a text view.&quot;&quot;&quot;</span>
+
+    <span class="n">RESET</span> <span class="o">=</span> <span class="s2">&quot;reset&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to reset.&quot;&quot;&quot;</span>
+
+    <span class="n">SPEAK</span> <span class="o">=</span> <span class="s2">&quot;speak&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to speak text out loud.&quot;&quot;&quot;</span>
+
+    <span class="n">SUGGESTIONS</span> <span class="o">=</span> <span class="s2">&quot;suggestions&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A view for a list of suggestions.&quot;&quot;&quot;</span>
+
+    <span class="n">SLEEP</span> <span class="o">=</span> <span class="s2">&quot;sleep&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A directive to put the client to sleep after a specified number of milliseconds.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="DirectiveTypes"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DirectiveTypes">[docs]</a><span class="k">class</span> <span class="nc">DirectiveTypes</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A constants object for directive types.&quot;&quot;&quot;</span>
+
+    <span class="n">VIEW</span> <span class="o">=</span> <span class="s2">&quot;view&quot;</span>
+    <span class="sd">&quot;&quot;&quot;An action directive.&quot;&quot;&quot;</span>
+
+    <span class="n">ACTION</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A view directive.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="DialogueStateException"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueStateException">[docs]</a><span class="k">class</span> <span class="nc">DialogueStateException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">target_dialogue_state</span></div>
+
+
+<div class="viewcode-block" id="DialogueStateRule"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueStateRule">[docs]</a><span class="k">class</span> <span class="nc">DialogueStateRule</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A rule that determines a dialogue state. Each rule represents a pattern that must match in</span>
+<span class="sd">    order to invoke a particular dialogue state.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        dialogue_state (str): The name of the dialogue state.</span>
+<span class="sd">        domain (str): The name of the domain to match against.</span>
+<span class="sd">        entity_types (set): The set of entity types to match against.</span>
+<span class="sd">        intent (str): The name of the intent to match against.</span>
+<span class="sd">        targeted_only (bool): Whether the state is targeted only.</span>
+<span class="sd">        default (bool): Whether this is the default state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;DialogueStateRule&quot;</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Class logger.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dialogue_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a dialogue state rule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dialogue_state (str): The name of the dialogue state.</span>
+<span class="sd">            domain (str): The name of the domain to match against.</span>
+<span class="sd">            has_entity (str): A single entity type to match.</span>
+<span class="sd">            has_entities (list, set): A list/set of entity types to match</span>
+<span class="sd">                against.</span>
+<span class="sd">            intent (str): The name of the intent to match against.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+
+        <span class="n">key_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;domain&quot;</span><span class="p">,),</span>
+            <span class="p">(</span><span class="s2">&quot;intent&quot;</span><span class="p">,),</span>
+            <span class="p">(</span><span class="s2">&quot;has_entity&quot;</span><span class="p">,</span> <span class="s2">&quot;has_entities&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;targeted_only&quot;</span><span class="p">,),</span>
+            <span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,),</span>
+        <span class="p">)</span>
+        <span class="n">valid_kwargs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">key_kwargs</span><span class="p">:</span>
+            <span class="n">valid_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">kwarg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_kwargs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;DialogueStateRule() got an unexpected keyword argument&quot;</span>
+                        <span class="s2">&quot; &#39;</span><span class="si">{!s}</span><span class="s2">&#39;&quot;</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwarg</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">resolved</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">key_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">single</span><span class="p">,</span> <span class="n">plural</span> <span class="o">=</span> <span class="n">keys</span>  <span class="c1"># pylint: disable=unbalanced-tuple-unpacking</span>
+                <span class="k">if</span> <span class="n">single</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">plural</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Only one of </span><span class="si">{!r}</span><span class="s2"> and </span><span class="si">{!r}</span><span class="s2"> can be specified for a dialogue state rule&quot;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">single</span><span class="p">,</span> <span class="n">plural</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">single</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">single</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">resolved</span><span class="p">[</span><span class="n">plural</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">kwargs</span><span class="p">[</span><span class="n">single</span><span class="p">]}</span>
+                <span class="k">elif</span> <span class="n">plural</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="n">plural</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">resolved</span><span class="p">[</span><span class="n">plural</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">plural</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">single</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid argument type </span><span class="si">{!r}</span><span class="s2"> for </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">single</span><span class="p">],</span> <span class="n">single</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">plural</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid argument type </span><span class="si">{!r}</span><span class="s2"> for </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">plural</span><span class="p">],</span> <span class="n">plural</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">resolved</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;intent&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targeted_only</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;targeted_only&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_entities&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">entities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid entity specification for dialogue state rule: </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entities</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">targeted_only</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;For a dialogue state rule, if targeted_only is &quot;</span>
+                <span class="s2">&quot;True, domain, intent, and has_entity must be omitted&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targeted_only</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;For a dialogue state rule, if default is True, &quot;</span>
+                <span class="s2">&quot;domain, intent, has_entity, and targeted_only must be omitted&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="DialogueStateRule.apply"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueStateRule.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state rule to the given context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): A request object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (bool): Whether or not the context matches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Note: this will probably change as the details of &quot;context&quot; are worked out</span>
+
+        <span class="c1"># bail if this rule is only reachable via target_dialogue_state</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">targeted_only</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># check domain is correct</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">domain</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># check intent is correct</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">intent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># check expected entity types are present</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO cache entity types</span>
+            <span class="n">entity_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+                <span class="n">entity_types</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span> <span class="o">&amp;</span> <span class="n">entity_types</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">complexity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an integer representing the complexity of this dialogue state rule.</span>
+<span class="sd">        Components of a rule in order of increasing complexity are as follows:</span>
+<span class="sd">        default rule, domains, intents, entity types, entity mappings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (int): A number representing the rule complexity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">complexity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span><span class="p">:</span>
+            <span class="n">complexity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity_types</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">:</span>
+            <span class="n">complexity</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">:</span>
+            <span class="n">complexity</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+            <span class="n">complexity</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">complexity</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{!r}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_state</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DialogueStateRule.compare"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueStateRule.compare">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">that</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compares the complexity of two dialogue state rules.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            this (DialogueStateRule): A dialogue state rule.</span>
+<span class="sd">            that (DialogueStateRule): A dialogue state rule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (int): The comparison result</span>
+<span class="sd">                 -1: that is more complex than this</span>
+<span class="sd">                 0: this and that are equally complex</span>
+<span class="sd">                 1: this is more complex than that</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">DialogueStateRule</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">that</span><span class="p">,</span> <span class="n">DialogueStateRule</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="c1"># https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">complexity</span> <span class="o">&gt;</span> <span class="n">that</span><span class="o">.</span><span class="n">complexity</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">complexity</span> <span class="o">&lt;</span> <span class="n">that</span><span class="o">.</span><span class="n">complexity</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DialogueManager"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager">[docs]</a><span class="k">class</span> <span class="nc">DialogueManager</span><span class="p">:</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;DialogueManager&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span> <span class="o">=</span> <span class="n">async_mode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">middlewares</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responder_class</span> <span class="o">=</span> <span class="n">responder_class</span> <span class="ow">or</span> <span class="n">DialogueResponder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_rule</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DialogueManager.handle"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A decorator that is used to register dialogue state rules.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_dialogue_rule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="k">return</span> <span class="n">_decorator</span></div>
+
+<div class="viewcode-block" id="DialogueManager.middleware"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.middleware">[docs]</a>    <span class="k">def</span> <span class="nf">middleware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A decorator that is used to register dialogue handler middleware.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="c1"># Support syntax: @middleware</span>
+            <span class="n">_decorator</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Support syntax: @middleware()</span>
+        <span class="k">return</span> <span class="n">_decorator</span></div>
+
+<div class="viewcode-block" id="DialogueManager.add_middleware"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.add_middleware">[docs]</a>    <span class="k">def</span> <span class="nf">add_middleware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">middleware</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds middleware for the dialogue manager. Middleware will be</span>
+<span class="sd">        called for each message before the dialogue state handler. Middleware</span>
+<span class="sd">        registered first will be called first.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            middleware (callable): A dialogue manager middleware</span>
+<span class="sd">                function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">middleware</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Cannot use middleware </span><span class="si">{!r}</span><span class="s2"> in async mode. &quot;</span>
+                <span class="s2">&quot;Middleware must be coroutine function.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">middleware</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">middlewares</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">middleware</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueManager.add_dialogue_rule"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.add_dialogue_rule">[docs]</a>    <span class="k">def</span> <span class="nf">add_dialogue_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a dialogue state rule for the dialogue manager.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the dialogue state.</span>
+<span class="sd">            handler (function): The dialogue state handler function.</span>
+<span class="sd">            kwargs (dict): A list of options to be passed to the DialogueStateRule initializer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">handler</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Cannot use dialogue state handler </span><span class="si">{!r}</span><span class="s2"> in async mode. &quot;</span>
+                <span class="s2">&quot;Handler must be coroutine function in async mode.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">rule</span> <span class="o">=</span> <span class="n">DialogueStateRule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">cmp_to_key</span><span class="p">(</span><span class="n">DialogueStateRule</span><span class="o">.</span><span class="n">compare</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">old_handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">old_handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">old_handler</span> <span class="o">!=</span> <span class="n">handler</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Handler mapping is overwriting an existing dialogue state: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="n">name</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handler_map</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">handler</span>
+
+            <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_rule</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;Only one default rule may be specified&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">default_rule</span> <span class="o">=</span> <span class="n">rule</span></div>
+
+<div class="viewcode-block" id="DialogueManager.apply_handler"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.apply_handler">[docs]</a>    <span class="k">def</span> <span class="nf">apply_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state handler for the most complex matching rule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+<span class="sd">            target_dialogue_state (str, optional): The target dialogue state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_handler_async</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="n">target_dialogue_state</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_handler_sync</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="n">target_dialogue_state</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply_handler_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state handler for the most complex matching rule.</span>
+
+<span class="sd">         Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+<span class="sd">            target_dialogue_state (str, optional): The target dialogue state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_handler_sync</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="n">target_dialogue_state</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">DialogueStateException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">!=</span> <span class="n">target_dialogue_state</span><span class="p">:</span>
+                <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Ignoring target dialogue state &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">target_dialogue_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Ignoring target dialogue state &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target_dialogue_state</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_handler_sync</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_attempt_handler_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tries to apply the dialogue state handler for the most complex matching rule</span>
+
+<span class="sd">         Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+<span class="sd">            target_dialogue_state (str, optional): The target dialogue state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_state</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_handler</span><span class="p">(</span><span class="n">dialogue_state</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="c1"># Add dialogue flow&#39;s sub-dialogue_state if provided</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+            <span class="n">dialogue_state</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dialogue_state</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">]])</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+        <span class="k">return</span> <span class="n">responder</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_apply_handler_async</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state handler for the most complex matching rule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object from the DM</span>
+<span class="sd">            responder (DialogueResponder): The responder from the DM</span>
+<span class="sd">            target_dialogue_state (str, optional): The target dialogue state</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DialogueResponder: A DialogueResponder containing the dialogue state and directives</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_handler_async</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="n">target_dialogue_state</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">DialogueStateException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">!=</span> <span class="n">target_dialogue_state</span><span class="p">:</span>
+                <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Ignoring target dialogue state &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">target_dialogue_state</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">target_dialogue_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Ignoring target dialogue state &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target_dialogue_state</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_handler_async</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_attempt_handler_async</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tries to apply the dialogue state handler for the most complex matching rule</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object from the DM</span>
+<span class="sd">            responder (DialogueResponder): The responder from the DM</span>
+<span class="sd">            target_dialogue_state (str, optional): The target dialogue state</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DialogueResponder: A DialogueResponder containing the dialogue state and directives</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_state</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_handler</span><span class="p">(</span><span class="n">dialogue_state</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+        <span class="n">result_handler</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="c1"># Add dialogue flow&#39;s sub-dialogue_state if provided</span>
+        <span class="k">if</span> <span class="n">result_handler</span> <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">result_handler</span><span class="p">:</span>
+            <span class="n">dialogue_state</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">dialogue_state</span><span class="p">,</span> <span class="n">result_handler</span><span class="p">[</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="n">responder</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+        <span class="k">return</span> <span class="n">responder</span>
+
+<div class="viewcode-block" id="DialogueManager.reprocess"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueManager.reprocess">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">reprocess</span><span class="p">(</span><span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forces the dialogue manager to back out of the flow based on the initial target</span>
+<span class="sd">        dialogue state setting and reselect a handler, following a new target dialogue state</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_dialogue_state (str, optional): a dialogue_state name to push system into</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">DialogueStateException</span><span class="p">(</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;reprocess&quot;</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="n">target_dialogue_state</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_dialogue_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">target_dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">dialogue_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_dialogue_state</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">target_dialogue_state</span> <span class="o">==</span> <span class="n">rule</span><span class="o">.</span><span class="n">dialogue_state</span><span class="p">:</span>
+                    <span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">dialogue_state</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+                    <span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">dialogue_state</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">dialogue_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to find dialogue state for </span><span class="si">{domain}</span><span class="s2">.</span><span class="si">{intent}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">intent</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dialogue_state</span>
+
+    <span class="k">def</span> <span class="nf">_get_dialogue_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dialogue_state</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handler_map</span><span class="p">[</span><span class="n">dialogue_state</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dialogue_state</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_handler</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">middlewares</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">handler</span>
+
+    <span class="k">def</span> <span class="nf">_create_responder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">responder_class</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_handler</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="c1"># TODO: implement default handler</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DialogueFlow"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueFlow">[docs]</a><span class="k">class</span> <span class="nc">DialogueFlow</span><span class="p">(</span><span class="n">DialogueManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A special dialogue manager subclass used to implement dialogue flows.</span>
+<span class="sd">    Dialogue flows allow developers to implement multiple turn interactions</span>
+<span class="sd">    where only a subset of dialogue states should be accessible or where</span>
+<span class="sd">    different dialogue rules should apply.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        app (Application): The application that initializes this flow.</span>
+<span class="sd">        exit_flow_states (list):  The list of exit states.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;DialogueFlow&quot;</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Class logger.&quot;&quot;&quot;</span>
+
+    <span class="n">all_flows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="sd">&quot;&quot;&quot;The dictionary that references all dialogue flows.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">entrance_handler</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">async_mode</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">async_mode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_flows</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit_flow_states</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">_set_target_state</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_state</span>
+            <span class="k">return</span> <span class="n">entrance_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">_async_set_target_state</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_state</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">entrance_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_async_set_target_state</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span> <span class="k">else</span> <span class="n">_set_target_state</span>
+        <span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_dialogue_rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_flow_handler_async</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_flow_handler_sync</span>
+        <span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_dialogue_rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_state</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">targeted_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The name of this flow.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flow_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The state of the flow (&lt;name&gt;_flow).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">+</span> <span class="s2">&quot;_flow&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dialogue_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The dialogue manager which contains this flow.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">app_manager</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">dialogue_manager</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DialogueFlow.use_middleware"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueFlow.use_middleware">[docs]</a>    <span class="k">def</span> <span class="nf">use_middleware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Allows a middleware to be added to this flow.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Support syntax: @middleware</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span>
+            <span class="n">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="c1"># Support syntax: @middleware()</span>
+            <span class="k">return</span> <span class="n">_decorator</span></div>
+
+<div class="viewcode-block" id="DialogueFlow.handle"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueFlow.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The dialogue flow handler.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">exit_flow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;exit_flow&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exit_flow</span><span class="p">:</span>
+                <span class="n">func_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exit_flow_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_dialogue_rule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="k">return</span> <span class="n">_decorator</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply_flow_handler_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state handler for the dialogue flow and set the target dialogue</span>
+<span class="sd">        state to the flow state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): A dict containing the dialogue state and directives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_state</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_handler</span><span class="p">(</span><span class="n">dialogue_state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dialogue_state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_flow_states</span><span class="p">:</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_state</span>
+
+        <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">:</span> <span class="n">dialogue_state</span><span class="p">,</span> <span class="s2">&quot;directives&quot;</span><span class="p">:</span> <span class="n">responder</span><span class="o">.</span><span class="n">directives</span><span class="p">}</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_apply_flow_handler_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the dialogue state handler for the dialogue flow and sets the target dialogue</span>
+<span class="sd">       state to the flow state asynchronously.</span>
+
+<span class="sd">       Args:</span>
+<span class="sd">           request (Request): The request object.</span>
+<span class="sd">           responder (DialogueResponder): The responder object.</span>
+
+<span class="sd">       Returns:</span>
+<span class="sd">           (dict): A dict containing the dialogue state and directives.</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+        <span class="n">dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_state</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dialogue_handler</span><span class="p">(</span><span class="n">dialogue_state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dialogue_state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_flow_states</span><span class="p">:</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_state</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">iscoroutine</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">res</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">:</span> <span class="n">dialogue_state</span><span class="p">,</span> <span class="s2">&quot;directives&quot;</span><span class="p">:</span> <span class="n">responder</span><span class="o">.</span><span class="n">directives</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_get_dialogue_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dialogue_state</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handler_map</span><span class="p">[</span><span class="n">dialogue_state</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dialogue_state</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_handler</span>
+        <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">middlewares</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">middlewares</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">middlewares</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;middleware&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">middlewares</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">handler</span></div>
+
+
+<div class="viewcode-block" id="AutoEntityFilling"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.AutoEntityFilling">[docs]</a><span class="k">class</span> <span class="nc">AutoEntityFilling</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling</span>
+<span class="sd">    (AEF) that allows developers to prompt users for completing the missing</span>
+<span class="sd">    requirements for entity slots.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        app (Application): The application that initializes this flow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;AutoEntityFilling&quot;</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Class logger.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entrance_handler</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">app</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">app</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span> <span class="o">=</span> <span class="n">entrance_handler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_attr</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_check_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s2">&quot;entities&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_form</span><span class="p">[</span><span class="s2">&quot;entities&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Entity list cannot be empty.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span><span class="p">[</span><span class="s2">&quot;entities&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_retries</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form</span><span class="p">[</span><span class="s2">&quot;max_retries&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;max_retries&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exit_response</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form</span><span class="p">[</span><span class="s2">&quot;exit_msg&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;exit_msg&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span>
+            <span class="k">else</span> <span class="s2">&quot;How may I help you?&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exit_keys</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form</span><span class="p">[</span><span class="s2">&quot;exit_keys&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;exit_keys&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span>
+            <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;cancel&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">,</span> <span class="s2">&quot;exit&quot;</span><span class="p">,</span> <span class="s2">&quot;reset&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_retries</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;max_retries&#39; should be of type: int.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exit_response</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;exit_msg&#39; should be of type: str.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exit_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;exit_keys&#39; should be of type: list.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exit_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exit_keys</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_set_next_turn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set target dialogue state to the entrance handler&#39;s name&quot;&quot;&quot;</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">intent</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">_exit_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exits this flow and clears the related parameter for re-usability&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">exit_flow</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_extract_query_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Extracts Query object from the user input and converts it into</span>
+<span class="sd">        appropriate format for entity extraction.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (Request.text): Text in the query</span>
+<span class="sd">            time_zone (str, optional): An IANA time zone id to create the query relative to.</span>
+<span class="sd">            timestamp (int, optional): A reference unix timestamp to create the query relative to,</span>
+<span class="sd">                in seconds.</span>
+<span class="sd">            locale (str, optional): The locale representing the ISO 639-1 language code and \</span>
+<span class="sd">                ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">            language (str, optional): Language as specified using a 639-1/2 code</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Query: A newly constructed query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query_factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">resource_loader</span><span class="o">.</span><span class="n">query_factory</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query_factory</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">time_zone</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">locale</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">query</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">slot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validates the user input based on the entity type and validation type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request: Request object</span>
+<span class="sd">            slot: FormEntity object</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (bool): Boolean whether the user input fulfills the slot requirements</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">entity_type</span> <span class="o">=</span> <span class="n">slot</span><span class="o">.</span><span class="n">entity</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_query_features</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="c1"># payload format for entity feature extractors:</span>
+        <span class="c1">#     tuple(query (Query Object), list of entities, entity index)</span>
+
+        <span class="c1"># For slot filling, the user query will consist of the prompted entity.</span>
+        <span class="c1"># Hence `entity = [query]` and `entity_index = 0`.</span>
+        <span class="n">formatted_payload</span> <span class="o">=</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">query</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">extracted_feature</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">_resolved_value</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">default_eval</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">DEFAULT_SYS_ENTITIES</span><span class="p">:</span>
+                <span class="c1"># system entity validation - checks for presence of required system entity</span>
+                <span class="n">resources</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">extracted_feature</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">query_features</span><span class="o">.</span><span class="n">extract_sys_candidates</span><span class="p">([</span><span class="n">entity_type</span><span class="p">])(</span>
+                        <span class="n">query</span><span class="p">,</span> <span class="n">resources</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># gazetteer validation</span>
+                <span class="n">gaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">resource_loader</span><span class="o">.</span><span class="n">get_gazetteer</span><span class="p">(</span>
+                    <span class="n">entity_type</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">gazetteer</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gazetteers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">entity_type</span><span class="p">:</span> <span class="n">gaz</span><span class="p">}}</span>
+                    <span class="n">extracted_feature</span> <span class="o">=</span> <span class="n">entity_features</span><span class="o">.</span><span class="n">extract_in_gaz_features</span><span class="p">()(</span>
+                        <span class="n">formatted_payload</span><span class="p">,</span> <span class="n">gazetteer</span>
+                    <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">extracted_feature</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_resolved_value</span>
+
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
+                    <span class="n">_resolved_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">hints</span><span class="p">:</span>
+            <span class="c1"># hints / user-list validation</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">slot</span><span class="o">.</span><span class="n">hints</span><span class="p">:</span>
+                <span class="n">extracted_feature</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;hint_validated_entity&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_resolved_value</span>
+
+        <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">:</span>
+            <span class="c1"># Custom validation using function provided by developer. Should return True/False</span>
+            <span class="c1"># for validation status. If true, then continue, else fail overall validation.</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_resolved_value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extracted_feature</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_validated_entity&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
+
+        <span class="c1"># return True iff user input results in extracted features (i.e. successfully validated)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">extracted_feature</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">_resolved_value</span>
+
+    <span class="k">def</span> <span class="nf">_initial_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs the first pass and fills the entity form with entity values available</span>
+<span class="sd">        in the initial query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+            <span class="n">entity_type</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+            <span class="n">role</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">entity_type</span> <span class="o">==</span> <span class="n">slot</span><span class="o">.</span><span class="n">entity</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">slot</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">role</span> <span class="o">==</span> <span class="n">slot</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
+                        <span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">entity</span>
+                        <span class="k">break</span>
+
+    <span class="k">def</span> <span class="nf">_end_slot_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="c1"># Returns filled entity objects as request.entities</span>
+        <span class="c1"># We pass in the previous turn&#39;s responder&#39;s params to the current request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">request_class</span><span class="p">(</span>
+            <span class="n">entities</span><span class="o">=</span><span class="p">[</span><span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span><span class="p">],</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">context</span> <span class="ow">or</span> <span class="p">{},</span>
+            <span class="n">history</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">history</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">responder</span><span class="o">.</span><span class="n">frame</span> <span class="ow">or</span> <span class="p">{},</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exit_flow</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prompt_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">nlr</span><span class="p">):</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">nlr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_retry_logic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">nlr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_retries</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">nlr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># max attempts exceeded, reset counter, exit auto_fill.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exit_flow</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">reprocess</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The iterative call to fill missing slots in the entity form till all slots have been</span>
+<span class="sd">        filled up or the flow has been exited.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exit_keys</span><span class="p">:</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exit_response</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exit_flow</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_next_turn</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Entering the flow</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_form</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Fill the form with the entities in the first query</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initial_fill</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">slot</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="c1"># check if user has been prompted for this entity slot</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_slot</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="n">slot</span><span class="o">.</span><span class="n">responses</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="c1"># If already prompted,</span>
+                <span class="c1"># validate the user response and retry if invalid response</span>
+                <span class="n">_is_valid</span><span class="p">,</span> <span class="n">_resolved_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">slot</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_valid</span><span class="p">:</span>
+                    <span class="c1"># retry logic</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_retry_logic</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="n">slot</span><span class="o">.</span><span class="n">retry_response</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Entity</span><span class="p">(</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">entity_type</span><span class="o">=</span><span class="n">slot</span><span class="o">.</span><span class="n">entity</span><span class="p">,</span>
+                    <span class="n">role</span><span class="o">=</span><span class="n">slot</span><span class="o">.</span><span class="n">role</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="n">_resolved_value</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+                <span class="c1"># Reset prompt for next slot</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Finish slot-filling and return to handler</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_slot_fill</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DialogueResponder"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder">[docs]</a><span class="k">class</span> <span class="nc">DialogueResponder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The dialogue responder helps generate directives and fill slots in the</span>
+<span class="sd">    system-generated natural language responses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;DialogueResponder&quot;</span><span class="p">)</span>
+
+    <span class="n">DirectiveNames</span> <span class="o">=</span> <span class="n">DirectiveNames</span>
+    <span class="sd">&quot;&quot;&quot;The list of directive names.&quot;&quot;&quot;</span>
+
+    <span class="n">DirectiveTypes</span> <span class="o">=</span> <span class="n">DirectiveTypes</span>
+    <span class="sd">&quot;&quot;&quot;The list of directive types.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">history</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">slots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dialogue_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">directives</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a dialogue responder.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            frame (dict): The frame object.</span>
+<span class="sd">            params (Params): The params object.</span>
+<span class="sd">            history (list): The history of the responder.</span>
+<span class="sd">            slots (dict): The slots of the responder.</span>
+<span class="sd">            request (Request): The request object associated with the responder.</span>
+<span class="sd">            dialogue_state (str): The dialogue state.</span>
+<span class="sd">            directives (list): The directives of the responder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directives</span> <span class="o">=</span> <span class="n">directives</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="n">Params</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slots</span> <span class="o">=</span> <span class="n">slots</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">history</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span> <span class="ow">or</span> <span class="n">Request</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DialogueResponder.reply"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.reply">[docs]</a>    <span class="k">def</span> <span class="nf">reply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;reply&#39; directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of the reply.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_template</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">REPLY</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.speak"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.speak">[docs]</a>    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;speak&#39; directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text to speak aloud.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_template</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">SPEAK</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.list"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;list&#39; view directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            items (list): The list of dictionary objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">items</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">LIST</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.suggest"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.suggest">[docs]</a>    <span class="k">def</span> <span class="nf">suggest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;suggestions&#39; directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            suggestions (list): A list of suggestions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">suggestions</span> <span class="o">=</span> <span class="n">suggestions</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">SUGGESTIONS</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.listen"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.listen">[docs]</a>    <span class="k">def</span> <span class="nf">listen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;listen&#39; directive.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">LISTEN</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.reset"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;reset&#39; directive.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">RESET</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.display"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an arbitrary directive of type &#39;view&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the directive.</span>
+<span class="sd">            payload (dict, optional): The payload for the view.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">DirectiveTypes</span><span class="o">.</span><span class="n">VIEW</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.act"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.act">[docs]</a>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an arbitrary directive of type &#39;action&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the directive.</span>
+<span class="sd">            payload (dict, optional): The payload for the action.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">DirectiveTypes</span><span class="o">.</span><span class="n">ACTION</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.direct"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.direct">[docs]</a>    <span class="k">def</span> <span class="nf">direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an arbitrary directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the directive.</span>
+<span class="sd">            dtype (str): The type of the directive.</span>
+<span class="sd">            payload (dict, optional): The payload for the view.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">directive</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">directive</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">directives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">directive</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.respond"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.respond">[docs]</a>    <span class="k">def</span> <span class="nf">respond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directive</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an arbitrary directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            directive (dict): A directive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;respond() is deprecated. Instead use direct().&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">directive</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.prompt"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.prompt">[docs]</a>    <span class="k">def</span> <span class="nf">prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Alias for `reply()`. Deprecated.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of the reply.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;prompt() is deprecated. Please use reply() and listen() instead&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogueResponder.sleep"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.sleep">[docs]</a>    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a &#39;sleep&#39; directive.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            delay (int): The amount of milliseconds to wait before putting the client to sleep.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">SLEEP</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="n">delay</span><span class="p">})</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_choose</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Chooses a random item from items.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">items</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="DialogueResponder.to_json"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.to_json">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert the responder into a JSON representation.</span>
+<span class="sd">        Args:</span>
+<span class="sd">             instance (DialogueResponder): The responder object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): The JSON representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">serialized_obj</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Params</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">FrozenParams</span><span class="p">)):</span>
+                <span class="n">serialized_obj</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">DialogueResponder</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">):</span>
+                <span class="n">serialized_obj</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">serialized_obj</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">serialized_obj</span></div>
+
+    <span class="k">def</span> <span class="nf">_process_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_choose</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">slots</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DialogueResponder.exit_flow"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder.exit_flow">[docs]</a>    <span class="k">def</span> <span class="nf">exit_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exit the current flow by clearing the target dialogue state.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="Conversation"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.Conversation">[docs]</a><span class="k">class</span> <span class="nc">Conversation</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The conversation object is a very basic MindMeld client.</span>
+
+<span class="sd">    It can be useful for testing out dialogue flows in python.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; convo = Conversation(app_path=&#39;path/to/my/app&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; convo.say(&#39;Hello&#39;)</span>
+<span class="sd">        [&#39;Hello. I can help you find store hours. How can I help?&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; convo.say(&#39;Is the store on elm open?&#39;)</span>
+<span class="sd">        [&#39;The 23 Elm Street Kwik-E-Mart is open from 7:00 to 19:00.&#39;]</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        history (list): The history of the conversation. Starts with the most recent message.</span>
+<span class="sd">        context (dict): The context of the conversation, containing user context.</span>
+<span class="sd">        default_params (Params): The default params to use with each turn. These \</span>
+<span class="sd">            defaults will be overridden by params passed for each turn.</span>
+<span class="sd">        params (FrozenParams): The params returned by the most recent turn.</span>
+<span class="sd">        force_sync (bool): Force synchronous return for `say()` and `process()` \</span>
+<span class="sd">            even when app is in async mode.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;Conversation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nlp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">force_sync</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            app (Application, optional): An initialized app object. Either app or app_path must</span>
+<span class="sd">                be given.</span>
+<span class="sd">            app_path (None, optional): The path to the app data. Used to create an app object.</span>
+<span class="sd">                Either app or app_path must be given.</span>
+<span class="sd">            nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.</span>
+<span class="sd">                If passed, changes to this processor will affect the response from `say()`</span>
+<span class="sd">            context (dict, optional): The context to be used in the conversation.</span>
+<span class="sd">            default_params (Params, optional): The default params to use with each turn. These</span>
+<span class="sd">                defaults will be overridden by params passed for each turn.</span>
+<span class="sd">            force_sync (bool, optional): Force synchronous return for `say()` and `process()`</span>
+<span class="sd">                even when app is in async mode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">get_app</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">lazy_init</span><span class="p">(</span><span class="n">nlp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">app_manager</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span> <span class="o">=</span> <span class="n">default_params</span> <span class="ow">or</span> <span class="n">Params</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_sync</span> <span class="o">=</span> <span class="n">force_sync</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Conversation.say"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.Conversation.say">[docs]</a>    <span class="k">def</span> <span class="nf">say</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a message in the conversation. The message will be</span>
+<span class="sd">        processed by the app based on the current state of the conversation and</span>
+<span class="sd">        returns the extracted messages from the directives.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of a message.</span>
+<span class="sd">            params (dict): The params to use with this message,</span>
+<span class="sd">                overriding any defaults which may have been set.</span>
+<span class="sd">            force_sync (bool, optional): Force synchronous response</span>
+<span class="sd">                even when app is in async mode.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A text representation of the dialogue responses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">async_mode</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_say_async</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_sync</span> <span class="ow">or</span> <span class="n">force_sync</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c1"># handle directives</span>
+        <span class="n">response_texts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_follow_directive</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">directives</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">response_texts</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_say_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a message in the conversation. The message will be</span>
+<span class="sd">        processed by the app based on the current state of the conversation and</span>
+<span class="sd">        returns the extracted messages from the directives.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of a message.</span>
+<span class="sd">            params (dict): The params to use with this message,</span>
+<span class="sd">                overriding any defaults which may have been set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A text representation of the dialogue responses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c1"># handle directives</span>
+        <span class="n">response_texts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_follow_directive</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">directives</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">response_texts</span>
+
+<div class="viewcode-block" id="Conversation.process"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.Conversation.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a message in the conversation. The message will be processed by</span>
+<span class="sd">        the app based on the current state of the conversation and returns</span>
+<span class="sd">        the response.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of a message.</span>
+<span class="sd">            params (dict): The params to use with this message, overriding any defaults</span>
+<span class="sd">                which may have been set.</span>
+<span class="sd">            force_sync (bool, optional): Force synchronous response</span>
+<span class="sd">                even when app is in async mode.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): The dictionary response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">async_mode</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_async</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_sync</span> <span class="ow">or</span> <span class="n">force_sync</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+        <span class="n">internal_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">internal_params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">internal_params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">internal_params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+            <span class="c1"># If the params arg is explicitly set, overight the internal params</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">vars</span><span class="p">(</span><span class="n">internal_params</span><span class="p">)[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">internal_params</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">params</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_process_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a message in the conversation. The message will be processed by</span>
+<span class="sd">        the app based on the current state of the conversation and returns</span>
+<span class="sd">        the response.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of a message.</span>
+<span class="sd">            params (dict): The params to use with this message, overriding any defaults</span>
+<span class="sd">                which may have been set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): The dictionary Response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+        <span class="n">internal_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">internal_params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">internal_params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">internal_params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+            <span class="c1"># If the params arg is explicitly set, overight the internal params</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">vars</span><span class="p">(</span><span class="n">internal_params</span><span class="p">)[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_manager</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">internal_params</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">params</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">def</span> <span class="nf">_follow_directive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directive</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">directive_name</span> <span class="o">=</span> <span class="n">directive</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">directive_name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">DirectiveNames</span><span class="o">.</span><span class="n">REPLY</span><span class="p">,</span> <span class="n">DirectiveNames</span><span class="o">.</span><span class="n">SPEAK</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">directive</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">directive_name</span> <span class="o">==</span> <span class="n">DirectiveNames</span><span class="o">.</span><span class="n">SUGGESTIONS</span><span class="p">:</span>
+                <span class="n">suggestions</span> <span class="o">=</span> <span class="n">directive</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">suggestions</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Suggestion</span><span class="si">{}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+                <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">suggestion</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">suggestions</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot; </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+
+                    <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_suggestion_text</span><span class="p">(</span><span class="n">suggestion</span><span class="p">))</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">texts</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">directive_name</span> <span class="o">==</span> <span class="n">DirectiveNames</span><span class="o">.</span><span class="n">LIST</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">directive</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">]</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">directive_name</span> <span class="o">==</span> <span class="n">DirectiveNames</span><span class="o">.</span><span class="n">LISTEN</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Listening...&quot;</span>
+            <span class="k">elif</span> <span class="n">directive_name</span> <span class="o">==</span> <span class="n">DirectiveNames</span><span class="o">.</span><span class="n">RESET</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Resetting...&quot;</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unsupported response: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directive</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_generate_suggestion_text</span><span class="p">(</span><span class="n">suggestion</span><span class="p">):</span>
+        <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">suggestion</span><span class="p">:</span>
+            <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">suggestion</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">suggestion</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+            <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suggestion</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Conversation.reset"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.Conversation.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the history, frame and params of the Conversation object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1043 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.markup &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.markup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.markup</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;The markup module contains functions for interacting with the MindMeld Markup language for</span>
+<span class="sd">representing annotations of query text inline.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">Entity</span><span class="p">,</span> <span class="n">NestedEntity</span><span class="p">,</span> <span class="n">ProcessedQuery</span><span class="p">,</span> <span class="n">QueryEntity</span><span class="p">,</span> <span class="n">Span</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">MarkupError</span><span class="p">,</span>
+    <span class="n">SystemEntityMarkupError</span><span class="p">,</span>
+    <span class="n">SystemEntityResolutionError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.query_factory</span> <span class="k">import</span> <span class="n">QueryFactory</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">ENTITY_START</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span>
+<span class="n">ENTITY_END</span> <span class="o">=</span> <span class="s2">&quot;}&quot;</span>
+<span class="n">GROUP_START</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
+<span class="n">GROUP_END</span> <span class="o">=</span> <span class="s2">&quot;]&quot;</span>
+<span class="n">META_SPLIT</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span>
+
+<span class="n">START_CHARACTERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ENTITY_START</span><span class="p">,</span> <span class="n">GROUP_START</span><span class="p">})</span>
+<span class="n">END_CHARACTERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ENTITY_END</span><span class="p">,</span> <span class="n">GROUP_END</span><span class="p">})</span>
+<span class="n">SPECIAL_CHARACTERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span><span class="n">ENTITY_START</span><span class="p">,</span> <span class="n">ENTITY_END</span><span class="p">,</span> <span class="n">GROUP_START</span><span class="p">,</span> <span class="n">GROUP_END</span><span class="p">,</span> <span class="n">META_SPLIT</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="n">TIME_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%S&quot;</span>
+
+
+<span class="n">MINDMELD_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;mindmeld&quot;</span>
+<span class="n">BRAT_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;brat&quot;</span>
+<span class="n">MARKUP_FORMATS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">MINDMELD_FORMAT</span><span class="p">,</span> <span class="n">BRAT_FORMAT</span><span class="p">})</span>
+
+
+<div class="viewcode-block" id="load_query"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.load_query">[docs]</a><span class="k">def</span> <span class="nf">load_query</span><span class="p">(</span>
+    <span class="n">markup</span><span class="p">,</span>
+    <span class="n">query_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_gold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">query_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a processed query object from marked up query text.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markup (str): The marked up query text.</span>
+<span class="sd">        query_factory (QueryFactory, optional): An object which can create</span>
+<span class="sd">            queries.</span>
+<span class="sd">        app_path (str, optional): The dir path of the application</span>
+<span class="sd">        domain (str, optional): The name of the domain annotated for the query.</span>
+<span class="sd">        intent (str, optional): The name of the intent annotated for the query.</span>
+<span class="sd">        is_gold (bool, optional): True if the markup passed in is a reference,</span>
+<span class="sd">            human-labeled example. Defaults to False.</span>
+<span class="sd">        query_options (dict, optional): A dict containing options for creating</span>
+<span class="sd">            a Query, such as `language`, `time_zone` and `timestamp`</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ProcessedQuery: a processed query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_factory</span> <span class="o">=</span> <span class="n">query_factory</span> <span class="ow">or</span> <span class="n">QueryFactory</span><span class="o">.</span><span class="n">create_query_factory</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="n">query_options</span> <span class="o">=</span> <span class="n">query_options</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span> <span class="o">=</span> <span class="n">process_markup</span><span class="p">(</span>
+        <span class="n">markup</span><span class="p">,</span> <span class="n">query_factory</span><span class="o">=</span><span class="n">query_factory</span><span class="p">,</span> <span class="n">query_options</span><span class="o">=</span><span class="n">query_options</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ProcessedQuery</span><span class="p">(</span>
+        <span class="n">query</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span> <span class="n">entities</span><span class="o">=</span><span class="n">entities</span><span class="p">,</span> <span class="n">is_gold</span><span class="o">=</span><span class="n">is_gold</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_query_file"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.load_query_file">[docs]</a><span class="k">def</span> <span class="nf">load_query_file</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">,</span>
+    <span class="n">query_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_gold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">query_cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads the queries from the specified file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The app path</span>
+<span class="sd">        file_path (str): The path of the file to load</span>
+<span class="sd">        query_factory (QueryFactory, optional): An object which can create</span>
+<span class="sd">            queries.</span>
+<span class="sd">        domain (str, optional): The name of the domain annotated for the query.</span>
+<span class="sd">        intent (str, optional): The name of the intent annotated for the query.</span>
+<span class="sd">        is_gold (bool, optional): True if the markup passed in is a reference,</span>
+<span class="sd">            human-labeled example. Defaults to False.</span>
+<span class="sd">        query_cache (QueryCache): A container containing cache query objects</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ProcessedQuery: a processed query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_factory</span> <span class="o">=</span> <span class="n">query_factory</span> <span class="ow">or</span> <span class="n">QueryFactory</span><span class="o">.</span><span class="n">create_query_factory</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+
+    <span class="n">queries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">query_text</span> <span class="ow">in</span> <span class="n">read_query_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">query_text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">query_cache</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">query_cache</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">query_text</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">query</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">load_query</span><span class="p">(</span>
+                    <span class="n">query_text</span><span class="p">,</span>
+                    <span class="n">query_factory</span><span class="o">=</span><span class="n">query_factory</span><span class="p">,</span>
+                    <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                    <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span>
+                    <span class="n">is_gold</span><span class="o">=</span><span class="n">is_gold</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">query_cache</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">query_text</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">load_query</span><span class="p">(</span>
+                <span class="n">query_text</span><span class="p">,</span>
+                <span class="n">query_factory</span><span class="o">=</span><span class="n">query_factory</span><span class="p">,</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span>
+                <span class="n">is_gold</span><span class="o">=</span><span class="n">is_gold</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">queries</span></div>
+
+
+<div class="viewcode-block" id="mark_down_file"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.mark_down_file">[docs]</a><span class="k">def</span> <span class="nf">mark_down_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read all annotated queries from the input file and remove all the annotations</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path (str): The path of the file to load</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        (str): marked down query text for each line</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">markup</span> <span class="ow">in</span> <span class="n">read_query_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">mark_down</span><span class="p">(</span><span class="n">markup</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_query_file"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.read_query_file">[docs]</a><span class="k">def</span> <span class="nf">read_query_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path (str): The path of the file to load</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        str: query text for each line</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">queries_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">queries_file</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="c1"># only create query if line is not empty string</span>
+                <span class="n">query_text</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">query_text</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">query_text</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Problem reading file </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">yield from</span> <span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="bootstrap_query_file"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.bootstrap_query_file">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_query_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">nlp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply predicted annotations to a file of text queries</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_file (str): filename of queries to be processed</span>
+<span class="sd">        output_file (str or None): filename for processed queries</span>
+<span class="sd">        nlp (NaturalLanguageProcessor): an application&#39;s NLP with built models</span>
+<span class="sd">        kwargs (dict): A dictionary of additional args</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">show_confidence</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;confidence&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">output_file</span> <span class="k">else</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
+        <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_domain&quot;</span><span class="p">):</span>
+            <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;domain&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show_confidence</span><span class="p">:</span>
+                <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;domain_conf&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_intent&quot;</span><span class="p">):</span>
+            <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;intent&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show_confidence</span><span class="p">:</span>
+                <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;intent_conf&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_confidence</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_entity&quot;</span><span class="p">):</span>
+            <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;entity_conf&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_confidence</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_role&quot;</span><span class="p">):</span>
+            <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;role_conf&quot;</span><span class="p">)</span>
+        <span class="n">csv_output</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">field_names</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">excel_tab</span><span class="p">)</span>
+        <span class="n">csv_output</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">raw_query</span> <span class="ow">in</span> <span class="n">mark_down_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+            <span class="n">proc_query</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">process_query</span><span class="p">(</span><span class="n">nlp</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">raw_query</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">csv_row</span> <span class="o">=</span> <span class="n">bootstrap_query_row</span><span class="p">(</span><span class="n">proc_query</span><span class="p">,</span> <span class="n">show_confidence</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">csv_output</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">csv_row</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bootstrap_query_row"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.bootstrap_query_row">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_query_row</span><span class="p">(</span><span class="n">proc_query</span><span class="p">,</span> <span class="n">show_confidence</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produce predicted annotation values and confidences for a single query</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        proc_query (ProcessedQuery): a labeled query</span>
+<span class="sd">        show_confidence (bool): whether to generate confidence columns</span>
+<span class="sd">        **kwargs: flags indicating which columns to generate</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">marked_up_query</span> <span class="o">=</span> <span class="n">dump_query</span><span class="p">(</span><span class="n">proc_query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">csv_row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">marked_up_query</span><span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_domain&quot;</span><span class="p">):</span>
+        <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">domain</span>
+        <span class="k">if</span> <span class="n">show_confidence</span><span class="p">:</span>
+            <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;domain_conf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">confidence</span><span class="p">[</span><span class="s2">&quot;domains&quot;</span><span class="p">][</span><span class="n">proc_query</span><span class="o">.</span><span class="n">domain</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_intent&quot;</span><span class="p">):</span>
+        <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;intent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">intent</span>
+        <span class="k">if</span> <span class="n">show_confidence</span><span class="p">:</span>
+            <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;intent_conf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">confidence</span><span class="p">[</span><span class="s2">&quot;intents&quot;</span><span class="p">][</span><span class="n">proc_query</span><span class="o">.</span><span class="n">intent</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">show_confidence</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_entity&quot;</span><span class="p">):</span>
+        <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;entity_conf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">confidence</span><span class="p">[</span><span class="s2">&quot;entities&quot;</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">show_confidence</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_role&quot;</span><span class="p">):</span>
+        <span class="n">csv_row</span><span class="p">[</span><span class="s2">&quot;role_conf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">proc_query</span><span class="o">.</span><span class="n">confidence</span><span class="p">[</span><span class="s2">&quot;roles&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">csv_row</span></div>
+
+
+<div class="viewcode-block" id="process_markup"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.process_markup">[docs]</a><span class="k">def</span> <span class="nf">process_markup</span><span class="p">(</span><span class="n">markup</span><span class="p">,</span> <span class="n">query_factory</span><span class="p">,</span> <span class="n">query_options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function takes in some text and returns a constructed Query object associated with the</span>
+<span class="sd">        text, along with other objects like a list of entities.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markup (str): The markup string to process</span>
+<span class="sd">        query_factory (QueryFactory): The factory used to construct Query objects</span>
+<span class="sd">        query_options (dict): A dictionary containing options for language, time_zone and time_stamp</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str, Query, list): Returns a tuple of the raw text, the Query object associated with the</span>
+<span class="sd">        text and a list of entities (ProcessedQuery) associated with the text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">raw_text</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_parse_tokens</span><span class="p">(</span><span class="n">_tokenize_markup</span><span class="p">(</span><span class="n">markup</span><span class="p">))</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query_factory</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">raw_text</span><span class="p">,</span> <span class="o">**</span><span class="n">query_options</span><span class="p">)</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="n">_process_annotations</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">query_factory</span><span class="o">.</span><span class="n">system_entity_recognizer</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">MarkupError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid markup in query </span><span class="si">{!r}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">markup</span><span class="p">,</span> <span class="n">exc</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">exc</span>
+    <span class="k">except</span> <span class="n">SystemEntityResolutionError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unable to load query </span><span class="si">{!r}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="n">SystemEntityMarkupError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">markup</span><span class="p">,</span> <span class="n">exc</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">exc</span>
+    <span class="k">return</span> <span class="n">raw_text</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span></div>
+
+
+<span class="k">def</span> <span class="nf">_process_annotations</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">system_entity_recognizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        query (Query)</span>
+<span class="sd">        annotations (list)</span>
+<span class="sd">        system_entity_recognizer (SystemEntityRecognizer)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of ProcessedQuery:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_close_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">,</span> <span class="n">entities</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">head</span> <span class="o">=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;head&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Group between </span><span class="si">{}</span><span class="s2"> and </span><span class="si">{}</span><span class="s2"> missing head&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">children</span> <span class="o">=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Group between </span><span class="si">{}</span><span class="s2"> and </span><span class="si">{}</span><span class="s2"> missing children&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">head</span><span class="o">.</span><span class="n">with_children</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+            <span class="n">entities</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
+            <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">):</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">)</span>
+                <span class="n">children</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+                <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">children</span>
+
+        <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;entity&quot;</span><span class="p">:</span>
+            <span class="n">span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">Entity</span><span class="o">.</span><span class="n">is_system_entity</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">raw_entity</span> <span class="o">=</span> <span class="n">system_entity_recognizer</span><span class="o">.</span><span class="n">resolve_system_entity</span><span class="p">(</span>
+                        <span class="n">query</span><span class="p">,</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="n">span</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">entity</span>
+                <span class="k">except</span> <span class="n">SystemEntityResolutionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to load query: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">return</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">raw_entity</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;children&quot;</span><span class="p">:</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]}</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">raw_entity</span> <span class="o">=</span> <span class="n">Entity</span><span class="p">(</span>
+                    <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="n">role</span><span class="o">=</span><span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">):</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;entity&quot;</span><span class="p">:</span>
+                    <span class="n">children</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                    <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">NestedEntity</span><span class="o">.</span><span class="n">from_query</span><span class="p">(</span>
+                            <span class="n">query</span><span class="p">,</span>
+                            <span class="n">span</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">parent</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]),</span>
+                            <span class="n">entity</span><span class="o">=</span><span class="n">raw_entity</span><span class="p">,</span>
+                            <span class="n">parent_offset</span><span class="o">=</span><span class="n">parent</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">children</span>
+                <span class="k">if</span> <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span>
+                    <span class="n">entity</span> <span class="o">=</span> <span class="n">QueryEntity</span><span class="o">.</span><span class="n">from_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">raw_entity</span><span class="p">)</span>
+                    <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]:</span>
+                        <span class="c1"># this is the head</span>
+                        <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;head&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">children</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                        <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+                        <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">children</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QueryEntity</span><span class="o">.</span><span class="n">from_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">raw_entity</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_open_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
+
+    <span class="n">entities</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]:</span>
+            <span class="c1"># if there are annotations on the stack of the same or greater depth,</span>
+            <span class="c1"># they have no more children so close them</span>
+            <span class="n">_close_ann</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">entities</span><span class="p">)</span>
+
+        <span class="n">_open_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">_close_ann</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">entities</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_tokens</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">START_CHARACTERS</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+                <span class="s2">&quot;ann_type&quot;</span><span class="p">:</span> <span class="s2">&quot;group&quot;</span> <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="n">GROUP_START</span> <span class="k">else</span> <span class="s2">&quot;entity&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">),</span>
+            <span class="p">}</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">token</span> <span class="o">==</span> <span class="n">META_SPLIT</span><span class="p">:</span>
+            <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">END_CHARACTERS</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># the index of the last character</span>
+            <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="p">:</span> <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">token_is_meta</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;role&quot;</span> <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">annotation</span> <span class="k">else</span> <span class="s2">&quot;type&quot;</span>
+            <span class="n">annotation</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="n">token</span>
+
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">text</span><span class="p">,</span> <span class="n">annotations</span>
+
+
+<span class="k">def</span> <span class="nf">_tokenize_markup</span><span class="p">(</span><span class="n">markup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts markup into a series of &#39;tokens&#39;.</span>
+
+<span class="sd">    A token can fall into one of 5 general categories:</span>
+<span class="sd">     - raw text</span>
+<span class="sd">     - a marker indicating the start of an entity or entity group</span>
+<span class="sd">     - a marker indicating the end of an entity or entity group</span>
+<span class="sd">     - a marker indicating the start of a label for an entity or entity group</span>
+<span class="sd">     - a label for an entity or entity group</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markup (str): The markup text</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        MarkupError: When markup is invalid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">open_annotations</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">markup</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">SPECIAL_CHARACTERS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">START_CHARACTERS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">token</span>
+                    <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="n">GROUP_START</span><span class="p">:</span>
+                    <span class="n">open_annotations</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">open_annotations</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">yield</span> <span class="n">char</span>
+            <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="n">META_SPLIT</span><span class="p">:</span>
+                <span class="c1"># TODO: improve this check</span>
+                <span class="c1"># if not token:</span>
+                <span class="c1">#     raise MarkupError(&#39;Entity or group text is empty at position {}&#39;.format(idx))</span>
+                <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">token</span>
+                    <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">yield</span> <span class="n">char</span>
+            <span class="k">elif</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">END_CHARACTERS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="n">GROUP_END</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;group&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;entity&quot;</span>
+                <span class="k">if</span> <span class="n">open_annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Mismatched end for </span><span class="si">{}</span><span class="s2"> at position </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">markup</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">token_is_meta</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Missing label for </span><span class="si">{}</span><span class="s2"> at position </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">markup</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Empty label for </span><span class="si">{}</span><span class="s2"> at position </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">markup</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">open_annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="k">yield</span> <span class="n">token</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">token_is_meta</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">yield</span> <span class="n">char</span>
+
+            <span class="k">continue</span>
+
+        <span class="n">token</span> <span class="o">+=</span> <span class="n">char</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">open_annotations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">open_annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="s2">&quot;Mismatched start for </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">markup</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">token</span>
+
+
+<div class="viewcode-block" id="dump_query"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.dump_query">[docs]</a><span class="k">def</span> <span class="nf">dump_query</span><span class="p">(</span><span class="n">processed_query</span><span class="p">,</span> <span class="n">markup_format</span><span class="o">=</span><span class="n">MINDMELD_FORMAT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a processed query into marked up query text.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        processed_query (ProcessedQuery): The query to convert</span>
+<span class="sd">        markup_format (str, optional): The format to use. Valid formats include</span>
+<span class="sd">            &#39;mindmeld&#39; and &#39;brat&#39;. Defaults to &#39;mindmeld&#39;</span>
+<span class="sd">        **kwargs: additional format specific parameters may be passed in as</span>
+<span class="sd">            keyword arguments.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A marked up representation of the query</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">markup_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MARKUP_FORMATS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid markup format </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">markup_format</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">MINDMELD_FORMAT</span><span class="p">:</span> <span class="n">_dump_mindmeld</span><span class="p">,</span> <span class="n">BRAT_FORMAT</span><span class="p">:</span> <span class="n">_dump_brat</span><span class="p">}[</span><span class="n">markup_format</span><span class="p">](</span>
+        <span class="n">processed_query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dump_queries"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.dump_queries">[docs]</a><span class="k">def</span> <span class="nf">dump_queries</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">markup_format</span><span class="o">=</span><span class="n">MINDMELD_FORMAT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a collection of processed queries to marked up query text</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        queries (iterable): A collection of processed queries</span>
+<span class="sd">        markup_format (str, optional): The format to use. Valid formats include</span>
+<span class="sd">            &#39;mindmeld&#39; and &#39;brat&#39;. Defaults to &#39;mindmeld&#39;</span>
+<span class="sd">        **kwargs: additional format specific parameters may be passed in as</span>
+<span class="sd">            keyword arguments.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        str or tuple: A marked up representation of the query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">markup_format</span> <span class="o">==</span> <span class="n">BRAT_FORMAT</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">_dump_brat_queries</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">dump_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">markup_format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_dump_brat_queries</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">entity_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entity_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">relation_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;relation_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">char_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;char_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+        <span class="n">text</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_dump_brat</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span>
+            <span class="n">char_offset</span><span class="o">=</span><span class="n">char_offset</span><span class="p">,</span>
+            <span class="n">entity_offset</span><span class="o">=</span><span class="n">entity_offset</span><span class="p">,</span>
+            <span class="n">relation_offset</span><span class="o">=</span><span class="n">relation_offset</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">text</span><span class="p">,</span> <span class="n">annotations</span>
+
+        <span class="n">char_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">entity_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span>
+        <span class="n">relation_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_dump_brat</span><span class="p">(</span><span class="n">processed_query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># TODO: support nested entities</span>
+    <span class="n">entity_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entity_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">relation_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;relation_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">char_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;char_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">processed_query</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">entity_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processed_query</span><span class="o">.</span><span class="n">entities</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="n">entity_offset</span> <span class="o">+</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">char_offset</span> <span class="o">+</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">char_offset</span> <span class="o">+</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">entity_dict</span><span class="p">[(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">)]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
+        <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;T</span><span class="si">{index}</span><span class="se">\t</span><span class="si">{entity}</span><span class="s2"> </span><span class="si">{start}</span><span class="s2"> </span><span class="si">{end}</span><span class="se">\t</span><span class="si">{text}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">))</span>
+
+    <span class="c1"># Loop again for dependents</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processed_query</span><span class="o">.</span><span class="n">entities</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">relation_offset</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># increment this first so first index is 1</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="n">relation_offset</span><span class="p">,</span>
+            <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="n">entity_dict</span><span class="p">[(</span><span class="n">entity</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">)],</span>
+            <span class="s2">&quot;dependent&quot;</span><span class="p">:</span> <span class="n">entity_dict</span><span class="p">[(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">)],</span>
+        <span class="p">}</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="s2">&quot;R</span><span class="si">{index}</span><span class="se">\t</span><span class="si">{entity}</span><span class="s2"> Arg1:T</span><span class="si">{head}</span><span class="s2"> Arg2:T</span><span class="si">{dependent}</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="o">**</span><span class="n">params</span>
+        <span class="p">)</span>
+        <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">annotations</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_dump_mindmeld</span><span class="p">(</span><span class="n">processed_query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">raw_text</span> <span class="o">=</span> <span class="n">processed_query</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">markup</span> <span class="o">=</span> <span class="n">_mark_up_entities</span><span class="p">(</span>
+        <span class="n">raw_text</span><span class="p">,</span>
+        <span class="n">processed_query</span><span class="o">.</span><span class="n">entities</span><span class="p">,</span>
+        <span class="n">exclude_entity</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_entity&quot;</span><span class="p">),</span>
+        <span class="n">exclude_role</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_role&quot;</span><span class="p">),</span>
+        <span class="n">exclude_group</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_group&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">markup</span>
+
+
+<div class="viewcode-block" id="validate_markup"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.validate_markup">[docs]</a><span class="k">def</span> <span class="nf">validate_markup</span><span class="p">(</span><span class="n">markup</span><span class="p">,</span> <span class="n">query_factory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks whether the markup text is well-formed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markup (str): The marked up query text</span>
+<span class="sd">        query_factory (QueryFactory): An object which can create queries</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the markup is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">markup</span>
+    <span class="k">del</span> <span class="n">query_factory</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span></div>
+
+
+<span class="k">def</span> <span class="nf">_mark_up_entities</span><span class="p">(</span>
+    <span class="n">query_str</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">exclude_entity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exclude_group</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exclude_role</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">():</span>
+        <span class="n">annotations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_annotations_for_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">))</span>
+
+    <span class="c1"># remove duplicates from annotations</span>
+    <span class="n">ann_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+        <span class="n">ann_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ann_key</span> <span class="ow">in</span> <span class="n">ann_map</span><span class="p">:</span>
+            <span class="c1"># a similar annotation has already been found</span>
+            <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ann_map</span><span class="p">[</span><span class="n">ann_key</span><span class="p">][</span><span class="s2">&quot;depth&quot;</span><span class="p">]:</span>
+                <span class="c1"># keep the annotation already in the map</span>
+                <span class="n">ann</span> <span class="o">=</span> <span class="n">ann_map</span><span class="p">[</span><span class="n">ann_key</span><span class="p">]</span>
+
+        <span class="n">ann_map</span><span class="p">[</span><span class="n">ann_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ann</span>
+
+    <span class="n">annotations</span> <span class="o">=</span> <span class="n">ann_map</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">])</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_open_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_str</span><span class="p">[</span><span class="n">cursor</span> <span class="p">:</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exclude_group</span><span class="p">:</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GROUP_START</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">exclude_entity</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">exclude_role</span> <span class="ow">and</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ENTITY_START</span><span class="p">)</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_close_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_str</span><span class="p">[</span><span class="n">cursor</span> <span class="p">:</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;ann_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exclude_group</span><span class="p">:</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">META_SPLIT</span><span class="p">)</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GROUP_END</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">exclude_entity</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">exclude_role</span> <span class="ow">and</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exclude_entity</span><span class="p">:</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">META_SPLIT</span><span class="p">)</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exclude_role</span> <span class="ow">and</span> <span class="n">ann</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">META_SPLIT</span><span class="p">)</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">])</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ENTITY_END</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">cursor</span>
+
+    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ann</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]:</span>
+            <span class="c1"># if there are annotations on the stack of the same depth, they have no more children</span>
+            <span class="c1"># so finish them</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="n">_close_ann</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">cursor</span><span class="p">)</span>
+
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">_open_ann</span><span class="p">(</span><span class="n">ann</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">_close_ann</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">cursor</span><span class="p">)</span>
+
+    <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_str</span><span class="p">[</span><span class="n">cursor</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_annotations_for_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">parent_offset</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">parent_offset</span>
+    <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+        <span class="c1"># This entity is the head of a group. Add an annotation for the group.</span>
+        <span class="n">leftmost</span> <span class="o">=</span> <span class="n">entity</span>
+        <span class="k">while</span> <span class="p">(</span>
+            <span class="n">leftmost</span><span class="o">.</span><span class="n">children</span> <span class="ow">and</span> <span class="n">leftmost</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">&lt;</span> <span class="n">leftmost</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span>
+        <span class="p">):</span>
+            <span class="n">leftmost</span> <span class="o">=</span> <span class="n">leftmost</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">g_start</span> <span class="o">=</span> <span class="n">leftmost</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span>
+        <span class="n">rightmost</span> <span class="o">=</span> <span class="n">entity</span>
+        <span class="k">while</span> <span class="p">(</span>
+            <span class="n">rightmost</span><span class="o">.</span><span class="n">children</span> <span class="ow">and</span> <span class="n">rightmost</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span> <span class="o">&gt;</span> <span class="n">rightmost</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span>
+        <span class="p">):</span>
+            <span class="n">rightmost</span> <span class="o">=</span> <span class="n">rightmost</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">g_end</span> <span class="o">=</span> <span class="n">rightmost</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span>
+        <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;ann_type&quot;</span><span class="p">:</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">g_start</span><span class="p">,</span>
+                <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">g_end</span><span class="p">,</span>
+                <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">depth</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="c1"># Add annotations for each of the dependents</span>
+            <span class="n">annotations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_annotations_for_entity</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
+    <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;ann_type&quot;</span><span class="p">:</span> <span class="s2">&quot;entity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span><span class="p">,</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
+            <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">depth</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Iterate over &#39;nested&#39; entities</span>
+    <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+        <span class="n">annotations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_annotations_for_entity</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="p">))</span>
+
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">annotations</span>
+
+
+<div class="viewcode-block" id="mark_down"><a class="viewcode-back" href="../../apidoc/mindmeld.markup.html#mindmeld.markup.mark_down">[docs]</a><span class="k">def</span> <span class="nf">mark_down</span><span class="p">(</span><span class="n">markup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removes all entity mark up from a string</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markup (str): A marked up string</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A clean string with no mark up</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_parse_tokens</span><span class="p">(</span><span class="n">_tokenize_markup</span><span class="p">(</span><span class="n">markup</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">text</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

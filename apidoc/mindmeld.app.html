@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.app module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.app module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.app.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.app">
+<span id="mindmeld-app-module"></span><h1>mindmeld.app module<a class="headerlink" href="#module-mindmeld.app" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the app component.</p>
+<dl class="class">
+<dt id="mindmeld.app.Application">
+<em class="property">class </em><code class="descclassname">mindmeld.app.</code><code class="descname">Application</code><span class="sig-paren">(</span><em>import_name</em>, <em>request_class=None</em>, <em>responder_class=None</em>, <em>preprocessor=None</em>, <em>async_mode=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The conversational application.</p>
+<dl class="attribute">
+<dt id="mindmeld.app.Application.import_name">
+<code class="descname">import_name</code><a class="headerlink" href="#mindmeld.app.Application.import_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the application package.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.app_path">
+<code class="descname">app_path</code><a class="headerlink" href="#mindmeld.app.Application.app_path" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The application path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.app_manager">
+<code class="descname">app_manager</code><a class="headerlink" href="#mindmeld.app.Application.app_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>ApplicationManager</em> – The application manager.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.request_class">
+<code class="descname">request_class</code><a class="headerlink" href="#mindmeld.app.Application.request_class" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Request</em> – Any class that inherits from                 Request.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.responder_class">
+<code class="descname">responder_class</code><a class="headerlink" href="#mindmeld.app.Application.responder_class" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>DialogueResponder</em> – Any class that                 inherits from the DialogueResponder.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.preprocessor">
+<code class="descname">preprocessor</code><a class="headerlink" href="#mindmeld.app.Application.preprocessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Preprocessor</em> – The application preprocessor, if any.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.async_mode">
+<code class="descname">async_mode</code><a class="headerlink" href="#mindmeld.app.Application.async_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – <code class="docutils literal"><span class="pre">True</span></code> if the application is async, <code class="docutils literal"><span class="pre">False</span></code> otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.add_dialogue_rule">
+<code class="descname">add_dialogue_rule</code><span class="sig-paren">(</span><em>name</em>, <em>handler</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.add_dialogue_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.add_dialogue_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a dialogue rule for the dialogue manager.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the dialogue state</li>
+<li><strong>handler</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.8)"><em>callable</em></a>) – The dialogue state handler function</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A list of options which specify the dialogue rule</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.add_middleware">
+<code class="descname">add_middleware</code><span class="sig-paren">(</span><em>middleware</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.add_middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.add_middleware" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds middleware for the dialogue manager</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>middleware</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.8)"><em>callable</em></a>) – A dialogue manager middleware function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.auto_fill">
+<code class="descname">auto_fill</code><span class="sig-paren">(</span><em>name=None</em>, <em>*</em>, <em>form</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.auto_fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.auto_fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a flow to fill missing entities</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.cli">
+<code class="descname">cli</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.cli"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.cli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the application’s command line interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.dialogue_flow">
+<code class="descname">dialogue_flow</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.dialogue_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.dialogue_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dialogue flow for the application</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.handle">
+<code class="descname">handle</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator that is used to register dialogue state rules</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.lazy_init">
+<code class="descname">lazy_init</code><span class="sig-paren">(</span><em>nlp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.lazy_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.lazy_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the application manager, spin up the server and compile the dialogue rules.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.middleware">
+<code class="descname">middleware</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.middleware" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator that is used to register dialogue handler middleware</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.app.Application.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app.html#Application.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app.Application.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the application on a local development server.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.app.Application.question_answerer">
+<code class="descname">question_answerer</code><a class="headerlink" href="#mindmeld.app.Application.question_answerer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The application’s Question Answerer, which is initialized as part of the application             manager.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

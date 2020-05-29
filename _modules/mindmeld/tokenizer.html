@@ -1,0 +1,773 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.tokenizer &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.tokenizer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.tokenizer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the tokenizer.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">.path</span> <span class="k">import</span> <span class="n">ASCII_FOLDING_DICT_PATH</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Tokenizer"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer">[docs]</a><span class="k">class</span> <span class="nc">Tokenizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a</span>
+<span class="sd">    given piece of text.&quot;&quot;&quot;</span>
+
+    <span class="n">_ASCII_CUTOFF</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\u0080</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_from_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the tokenizer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exclude_from_norm (optional) - list of chars to exclude from normalization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ascii_folding_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_ascii_folding_table</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_from_norm</span> <span class="o">=</span> <span class="n">exclude_from_norm</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_regex</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_init_regex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the regex for matching and tokenizing text.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># List of regex&#39;s for matching and tokenizing when keep_special_chars=False</span>
+        <span class="n">regex_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># List of regex&#39;s for matching and tokenizing when keep_special_chars=True</span>
+        <span class="n">keep_special_regex_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">exception_chars</span> <span class="o">=</span> <span class="s2">&quot;\@\[\]\|\{\}&#39;&quot;</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># This is more of a tactical fix at this moment. Will probably need a more generic way</span>
+        <span class="c1"># to handle all currency symbols.</span>
+        <span class="n">currency_symbols</span> <span class="o">=</span> <span class="s2">&quot;$¥&quot;</span>
+        <span class="n">to_exclude</span> <span class="o">=</span> <span class="n">currency_symbols</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_from_norm</span><span class="p">)</span>
+
+        <span class="n">letter_pattern_str</span> <span class="o">=</span> <span class="s2">&quot;[^\W\d_]+&quot;</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># Make keep special regex list</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;start&gt;^[^\w\d&amp;&quot;</span> <span class="o">+</span> <span class="n">to_exclude</span> <span class="o">+</span> <span class="n">exception_chars</span> <span class="o">+</span> <span class="s2">&quot;]+&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;end&gt;[^\w\d&amp;&quot;</span> <span class="o">+</span> <span class="n">to_exclude</span> <span class="o">+</span> <span class="n">exception_chars</span> <span class="o">+</span> <span class="s2">&quot;]+$&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern1&gt;(?P&lt;pattern1_replace&gt;&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&amp;&quot;</span>
+            <span class="o">+</span> <span class="n">exception_chars</span>
+            <span class="o">+</span> <span class="s2">&quot;]+(?=[\d]+)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern2&gt;(?P&lt;pattern2_replace&gt;[\d]+)[^\w\d\s&amp;&quot;</span>
+            <span class="o">+</span> <span class="n">exception_chars</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="s2">&quot;]+&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;u(?=&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern3&gt;(?P&lt;pattern3_replace&gt;&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&amp;&quot;</span>
+            <span class="o">+</span> <span class="n">exception_chars</span>
+            <span class="o">+</span> <span class="s2">&quot;]+&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;(?=&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;escape1&gt;(?P&lt;escape1_replace&gt;[\w\d]+)&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="n">exception_chars</span>
+            <span class="o">+</span> <span class="s2">&quot;]+&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;(?=\|)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;escape2&gt;(?P&lt;escape2_replace&gt;[\]\}]+)&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="n">exception_chars</span>
+            <span class="o">+</span> <span class="s2">&quot;]+(?=s)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># Make regex list</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;start&gt;^[^\w\d&amp;&quot;</span> <span class="o">+</span> <span class="n">to_exclude</span> <span class="o">+</span> <span class="s2">&quot;]+&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;end&gt;[^\w\d&amp;&quot;</span> <span class="o">+</span> <span class="n">to_exclude</span> <span class="o">+</span> <span class="s2">&quot;]+$&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern1&gt;(?P&lt;pattern1_replace&gt;&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&amp;]+(?=[\d]+)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern2&gt;(?P&lt;pattern2_replace&gt;[\d]+)[^\w\d\s&amp;]+(?=&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;?P&lt;pattern3&gt;(?P&lt;pattern3_replace&gt;&quot;</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;[^\w\d\s&amp;]+(?=&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">+</span> <span class="n">letter_pattern_str</span>
+            <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># commonalities between lists</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;underscore&gt;_&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;underscore&gt;_&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;begspace&gt;^\s+&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;begspace&gt;^\s+&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;trailspace&gt;\s+$&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;trailspace&gt;\s+$&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;spaceplus&gt;\s+&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;spaceplus&gt;\s+&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;bar&gt; &#39;|&#39; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;bar&gt; &#39;|&#39; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;apos_s&gt;(?&lt;=[^</span><span class="se">\\</span><span class="s2">s])&#39;[sS]&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;apos_s&gt;(?&lt;=[^</span><span class="se">\\</span><span class="s2">s])&#39;[sS]&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># handle the apostrophes used at the end of a possessive form, e.g. dennis&#39;</span>
+        <span class="n">keep_special_regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;apos_poss&gt;(?&lt;=[^</span><span class="se">\\</span><span class="s2">s])&#39;$&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="n">regex_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;?P&lt;apos_poss&gt;(?&lt;=[^</span><span class="se">\\</span><span class="s2">s])&#39;$&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1"># Replace lookup based on regex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replace_lookup</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;apos_s&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &#39;s&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;apos_poss&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;bar&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;begspace&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;escape1&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;escape1_replace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;escape2&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="s2">&quot;escape2_replace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;pattern1&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="s2">&quot;pattern1_replace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;pattern2&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="s2">&quot;pattern2_replace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;pattern3&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="s2">&quot;pattern3_replace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;spaceplus&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;trailspace&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;underscore&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;apostrophe&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Create a regular expression  from the dictionary keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_special_compiled</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="s2">&quot;)|(&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keep_special_regex_list</span><span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="s2">&quot;)|(&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">regex_list</span><span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+
+    <span class="c1"># Needed for train-roles where queries are deep copied (and thus tokenizer).</span>
+    <span class="c1"># Pre compiled patterns don&#39;t deepcopy natively. Bug introduced past python 2.5</span>
+    <span class="c1"># TODO investigate necessity of deepcopy in train-roles</span>
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="c1"># TODO: optimize this</span>
+        <span class="k">return</span> <span class="n">Tokenizer</span><span class="p">(</span><span class="n">exclude_from_norm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_from_norm</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Tokenizer.load_ascii_folding_table"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.load_ascii_folding_table">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load_ascii_folding_table</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load mapping of ascii code points to ascii characters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Loading ascii folding mapping from file: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">ASCII_FOLDING_DICT_PATH</span>
+        <span class="p">)</span>
+
+        <span class="n">ascii_folding_table</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">with</span> <span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+            <span class="n">ASCII_FOLDING_DICT_PATH</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;unicode_escape&quot;</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">mapping_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mapping_file</span><span class="p">:</span>
+                <span class="n">tokens</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">codepoint</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ascii_char</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">ascii_folding_table</span><span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">codepoint</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ascii_char</span>
+
+        <span class="k">return</span> <span class="n">ascii_folding_table</span></div>
+
+    <span class="k">def</span> <span class="nf">_one_xlat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function for for multiple replace. Takes match object and looks up replacement.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            match_object: A regex match object</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: A string with punctuation replaced/removed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">replace_str</span><span class="p">,</span> <span class="n">format_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_lookup</span><span class="p">[</span><span class="n">match_object</span><span class="o">.</span><span class="n">lastgroup</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">format_str</span><span class="p">:</span>
+            <span class="n">replace_str</span> <span class="o">=</span> <span class="n">replace_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">match_object</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()[</span><span class="n">format_str</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">replace_str</span>
+
+<div class="viewcode-block" id="Tokenizer.multiple_replace"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.multiple_replace">[docs]</a>    <span class="k">def</span> <span class="nf">multiple_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">compiled</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes text and compiled regex pattern, does lookup for multi rematch.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text to perform matching on</span>
+<span class="sd">            compiled: A compiled regex object that can be used for matching</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The text with replacement specified by self.replace_lookup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># For each match, look-up corresponding value in dictionary</span>
+        <span class="k">return</span> <span class="n">compiled</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_one_xlat</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Tokenizer.normalize"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">keep_special_chars</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize a given text string and return the string with each token normalized.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text to normalize</span>
+<span class="sd">            keep_special_chars (bool): If True, the tokenizer excludes a list of special</span>
+<span class="sd">                characters used in annotations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: the original text string with each token in normalized form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">norm_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">keep_special_chars</span><span class="p">)</span>
+        <span class="n">normalized_text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">norm_tokens</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">normalized_text</span></div>
+
+<div class="viewcode-block" id="Tokenizer.tokenize"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.tokenize">[docs]</a>    <span class="k">def</span> <span class="nf">tokenize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">keep_special_chars</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tokenizes the input text, normalizes the token text, and returns normalized tokens.</span>
+
+<span class="sd">        Currently it does the following during normalization:</span>
+<span class="sd">        1. remove leading special characters except dollar sign and ampersand</span>
+<span class="sd">        2. remove trailing special characters except ampersand</span>
+<span class="sd">        3. remove special characters except ampersand when the preceding character is a letter and</span>
+<span class="sd">        the following characters is a number</span>
+<span class="sd">        4. remove special characters except ampersand when the preceding character is a number and</span>
+<span class="sd">        the following character is a letter</span>
+<span class="sd">        5. remove special characters except ampersand when both preceding and following characters</span>
+<span class="sd">        are letters</span>
+<span class="sd">        6. remove special character except ampersand when the following character is &#39;|&#39;</span>
+<span class="sd">        7. remove diacritics and replace it with equivalent ascii character when possible</span>
+
+<span class="sd">        Note that the tokenizer also excludes a list of special characters used in annotations when</span>
+<span class="sd">        the flag keep_special_chars is set to True</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text to normalize</span>
+<span class="sd">            keep_special_chars (bool): If True, the tokenizer excludes a list of special</span>
+<span class="sd">                characters used in annotations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of normalized tokens</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">raw_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenize_raw</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="n">norm_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">raw_token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_tokens</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">norm_token_start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">norm_tokens</span><span class="p">)</span>
+            <span class="n">norm_token_text</span> <span class="o">=</span> <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">keep_special_chars</span><span class="p">:</span>
+                <span class="n">norm_token_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiple_replace</span><span class="p">(</span>
+                    <span class="n">norm_token_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_special_compiled</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">norm_token_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiple_replace</span><span class="p">(</span><span class="n">norm_token_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span><span class="p">)</span>
+
+            <span class="c1"># fold to ascii</span>
+            <span class="n">norm_token_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fold_str_to_ascii</span><span class="p">(</span><span class="n">norm_token_text</span><span class="p">)</span>
+
+            <span class="n">norm_token_text</span> <span class="o">=</span> <span class="n">norm_token_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="n">norm_token_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">norm_token_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># remove diacritics and fold the character to equivalent ascii character if possible</span>
+                <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">norm_token_text</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                    <span class="n">norm_token</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">norm_token</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+                    <span class="n">norm_token</span><span class="p">[</span><span class="s2">&quot;raw_entity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+                    <span class="n">norm_token</span><span class="p">[</span><span class="s2">&quot;raw_token_index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">norm_token</span><span class="p">[</span><span class="s2">&quot;raw_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+                    <span class="n">norm_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_token</span><span class="p">)</span>
+                    <span class="n">norm_token_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;norm_token_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_token_start</span>
+            <span class="n">raw_token</span><span class="p">[</span><span class="s2">&quot;norm_token_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_token_count</span>
+
+        <span class="k">return</span> <span class="n">norm_tokens</span></div>
+
+<div class="viewcode-block" id="Tokenizer.tokenize_raw"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.tokenize_raw">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">tokenize_raw</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identify tokens in text and create normalized tokens that contain the text and start index.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text to normalize</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of normalized tokens</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">token_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">token</span> <span class="ow">and</span> <span class="n">token_text</span><span class="p">:</span>
+                    <span class="n">token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token_text</span>
+                    <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">token_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">token_text</span><span class="p">:</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span>
+            <span class="n">token_text</span> <span class="o">+=</span> <span class="n">char</span>
+
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">and</span> <span class="n">token_text</span><span class="p">:</span>
+            <span class="n">token</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token_text</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tokens</span></div>
+
+<div class="viewcode-block" id="Tokenizer.get_char_index_map"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.get_char_index_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_char_index_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_text</span><span class="p">,</span> <span class="n">normalized_text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates character index mapping from normalized query to raw query. The entity model</span>
+<span class="sd">        always operates on normalized query during NLP processing but for entity output we need</span>
+<span class="sd">        to generate indexes based on raw query.</span>
+
+<span class="sd">        The mapping is generated by calculating edit distance and backtracking to get the</span>
+<span class="sd">        proper alignment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            raw_text (str): Raw query text.</span>
+<span class="sd">            normalized_text (str): Normalized query text.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A mapping of character indexes from normalized query to raw query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">text</span> <span class="o">=</span> <span class="n">raw_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fold_str_to_ascii</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_text</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_text</span><span class="p">)</span>
+
+        <span class="c1"># handle case where normalized text is the empty string</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">raw_to_norm_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">)}</span>
+            <span class="k">return</span> <span class="n">raw_to_norm_mapping</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="c1"># handle case where normalized text and raw text are identical</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">raw_text</span> <span class="o">==</span> <span class="n">normalized_text</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)}</span>
+            <span class="k">return</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">mapping</span>
+
+        <span class="n">edit_dis</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">edit_dis</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">edit_dis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">edit_dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="n">directions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">directions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">dis</span> <span class="o">=</span> <span class="mi">999</span>
+                <span class="n">direction</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="n">diag_dis</span> <span class="o">=</span> <span class="n">edit_dis</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">normalized_text</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">text</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">diag_dis</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># dis from going down</span>
+                <span class="n">down_dis</span> <span class="o">=</span> <span class="n">edit_dis</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c1"># dis from going right</span>
+                <span class="n">right_dis</span> <span class="o">=</span> <span class="n">edit_dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">down_dis</span> <span class="o">&lt;</span> <span class="n">dis</span><span class="p">:</span>
+                    <span class="n">dis</span> <span class="o">=</span> <span class="n">down_dis</span>
+                    <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;↓&quot;</span>
+                <span class="k">if</span> <span class="n">right_dis</span> <span class="o">&lt;</span> <span class="n">dis</span><span class="p">:</span>
+                    <span class="n">dis</span> <span class="o">=</span> <span class="n">right_dis</span>
+                    <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;→&quot;</span>
+                <span class="k">if</span> <span class="n">diag_dis</span> <span class="o">&lt;</span> <span class="n">dis</span><span class="p">:</span>
+                    <span class="n">dis</span> <span class="o">=</span> <span class="n">diag_dis</span>
+                    <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;↘&quot;</span>
+
+                <span class="n">edit_dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dis</span>
+                <span class="n">directions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">direction</span>
+
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># backtrack</span>
+        <span class="n">m_idx</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="n">n_idx</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="k">while</span> <span class="n">m_idx</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">directions</span><span class="p">[</span><span class="n">n_idx</span><span class="p">][</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;↘&quot;</span><span class="p">:</span>
+                <span class="n">mapping</span><span class="p">[</span><span class="n">n_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_idx</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">m_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">n_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">directions</span><span class="p">[</span><span class="n">n_idx</span><span class="p">][</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;→&quot;</span><span class="p">:</span>
+                <span class="n">m_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">directions</span><span class="p">[</span><span class="n">n_idx</span><span class="p">][</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;↓&quot;</span><span class="p">:</span>
+                <span class="n">n_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="c1"># initialize the forward mapping (raw to normalized text)</span>
+        <span class="n">raw_to_norm_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="c1"># naive approach for generating forward mapping. this is naive and probably not robust.</span>
+        <span class="c1"># all leading special characters will get mapped to index position 0 in normalized text.</span>
+        <span class="n">raw_to_norm_mapping</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">raw_to_norm_mapping</span><span class="p">:</span>
+                <span class="n">raw_to_norm_mapping</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_to_norm_mapping</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">raw_to_norm_mapping</span><span class="p">,</span> <span class="n">mapping</span></div>
+
+<div class="viewcode-block" id="Tokenizer.fold_char_to_ascii"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.fold_char_to_ascii">[docs]</a>    <span class="k">def</span> <span class="nf">fold_char_to_ascii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the ASCII character corresponding to the folding token.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            char: ASCII folding token</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            char: a ASCII character</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">char_ord</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">char_ord</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ASCII_CUTOFF</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">char</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ascii_folding_table</span><span class="p">[</span><span class="n">char_ord</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">char</span></div>
+
+<div class="viewcode-block" id="Tokenizer.fold_str_to_ascii"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.fold_str_to_ascii">[docs]</a>    <span class="k">def</span> <span class="nf">fold_str_to_ascii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the ASCII character corresponding to the folding token string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            str: ASCII folding token string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            char: a ASCII character</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">folded_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">folded_str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fold_char_to_ascii</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">folded_str</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Tokenizer exclude_from_norm: </span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclude_from_norm</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Tokenizer.create_tokenizer"><a class="viewcode-back" href="../../apidoc/mindmeld.tokenizer.html#mindmeld.tokenizer.Tokenizer.create_tokenizer">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_tokenizer</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Creates the tokenizer for the app</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tokenizer: a tokenizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Tokenizer</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

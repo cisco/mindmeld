@@ -1,0 +1,620 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.role_classifier &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.role_classifier</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.role_classifier</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the role classifier component of the MindMeld natural language processor.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.externals</span> <span class="k">import</span> <span class="n">joblib</span>
+
+<span class="kn">from</span> <span class="nn">..constants</span> <span class="k">import</span> <span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+<span class="kn">from</span> <span class="nn">..core</span> <span class="k">import</span> <span class="n">Query</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="k">import</span> <span class="n">CLASS_LABEL_TYPE</span><span class="p">,</span> <span class="n">ENTITY_EXAMPLE_TYPE</span><span class="p">,</span> <span class="n">create_model</span>
+<span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="n">get_classifier_config</span>
+<span class="kn">from</span> <span class="nn">.classifier</span> <span class="k">import</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">ClassifierConfig</span><span class="p">,</span> <span class="n">ClassifierLoadError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RoleClassifier"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier">[docs]</a><span class="k">class</span> <span class="nc">RoleClassifier</span><span class="p">(</span><span class="n">Classifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A role classifier is used to determine the target role for entities in a given query. It is</span>
+<span class="sd">    trained using all the labeled queries for a particular intent. The labels are the role names</span>
+<span class="sd">    associated with each entity within each query.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        domain (str): The domain that this role classifier belongs to</span>
+<span class="sd">        intent (str): The intent that this role classifier belongs to</span>
+<span class="sd">        entity_type (str): The entity type that this role classifier is for</span>
+<span class="sd">        roles (set): A set containing the roles which can be classified</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">CLF_TYPE</span> <span class="o">=</span> <span class="s2">&quot;role&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_loader</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a role classifier</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_loader (ResourceLoader): An object which can load resources for the classifier</span>
+<span class="sd">            domain (str): The domain that this role classifier belongs to</span>
+<span class="sd">            intent (str): The intent that this role classifier belongs to</span>
+<span class="sd">            entity_type (str): The entity type that this role classifier is for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">resource_loader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="o">=</span> <span class="n">intent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">=</span> <span class="n">entity_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">_get_model_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets a machine learning model configuration</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ModelConfig: The model configuration corresponding to the provided config name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;example_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ENTITY_EXAMPLE_TYPE</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;label_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CLASS_LABEL_TYPE</span>
+        <span class="n">loaded_config</span> <span class="o">=</span> <span class="n">get_classifier_config</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">CLF_TYPE</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span>
+            <span class="n">domain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="n">entity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_model_config</span><span class="p">(</span><span class="n">loaded_config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RoleClassifier.fit"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incremental_timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains a statistical model for role classification using the provided training examples.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            queries (list of ProcessedQuery): The labeled queries to use as training data</span>
+<span class="sd">            label_set (list, optional): A label set to load. If not specified, the default</span>
+<span class="sd">                training set will be loaded.</span>
+<span class="sd">            incremental_timestamp (str, optional): The timestamp folder to cache models in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Fitting role classifier: domain=</span><span class="si">%r</span><span class="s2">, intent=</span><span class="si">%r</span><span class="s2">, entity_type=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># create model with given params</span>
+        <span class="n">model_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span><span class="n">model_config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">label_set</span><span class="p">:</span>
+            <span class="n">label_set</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">train_label_set</span>
+            <span class="n">label_set</span> <span class="o">=</span> <span class="n">label_set</span> <span class="k">if</span> <span class="n">label_set</span> <span class="k">else</span> <span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+
+        <span class="n">new_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_hash</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">label_set</span><span class="p">)</span>
+        <span class="n">cached_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">hash_to_model_path</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">new_hash</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">incremental_timestamp</span> <span class="ow">and</span> <span class="n">cached_model</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No need to fit. Loading previous model.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">cached_model</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Load labeled data</span>
+        <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_queries_and_labels</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">label_set</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">examples</span><span class="p">:</span>
+            <span class="c1"># Build roles set</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">roles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">initialize_resources</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">ClassifierConfig</span><span class="o">.</span><span class="n">from_model_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hash</span> <span class="o">=</span> <span class="n">new_hash</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_data_dump_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="s2">&quot;roles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="p">}</span>
+
+<div class="viewcode-block" id="RoleClassifier.dump"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">,</span> <span class="n">incremental_model_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Persists the trained role classification model to disk.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_path (str): The model path.</span>
+<span class="sd">            incremental_model_path (str, Optional): The timestamped folder where the cached \</span>
+<span class="sd">                models are stored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Saving role classifier: domain=</span><span class="si">%r</span><span class="s2">, intent=</span><span class="si">%r</span><span class="s2">, entity=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">incremental_model_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RoleClassifier.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads the trained role classification model from disk.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_path (str): The location on disk where the model is stored</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Loading role classifier: domain=</span><span class="si">%r</span><span class="s2">, intent=</span><span class="si">%r</span><span class="s2">, entity_type=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rc_data</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">rc_data</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">roles</span> <span class="o">=</span> <span class="n">rc_data</span><span class="p">[</span><span class="s2">&quot;roles&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to load </span><span class="si">%s</span><span class="s2">. Pickle file cannot be read from </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="n">model_path</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+            <span class="c1"># msg = &#39;Unable to load {}. Pickle file cannot be read from {!r}&#39;</span>
+            <span class="c1"># raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="s2">&quot;mindmeld_version&quot;</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Your trained models are incompatible with this version of MindMeld. &quot;</span>
+                    <span class="s2">&quot;Please run a clean build to retrain models&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ClassifierLoadError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c1"># Loaded model config is incompatible with app config.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resolve_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_model_config</span><span class="p">())</span>
+
+            <span class="n">gazetteers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_gazetteers</span><span class="p">()</span>
+            <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">register_resources</span><span class="p">(</span><span class="n">gazetteers</span><span class="o">=</span><span class="n">gazetteers</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">ClassifierConfig</span><span class="o">.</span><span class="n">from_model_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_hash</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="RoleClassifier.predict"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span>
+    <span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Predicts a role for the given entity using the trained role classification model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (Query): The input query</span>
+<span class="sd">            entities (list): The entities in the query</span>
+<span class="sd">            entity_index (int): The index of the entity whose role should be classified</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The predicted role for the provided entity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;You must fit or load the model before running predict&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">Query</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">gazetteers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_gazetteers</span><span class="p">()</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">register_resources</span><span class="p">(</span><span class="n">gazetteers</span><span class="o">=</span><span class="n">gazetteers</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">predict</span><span class="p">([(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span><span class="p">)])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="RoleClassifier.predict_proba"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span>
+    <span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Runs prediction on a given entity and generates multiple role hypotheses and</span>
+<span class="sd">        associated probabilities using the trained role classification model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (Query): The input query</span>
+<span class="sd">            entities (list): The entities in the query</span>
+<span class="sd">            entity_index (int): The index of the entity whose role should be classified</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: a list of tuples of the form (str, float) grouping roles and their probabilities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;You must fit or load the model before running predict&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">Query</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">gazetteers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_gazetteers</span><span class="p">()</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">register_resources</span><span class="p">(</span><span class="n">gazetteers</span><span class="o">=</span><span class="n">gazetteers</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+
+        <span class="n">predict_proba_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+            <span class="p">[(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">class_proba_tuples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">predict_proba_result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">class_proba_tuples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="RoleClassifier.view_extracted_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.view_extracted_features">[docs]</a>    <span class="k">def</span> <span class="nf">view_extracted_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts features for a given entity for role classification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (Query or str): The input query</span>
+<span class="sd">            entities (list): The entities in the query</span>
+<span class="sd">            entity_index (int): The index of the entity whose role should be classified</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: The extracted features from the given input</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;You must fit or load the model to initialize resources&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">Query</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">create_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">gazetteers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_gazetteers</span><span class="p">()</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">register_resources</span><span class="p">(</span><span class="n">gazetteers</span><span class="o">=</span><span class="n">gazetteers</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_extract_features</span><span class="p">((</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_query_tree</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">DEFAULT_TRAIN_SET_REGEX</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the set of queries to train on</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            queries (list, optional): A list of ProcessedQuery objects, to</span>
+<span class="sd">                train. If not specified, a label set will be loaded.</span>
+<span class="sd">            label_set (list, optional): A label set to load. If not specified,</span>
+<span class="sd">                the default training set will be loaded.</span>
+<span class="sd">            raw (bool, optional): When True, raw query strings will be returned</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List: list of queries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">queries</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_query_tree</span><span class="p">(</span>
+                <span class="n">queries</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="n">raw</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_labeled_queries</span><span class="p">(</span>
+            <span class="n">domain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">label_set</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="n">raw</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_queries_and_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">DEFAULT_TRAIN_SET_REGEX</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a set of queries and their labels based on the label set</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            queries (list, optional): A list of ProcessedQuery objects, to</span>
+<span class="sd">                train on. If not specified, a label set will be loaded.</span>
+<span class="sd">            label_set (list, optional): A label set to load. If not specified,</span>
+<span class="sd">                the default training set will be loaded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_query_tree</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">label_set</span><span class="p">)</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">flatten_query_tree</span><span class="p">(</span><span class="n">query_tree</span><span class="p">)</span>
+
+        <span class="c1"># build list of examples -- entities of this role classifier&#39;s type</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">entities</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span> <span class="ow">and</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span><span class="p">:</span>
+                    <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">query</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">entities</span><span class="p">,</span> <span class="n">idx</span><span class="p">))</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span><span class="p">)</span>
+
+        <span class="n">unique_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># No roles</span>
+            <span class="k">return</span> <span class="p">(),</span> <span class="p">()</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">unique_labels</span><span class="p">:</span>
+            <span class="n">bad_examples</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span> <span class="k">if</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">bad_examples</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid entity annotation, expecting role in query </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">example</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One or more invalid entity annotations, expecting role&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span>
+
+    <span class="k">def</span> <span class="nf">_get_queries_and_labels_hash</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+    <span class="p">):</span>
+        <span class="n">query_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_query_tree</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="n">label_set</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">flatten_query_tree</span><span class="p">(</span><span class="n">query_tree</span><span class="p">)</span>
+        <span class="n">hashable_queries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">+</span> <span class="s2">&quot;###&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="o">+</span> <span class="s2">&quot;###&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">+</span> <span class="s2">&quot;###&quot;</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">hash_list</span><span class="p">(</span><span class="n">hashable_queries</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RoleClassifier.inspect"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.role_classifier.html#mindmeld.components.role_classifier.RoleClassifier.inspect">[docs]</a>    <span class="k">def</span> <span class="nf">inspect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">gold_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">gold_label</span>
+        <span class="k">del</span> <span class="n">dynamic_resource</span>
+        <span class="k">del</span> <span class="n">query</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;method not implemented&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

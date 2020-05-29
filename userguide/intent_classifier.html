@@ -1,0 +1,1470 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with the Intent Classifier &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Entity Recognizer" href="entity_recognizer.html" />
+    <link rel="prev" title="Working with the Domain Classifier" href="domain_classifier.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with the Intent Classifier</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#access-an-intent-classifier">Access an intent classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-an-intent-classifier">Train an intent classifier</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classifier-configuration">Classifier configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#training-with-custom-configurations">Training with custom configurations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#application-configuration-file">1. Application configuration file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arguments-to-the-fit-method">2. Arguments to the <code class="docutils literal"><span class="pre">fit()</span></code> method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-intent-classifier">Run the intent classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluate-classifier-performance">Evaluate classifier performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewing-features-extracted-for-classification">Viewing features extracted for classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inspect-features-and-their-importance">Inspect features and their importance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-model-for-future-use">Save model for future use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with the Intent Classifier</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/intent_classifier.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-the-intent-classifier">
+<h1>Working with the Intent Classifier<a class="headerlink" href="#working-with-the-intent-classifier" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="architecture.html#arch-intent-model"><span class="std std-ref">Intent Classifier</span></a></p>
+<blockquote>
+<div><ul class="simple">
+<li>is run as the second step in the <a class="reference internal" href="architecture.html#arch-nlp"><span class="std std-ref">natural language processing pipeline</span></a></li>
+<li>is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model that determines the target intent for a given query</li>
+<li>is trained using all of the labeled queries across all the intents in a given domain</li>
+</ul>
+</div></blockquote>
+<p>Every MindMeld app has one intent classifier for every domain with multiple intents. The name of each intent folder serves as the label for the training queries contained within that folder.</p>
+<p>See <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> for more details on training data preparation.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to the <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html#intent-classification"><span class="std std-ref">Intent Classification</span></a> section.</li>
+<li>This section requires the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a> blueprint application. To get the app, open a terminal and run <code class="docutils literal"><span class="pre">mindmeld</span> <span class="pre">blueprint</span> <span class="pre">home_assistant</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="access-an-intent-classifier">
+<h2>Access an intent classifier<a class="headerlink" href="#access-an-intent-classifier" title="Permalink to this headline">¶</a></h2>
+<p>Working with the natural language processor falls into two broad phases:</p>
+<blockquote>
+<div><ul class="simple">
+<li>First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a>.</li>
+<li>Then, conduct experimentation in the Python shell.</li>
+</ul>
+</div></blockquote>
+<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> (NLP) class from the MindMeld <code class="xref py py-mod docutils literal"><span class="pre">nlp</span></code> module and <a class="reference internal" href="nlp.html#instantiate-nlp"><span class="std std-ref">instantiate an object</span></a> with the path to your MindMeld project.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
+<span class="n">nlp</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
+</pre></div>
+</div>
+<p>Verify that the NLP has correctly identified all the domains for your app.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;greeting&#39;: &lt;DomainProcessor &#39;greeting&#39; ready: False, dirty: False&gt;,</span>
+<span class="go"> &#39;smart_home&#39;: &lt;DomainProcessor &#39;smart_home&#39; ready: False, dirty: False&gt;,</span>
+<span class="go"> &#39;times_and_dates&#39;: &lt;DomainProcessor &#39;times_and_dates&#39; ready: False, dirty: False&gt;,</span>
+<span class="go"> &#39;unknown&#39;: &lt;DomainProcessor &#39;unknown&#39; ready: False, dirty: False&gt;,</span>
+<span class="go"> &#39;weather&#39;: &lt;DomainProcessor &#39;weather&#39; ready: False, dirty: False&gt;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Access the <code class="xref py py-class docutils literal"><span class="pre">IntentClassifier</span></code> for a domain of your choice, using the <code class="xref py py-attr docutils literal"><span class="pre">intent_classifier</span></code> attribute of the desired entity.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Intent classifier for the &#39;smart_home&#39; domain:</span>
+<span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;smart_home&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<span class="n">ic</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;IntentClassifier ready: False, dirty: False&gt;</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Intent classifier for the &#39;weather&#39; domain:</span>
+<span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<span class="n">ic</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;IntentClassifier ready: False, dirty: False&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="train-an-intent-classifier">
+<h2>Train an intent classifier<a class="headerlink" href="#train-an-intent-classifier" title="Permalink to this headline">¶</a></h2>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.fit()</span></code> method to train an intent classification model for a domain of your choice. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes to finish. With logging level set to <code class="docutils literal"><span class="pre">INFO</span></code> or below, you should see the build progress in the console and the cross-validation accuracy of the trained model.</p>
+<div class="highlight-python" id="baseline-intent-fit"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Loading queries from file times_and_dates/change_alarm/train.txt</span>
+<span class="go">Loading queries from file times_and_dates/check_alarm/train.txt</span>
+<span class="go">Loading queries from file times_and_dates/remove_alarm/train.txt</span>
+<span class="go">Loading queries from file times_and_dates/set_alarm/train.txt</span>
+<span class="go">Loading queries from file times_and_dates/start_timer/train.txt</span>
+<span class="go">Loading queries from file times_and_dates/stop_timer/train.txt</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
+<span class="go">Best accuracy: 97.68%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4:    0.98433048433048431, 5: 3.3872549019607843}, &#39;fit_intercept&#39;: True}</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method loads all the necessary training queries and trains an intent classification model. When called with no arguments (as in the example above), the method uses the settings from <code class="docutils literal"><span class="pre">config.py</span></code>, the <a class="reference internal" href="nlp.html#build-nlp-with-config"><span class="std std-ref">app’s configuration file</span></a>. If <code class="docutils literal"><span class="pre">config.py</span></code> is not defined, the method uses the MindMeld preset <a class="reference internal" href="nlp.html#config"><span class="std std-ref">classifier configuration</span></a>.</p>
+<p>Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.</p>
+<div class="section" id="classifier-configuration">
+<h3>Classifier configuration<a class="headerlink" href="#classifier-configuration" title="Permalink to this headline">¶</a></h3>
+<p>Use the <code class="xref py py-attr docutils literal"><span class="pre">config</span></code> attribute of a trained classifier to view the <a class="reference internal" href="nlp.html#config"><span class="std std-ref">configuration</span></a> that the classifier is using. Here’s an example where we view the configuration of a baseline intent classifier trained using default settings:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;features&#39;: {</span>
+<span class="go">   &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<span class="go">   &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<span class="go">   &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
+<span class="go">   &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
+<span class="go">   &#39;in-gaz&#39;: {},</span>
+<span class="go">   &#39;length&#39;: {}</span>
+<span class="go"> },</span>
+<span class="go"> &#39;model_settings&#39;: {&#39;classifier_type&#39;: &#39;logreg&#39;},</span>
+<span class="go"> &#39;model_type&#39;: &#39;text&#39;,</span>
+<span class="go"> &#39;param_selection&#39;: {</span>
+<span class="go">   &#39;grid&#39;: {</span>
+<span class="go">     &#39;C&#39;: [0.01, 1, 100, 10000, 1000000],</span>
+<span class="go">     &#39;class_weight&#39;: [</span>
+<span class="go">       ...</span>
+<span class="go">     ],</span>
+<span class="go">     &#39;fit_intercept&#39;: [True, False]</span>
+<span class="go">   },</span>
+<span class="go">   &#39;k&#39;: 10,</span>
+<span class="go">   &#39;type&#39;: &#39;k-fold&#39;</span>
+<span class="go"> },</span>
+<span class="go"> &#39;params&#39;: None,</span>
+<span class="go"> &#39;train_label_set&#39;: &#39;train.*\.txt&#39;,</span>
+<span class="go"> &#39;test_label_set&#39;: &#39;test.*\.txt&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Let’s take a look at the allowed values for each setting in an intent classifier configuration.</p>
+<ol class="arabic simple">
+<li><strong>Model Settings</strong></li>
+</ol>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">'model_type'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">Always <code class="docutils literal"><span class="pre">'text'</span></code>, since an intent classifier is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model.</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">'model_settings'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p>Always a dictionary with the single key <code class="docutils literal"><span class="pre">'classifier_type'</span></code> whose value specifies the machine learning model to use. Allowed values are shown in the table below.</p>
+<table border="1" class="last docutils" id="sklearn-intent-models">
+<colgroup>
+<col width="8%" />
+<col width="40%" />
+<col width="51%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Value</th>
+<th class="head">Classifier</th>
+<th class="head">Reference for configurable hyperparameters</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'logreg'</span></code></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">Logistic regression</a></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">sklearn.linear_model.LogisticRegression</a></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'svm'</span></code></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/svm.html#svm-classification">Support vector machine</a></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC">sklearn.svm.SVC</a></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'dtree'</span></code></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/tree.html#tree">Decision tree</a></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier">sklearn.tree.DecisionTreeClassifier</a></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'rforest'</span></code></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/ensemble.html#forest">Random forest</a></td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier">sklearn.ensemble.RandomForestClassifier</a></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><strong>Feature Extraction Settings</strong></li>
+</ol>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">'features'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p>A dictionary whose keys are the names of the feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for intent classification.</p>
+<table border="1" class="last docutils" id="intent-features">
+<colgroup>
+<col width="18%" />
+<col width="82%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Group Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'bag-of-words'</span></code></td>
+<td><p class="first">Generates n-grams of the specified lengths from the query text.</p>
+<p>Settings:</p>
+<p>A list of n-gram lengths to extract.</p>
+<p>Examples:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>only extracts words (unigrams)</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts unigrams, bigrams and trigrams</li>
+</ul>
+</dd>
+</dl>
+<p>Given the query “how are you”:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts “how”, “are”, and “you”</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts “how”, “are”, “you”, “how are”, and “are you”</li>
+</ul>
+</dd>
+</dl>
+<p>Additionally, you can also limit the n-grams considered while extracting the feature by setting a
+threshold on their frequency. These frequencies are computed over the entire training set. This prevents
+infrequent n-grams from being used as features. By default, this frequency is set to 0.</p>
+<p>Examples:</p>
+<blockquote class="last">
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+  <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>extracts all bigrams whose frequency in the training set is 5 or greater and all trigrams whose
+frequency is 8 or greater.</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+  <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>extracts all unigrams whose frequency in the training set is 8 or greater and all trigrams.</li>
+</ul>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'freq'</span></code></td>
+<td><p class="first">Generates a log-scaled count for each frequency bin, where the count represents the number of query tokens
+whose frequency falls into that bin. Frequency is measured by number of occurrences in the training data.</p>
+<p>Settings:</p>
+<p>Number of bins.</p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'bins':</span> <span class="pre">5}</span></code></dt>
+<dd><ul class="first last simple">
+<li>quantizes the vocabulary frequency into 5 bins</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'enable-stemming'</span></code></td>
+<td><p class="first">Stemming is the process of reducing inflected words to their word stem or base form. For example, word stem
+of “eating” is “eat”, word stem of “backwards” is “backward”. MindMeld extracts word stems using a variant
+of the <a class="reference external" href="https://tartarus.org/martin/PorterStemmer/">Porter stemming algorithm</a> that only removes
+inflectional suffixes.</p>
+<p>This feature extends the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> and <code class="docutils literal"><span class="pre">'freq'</span></code> features described above.</p>
+<p>If this flag is set to <code class="docutils literal"><span class="pre">True</span></code>:</p>
+<ul class="simple">
+<li>The stemmed versions of the n-grams are extracted from the query in addition to regular n-grams when
+using the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> feature</li>
+<li>Frequency counts for both unstemmed as well as stemmed versions of the query tokens are computed when
+using the <code class="docutils literal"><span class="pre">'freq'</span></code> feature</li>
+</ul>
+<p>Example:</p>
+<blockquote class="last">
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;bag-of-words&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span>
+    <span class="s1">&#39;enable-stemming&#39;</span><span class="p">:</span> <span class="bp">True</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>extracts [“two”, “orders”, “of”, “breadsticks”, <strong>“order”</strong>, <strong>“breadstick”</strong>] from the query “two
+orders of breadsticks”.</li>
+</ul>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'word-shape'</span></code></td>
+<td><p class="first">Generates word shapes of n-grams of the specified lengths from the query text. Word shapes are simplified
+representations which encode attributes such as capitalization, numerals, punctuation etc.
+Currently, we only encode whether a character is a digit or not.</p>
+<p>Settings:</p>
+<p>A list of n-gram lengths to extract.</p>
+<p>Examples:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>only extracts word shapes of individual tokens (unigrams)</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts word shapes of unigrams, bigrams and trigrams</li>
+</ul>
+</dd>
+</dl>
+<p>Given the query “i want 12”:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts “x”, “xxxx”, and “dd”</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts “x”, “xxxx”, “dd”, “x xxxx”, and “xxxx dd”</li>
+</ul>
+</dd>
+</dl>
+<p>Note:</p>
+<ul class="last simple">
+<li>Shapes of words which are all digits or non-digits and have more than 5 characters are collapsed to
+<cite>ddddd+</cite> and <cite>xxxxx+</cite> respectively.</li>
+<li>Feature value for each shape is its log-scaled count.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'edge-ngrams'</span></code></td>
+<td><p class="first">Generates n-grams of the specified lengths from the edges (that is, the start and the end) of the query.</p>
+<p>Settings:</p>
+<p>A list of n-gram lengths to extract.</p>
+<p>Examples:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>only extracts the first and last word</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts all leading and trailing n-grams up to size 3</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'char-ngrams'</span></code></td>
+<td><p class="first">Generates character n-grams of specified lengths from the query text.</p>
+<p>Examples:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts each character in the query (unigrams)</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts character unigrams, bigrams and trigrams</li>
+</ul>
+</dd>
+</dl>
+<p>Given the query “hi there”:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts ‘h’, ‘i’, ‘ ‘, t’, ‘h’, ‘e’, ‘r’, and ‘e’</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts  ‘h’, ‘i’, ‘ ‘, ‘t’, ‘h’, ‘e’, ‘r’, ‘e’, ‘hi’, ‘i ‘, ‘ t’, ‘th’, ‘he’, ‘er’, and ‘re’</li>
+</ul>
+</dd>
+</dl>
+<p>Additionally, you can also limit the character n-grams considered while extracting the feature by setting
+a threshold on their frequency. These frequencies are computed over the entire training set. This prevents
+infrequent n-grams from being used as features. By default, this frequency is set to 0.</p>
+<p>Examples:</p>
+<blockquote class="last">
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+  <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>extracts all character bigrams whose frequency in the training set is 5 or greater and all character
+trigrams whose frequency is 8 or greater.</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+  <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>extracts all character unigrams whose frequency in the training set is 8 or greater and all character
+trigrams.</li>
+</ul>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'sys-candidates'</span></code></td>
+<td><p class="first">Generates a set of features indicating the presence of system entities in the query.</p>
+<p>Settings:</p>
+<p>The types of system entities to extract. If unspecified, all system entities will be considered by default.</p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'entities':</span> <span class="pre">['sys_number',</span> <span class="pre">'sys_time',</span> <span class="pre">'sys_phone-number']}</span></code></dt>
+<dd><ul class="first last simple">
+<li>extracts features indicating the presence of the above system entities</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'in-gaz'</span></code></td>
+<td>Generates a set of features indicating the presence of query n-grams in different entity gazetteers,
+along with popularity information as defined in the gazetteer.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'length'</span></code></td>
+<td>Generates a set of features that capture query length information.
+Computes the number of tokens and characters in the query, on both linear and log scales.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'exact'</span></code></td>
+<td>Returns the entire query text as a feature.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<ol class="arabic simple" id="intent-tuning" start="3">
+<li><strong>Hyperparameter Settings</strong></li>
+</ol>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">A dictionary of values to be used for model hyperparameters during training. Examples include the <code class="docutils literal"><span class="pre">'kernel'</span></code> parameter for SVM, the <code class="docutils literal"><span class="pre">'penalty'</span></code> parameter for logistic regression, <code class="docutils literal"><span class="pre">'max_depth'</span></code> for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the <a class="reference internal" href="#sklearn-intent-models"><span class="std std-ref">reference links</span></a> above for parameter lists.</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">'param_selection'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p>A dictionary of settings for <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search">hyperparameter selection</a>. Provides an alternative to the <code class="docutils literal"><span class="pre">'params'</span></code> dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.</p>
+<p>To estimate parameters, MindMeld needs two pieces of information from the developer:</p>
+<ol class="arabic simple">
+<li>The parameter space to search, as the value for the <code class="docutils literal"><span class="pre">'grid'</span></code> key</li>
+<li>The strategy for splitting the labeled data into training and validation sets, as the value for the <code class="docutils literal"><span class="pre">'type'</span></code> key</li>
+</ol>
+<p>Depending on the splitting scheme selected, the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key</th>
+<th class="head">Value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'grid'</span></code></td>
+<td><p class="first">A dictionary which maps each hyperparameter to a list of potential values to search.
+Here is an example for a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">logistic regression</a> model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">],</span>
+  <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">],</span>
+   <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="last">See the <a class="reference internal" href="#sklearn-intent-models"><span class="std std-ref">reference links</span></a> above for details on the hyperparameters available for each model.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'type'</span></code></td>
+<td><p class="first">The <a class="reference external" href="http://scikit-learn.org/stable/modules/cross_validation">cross-validation</a> methodology to use. One of:</p>
+<ul class="last simple">
+<li><code class="docutils literal"><span class="pre">'k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold">K-folds</a></li>
+<li><code class="docutils literal"><span class="pre">'shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ShuffleSplit">Randomized folds</a></li>
+<li><code class="docutils literal"><span class="pre">'group-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold">K-folds with non-overlapping groups</a></li>
+<li><code class="docutils literal"><span class="pre">'group-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupShuffleSplit">Group-aware randomized folds</a></li>
+<li><code class="docutils literal"><span class="pre">'stratified-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold">Stratified k-folds</a></li>
+<li><code class="docutils literal"><span class="pre">'stratified-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit">Stratified randomized folds</a></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'k'</span></code></td>
+<td>Number of folds (splits)</td>
+</tr>
+</tbody>
+</table>
+<p class="last">To identify the parameters that give the highest accuracy, the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method does an <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search">exhaustive grid search</a> over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> can use these optimal parameters and skip the parameter selection process.</p>
+</dd>
+</dl>
+<ol class="arabic simple" start="4">
+<li><strong>Custom Train/Test Settings</strong></li>
+</ol>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">'train_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">A string representing a regex pattern that selects all training files for intent model training with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'train.*\.txt'</span></code>.</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">'test_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">A string representing a regex pattern that selects all evaluation files for intent model testing with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'test.*\.txt'</span></code>.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="training-with-custom-configurations">
+<span id="build-intent-with-config"></span><h3>Training with custom configurations<a class="headerlink" href="#training-with-custom-configurations" title="Permalink to this headline">¶</a></h3>
+<p>To override MindMeld’s default intent classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method with appropriate arguments.</p>
+<div class="section" id="application-configuration-file">
+<h4>1. Application configuration file<a class="headerlink" href="#application-configuration-file" title="Permalink to this headline">¶</a></h4>
+<p>When you define custom classifier settings in  <code class="docutils literal"><span class="pre">config.py</span></code>, the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.fit()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> methods use those settings instead of MindMeld’s defaults. To do this, define a dictionary of your custom settings, named <code class="xref py py-data docutils literal"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code>.</p>
+<p>Here’s an example of a <code class="docutils literal"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the preset configuration for the intent classifier.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">INTENT_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;class_bias&quot;</span><span class="p">:</span> <span class="mf">0.3</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;bag-of-words&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;edge-ngrams&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span>
+        <span class="s2">&quot;in-gaz&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;scaling&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+        <span class="s2">&quot;gaz-freq&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bins&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Settings defined in <code class="xref py py-data docutils literal"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code> apply to intent classifiers across all domains in your application. For finer-grained control, you can implement the <code class="xref py py-meth docutils literal"><span class="pre">get_intent_classifier_config()</span></code> function in <code class="docutils literal"><span class="pre">config.py</span></code> to specify suitable configurations for each domain. This gives you the flexibility to modify models and features based on the domain.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="k">def</span> <span class="nf">get_intent_classifier_config</span><span class="p">(</span><span class="n">domain</span><span class="p">):</span>
+    <span class="n">SPECIAL_CONFIG</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">INTENT_CLASSIFIER_CONFIG</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s1">&#39;smart_home&#39;</span><span class="p">:</span>
+        <span class="n">SPECIAL_CONFIG</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">][</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">domain</span> <span class="o">==</span> <span class="s1">&#39;greeting&#39;</span><span class="p">:</span>
+        <span class="n">SPECIAL_CONFIG</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="n">SPECIAL_CONFIG</span>
+</pre></div>
+</div>
+<p>Using <code class="docutils literal"><span class="pre">config.py</span></code> is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.</p>
+<p>Since this method requires updating a file each time you modify a setting, it’s less suitable for rapid prototyping than the method described next.</p>
+</div>
+<div class="section" id="arguments-to-the-fit-method">
+<h4>2. Arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method<a class="headerlink" href="#arguments-to-the-fit-method" title="Permalink to this headline">¶</a></h4>
+<p>For experimenting with an intent classifier, the recommended method is to use arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. The main areas for exploration are feature extraction, hyperparameter tuning, and model selection.</p>
+<p><strong>Feature extraction</strong></p>
+<p>Let’s start with the baseline classifier we trained <a class="reference internal" href="#baseline-intent-fit"><span class="std std-ref">earlier</span></a>. Viewing the feature set reveals that, by default, the classifier just uses a bag of words (unigrams) for features.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<span class="n">my_features</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<span class="go"> &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
+<span class="go"> &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
+<span class="go"> &#39;in-gaz&#39;: {},</span>
+<span class="go"> &#39;length&#39;: {}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Now we want the classifier to look at longer phrases, which carry more context than unigrams. Change the <code class="docutils literal"><span class="pre">'lengths'</span></code> setting of the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> feature to extract longer n-grams. For this example, to extract single words (unigrams), bigrams, and trigrams, we’ll edit the <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary as shown below.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We can also add more <a class="reference internal" href="#intent-features"><span class="std std-ref">supported features</span></a>. Suppose that our intents are such that the natural language patterns at the start or the end of a query can be highly indicative of one intent or another. To capture this, we extract the leading and trailing phrases of different lengths — known as <em>edge n-grams</em> — from the query. The code below adds the new <code class="docutils literal"><span class="pre">'edge-ngrams'</span></code> feature to the existing <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary.</p>
+<p>If <code class="docutils literal"><span class="pre">'edge-ngrams'</span></code> feature already exists in <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary this will update the feature value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;edge-ngrams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">}</span>
+<span class="n">my_features</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2, 3]},</span>
+<span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2, 3]},</span>
+<span class="go"> &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
+<span class="go"> &#39;in-gaz&#39;: {},</span>
+<span class="go"> &#39;length&#39;: {}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>To retrain the classifier with the updated feature set, pass in the <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary as an argument to the <code class="xref py py-data docutils literal"><span class="pre">features</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method.  This trains the intent classification model with our new feature extraction settings, while continuing to use MindMeld defaults for model type (logistic regression) and hyperparameter selection.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">my_features</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
+<span class="go">Best accuracy: 97.83%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 1.9123333333333332, 1: 1.0464506172839507, 2: 0.77702169625246553, 3: 0.67848200312989049, 4: 0.989031339031339, 5: 2.6710784313725489}, &#39;fit_intercept&#39;: False}</span>
+</pre></div>
+</div>
+<p>The exact accuracy number and the selected params might be different each time we run hyperparameter tuning, which we will explore in detail in the next section.</p>
+<p><strong>Hyperparameter tuning</strong></p>
+<p>View the model’s <a class="reference internal" href="#intent-tuning"><span class="std std-ref">hyperparameters</span></a>, keeping in mind the hyperparameters for logistic regression, the default model in MindMeld. These include: <code class="docutils literal"><span class="pre">'C'</span></code>, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to <code class="docutils literal"><span class="pre">'l2'</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span>
+<span class="n">my_param_settings</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;grid&#39;: {</span>
+<span class="go">           &#39;C&#39;: [0.01, 1, 100, 10000, 1000000],</span>
+<span class="go">           &#39;class_weight&#39;: [ ... ],</span>
+<span class="go">           &#39;fit_intercept&#39;: [True, False]</span>
+<span class="go">         },</span>
+<span class="go"> &#39;k&#39;: 5,</span>
+<span class="go"> &#39;type&#39;: &#39;k-fold&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Instead of relying on default preset values, let’s reduce the range of values to search for <code class="docutils literal"><span class="pre">'C'</span></code>, and allow the hyperparameter estimation process to choose the ideal norm (<code class="docutils literal"><span class="pre">'l1'</span></code> or <code class="docutils literal"><span class="pre">'l2'</span></code>) for penalization. Pass the updated settings to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> as arguments to the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> parameter. The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose cross-validation accuracy is highest.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;penalty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">]</span>
+<span class="n">my_param_settings</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;grid&#39;: {</span>
+<span class="go">           &#39;C&#39;: [10, 100, 1000],</span>
+<span class="go">           &#39;class_weight&#39;: [ ... ],</span>
+<span class="go">           &#39;fit_intercept&#39;: [True, False],</span>
+<span class="go">           &#39;penalty&#39;: [&#39;l1&#39;, &#39;l2&#39;]</span>
+<span class="go">         },</span>
+<span class="go"> &#39;k&#39;: 5,</span>
+<span class="go"> &#39;type&#39;: &#39;k-fold&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 97.97%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, &#39;fit_intercept&#39;: False, &#39;penalty&#39;: &#39;l1&#39;}</span>
+</pre></div>
+</div>
+<p>Finally, we’ll try a new cross-validation strategy of randomized folds instead of the 5-fold cross-validation currently specified in the config. To do this, we modify the value of the <code class="docutils literal"><span class="pre">'type'</span></code> key in <code class="xref py py-data docutils literal"><span class="pre">my_param_settings</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;shuffle&#39;</span>
+<span class="n">my_param_settings</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;grid&#39;: {</span>
+<span class="go">           &#39;C&#39;: [10, 100, 1000],</span>
+<span class="go">           &#39;class_weight&#39;: [ ... ],</span>
+<span class="go">           &#39;fit_intercept&#39;: [True, False],</span>
+<span class="go">           &#39;penalty&#39;: [&#39;l1&#39;, &#39;l2&#39;]</span>
+<span class="go">         },</span>
+<span class="go"> &#39;k&#39;: 5,</span>
+<span class="go"> &#39;type&#39;: &#39;shuffle&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 97.70%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, &#39;fit_intercept&#39;: False, &#39;penalty&#39;: &#39;l2&#39;}</span>
+</pre></div>
+</div>
+<p>For a list of configurable hyperparameters for each model, along with available cross-validation methods, see <a class="reference internal" href="#intent-tuning"><span class="std std-ref">hyperparameter settings</span></a>.</p>
+<p><strong>Model selection</strong></p>
+<p>To try <a class="reference internal" href="#sklearn-intent-models"><span class="std std-ref">machine learning models</span></a> other than the default of logistic regression, we specify the new model as the argument to <code class="docutils literal"><span class="pre">model_settings</span></code>, then update the hyperparameter grid accordingly.</p>
+<p>For example, a <a class="reference external" href="http://scikit-learn.org/stable/modules/svm">support vector machine (SVM)</a> with the same features as before, and parameter selection settings updated to search over the <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">SVM hyperparameters</a>, looks like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
+ <span class="s1">&#39;kernel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">my_param_settings</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;grid&#39;: {</span>
+<span class="go">           &#39;C&#39;: [0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000],</span>
+<span class="go">           &#39;kernel&#39;: [&#39;linear&#39;, &#39;rbf&#39;, &#39;poly&#39;]</span>
+<span class="go">         },</span>
+<span class="go"> &#39;k&#39;: 5,</span>
+<span class="go"> &#39;type&#39;: &#39;shuffle&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;svm&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 97.41%, params: {&#39;C&#39;: 1, &#39;kernel&#39;: &#39;linear&#39;}</span>
+</pre></div>
+</div>
+<p>Meanwhile, a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier">random forest</a> <a class="reference external" href="http://scikit-learn.org/stable/modules/ensemble">ensemble</a> classifier would look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+ <span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;gini&#39;</span><span class="p">,</span> <span class="s1">&#39;entropy&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;warm_start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;rforest&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 90.50%, params: {&#39;criterion&#39;: &#39;gini&#39;, &#39;n_estimators&#39;: 15, &#39;warm_start&#39;: False}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="run-the-intent-classifier">
+<h2>Run the intent classifier<a class="headerlink" href="#run-the-intent-classifier" title="Permalink to this headline">¶</a></h2>
+<p>Run the trained intent classifier on a test query using the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.predict()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.predict()</span></code> method returns the label for the intent whose predicted probability is highest.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s1">&#39;cancel my morning alarm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;remove_alarm&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">At runtime, the natural language processor’s <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method calls <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.predict()</span></code> to classify the domain for an incoming query.</p>
+</div>
+<p>We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible intent labels, use the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.predict_proba()</span></code> method. This is useful both for experimenting with classifier settings and for debugging classifier performance.</p>
+<p>The result is a list of tuples whose first element is the intent label and whose second element is the associated classification probability. These are ranked by intent, from most likely to least likely.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="s1">&#39;cancel my alarm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go"> (&#39;remove_alarm&#39;, 0.80000000000000004),</span>
+<span class="go"> (&#39;set_alarm&#39;, 0.20000000000000001),</span>
+<span class="go"> (&#39;change_alarm&#39;, 0.0),</span>
+<span class="go"> (&#39;check_alarm&#39;, 0.0),</span>
+<span class="go"> (&#39;start_timer&#39;, 0.0),</span>
+<span class="go"> (&#39;stop_timer&#39;, 0.0)]</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>An ideal classifier would assign a high probability to the expected (correct) class label for a test query, while assigning very low probabilities to incorrect labels.</p>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> methods take one query at a time. Next, we’ll see how to test a trained model on a batch of labeled test queries.</p>
+</div>
+<div class="section" id="evaluate-classifier-performance">
+<h2>Evaluate classifier performance<a class="headerlink" href="#evaluate-classifier-performance" title="Permalink to this headline">¶</a></h2>
+<p>Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your MindMeld project as described in the <a class="reference internal" href="nlp.html#evaluate-nlp"><span class="std std-ref">Natural Language Processor</span></a> chapter.</p>
+<p>Then, when you are ready, use the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.evaluate()</span></code> method, which</p>
+<blockquote>
+<div><ul class="simple">
+<li>strips away all ground truth annotations from the test queries,</li>
+<li>passes the resulting unlabeled queries to the trained intent classifier for prediction, and</li>
+<li>compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.</li>
+</ul>
+</div></blockquote>
+<p>In the example below, the model gets 339 out of 345 test queries correct, resulting in an accuracy of about 98.3%.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading queries from file times_and_dates/change_alarm/test.txt</span>
+<span class="go">Loading queries from file times_and_dates/check_alarm/test.txt</span>
+<span class="go">Loading queries from file times_and_dates/remove_alarm/test.txt</span>
+<span class="go">Loading queries from file times_and_dates/set_alarm/test.txt</span>
+<span class="go">Loading queries from file times_and_dates/start_timer/test.txt</span>
+<span class="go">Loading queries from file times_and_dates/stop_timer/test.txt</span>
+<span class="go">&lt;StandardModelEvaluation score: 98.26%, 339 of 345 examples correct&gt;</span>
+</pre></div>
+</div>
+<p>The aggregate accuracy score we see above is only the beginning, because the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.</p>
+<p>Print all the model performance statistics reported by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">eval</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Overall statistics:</span>
+
+<span class="go">   accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro</span>
+<span class="go">      0.983       0.982         339        2064           6           6       0.942       0.983</span>
+
+
+
+<span class="go">Statistics by class:</span>
+
+<span class="go">              class      f_beta   precision      recall     support          tp          tn          fp          fn</span>
+<span class="go">       change_alarm       0.952       1.000       0.909          11          10         334           0           1</span>
+<span class="go">       remove_alarm       0.947       0.964       0.931          29          27         315           1           2</span>
+<span class="go">        check_alarm       0.974       1.000       0.950          20          19         325           0           1</span>
+<span class="go">          set_alarm       0.889       0.800       1.000           8           8         335           2           0</span>
+<span class="go">       specify_time       0.994       0.989       1.000         264         264          78           3           0</span>
+<span class="go">        start_timer       0.833       1.000       0.714           7           5         338           0           2</span>
+<span class="go">         stop_timer       1.000       1.000       1.000           6           6         339           0           0</span>
+
+
+
+<span class="go">Confusion matrix:</span>
+
+<span class="go">                 change_ala..   remove_ala..   check_alar..      set_alarm   specify_ti..   start_time..     stop_timer</span>
+<span class="go">  change_ala..             10              1              0              0              0              0              0</span>
+<span class="go">  remove_ala..              0             27              0              0              2              0              0</span>
+<span class="go">  check_alar..              0              0             19              1              0              0              0</span>
+<span class="go">     set_alarm              0              0              0              8              0              0              0</span>
+<span class="go">  specify_ti..              0              0              0              0            264              0              0</span>
+<span class="go">  start_time..              0              0              0              1              1              5              0</span>
+<span class="go">    stop_timer              0              0              0              0              0              0              6</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">eval.get_stats()</span></code> method returns all the above statistics in a structured dictionary without printing them to the console.</p>
+<p>Let’s decipher the statistics output by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method.</p>
+<dl class="docutils">
+<dt><strong>Overall Statistics</strong></dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p>Aggregate stats measured across the entire test set:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="88%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>accuracy</td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score">Classification accuracy score</a></td>
+</tr>
+<tr class="row-even"><td>f1_weighted</td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html">Class-weighted average f1 score</a></td>
+</tr>
+<tr class="row-odd"><td>tp</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">true positives</a></td>
+</tr>
+<tr class="row-even"><td>tn</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">true negatives</a></td>
+</tr>
+<tr class="row-odd"><td>fp</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">false positives</a></td>
+</tr>
+<tr class="row-even"><td>fn</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">false negatives</a></td>
+</tr>
+<tr class="row-odd"><td>f1_macro</td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html">Macro-averaged f1 score</a></td>
+</tr>
+<tr class="row-even"><td>f1_micro</td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html">Micro-averaged f1 score</a></td>
+</tr>
+</tbody>
+</table>
+<p>When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.</p>
+<ul class="last simple">
+<li><strong>Classes are balanced</strong> — When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.</li>
+<li><strong>Classes are imbalanced</strong> — In this case, it’s important to take the f1 scores into account.</li>
+<li><strong>All f1 and accuracy scores are low</strong> — When intent classification is performing poorly across all intents, any of the following may be the problem: 1) You do not have enough training data for the model to learn; 2) you need to tune your model hyperparameters; 3) you need to reconsider your intent structure to ensure that queries in different intents have different natural language patterns — this may involve either combining or separating intents so that the resulting classes are easier for the classifier to distinguish.</li>
+<li><strong>f1 weighted is higher than f1 macro</strong> — This means that intents with fewer evaluation examples are performing poorly. Try adding more data to these intents or adding class weights to your hyperparameters.</li>
+<li><strong>f1 macro is higher than f1 weighted</strong> — This means that intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.</li>
+<li><strong>f1 micro is higher than f1 macro</strong> — This means that some intents are being misclassified more often than others. Identify the problematic intents by checking the class-wise statistics below. Some intents may be too similar to others, or you may need to add more training data to some intents.</li>
+<li><strong>Some classes are more important than others</strong> — If some intents are more important than others for your use case, it is best to focus especially on the class-wise statistics described below.</li>
+</ul>
+</dd>
+<dt><strong>Class-wise Statistics</strong></dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p>Stats computed at a per-class level:</p>
+<table border="1" class="last docutils">
+<colgroup>
+<col width="12%" />
+<col width="88%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>class</td>
+<td>Intent label</td>
+</tr>
+<tr class="row-even"><td>f_beta</td>
+<td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.metrics.fbeta_score">F-beta score</a></td>
+</tr>
+<tr class="row-odd"><td>precision</td>
+<td><a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall#Precision">Precision</a></td>
+</tr>
+<tr class="row-even"><td>recall</td>
+<td><a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall">Recall</a></td>
+</tr>
+<tr class="row-odd"><td>support</td>
+<td>Number of test queries in this intent (based on ground truth)</td>
+</tr>
+<tr class="row-even"><td>tp</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">true positives</a></td>
+</tr>
+<tr class="row-odd"><td>tn</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">true negatives</a></td>
+</tr>
+<tr class="row-even"><td>fp</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">false positives</a></td>
+</tr>
+<tr class="row-odd"><td>fn</td>
+<td>Number of <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">false negatives</a></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt><strong>Confusion Matrix</strong></dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">A <a class="reference external" href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified four instances of <code class="docutils literal"><span class="pre">check_alarm</span></code> queries as <code class="docutils literal"><span class="pre">set_alarm</span></code>, and another four as <code class="docutils literal"><span class="pre">remove_alarm</span></code>.</p>
+</dd>
+</dl>
+<p>Now we have a wealth of information about the performance of our classifier. Let’s go further and inspect the classifier’s predictions at the level of individual queries, to better understand error patterns.</p>
+<p>View the classifier predictions for the entire test set using the <code class="xref py py-attr docutils literal"><span class="pre">results</span></code> attribute of the returned <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-obj docutils literal"><span class="pre">eval</span></code></a> object. Each result is an instance of the <code class="xref py py-class docutils literal"><span class="pre">EvaluatedExample</span></code> class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;change_alarm&#39;, probas={&#39;change_alarm&#39;: 0.40000000000000002, &#39;check_alarm&#39;: 0.0, &#39;remove_alarm&#39;: 0.26666666666666666, &#39;set_alarm&#39;: 0.33333333333333331, &#39;start_timer&#39;: 0.0, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;change_alarm&#39;, probas={&#39;change_alarm&#39;: 1.0, &#39;check_alarm&#39;: 0.0, &#39;remove_alarm&#39;: 0.0, &#39;set_alarm&#39;: 0.0, &#39;start_timer&#39;: 0.0, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>Next, we look selectively at just the correct or incorrect predictions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">correct_results</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;change_alarm&#39;, probas={&#39;change_alarm&#39;: 0.40000000000000002, &#39;check_alarm&#39;: 0.0, &#39;remove_alarm&#39;: 0.26666666666666666, &#39;set_alarm&#39;: 0.33333333333333331, &#39;start_timer&#39;: 0.0, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;change_alarm&#39;, probas={&#39;change_alarm&#39;: 1.0, &#39;check_alarm&#39;: 0.0, &#39;remove_alarm&#39;: 0.0, &#39;set_alarm&#39;: 0.0, &#39;start_timer&#39;: 0.0, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;reschedule my 6 am alarm to tomorrow morning at 10&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;set_alarm&#39;, probas={&#39;change_alarm&#39;: 0.26666666666666666, &#39;check_alarm&#39;: 0.0, &#39;remove_alarm&#39;: 0.26666666666666666, &#39;set_alarm&#39;: 0.46666666666666667, &#39;start_timer&#39;: 0.0, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> EvaluatedExample(example=&lt;Query &#39;move my 6 am alarm to 3pm in the afternoon&#39;&gt;, expected=&#39;change_alarm&#39;, predicted=&#39;remove_alarm&#39;, probas={&#39;change_alarm&#39;: 0.20000000000000001, &#39;check_alarm&#39;: 0.20000000000000001, &#39;remove_alarm&#39;: 0.33333333333333331, &#39;set_alarm&#39;: 0.066666666666666666, &#39;start_timer&#39;: 0.20000000000000001, &#39;stop_timer&#39;: 0.0}, label_type=&#39;class&#39;),</span>
+<span class="go"> ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>Slicing and dicing these results for error analysis is easily done with <a class="reference external" href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehensions</a>.</p>
+<p>A simple example of this is inspecting incorrect predictions for a particular intent. For the <code class="docutils literal"><span class="pre">start_timer</span></code> intent, we get:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;start_timer&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go"> (&lt;Query &#39;remind me in 1 hour&#39;&gt;,</span>
+<span class="go">  {</span>
+<span class="go">   &#39;change_alarm&#39;: 0.0,</span>
+<span class="go">   &#39;check_alarm&#39;: 0.066666666666666666,</span>
+<span class="go">   &#39;remove_alarm&#39;: 0.066666666666666666,</span>
+<span class="go">   &#39;set_alarm&#39;: 0.53333333333333333,</span>
+<span class="go">   &#39;start_timer&#39;: 0.33333333333333331,</span>
+<span class="go">   &#39;stop_timer&#39;: 0.0</span>
+<span class="go">  }</span>
+<span class="go"> )</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>In this case, only one test query from the <code class="docutils literal"><span class="pre">start_timer</span></code> intent got misclassified as <code class="docutils literal"><span class="pre">set_alarm</span></code>. The correct label came in second, but lost by a significant margin in classification probability.</p>
+<p>Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all misclassified queries from a given intent, where the classifier’s confidence for the true label is very low. We’ll demonstrate this with the <code class="docutils literal"><span class="pre">check_alarm</span></code> intent and a confidence of &lt;25%.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;check_alarm&#39;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">[</span><span class="s1">&#39;check_alarm&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">25</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go"> [</span>
+<span class="go">  ...</span>
+<span class="go">  (&lt;Query &#39;did you set an alarm for 6 am&#39;&gt;,</span>
+<span class="go">   {</span>
+<span class="go">    &#39;change_alarm&#39;: 0.0,</span>
+<span class="go">    &#39;check_alarm&#39;: 0.066666666666666666,</span>
+<span class="go">    &#39;remove_alarm&#39;: 0.0,</span>
+<span class="go">    &#39;set_alarm&#39;: 0.80000000000000004,</span>
+<span class="go">    &#39;start_timer&#39;: 0.13333333333333333,</span>
+<span class="go">    &#39;stop_timer&#39;: 0.0</span>
+<span class="go">   }</span>
+<span class="go">),</span>
+<span class="go">  (&lt;Query &#39;did you set an alarm to wake me up at 6 am&#39;&gt;,</span>
+<span class="go">   {</span>
+<span class="go">    &#39;change_alarm&#39;: 0.0,</span>
+<span class="go">    &#39;check_alarm&#39;: 0.066666666666666666,</span>
+<span class="go">    &#39;remove_alarm&#39;: 0.0,</span>
+<span class="go">    &#39;set_alarm&#39;: 0.80000000000000004,</span>
+<span class="go">    &#39;start_timer&#39;: 0.13333333333333333,</span>
+<span class="go">    &#39;stop_timer&#39;: 0.0</span>
+<span class="go">   }</span>
+<span class="go">  ),</span>
+<span class="go">  ...</span>
+<span class="go"> ]</span>
+</pre></div>
+</div>
+<p>The result reveals queries where the intent was misclassified as <code class="docutils literal"><span class="pre">set_alarm</span></code>, and where the language pattern was some words followed the phrase “set an alarm” followed by more words. We’ll call this the “… set an alarm …” pattern.</p>
+<p>Try looking for similar queries in the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">training data</span></a>. You should discover that the <code class="docutils literal"><span class="pre">check_alarm</span></code> intent does indeed lack labeled training queries that match the pattern. But the <code class="docutils literal"><span class="pre">set_alarm</span></code> intent has plenty of queries that fit. This explains why the model chose <code class="docutils literal"><span class="pre">set_alarm</span></code> over <code class="docutils literal"><span class="pre">check_alarm</span></code> when classifying such queries.</p>
+<p>One potential solution is to add more training queries that match the “… set an alarm …” pattern to the <code class="docutils literal"><span class="pre">check_alarm</span></code> intent. Then the classification model should more effectively learn to distinguish the two intents that it confused.</p>
+<p>Error analysis on the results of the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described <a class="reference internal" href="#build-intent-with-config"><span class="std std-ref">earlier</span></a> in this chapter.</p>
+</div>
+<div class="section" id="viewing-features-extracted-for-classification">
+<h2>Viewing features extracted for classification<a class="headerlink" href="#viewing-features-extracted-for-classification" title="Permalink to this headline">¶</a></h2>
+<p>While training a new model or investigating a misclassification by the classifier, it is sometimes useful to view the extracted features to make sure they are as expected. For example, there may be non-ASCII characters in the query that are treated differently by the feature extractors. Or the value assigned to a particular feature may be computed differently than you expected. Not extracting the right features could lead to misclassifications. In the example below, we view the features extracted for the query ‘set alarm for 7 am’ using <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.view_extracted_features()</span></code> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">view_extracted_features</span><span class="p">(</span><span class="s2">&quot;set alarm for 7 am&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;bag_of_words|edge:left|length:1|ngram:set&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|edge:left|length:2|ngram:set alarm&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|edge:right|length:1|ngram:am&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|edge:right|length:2|ngram:#NUM am&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:1|ngram:#NUM&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:1|ngram:alarm&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:1|ngram:am&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:1|ngram:for&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:1|ngram:set&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:2|ngram:#NUM am&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:2|ngram:alarm for&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:2|ngram:for #NUM&#39;: 1,</span>
+<span class="go"> &#39;bag_of_words|length:2|ngram:set alarm&#39;: 1,</span>
+<span class="go"> &#39;exact|query:&lt;OOV&gt;&#39;: 10,</span>
+<span class="go"> &#39;in_gaz|type:city|gaz_freq_bin:2&#39;: 0.2,</span>
+<span class="go"> &#39;in_gaz|type:city|gaz_freq_bin:4&#39;: 0.2,</span>
+<span class="go"> &#39;in_vocab:IV|freq_bin:0&#39;: 0.31699250014423125,</span>
+<span class="go"> &#39;in_vocab:IV|freq_bin:1&#39;: 0.4,</span>
+<span class="go"> &#39;in_vocab:IV|in_gaz|type:city|gaz_freq_bin:4&#39;: 0.2,</span>
+<span class="go"> &#39;in_vocab:OOV|in_gaz|type:city|gaz_freq_bin:2&#39;: 0.2}</span>
+</pre></div>
+</div>
+<p>This is especially useful when you are writing <a class="reference internal" href="custom_features.html"><span class="doc">custom feature extractors</span></a> to inspect whether the right features are being extracted.</p>
+</div>
+<div class="section" id="inspect-features-and-their-importance">
+<h2>Inspect features and their importance<a class="headerlink" href="#inspect-features-and-their-importance" title="Permalink to this headline">¶</a></h2>
+<p>Examining the learned feature weights of a machine-learned model can offer insights into its behavior. To analyze the prediction of the intent classifier on any query, you can inspect its features and their weights using <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> method. In particular, it is useful to compare the computed feature values for the query for the predicted class and the expected ground truth (also called <strong>gold</strong>) class. Looking at the feature values closely can help in identifying the features that are useful, those that aren’t, and even those that may be misleading or confusing for the model.</p>
+<p>Here is an example of the results returned by <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> method on the query “have i set an alarm to awaken me” with the expected gold intent <code class="docutils literal"><span class="pre">check_alarm</span></code>. Focus on the ‘Feature’ and ‘Diff’ columns. The high negative value in the ‘Diff’ column  for the ngram ‘set’ indicates that its presence biases the decision of the classifier towards <code class="docutils literal"><span class="pre">set_alarm</span></code> intent over <code class="docutils literal"><span class="pre">check_alarm</span></code>.  A possible solution is to add more training queries (like the example query) to the <code class="docutils literal"><span class="pre">check_alarm</span></code> intent, making the classifier rely on tokens like ‘have’ as well.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This section requires trained domain and intent models for the Home Assistant app. If you have not built them yet, run <code class="docutils literal"><span class="pre">nlp.build()</span></code>. If you have already built and saved the models, do <code class="docutils literal"><span class="pre">nlp.load()</span></code>.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="s2">&quot;have i set an alarm to awaken me&quot;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;check_alarm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Inspecting intent classification</span>
+<span class="go">                                                                                 Feature   Value Pred_W(set_alarm)     Pred_P Gold_W(check_alarm)     Gold_P       Diff</span>
+<span class="go">bag_of_words|edge:left|length:1|ngram:have    bag_of_words|edge:left|length:1|ngram:have       1          [0.6906]   [0.6906]           [-0.4421]  [-0.4421]  [-1.1328]</span>
+<span class="go">bag_of_words|edge:right|length:1|ngram:me      bag_of_words|edge:right|length:1|ngram:me       1         [-0.1648]  [-0.1648]           [-0.3431]  [-0.3431]  [-0.1782]</span>
+<span class="go">bag_of_words|length:1|ngram:alarm                      bag_of_words|length:1|ngram:alarm       1          [1.6087]   [1.6087]            [1.5089]   [1.5089]  [-0.0997]</span>
+<span class="go">bag_of_words|length:1|ngram:an                            bag_of_words|length:1|ngram:an       1          [1.6324]   [1.6324]            [0.2536]   [0.2536]  [-1.3788]</span>
+<span class="go">bag_of_words|length:1|ngram:have                        bag_of_words|length:1|ngram:have       1         [-1.0182]  [-1.0182]            [1.3052]   [1.3052]   [2.3234]</span>
+<span class="go">bag_of_words|length:1|ngram:i                              bag_of_words|length:1|ngram:i       1          [0.4271]   [0.4271]            [1.6761]   [1.6761]    [1.249]</span>
+<span class="go">bag_of_words|length:1|ngram:me                            bag_of_words|length:1|ngram:me       1          [2.1782]   [2.1782]            [0.4724]   [0.4724]  [-1.7058]</span>
+<span class="hll"><span class="go">bag_of_words|length:1|ngram:set                          bag_of_words|length:1|ngram:set       1           [3.682]    [3.682]            [1.0064]   [1.0064]  [-2.6756]</span>
+</span><span class="go">bag_of_words|length:1|ngram:to                            bag_of_words|length:1|ngram:to       1          [0.0281]   [0.0281]           [-0.8413]  [-0.8413]  [-0.8694]</span>
+<span class="go">bag_of_words|length:2|ngram:alarm to                bag_of_words|length:2|ngram:alarm to       1         [-0.4646]  [-0.4646]           [-0.1883]  [-0.1883]   [0.2763]</span>
+<span class="go">bag_of_words|length:2|ngram:an alarm                bag_of_words|length:2|ngram:an alarm       1          [1.1225]   [1.1225]            [0.3721]   [0.3721]  [-0.7504]</span>
+<span class="go">bag_of_words|length:2|ngram:set an                    bag_of_words|length:2|ngram:set an       1         [-1.8094]  [-1.8094]            [0.0306]   [0.0306]     [1.84]</span>
+<span class="go">exact|query:&lt;OOV&gt;                                                      exact|query:&lt;OOV&gt;      10         [-0.5906]  [-5.9056]           [-0.6247]  [-6.2467]  [-0.3411]</span>
+<span class="go">in_gaz|type:city|gaz_freq_bin:1                          in_gaz|type:city|gaz_freq_bin:1  0.1981         [-0.6438]  [-0.1275]            [1.2285]   [0.2434]   [0.3709]</span>
+<span class="go">in_gaz|type:city|gaz_freq_bin:3                          in_gaz|type:city|gaz_freq_bin:3   0.125         [-0.8062]  [-0.1008]           [-0.0586]  [-0.0073]   [0.0934]</span>
+<span class="go">in_gaz|type:city|gaz_freq_bin:4                          in_gaz|type:city|gaz_freq_bin:4   0.125         [-0.1004]  [-0.0125]           [-0.6153]  [-0.0769]  [-0.0644]</span>
+<span class="go">in_vocab:IV|freq_bin:0                                            in_vocab:IV|freq_bin:0   0.125         [-0.9523]   [-0.119]           [-0.5941]  [-0.0743]   [0.0448]</span>
+<span class="go">in_vocab:IV|freq_bin:1                                            in_vocab:IV|freq_bin:1   0.125          [0.1404]   [0.0176]           [-0.4717]   [-0.059]  [-0.0765]</span>
+<span class="go">in_vocab:IV|freq_bin:2                                            in_vocab:IV|freq_bin:2   0.125          [0.3538]   [0.0442]           [-0.7243]  [-0.0905]  [-0.1348]</span>
+<span class="go">in_vocab:IV|freq_bin:3                                            in_vocab:IV|freq_bin:3  0.1981         [-0.4922]  [-0.0975]           [-0.5453]   [-0.108]  [-0.0105]</span>
+<span class="go">in_vocab:IV|freq_bin:4                                            in_vocab:IV|freq_bin:4  0.1981         [-0.2612]  [-0.0517]           [-0.7934]  [-0.1572]  [-0.1055]</span>
+<span class="go">in_vocab:IV|in_gaz|type:city|gaz_freq_bin:1  in_vocab:IV|in_gaz|type:city|gaz_freq_bin:1  0.1981         [-0.9942]   [-0.197]            [1.4016]   [0.2777]   [0.4746]</span>
+<span class="go">in_vocab:IV|in_gaz|type:city|gaz_freq_bin:3  in_vocab:IV|in_gaz|type:city|gaz_freq_bin:3   0.125         [-0.8062]  [-0.1008]           [-0.0586]  [-0.0073]   [0.0934]</span>
+<span class="go">in_vocab:IV|in_gaz|type:city|gaz_freq_bin:4  in_vocab:IV|in_gaz|type:city|gaz_freq_bin:4   0.125         [-0.1004]  [-0.0125]           [-0.6153]  [-0.0769]  [-0.0644]</span>
+<span class="go">in_vocab:OOV                                                                in_vocab:OOV   0.125          [0.0209]   [0.0026]           [-0.2293]  [-0.0287]  [-0.0313]</span>
+</pre></div>
+</div>
+<p>You can combine both domain and intent inspection by passing both parameters into the function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="s2">&quot;have i set an alarm to awaken me&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;times_and_dates&quot;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;check_alarm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The columns returned by the method are explained below:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Feature</td>
+<td>Name of the feature extracted from the query</td>
+</tr>
+<tr class="row-even"><td>Value</td>
+<td>Value of the extracted feature</td>
+</tr>
+<tr class="row-odd"><td>Pred_W</td>
+<td>Feature weight from the co-efficient matrix for the predicted label</td>
+</tr>
+<tr class="row-even"><td>Pred_P</td>
+<td>Product of the co-efficient and the feature value for the predicted label</td>
+</tr>
+<tr class="row-odd"><td>Gold_W</td>
+<td>Feature weight from the co-efficient matrix for the gold label</td>
+</tr>
+<tr class="row-even"><td>Gold_P</td>
+<td>Product of the co-efficient and the feature value for the gold label</td>
+</tr>
+<tr class="row-odd"><td>Diff</td>
+<td>Difference between Gold_P and Pred_P</td>
+</tr>
+</tbody>
+</table>
+<p>Currently, feature inspection is only available for logistic regression models.</p>
+</div>
+<div class="section" id="save-model-for-future-use">
+<h2>Save model for future use<a class="headerlink" href="#save-model-for-future-use" title="Permalink to this headline">¶</a></h2>
+<p>Save the trained intent classifier for later use by calling the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.dump()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">dump()</span></code> method serializes the trained model as a <a class="reference external" href="https://docs.python.org/3/library/pickle.html">pickle file</a> and saves it to the specified location on disk.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/intent_classifier.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Saving intent classifier: domain=&#39;times_and_dates&#39;</span>
+</pre></div>
+</div>
+<p>You can load the saved model anytime using the <code class="xref py py-meth docutils literal"><span class="pre">IntentClassifier.load()</span></code> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/intent_classifier.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading intent classifier: domain=&#39;times_and_dates&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="entity_recognizer.html" class="btn btn-neutral float-right" title="Working with the Entity Recognizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="domain_classifier.html" class="btn btn-neutral float-left" title="Working with the Domain Classifier" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

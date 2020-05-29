@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Step 5: Create the Knowledge Base &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Step 6: Generate Representative Training Data" href="06_generate_representative_training_data.html" />
+    <link rel="prev" title="Step 4: Define the Dialogue State Handlers" href="04_define_the_dialogue_handlers.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Step 5: Create the Knowledge Base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/05_create_the_knowledge_base.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="step-5-create-the-knowledge-base">
+<h1>Step 5: Create the Knowledge Base<a class="headerlink" href="#step-5-create-the-knowledge-base" title="Permalink to this headline">¶</a></h1>
+<p>Every one of the smartest and most useful intelligent assistants in widespread use today relies on an underlying <em>knowledge base</em>. A knowledge base is a comprehensive repository that contains the universe of helpful information needed to understand requests and answer questions. The knowledge base is often the secret ingredient that makes a conversational interface appear surprisingly intelligent and versatile. For example, when asked to play a song, Alexa relies on a knowledge base which contains information about every track, artist and album accessible from your music streaming service. When you asked to send a text message, Siri enlists a knowledge base which knows about all of your important contacts. When IBM’s Watson bested Jeopardy! grand champions, it leveraged an extensive knowledge base of Wikipedia facts. While some tasks, like setting a thermostat or appending a to-do list, may not warrant a knowledge base, the lion’s share of today’s commercial conversational applications owe their intelligence and utility to an underlying base of global knowledge.</p>
+<p>In its most basic form, a knowledge base is simply a repository of objects of specified types. For example, a knowledge base that contains a large entertainment content catalog could include <code class="docutils literal"><span class="pre">movie</span></code> and <code class="docutils literal"><span class="pre">tv_show</span></code> among the types of its objects. A knowledge base that contains a directory of local businesses could have object types like <code class="docutils literal"><span class="pre">restaurant</span></code>, <code class="docutils literal"><span class="pre">hardware_store</span></code>, and so on. Objects typically have attributes which capture salient aspects of the concepts they describe. For example, a <code class="docutils literal"><span class="pre">restaurant</span></code> object might have attributes for <code class="docutils literal"><span class="pre">address</span></code> and <code class="docutils literal"><span class="pre">phone_number</span></code>; a <code class="docutils literal"><span class="pre">movie</span></code> object might have attributes like <code class="docutils literal"><span class="pre">cast_list</span></code>, <code class="docutils literal"><span class="pre">runtime</span></code>, and <code class="docutils literal"><span class="pre">release_date</span></code>.</p>
+<p>MindMeld makes it straightforward to leverage a custom knowledge base in any application. The Question Answerer module of MindMeld provides powerful capabilities for creating a knowledge base in order to demonstrate intelligent behavior in your application. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this component and its underlying knowledge base for the four primary purposes listed below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Answer Questions</strong></td>
+<td>The primary purpose of the Question Answerer is to identify and rank candidate answers to user questions. For example, if a user asks about good, nearby Italian restaurants, a knowledge base of local restaurants provides the best options.</td>
+</tr>
+<tr class="row-even"><td><strong>Validate Questions</strong></td>
+<td>The knowledge base can also be used to inform a user if her question is out of scope. For example, if a user mistakenly asks to order a pizza from a coffee shop assistant, the knowledge base can help steer the user in the right direction.</td>
+</tr>
+<tr class="row-odd"><td><strong>Disambiguate Entities</strong></td>
+<td>Vague user requests often require clarification. A knowledge base can help disambiguate similar concepts. For example, if a user says ‘play Thriller,’ the Question Answerer could ask the user whether he means the bestselling album or the hit song.</td>
+</tr>
+<tr class="row-even"><td><strong>Suggest Alternatives</strong></td>
+<td>When an exact answer cannot be found, the knowledge base can sometimes offer relevant suggestions. For example, if a user requests ‘Star Wars Rogue One’ and that movie is not available, the knowledge base could suggest other, available Star Wars titles.</td>
+</tr>
+</tbody>
+</table>
+<p>Creating the knowledge base is the first step in utilizing the Question Answerer capabilities in MindMeld. The knowledge base contains one or more indexes. Each index holds a collection of objects of the same type. For example, one index may contain a collection of retail store locations and another index might contain a collection of products in a product catalog. Each index is built using data from one or more JSON files. These JSON data files can be stored either locally or remotely, for example in an <a class="reference external" href="https://aws.amazon.com/s3/">AWS S3</a> bucket.</p>
+<p>As shown in <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, our example application provides information about Kwik-E-Mart stores, relying on a knowledge base which contains information about all retail store locations. In our example, let’s assume that each store object contains the following attributes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">id</span></code></li>
+<li><code class="docutils literal"><span class="pre">store_name</span></code></li>
+<li><code class="docutils literal"><span class="pre">open_time</span></code></li>
+<li><code class="docutils literal"><span class="pre">close_time</span></code></li>
+<li><code class="docutils literal"><span class="pre">address</span></code></li>
+<li><code class="docutils literal"><span class="pre">phone_number</span></code></li>
+</ul>
+</div></blockquote>
+<p>The corresponding JSON data file could look like this:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;store_name&quot;</span><span class="o">:</span> <span class="s2">&quot;23 Elm Street&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;open_time&quot;</span><span class="o">:</span> <span class="s2">&quot;7am&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;close_time&quot;</span><span class="o">:</span> <span class="s2">&quot;9pm&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;address&quot;</span><span class="o">:</span> <span class="s2">&quot;100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;phone_number&quot;</span><span class="o">:</span> <span class="s2">&quot;(+1) 415-555-1100&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;store_name&quot;</span><span class="o">:</span> <span class="s2">&quot;Pine and Market&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;open_time&quot;</span><span class="o">:</span> <span class="s2">&quot;6am&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;close_time&quot;</span><span class="o">:</span> <span class="s2">&quot;10pm&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;address&quot;</span><span class="o">:</span> <span class="s2">&quot;750 Market Street, Capital City, CA 94001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;phone_number&quot;</span><span class="o">:</span> <span class="s2">&quot;(+1) 650-555-4500&quot;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Assuming that this file is named <code class="docutils literal"><span class="pre">stores.json</span></code> and is in the <code class="docutils literal"><span class="pre">data</span></code> subdirectory of the application root directory, you would create the knowledge base as follows.</p>
+<p>A sample <code class="docutils literal"><span class="pre">stores.json</span></code> is available under the <a class="reference external" href="https://github.com/cisco/mindmeld/blob/master/tests/kwik_e_mart/data/stores.json">data</a> folder in the Kwik-E-Mart blueprint.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The QuestionAnswerer requires Elasticsearch. Make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer.</p>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+python
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="s1">&#39;my_app&#39;</span><span class="p">,</span> <span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="s1">&#39;./data/stores.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This code loads the Question Answerer module from MindMeld, then loads the <code class="docutils literal"><span class="pre">data/stores.json</span></code> JSON file into the index named <code class="docutils literal"><span class="pre">stores</span></code>. To check that your knowledge base was created successfully, use the Question Answerer to retrieve store information from your index:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
+<span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;id&quot;: &quot;3&quot;,</span>
+<span class="go">  &quot;store_name&quot;: &quot;Central Plaza Store&quot;,</span>
+<span class="go">  &quot;open_time&quot;: &quot;0800 hrs&quot;,</span>
+<span class="go">  &quot;close_time&quot;: &quot;1800 hrs&quot;,</span>
+<span class="go">  &quot;address&quot;: &quot;100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001&quot;,</span>
+<span class="go">  &quot;phone_number&quot;: (+1) 100-100-1100</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Now that your knowledge base is created, the Question Answerer can leverage it in your dialogue state handling logic. See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for more about how to use the Question Answerer to find answers to questions, validate user requests, disambiguate entities, and offer alternative suggestions.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="06_generate_representative_training_data.html" class="btn btn-neutral float-right" title="Step 6: Generate Representative Training Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="04_define_the_dialogue_handlers.html" class="btn btn-neutral float-left" title="Step 4: Define the Dialogue State Handlers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

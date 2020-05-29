@@ -1,0 +1,1336 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.lstm &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.lstm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.taggers.lstm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.externals</span> <span class="k">import</span> <span class="n">joblib</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">LabelBinarizer</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">.embeddings</span> <span class="k">import</span> <span class="n">CharacterSequenceEmbedding</span><span class="p">,</span> <span class="n">WordSequenceEmbedding</span>
+<span class="kn">from</span> <span class="nn">.taggers</span> <span class="k">import</span> <span class="n">Tagger</span><span class="p">,</span> <span class="n">extract_sequence_features</span>
+
+<span class="n">DEFAULT_ENTITY_TOKEN_SPAN_INDEX</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">GAZ_PATTERN_MATCH</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;in-gaz\|type:(\w+)\|pos:(\w+)\|&quot;</span>
+<span class="n">REGEX_TYPE_POSITIONAL_INDEX</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">DEFAULT_LABEL</span> <span class="o">=</span> <span class="s2">&quot;B|UNK&quot;</span>
+<span class="n">DEFAULT_GAZ_LABEL</span> <span class="o">=</span> <span class="s2">&quot;O&quot;</span>
+<span class="n">RANDOM_SEED</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">ZERO_INITIALIZER_VALUE</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LstmModel"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel">[docs]</a><span class="k">class</span> <span class="nc">LstmModel</span><span class="p">(</span><span class="n">Tagger</span><span class="p">):</span>  <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;This class encapsulates the bi-directional LSTM model and provides</span>
+<span class="sd">    the correct interface for use by the tagger model&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LstmModel.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">examples_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">labels_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">examples_arr</span><span class="p">,</span> <span class="n">labels_arr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="LstmModel.predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">encoded_examples_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">tags_by_example_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">encoded_examples_arr</span><span class="p">)</span>
+
+        <span class="n">resized_predicted_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">query</span><span class="p">,</span> <span class="n">seq_len</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tags_by_example_arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">):</span>
+            <span class="n">resized_predicted_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query</span><span class="p">[:</span><span class="n">seq_len</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">resized_predicted_tags</span></div>
+
+<div class="viewcode-block" id="LstmModel.set_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize params for the LSTM. The keys in the parameters dictionary</span>
+<span class="sd">        are as follows:</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parameters (dict): The keys in the parameters dictionary are as follows:</span>
+
+<span class="sd">            number_of_epochs: The number of epochs to run (int)</span>
+
+<span class="sd">            batch_size: The batch size for mini-batch training (int)</span>
+
+<span class="sd">            token_lstm_hidden_state_dimension: The hidden state</span>
+<span class="sd">                dimension of the LSTM cell (int)</span>
+
+<span class="sd">            learning_rate: The learning rate of the optimizer (int)</span>
+
+<span class="sd">            optimizer: The optimizer used to train the network</span>
+<span class="sd">                is the number of entities in the dataset (str)</span>
+
+<span class="sd">            display_epoch: The number of epochs after which the</span>
+<span class="sd">                network displays common stats like accuracy (int)</span>
+
+<span class="sd">            padding_length: The length of each query, which is</span>
+<span class="sd">                fixed, so some queries will be cut short in length</span>
+<span class="sd">                representing the word embedding, the row index</span>
+<span class="sd">                is the word&#39;s index (int)</span>
+
+<span class="sd">            token_embedding_dimension: The embedding dimension of the word (int)</span>
+
+<span class="sd">            token_pretrained_embedding_filepath: The pretrained embedding file-path (str)</span>
+
+<span class="sd">            dense_keep_prob: The dropout rate of the dense layers (float)</span>
+
+<span class="sd">            lstm_input_keep_prob: The dropout rate of the inputs to the LSTM cell (float)</span>
+
+<span class="sd">            lstm_output_keep_prob: The dropout rate of the outputs of the LSTM cell (float)</span>
+
+<span class="sd">            gaz_encoding_dimension: The gazetteer encoding dimension (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_epochs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number_of_epochs&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;batch_size&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_lstm_hidden_state_dimension</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;token_lstm_hidden_state_dimension&quot;</span><span class="p">,</span> <span class="mi">300</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_tf</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="s2">&quot;adam&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;padding_length&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display_epoch</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_epoch&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;token_embedding_dimension&quot;</span><span class="p">,</span> <span class="mi">300</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_pretrained_embedding_filepath</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;token_pretrained_embedding_filepath&quot;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_probability</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_keep_prob&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lstm_input_keep_prob&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lstm_output_keep_prob&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoding_dimension</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gaz_encoding_dimension&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_crf_layer</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_crf_layer&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_character_embeddings&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_window_sizes</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;char_window_sizes&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;maximum_characters_per_word&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;character_embedding_dimension&quot;</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;word_level_character_embedding_size&quot;</span><span class="p">,</span> <span class="mi">40</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LstmModel.get_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span></div>
+
+<div class="viewcode-block" id="LstmModel.construct_tf_variables"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.construct_tf_variables">[docs]</a>    <span class="k">def</span> <span class="nf">construct_tf_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the variables and operations in the TensorFlow session graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_prob_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dense_keep_prob_tf&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm_input_keep_prob_tf&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm_output_keep_prob_tf&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;query_input_tf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_input_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_dimension</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gaz_input_tf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;label_tf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_lengths_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_sequence_lengths_tf&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_mask_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_sequence_mask_tf&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">char_input_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                    <span class="p">[</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span><span class="p">,</span>
+                    <span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;char_input_tf&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">combined_embedding_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_embedding_network</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_lstm_network</span><span class="p">(</span><span class="n">combined_embedding_tf</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_softmax_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;output_softmax_tensor&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_tf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_optimizer_and_cost</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">global_init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">local_init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables_initializer</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LstmModel.extract_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.extract_features">[docs]</a>    <span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a list of examples into features that are then used by the</span>
+<span class="sd">        deep learning model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+<span class="sd">            y (list): A list of label sequences</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (sequence_embeddings, encoded_labels, groups): features for the LSTM network</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="n">fit</span>  <span class="c1"># unused -- we use the value of y to determine whether to encode labels</span>
+        <span class="k">if</span> <span class="n">y</span><span class="p">:</span>
+            <span class="c1"># Train time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="n">resources</span>
+
+            <span class="n">padded_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_labels</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">DEFAULT_LABEL</span><span class="p">)</span>
+            <span class="n">y_flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">padded_y</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+            <span class="n">encoded_labels_flat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y_flat</span><span class="p">)</span>
+            <span class="n">encoded_labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">label_sequence</span> <span class="ow">in</span> <span class="n">padded_y</span><span class="p">:</span>
+                <span class="n">encoded_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">encoded_labels_flat</span><span class="p">[</span><span class="n">start_index</span> <span class="p">:</span> <span class="n">start_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">label_sequence</span><span class="p">)]</span>
+                <span class="p">)</span>
+                <span class="n">start_index</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">label_sequence</span><span class="p">)</span>
+
+            <span class="n">gaz_entities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gazetteers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">gaz_entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DEFAULT_GAZ_LABEL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">gaz_entities</span><span class="p">)</span>
+
+            <span class="c1"># The gaz dimension are the sum total of the gazetteer entities and</span>
+            <span class="c1"># the &#39;other&#39; gaz entity, which is the entity for all non-gazetteer tokens</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_dimension</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaz_entities</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Predict time</span>
+            <span class="n">encoded_labels</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Extract features and classes</span>
+        <span class="p">(</span>
+            <span class="n">x_sequence_embeddings_arr</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features_arr</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">char_features_arr</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_features</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_seq_length</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+
+        <span class="c1"># There are no groups in this model</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">x_sequence_embeddings_arr</span><span class="p">,</span> <span class="n">encoded_labels</span><span class="p">,</span> <span class="n">groups</span></div>
+
+<div class="viewcode-block" id="LstmModel.setup_model"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.setup_model">[docs]</a>    <span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="n">LabelBinarizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span> <span class="o">=</span> <span class="n">LabelBinarizer</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saver</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">example_type</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">example_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">features</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_encoder</span> <span class="o">=</span> <span class="n">WordSequenceEmbedding</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_pretrained_embedding_filepath</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">char_encoder</span> <span class="o">=</span> <span class="n">CharacterSequenceEmbedding</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LstmModel.construct_feed_dictionary"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.construct_feed_dictionary">[docs]</a>    <span class="k">def</span> <span class="nf">construct_feed_dictionary</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_examples</span><span class="p">,</span> <span class="n">batch_char</span><span class="p">,</span> <span class="n">batch_gaz</span><span class="p">,</span> <span class="n">batch_seq_len</span><span class="p">,</span> <span class="n">batch_labels</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs the feed dictionary that is used to feed data into the tensors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch_examples (ndarray): A batch of examples</span>
+<span class="sd">            batch_char (ndarray): A batch of character features</span>
+<span class="sd">            batch_gaz (ndarray): A batch of gazetteer features</span>
+<span class="sd">            batch_seq_len (ndarray): A batch of sequence length of each query</span>
+<span class="sd">            batch_labels (ndarray): A batch of labels</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The feed dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">batch_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">batch_labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span><span class="p">:</span> <span class="n">batch_examples</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_lengths_tf</span><span class="p">:</span> <span class="n">batch_seq_len</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_input_tf</span><span class="p">:</span> <span class="n">batch_gaz</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_prob_tf</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_probability</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob_tf</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob_tf</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_mask_tf</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_boolean_mask</span><span class="p">(</span><span class="n">batch_seq_len</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">return_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_tf</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_labels</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_char</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">return_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">char_input_tf</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_char</span>
+
+        <span class="k">return</span> <span class="n">return_dict</span></div>
+
+    <span class="k">def</span> <span class="nf">_construct_embedding_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructs a network based on the word embedding and gazetteer</span>
+<span class="sd">        inputs and concatenates them together</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Combined embeddings of the word and gazetteer embeddings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">initializer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">xavier_initializer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
+
+        <span class="n">dense_gaz_embedding_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gaz_input_tf</span><span class="p">,</span>
+            <span class="n">num_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoding_dimension</span><span class="p">,</span>
+            <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">batch_size_dim</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+            <span class="n">word_level_char_embeddings_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">window_size</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_window_sizes</span><span class="p">:</span>
+                <span class="n">word_level_char_embeddings_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">apply_convolution</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">char_input_tf</span><span class="p">,</span> <span class="n">batch_size_dim</span><span class="p">,</span> <span class="n">window_size</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">word_level_char_embedding</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">word_level_char_embeddings_list</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># Combined the two embeddings</span>
+            <span class="n">combined_embedding_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span><span class="p">,</span> <span class="n">word_level_char_embedding</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">combined_embedding_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span>
+
+        <span class="n">combined_embedding_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">combined_embedding_tf</span><span class="p">,</span> <span class="n">dense_gaz_embedding_tf</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">combined_embedding_tf</span>
+
+<div class="viewcode-block" id="LstmModel.apply_convolution"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.apply_convolution">[docs]</a>    <span class="k">def</span> <span class="nf">apply_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">char_window_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructs a convolution network of a specific window size</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_tensor (tensor): The input tensor to the network</span>
+<span class="sd">            batch_size (int): The batch size of the training data</span>
+<span class="sd">            char_window_size (int): The character window size of each stride</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Tensor): Convolved output tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">convolution_reshaped_char_embedding</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">input_tensor</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Index 0 dimension is 1 because we want to apply this to every word. Index 1 dimension is</span>
+        <span class="c1"># char_window_size since this is the convolution window size. Index 3 dimension is</span>
+        <span class="c1"># 1 since the input channel is 1 dimensional (the sequence string). Index 4 dimension is</span>
+        <span class="c1"># the output dimension which is a hyper-parameter.</span>
+        <span class="n">char_convolution_filter</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">char_window_size</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Strides is None because we want to advance one character at a time and one word at a time</span>
+        <span class="n">conv_output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span>
+            <span class="n">convolution_reshaped_char_embedding</span><span class="p">,</span> <span class="n">char_convolution_filter</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;SAME&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Max pool over each word, captured by the size of the filter corresponding to an entire</span>
+        <span class="c1"># single word</span>
+        <span class="n">max_pool</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">pool</span><span class="p">(</span>
+            <span class="n">conv_output</span><span class="p">,</span>
+            <span class="n">window_shape</span><span class="o">=</span><span class="p">[</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">character_embedding_dimension</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">pooling_type</span><span class="o">=</span><span class="s2">&quot;MAX&quot;</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1</span>
+        <span class="c1"># BY num_filters. This transform  rearranges the dimension of each rank such that</span>
+        <span class="c1"># the num_filters dimension comes after the query_padding_length, so the last index</span>
+        <span class="c1"># 4 is brought after the index 1.</span>
+        <span class="n">max_pool</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">max_pool</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">max_pool</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">max_pool</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">char_convolution_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span><span class="p">,])</span>
+        <span class="p">)</span>
+
+        <span class="n">char_convolution_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">char_convolution_bias</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">])</span>
+        <span class="n">char_convolution_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">char_convolution_bias</span><span class="p">,</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">char_convolution_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">char_convolution_bias</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">char_convolution_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">char_convolution_bias</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_level_character_embedding_size</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">word_level_char_embedding</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">max_pool</span> <span class="o">+</span> <span class="n">char_convolution_bias</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">word_level_char_embedding</span></div>
+
+    <span class="k">def</span> <span class="nf">_define_optimizer_and_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This function defines the optimizer and cost function of the LSTM model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            AdamOptimizer, Tensor: The optimizer function to reduce loss and the loss values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_crf_layer</span><span class="p">:</span>
+            <span class="n">flattened_labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_tf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">log_likelihood</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">crf</span><span class="o">.</span><span class="n">crf_log_likelihood</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span><span class="p">,</span> <span class="n">flattened_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_lengths_tf</span>
+            <span class="p">)</span>
+            <span class="n">cost_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="o">-</span><span class="n">log_likelihood</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cost_tf&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masked_logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_mask_tf</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">masked_labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">boolean_mask</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_tf</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_mask_tf</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">softmax_loss_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span>
+                <span class="n">logits</span><span class="o">=</span><span class="n">masked_logits</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">masked_labels</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;softmax_loss_tf&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">cost_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">softmax_loss_tf</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cost_tf&quot;</span><span class="p">)</span>
+
+        <span class="n">optimizer_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">cost_tf</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">optimizer_tf</span><span class="p">,</span> <span class="n">cost_tf</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_arr</span><span class="p">,</span> <span class="n">label_arr</span><span class="p">,</span> <span class="n">seq_lengths_arr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This function calculates the sequence score of all the queries,</span>
+<span class="sd">        that is, the total number of queries where all the tags are predicted</span>
+<span class="sd">        correctly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_arr (ndarray): Output array of the LSTM network</span>
+<span class="sd">            label_arr (ndarray): Label array of the true labels of the data</span>
+<span class="sd">            seq_lengths_arr (ndarray): A real sequence lengths of each example</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The number of queries where all the tags are correct</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reshaped_output_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">output_arr</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">reshaped_output_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">reshaped_output_arr</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">reshaped_labels_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">label_arr</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reshaped_output_arr</span><span class="p">):</span>
+            <span class="n">seq_len</span> <span class="o">=</span> <span class="n">seq_lengths_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">predicted_tags</span> <span class="o">=</span> <span class="n">reshaped_output_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">][:</span><span class="n">seq_len</span><span class="p">]</span>
+            <span class="n">actual_tags</span> <span class="o">=</span> <span class="n">reshaped_labels_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">][:</span><span class="n">seq_len</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">predicted_tags</span><span class="p">,</span> <span class="n">actual_tags</span><span class="p">):</span>
+                <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">score</span>
+
+    <span class="k">def</span> <span class="nf">_pad_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_sequences</span><span class="p">,</span> <span class="n">default_token</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pads the label sequence</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            list_of_sequences (list): A list of label sequences</span>
+<span class="sd">            default_token (str): The default label token for padding purposes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: padded output</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">padded_output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">list_of_sequences</span><span class="p">:</span>
+            <span class="n">padded_seq</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_token</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">:</span>
+                    <span class="n">padded_seq</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">padded_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">padded_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">padded_output</span>
+
+    <span class="k">def</span> <span class="nf">_generate_boolean_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_lengths</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates boolean masks for each query in a query list</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seq_lengths (list): A list of sequence lengths</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            list: A list of boolean masking values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq_lengths</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">seq_len</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">seq_lengths</span><span class="p">):</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">seq_len</span><span class="p">):</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">mask</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_construct_lstm_state</span><span class="p">(</span><span class="n">initializer</span><span class="p">,</span> <span class="n">hidden_dimension</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the LSTM initial state</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            initializer (tf.contrib.layers.xavier_initializer): initializer used</span>
+<span class="sd">            hidden_dimension: num dimensions of the hidden state variable</span>
+<span class="sd">            batch_size: the batch size of the data</span>
+<span class="sd">            name: suffix of the variable going to be used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (LSTMStateTuple): LSTM state information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">initial_cell_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+            <span class="s2">&quot;initial_cell_state_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">hidden_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">initial_output_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+            <span class="s2">&quot;initial_output_state_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">hidden_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">c_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">initial_cell_state</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="n">h_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">initial_output_state</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMStateTuple</span><span class="p">(</span><span class="n">c_states</span><span class="p">,</span> <span class="n">h_states</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_construct_regularized_lstm_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_dimensions</span><span class="p">,</span> <span class="n">initializer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a regularized lstm cell based on a dropout layer</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hidden_dimensions: num dimensions of the hidden state variable</span>
+<span class="sd">            initializer (tf.contrib.layers.xavier_initializer): initializer used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (DropoutWrapper): regularized LSTM cell</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">lstm_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">CoupledInputForgetGateLSTMCell</span><span class="p">(</span>
+            <span class="n">hidden_dimensions</span><span class="p">,</span>
+            <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+            <span class="n">state_is_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">lstm_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">DropoutWrapper</span><span class="p">(</span>
+            <span class="n">lstm_cell</span><span class="p">,</span>
+            <span class="n">input_keep_prob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob_tf</span><span class="p">,</span>
+            <span class="n">output_keep_prob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob_tf</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lstm_cell</span>
+
+    <span class="k">def</span> <span class="nf">_construct_lstm_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This function constructs the Bi-Directional LSTM network</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_tensor (Tensor): Input tensor to the LSTM network</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            output_tensor (Tensor): The output layer of the LSTM network</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_hidden</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_lstm_hidden_state_dimension</span><span class="p">)</span>
+
+        <span class="c1"># We cannot use the static batch size variable since for the last batch set</span>
+        <span class="c1"># of data, the data size could be less than the batch size</span>
+        <span class="n">batch_size_dim</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># We use the xavier initializer for some of it&#39;s gradient control properties</span>
+        <span class="n">initializer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">xavier_initializer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
+
+        <span class="c1"># Forward LSTM construction</span>
+        <span class="n">lstm_cell_forward_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_regularized_lstm_cell</span><span class="p">(</span>
+            <span class="n">n_hidden</span><span class="p">,</span> <span class="n">initializer</span>
+        <span class="p">)</span>
+        <span class="n">initial_state_forward_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_lstm_state</span><span class="p">(</span>
+            <span class="n">initializer</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">,</span> <span class="n">batch_size_dim</span><span class="p">,</span> <span class="s2">&quot;lstm_cell_forward_tf&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Backward LSTM construction</span>
+        <span class="n">lstm_cell_backward_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_regularized_lstm_cell</span><span class="p">(</span>
+            <span class="n">n_hidden</span><span class="p">,</span> <span class="n">initializer</span>
+        <span class="p">)</span>
+        <span class="n">initial_state_backward_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_lstm_state</span><span class="p">(</span>
+            <span class="n">initializer</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">,</span> <span class="n">batch_size_dim</span><span class="p">,</span> <span class="s2">&quot;lstm_cell_backward_tf&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Combined the forward and backward LSTM networks</span>
+        <span class="p">(</span><span class="n">output_fw</span><span class="p">,</span> <span class="n">output_bw</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">bidirectional_dynamic_rnn</span><span class="p">(</span>
+            <span class="n">cell_fw</span><span class="o">=</span><span class="n">lstm_cell_forward_tf</span><span class="p">,</span>
+            <span class="n">cell_bw</span><span class="o">=</span><span class="n">lstm_cell_backward_tf</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">input_tensor</span><span class="p">,</span>
+            <span class="n">sequence_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_lengths_tf</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="n">initial_state_fw</span><span class="o">=</span><span class="n">initial_state_forward_tf</span><span class="p">,</span>
+            <span class="n">initial_state_bw</span><span class="o">=</span><span class="n">initial_state_backward_tf</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Construct the output later</span>
+        <span class="n">output_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">output_fw</span><span class="p">,</span> <span class="n">output_bw</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">output_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">output_tf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_prob_tf</span><span class="p">)</span>
+
+        <span class="n">output_weights_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;output_weights_tf&quot;</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_hidden</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">output_weights_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">output_weights_tf</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">output_weights_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">output_weights_tf</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size_dim</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_hidden</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">zero_initializer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="n">ZERO_INITIALIZER_VALUE</span><span class="p">)</span>
+        <span class="n">output_bias_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;output_bias_tf&quot;</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="n">zero_initializer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">output_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">output_tf</span><span class="p">,</span> <span class="n">output_weights_tf</span><span class="p">),</span>
+            <span class="n">output_bias_tf</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;output_tensor&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_tf</span>
+
+    <span class="k">def</span> <span class="nf">_get_model_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_extract_seq_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract sequence lengths from the input examples</span>
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of Query objects): List of input queries</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): List of seq lengths for each query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq_lengths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">example</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">:</span>
+                <span class="n">seq_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seq_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">example</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">seq_lengths</span>
+
+    <span class="k">def</span> <span class="nf">_get_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extracts the word and gazetteer embeddings from the input examples</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): Word embeddings and Gazetteer one-hot embeddings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_feats_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">gaz_feats_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">char_feats_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">:</span>
+            <span class="n">x_feat</span><span class="p">,</span> <span class="n">gaz_feat</span><span class="p">,</span> <span class="n">char_feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_features</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+            <span class="n">x_feats_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_feat</span><span class="p">)</span>
+            <span class="n">gaz_feats_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gaz_feat</span><span class="p">)</span>
+            <span class="n">char_feats_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char_feat</span><span class="p">)</span>
+
+        <span class="c1"># save all the embeddings used for model saving purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_encoder</span><span class="o">.</span><span class="n">save_embeddings</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">char_encoder</span><span class="o">.</span><span class="n">save_embeddings</span><span class="p">()</span>
+
+        <span class="n">x_feats_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_feats_array</span><span class="p">)</span>
+        <span class="n">gaz_feats_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gaz_feats_array</span><span class="p">)</span>
+        <span class="n">char_feats_array</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">char_feats_array</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x_feats_array</span><span class="p">,</span> <span class="n">gaz_feats_array</span><span class="p">,</span> <span class="n">char_feats_array</span>
+
+    <span class="k">def</span> <span class="nf">_gaz_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_tokens_to_transform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This function is used to handle special logic around SKLearn&#39;s LabelBinarizer</span>
+<span class="sd">        class which behaves in a non-standard way for 2 classes. In a 2 class system,</span>
+<span class="sd">        it encodes the classes as [0] and [1]. However, in a 3 class system, it encodes</span>
+<span class="sd">        the classes as [0,0,1], [0,1,0], [1,0,0] and sustains this behavior for num_class &gt; 2.</span>
+
+<span class="sd">        We want to encode 2 class systems as [0,1] and [1,0]. This function does that.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            list_of_tokens_to_transform (list): A sequence of class labels</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (array): corrected encoding from the binarizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">list_of_tokens_to_transform</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">output</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">_extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extracts feature dicts for each token in an example.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example (mindmeld.core.Query): an query</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of dict): features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">default_gaz_one_hot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gaz_transform</span><span class="p">([</span><span class="n">DEFAULT_GAZ_LABEL</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">extracted_gaz_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_gaz_one_hot</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span>
+        <span class="n">extracted_sequence_features</span> <span class="o">=</span> <span class="n">extract_sequence_features</span><span class="p">(</span>
+            <span class="n">example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">example_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">extracted_gaz</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extracted_sequence_features</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">extracted_gaz</span> <span class="o">==</span> <span class="p">{}:</span>
+                <span class="k">continue</span>
+
+            <span class="n">combined_gaz_features</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">extracted_gaz</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">regex_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">GAZ_PATTERN_MATCH</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">regex_match</span><span class="p">:</span>
+                    <span class="c1"># Examples of gaz features here are:</span>
+                    <span class="c1"># in-gaz|type:city|pos:start|p_fe,</span>
+                    <span class="c1"># in-gaz|type:city|pos:end|pct-char-len</span>
+                    <span class="c1"># There were many gaz features of the same type that had</span>
+                    <span class="c1"># bot start and end position tags for a given token.</span>
+                    <span class="c1"># Due to this, we did not implement functionality to</span>
+                    <span class="c1"># extract the positional information due to the noise</span>
+                    <span class="c1"># associated with it.</span>
+                    <span class="n">combined_gaz_features</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                        <span class="n">regex_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">REGEX_TYPE_POSITIONAL_INDEX</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_gaz_features</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">total_encoding</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gaz_dimension</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">encoding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gaz_transform</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">combined_gaz_features</span><span class="p">)):</span>
+                    <span class="n">total_encoding</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">total_encoding</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+                <span class="n">extracted_gaz_tokens</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_encoding</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">padded_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_encoder</span><span class="o">.</span><span class="n">encode_sequence_of_tokens</span><span class="p">(</span>
+            <span class="n">example</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+            <span class="n">padded_char</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_encoder</span><span class="o">.</span><span class="n">encode_sequence_of_tokens</span><span class="p">(</span>
+                <span class="n">example</span><span class="o">.</span><span class="n">normalized_tokens</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">padded_char</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">padded_query</span><span class="p">,</span> <span class="n">extracted_gaz_tokens</span><span class="p">,</span> <span class="n">padded_char</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains a classifier without cross-validation. It iterates through</span>
+<span class="sd">        the data, feeds batches to the tensorflow session graph and fits the</span>
+<span class="sd">        model based on the feed forward and back propagation steps.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list of list of list of str): a list of queries to train on</span>
+<span class="sd">            y (list of list of str): a list of expected labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">construct_tf_variables</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">global_init</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_init</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">epochs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_epochs</span><span class="p">)):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training epoch : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+
+            <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
+            <span class="n">gaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features_arr</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+            <span class="n">char</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_features_arr</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span> <span class="k">else</span> <span class="p">[]</span>
+
+            <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">))</span>
+            <span class="n">seq_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">)[</span><span class="n">indices</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">):</span>
+                <span class="n">batch_start_index</span> <span class="o">=</span> <span class="n">batch</span> <span class="o">*</span> <span class="n">batch_size</span>
+                <span class="n">batch_end_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">batch</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span>
+
+                <span class="n">batch_info</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;batch_examples&quot;</span><span class="p">:</span> <span class="n">examples</span><span class="p">[</span><span class="n">batch_start_index</span><span class="p">:</span><span class="n">batch_end_index</span><span class="p">],</span>
+                    <span class="s2">&quot;batch_labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">[</span><span class="n">batch_start_index</span><span class="p">:</span><span class="n">batch_end_index</span><span class="p">],</span>
+                    <span class="s2">&quot;batch_gaz&quot;</span><span class="p">:</span> <span class="n">gaz</span><span class="p">[</span><span class="n">batch_start_index</span><span class="p">:</span><span class="n">batch_end_index</span><span class="p">],</span>
+                    <span class="s2">&quot;batch_seq_len&quot;</span><span class="p">:</span> <span class="n">seq_len</span><span class="p">[</span><span class="n">batch_start_index</span><span class="p">:</span><span class="n">batch_end_index</span><span class="p">],</span>
+                    <span class="s2">&quot;batch_char&quot;</span><span class="p">:</span> <span class="n">char</span><span class="p">[</span><span class="n">batch_start_index</span><span class="p">:</span><span class="n">batch_end_index</span><span class="p">],</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">display_epoch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">output</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_tf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_tf</span><span class="p">],</span>
+                        <span class="n">feed_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">construct_feed_dictionary</span><span class="p">(</span><span class="o">**</span><span class="n">batch_info</span><span class="p">),</span>
+                    <span class="p">)</span>
+
+                    <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_score</span><span class="p">(</span>
+                        <span class="n">output</span><span class="p">,</span> <span class="n">batch_info</span><span class="p">[</span><span class="s2">&quot;batch_labels&quot;</span><span class="p">],</span> <span class="n">batch_info</span><span class="p">[</span><span class="s2">&quot;batch_seq_len&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">score</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_info</span><span class="p">[</span><span class="s2">&quot;batch_examples&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span>
+
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s2">&quot;Trained batch from index </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2">, &quot;</span>
+                        <span class="s2">&quot;Mini-batch loss: </span><span class="si">{:.5f}</span><span class="s2">, &quot;</span>
+                        <span class="s2">&quot;Training sequence accuracy: </span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">batch</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">batch</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">,</span>
+                            <span class="n">loss</span><span class="p">,</span>
+                            <span class="n">accuracy</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_tf</span><span class="p">,</span>
+                        <span class="n">feed_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">construct_feed_dictionary</span><span class="p">(</span><span class="o">**</span><span class="n">batch_info</span><span class="p">),</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predicts tags for query sequence</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list of list of list of str): a list of input representations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A list of decoded labelled predicted by the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq_len_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">)</span>
+
+        <span class="c1"># During predict time, we make sure no nodes are dropped out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_probability</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_softmax_tf</span><span class="p">],</span>
+            <span class="n">feed_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">construct_feed_dictionary</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_features_arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features_arr</span><span class="p">,</span> <span class="n">seq_len_arr</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">decoded_queries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">encoded_predict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+            <span class="n">decoded_query</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">encoded_predict</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">[</span><span class="n">idx</span><span class="p">]]:</span>
+                <span class="n">decoded_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span>
+            <span class="n">decoded_queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoded_query</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">decoded_queries</span>
+
+    <span class="k">def</span> <span class="nf">_predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict tags for query sequence with their confidence scores</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list of list of list of str): a list of input representations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A list of decoded labelled predicted by the model with confidence scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">seq_len_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">)</span>
+
+        <span class="c1"># During predict time, we make sure no nodes are dropped out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_probability</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_softmax_tf</span><span class="p">],</span>
+            <span class="n">feed_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">construct_feed_dictionary</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_features_arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features_arr</span><span class="p">,</span> <span class="n">seq_len_arr</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding_length</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">class_output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">decoded_queries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">encoded_predict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">class_output</span><span class="p">):</span>
+            <span class="n">decoded_query</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">token_idx</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">encoded_predict</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
+            <span class="p">):</span>
+                <span class="n">decoded_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">output</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">token_idx</span><span class="p">][</span><span class="n">tag</span><span class="p">]]</span>
+                <span class="p">)</span>
+            <span class="n">decoded_queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoded_query</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">decoded_queries</span>
+
+<div class="viewcode-block" id="LstmModel.dump"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the Tensorflow model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): the folder path for the entity model folder</span>
+<span class="sd">            config (dict): The model config</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.pkl&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_model_files&quot;</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;serializable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">saver</span><span class="p">:</span>
+            <span class="c1"># This conditional happens when there are not entities for the associated</span>
+            <span class="c1"># model</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;lstm_model&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Save feature extraction variables</span>
+        <span class="n">variables_to_dump</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">,</span>
+            <span class="s2">&quot;gaz_dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_dimension</span><span class="p">,</span>
+            <span class="s2">&quot;output_dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
+            <span class="s2">&quot;gaz_features&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features_arr</span><span class="p">,</span>
+            <span class="s2">&quot;sequence_lengths&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span><span class="p">,</span>
+            <span class="s2">&quot;gaz_encoder&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span><span class="p">,</span>
+            <span class="s2">&quot;label_encoder&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">variables_to_dump</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;.feature_extraction_vars&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="LstmModel.load"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.lstm.html#mindmeld.models.taggers.lstm.LstmModel.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the Tensorflow model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): the folder path for the entity model folder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.pkl&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_model_files&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;lstm_model.meta&quot;</span><span class="p">)):</span>
+            <span class="c1"># This conditional is for models with no labels where no TF graph was built</span>
+            <span class="c1"># for this.</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+            <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">import_meta_graph</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;lstm_model.meta&quot;</span><span class="p">))</span>
+            <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;lstm_model&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Restore tensorflow graph variables</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dense_keep_prob_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;dense_keep_prob_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_input_keep_prob_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;lstm_input_keep_prob_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_keep_prob_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;lstm_output_keep_prob_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_input_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;query_input_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaz_input_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="s2">&quot;gaz_input_tf:0&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="s2">&quot;label_tf:0&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_lengths_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;batch_sequence_lengths_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_sequence_mask_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;batch_sequence_mask_tf:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;output_tensor:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lstm_output_softmax_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                <span class="s2">&quot;output_softmax_tensor:0&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_char_embeddings</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">char_input_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span>
+                    <span class="s2">&quot;char_input_tf:0&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Load feature extraction variables</span>
+        <span class="n">variables_to_load</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;.feature_extraction_vars&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;resources&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaz_dimension</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;gaz_dimension&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;output_dimension&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaz_features</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;gaz_features&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_lengths</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;sequence_lengths&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaz_encoder</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;gaz_encoder&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;label_encoder&quot;</span><span class="p">]</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

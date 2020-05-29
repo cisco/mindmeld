@@ -1,0 +1,811 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.converter.dialogflow &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.converter.dialogflow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.converter.dialogflow</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the DialogflowConverter class used to convert Dialogflow projects</span>
+<span class="sd">into Mindmeld projects&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">importlib.util</span>
+
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">copyfile</span>
+<span class="kn">from</span> <span class="nn">mindmeld.converter.converter</span> <span class="k">import</span> <span class="n">Converter</span>
+<span class="kn">from</span> <span class="nn">mindmeld.converter.code_generator</span> <span class="k">import</span> <span class="n">MindmeldCodeGenerator</span>
+<span class="kn">from</span> <span class="nn">mindmeld.components._config</span> <span class="k">import</span> <span class="n">DEFAULT_INTENT_CLASSIFIER_CONFIG</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">package_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="DialogflowConverter"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter">[docs]</a><span class="k">class</span> <span class="nc">DialogflowConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The class is a sub class of the abstract Converter class. This class</span>
+<span class="sd">    contains the methods required to convert a Dialogflow project into a MindMeld project</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sys_entity_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;@sys.date-time&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_interval&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.date&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.date-period&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_interval&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.time&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.time-period&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_duration&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.duration&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_duration&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.number&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_number&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.cardinal&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_number&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.ordinal&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_ordinal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-currency&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_amount-of-money&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-volume&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_volume&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.email&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_email&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.phone-number&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_phone-number&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.url&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_url&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.temperature&quot;</span><span class="p">:</span> <span class="s2">&quot;sys_temperature&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># TODO: provide support for entities listed in sys_entity_map_todo</span>
+    <span class="n">sys_entity_map_todo</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;@sys.number-integer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.number-sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.flight-number&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-area&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-length&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-speed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-information&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.percentage&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.age&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.currency-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-area-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-length-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-speed-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-volume-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-weight-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.unit-information-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.address&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.zip-code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-capital&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-country&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-country-code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-city&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-city&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.geo-state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.place-attraction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.airport&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.location&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.given-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.last-name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.person&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.music-artist&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.music-genre&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.color&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.language&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@sys.any&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dialogflow_project_directory</span><span class="p">,</span>
+        <span class="n">mindmeld_project_directory</span><span class="p">,</span>
+        <span class="n">custom_config_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dialogflow_project_directory</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dialogflow_project_directory</span> <span class="o">=</span> <span class="n">dialogflow_project_directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span> <span class="o">=</span> <span class="n">mindmeld_project_directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entities_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intents_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span> <span class="o">=</span> <span class="n">MindmeldCodeGenerator</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">custom_config_file_path</span> <span class="o">=</span> <span class="n">custom_config_file_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;`</span><span class="si">{dialogflow_project_directory}</span><span class="s2">` does not exist. Please verify.&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dialogflow_project_directory</span><span class="o">=</span><span class="n">dialogflow_project_directory</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DialogflowConverter.create_mindmeld_directory"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.create_mindmeld_directory">[docs]</a>    <span class="k">def</span> <span class="nf">create_mindmeld_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">,</span> <span class="s2">&quot;app_specific&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">,</span> <span class="s2">&quot;unrelated&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;entities&quot;</span><span class="p">))</span></div>
+
+    <span class="c1"># =========================</span>
+    <span class="c1"># create training data (entities, intents)</span>
+    <span class="c1"># =========================</span>
+
+    <span class="k">def</span> <span class="nf">_create_entities_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entities</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates directories + files for all languages/files.</span>
+<span class="sd">        Currently does not use meta data in entityName.json files (the keys in var entities).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">languages</span> <span class="ow">in</span> <span class="n">entities</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">languages</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">sub</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">:</span>
+                    <span class="c1"># Each MindMeld app works on one language</span>
+                    <span class="k">continue</span>
+
+                <span class="n">dialogflow_entity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dialogflow_project_directory</span><span class="p">,</span> <span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="n">sub</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+                <span class="p">)</span>
+
+                <span class="n">mindmeld_entity_directory_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_check</span><span class="p">(</span>
+                    <span class="n">sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entities_list</span>
+                <span class="p">)</span>
+
+                <span class="n">mindmeld_entity_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span>
+                    <span class="s2">&quot;entities&quot;</span><span class="p">,</span>
+                    <span class="n">mindmeld_entity_directory_name</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># remove DF entity reference &quot;entries&quot;</span>
+                <span class="n">mindmeld_entity_directory</span> <span class="o">=</span> <span class="n">mindmeld_entity_directory</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;entries_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="n">mindmeld_entity_directory</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_entity_file</span><span class="p">(</span>
+                    <span class="n">dialogflow_entity_file</span><span class="p">,</span> <span class="n">mindmeld_entity_directory</span>
+                <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_entity_file</span><span class="p">(</span><span class="n">dialogflow_entity_file</span><span class="p">,</span> <span class="n">mindmeld_entity_directory</span><span class="p">):</span>
+        <span class="n">source_en</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">dialogflow_entity_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">target_gazetteer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mindmeld_entity_directory</span><span class="p">,</span> <span class="s2">&quot;gazetteer.txt&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+        <span class="p">)</span>
+        <span class="n">target_mapping</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mindmeld_entity_directory</span><span class="p">,</span> <span class="s2">&quot;mapping.json&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">datastore</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source_en</span><span class="p">)</span>
+        <span class="n">mapping_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;entities&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">datastore</span><span class="p">:</span>
+            <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">while</span> <span class="p">(</span><span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;synonyms&quot;</span><span class="p">]):</span>
+                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;synonyms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+            <span class="n">new_dict</span><span class="p">[</span><span class="s2">&quot;whitelist&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;synonyms&quot;</span><span class="p">]</span>
+            <span class="n">new_dict</span><span class="p">[</span><span class="s2">&quot;cname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="n">mapping_dict</span><span class="p">[</span><span class="s2">&quot;entities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+            <span class="n">target_gazetteer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">mapping_dict</span><span class="p">,</span> <span class="n">target_mapping</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">source_en</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">target_gazetteer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">target_mapping</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_create_intents_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">intents</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates directories + files for all languages/files.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">languages</span> <span class="ow">in</span> <span class="n">intents</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">language</span><span class="p">,</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">languages</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">language</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">:</span>
+                    <span class="c1"># Each MindMeld app works on one language</span>
+                    <span class="k">continue</span>
+
+                <span class="n">dialogflow_intent_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dialogflow_project_directory</span><span class="p">,</span> <span class="s2">&quot;intents&quot;</span><span class="p">,</span> <span class="n">sub</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+                <span class="p">)</span>
+
+                <span class="n">mindmeld_intent_directory_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_check</span><span class="p">(</span>
+                    <span class="n">sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intents_list</span>
+                <span class="p">)</span>
+
+                <span class="c1"># DF has &quot;default&quot; intents like &quot;default_fallback&quot; and &quot;default_greeting&quot;</span>
+                <span class="c1"># which are in-built intents. We map these intents to the &quot;unrelated&quot; domain</span>
+                <span class="c1"># compared to the other app specific intents being mapped to the &quot;app_specific&quot;</span>
+                <span class="c1"># domain.</span>
+                <span class="k">if</span> <span class="s2">&quot;default&quot;</span> <span class="ow">in</span> <span class="n">mindmeld_intent_directory_name</span><span class="p">:</span>
+                    <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;unrelated&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;app_specific&quot;</span>
+
+                <span class="n">mindmeld_intent_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span>
+                    <span class="s2">&quot;domains&quot;</span><span class="p">,</span>
+                    <span class="n">domain</span><span class="p">,</span>
+                    <span class="n">mindmeld_intent_directory_name</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># remove DF intent reference &quot;usersays_&quot;</span>
+                <span class="n">mindmeld_intent_directory</span> <span class="o">=</span> <span class="n">mindmeld_intent_directory</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;usersays_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_directory</span><span class="p">(</span><span class="n">mindmeld_intent_directory</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_intent_file</span><span class="p">(</span>
+                    <span class="n">dialogflow_intent_file</span><span class="p">,</span> <span class="n">mindmeld_intent_directory</span><span class="p">,</span> <span class="n">language</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_intent_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dialogflow_intent_file</span><span class="p">,</span> <span class="n">mindmeld_intent_directory</span><span class="p">,</span> <span class="n">language</span>
+    <span class="p">):</span>
+        <span class="n">source_en</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">dialogflow_intent_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">target_train</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mindmeld_intent_directory</span><span class="p">,</span> <span class="s2">&quot;train.txt&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">datastore</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source_en</span><span class="p">)</span>
+        <span class="n">all_text</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">default_intent_to_training_file</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;default_fallback_intent&quot;</span><span class="p">:</span> <span class="s2">&quot;unrelated.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;default_welcome_intent&quot;</span><span class="p">:</span> <span class="s2">&quot;greetings.txt&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">usersay</span> <span class="ow">in</span> <span class="n">datastore</span><span class="p">:</span>
+            <span class="n">sentence</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">texts</span> <span class="ow">in</span> <span class="n">usersay</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]:</span>
+                <span class="n">df_text</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;meta&quot;</span> <span class="ow">in</span> <span class="n">texts</span> <span class="ow">and</span> <span class="n">texts</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;@sys.ignore&quot;</span><span class="p">:</span>
+                    <span class="n">df_meta</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">]</span>
+                    <span class="n">role_type</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="s2">&quot;alias&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                        <span class="s2">&quot;(@sys.).+&quot;</span><span class="p">,</span> <span class="n">df_meta</span>
+                    <span class="p">):</span>  <span class="c1"># if text is a dialogflow sys entity</span>
+                        <span class="k">if</span> <span class="n">df_meta</span> <span class="ow">in</span> <span class="n">DialogflowConverter</span><span class="o">.</span><span class="n">sys_entity_map</span><span class="p">:</span>
+                            <span class="n">mm_meta</span> <span class="o">=</span> <span class="n">DialogflowConverter</span><span class="o">.</span><span class="n">sys_entity_map</span><span class="p">[</span><span class="n">df_meta</span><span class="p">]</span>
+                            <span class="n">entity_type</span> <span class="o">=</span> <span class="n">mm_meta</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">mm_meta</span> <span class="o">=</span> <span class="s2">&quot;[DNE: </span><span class="si">{sysEntity}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sysEntity</span><span class="o">=</span><span class="n">df_meta</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s2">&quot;Unfortunately mindmeld does not currently support&quot;</span>
+                                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> as a sys entity.&quot;</span>
+                                <span class="s2">&quot;Please create an entity for this.&quot;</span><span class="p">,</span>
+                                <span class="n">df_meta</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                            <span class="p">)</span>
+                            <span class="n">entity_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_name</span><span class="p">(</span><span class="n">mm_meta</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">language</span>
+
+                        <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">df_text</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">entity_type</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">role_type</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">entity_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_name</span><span class="p">(</span><span class="n">df_meta</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">language</span>
+                        <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">df_text</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">entity_type</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">role_type</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="n">df_text</span>
+
+                <span class="n">sentence</span> <span class="o">+=</span> <span class="n">part</span>
+            <span class="n">all_text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">default_intent_to_training_file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mindmeld_intent_directory</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_dir</span><span class="p">,</span> <span class="n">default_intent_to_training_file</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fp</span><span class="p">:</span>
+                        <span class="n">all_text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="c1"># Double the size of the training set if there are less than the number of</span>
+        <span class="c1"># folds for cross-val in the config.py file</span>
+        <span class="n">intent_config</span> <span class="o">=</span> <span class="n">DEFAULT_INTENT_CLASSIFIER_CONFIG</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_config_file_path</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;config.py&quot;</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="s2">&quot;mindmeld_app&quot;</span><span class="p">,</span> <span class="n">config_path</span><span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">intent_config</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;INTENT_RECOGNIZER_CONFIG&quot;</span><span class="p">,</span> <span class="n">intent_config</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">intent_config</span><span class="p">[</span><span class="s2">&quot;param_selection&quot;</span><span class="p">][</span><span class="s2">&quot;k&quot;</span><span class="p">]:</span>
+            <span class="n">all_text</span> <span class="o">=</span> <span class="n">all_text</span> <span class="o">*</span> <span class="mi">2</span>
+
+        <span class="n">target_train</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">all_text</span><span class="p">))</span>
+        <span class="n">source_en</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">target_train</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_file_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Gets the names of the entities from Dialogflow as a dictionary.</span>
+<span class="sd">        levels (str): either &quot;entities&quot; or &quot;intents&quot;</span>
+
+<span class="sd">        ex. if we had the following files in our entities directory:</span>
+<span class="sd">            [&quot;test.json&quot;, &quot;test_entries_en.json&quot;, &quot;test_entries_de.json&quot;]</span>
+<span class="sd">        it returns:</span>
+<span class="sd">            {&#39;test&#39;: {&#39;en&#39;: &#39;test_entries_en&#39;, &#39;de&#39;: &#39;test_entries_de&#39;}} &quot;&quot;&quot;</span>
+
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dialogflow_project_directory</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;entities&quot;</span><span class="p">:</span> <span class="s2">&quot;entries&quot;</span><span class="p">,</span> <span class="s2">&quot;intents&quot;</span><span class="p">:</span> <span class="s2">&quot;usersays&quot;</span><span class="p">}</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;.+(?&lt;=(_&quot;</span> <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_))(.*)(?=(.json))&quot;</span>
+        <span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;en&quot;</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">isbase</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+                <span class="n">language</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">isbase</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">base</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+                <span class="n">info</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isbase</span><span class="p">:</span>
+                <span class="n">info</span><span class="p">[</span><span class="n">base</span><span class="p">][</span><span class="n">language</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">info</span>
+
+<div class="viewcode-block" id="DialogflowConverter.create_mindmeld_training_data"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.create_mindmeld_training_data">[docs]</a>    <span class="k">def</span> <span class="nf">create_mindmeld_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_names</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_entities_directories</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+
+        <span class="n">intents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_names</span><span class="p">(</span><span class="s2">&quot;intents&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_intents_directories</span><span class="p">(</span><span class="n">intents</span><span class="p">)</span></div>
+
+    <span class="c1"># =========================</span>
+    <span class="c1"># create init</span>
+    <span class="c1"># =========================</span>
+
+<div class="viewcode-block" id="DialogflowConverter.clean_name"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.clean_name">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">clean_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Takes in a string and returns a valid folder name (no spaces, all lowercase).&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\w\s-]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[-\s]+&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="DialogflowConverter.clean_check"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.clean_check">[docs]</a>    <span class="k">def</span> <span class="nf">clean_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Takes in a list of strings and a name.</span>
+<span class="sd">        Returns name cleaned if the cleaned name is not found in lst.&quot;&quot;&quot;</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cleaned</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cleaned</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> name has been created twice. Please ensure there &quot;</span>
+                <span class="s2">&quot;are no duplicate names in the dialogflow files and &quot;</span>
+                <span class="s2">&quot;filenames are valid (no spaces or special characters)&quot;</span><span class="p">,</span>
+                <span class="n">cleaned</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogflowConverter.create_mindmeld_init"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.create_mindmeld_init">[docs]</a>    <span class="k">def</span> <span class="nf">create_mindmeld_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">target</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span><span class="o">.</span><span class="n">begin</span><span class="p">(</span><span class="n">tab</span><span class="o">=</span><span class="s2">&quot;    &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span><span class="o">.</span><span class="n">generate_top_block</span><span class="p">()</span>
+
+            <span class="n">intents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_names</span><span class="p">(</span><span class="s2">&quot;intents&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">main</span> <span class="ow">in</span> <span class="n">intents</span><span class="p">:</span>
+
+                <span class="n">df_main</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dialogflow_project_directory</span><span class="p">,</span> <span class="s2">&quot;intents&quot;</span><span class="p">,</span> <span class="n">main</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+                <span class="p">)</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">df_main</span><span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;usersays&quot;</span> <span class="ow">in</span> <span class="n">df_main</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s2">&quot;Please check if your intent file&quot;</span>
+                            <span class="s2">&quot;names are correctly labeled.&quot;</span>
+                        <span class="p">)</span>
+                        <span class="k">return</span>
+
+                    <span class="n">datastore</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+                    <span class="n">intent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_name</span><span class="p">(</span><span class="n">datastore</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">datastore</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">generate_handlers</span><span class="p">(</span><span class="n">intent</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+            <span class="n">target</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span><span class="o">.</span><span class="n">end</span><span class="p">())</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DialogflowConverter.generate_handlers"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.generate_handlers">[docs]</a>    <span class="k">def</span> <span class="nf">generate_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">language</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="s2">&quot;lang&quot;</span><span class="p">]</span>
+        <span class="n">intent_lang</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">intent</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+        <span class="n">intent_entity_role_replies</span> <span class="o">=</span> <span class="p">{</span><span class="n">intent_lang</span><span class="p">:</span> <span class="p">{}}</span>
+
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]:</span>
+                <span class="n">entity</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;dataType&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">DialogflowConverter</span><span class="o">.</span><span class="n">sys_entity_map</span><span class="p">:</span>
+                    <span class="n">entity</span> <span class="o">=</span> <span class="n">DialogflowConverter</span><span class="o">.</span><span class="n">sys_entity_map</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">entity</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;dataType&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="n">entity</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+                <span class="n">role</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+                <span class="n">prompts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="s2">&quot;prompts&quot;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
+                    <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;prompts&quot;</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;What is the &quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span>
+
+                <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">intent_entity_role_replies</span><span class="p">[</span><span class="n">intent_lang</span><span class="p">]:</span>
+                    <span class="n">intent_entity_role_replies</span><span class="p">[</span><span class="n">intent_lang</span><span class="p">][</span><span class="n">entity</span><span class="p">][</span><span class="n">role</span><span class="p">]</span> <span class="o">=</span> <span class="n">prompts</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">intent_entity_role_replies</span><span class="p">[</span><span class="n">intent_lang</span><span class="p">][</span><span class="n">entity</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">role</span><span class="p">:</span> <span class="n">prompts</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="s2">&quot;speech&quot;</span> <span class="ow">in</span> <span class="n">message</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="s2">&quot;speech&quot;</span><span class="p">]</span>
+            <span class="n">replies</span> <span class="o">=</span> <span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+            <span class="n">slot_templated_replies</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">is_slot_template</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">resp</span> <span class="ow">in</span> <span class="n">replies</span><span class="p">:</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="n">resp</span>
+                <span class="n">slots</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\$([\w\-\_]+)&quot;</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="n">slot</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">slot</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">template</span> <span class="o">!=</span> <span class="n">resp</span><span class="p">:</span>
+                    <span class="n">is_slot_template</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">slot_templated_replies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+            <span class="n">handle</span> <span class="o">=</span> <span class="s2">&quot;intent=&#39;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">intent</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">function_name</span> <span class="o">=</span> <span class="n">intent</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">language</span> <span class="o">+</span> <span class="s2">&quot;_handler&quot;</span>
+
+            <span class="k">if</span> <span class="n">is_slot_template</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span><span class="o">.</span><span class="n">generate_followup_function_code_block</span><span class="p">(</span>
+                    <span class="n">handle</span><span class="p">,</span>
+                    <span class="n">function_name</span><span class="p">,</span>
+                    <span class="n">intent_entity_role_replies</span><span class="p">,</span>
+                    <span class="n">slot_templated_replies</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">code_gen</span><span class="o">.</span><span class="n">generate_function</span><span class="p">(</span>
+                    <span class="n">handle</span><span class="o">=</span><span class="n">handle</span><span class="p">,</span> <span class="n">function_name</span><span class="o">=</span><span class="n">function_name</span><span class="p">,</span> <span class="n">replies</span><span class="o">=</span><span class="n">replies</span><span class="p">,</span>
+                <span class="p">)</span></div>
+
+    <span class="c1"># =========================</span>
+    <span class="c1"># convert project</span>
+    <span class="c1"># =========================</span>
+
+<div class="viewcode-block" id="DialogflowConverter.convert_project"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.dialogflow.html#mindmeld.converter.DialogflowConverter.convert_project">[docs]</a>    <span class="k">def</span> <span class="nf">convert_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Converts a Dialogflow project into a MindMeld project.</span>
+
+<span class="sd">        Dialogflow projects consist of entities and intents.</span>
+<span class="sd">            note on languages:</span>
+<span class="sd">                Dialogflow supports multiple languages and locales. They store their training</span>
+<span class="sd">                data for different languages in different files. So, the name of each training</span>
+<span class="sd">                file ends with a meta tag, two letters long for language, and an additional</span>
+<span class="sd">                two letters for dialect (if applicable). For example, a file ending in &quot;_en-au&quot;</span>
+<span class="sd">                indicates it&#39;s in English (Australia). Below we use &quot;la&quot; to represent this</span>
+<span class="sd">                meta tag.</span>
+
+<span class="sd">            entities folder contains:</span>
+<span class="sd">                entityName.json - Meta data about entityName for all languages.</span>
+<span class="sd">                entityName_la.json - One for each language, contains entitiy mappings.</span>
+
+<span class="sd">            intents folder contain:</span>
+<span class="sd">                intentName.json - Contains rules, information about conversation flow, meta data.</span>
+<span class="sd">                    Contains previously mentioned information and responses for all languages.</span>
+<span class="sd">                intentName_usersays_la.json - one for each language,</span>
+<span class="sd">                    contains training data to recognize intentName</span>
+
+<span class="sd">        Limitations:</span>
+<span class="sd">        - The converter is unable to create an entity when it encounters an</span>
+<span class="sd">        unrecognized entity (an entity not defined under entities folder</span>
+<span class="sd">         or system entities), and labels such entities as DNE in training data.</span>
+<span class="sd">        - The converter currently does not automatically convert features like</span>
+<span class="sd">        slot filling, contexts, and follow-up intents. Users can still implement such</span>
+<span class="sd">        features and more.</span>
+<span class="sd">        - Information in agent.json are not copied over.</span>
+<span class="sd">        - There is no official support for different languages. Users can still</span>
+<span class="sd">        implement this. The converter is able to successfully convert dialogflow</span>
+<span class="sd">        bots that support multiple languages.</span>
+
+<span class="sd">        Mindmeld:</span>
+<span class="sd">        - Users can store data locally</span>
+<span class="sd">        - Users can build a knowledge base (currently beta in Dialogflow).</span>
+<span class="sd">        - Users can configure the machine learning models to best suit their needs.</span>
+<span class="sd">        - Users have more flexibility in defining their own features, including</span>
+<span class="sd">         ones like slot filling, contexts, and follow-up intents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Converting project.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create project directory with sub folders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_mindmeld_directory</span><span class="p">()</span>
+
+        <span class="c1"># copy config file to the Mindmeld dir</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_config_file_path</span><span class="p">:</span>
+            <span class="n">copyfile</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">custom_config_file_path</span><span class="p">,</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;config.py&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">file_loc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_main</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="n">file_loc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_mindmeld_init</span><span class="p">()</span>
+
+        <span class="c1"># Transfer over test data from Dialogflow project and reformat to Mindmeld project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_mindmeld_training_data</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Project converted.&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

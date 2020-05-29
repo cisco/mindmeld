@@ -1,0 +1,669 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.helpers &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.helpers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.helpers</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains some helper functions for the models package&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">make_scorer</span>
+
+<span class="kn">from</span> <span class="nn">..gazetteer</span> <span class="k">import</span> <span class="n">Gazetteer</span>
+<span class="kn">from</span> <span class="nn">..tokenizer</span> <span class="k">import</span> <span class="n">Tokenizer</span>
+
+<span class="n">FEATURE_MAP</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">MODEL_MAP</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">LABEL_MAP</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Example types</span>
+<span class="n">QUERY_EXAMPLE_TYPE</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span>
+<span class="n">ENTITY_EXAMPLE_TYPE</span> <span class="o">=</span> <span class="s2">&quot;entity&quot;</span>
+
+<span class="c1"># Label types</span>
+<span class="n">CLASS_LABEL_TYPE</span> <span class="o">=</span> <span class="s2">&quot;class&quot;</span>
+<span class="n">ENTITIES_LABEL_TYPE</span> <span class="o">=</span> <span class="s2">&quot;entities&quot;</span>
+
+
+<span class="c1"># resource/requirements names</span>
+<span class="n">GAZETTEER_RSC</span> <span class="o">=</span> <span class="s2">&quot;gazetteers&quot;</span>
+<span class="n">QUERY_FREQ_RSC</span> <span class="o">=</span> <span class="s2">&quot;q_freq&quot;</span>
+<span class="n">SYS_TYPES_RSC</span> <span class="o">=</span> <span class="s2">&quot;sys_types&quot;</span>
+<span class="n">ENABLE_STEMMING</span> <span class="o">=</span> <span class="s2">&quot;enable-stemming&quot;</span>
+<span class="n">WORD_FREQ_RSC</span> <span class="o">=</span> <span class="s2">&quot;w_freq&quot;</span>
+<span class="n">WORD_NGRAM_FREQ_RSC</span> <span class="o">=</span> <span class="s2">&quot;w_ngram_freq&quot;</span>
+<span class="n">CHAR_NGRAM_FREQ_RSC</span> <span class="o">=</span> <span class="s2">&quot;c_ngram_freq&quot;</span>
+<span class="n">OUT_OF_BOUNDS_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;&lt;$&gt;&quot;</span>
+<span class="n">DEFAULT_SYS_ENTITIES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;sys_time&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_temperature&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_volume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_amount-of-money&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_email&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_url&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_number&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_ordinal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_duration&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sys_phone-number&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="create_model"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.create_model">[docs]</a><span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a model instance using the provided configuration</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (ModelConfig): A model configuration</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Model: a configured model</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: When model configuration is invalid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MODEL_MAP</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">model_type</span><span class="p">](</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid model configuration: Unknown model type </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">model_type</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_feature_extractor"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.get_feature_extractor">[docs]</a><span class="k">def</span> <span class="nf">get_feature_extractor</span><span class="p">(</span><span class="n">example_type</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets a feature extractor given the example type and name</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        example_type (str): The type of example</span>
+<span class="sd">        name (str): The name of the feature extractor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        function: A feature extractor wrapper</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FEATURE_MAP</span><span class="p">[</span><span class="n">example_type</span><span class="p">][</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_label_encoder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.get_label_encoder">[docs]</a><span class="k">def</span> <span class="nf">get_label_encoder</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets a label encoder given the label type from the config</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (ModelConfig): A model configuration</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        LabelEncoder: The appropriate LabelEncoder object for the given config</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LABEL_MAP</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">](</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_model"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_model">[docs]</a><span class="k">def</span> <span class="nf">register_model</span><span class="p">(</span><span class="n">model_type</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Registers a model for use with `create_model()`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_type (str): The model type as specified in model configs</span>
+<span class="sd">        model_class (class): The model to register</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="n">MODEL_MAP</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model </span><span class="si">{!r}</span><span class="s2"> is already registered.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_type</span><span class="p">))</span>
+
+    <span class="n">MODEL_MAP</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span></div>
+
+
+<div class="viewcode-block" id="register_query_feature"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_query_feature">[docs]</a><span class="k">def</span> <span class="nf">register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Registers query feature</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feature_name (str): The name of the query feature</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (func): the feature extractor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">register_feature</span><span class="p">(</span><span class="n">QUERY_EXAMPLE_TYPE</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_entity_feature"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_entity_feature">[docs]</a><span class="k">def</span> <span class="nf">register_entity_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Registers entity feature</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feature_name (str): The name of the entity feature</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (func): the feature extractor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">register_feature</span><span class="p">(</span><span class="n">ENTITY_EXAMPLE_TYPE</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_feature"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_feature">[docs]</a><span class="k">def</span> <span class="nf">register_feature</span><span class="p">(</span><span class="n">feature_type</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator for adding feature extractor mappings to FEATURE_MAP</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feature_type: &#39;query&#39; or &#39;entity&#39;</span>
+<span class="sd">        feature_name: The name of the feature, used in config.py</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (func): the feature extractor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">add_feature</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">feature_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="n">QUERY_EXAMPLE_TYPE</span><span class="p">,</span> <span class="n">ENTITY_EXAMPLE_TYPE</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Feature type can only be &#39;query&#39; or &#39;entity&#39;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add func to feature map with given type and name</span>
+        <span class="k">if</span> <span class="n">feature_type</span> <span class="ow">in</span> <span class="n">FEATURE_MAP</span><span class="p">:</span>
+            <span class="n">FEATURE_MAP</span><span class="p">[</span><span class="n">feature_type</span><span class="p">][</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">FEATURE_MAP</span><span class="p">[</span><span class="n">feature_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">feature_name</span><span class="p">:</span> <span class="n">func</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="k">return</span> <span class="n">add_feature</span></div>
+
+
+<div class="viewcode-block" id="register_label"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_label">[docs]</a><span class="k">def</span> <span class="nf">register_label</span><span class="p">(</span><span class="n">label_type</span><span class="p">,</span> <span class="n">label_encoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Register a label encoder for use with</span>
+<span class="sd">    `get_label_encoder()`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        label_type (str): The label type of the label encoder</span>
+<span class="sd">        label_encoder (LabelEncoder): The label encoder class to register</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the label type is already registered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">label_type</span> <span class="ow">in</span> <span class="n">LABEL_MAP</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Label encoder for label type </span><span class="si">{!r}</span><span class="s2"> is already registered.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">label_type</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">LABEL_MAP</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_encoder</span></div>
+
+
+<div class="viewcode-block" id="mask_numerics"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.mask_numerics">[docs]</a><span class="k">def</span> <span class="nf">mask_numerics</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Masks digit characters in a token</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (str): A string</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A masked string for digit characters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">&quot;#NUM&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_ngram"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.get_ngram">[docs]</a><span class="k">def</span> <span class="nf">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets a ngram from a list of tokens.</span>
+
+<span class="sd">    Handles out-of-bounds token positions with a special character.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tokens (list of str): Word tokens.</span>
+<span class="sd">        start (int): The index of the desired ngram&#39;s start position.</span>
+<span class="sd">        length (int): The length of the n-gram, e.g. 1 for unigram, etc.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) An n-gram in the input token list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ngram_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">length</span><span class="p">):</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">OUT_OF_BOUNDS_TOKEN</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="k">else</span> <span class="n">tokens</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">ngram_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram_tokens</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_seq_accuracy_scorer"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.get_seq_accuracy_scorer">[docs]</a><span class="k">def</span> <span class="nf">get_seq_accuracy_scorer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a scorer that can be used by sklearn&#39;s GridSearchCV based on the</span>
+<span class="sd">    sequence_accuracy_scoring method below.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">score_func</span><span class="o">=</span><span class="n">sequence_accuracy_scoring</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_seq_tag_accuracy_scorer"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.get_seq_tag_accuracy_scorer">[docs]</a><span class="k">def</span> <span class="nf">get_seq_tag_accuracy_scorer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a scorer that can be used by sklearn&#39;s GridSearchCV based on the</span>
+<span class="sd">    sequence_tag_accuracy_scoring method below.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">score_func</span><span class="o">=</span><span class="n">sequence_tag_accuracy_scoring</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sequence_accuracy_scoring"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.sequence_accuracy_scoring">[docs]</a><span class="k">def</span> <span class="nf">sequence_accuracy_scoring</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Accuracy score which calculates two sequences to be equal only if all of</span>
+<span class="sd">        their predicted tags are equal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_true (list): A sequence of true expected labels</span>
+<span class="sd">        y_pred (list): A sequence of predicted labels</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The sequence-level accuracy when comparing the predicted labels \</span>
+<span class="sd">            against the true expected labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">total</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+        <span class="mi">1</span> <span class="k">for</span> <span class="n">yseq_true</span><span class="p">,</span> <span class="n">yseq_pred</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span> <span class="k">if</span> <span class="n">yseq_true</span> <span class="o">==</span> <span class="n">yseq_pred</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sequence_tag_accuracy_scoring"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.sequence_tag_accuracy_scoring">[docs]</a><span class="k">def</span> <span class="nf">sequence_tag_accuracy_scoring</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Accuracy score which calculates the number of tags that were predicted</span>
+<span class="sd">        correctly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_true (list): A sequence of true expected labels</span>
+<span class="sd">        y_pred (list): A sequence of predicted labels</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The tag-level accuracy when comparing the predicted labels \</span>
+<span class="sd">            against the true expected labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y_true_flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">y_true</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">]</span>
+    <span class="n">y_pred_flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">y_pred</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">]</span>
+
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true_flat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">total</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+        <span class="mi">1</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">y_true_tag</span><span class="p">,</span> <span class="n">y_pred_tag</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">y_true_flat</span><span class="p">,</span> <span class="n">y_pred_flat</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y_true_tag</span> <span class="o">==</span> <span class="n">y_pred_tag</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="entity_seqs_equal"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.entity_seqs_equal">[docs]</a><span class="k">def</span> <span class="nf">entity_seqs_equal</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">predicted</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns true if the expected entities and predicted entities all match, returns</span>
+<span class="sd">    false otherwise. Note that for entity comparison, we compare that the span, text,</span>
+<span class="sd">    and type of all the entities match.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expected (list of core.Entity): A list of the expected entities for some query</span>
+<span class="sd">        predicted (list of core.Entity): A list of the predicted entities for some query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">expected_entity</span><span class="p">,</span> <span class="n">predicted_entity</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">predicted</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">expected_entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">predicted_entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">expected_entity</span><span class="o">.</span><span class="n">span</span> <span class="o">!=</span> <span class="n">predicted_entity</span><span class="o">.</span><span class="n">span</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">expected_entity</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="n">predicted_entity</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="merge_gazetteer_resource"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.merge_gazetteer_resource">[docs]</a><span class="k">def</span> <span class="nf">merge_gazetteer_resource</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a new resource that is a merge between the original resource and the dynamic</span>
+<span class="sd">    resource passed in for only the gazetteer values</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        resource (dict): The original resource built from the app</span>
+<span class="sd">        dynamic_resource (dict): The dynamic resource passed in</span>
+<span class="sd">        tokenizer (Tokenizer): This component is used to normalize entities in dyn gaz</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The merged resource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">return_obj</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">resource</span><span class="p">:</span>
+        <span class="c1"># Pass by reference if not a gazetteer key</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">GAZETTEER_RSC</span><span class="p">:</span>
+            <span class="n">return_obj</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Create a dict from scratch if we match the gazetteer key</span>
+        <span class="n">return_obj</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">resource</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="c1"># If the entity type is in the dyn gaz, we merge the data. Else,</span>
+            <span class="c1"># just pass by reference the original resource data</span>
+            <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">dynamic_resource</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">new_gaz</span> <span class="o">=</span> <span class="n">Gazetteer</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+                <span class="c1"># We deep copy here since shallow copying will also change the</span>
+                <span class="c1"># original resource&#39;s data during the &#39;_update_entity&#39; op.</span>
+                <span class="n">new_gaz</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">resource</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">])</span>
+
+                <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dynamic_resource</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">]:</span>
+                    <span class="n">new_gaz</span><span class="o">.</span><span class="n">_update_entity</span><span class="p">(</span>
+                        <span class="n">tokenizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">entity</span><span class="p">),</span>
+                        <span class="n">dynamic_resource</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">][</span><span class="n">entity</span><span class="p">],</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># The new gaz created is a deep copied version of the merged gaz data</span>
+                <span class="n">return_obj</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_gaz</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">return_obj</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">entity_type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">return_obj</span></div>
+
+
+<div class="viewcode-block" id="ingest_dynamic_gazetteer"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.ingest_dynamic_gazetteer">[docs]</a><span class="k">def</span> <span class="nf">ingest_dynamic_gazetteer</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ingests dynamic gazetteers from the app and adds them to the resource</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        resource (dict): The original resource</span>
+<span class="sd">        dynamic_resource (dict, optional): The dynamic resource that needs to be ingested</span>
+<span class="sd">        tokenizer (Tokenizer): This used to normalize the entities in the dynamic resource</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict): A new resource with the ingested dynamic resource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dynamic_resource</span> <span class="ow">or</span> <span class="n">GAZETTEER_RSC</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dynamic_resource</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">resource</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span> <span class="ow">or</span> <span class="n">Tokenizer</span><span class="p">()</span>
+    <span class="n">workspace_resource</span> <span class="o">=</span> <span class="n">merge_gazetteer_resource</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">workspace_resource</span></div>
+
+
+<div class="viewcode-block" id="requires"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.requires">[docs]</a><span class="k">def</span> <span class="nf">requires</span><span class="p">(</span><span class="n">resource</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to enforce the resource dependencies of the active feature extractors</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        resource (str): the key of a classifier resource which must be initialized before</span>
+<span class="sd">            the given feature extractor is used</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (func): the feature extractor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">add_resource</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">req</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;requirements&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+        <span class="n">req</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">requirements</span> <span class="o">=</span> <span class="n">req</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="k">return</span> <span class="n">add_resource</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

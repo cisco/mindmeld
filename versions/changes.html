@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Recent Changes &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Package History" href="history.html" />
+    <link rel="prev" title="MindMeld UI" href="../mindmeld_ui/mindmeld_ui.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Recent Changes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-4-2">MindMeld 4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-4-1">MindMeld 4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-4-0">MindMeld 4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-3-4">MindMeld 3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-3-3">MindMeld 3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-3-2">MindMeld 3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mindmeld-3-1">MindMeld 3.1</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Recent Changes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/versions/changes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="recent-changes">
+<h1>Recent Changes<a class="headerlink" href="#recent-changes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="mindmeld-4-2">
+<h2>MindMeld 4.2<a class="headerlink" href="#mindmeld-4-2" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld 4.2 packages several new features to make it easier for developers to build NLP applications for non-English languages, do unstructured QA searches,
+and a new enterprise blueprint for a human resources (HR) use-case.</p>
+<p><strong>1. MindMeld UI</strong></p>
+<p>MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application. This web UI also
+serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline. See
+<a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html"><span class="doc">MindMeld UI</span></a> for more details.</p>
+<p><strong>2. Question-answering on unstructured text</strong></p>
+<p>MindMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
+This new feature can be used to perform QA using a knowledge base of passages, frequently asked questions or any long-form
+text data. This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
+<a class="reference internal" href="../userguide/kb.html#unstructured-data"><span class="std std-ref">dealing with unstructed data</span></a> for more details.</p>
+<p><strong>3. New Human Resources Blueprint</strong></p>
+<p>MindMeld 4.2 provide an enterprise Human Resources bot blueprint to complement the existing consumer blueprints we currently support. Refer to
+<a class="reference internal" href="../blueprints/hr_assistant.html#hr-assistant"><span class="std std-ref">HR assistant</span></a> blueprint for more details.</p>
+<p><strong>4. Webex Teams Bot Integration</strong></p>
+<p>MindMeld 4.2 includes built-in support for Webex Teams integration, so developers can seamlessly integrate MindMeld bots
+to Webex Teams. See <a class="reference internal" href="../integrations/webex_teams.html"><span class="doc">Webex bot integration</span></a> for implementation details.</p>
+<p><strong>5. Locale and Language codes</strong></p>
+<p>MindMeld 4.2 now supports system entity classification and resolution in non-English languages. Please see <a class="reference internal" href="../userguide/internationalization.html#specify-language"><span class="std std-ref">Specify language and locale codes</span></a> for more details.</p>
+<p><strong>6. Stemming</strong></p>
+<p>MindMeld 4.2 supports language stemmers.</p>
+<p><strong>7. DialogueFlow.reprocess</strong></p>
+<p>MindMeld 4.2 includes an improvement to DialogueFlow (a MindMeld dialogue feature) where the user can exit the current dialogue flow and
+return to a default flow. Refer to <a class="reference internal" href="../userguide/dm.html#exiting-dialogue-flow"><span class="std std-ref">Exiting Dialogue Flow</span></a> section on how to exit an active dialogue flow.</p>
+<p><strong>8. Docker updates</strong></p>
+<p>We updated the <a class="reference internal" href="../userguide/getting_started.html#getting-started-docker-setup"><span class="std std-ref">Getting started with docker</span></a> page to spawn Elasticsearch within the docker
+container, which means the developer doesn’t have to do any local Elasticsearch setup, thus significantly reducing the
+local dependencies needed to run MindMeld.</p>
+</div>
+<div class="section" id="mindmeld-4-1">
+<h2>MindMeld 4.1<a class="headerlink" href="#mindmeld-4-1" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This release includes breaking changes. See below
+for instructions on migrating your apps from MindMeld 4.0 to MindMeld 4.1</p>
+</div>
+<p>MindMeld 4.1 allows the package to be open-sourced by complying to the Apache 2.0 license standard.</p>
+<p><strong>1. De-coupled Duckling from MindMeld</strong></p>
+<p>Duckling, the numerical parser used to detect system entities, is now a configurable option, so an application can
+disable it if it doesn’t need it. See <a class="reference internal" href="../userguide/entity_recognizer.html#configuring-system-entities"><span class="std std-ref">configuring system entities section</span></a> for more details.</p>
+<p><strong>2. Added extensive API documentation for the MindMeld library</strong></p>
+<p>The API reference for the MindMeld package can be found here: <a class="reference internal" href="../internal/api_reference.html"><span class="doc">API Reference</span></a>.</p>
+<p><strong>3. Replaced all instances of the term mmworkbench to mindmeld</strong></p>
+<p>All instances of the term <code class="docutils literal"><span class="pre">mmworkbench</span></code> in the codebase have been replaced to <code class="docutils literal"><span class="pre">mindmeld</span></code> to be consistent with the new open-source package name.
+Due to this change, older saved models will no longer load in 4.1. Please make sure to delete the <code class="docutils literal"><span class="pre">.generated</span></code> folder in
+the top level of the application and re-build the application.</p>
+</div>
+<div class="section" id="mindmeld-4-0">
+<h2>MindMeld 4.0<a class="headerlink" href="#mindmeld-4-0" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a major release that includes breaking changes. Refer to the changes numbered 6, 9, and
+10 below for instructions on migrating your apps from MindMeld 3 to MindMeld 4.</p>
+</div>
+<p>MindMeld 4 is a major update to the MindMeld conversational AI platform, adding a
+number of new features to the natural language processor and dialogue manager components. This
+section provides highlights; see <a class="reference internal" href="history.html"><span class="doc">Package History</span></a> for the full release notes.</p>
+<p><strong>1. Robustness to ASR errors</strong></p>
+<p>Conversational applications that support voice inputs use an automatic speech recognition (ASR)
+system to convert the input speech into text and then send the resulting transcript to the
+MindMeld NLP pipeline. ASRs often make errors, especially on domain-specific vocabulary and
+proper nouns which can in turn adversely affect the accuracy of the NLP classifiers. MindMeld 4
+introduces a couple of new techniques to make the entity processing steps (recognition and
+resolution) more resilient to ASR errors. Read the new chapter on <a class="reference internal" href="../userguide/voice.html"><span class="doc">Dealing with Voice Inputs</span></a> for more details.</p>
+<p><strong>2. Improved recognition of numerical entities</strong></p>
+<p>MindMeld 4 uses the actively maintained <a class="reference external" href="https://github.com/facebook/duckling">Duckling library</a>
+for recognizing numerical entities. The new Haskell-based version is faster and more robust than
+the deprecated <a class="reference external" href="https://github.com/wit-ai/duckling_old">Java-based version</a> that was used in
+MindMeld 3. There are minor changes to the MindMeld system entity recognizer’s
+<code class="xref py py-meth docutils literal"><span class="pre">parse_numerics()</span></code> method as a result. See the
+<a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">system entities section</span></a>.</p>
+<p><strong>3. Dynamic gazetteers</strong></p>
+<p>Gazetteer-based features have a significant impact on NLP accuracy since they provide a very
+strong signal to the classification models. This is especially true for entity recognition. In
+addition to the static gazetteers used by the NLP classifiers at training time, MindMeld 4
+introduces the ability to dynamically inject new entries into the gazetteers at runtime to further
+aid the model in making the right prediction. The section on
+<a class="reference internal" href="../userguide/dm.html#dynamic-gaz"><span class="std std-ref">dynamic gazetteers</span></a> in the dialogue manager chapter describes when and how to
+use this new functionality.</p>
+<p><strong>4. New features for text classification</strong></p>
+<p>MindMeld 4 adds three new feature extractors for the domain and intent classifiers:</p>
+<ul class="simple">
+<li>The <code class="docutils literal"><span class="pre">'word-shape'</span></code> feature encodes information about the presence of capitalization, numerals,
+punctuation, etc. in the input query.</li>
+<li>The <code class="docutils literal"><span class="pre">'sys-candidates'</span></code> feature indicates the presence of system entities in the query.
+This feature extractor was only available to the entity recognizer in previous versions.</li>
+<li>The <code class="docutils literal"><span class="pre">'enable-stemming'</span></code> feature extracts stemmed versions of the query tokens in
+addition to the regular bag-of-words features.</li>
+</ul>
+<p>Refer to the “Feature Extraction Settings” section of the domain and intent classifier chapters for
+more details.</p>
+<p><strong>5. Support for user-defined features</strong></p>
+<p>If the standard set of available features for the various classifiers isn’t adequate for your use
+case, MindMeld now allows you to define your own custom feature extractors and use them with the
+NLP models. See the new chapter on <a class="reference internal" href="../userguide/custom_features.html"><span class="doc">Working with User-Defined Features</span></a>.</p>
+<p><strong>6. Improvements to model debugging</strong></p>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> method is now available for the entity recognizer and the role
+classifier as well. The entity recognizer’s <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> method outputs a confidence score
+for each detected entity. The role classifier’s <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> method returns a probability
+distribution across all the possible role labels for a given entity. See the relevant sections in
+the <a class="reference internal" href="../userguide/entity_recognizer.html#predict-entities"><span class="std std-ref">entity recognizer</span></a> and <a class="reference internal" href="../userguide/role_classifier.html#predict-roles"><span class="std std-ref">role classifier</span></a>
+chapters.</p>
+<p>While training a new model or investigating classification errors, it is useful to view the
+features used by the model to make sure they are being extracted correctly. To enable this, each
+classifier in the MindMeld NLP hierarchy now exposes a <code class="xref py py-meth docutils literal"><span class="pre">view_extracted_features()</span></code> method that
+dumps all the features extracted from a given query. See the section titled “Viewing features
+extracted for classification” for each NLP classifier.</p>
+<p>To make MindMeld’s model inspection capabilities more user-friendly, the internal representation
+of all extracted features has been modified to make the output of <code class="xref py py-meth docutils literal"><span class="pre">nlp.inspect()</span></code> and
+<code class="xref py py-meth docutils literal"><span class="pre">view_extracted_features()</span></code> methods easier to comprehend. Due to this change, models trained
+and saved using MindMeld 3 cannot be loaded in MindMeld 4. You need to train your models afresh
+on MindMeld 4.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">NLP models trained on MindMeld 3 cannot be loaded by MindMeld 4.</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>After installing MindMeld 4, follow these steps to upgrade your old project:</p>
+<ul class="last simple">
+<li>Modify your app’s project structure to comply with the newly introduced
+<a class="reference internal" href="#new-project-structure"><span class="std std-ref">modular project structure</span></a>.</li>
+<li>Clear all the previously trained models by running <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">APP_NAME</span> <span class="pre">clean</span></code>.</li>
+<li>Rebuild all models by running <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">APP_NAME</span> <span class="pre">build</span></code> or running <code class="xref py py-meth docutils literal"><span class="pre">nlp.build()</span></code> in a
+Python shell.</li>
+</ul>
+</div>
+<p><strong>7. Dialogue flows</strong></p>
+<p>MindMeld 4 introduces a new construct called <em>Dialogue Flow</em> for easily structuring conversation
+flows where the user needs to be directed towards a specific end goal in a focused manner. See the
+new <a class="reference internal" href="../userguide/dm.html#dialogue-flow"><span class="std std-ref">Dialogue Flows</span></a> section in the Dialogue Manager chapter.</p>
+<p><strong>8. Asynchronous dialogue state handlers and middleware</strong></p>
+<p>To improve the performance and scalability of complex applications that depend on remote services,
+MindMeld 4 supports asynchronous execution of dialogue state handling logic. Read the section on
+<a class="reference internal" href="../userguide/dm.html#async-dialogue"><span class="std std-ref">Asynchronous Dialogue State Handlers and Middleware</span></a> for more information.</p>
+<p><strong>9. New dialogue state handler interface</strong></p>
+<p>MindMeld 4 introduces a new dialogue state handler interface that makes an explicit mutability distinction between the data
+being passed into the dialogue manager from the client and the natural language processor (immutable) and the
+output data written by the dialogue state handlers and sent back to the client (mutable). This distinction is useful in
+cases where a single request is handled by multiple dialogue state handlers in sequence, and it’s important to keep track of both
+the original data passed into the dialogue manager and the new data being generated by the dialogue state handling logic. Here is
+an example of the new interface, where the <code class="docutils literal"><span class="pre">request</span></code> object is the immutable data passed into the handler and the
+<code class="docutils literal"><span class="pre">responder</span></code> object is the carrier of the mutable data written to by the handler:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+   <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;World&#39;</span><span class="p">)</span>
+   <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Hello &#39;</span> <span class="o">+</span> <span class="n">username</span><span class="p">)</span>
+   <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Hello &#39;</span> <span class="o">+</span> <span class="n">username</span>
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="../userguide/dm.html#dialogue-state-handlers"><span class="std std-ref">updated section</span></a> in the dialogue manager chapter for more details on the <code class="docutils literal"><span class="pre">request</span></code> and <code class="docutils literal"><span class="pre">responder</span></code> objects.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The new dialogue state handler interface is incompatible with MindMeld 3 applications.</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>Previously, the application used the <code class="docutils literal"><span class="pre">context</span></code> and <code class="docutils literal"><span class="pre">responder</span></code> objects in its dialogue state handlers, e.g. <code class="docutils literal"><span class="pre">def</span> <span class="pre">welcome(context,</span> <span class="pre">responder)</span></code>.</p>
+<p>The <code class="docutils literal"><span class="pre">context</span></code> object has now been replaced by the immutable <code class="docutils literal"><span class="pre">request</span></code> object which cannot be written to. You can only perform write operations on the corresponding properties in the mutable <code class="docutils literal"><span class="pre">responder</span></code> object. You should write all your data to the appropriate <code class="docutils literal"><span class="pre">responder</span></code> object property instead of the <code class="docutils literal"><span class="pre">context</span></code> dictionary.</p>
+<p class="last">See the <a class="reference internal" href="../userguide/dm.html#dialogue-example"><span class="std std-ref">examples</span></a> in the user guide and the blueprints.</p>
+</div>
+<p id="new-project-structure"><strong>10. New project structure</strong></p>
+<p>Previously, MindMeld required all application logic to be in a single file, <code class="docutils literal"><span class="pre">app.py</span></code>. As an application grows in complexity, this approach is not scalable.
+MindMeld 4 allows the application logic to be shared across multiple files. The <a class="reference internal" href="../blueprints/home_assistant.html#home-assistant"><span class="std std-ref">home assistant</span></a> blueprint is an example of this modularized approach,
+where the <code class="docutils literal"><span class="pre">times_and_dates.py</span></code> file handles all the logic for the time and date-related functionality.</p>
+<p>In the new project structure, we introduce two files: <code class="docutils literal"><span class="pre">__init__.py</span></code> where you register all the application files as imports and <code class="docutils literal"><span class="pre">__main__.py</span></code> where you register the application command line interface.
+Read the updated section in the <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html#app-container"><span class="std std-ref">Step-by-Step Guide</span></a> for more information.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The new project structure is incompatible with MindMeld 3 applications.</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<ul class="last simple">
+<li>In the new modular application project structure, we require two files: <code class="docutils literal"><span class="pre">__init__.py</span></code> where you register all the application files as imports, and <code class="docutils literal"><span class="pre">__main__.py</span></code> where you register the application command line interface. You can still keep all the application logic in a single file (<code class="docutils literal"><span class="pre">__init__.py</span></code>); this is how we organize most of our blueprint applications except for Home Assistant.</li>
+<li>If the app has all the dialogue state logic in <code class="docutils literal"><span class="pre">app.py</span></code>, rename the file to <code class="docutils literal"><span class="pre">__init__.py</span></code>. Add a new file called <code class="docutils literal"><span class="pre">__main__.py</span></code>, similar to <code class="docutils literal"><span class="pre">__main__.py</span></code> in <a class="reference internal" href="../blueprints/home_assistant.html#home-assistant"><span class="std std-ref">Home Assistant</span></a>.</li>
+<li>To build and run the application, use the commands <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_app</span> <span class="pre">build</span></code> and <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_app</span> <span class="pre">run</span></code> from outside the application directory.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="mindmeld-3-4">
+<h2>MindMeld 3.4<a class="headerlink" href="#mindmeld-3-4" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld 3.4 brings new functionality to the dialogue manager along with some improvements to the natural language processing pipeline. This section provides highlights; see <a class="reference internal" href="history.html"><span class="doc">Package History</span></a> for the full release notes.</p>
+<p><strong>1. Dialogue middleware</strong></p>
+<p>MindMeld 3.4 provides a useful mechanism for changing the behavior of many or all dialogue states via middleware. Middleware are developer-defined functions that get called for every request before the matched dialogue state handler. The <a class="reference internal" href="../userguide/dm.html#dialogue-middleware"><span class="std std-ref">Dialogue Middleware</span></a> section describes potential use cases for the middleware functionality and details on how to implement them.</p>
+<p><strong>2. Targeted-only and default dialogue state handlers</strong></p>
+<p>MindMeld 3.2 introduced the ability to skip NLP classification and pre-select a <a class="reference internal" href="#target-dialogue-state-release-note"><span class="std std-ref">target dialogue state</span></a> for the next conversational turn. In 3.4, you can further mark certain dialogue states as <code class="docutils literal"><span class="pre">targeted_only</span></code> to exclude them from consideration in regular non-targeted turns.</p>
+<p>Additionally, you can now also explicitly denote a dialogue state handler as the default handler without worrying about where it appears in <code class="docutils literal"><span class="pre">app.py</span></code>. See the updated <a class="reference internal" href="../userguide/dm.html"><span class="doc">Dialogue Manager</span></a> chapter for more details.</p>
+<p><strong>3. Different datasets for different NLP models</strong></p>
+<p>It is now possible to specify different sets of labeled query files for training or testing different classifiers in the NLP pipeline. This addresses a big limitation in the earlier versions of MindMeld. For instance, previously, you couldn’t add data files under an intent folder and use them only for training the entity recognizer without also affecting the domain or intent models. MindMeld 3.4 gives you the flexibility to do so and hence have a finer control over the behavior of your individual classification models. Read more about the newly added <cite>Custom Train/Test Settings</cite> in the “Classifier configuration” section for each NLP classifier.</p>
+<p><strong>4. Frequency-based thresholding for n-gram features</strong></p>
+<p>MindMeld 3.4 allows you to specify a frequency threshold for n-gram feature extractors such as <code class="docutils literal"><span class="pre">bag-of-words</span></code> and <code class="docutils literal"><span class="pre">char-ngrams</span></code> to prevent rare n-grams from being used as features in your classification model. See <cite>Feature Extraction Settings</cite> under the “Classifier configuration” section for each NLP classifier.</p>
+<p><strong>5. Batch predictions</strong></p>
+<p>The <a class="reference internal" href="../userguide/getting_started.html#cli"><span class="std std-ref">MindMeld CLI</span></a> has been updated with a new <code class="docutils literal"><span class="pre">predict</span></code> command that runs NLP predictions on a given set of queries using your app’s trained models. The command is useful when you want to run your NLP models in batch on a dataset of queries or bootstrap expected labels in new queries for training. For instance, consider the case where you are preparing additional training data to improve your entity recognizer’s performance. It is a lot easier to annotate your new training queries with your existing entity model and then manually correct any errors, than go through every new query and annotate the ground truth entities by hand from scratch.</p>
+</div>
+<div class="section" id="mindmeld-3-3">
+<h2>MindMeld 3.3<a class="headerlink" href="#mindmeld-3-3" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld 3.3 contains many useful enhancements aimed at reducing the amount of time it takes to iterate on ML experiments and giving developers a finer-grained control over certain aspects of the application behavior. This section provides highlights; see <a class="reference internal" href="history.html"><span class="doc">Package History</span></a> for the full release notes.</p>
+<p><strong>1. New feature types and inspection capabilities for NLP models</strong></p>
+<p>In addition to word n-grams, you can now use character n-grams as features for the <a class="reference internal" href="../userguide/domain_classifier.html"><span class="doc">domain classifier</span></a>, <a class="reference internal" href="../userguide/intent_classifier.html"><span class="doc">intent classifier</span></a> and <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">entity recognizer</span></a>. Refer to the “Feature Extraction Settings” section of each classifier for more details.</p>
+<p>For the domain and intent classifiers, you can also use the newly-introduced feature inspection capability in MindMeld to view the learned feature weights for your trained models. See the section titled “Inspect features and their importance” for each classifier.</p>
+<p><strong>2. Improvements to NLP model training</strong></p>
+<p><strong>Overriding global configuration:</strong> Depending on the characteristics and distribution of your training data across domains and intents, you might want to train a different kind of model for each domain, intent, or entity type in your application. This was not possible previously as you could only specify one global configuration for each classifier type in your NLP pipeline. Refer to the updated section on <a class="reference internal" href="../userguide/nlp.html#custom-configs"><span class="std std-ref">custom configurations</span></a> to see how MindMeld 3.3 allows you to override these global settings on a model-by-model basis.</p>
+<p><strong>Incremental builds:</strong> Till version 3.2, every call to the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> method kicked off a full build where MindMeld trained/retrained every NLP component from scratch across every domain, intent, and entity type in the project. From version 3.3 onwards, you can do an incremental build where the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> only trains those subset of models that have been affected by changes to the training data and associated resources. This significantly reduces the time to rebuild the NLP pipeline after small changes to the data. See <a class="reference internal" href="../userguide/nlp.html#incremental-builds"><span class="std std-ref">building models incrementally</span></a>.</p>
+<p><strong>3. Custom datasets</strong></p>
+<p>You can now create your own arbitrarily-named custom datasets in addition to the default <code class="docutils literal"><span class="pre">'train'</span></code> and <code class="docutils literal"><span class="pre">'test'</span></code> sets recognized by MindMeld. This allows you to store multiple datasets for your ML experiments and select the relevant dataset for use with each round of training or testing. See <a class="reference internal" href="../userguide/nlp.html#custom-datasets"><span class="std std-ref">select data for experiments</span></a>.</p>
+<p><strong>4. Improved support for dates and times</strong></p>
+<p>For applications dealing with temporal events, you can now specify the time zone and timestamp associated with each query to the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> to ensure accurate prediction of time-based <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">system entities</span></a>. See <a class="reference internal" href="../userguide/nlp.html#specify-timestamp"><span class="std std-ref">specifying request timestamp and time zone</span></a>.</p>
+<p><strong>5. Preprocessor</strong></p>
+<p>The preprocessor is a new component that has been added to MindMeld in version 3.3. It allows developers to define any custom preprocessing logic that must be applied on each query before being processed by the NLP pipeline. Read more in the new user guide chapter on <a class="reference internal" href="../userguide/preprocessor.html"><span class="doc">Working with the Preprocessor</span></a>.</p>
+</div>
+<div class="section" id="mindmeld-3-2">
+<h2>MindMeld 3.2<a class="headerlink" href="#mindmeld-3-2" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld 3.2 brings deep learning models to the MindMeld platform for the first time. This release also improves natural language processing and enhances dialogue management capabilities. This section provides highlights; see <a class="reference internal" href="history.html"><span class="doc">Package History</span></a> for the full release notes.</p>
+<p><strong>1. Deep Learning for Entity Recognition (Beta)</strong></p>
+<p>You can now opt to train your entity recognizers with a Long Short Term Memory (LSTM) network build in TensorFlow. See <a class="reference internal" href="../userguide/entity_recognizer.html#train-entity-model"><span class="std std-ref">Train an entity recognizer</span></a>.</p>
+<p id="target-dialogue-state-release-note"><strong>2. Support for targeted dialogue state handling</strong></p>
+<p>The dialogue manager now offers finer-grained control over the dialogue flow logic. You can specify rules that override or bias the output of the NLP classifiers to ensure that you reach a pre-determined dialogue state in the next conversational turn. See <a class="reference internal" href="../userguide/dm.html#targeted-dialogue"><span class="std std-ref">Targeted Dialogue State Handling</span></a>.</p>
+<p><strong>3. Improved dialogue state handler interfaces</strong></p>
+<p>In version 3.2, the term <em>directives</em> replaces the term <em>client actions</em> found in previous versions. Also, the <code class="docutils literal"><span class="pre">DialogueResponder</span></code> class used in dialogue state handlers has been refactored to make its functions more intuitive. See <a class="reference internal" href="../userguide/dm.html#responder"><span class="std std-ref">responder</span></a>.</p>
+<p><em>For existing MindMeld 3.1 apps:</em></p>
+<blockquote>
+<div><ul class="simple">
+<li>If the app used the <code class="docutils literal"><span class="pre">responder.prompt()</span></code> construct, change that to <code class="docutils literal"><span class="pre">responder.reply()</span></code> followed by a <code class="docutils literal"><span class="pre">responder.listen()</span></code>.</li>
+<li>If the app used the <code class="docutils literal"><span class="pre">responder.respond()</span></code> construct, change that to <code class="docutils literal"><span class="pre">responder.direct()</span></code>.</li>
+</ul>
+</div></blockquote>
+<p><strong>4. Easy evaluation interface</strong></p>
+<p>The <code class="docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class now has an <code class="docutils literal"><span class="pre">evaluate()</span></code> method that runs model evaluation for all the components in the NLP pipeline. The <a class="reference internal" href="../userguide/getting_started.html#cli"><span class="std std-ref">MindMeld CLI</span></a> has a corresponding <code class="docutils literal"><span class="pre">evaluate</span></code> command.</p>
+<p><strong>5. Conversational History Management</strong></p>
+<p>The <code class="docutils literal"><span class="pre">history</span></code> field of the <code class="docutils literal"><span class="pre">context</span></code> object used by dialogue state handlers is now maintained by MindMeld. Prior to 3.2, MindMeld assumed that the client would manage the conversational history by appending the necessary information to the <code class="docutils literal"><span class="pre">history</span></code> after each turn.</p>
+</div>
+<div class="section" id="mindmeld-3-1">
+<h2>MindMeld 3.1<a class="headerlink" href="#mindmeld-3-1" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Upgrading some existing MindMeld 3.0 projects to MindMeld 3.1 will fail unless modified as described below.</p>
+</div>
+<p>MindMeld 3.1 has improved natural language processing and application logic management capabilities, along with enhancements and bug fixes. This section provides highlights; see <a class="reference internal" href="history.html"><span class="doc">Package History</span></a> for the full release notes.</p>
+<p><strong>1. Consistent configuration format for NLP classifiers</strong></p>
+<p>The classifier configuration formats for the entity recognizer and the role classifier have been updated to be consistent with the domain and intent classifiers. See the relevant sections on <a class="reference internal" href="../userguide/entity_recognizer.html#train-entity-model"><span class="std std-ref">entity recognizer training</span></a> and <a class="reference internal" href="../userguide/role_classifier.html#train-role-model"><span class="std std-ref">role classifier training</span></a> for the new format.</p>
+<p><em>For existing MindMeld 3.0 apps:</em></p>
+<blockquote>
+<div><ul class="simple">
+<li>If custom classifier configurations for the entity and role models are defined in the application configuration file (<code class="docutils literal"><span class="pre">config.py</span></code>), you must manually update those configurations to the 3.1 format.</li>
+<li>If the app is based on a MindMeld blueprint, you can use the <a class="reference internal" href="../userguide/getting_started.html#getting-started-blueprint"><span class="std std-ref">blueprint</span></a> command to upgrade to the 3.1 format. Running this command will download the version of the blueprint that is compatible with the latest stable MindMeld release and overwrite your local copy. This means that if you have modified the blueprint, your modifications will be lost, so you should consider saving the modifications outside of your project and manually adding them back in after upgrading.</li>
+</ul>
+</div></blockquote>
+<p><strong>2. Support for modular dialogue state handling logic</strong></p>
+<p>Relative imports of arbitrary modules and packages are now supported within the application container file (<code class="docutils literal"><span class="pre">app.py</span></code>). This means that all application logic required for dialogue state handling need not be contained within a single Python file (<code class="docutils literal"><span class="pre">app.py</span></code>), as was the case with MindMeld 3.0. Because MindMeld loads each project as a Python package to support this new capability, every project folder must now have an empty <code class="docutils literal"><span class="pre">__init__.py</span></code> file at root level.</p>
+<p><em>For existing MindMeld 3.0 apps:</em></p>
+<blockquote>
+<div><ul class="simple">
+<li>Manually add an empty <code class="docutils literal"><span class="pre">__init__.py</span></code> file at the root of your project folder to ensure compatibility with MindMeld 3.1. You can use the <a class="reference internal" href="../userguide/getting_started.html#getting-started-blueprint"><span class="std std-ref">blueprint</span></a> command to overwrite previously-downloaded blueprints with the new 3.1-compatible versions.</li>
+</ul>
+</div></blockquote>
+<p>To learn more about support for relative imports, see the <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html#app-container"><span class="std std-ref">application container</span></a> section in Step 4 of the Step-by-Step Guide.</p>
+<p><strong>3. CRF for entity recognition</strong></p>
+<p>You now have the option of training your entity recognizers using a linear-chain conditional random field (CRF) instead of the default maximum entropy Markov model (MEMM). See <a class="reference internal" href="../userguide/entity_recognizer.html#train-entity-model"><span class="std std-ref">entity recognizer training</span></a>.</p>
+<p><strong>4. More models for role classification</strong></p>
+<p>You now have the option of training your role classifiers using any of the text models (namely, SVM, Decision Tree, and so on) instead of the default maximum entropy model. See <a class="reference internal" href="../userguide/role_classifier.html#train-role-model"><span class="std std-ref">role classifier training</span></a>.</p>
+<p><strong>5. New metrics for entity recognition</strong></p>
+<p>Entity recognizer evaluation now exposes new metrics called <em>segment-level errors</em>. These make it easier to interpret and understand the model’s sequence tagging performance. See <a class="reference internal" href="../userguide/entity_recognizer.html#entity-evaluation"><span class="std std-ref">entity recognizer evaluation</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="history.html" class="btn btn-neutral float-right" title="Package History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../mindmeld_ui/mindmeld_ui.html" class="btn btn-neutral float-left" title="MindMeld UI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

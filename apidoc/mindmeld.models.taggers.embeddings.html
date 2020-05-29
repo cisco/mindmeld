@@ -1,0 +1,429 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.embeddings module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.embeddings module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.models.taggers.embeddings.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.models.taggers.embeddings">
+<span id="mindmeld-models-taggers-embeddings-module"></span><h1>mindmeld.models.taggers.embeddings module<a class="headerlink" href="#module-mindmeld.models.taggers.embeddings" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.embeddings.</code><code class="descname">CharacterSequenceEmbedding</code><span class="sig-paren">(</span><em>sequence_padding_length</em>, <em>token_embedding_dimension=None</em>, <em>max_char_per_word=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#CharacterSequenceEmbedding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>CharacterSequenceEmbedding encodes a sequence of words into a sequence of fixed
+dimension real-numbered vectors by mapping each character in the words as vectors.</p>
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.encode_sequence_of_tokens">
+<code class="descname">encode_sequence_of_tokens</code><span class="sig-paren">(</span><em>token_sequence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#CharacterSequenceEmbedding.encode_sequence_of_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.encode_sequence_of_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a sequence of tokens into real value vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token_sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of tokens.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Encoded sequence of tokens.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.save_embeddings">
+<code class="descname">save_embeddings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#CharacterSequenceEmbedding.save_embeddings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.save_embeddings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save extracted embeddings to historic pickle file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.embeddings.</code><code class="descname">GloVeEmbeddingsContainer</code><span class="sig-paren">(</span><em>token_dimension=300</em>, <em>token_pretrained_embedding_filepath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#GloVeEmbeddingsContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is responsible for the downloading, extraction and storing of
+word embeddings based on the GloVe format.</p>
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer.get_pretrained_word_to_embeddings_dict">
+<code class="descname">get_pretrained_word_to_embeddings_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#GloVeEmbeddingsContainer.get_pretrained_word_to_embeddings_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer.get_pretrained_word_to_embeddings_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the word to embedding dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">word to embedding mapping.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.models.taggers.embeddings.TqdmUpTo">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.embeddings.</code><code class="descname">TqdmUpTo</code><span class="sig-paren">(</span><em>iterable=None</em>, <em>desc=None</em>, <em>total=None</em>, <em>leave=True</em>, <em>file=None</em>, <em>ncols=None</em>, <em>mininterval=0.1</em>, <em>maxinterval=10.0</em>, <em>miniters=None</em>, <em>ascii=None</em>, <em>disable=False</em>, <em>unit='it'</em>, <em>unit_scale=False</em>, <em>dynamic_ncols=False</em>, <em>smoothing=0.3</em>, <em>bar_format=None</em>, <em>initial=0</em>, <em>position=None</em>, <em>postfix=None</em>, <em>unit_divisor=1000</em>, <em>write_bytes=None</em>, <em>lock_args=None</em>, <em>nrows=None</em>, <em>gui=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#TqdmUpTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.TqdmUpTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tqdm.std.tqdm</span></code></p>
+<p>Provides <cite>update_to(n)</cite> which uses <cite>tqdm.update(delta_n)</cite>.</p>
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.TqdmUpTo.update_to">
+<code class="descname">update_to</code><span class="sig-paren">(</span><em>b=1</em>, <em>bsize=1</em>, <em>tsize=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#TqdmUpTo.update_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.TqdmUpTo.update_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reports update statistics on the download progress.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of blocks transferred so far [default: 1].</li>
+<li><strong>bsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Size of each block (in tqdm units) [default: 1].</li>
+<li><strong>tsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Total size (in tqdm units). If [default: None] remains unchanged.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.models.taggers.embeddings.WordSequenceEmbedding">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.embeddings.</code><code class="descname">WordSequenceEmbedding</code><span class="sig-paren">(</span><em>sequence_padding_length</em>, <em>token_embedding_dimension=None</em>, <em>token_pretrained_embedding_filepath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#WordSequenceEmbedding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.WordSequenceEmbedding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>WordSequenceEmbedding encodes a sequence of words into a sequence of fixed
+dimension real-numbered vectors by mapping each word as a vector.</p>
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.WordSequenceEmbedding.encode_sequence_of_tokens">
+<code class="descname">encode_sequence_of_tokens</code><span class="sig-paren">(</span><em>token_sequence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#WordSequenceEmbedding.encode_sequence_of_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.WordSequenceEmbedding.encode_sequence_of_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a sequence of tokens into real value vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token_sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of tokens.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Encoded sequence of tokens.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.embeddings.WordSequenceEmbedding.save_embeddings">
+<code class="descname">save_embeddings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/embeddings.html#WordSequenceEmbedding.save_embeddings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.embeddings.WordSequenceEmbedding.save_embeddings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save extracted embeddings to historic pickle file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

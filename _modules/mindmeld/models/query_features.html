@@ -1,0 +1,1286 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.query_features &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.query_features</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.query_features</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains feature extractors for queries&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">DEFAULT_SYS_ENTITIES</span><span class="p">,</span>
+    <span class="n">ENABLE_STEMMING</span><span class="p">,</span>
+    <span class="n">GAZETTEER_RSC</span><span class="p">,</span>
+    <span class="n">OUT_OF_BOUNDS_TOKEN</span><span class="p">,</span>
+    <span class="n">QUERY_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">SYS_TYPES_RSC</span><span class="p">,</span>
+    <span class="n">WORD_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">get_ngram</span><span class="p">,</span>
+    <span class="n">mask_numerics</span><span class="p">,</span>
+    <span class="n">register_query_feature</span><span class="p">,</span>
+    <span class="n">requires</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="extract_in_gaz_span_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_in_gaz_span_features">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;in-gaz-span-seq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">GAZETTEER_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_in_gaz_span_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a feature extractor for properties of spans in gazetteers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_get_span_features</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazes</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">]</span>
+            <span class="n">feature_sequence</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+
+            <span class="n">pop</span> <span class="o">=</span> <span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">]</span>
+            <span class="n">p_total</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="n">p_entity_type</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">p_entity</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">])</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">p_joint</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                <span class="c1"># Generic non-positional features</span>
+                <span class="n">gaz_feat_prefix</span> <span class="o">=</span> <span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+
+                <span class="c1"># Basic existence features</span>
+                <span class="n">feature_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">gaz_feat_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="c1"># Used to distinguish among B/I/E/S tags</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">start</span><span class="p">:</span>
+                    <span class="n">pos_attr</span> <span class="o">=</span> <span class="s2">&quot;start&quot;</span>
+                <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="n">end</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">pos_attr</span> <span class="o">=</span> <span class="s2">&quot;end&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pos_attr</span> <span class="o">=</span> <span class="s2">&quot;cont&quot;</span>
+
+                <span class="c1"># Basic existence features</span>
+                <span class="n">positional_gaz_prefix</span> <span class="o">=</span> <span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|segment:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">entity_type</span><span class="p">,</span> <span class="n">pos_attr</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Basic Positional features</span>
+                <span class="n">feature_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">positional_gaz_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="c1"># Features for ngram before the span</span>
+                    <span class="s2">&quot;|ngram_before|length:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">get_ngram</span><span class="p">(</span>
+                        <span class="n">tokens</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+                    <span class="p">),</span>
+                    <span class="c1"># Features for ngram after the span</span>
+                    <span class="s2">&quot;|ngram_after|length:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="c1"># Features for ngram at start of span</span>
+                    <span class="s2">&quot;|ngram_first|length:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="c1"># Features for ngram at end of span</span>
+                    <span class="s2">&quot;|ngram_last|length:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="c1"># Popularity features</span>
+                    <span class="s2">&quot;|pop&quot;</span><span class="p">:</span> <span class="n">pop</span><span class="p">,</span>
+                    <span class="c1"># Character length features</span>
+                    <span class="s2">&quot;|log_char_len&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)),</span>
+                    <span class="s2">&quot;|pct_char_len&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)),</span>
+                    <span class="c1"># entity PMI and conditional prob</span>
+                    <span class="s2">&quot;|pmi&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity_type</span> <span class="o">-</span> <span class="n">p_entity</span><span class="p">,</span>
+                    <span class="s2">&quot;|class_prob&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity</span><span class="p">,</span>
+                    <span class="s2">&quot;|output_prob&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity_type</span><span class="p">,</span>
+                <span class="p">}</span>
+
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">[</span><span class="n">gaz_feat_prefix</span><span class="p">,</span> <span class="n">positional_gaz_prefix</span><span class="p">]:</span>
+                        <span class="n">feature_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="c1"># End of span feature</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+                <span class="n">feat_prefix</span> <span class="o">=</span> <span class="s2">&quot;in-gaz|type:</span><span class="si">{}</span><span class="s2">|signal_entity_end&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+                <span class="n">feature_sequence</span><span class="p">[</span><span class="n">end</span><span class="p">][</span><span class="n">feat_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">span_features</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;|log_char_len&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)),</span>
+                    <span class="s2">&quot;|pct_char_len&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)),</span>
+                    <span class="s2">&quot;|pmi&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity_type</span> <span class="o">-</span> <span class="n">p_entity</span><span class="p">,</span>
+                    <span class="s2">&quot;|class_prob&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity</span><span class="p">,</span>
+                    <span class="s2">&quot;|output_prob&quot;</span><span class="p">:</span> <span class="n">p_total</span> <span class="o">+</span> <span class="n">p_joint</span> <span class="o">-</span> <span class="n">p_entity_type</span><span class="p">,</span>
+                <span class="p">}</span>
+
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">span_features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">feature_sequence</span><span class="p">[</span><span class="n">end</span><span class="p">][</span><span class="n">feat_prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="k">return</span> <span class="n">feature_sequence</span>
+
+        <span class="k">def</span> <span class="nf">get_exact_span_conflict_features</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">gazes</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">ent_type_1</span><span class="p">,</span> <span class="n">ent_type_2</span><span class="p">,</span> <span class="n">entity_text</span>
+        <span class="p">):</span>
+            <span class="n">feature_sequence</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                <span class="n">feat_prefix</span> <span class="o">=</span> <span class="s2">&quot;in-gaz|conflict:exact|type1:</span><span class="si">{}</span><span class="s2">|type2:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">ent_type_1</span><span class="p">,</span> <span class="n">ent_type_2</span>
+                <span class="p">)</span>
+
+                <span class="n">p_ent_type_1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_1</span><span class="p">][</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">p_ent_type_2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_2</span><span class="p">][</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">p_joint_1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_1</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">entity_text</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">p_joint_2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_2</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">entity_text</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">pop_1</span> <span class="o">=</span> <span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_1</span><span class="p">][</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">][</span><span class="n">entity_text</span><span class="p">]</span>
+                <span class="n">pop_2</span> <span class="o">=</span> <span class="n">gazes</span><span class="p">[</span><span class="n">ent_type_2</span><span class="p">][</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">][</span><span class="n">entity_text</span><span class="p">]</span>
+
+                <span class="c1"># Generic non-positional features</span>
+                <span class="n">feature_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;|diff_pop&quot;</span><span class="p">:</span> <span class="n">pop_1</span> <span class="o">-</span> <span class="n">pop_2</span><span class="p">,</span>
+                    <span class="s2">&quot;|diff_pmi&quot;</span><span class="p">:</span> <span class="n">p_ent_type_2</span> <span class="o">-</span> <span class="n">p_ent_type_1</span> <span class="o">-</span> <span class="n">p_joint_2</span> <span class="o">+</span> <span class="n">p_joint_1</span><span class="p">,</span>
+                    <span class="s2">&quot;|diff_class_prob&quot;</span><span class="p">:</span> <span class="n">p_joint_1</span> <span class="o">-</span> <span class="n">p_joint_2</span><span class="p">,</span>
+                <span class="p">}</span>
+
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">feature_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="k">return</span> <span class="n">feature_sequence</span>
+
+        <span class="k">def</span> <span class="nf">get_gaz_spans</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazetteers</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Collect tuples of (start index, end index, ngram, entity type)</span>
+<span class="sd">            tracking ngrams that match with the entity gazetteer data</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">spans</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+
+            <span class="c1"># Collect ngrams of plain normalized ngrams</span>
+            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">gaz</span> <span class="ow">in</span> <span class="n">gazetteers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">ngram</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">gaz</span><span class="p">[</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">]:</span>
+                            <span class="n">spans</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">ngram</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">spans</span>
+
+        <span class="n">gazetteers</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="n">GAZETTEER_RSC</span><span class="p">]</span>
+        <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">]</span>
+        <span class="n">in_gaz_spans</span> <span class="o">=</span> <span class="n">get_gaz_spans</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazetteers</span><span class="p">)</span>
+
+        <span class="c1"># Sort the spans by their indices. The algorithm below assumes this</span>
+        <span class="c1"># sort order.</span>
+        <span class="n">in_gaz_spans</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">in_gaz_spans</span><span class="p">:</span>
+            <span class="n">span</span> <span class="o">=</span> <span class="n">in_gaz_spans</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">span_feat_seq</span> <span class="o">=</span> <span class="n">_get_span_features</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazetteers</span><span class="p">,</span> <span class="o">*</span><span class="n">span</span><span class="p">)</span>
+            <span class="n">update_features_sequence</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">,</span> <span class="n">span_feat_seq</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">other_span</span> <span class="ow">in</span> <span class="n">in_gaz_spans</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">other_span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="c1"># For now, if two spans of the same type start at the same</span>
+                <span class="c1"># place, take the longer one.</span>
+                <span class="k">if</span> <span class="n">other_span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">other_span</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">span</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">other_span</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">other_span</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">cmp_span_features</span> <span class="o">=</span> <span class="n">get_exact_span_conflict_features</span><span class="p">(</span>
+                            <span class="n">query</span><span class="p">,</span>
+                            <span class="n">gazetteers</span><span class="p">,</span>
+                            <span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">span</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="n">other_span</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="n">span</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                        <span class="p">)</span>
+                        <span class="n">update_features_sequence</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">,</span> <span class="n">cmp_span_features</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">feat_seq</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_in_gaz_ngram_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_in_gaz_ngram_features">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;in-gaz-ngram-seq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">GAZETTEER_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_in_gaz_ngram_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a feature extractor for surrounding ngrams in gazetteers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_ngram_gaz_features</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazes</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+            <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">):</span>
+                <span class="n">feat_prefix</span> <span class="o">=</span> <span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|ngram&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+
+                <span class="c1"># entity PMI and conditional prob</span>
+                <span class="n">p_total</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="p">)</span>
+                <span class="n">p_entity_type</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;total_entities&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|idf&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|idf&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+                        <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|idf&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+                <span class="c1"># these features are extracted on a window span around the current token</span>
+                <span class="n">window_features</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s2">&quot;p_ngram&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">sum</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+                                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;p_joint&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="s2">&quot;p_ngram&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">sum</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+                                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;p_joint&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span>
+                                <span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s2">&quot;p_ngram&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">sum</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+                                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;p_joint&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s2">&quot;p_ngram&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">sum</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+                                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gazes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;p_joint&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span>
+                                <span class="n">gazes</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;index&quot;</span><span class="p">][</span><span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                <span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">window_feature</span> <span class="ow">in</span> <span class="n">window_features</span><span class="p">:</span>
+                    <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|pmi&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">],</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span>
+                        <span class="p">):</span> <span class="n">p_total</span>
+                        <span class="o">+</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;p_joint&quot;</span><span class="p">]</span>
+                        <span class="o">-</span> <span class="n">p_entity_type</span>
+                        <span class="o">-</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;p_ngram&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|class_prob&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">],</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span>
+                        <span class="p">):</span> <span class="n">p_total</span>
+                        <span class="o">+</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;p_joint&quot;</span><span class="p">]</span>
+                        <span class="o">-</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;p_ngram&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;|length:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|output_prob&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">],</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span>
+                        <span class="p">):</span> <span class="n">p_total</span>
+                        <span class="o">+</span> <span class="n">window_feature</span><span class="p">[</span><span class="s2">&quot;p_ngram&quot;</span><span class="p">]</span>
+                        <span class="o">-</span> <span class="n">p_entity_type</span><span class="p">,</span>
+                    <span class="p">}</span>
+
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">feat_seq</span>
+
+        <span class="n">gazetteers</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="n">GAZETTEER_RSC</span><span class="p">]</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">gazetteers</span><span class="p">:</span>
+            <span class="n">feats</span> <span class="o">=</span> <span class="n">get_ngram_gaz_features</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">gazetteers</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+            <span class="n">update_features_sequence</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">,</span> <span class="n">feats</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">feat_seq</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_bag_of_words_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_bag_of_words_features">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;bag-of-words-seq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_bag_of_words_features</span><span class="p">(</span>
+    <span class="n">ngram_lengths_to_start_positions</span><span class="p">,</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a bag-of-words feature extractor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ngram_lengths_to_start_positions (dict)</span>
+<span class="sd">        thresholds (int): Cut off value to include word in n-gram vocab</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) The feature extractor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">threshold_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+    <span class="n">word_thresholds</span> <span class="o">=</span> <span class="n">threshold_list</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">ngram_lengths_to_start_positions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold_list</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+        <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">stemmed_tokens</span>
+            <span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">stemmed_tokens</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)):</span>
+            <span class="n">threshold_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">starts</span> <span class="ow">in</span> <span class="n">ngram_lengths_to_start_positions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">word_thresholds</span><span class="p">[</span><span class="n">threshold_index</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">starts</span><span class="p">:</span>
+                    <span class="n">n_gram</span> <span class="o">=</span> <span class="n">get_ngram</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+                    <span class="n">feat_name</span> <span class="o">=</span> <span class="s2">&quot;bag_of_words|length:</span><span class="si">{}</span><span class="s2">|word_pos:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">length</span><span class="p">,</span> <span class="n">start</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n_gram</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                        <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_gram</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OOV&quot;</span>
+
+                    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                        <span class="n">stemmed_n_gram</span> <span class="o">=</span> <span class="n">get_ngram</span><span class="p">(</span>
+                            <span class="n">stemmed_tokens</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="n">stemmed_feat_name</span> <span class="o">=</span> <span class="s2">&quot;bag_of_words_stemmed|length:</span><span class="si">{}</span><span class="s2">|word_pos:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">length</span><span class="p">,</span> <span class="n">start</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">resources</span><span class="p">[</span><span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stemmed_n_gram</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="o">&gt;</span> <span class="n">threshold</span>
+                        <span class="p">):</span>
+                            <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">stemmed_feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">stemmed_n_gram</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">stemmed_feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OOV&quot;</span>
+
+                <span class="n">threshold_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">feat_seq</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="char_ngrams"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.char_ngrams">[docs]</a><span class="k">def</span> <span class="nf">char_ngrams</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function extracts character ngrams for the given word</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Max size of n-gram to extract</span>
+<span class="sd">        word (str): The word to be extract n-grams from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of character n-grams for the given word</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="n">char_grams</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)):</span>
+        <span class="c1"># if char ngram of length n doesn&#39;t exist, if no ngrams have been extracted for the token,</span>
+        <span class="c1"># add token to the list and return. No need to compute for other windows.</span>
+        <span class="c1"># Ex: token is &quot;you&quot;, n=4, return [&quot;you&quot;], token is &quot;doing&quot;, n=4 return [&quot;doin&quot;,&quot;oing&quot;]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">char_grams</span><span class="p">:</span>
+                <span class="n">char_grams</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">word</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="n">char_grams</span>
+        <span class="n">char_grams</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">word</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">char_grams</span></div>
+
+
+<div class="viewcode-block" id="enabled_stemming"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.enabled_stemming">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;enable-stemming&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">enabled_stemming</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Feature extractor for enabling stemming of the query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="c1"># no op</span>
+        <span class="k">del</span> <span class="n">query</span>
+        <span class="k">del</span> <span class="n">resources</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_char_ngrams_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_char_ngrams_features">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;char-ngrams-seq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_char_ngrams_features</span><span class="p">(</span>
+    <span class="n">ngram_lengths_to_start_positions</span><span class="p">,</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a character n-gram feature extractor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ngram_lengths_to_start_positions (dict):</span>
+<span class="sd">            The window of tokens to be considered relative to the</span>
+<span class="sd">            current token while extracting char n-grams</span>
+<span class="sd">            thresholds (int): Cut off value to include word in n-gram vocab</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (function) The feature extractor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="n">threshold_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+    <span class="n">char_thresholds</span> <span class="o">=</span> <span class="n">threshold_list</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">ngram_lengths_to_start_positions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold_list</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="c1"># normalize digits</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+        <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)):</span>
+            <span class="n">threshold_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">starts</span> <span class="ow">in</span> <span class="n">ngram_lengths_to_start_positions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">char_thresholds</span><span class="p">[</span><span class="n">threshold_index</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">starts</span><span class="p">:</span>
+                    <span class="n">token_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">token_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+                        <span class="n">ngrams</span> <span class="o">=</span> <span class="n">char_ngrams</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">tokens</span><span class="p">[</span><span class="n">token_index</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># if token index out of bounds, return OUT_OF_BOUNDS token</span>
+                        <span class="n">ngrams</span> <span class="o">=</span> <span class="p">[</span><span class="n">OUT_OF_BOUNDS_TOKEN</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c_gram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ngrams</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">resources</span><span class="p">[</span><span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c_gram</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                            <span class="n">feat_name</span> <span class="o">=</span> <span class="s2">&quot;char_ngrams|length:</span><span class="si">{}</span><span class="s2">|word_pos:</span><span class="si">{}</span><span class="s2">|char_pos:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">length</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">j</span>
+                            <span class="p">)</span>
+                            <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_gram</span>
+                <span class="n">threshold_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">feat_seq</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_sys_candidate_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_sys_candidate_features">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;sys-candidates-seq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">SYS_TYPES_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_sys_candidate_features</span><span class="p">(</span><span class="n">start_positions</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an extractor for features based on a heuristic guess of numeric</span>
+<span class="sd">    candidates at/near the current token.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        start_positions (tuple): positions relative to current token (=0)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) The feature extractor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">]</span>
+        <span class="n">system_entities</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_system_entity_candidates</span><span class="p">(</span><span class="n">resources</span><span class="p">[</span><span class="n">SYS_TYPES_RSC</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">system_entities</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">token_span</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">start_positions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">-</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">):</span>
+                        <span class="n">feat_name</span> <span class="o">=</span> <span class="s2">&quot;sys_candidate|type:</span><span class="si">{}</span><span class="s2">|granularity:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grain&quot;</span><span class="p">),</span> <span class="n">j</span>
+                        <span class="p">)</span>
+                        <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">][</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">feat_name</span> <span class="o">=</span> <span class="s2">&quot;sys_candidate|type:</span><span class="si">{}</span><span class="s2">|granularity:</span><span class="si">{}</span><span class="s2">|pos:</span><span class="si">{}</span><span class="s2">|log_len&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grain&quot;</span><span class="p">),</span> <span class="n">j</span>
+                        <span class="p">)</span>
+                        <span class="n">feat_seq</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">][</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">)</span>
+                        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">feat_seq</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="update_features_sequence"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.update_features_sequence">[docs]</a><span class="k">def</span> <span class="nf">update_features_sequence</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">,</span> <span class="n">update_feat_seq</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Update a list of features with another parallel list of features.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feat_seq (list of dict): The original list of feature dicts which gets</span>
+<span class="sd">            mutated.</span>
+<span class="sd">        update_feat_seq (list of dict): The list of features to update with.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat_seq_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feat_seq</span><span class="p">):</span>
+        <span class="n">feat_seq_i</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">update_feat_seq</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="extract_char_ngrams"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_char_ngrams">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;char-ngrams&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_char_ngrams</span><span class="p">(</span><span class="n">lengths</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract character ngrams of specified lengths.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lengths (list of int): The ngram length.</span>
+<span class="sd">            thresholds (list of int): frequency cut off value to include ngram in vocab</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (function) An feature extraction function that takes a query and</span>
+<span class="sd">                returns character ngrams of specified lengths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="n">threshold_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+    <span class="n">char_thresholds</span> <span class="o">=</span> <span class="n">threshold_list</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold_list</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">query_text</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_text</span>
+        <span class="n">ngram_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">char_thresholds</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query_text</span><span class="p">)</span> <span class="o">-</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">char_ngram</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">query_text</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">]:</span>
+                    <span class="n">char_ngram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">resources</span><span class="p">[</span><span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">char_ngram</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="o">&gt;</span> <span class="n">threshold</span>
+                <span class="p">):</span>
+                    <span class="n">ngram_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="s2">&quot;char_ngram|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="nb">len</span><span class="p">(</span><span class="n">char_ngram</span><span class="p">),</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">char_ngram</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ngram_counter</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_ngrams"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_ngrams">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;bag-of-words&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_ngrams</span><span class="p">(</span><span class="n">lengths</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract ngrams of some specified lengths.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lengths (list of int): The ngram length.</span>
+<span class="sd">        thresholds (list of int): frequency cut off value to include ngram in vocab</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) An feature extraction function that takes a query and \</span>
+<span class="sd">            returns ngrams of the specified lengths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">threshold_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+    <span class="n">word_thresholds</span> <span class="o">=</span> <span class="n">threshold_list</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold_list</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">stemmed_tokens</span>
+        <span class="n">ngram_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">word_thresholds</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">ngram</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">stemmed_ngram</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">):</span>
+                    <span class="c1"># We never want to differentiate between number tokens.</span>
+                    <span class="c1"># We may need to convert number words too, like &quot;eighty&quot;.</span>
+                    <span class="n">token</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                    <span class="n">tok</span> <span class="o">=</span> <span class="n">mask_numerics</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                    <span class="n">ngram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                        <span class="n">tok_stemmed</span> <span class="o">=</span> <span class="n">mask_numerics</span><span class="p">(</span><span class="n">stemmed_tokens</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                        <span class="n">stemmed_ngram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok_stemmed</span><span class="p">)</span>
+
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">freq</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                    <span class="n">joined_ngram</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram</span><span class="p">)</span>
+                    <span class="n">ngram_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="s2">&quot;bag_of_words|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="nb">len</span><span class="p">(</span><span class="n">ngram</span><span class="p">),</span> <span class="n">joined_ngram</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                        <span class="n">joined_stemmed_ngram</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stemmed_ngram</span><span class="p">)</span>
+                        <span class="n">ngram_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="s2">&quot;bag_of_words_stemmed|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">stemmed_ngram</span><span class="p">),</span> <span class="n">joined_stemmed_ngram</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ngram_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">[</span><span class="s2">&quot;bag_of_words|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ngram</span><span class="p">),</span> <span class="s2">&quot;OOV&quot;</span><span class="p">)]</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ngram_counter</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_sys_candidates"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_sys_candidates">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;sys-candidates&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_sys_candidates</span><span class="p">(</span><span class="n">entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an extractor for features based on a heuristic guess of numeric \</span>
+<span class="sd">        candidates in the current query.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">            (function) The feature extractor.</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span> <span class="ow">or</span> <span class="n">DEFAULT_SYS_ENTITIES</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">resources</span>
+        <span class="n">system_entities</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_system_entity_candidates</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="p">))</span>
+        <span class="n">sys_ent_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">system_entities</span><span class="p">:</span>
+            <span class="n">sys_ent_counter</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="s2">&quot;sys_candidate|type:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">)])</span>
+            <span class="n">sys_ent_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;sys_candidate|type:</span><span class="si">{}</span><span class="s2">|granularity:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grain&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">sys_ent_counter</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_word_shape"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_word_shape">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;word-shape&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_word_shape</span><span class="p">(</span><span class="n">lengths</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts word shape for ngrams of specified lengths.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lengths (list of int): The ngram length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) An feature extraction function that takes a query and \</span>
+<span class="sd">            returns ngrams of word shapes, for n of specified lengths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">word_shape_basic</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="c1"># example: option --&gt; xxxxx+, 123 ---&gt; ddd, call --&gt; xxxx</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;d&quot;</span> <span class="k">if</span> <span class="n">character</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;x&quot;</span> <span class="k">for</span> <span class="n">character</span> <span class="ow">in</span> <span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;ddddd+&quot;</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;xxxxx+&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">resources</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">shape_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">lengths</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">word_shapes</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">]:</span>
+                    <span class="c1"># We can incorporate different kinds of shapes in the future (capitalization)</span>
+                    <span class="n">tok</span> <span class="o">=</span> <span class="n">word_shape_basic</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                    <span class="n">word_shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
+                <span class="n">shape_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="s2">&quot;bag_of_words|length:</span><span class="si">{}</span><span class="s2">|word_shape:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">word_shapes</span><span class="p">),</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word_shapes</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+        <span class="n">q_len</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">shape_counter</span><span class="p">:</span>
+            <span class="n">shape_counter</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">shape_counter</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">q_len</span>
+        <span class="k">return</span> <span class="n">shape_counter</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_edge_ngrams"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_edge_ngrams">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;edge-ngrams&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">WORD_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_edge_ngrams</span><span class="p">(</span><span class="n">lengths</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract ngrams of some specified lengths.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lengths (list of int): The ngram length.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) An feature extraction function that takes a query and \</span>
+<span class="sd">            returns ngrams of the specified lengths at start and end of query.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">feats</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">lengths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+                <span class="n">left_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">mask_numerics</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">[:</span><span class="n">length</span><span class="p">]]</span>
+                <span class="n">left_tokens</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">tok</span> <span class="k">if</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;OOV&quot;</span>
+                    <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">left_tokens</span>
+                <span class="p">]</span>
+                <span class="n">right_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">mask_numerics</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">[</span><span class="o">-</span><span class="n">length</span><span class="p">:]]</span>
+                <span class="n">right_tokens</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">tok</span> <span class="k">if</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;OOV&quot;</span>
+                    <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">right_tokens</span>
+                <span class="p">]</span>
+                <span class="n">feats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;bag_of_words|edge:left|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">length</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">left_tokens</span><span class="p">)</span>
+                        <span class="p">):</span> <span class="mi">1</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+                <span class="n">feats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;bag_of_words|edge:right|length:</span><span class="si">{}</span><span class="s2">|ngram:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">length</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right_tokens</span><span class="p">)</span>
+                        <span class="p">):</span> <span class="mi">1</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">feats</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_freq"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_freq">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;freq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">WORD_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_freq</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract frequency bin features.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bins (int): The number of frequency bins (besides OOV)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function): A feature extraction function that returns the log of the \</span>
+<span class="sd">            count of query tokens within each frequency bin.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">stemmed_tokens</span>
+
+        <span class="n">freq_dict</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_FREQ_RSC</span><span class="p">]</span>
+        <span class="n">max_freq</span> <span class="o">=</span> <span class="n">freq_dict</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">freq_features</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">tok</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+            <span class="n">tok</span> <span class="o">=</span> <span class="n">mask_numerics</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">stemmed_tok</span> <span class="o">=</span> <span class="n">stemmed_tokens</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">stemmed_tok</span> <span class="o">=</span> <span class="n">mask_numerics</span><span class="p">(</span><span class="n">stemmed_tok</span><span class="p">)</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">freq_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">,</span> <span class="n">freq_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stemmed_tok</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">freq_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">freq</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">freq_features</span><span class="p">[</span><span class="s2">&quot;in_vocab:OOV&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Bin the frequency with break points at</span>
+                <span class="c1"># half max, a quarter max, an eighth max, etc.</span>
+                <span class="n">freq_bin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">max_freq</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">freq_bin</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">:</span>
+                    <span class="n">freq_features</span><span class="p">[</span><span class="s2">&quot;in_vocab:IV|freq_bin:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq_bin</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">freq_features</span><span class="p">[</span><span class="s2">&quot;in_vocab:IV|freq_bin:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bins</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">q_len</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">freq_features</span><span class="p">:</span>
+            <span class="c1"># sublinear</span>
+            <span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="c1"># ratio</span>
+            <span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="n">q_len</span>
+        <span class="k">return</span> <span class="n">freq_features</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_gaz_freq"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_gaz_freq">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;gaz-freq&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">GAZETTEER_RSC</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">WORD_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_gaz_freq</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract frequency bin features for each gazetteer</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function): A feature extraction function that returns the log of the \</span>
+<span class="sd">            count of query tokens within each gazetteer&#39;s frequency bins.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">freq_features</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+            <span class="n">query_freq</span> <span class="o">=</span> <span class="s2">&quot;OOV&quot;</span> <span class="k">if</span> <span class="n">resources</span><span class="p">[</span><span class="n">WORD_FREQ_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;IV&quot;</span>
+            <span class="k">for</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">gaz</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">[</span><span class="n">GAZETTEER_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaz</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tok</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="k">if</span> <span class="n">freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">freq_bin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">freq_features</span><span class="p">[</span>
+                        <span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|gaz_freq_bin:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">,</span> <span class="n">freq_bin</span><span class="p">)</span>
+                    <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">freq_features</span><span class="p">[</span>
+                        <span class="s2">&quot;in_vocab:</span><span class="si">{}</span><span class="s2">|in_gaz|type:</span><span class="si">{}</span><span class="s2">|gaz_freq_bin:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">query_freq</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">freq_bin</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">q_len</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">freq_features</span><span class="p">:</span>
+            <span class="c1"># sublinear</span>
+            <span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="c1"># ratio</span>
+            <span class="n">freq_features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="n">q_len</span>
+        <span class="k">return</span> <span class="n">freq_features</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_in_gaz_feature"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_in_gaz_feature">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;in-gaz&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">GAZETTEER_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_in_gaz_feature</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a feature extractor that generates a set of features indicating the presence</span>
+<span class="sd">    of query n-grams in different entity gazetteers. Used by the domain and intent classifiers</span>
+<span class="sd">    when the &#39;in-gaz&#39; feature is specified in the config.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scaling (int): A multiplicative scale factor to the ``ratio_pop`` and ``ratio`` features of</span>
+<span class="sd">        the in-gaz feature set.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        function: Returns an extractor function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">in_gaz_features</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">norm_text</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_text</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">ngrams</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="n">ngrams</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">find_ngrams</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">gaz</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">[</span><span class="n">GAZETTEER_RSC</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">gaz</span><span class="p">[</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">]:</span>
+                    <span class="n">popularity</span> <span class="o">=</span> <span class="n">gaz</span><span class="p">[</span><span class="s2">&quot;pop_dict&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ngram</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">ratio</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ngram</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">norm_text</span><span class="p">)</span> <span class="o">*</span> <span class="n">scaling</span>
+                    <span class="n">ratio_pop</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">popularity</span>
+                    <span class="n">in_gaz_features</span><span class="p">[</span>
+                        <span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|ratio_pop&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span>
+                    <span class="p">]</span> <span class="o">+=</span> <span class="n">ratio_pop</span>
+                    <span class="n">in_gaz_features</span><span class="p">[</span><span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|ratio&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">ratio</span>
+                    <span class="n">in_gaz_features</span><span class="p">[</span><span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">|pop&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">popularity</span>
+                    <span class="n">in_gaz_features</span><span class="p">[</span><span class="s2">&quot;in_gaz|type:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">in_gaz_features</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_length"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_length">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;length&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_length</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract length measures (tokens and chars; linear and log) on whole query.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) A feature extraction function that takes a query and \</span>
+<span class="sd">            returns number of tokens and characters on linear and log scales</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">resources</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">)</span>
+        <span class="n">chars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;tokens&quot;</span><span class="p">:</span> <span class="n">tokens</span><span class="p">,</span>
+            <span class="s2">&quot;chars&quot;</span><span class="p">:</span> <span class="n">chars</span><span class="p">,</span>
+            <span class="s2">&quot;tokens_log&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tokens</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;chars_log&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">chars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="extract_query_string"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.extract_query_string">[docs]</a><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
+<span class="nd">@requires</span><span class="p">(</span><span class="n">QUERY_FREQ_RSC</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_query_string</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract whole query string as a feature.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) A feature extraction function that takes a query and \</span>
+<span class="sd">            returns the whole query string for exact matching</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">query_key</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">query_key</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">[</span><span class="n">QUERY_FREQ_RSC</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;exact|query:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query_key</span><span class="p">):</span> <span class="n">scaling</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">stemmed_query_key</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">stemmed_text</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">stemmed_query_key</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">[</span><span class="n">QUERY_FREQ_RSC</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;exact|query:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stemmed_query_key</span><span class="p">):</span> <span class="n">scaling</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;exact|query:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&lt;OOV&gt;&quot;</span><span class="p">):</span> <span class="n">scaling</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span></div>
+
+
+<div class="viewcode-block" id="find_ngrams"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.query_features.html#mindmeld.models.query_features.find_ngrams">[docs]</a><span class="k">def</span> <span class="nf">find_ngrams</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates all n-gram combinations from a list of strings</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_list (list): List of string to n-gramize</span>
+<span class="sd">        n (int): The size of the n-gram</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of ngrams across all the strings in the \</span>
+<span class="sd">            input list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">kwargs</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">input_list</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]):</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

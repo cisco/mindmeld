@@ -1,0 +1,736 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.resource_loader module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.resource_loader module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.resource_loader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.resource_loader">
+<span id="mindmeld-resource-loader-module"></span><h1>mindmeld.resource_loader module<a class="headerlink" href="#module-mindmeld.resource_loader" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the processor resource loader.</p>
+<dl class="class">
+<dt id="mindmeld.resource_loader.Hasher">
+<em class="property">class </em><code class="descclassname">mindmeld.resource_loader.</code><code class="descname">Hasher</code><span class="sig-paren">(</span><em>algorithm='sha1'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#Hasher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.Hasher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>An thin wrapper around hashlib. Uses cache for commonly hashed strings.</p>
+<dl class="attribute">
+<dt id="mindmeld.resource_loader.Hasher.algorithm">
+<code class="descname">algorithm</code><a class="headerlink" href="#mindmeld.resource_loader.Hasher.algorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The hashing algorithm to use. Defaults to
+‘sha1’. See <cite>hashlib.algorithms_available</cite> for a list of
+options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.Hasher.hash">
+<code class="descname">hash</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#Hasher.hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.Hasher.hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashes a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The string to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The hash result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.Hasher.hash_file">
+<code class="descname">hash_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#Hasher.hash_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.Hasher.hash_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a hash of the file. If the file does not exist, use the empty string instead
+and return the resulting hash digest.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path of a file to hash.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A hex digest of the file hash</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.Hasher.hash_list">
+<code class="descname">hash_list</code><span class="sig-paren">(</span><em>strings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#Hasher.hash_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.Hasher.hash_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashes a list of strings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – The strings to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The hash result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">algorithm</code></dt>
+<dd><p>Getter for algorithm property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the hashing algorithm</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.resource_loader.ResourceLoader">
+<em class="property">class </em><code class="descclassname">mindmeld.resource_loader.</code><code class="descname">ResourceLoader</code><span class="sig-paren">(</span><em>app_path</em>, <em>query_factory</em>, <em>query_cache=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>ResourceLoader objects are responsible for loading resources necessary for nlp components
+(classifiers, entity recognizer, parsers, etc).</p>
+<p>Note: we need to keep resource helpers as instance methods, as <code class="docutils literal"><span class="pre">load_feature_resource</span></code>
+assumes all helpers to be instance methods.</p>
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.build_gazetteer">
+<code class="descname">build_gazetteer</code><span class="sig-paren">(</span><em>gaz_name</em>, <em>exclude_ngrams=False</em>, <em>force_reload=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.build_gazetteer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.build_gazetteer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the specified gazetteer using the entity data and mapping files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gaz_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity the gazetteer corresponds to</li>
+<li><strong>exclude_ngrams</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether partial matches of
+entities should be included in the gazetteer</li>
+<li><strong>force_reload</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether file should be forcefully
+reloaded from disk</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.resource_loader.ResourceLoader.create_resource_loader">
+<em class="property">static </em><code class="descname">create_resource_loader</code><span class="sig-paren">(</span><em>app_path</em>, <em>query_factory=None</em>, <em>preprocessor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.create_resource_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.create_resource_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the resource loader for the app at app path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to the directory containing the app’s data</li>
+<li><strong>query_factory</strong> (<em>QueryFactory</em>) – The app’s query factory</li>
+<li><strong>preprocessor</strong> (<em>Preprocessor</em>) – The app’s preprocessor</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a resource loader</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ResourceLoader</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.resource_loader.ResourceLoader.flatten_query_tree">
+<em class="property">static </em><code class="descname">flatten_query_tree</code><span class="sig-paren">(</span><em>query_tree</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.flatten_query_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.flatten_query_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a query tree and returns the elements in list form.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_tree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A nested dictionary that organizes queries by domain then intent.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of Query objects.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_entity_map">
+<code class="descname">get_entity_map</code><span class="sig-paren">(</span><em>entity_type</em>, <em>force_reload=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_entity_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_entity_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a mapping file for a given entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_gazetteer">
+<code class="descname">get_gazetteer</code><span class="sig-paren">(</span><em>gaz_name</em>, <em>force_reload=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_gazetteer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_gazetteer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a gazetteers by name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity the gazetteer corresponds to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Gazetteer data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_gazetteer_hash">
+<code class="descname">get_gazetteer_hash</code><span class="sig-paren">(</span><em>gaz_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_gazetteer_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_gazetteer_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the hash of a gazetteer by entity name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity the gazetteer corresponds to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Hash of a gazetteer specified by name.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_gazetteers">
+<code class="descname">get_gazetteers</code><span class="sig-paren">(</span><em>force_reload=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_gazetteers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_gazetteers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets gazetteers for all entities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Gazetteer data keyed by entity type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_gazetteers_hash">
+<code class="descname">get_gazetteers_hash</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_gazetteers_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_gazetteers_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a single hash of all the gazetteer ordered by alphabetical entity type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Hash of a list of gazetteer hashes.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_labeled_queries">
+<code class="descname">get_labeled_queries</code><span class="sig-paren">(</span><em>domain=None</em>, <em>intent=None</em>, <em>label_set=None</em>, <em>force_reload=False</em>, <em>raw=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_labeled_queries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_labeled_queries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets labeled queries from the cache, or loads them from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The domain of queries to load</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The intent of queries to load</li>
+<li><strong>force_reload</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Will not load queries from the cache when True</li>
+<li><strong>raw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Will return raw query strings instead of ProcessedQuery objects when true</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>ProcessedQuery objects (or strings) loaded from labeled query files, organized by</dt>
+<dd><p class="first last">domain and intent.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.get_tokenizer">
+<code class="descname">get_tokenizer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.get_tokenizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.get_tokenizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the tokenizer from the query_factory attribute</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The resource loaders tokenizer</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tokenizer (Tokenizer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.hash_feature_resource">
+<code class="descname">hash_feature_resource</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.hash_feature_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.hash_feature_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashes the named resource.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the resource to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The hash result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.hash_list">
+<code class="descname">hash_list</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.hash_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.hash_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashes the list of items.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – A list of strings to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The hash result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.hash_string">
+<code class="descname">hash_string</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.hash_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.hash_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashes a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The string to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The hash result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.load_entity_map">
+<code class="descname">load_entity_map</code><span class="sig-paren">(</span><em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.load_entity_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.load_entity_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an entity mapping file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.load_feature_resource">
+<code class="descname">load_feature_resource</code><span class="sig-paren">(</span><em>name</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.load_feature_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.load_feature_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load specified resource for feature extractor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – resource name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.load_gazetteer">
+<code class="descname">load_gazetteer</code><span class="sig-paren">(</span><em>gaz_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.load_gazetteer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.load_gazetteer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a gazetteer specified by the entity name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity the gazetteer corresponds to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.resource_loader.ResourceLoader.load_query_file">
+<code class="descname">load_query_file</code><span class="sig-paren">(</span><em>domain</em>, <em>intent</em>, <em>file_path</em>, <em>raw=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/resource_loader.html#ResourceLoader.load_query_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.load_query_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the queries from the specified file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The domain of the query file</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The intent of the query file</li>
+<li><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the query file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.resource_loader.ResourceLoader.FEATURE_RSC_MAP">
+<code class="descname">FEATURE_RSC_MAP</code><em class="property"> = {'gazetteers': &lt;function ResourceLoader.get_gazetteers&gt;, 'w_freq': &lt;function ResourceLoader._build_word_freq_dict&gt;, 'c_ngram_freq': &lt;function ResourceLoader._build_char_ngram_freq_dict&gt;, 'w_ngram_freq': &lt;function ResourceLoader._build_word_ngram_freq_dict&gt;, 'q_freq': &lt;function ResourceLoader._build_query_freq_dict&gt;, 'sys_types': &lt;function ResourceLoader._get_sys_entity_types&gt;}</em><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.FEATURE_RSC_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.resource_loader.ResourceLoader.RSC_HASH_MAP">
+<code class="descname">RSC_HASH_MAP</code><em class="property"> = {'gazetteers': &lt;function ResourceLoader.get_gazetteers_hash&gt;, 'w_freq': &lt;function ResourceLoader.&lt;lambda&gt;&gt;, 'w_ngram_freq': &lt;function ResourceLoader.&lt;lambda&gt;&gt;, 'c_ngram_freq': &lt;function ResourceLoader.&lt;lambda&gt;&gt;, 'q_freq': &lt;function ResourceLoader.&lt;lambda&gt;&gt;, 'sys_types': &lt;function ResourceLoader.&lt;lambda&gt;&gt;, 'enable-stemming': &lt;function ResourceLoader.&lt;lambda&gt;&gt;}</em><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.RSC_HASH_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.resource_loader.ResourceLoader.hash_to_model_path">
+<code class="descname">hash_to_model_path</code><a class="headerlink" href="#mindmeld.resource_loader.ResourceLoader.hash_to_model_path" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – A dictionary that maps hashes to the file path of the classifier.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

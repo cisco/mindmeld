@@ -1,0 +1,673 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.classifier module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.components.classifier module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.components.classifier.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.components.classifier">
+<span id="mindmeld-components-classifier-module"></span><h1>mindmeld.components.classifier module<a class="headerlink" href="#module-mindmeld.components.classifier" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the base class for all the machine-learned classifiers in MindMeld.</p>
+<dl class="class">
+<dt id="mindmeld.components.classifier.Classifier">
+<em class="property">class </em><code class="descclassname">mindmeld.components.classifier.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>resource_loader</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<p>The base class for all the machine-learned classifiers in MindMeld. A classifier is a     machine-learned model that categorizes input examples into one of the pre-determined class     labels. Among other functionality, each classifier provides means by which to fit a     statistical model on a given training dataset and then use the trained model to make     predictions on new unseen data.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.Classifier.ready">
+<code class="descname">ready</code><a class="headerlink" href="#mindmeld.components.classifier.Classifier.ready" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Whether the classifier is ready.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.Classifier.dirty">
+<code class="descname">dirty</code><a class="headerlink" href="#mindmeld.components.classifier.Classifier.dirty" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Whether the classifier has unsaved changes to its model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.Classifier.config">
+<code class="descname">config</code><a class="headerlink" href="#mindmeld.components.classifier.Classifier.config" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>ClassifierConfig</em> – The classifier configuration.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.Classifier.hash">
+<code class="descname">hash</code><a class="headerlink" href="#mindmeld.components.classifier.Classifier.hash" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – A hash representing the inputs into the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><em>model_path</em>, <em>incremental_model_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Persists the trained classification model to disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the model should be stored.</li>
+<li><strong>incremental_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The timestamp folder where the cached
+models are stored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>queries=None</em>, <em>label_set=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the trained classification model on the given test data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>queries</strong> (<em>list of ProcessedQuery</em>) – The labeled queries to use as test data. If none
+are provided, the test label set will be used.</li>
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The label set to use for evaluation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A ModelEvaluation object that contains evaluation results</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ModelEvaluation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>queries=None</em>, <em>label_set=None</em>, <em>incremental_timestamp=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains a statistical model for classification using the provided training examples and
+model configuration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>queries</strong> (<em>list of ProcessedQuery</em>) – The labeled queries to use as training data</li>
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A label set to load. If not specified, the default
+training set will be loaded.</li>
+<li><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The timestamp folder to cache models in</li>
+<li><strong>model_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The type of machine learning model to use. If omitted, the
+default model type will be used.</li>
+<li><strong>model_settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Settings specific to the model type specified</li>
+<li><strong>features</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Features to extract from each example instance to form the feature
+vector used for model training. If omitted, the default feature set for the model
+type will be used.</li>
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Params to pass to the underlying classifier</li>
+<li><strong>params_selection</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The grid of hyper-parameters to search, for finding the optimal
+hyper-parameter settings for the model. If omitted, the default hyper-parameter
+search grid will be used.</li>
+<li><strong>param_selection</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Configuration for param selection (using cross-validation)
+{‘type’: ‘shuffle’,
+‘n’: 3,
+‘k’: 10,
+‘n_jobs’: 2,
+‘scoring’: ‘’,
+‘grid’: { ‘C’: [100, 10000, 1000000]}}</li>
+<li><strong>features</strong> – The keys are the names of feature extractors and the
+values are either a kwargs dict which will be passed into the
+feature extractor function, or a callable which will be used as to
+extract features.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>Fit using default the configuration.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Fit using a ‘special’ label set.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">label_set</span><span class="o">=</span><span class="s1">&#39;special&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fit using given params, bypassing cross-validation. This is useful for speeding up
+train times if you are confident the params are optimized.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">10000000</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Fit using given parameter selection settings (also known as cross-validation settings).</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="p">{})</span>
+</pre></div>
+</div>
+<p>Fit using a custom set of features, including a custom feature extractor.
+This is only for advanced users.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="p">{</span>
+<span class="go">        &#39;in-gaz&#39;: {}, // gazetteer features</span>
+<span class="go">        &#39;contrived&#39;: lambda exa, res: {&#39;contrived&#39;: len(exa.text) == 26}</span>
+<span class="go">    })</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.inspect">
+<code class="descname">inspect</code><span class="sig-paren">(</span><em>query</em>, <em>gold_label=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.inspect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.inspect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>model_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the trained classification model from disk</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the model is stored</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>query</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts a class label for the given query using the trained classification model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The input query</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
+‘America/Los_Angeles’, or ‘Asia/Kolkata’
+See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The predicted class label</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>query</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs prediction on a given query and generates multiple hypotheses with their
+associated probabilities using the trained classification model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The input query</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
+‘America/Los_Angeles’, or ‘Asia/Kolkata’
+See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list of tuples of the form (str, float) grouping predicted class labels and                 their probabilities</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.Classifier.view_extracted_features">
+<code class="descname">view_extracted_features</code><span class="sig-paren">(</span><em>query</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#Classifier.view_extracted_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.Classifier.view_extracted_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts features for the given input based on the model config.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The input query</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dynamic gazetteer to be included for feature extraction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The extracted features from the given input</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.Classifier.CLF_TYPE">
+<code class="descname">CLF_TYPE</code><em class="property"> = None</em><a class="headerlink" href="#mindmeld.components.classifier.Classifier.CLF_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier type (<cite>str</cite>).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.classifier.ClassifierConfig">
+<em class="property">class </em><code class="descclassname">mindmeld.components.classifier.</code><code class="descname">ClassifierConfig</code><span class="sig-paren">(</span><em>model_type=None</em>, <em>features=None</em>, <em>model_settings=None</em>, <em>params=None</em>, <em>param_selection=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#ClassifierConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A value object representing a classifier configuration</p>
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.ClassifierConfig.model_type">
+<code class="descname">model_type</code><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.model_type" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the model type. Will be used to find the                 model class to instantiate.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.ClassifierConfig.model_settings">
+<code class="descname">model_settings</code><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.model_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Settings specific to the model type specified.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.ClassifierConfig.params">
+<code class="descname">params</code><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.params" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Params to pass to the underlying classifier.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.ClassifierConfig.param_selection">
+<code class="descname">param_selection</code><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.param_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Configuration for param selection (using cross                 validation). For example:
+{‘type’: ‘shuffle’,
+‘n’: 3,
+‘k’: 10,
+‘n_jobs’: 2,
+‘scoring’: ‘’,
+‘grid’: {}
+}</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.classifier.ClassifierConfig.features">
+<code class="descname">features</code><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.features" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – The keys are the names of feature extractors and the                 values are either a kwargs dict which will be passed into the                 feature extractor function, or a callable which will be used as to                 extract features.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mindmeld.components.classifier.ClassifierConfig.from_model_config">
+<em class="property">classmethod </em><code class="descname">from_model_config</code><span class="sig-paren">(</span><em>model_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#ClassifierConfig.from_model_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.from_model_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.ClassifierConfig.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#ClassifierConfig.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the model config object into a dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A dict version of the config.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.classifier.ClassifierConfig.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/classifier.html#ClassifierConfig.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.classifier.ClassifierConfig.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the model config object to JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">JSON representation of the classifier.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">features</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">model_settings</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">model_type</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">param_selection</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">params</code></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

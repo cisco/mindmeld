@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.parser &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the language parser component of the MindMeld natural language processor</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
+
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="k">import</span> <span class="n">FeatureChartParser</span>
+<span class="kn">from</span> <span class="nn">nltk.featstruct</span> <span class="k">import</span> <span class="n">Feature</span>
+<span class="kn">from</span> <span class="nn">nltk.grammar</span> <span class="k">import</span> <span class="n">FeatureGrammar</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">..core</span> <span class="k">import</span> <span class="n">Span</span>
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">ParserTimeout</span>
+<span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="n">get_parser_config</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">START_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;S&quot;</span>
+<span class="n">HEAD_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;H&quot;</span>
+
+<span class="n">TYPE_FEATURE</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="s2">&quot;prefix&quot;</span><span class="p">)</span>
+
+<span class="n">START_SYMBOLS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">HEAD_SYMBOL</span><span class="p">})</span>
+
+<span class="n">MAX_PARSE_TIME</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+
+<div class="viewcode-block" id="Parser"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.parser.html#mindmeld.components.parser.Parser">[docs]</a><span class="k">class</span> <span class="nc">Parser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A language parser which is used to extract relations between entities in a</span>
+<span class="sd">    given query and group related entities together.</span>
+
+<span class="sd">    The parser uses a context free grammar based on a configuration to generate</span>
+<span class="sd">    candidate entity groupings. Heuristics are then used to rank and select a</span>
+<span class="sd">    grouping.</span>
+
+<span class="sd">    This rule based parser will be helpful in many situations, but if you have</span>
+<span class="sd">    a sufficiently sophisticated entity hierarchy, you may benefit from using a</span>
+<span class="sd">    statistical approach.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config (dict): The parser config.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resource_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_relaxed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the parser</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_loader (ResourceLoader): An object which can load</span>
+<span class="sd">                resources for the parser.</span>
+<span class="sd">            config (dict, optional): The configuration for the parser. If none</span>
+<span class="sd">                is provided the app config will be loaded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resource_loader</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Parser requires either a configuration or a resource loader&quot;</span>
+            <span class="p">)</span>
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">resource_loader</span><span class="o">.</span><span class="n">app_path</span> <span class="k">if</span> <span class="n">resource_loader</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">entity_types</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_types</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;unk&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">entity_types</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;unk&quot;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span> <span class="o">=</span> <span class="n">resource_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">get_parser_config</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">configured_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">configured_entities</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+            <span class="n">configured_entities</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">entity_config</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configured_entities</span> <span class="o">=</span> <span class="n">configured_entities</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="n">generate_grammar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">entity_types</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">FeatureGrammar</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span> <span class="o">=</span> <span class="n">FeatureChartParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">allow_relaxed</span><span class="p">:</span>
+            <span class="n">relaxed_rules</span> <span class="o">=</span> <span class="n">generate_grammar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">entity_types</span><span class="p">,</span> <span class="n">relaxed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_grammar</span> <span class="o">=</span> <span class="n">FeatureGrammar</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">relaxed_rules</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_parser</span> <span class="o">=</span> <span class="n">FeatureChartParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_grammar</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_grammar</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_parser</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Parser.parse_entities"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.parser.html#mindmeld.components.parser.Parser.parse_entities">[docs]</a>    <span class="k">def</span> <span class="nf">parse_entities</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">entities</span><span class="p">,</span>
+        <span class="n">all_candidates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">handle_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">MAX_PARSE_TIME</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determines groupings of entities for the given query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (Query): The query being parsed.</span>
+<span class="sd">            entities (list[QueryEntity]): The entities to find groupings for.</span>
+<span class="sd">            all_candidates (bool, optional): Whether to return all the entity candidates.</span>
+<span class="sd">            handle_timeout (bool, optional): False if an exception should be raised in the event of</span>
+<span class="sd">                a parsing times out. Defaults to True.</span>
+<span class="sd">            timeout (float, optional): The amount of time to wait for the parsing to complete.</span>
+<span class="sd">                By default this is set to MAX_PARSE_TIME. If None is passed, the passing will never</span>
+<span class="sd">                time out</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple[QueryEntity]): An updated version of the entities collection passed in with \</span>
+<span class="sd">                their parent and children attributes set appropriately.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configured_entities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">entities</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">handle_timeout</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span>
+                <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">all_candidates</span><span class="o">=</span><span class="n">all_candidates</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span>
+                <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">all_candidates</span><span class="o">=</span><span class="n">all_candidates</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">ParserTimeout</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Parser timed out parsing query </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">entities</span></div>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">all_candidates</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="n">entity_type_count</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">entity_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># tokens to be parsed</span>
+
+        <span class="c1"># generate sentential form (assumes entities are sorted)</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+            <span class="n">entity_type</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">role_type</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span>
+            <span class="k">if</span> <span class="n">role_type</span><span class="p">:</span>
+                <span class="c1"># Append role type to entity type with - separator</span>
+                <span class="n">entity_with_role_type</span> <span class="o">=</span> <span class="n">entity_type</span> <span class="o">+</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">role_type</span>
+                <span class="k">if</span> <span class="n">entity_with_role_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configured_entities</span><span class="p">:</span>
+                    <span class="n">entity_type</span> <span class="o">=</span> <span class="n">entity_with_role_type</span>
+            <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configured_entities</span><span class="p">:</span>
+                <span class="n">entity_type</span> <span class="o">=</span> <span class="s2">&quot;unk&quot;</span>
+            <span class="n">entity_id</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_type_count</span><span class="p">[</span><span class="n">entity_type</span><span class="p">])</span>
+            <span class="n">entity_type_count</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">entity_dict</span><span class="p">[</span><span class="n">entity_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Parsing sentential form: </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">parses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">parse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+            <span class="n">parses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ParserTimeout</span><span class="p">(</span><span class="s2">&quot;Parsing took too long&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parses</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_parser</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">parse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relaxed_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+                <span class="n">parses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_PARSE_TIME</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ParserTimeout</span><span class="p">(</span><span class="s2">&quot;Parsing took too long&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">all_candidates</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[]</span>
+            <span class="k">return</span> <span class="n">entities</span>
+
+        <span class="n">ranked_parses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_parses</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">,</span> <span class="n">parses</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">start_time</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">all_candidates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ranked_parses</span>
+
+        <span class="c1"># if we still have more than one, choose the first</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_flat_entities</span><span class="p">(</span><span class="n">ranked_parses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_rank_parses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">,</span> <span class="n">parses</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">resolved</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">parse</span> <span class="ow">in</span> <span class="n">parses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ParserTimeout</span><span class="p">(</span><span class="s2">&quot;Parsing took too long&quot;</span><span class="p">)</span>
+            <span class="n">resolved</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolve_parse</span><span class="p">(</span><span class="n">parse</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">resolved</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Prefer parses with fewer groups</span>
+        <span class="n">parses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">filtered</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parses</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parses</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1"># Prefer parses with minimal distance from dependents to heads</span>
+        <span class="n">parses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">filtered</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_distance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">min_parse_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_distance</span><span class="p">(</span><span class="n">parses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">)</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">p</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parses</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_distance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">min_parse_dist</span>
+        <span class="p">)</span>
+
+        <span class="c1"># TODO: apply precedence</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parse_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">):</span>
+        <span class="n">total_link_distance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">entity_dict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">dependents</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">dep</span><span class="o">.</span><span class="n">dependents</span><span class="p">:</span>
+                    <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="n">entity_dict</span><span class="p">[</span><span class="n">dep</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">head</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                    <span class="n">intra_entity_span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span>
+                        <span class="n">head</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">intra_entity_span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">head</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span>
+                    <span class="p">)</span>
+                <span class="n">link_distance</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">intra_entity_span</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">type</span><span class="p">][</span><span class="n">dep</span><span class="o">.</span><span class="n">type</span><span class="p">][</span><span class="s2">&quot;linking_words&quot;</span><span class="p">]:</span>
+                        <span class="n">link_distance</span> <span class="o">-=</span> <span class="mf">0.5</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">link_distance</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">total_link_distance</span> <span class="o">+=</span> <span class="n">link_distance</span>
+
+        <span class="k">return</span> <span class="n">total_link_distance</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_flat_entities</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">):</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">to_query_entity</span><span class="p">(</span><span class="n">entity_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">parse</span><span class="p">]</span>
+        <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">new_dict</span><span class="p">[(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entity</span>
+
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">children</span> <span class="ow">or</span> <span class="p">():</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">new_dict</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">e</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_resolve_parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">child_symbol</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">label</span><span class="p">()[</span><span class="n">TYPE_FEATURE</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">child_symbol</span> <span class="ow">in</span> <span class="n">START_SYMBOLS</span><span class="p">:</span>
+                <span class="n">groups</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_parse</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_group</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span>
+                <span class="n">groups</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_resolve_group</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="n">symbol</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">label</span><span class="p">()[</span><span class="n">TYPE_FEATURE</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">symbol</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+            <span class="c1"># this node is a generic entity of type {symbol}, its child is the terminal</span>
+            <span class="k">return</span> <span class="n">_EntityNode</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># if first char is capitalized, this is a group!</span>
+        <span class="n">group_type</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">dependents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">child_symbol</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">label</span><span class="p">()[</span><span class="n">TYPE_FEATURE</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">child_symbol</span> <span class="o">==</span> <span class="n">symbol</span><span class="p">:</span>
+                <span class="c1"># this is the ancestor of this group</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_group</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">child_symbol</span> <span class="o">==</span> <span class="n">group_type</span><span class="p">:</span>
+                <span class="c1"># this is the root ancestor of this group</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_group</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="n">_EntityNode</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dependents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_group</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">freeze</span><span class="p">())</span>
+
+        <span class="n">group</span><span class="o">.</span><span class="n">dependents</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dependents</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">group</span></div>
+
+
+<span class="k">class</span> <span class="nc">_EntityNode</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;EntityNode&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;dependents&quot;</span><span class="p">))):</span>
+    <span class="sd">&quot;&quot;&quot;A private tree data structure used to parse queries</span>
+
+<span class="sd">    EntityNodes use sets and are conditionally hashable. This makes it easy to check the</span>
+<span class="sd">    equivalence of parse trees represented as entity nodes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">freeze</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts to a &#39;frozen&#39; representation that can be hashed&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="n">frozen_dependents</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="n">d</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_EntityNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">frozen_dependents</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pretty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pretty prints the entity node.</span>
+
+<span class="sd">        Primarily useful for debugging.&quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;  &quot;</span> <span class="o">*</span> <span class="n">indent</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">text</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">to_query_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_dict</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts a node to an QueryEntity</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_dict (dict): A mapping from entity ids to the corresponding</span>
+<span class="sd">                original QueryEntity objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_root</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">entity_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+
+        <span class="n">head</span> <span class="o">=</span> <span class="n">entity_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">head</span>
+        <span class="n">dependents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">to_query_entity</span><span class="p">(</span><span class="n">entity_dict</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependents</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">head</span><span class="o">.</span><span class="n">with_children</span><span class="p">(</span><span class="n">dependents</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_build_symbol_template</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds a template for a symbol in a feature CFG.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        group (str): The group the template is for</span>
+<span class="sd">        features (iterable): The names of features which should be included in</span>
+<span class="sd">            the template</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; _build_symbol_template(&#39;Group&#39;, {&#39;feat1&#39;, &#39;feat2&#39;})</span>
+<span class="sd">    &quot;Group[feat1={feat1}, feat2={feat2}]&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbol_template</span> <span class="o">=</span> <span class="n">group</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">symbol_template</span> <span class="ow">is</span> <span class="n">group</span><span class="p">:</span>
+            <span class="n">symbol_template</span> <span class="o">+=</span> <span class="s2">&quot;[&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symbol_template</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
+        <span class="n">symbol_template</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">={{</span><span class="si">{0}</span><span class="s2">}}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">symbol_template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">group</span><span class="p">:</span>
+        <span class="n">symbol_template</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
+    <span class="k">return</span> <span class="n">symbol_template</span>
+
+
+<span class="k">def</span> <span class="nf">_generate_dependent_rules</span><span class="p">(</span><span class="n">dep_type</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">symbol_template</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">head_types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates the rules for a dependent entity</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): A dictionary containing the configuration for this dependent</span>
+<span class="sd">        symbol_template (str): A symbol template</span>
+<span class="sd">        features (iterable): A list of features for this symbol</span>
+<span class="sd">        head_types (set): All symbols which have dependents</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        str: A rule for the dependent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If dependent is a group, its symbol should be capitalized</span>
+    <span class="n">dep_symbol</span> <span class="o">=</span> <span class="n">dep_type</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">if</span> <span class="n">dep_type</span> <span class="ow">in</span> <span class="n">head_types</span> <span class="k">else</span> <span class="n">dep_type</span>
+
+    <span class="n">max_instances</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_instances&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_instances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># pass through features unchanged</span>
+        <span class="n">lhs</span> <span class="o">=</span> <span class="n">symbol_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="p">)}</span>
+        <span class="p">)</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">lhs</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="s2">&quot;</span><span class="si">{lhs}</span><span class="s2"> -&gt; </span><span class="si">{dep}</span><span class="s2"> </span><span class="si">{rhs}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhs</span><span class="o">=</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="o">=</span><span class="n">rhs</span><span class="p">,</span> <span class="n">dep</span><span class="o">=</span><span class="n">dep_symbol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="s2">&quot;</span><span class="si">{lhs}</span><span class="s2"> -&gt; </span><span class="si">{rhs}</span><span class="s2"> </span><span class="si">{dep}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhs</span><span class="o">=</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="o">=</span><span class="n">rhs</span><span class="p">,</span> <span class="n">dep</span><span class="o">=</span><span class="n">dep_symbol</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dep_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_instances</span><span class="p">):</span>
+            <span class="n">feature_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">f</span><span class="p">:</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dep_type</span>
+            <span class="p">}</span>
+            <span class="n">feature_dict</span><span class="p">[</span><span class="n">dep_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">dep_count</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">symbol_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">feature_dict</span><span class="p">)</span>
+            <span class="n">feature_dict</span><span class="p">[</span><span class="n">dep_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">dep_count</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">lhs</span> <span class="o">=</span> <span class="n">symbol_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">feature_dict</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="s2">&quot;</span><span class="si">{lhs}</span><span class="s2"> -&gt; </span><span class="si">{dep}</span><span class="s2"> </span><span class="si">{rhs}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhs</span><span class="o">=</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="o">=</span><span class="n">rhs</span><span class="p">,</span> <span class="n">dep</span><span class="o">=</span><span class="n">dep_symbol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="s2">&quot;</span><span class="si">{lhs}</span><span class="s2"> -&gt; </span><span class="si">{rhs}</span><span class="s2"> </span><span class="si">{dep}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhs</span><span class="o">=</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="o">=</span><span class="n">rhs</span><span class="p">,</span> <span class="n">dep</span><span class="o">=</span><span class="n">dep_symbol</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="generate_grammar"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.parser.html#mindmeld.components.parser.generate_grammar">[docs]</a><span class="k">def</span> <span class="nf">generate_grammar</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">entity_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">relaxed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique_entities</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates a feature context free grammar from the provided parser config.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): The parser configuration</span>
+<span class="sd">        unique_entities (int, optional): The number of entities of the same type that should be</span>
+<span class="sd">            permitted in the same query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: a string containing the grammar with rules separated by line</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">entity_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">entity_types</span> <span class="ow">or</span> <span class="p">())</span>
+    <span class="c1"># start rules</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">HEAD_SYMBOL</span><span class="p">),</span>  <span class="c1"># The start rule</span>
+        <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> -&gt; </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">HEAD_SYMBOL</span><span class="p">),</span>
+    <span class="p">]</span>  <span class="c1"># Allow multiple heads</span>
+
+    <span class="c1"># the set of all heads</span>
+    <span class="n">head_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c1"># the set of all dependents</span>
+    <span class="n">dependent_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">t</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">g</span><span class="p">))</span>
+
+    <span class="n">all_types</span> <span class="o">=</span> <span class="n">head_types</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">dependent_types</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">entity_types</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">all_types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">entity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">head_types</span> <span class="ow">and</span> <span class="n">entity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dependent_types</span><span class="p">:</span>
+            <span class="c1"># Add entities which are not mentioned in config as standalones</span>
+            <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">relaxed</span> <span class="ow">and</span> <span class="n">entity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">head_types</span> <span class="ow">and</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dependent_types</span><span class="p">:</span>
+            <span class="c1"># Add dependent entities as standalones in relaxed mode</span>
+            <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity</span><span class="p">))</span>
+
+    <span class="c1"># create rules for each group</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">head_types</span><span class="p">:</span>
+        <span class="c1"># the symbol for a group is the capitalized version of the string</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+
+        <span class="n">dep_configs</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span>
+        <span class="c1"># If a dependent has a max number of instances, we will track it as a feature</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">t</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dep_configs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_instances&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+
+        <span class="n">symbol_template</span> <span class="o">=</span> <span class="n">_build_symbol_template</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># basic rule with features initialized to 0</span>
+        <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">symbol_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">features</span><span class="p">}),</span> <span class="n">entity</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dep_type</span><span class="p">,</span> <span class="n">dep_config</span> <span class="ow">in</span> <span class="n">dep_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">_generate_dependent_rules</span><span class="p">(</span>
+                    <span class="n">dep_type</span><span class="p">,</span> <span class="n">dep_config</span><span class="p">,</span> <span class="n">symbol_template</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">head_types</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">all_types</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">unique_entities</span><span class="p">):</span>
+            <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> -&gt; &#39;</span><span class="si">{0}{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">idx</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

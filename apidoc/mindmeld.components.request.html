@@ -1,0 +1,614 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.request module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.components.request module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.components.request.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.components.request">
+<span id="mindmeld-components-request-module"></span><h1>mindmeld.components.request module<a class="headerlink" href="#module-mindmeld.components.request" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mindmeld.components.request.FrozenParams">
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">FrozenParams</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#FrozenParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.FrozenParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.request.Params" title="mindmeld.components.request.Params"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.request.Params</span></code></a></p>
+<p>An immutable version of the Params object.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.allowed_intents">
+<code class="descname">allowed_intents</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.allowed_intents" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list, str</em> – A list of intents that you can set to force the language
+processor to choose from.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.target_dialogue_state">
+<code class="descname">target_dialogue_state</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.target_dialogue_state" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the dialogue handler that you want to reach in
+the next turn.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.time_zone">
+<code class="descname">time_zone</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.time_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of an IANA time zone, such as ‘America/Los_Angeles’, or
+‘Asia/Kolkata’.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.language">
+<code class="descname">language</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.language" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The language code representing ISO 639-1/2 language codes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.locale">
+<code class="descname">locale</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.locale" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str, optional</em> – The locale representing the ISO 639-1/2 language code and
+ISO3166 alpha 2 country code separated by an underscore character.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.timestamp">
+<code class="descname">timestamp</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>long</em> – A unix time stamp for the request accurate to the nearest second.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.FrozenParams.dynamic_resource">
+<code class="descname">dynamic_resource</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.dynamic_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – A dictionary containing data used to influence the language
+classifiers by adding resource data for the given turn.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.request.Params">
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Params</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=NOTHING</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#Params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A class that contains parameters that modify how the user query is parsed.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.allowed_intents">
+<code class="descname">allowed_intents</code><a class="headerlink" href="#mindmeld.components.request.Params.allowed_intents" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list, str</em> – A list of intents that you can set to force the language
+processor to choose from.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.target_dialogue_state">
+<code class="descname">target_dialogue_state</code><a class="headerlink" href="#mindmeld.components.request.Params.target_dialogue_state" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the dialogue handler that you want to reach in
+the next turn.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.time_zone">
+<code class="descname">time_zone</code><a class="headerlink" href="#mindmeld.components.request.Params.time_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of an IANA time zone, such as ‘America/Los_Angeles’, or
+‘Asia/Kolkata’.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.timestamp">
+<code class="descname">timestamp</code><a class="headerlink" href="#mindmeld.components.request.Params.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>long</em> – A unix time stamp for the request accurate to the nearest second.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.locale">
+<code class="descname">locale</code><a class="headerlink" href="#mindmeld.components.request.Params.locale" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str, optional</em> – The locale representing the ISO 639-1/2 language code and ISO3166
+alpha 2 country code separated by an underscore character.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.language">
+<code class="descname">language</code><a class="headerlink" href="#mindmeld.components.request.Params.language" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str, optional</em> – The language code representing ISO 639-1/2
+language codes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Params.dynamic_resource">
+<code class="descname">dynamic_resource</code><a class="headerlink" href="#mindmeld.components.request.Params.dynamic_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – A dictionary containing data used to influence the language
+classifiers by adding resource data for the given turn.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.request.Params.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.request.Params.validate_dm_params">
+<code class="descname">validate_dm_params</code><span class="sig-paren">(</span><em>handler_map</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params.validate_dm_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params.validate_dm_params" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Validate that the value of the ‘target_dialogue_state’ parameter is a valid dialogue state</dt>
+<dd>for the application and returns that value in a dictionary.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>handler_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Mapping from dialogue state to the function handler that gets
+called when in the state.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">single item dictionary with the parameter value if valid and None if not.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.request.Params.validate_nlp_params">
+<code class="descname">validate_nlp_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params.validate_nlp_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params.validate_nlp_params" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Validate language, locale, time zone, timestamp, and dynamic resource parameters</dt>
+<dd>and return the params as a dictionary.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Mapping from parameter name to bool depending on validation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.request.Params.validate_param">
+<code class="descname">validate_param</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params.validate_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params.validate_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform validation on the value of a specific parameter in the Params object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the parameter to be validated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>True/False depending on success of the validation, None if the param name does</dt>
+<dd>not exist.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.request.Request">
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Request</code><span class="sig-paren">(</span><em>*</em>, <em>domain=None</em>, <em>intent=None</em>, <em>entities=NOTHING</em>, <em>history=NOTHING</em>, <em>text=None</em>, <em>frame=&lt;immutables.Map({})&gt;</em>, <em>params=FrozenParams(allowed_intents=()</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;)</em>, <em>context=&lt;immutables.Map({})&gt;</em>, <em>confidences=&lt;immutables.Map({})&gt;</em>, <em>nbest_transcripts_text=NOTHING</em>, <em>nbest_transcripts_entities=NOTHING</em>, <em>nbest_aligned_entities=NOTHING</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#Request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The Request is an object passed in through the Dialogue Manager and contains all the
+information provided by the application client for the dialogue handler to act on. Note: the
+Request object is read-only since it represents the client state, which should not be mutated.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.domains">
+<code class="descname">domains</code><a class="headerlink" href="#mindmeld.components.request.Request.domains" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Domain of the current query.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.intent">
+<code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.request.Request.intent" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Intent of the current query.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.entities">
+<code class="descname">entities</code><a class="headerlink" href="#mindmeld.components.request.Request.entities" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> – A list of entities in the current query.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.history">
+<code class="descname">history</code><a class="headerlink" href="#mindmeld.components.request.Request.history" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> – List of previous and current responder objects (de-serialized) up to the
+current conversation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.text">
+<code class="descname">text</code><a class="headerlink" href="#mindmeld.components.request.Request.text" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The query text.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.frame">
+<code class="descname">frame</code><a class="headerlink" href="#mindmeld.components.request.Request.frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Immutables Map of stored data across multiple dialogue turns.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.params">
+<code class="descname">params</code><a class="headerlink" href="#mindmeld.components.request.Request.params" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Params</em> – An object that modifies how MindMeld process the current turn.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.context">
+<code class="descname">context</code><a class="headerlink" href="#mindmeld.components.request.Request.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Immutables Map containing front-end client state that is passed to the
+application from the client in the request.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.confidences">
+<code class="descname">confidences</code><a class="headerlink" href="#mindmeld.components.request.Request.confidences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Immutables Map of keys <code class="docutils literal"><span class="pre">domains</span></code>, <code class="docutils literal"><span class="pre">intents</span></code>, <code class="docutils literal"><span class="pre">entities</span></code> and <code class="docutils literal"><span class="pre">roles</span></code>
+containing confidence probabilities across all labels for each classifier.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.nbest_transcripts_text">
+<code class="descname">nbest_transcripts_text</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_transcripts_text" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple</em> – List of alternate n-best transcripts from an ASR system</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.nbest_transcripts_entities">
+<code class="descname">nbest_transcripts_entities</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_transcripts_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple</em> – List of lists of extracted entities for each of the
+n-best transcripts.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.request.Request.nbest_aligned_entities">
+<code class="descname">nbest_aligned_entities</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_aligned_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple</em> – List of lists of aligned entities for each of the n-best
+transcripts.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.components.request.validate_language_code">
+<code class="descclassname">mindmeld.components.request.</code><code class="descname">validate_language_code</code><span class="sig-paren">(</span><em>param=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#validate_language_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.validate_language_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates language code parameters
+:param param: The language code parameter
+:type param: str, optional</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A validated language code or None if unvalidated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.components.request.validate_locale_code">
+<code class="descclassname">mindmeld.components.request.</code><code class="descname">validate_locale_code</code><span class="sig-paren">(</span><em>param=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#validate_locale_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.validate_locale_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the locale code parameters
+:param param: The locale code parameter
+:type param: str, optional</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A validated locale code or None if unvalidated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

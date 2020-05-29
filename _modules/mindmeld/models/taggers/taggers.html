@@ -1,0 +1,890 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.taggers &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.taggers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.taggers.taggers</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains all code required to perform sequence tagging.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">...core</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">,</span>
+    <span class="n">TEXT_FORM_RAW</span><span class="p">,</span>
+    <span class="n">QueryEntity</span><span class="p">,</span>
+    <span class="n">Span</span><span class="p">,</span>
+    <span class="n">_sort_by_lowest_time_grain</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...markup</span> <span class="k">import</span> <span class="n">MarkupError</span>
+<span class="kn">from</span> <span class="nn">...system_entity_recognizer</span> <span class="k">import</span> <span class="n">SystemEntityResolutionError</span>
+<span class="kn">from</span> <span class="nn">..helpers</span> <span class="k">import</span> <span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="n">get_feature_extractor</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">START_TAG</span> <span class="o">=</span> <span class="s2">&quot;START&quot;</span>
+<span class="n">B_TAG</span> <span class="o">=</span> <span class="s2">&quot;B&quot;</span>
+<span class="n">I_TAG</span> <span class="o">=</span> <span class="s2">&quot;I&quot;</span>
+<span class="n">O_TAG</span> <span class="o">=</span> <span class="s2">&quot;O&quot;</span>
+<span class="n">E_TAG</span> <span class="o">=</span> <span class="s2">&quot;E&quot;</span>
+<span class="n">S_TAG</span> <span class="o">=</span> <span class="s2">&quot;S&quot;</span>
+<span class="c1"># End tag is used by the evaluation algorithm to mark the end of query. This</span>
+<span class="c1"># differs from the E tag which is used to denote the end of an entity in IOBES tagging.</span>
+<span class="n">END_TAG</span> <span class="o">=</span> <span class="s2">&quot;END&quot;</span>
+
+
+<div class="viewcode-block" id="Tagger"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger">[docs]</a><span class="k">class</span> <span class="nc">Tagger</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A class for all sequence tagger models implemented in house.</span>
+<span class="sd">    It is importent to follow this interface exactly when implementing a new model so that your</span>
+<span class="sd">    model is configured and trained as expected in the MindMeld pipeline. Note that this follows</span>
+<span class="sd">    the sklearn estimator interface so that GridSearchCV can be used on our sequence models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be consistent with the sklearn interface, __init__ and set_params should have the same</span>
+<span class="sd">        effect. We do all parameter setting and validation in set_params which is called from here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **parameters: Arbitrary keyword arguments. The keys are model parameter names and the</span>
+<span class="sd">                          values are what they should be set to</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the information needed pickle an instance of this class. By default, pickling removes</span>
+<span class="sd">        attributes with names starting with underscores.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">attributes</span>
+
+<div class="viewcode-block" id="Tagger.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains the model. X and y are the format of what is returned by extract_features. There is no</span>
+<span class="sd">        restriction on their type or content. X should be the fully processed data with extracted</span>
+<span class="sd">        features that are ready to be used to train the model. y should be a list of classes as</span>
+<span class="sd">        encoded by the label_encoder</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list): Generally a list of feature vectors, one for each training example</span>
+<span class="sd">            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld</span>
+<span class="sd">                      entity objects)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predicts the labels from a feature matrix X. Again X is the format of what is returned by</span>
+<span class="sd">        extract_features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list): A list of feature vectors, one for each example</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of classification labels): a list of predicted labels (in an encoded format)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.get_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets a dictionary of all of the current model parameters and their values</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            deep (bool): Not used, needed for sklearn compatibility</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): A dictionary of the model parameter names as keys and their set values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.set_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the model parameters. Defaults should be set for all parameters such that a model</span>
+<span class="sd">        is initialized with reasonable default parameters if none are explicitly passed in.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **parameters: Arbitrary keyword arguments. The keys are model parameter names and the</span>
+<span class="sd">                          values are what they should be set to</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.setup_model"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.setup_model">[docs]</a>    <span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.extract_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.extract_features">[docs]</a>    <span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extracts all features from a list of MindMeld examples. Processes the data and returns the</span>
+<span class="sd">        features in the format that is expected as an input to fit(). Note that the MindMeld config</span>
+<span class="sd">        and resources are passed in each time to make the underlying model implementation stateless.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): A list of queries to extract features for</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * (list of feature vectors): X</span>
+<span class="sd">                * (list of labels): y</span>
+<span class="sd">                * (list of groups): A list of groups to be used for splitting with \</span>
+<span class="sd">                    sklearn GridSearchCV</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Tagger.extract_and_predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.extract_and_predict">[docs]</a>    <span class="k">def</span> <span class="nf">extract_and_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Does both feature extraction and prediction. Often necessary for sequence models when the</span>
+<span class="sd">        prediction of the previous example is used as a feature for the next example. If this is</span>
+<span class="sd">        not the case, extract is simply called before predict here. Note that the MindMeld config</span>
+<span class="sd">        and resources are passed in each time to make the underlying model implementation stateless.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): A list of queries to extract features for and</span>
+<span class="sd">                                                       predict</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of classification labels): A list of predicted labels (in encoded format)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="Tagger.predict_proba"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): A list of queries to extract features for and</span>
+<span class="sd">                                                       predict</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of lists): A list of predicted labels (in encoded format) and confidence scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">X</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Tagger.dump"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.dump">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Since traditional SKLearn models are easily serializable, we can</span>
+<span class="sd">        use JobLib to serialize them. So we alter the context object to make</span>
+<span class="sd">        this explicit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_path (str): The path to dump the model to</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            config (dict): The altered config object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="n">model_path</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;serializable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">config</span></div>
+
+<div class="viewcode-block" id="Tagger.load"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the model state to memory. This is a no-op since we do not</span>
+<span class="sd">        have to do anything special to load default serializable models</span>
+<span class="sd">        for SKLearn.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_path (str): The path to dump the model to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="n">model_path</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="get_tags_from_entities"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.get_tags_from_entities">[docs]</a><span class="k">def</span> <span class="nf">get_tags_from_entities</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;IOB&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get joint app and system IOB tags from a query&#39;s entities.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query (Query): A query instance.</span>
+<span class="sd">        entities (List of QueryEntity): A list of queries found in the query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (list of str): The tags for each token in the query. A tag has four \</span>
+<span class="sd">            parts separated by &#39;|&#39;. The first two are the IOB status for \</span>
+<span class="sd">            app entities followed by the type of app entity or \</span>
+<span class="sd">            &#39;&#39; if the IOB status is &#39;O&#39;. The last two are like the first two, \</span>
+<span class="sd">            but for system entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">iobs</span><span class="p">,</span> <span class="n">types</span> <span class="o">=</span> <span class="n">_get_tags_from_entities</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MarkupError</span><span class="p">(</span><span class="s2">&quot;Invalid entities </span><span class="si">{}</span><span class="s2"> in &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">query</span><span class="p">))</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">iobs</span><span class="p">,</span> <span class="n">types</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">tags</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_tags_from_entities</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;IOB&quot;</span><span class="p">):</span>
+    <span class="n">normalized_tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+    <span class="n">iobs</span> <span class="o">=</span> <span class="p">[</span><span class="n">O_TAG</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">normalized_tokens</span><span class="p">]</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">normalized_tokens</span><span class="p">]</span>
+
+    <span class="c1"># tag I and type for all tag schemes</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="p">:</span>
+            <span class="n">iobs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_TAG</span>
+            <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span>
+
+    <span class="c1"># Replace I with B/E/S when appropriate</span>
+    <span class="k">if</span> <span class="n">scheme</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;IOB&quot;</span><span class="p">,</span> <span class="s2">&quot;IOBES&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+            <span class="n">iobs</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="n">B_TAG</span>
+    <span class="k">if</span> <span class="n">scheme</span> <span class="o">==</span> <span class="s2">&quot;IOBES&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">iobs</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">S_TAG</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">iobs</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">E_TAG</span>
+
+    <span class="k">return</span> <span class="n">iobs</span><span class="p">,</span> <span class="n">types</span>
+
+
+<div class="viewcode-block" id="get_entities_from_tags"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.get_entities_from_tags">[docs]</a><span class="k">def</span> <span class="nf">get_entities_from_tags</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">system_entity_recognizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;From a set of joint IOB tags, parse the app and system entities.</span>
+
+<span class="sd">    This performs the reverse operation of get_tags_from_entities.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query (Query): Any query instance.</span>
+<span class="sd">        tags (list of str): Joint app and system tags, like those</span>
+<span class="sd">            created by get_tags_from_entities.</span>
+<span class="sd">        system_entity_recognizer (SystemEntityRecognizer)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (list of QueryEntity) The tuple containing the list of entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">normalized_tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+
+    <span class="n">entities</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_is_system_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">entity_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;sys&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_append_entity</span><span class="p">(</span><span class="n">token_start</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">normalized_tokens</span><span class="p">[:</span><span class="n">token_start</span><span class="p">])</span>
+        <span class="c1"># If there is a prefix, we have to add one for the whitespace</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+
+        <span class="n">norm_span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="n">QueryEntity</span><span class="o">.</span><span class="n">from_query</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">normalized_span</span><span class="o">=</span><span class="n">norm_span</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="n">entity_type</span>
+        <span class="p">)</span>
+        <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Appended </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_append_system_entity</span><span class="p">(</span><span class="n">token_start</span><span class="p">,</span> <span class="n">token_end</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Looking for &#39;</span><span class="si">%s</span><span class="s2">&#39; between </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">.&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">token_start</span><span class="p">,</span> <span class="n">token_end</span><span class="p">)</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">normalized_tokens</span><span class="p">[:</span><span class="n">token_start</span><span class="p">])</span>
+        <span class="c1"># If there is a prefix, we have to add one for the whitespace</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">normalized_tokens</span><span class="p">[</span><span class="n">token_start</span><span class="p">:</span><span class="n">token_end</span><span class="p">]))</span>
+
+        <span class="n">norm_span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="n">span</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">transform_span</span><span class="p">(</span><span class="n">norm_span</span><span class="p">,</span> <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">,</span> <span class="n">TEXT_FORM_RAW</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">system_entity_recognizer</span><span class="o">.</span><span class="n">resolve_system_entity</span><span class="p">(</span>
+                <span class="n">query</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">span</span>
+            <span class="p">)</span>
+            <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Appended system entity </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SystemEntityResolutionError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Found no matching system entity </span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">, </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">token_start</span><span class="p">,</span> <span class="n">token_end</span><span class="p">,</span> <span class="n">entity_type</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">entity_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">entity_start</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">prev_ent_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">tag_idx</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+        <span class="n">iob</span><span class="p">,</span> <span class="n">ent_type</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Close entity and reset if the tag indicates a new entity</span>
+        <span class="k">if</span> <span class="n">entity_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">iob</span> <span class="ow">in</span> <span class="p">(</span><span class="n">O_TAG</span><span class="p">,</span> <span class="n">B_TAG</span><span class="p">,</span> <span class="n">S_TAG</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ent_type</span> <span class="o">!=</span> <span class="n">prev_ent_type</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entity closed at prev&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_is_system_entity</span><span class="p">(</span><span class="n">prev_ent_type</span><span class="p">):</span>
+                <span class="n">_append_system_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="n">tag_idx</span><span class="p">,</span> <span class="n">prev_ent_type</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_append_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="n">prev_ent_type</span><span class="p">,</span> <span class="n">entity_tokens</span><span class="p">)</span>
+            <span class="n">entity_start</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">prev_ent_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">entity_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Check if an entity has started</span>
+        <span class="k">if</span> <span class="n">iob</span> <span class="ow">in</span> <span class="p">(</span><span class="n">B_TAG</span><span class="p">,</span> <span class="n">S_TAG</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ent_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">prev_ent_type</span><span class="p">):</span>
+            <span class="n">entity_start</span> <span class="o">=</span> <span class="n">tag_idx</span>
+            <span class="k">if</span> <span class="n">_is_system_entity</span><span class="p">(</span><span class="n">ent_type</span><span class="p">):</span>
+                <span class="c1"># During predict time, we construct sys_candidates for the input query.</span>
+                <span class="c1"># These candidates are &quot;global&quot; sys_candidates, in that the entire query</span>
+                <span class="c1"># is sent to Duckling to extract sys_candidates and not just a span range</span>
+                <span class="c1"># within the query. When we append system entities for a given token,</span>
+                <span class="c1"># we pick among candidates with start_span equivalent to the token&#39;s tag_idx.</span>
+
+                <span class="n">picked_by_existing_system_entity_candidates</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="n">sys_entities</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_system_entity_candidates</span><span class="p">(</span><span class="n">ent_type</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ent_type</span> <span class="o">==</span> <span class="s2">&quot;sys_time&quot;</span><span class="p">:</span>
+                    <span class="n">sys_entities</span> <span class="o">=</span> <span class="n">_sort_by_lowest_time_grain</span><span class="p">(</span><span class="n">sys_entities</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">sys_candidate</span> <span class="ow">in</span> <span class="n">sys_entities</span><span class="p">:</span>
+                    <span class="n">start_span</span> <span class="o">=</span> <span class="n">sys_candidate</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">start</span>
+                    <span class="n">end_span</span> <span class="o">=</span> <span class="n">sys_candidate</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">end</span>
+
+                    <span class="k">if</span> <span class="n">start_span</span> <span class="o">==</span> <span class="n">tag_idx</span> <span class="ow">and</span> <span class="n">tag_idx</span> <span class="o">&lt;=</span> <span class="n">end_span</span><span class="p">:</span>
+                        <span class="c1"># We currently don&#39;t prioritize any sys_candidate if there are</span>
+                        <span class="c1"># multiple candidates that meet this conditional.</span>
+                        <span class="n">entity_start</span> <span class="o">=</span> <span class="n">sys_candidate</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">start</span>
+                    <span class="n">picked_by_existing_system_entity_candidates</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">picked_by_existing_system_entity_candidates</span><span class="p">:</span>
+                    <span class="n">entity_start</span> <span class="o">=</span> <span class="n">tag_idx</span>
+
+        <span class="c1"># Append the current token to the current entity, if applicable.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">iob</span> <span class="o">!=</span> <span class="n">O_TAG</span>
+            <span class="ow">and</span> <span class="n">entity_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_system_entity</span><span class="p">(</span><span class="n">ent_type</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">entity_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">normalized_tokens</span><span class="p">[</span><span class="n">tag_idx</span><span class="p">])</span>
+
+        <span class="c1"># Close the entity if the tag indicates it closed</span>
+        <span class="k">if</span> <span class="n">entity_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">iob</span> <span class="ow">in</span> <span class="p">(</span><span class="n">E_TAG</span><span class="p">,</span> <span class="n">S_TAG</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entity closed here&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_is_system_entity</span><span class="p">(</span><span class="n">ent_type</span><span class="p">):</span>
+                <span class="n">_append_system_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="n">tag_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ent_type</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_append_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="n">ent_type</span><span class="p">,</span> <span class="n">entity_tokens</span><span class="p">)</span>
+            <span class="n">entity_start</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">ent_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">entity_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">prev_ent_type</span> <span class="o">=</span> <span class="n">ent_type</span>
+
+    <span class="c1"># Handle entities that end with the end of the query</span>
+    <span class="k">if</span> <span class="n">entity_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entity closed at end&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_is_system_entity</span><span class="p">(</span><span class="n">prev_ent_type</span><span class="p">):</span>
+            <span class="n">_append_system_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">),</span> <span class="n">prev_ent_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_append_entity</span><span class="p">(</span><span class="n">entity_start</span><span class="p">,</span> <span class="n">prev_ent_type</span><span class="p">,</span> <span class="n">entity_tokens</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entity did not end: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">entity_start</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span></div>
+
+
+<span class="c1"># Methods for tag evaluation</span>
+
+
+<div class="viewcode-block" id="BoundaryCounts"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.BoundaryCounts">[docs]</a><span class="k">class</span> <span class="nc">BoundaryCounts</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class stores the counts of the boundary evaluation metrics.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        le (int): Label error count. This is when the span is the same but the entity</span>
+<span class="sd">                  label is incorrect</span>
+<span class="sd">        be (int): Boundary error count. This is when the entity type is correct but the span is</span>
+<span class="sd">                  incorrect</span>
+<span class="sd">        lbe (int): Label boundary error count. This is when both the entity type and span are</span>
+<span class="sd">                   incorrect, but there was an entity predicted</span>
+<span class="sd">        tp (int): True positive count. When an entity was correctly predicted</span>
+<span class="sd">        tn (int): True negative count. Count of times it was correctly predicted that there is no</span>
+<span class="sd">                  entity</span>
+<span class="sd">        fp (int): False positive count. When an entity was predicted but one shouldn&#39;t have been</span>
+<span class="sd">        fn (int): False negative count. When an entity was not predicted where one should have been</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the object with all counts set to 0&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">le</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">be</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lbe</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tn</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="BoundaryCounts.to_dict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.BoundaryCounts.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the object to a dictionary&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;le&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">le</span><span class="p">,</span>
+            <span class="s2">&quot;be&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">be</span><span class="p">,</span>
+            <span class="s2">&quot;lbe&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbe</span><span class="p">,</span>
+            <span class="s2">&quot;tp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tp</span><span class="p">,</span>
+            <span class="s2">&quot;tn&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tn</span><span class="p">,</span>
+            <span class="s2">&quot;fp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">,</span>
+            <span class="s2">&quot;fn&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span>
+        <span class="p">}</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_get_tag_label</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Splits a token into its tag and label.&quot;&quot;&quot;</span>
+    <span class="n">tag</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tag</span><span class="p">,</span> <span class="n">label</span>
+
+
+<span class="k">def</span> <span class="nf">_contains_O</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true if there is an O tag in the list of tokens we are considering</span>
+<span class="sd">    as an entity&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">entity</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">O_TAG</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_all_O</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true if all of the tokens we are considering as an entity contain O tags&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">entity</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">O_TAG</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">_is_boundary_error</span><span class="p">(</span><span class="n">pred_entity</span><span class="p">,</span> <span class="n">exp_entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true if the predicted and expected entity form a boundary error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">trimmed_pred_entity</span> <span class="o">=</span> <span class="p">[</span><span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">pred_entity</span> <span class="k">if</span> <span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">B_TAG</span><span class="p">]</span>
+    <span class="n">trimmed_exp_entity</span> <span class="o">=</span> <span class="p">[</span><span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">exp_entity</span> <span class="k">if</span> <span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">B_TAG</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">trimmed_pred_entity</span> <span class="o">==</span> <span class="n">trimmed_exp_entity</span>
+
+
+<span class="k">def</span> <span class="nf">_new_tag</span><span class="p">(</span><span class="n">last_entity</span><span class="p">,</span> <span class="n">curr_tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true if the current tag is different than the tag of the last entity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">last_entity</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">curr_tag</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">last_entity</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">I_TAG</span> <span class="ow">or</span> <span class="n">last_entity</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">B_TAG</span>
+    <span class="p">)</span> <span class="ow">and</span> <span class="n">curr_tag</span> <span class="o">==</span> <span class="n">B_TAG</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_determine_count_type</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">last_exp_entity</span><span class="p">,</span> <span class="n">boundary_counts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determines which of TP, FP, FN, LE, LBE, or BE the last predicted and expected entity</span>
+<span class="sd">    are and updates the boundary counts accordingly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TP if both are the same</span>
+    <span class="k">if</span> <span class="n">last_pred_entity</span> <span class="o">==</span> <span class="n">last_exp_entity</span><span class="p">:</span>
+        <span class="n">boundary_counts</span><span class="o">.</span><span class="n">tp</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># FP if entity predicted but not expected</span>
+    <span class="k">elif</span> <span class="n">_all_O</span><span class="p">(</span><span class="n">last_exp_entity</span><span class="p">):</span>
+        <span class="n">boundary_counts</span><span class="o">.</span><span class="n">fp</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># FN if entity expected but not predicted</span>
+    <span class="k">elif</span> <span class="n">_all_O</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">):</span>
+        <span class="n">boundary_counts</span><span class="o">.</span><span class="n">fn</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># LE if wrong entity predicted</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">_contains_O</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_contains_O</span><span class="p">(</span><span class="n">last_exp_entity</span><span class="p">):</span>
+        <span class="n">boundary_counts</span><span class="o">.</span><span class="n">le</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># BE and LBE</span>
+    <span class="k">elif</span> <span class="n">_contains_O</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_contains_O</span><span class="p">(</span><span class="n">last_exp_entity</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_is_boundary_error</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">last_exp_entity</span><span class="p">):</span>
+            <span class="n">boundary_counts</span><span class="o">.</span><span class="n">be</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">boundary_counts</span><span class="o">.</span><span class="n">lbe</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">boundary_counts</span>
+
+
+<div class="viewcode-block" id="get_boundary_counts"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.get_boundary_counts">[docs]</a><span class="k">def</span> <span class="nf">get_boundary_counts</span><span class="p">(</span><span class="n">expected_sequence</span><span class="p">,</span> <span class="n">predicted_sequence</span><span class="p">,</span> <span class="n">boundary_counts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the boundary counts for the expected and predicted sequence of entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize values</span>
+    <span class="n">in_coding_region</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">last_pred_entity</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_exp_entity</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">end_token</span> <span class="o">=</span> <span class="n">END_TAG</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span>
+
+    <span class="c1"># Iterate through the tokens in the sequence</span>
+    <span class="k">for</span> <span class="n">predicted_token</span><span class="p">,</span> <span class="n">expected_token</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">predicted_sequence</span> <span class="o">+</span> <span class="p">[</span><span class="n">end_token</span><span class="p">],</span> <span class="n">expected_sequence</span> <span class="o">+</span> <span class="p">[</span><span class="n">end_token</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">predicted_tag</span><span class="p">,</span> <span class="n">predicted_label</span> <span class="o">=</span> <span class="n">_get_tag_label</span><span class="p">(</span><span class="n">predicted_token</span><span class="p">)</span>
+        <span class="n">expected_tag</span><span class="p">,</span> <span class="n">expected_label</span> <span class="o">=</span> <span class="n">_get_tag_label</span><span class="p">(</span><span class="n">expected_token</span><span class="p">)</span>
+
+        <span class="c1"># If we are exiting a coding region, determine the boundary count</span>
+        <span class="k">if</span> <span class="n">predicted_tag</span> <span class="o">==</span> <span class="n">expected_tag</span> <span class="o">==</span> <span class="n">O_TAG</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">in_coding_region</span><span class="p">:</span>
+                <span class="n">boundary_counts</span> <span class="o">=</span> <span class="n">_determine_count_type</span><span class="p">(</span>
+                    <span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">last_exp_entity</span><span class="p">,</span> <span class="n">boundary_counts</span>
+                <span class="p">)</span>
+                <span class="n">in_coding_region</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">last_pred_entity</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">last_exp_entity</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># If we are entering a new coding region (with a new tag), determine the boundary count and</span>
+        <span class="c1"># reset entity history</span>
+        <span class="k">elif</span> <span class="n">_new_tag</span><span class="p">(</span><span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">predicted_tag</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_new_tag</span><span class="p">(</span>
+            <span class="n">last_exp_entity</span><span class="p">,</span> <span class="n">expected_tag</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">in_coding_region</span><span class="p">:</span>
+                <span class="n">boundary_counts</span> <span class="o">=</span> <span class="n">_determine_count_type</span><span class="p">(</span>
+                    <span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">last_exp_entity</span><span class="p">,</span> <span class="n">boundary_counts</span>
+                <span class="p">)</span>
+                <span class="n">last_pred_entity</span> <span class="o">=</span> <span class="p">[(</span><span class="n">predicted_tag</span><span class="p">,</span> <span class="n">predicted_label</span><span class="p">)]</span>
+                <span class="n">last_exp_entity</span> <span class="o">=</span> <span class="p">[(</span><span class="n">expected_tag</span><span class="p">,</span> <span class="n">expected_label</span><span class="p">)]</span>
+
+        <span class="c1"># If we are at the end of the sequence, determine the boundary count for the last section</span>
+        <span class="k">elif</span> <span class="n">predicted_tag</span> <span class="o">==</span> <span class="n">expected_tag</span> <span class="o">==</span> <span class="n">END_TAG</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">start</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">in_coding_region</span><span class="p">:</span>
+                <span class="n">boundary_counts</span> <span class="o">=</span> <span class="n">_determine_count_type</span><span class="p">(</span>
+                    <span class="n">last_pred_entity</span><span class="p">,</span> <span class="n">last_exp_entity</span><span class="p">,</span> <span class="n">boundary_counts</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">boundary_counts</span><span class="o">.</span><span class="n">tn</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If going from a non coding to coding region, add a count for the true negative</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">in_coding_region</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">start</span><span class="p">:</span>
+                    <span class="n">boundary_counts</span><span class="o">.</span><span class="n">tn</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">in_coding_region</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># If continuing in a coding region, append context to current entity</span>
+            <span class="n">last_pred_entity</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">predicted_tag</span><span class="p">,</span> <span class="n">predicted_label</span><span class="p">))</span>
+            <span class="n">last_exp_entity</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">expected_tag</span><span class="p">,</span> <span class="n">expected_label</span><span class="p">))</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">boundary_counts</span></div>
+
+
+<div class="viewcode-block" id="extract_sequence_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.extract_sequence_features">[docs]</a><span class="k">def</span> <span class="nf">extract_sequence_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">example_type</span><span class="p">,</span> <span class="n">feature_config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extracts feature dicts for each token in an example.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        example (mindmeld.core.Query): a query</span>
+<span class="sd">        example_type (str): The type of example</span>
+<span class="sd">        feature_config (dict): The config for features</span>
+<span class="sd">        resources (dict): Resources of this model</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (list of dict): features</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">feat_seq</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">workspace_features</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">feature_config</span><span class="p">)</span>
+    <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">workspace_features</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ENABLE_STEMMING</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">workspace_features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># a feature extractor function was passed in directly</span>
+            <span class="n">feat_extractor</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">ENABLE_STEMMING</span><span class="p">]</span> <span class="o">=</span> <span class="n">enable_stemming</span>
+            <span class="n">feat_extractor</span> <span class="o">=</span> <span class="n">get_feature_extractor</span><span class="p">(</span><span class="n">example_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">update_feat_seq</span> <span class="o">=</span> <span class="n">feat_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">feat_seq</span><span class="p">:</span>
+            <span class="n">feat_seq</span> <span class="o">=</span> <span class="n">update_feat_seq</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">features</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">update_feat_seq</span><span class="p">):</span>
+                <span class="n">feat_seq</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">feat_seq</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,592 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld._util &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld._util</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld._util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;A module containing various utility functions for MindMeld.</span>
+<span class="sd">These are capabilities that do not have an obvious home within the existing</span>
+<span class="sd">project structure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">from</span> <span class="nn">email.utils</span> <span class="k">import</span> <span class="n">parsedate</span>
+
+<span class="kn">import</span> <span class="nn">py</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="k">import</span> <span class="n">tz</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.components</span> <span class="k">import</span> <span class="n">QuestionAnswerer</span>
+<span class="kn">from</span> <span class="nn">.components._config</span> <span class="k">import</span> <span class="n">get_app_namespace</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="k">import</span> <span class="n">DEVCENTER_URL</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">KnowledgeBaseConnectionError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">CONFIG_FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;mindmeld.cfg&quot;</span>
+<span class="n">BLUEPRINT_URL</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{mindmeld_url}</span><span class="s2">/bp/</span><span class="si">{blueprint}</span><span class="s2">/</span><span class="si">{filename}</span><span class="s2">&quot;</span>
+
+<span class="n">BLUEPRINT_APP_ARCHIVE</span> <span class="o">=</span> <span class="s2">&quot;app.tar.gz&quot;</span>
+<span class="n">BLUEPRINT_KB_ARCHIVE</span> <span class="o">=</span> <span class="s2">&quot;kb.tar.gz&quot;</span>
+<span class="n">BLUEPRINTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;kwik_e_mart&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;food_ordering&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;home_assistant&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kb&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kb&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="s2">&quot;video_discovery&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;hr_assistant&quot;</span><span class="p">:</span> <span class="p">{},</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">Blueprint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This is a callable class used to set up a blueprint app.</span>
+
+<span class="sd">    The MindMeld website hosts the blueprints in a directory structure like this:</span>
+
+<span class="sd">       - https://mindmeld.com/blueprints/</span>
+<span class="sd">       |-food_ordering</span>
+<span class="sd">       |  |-app.tar.gz</span>
+<span class="sd">       |  |-kb.tar.gz</span>
+<span class="sd">       |-quickstart</span>
+<span class="sd">          |-app.tar.gz</span>
+<span class="sd">          |-kb.tar.gz</span>
+
+
+<span class="sd">    Within each blueprint directory `app.tar.gz` contains the MindMeld</span>
+<span class="sd">    application data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`</span>
+<span class="sd">    contains the a JSON file for each index in the knowledge base.</span>
+
+<span class="sd">    The blueprint method will check the MindMeld website for when the blueprint</span>
+<span class="sd">    files were last updated and compare that with any files in a local</span>
+<span class="sd">    blueprint cache at ~/.mindmeld/blueprints. If the cache is out of date,</span>
+<span class="sd">    the updated archive is downloaded. The archive is then extracted into a</span>
+<span class="sd">    directory named for the blueprint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_kb</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the blueprint</span>
+<span class="sd">            app_path (str, optional): The path to the app</span>
+<span class="sd">            es_host (str, optional): The hostname of the elasticsearch cluster</span>
+<span class="sd">                for the knowledge base. If no value is passed, value will be</span>
+<span class="sd">                read from the environment.</span>
+<span class="sd">            skip_kb (bool, optional): If True, the blueprint knowledge base</span>
+<span class="sd">                will not be set up.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The path where the blueprint was created</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: When an unknown blueprint is specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">BLUEPRINTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown blueprint name: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">bp_config</span> <span class="o">=</span> <span class="n">BLUEPRINTS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="n">app_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bp_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kb&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">skip_kb</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_kb</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="n">es_host</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">app_path</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">setup_app</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setups up the app folder for the specified blueprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the blueprint</span>
+<span class="sd">            app_path (str, optional): The path to the app</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: When an unknown blueprint is specified</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">BLUEPRINTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown blueprint name: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">app_path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+
+        <span class="n">local_archive</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_fetch_archive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;app&quot;</span><span class="p">)</span>
+        <span class="n">tarball</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">local_archive</span><span class="p">)</span>
+        <span class="n">tarball</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created </span><span class="si">%r</span><span class="s2"> app at </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">app_path</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">setup_kb</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets up the knowledge base for the specified blueprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the blueprint</span>
+<span class="sd">            app_path (str, optional): The path to the app</span>
+<span class="sd">            es_host (str, optional): The hostname of the elasticsearch cluster</span>
+<span class="sd">                for the knowledge base. If no value is passed, value will be</span>
+<span class="sd">                read from the environment.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnvironmentError: When no Elasticsearch host is specified directly</span>
+<span class="sd">                or in the environment.</span>
+<span class="sd">            ValueError: When an unknown blueprint is specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">BLUEPRINTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown blueprint name: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">app_path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="n">app_namespace</span> <span class="o">=</span> <span class="n">get_app_namespace</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="n">es_host</span> <span class="o">=</span> <span class="n">es_host</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MM_ES_HOST&quot;</span><span class="p">,</span> <span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_cached_blueprint_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">local_archive</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_fetch_archive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;kb&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No knowledge base to set up.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">kb_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="s2">&quot;kb&quot;</span><span class="p">)</span>
+        <span class="n">tarball</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">local_archive</span><span class="p">)</span>
+        <span class="n">tarball</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">kb_dir</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">index_files</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">kb_dir</span><span class="p">))</span>
+
+        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_files</span><span class="p">:</span>
+            <span class="n">index_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kb_dir</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+            <span class="c1"># Copy the index files into the app&#39;s data directory</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">QuestionAnswerer</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="p">,</span> <span class="n">index_name</span><span class="p">,</span> <span class="n">data_file</span><span class="p">,</span> <span class="n">es_host</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">KnowledgeBaseConnectionError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot set up knowledge base. Unable to connect to Elasticsearch &quot;</span>
+                    <span class="s2">&quot;instance at </span><span class="si">%r</span><span class="s2">. Confirm it is running or specify an alternate &quot;</span>
+                    <span class="s2">&quot;instance with the MM_ES_HOST environment variable&quot;</span><span class="p">,</span>
+                    <span class="n">es_host</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">raise</span> <span class="n">ex</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created </span><span class="si">%r</span><span class="s2"> knowledge base at </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">es_host</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_fetch_archive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">archive_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetches a blueprint archive from S3.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the blueprint.</span>
+<span class="sd">            archive_type (str): The type or the archive. Can be &#39;app&#39; or &#39;kb&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The path of the local archive after it is downloaded.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnvironmentError: When AWS credentials are not available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_cached_blueprint_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="c1"># dir already exists -- no worries</span>
+            <span class="k">pass</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;app&quot;</span><span class="p">:</span> <span class="n">BLUEPRINT_APP_ARCHIVE</span><span class="p">,</span> <span class="s2">&quot;kb&quot;</span><span class="p">:</span> <span class="n">BLUEPRINT_KB_ARCHIVE</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">archive_type</span>
+        <span class="p">)</span>
+
+        <span class="n">local_archive</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">remote_url</span> <span class="o">=</span> <span class="n">BLUEPRINT_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">mindmeld_url</span><span class="o">=</span><span class="n">DEVCENTER_URL</span><span class="p">,</span> <span class="n">blueprint</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span>
+        <span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">remote_url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+            <span class="c1"># authentication error</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Invalid MindMeld credentials. Cannot download blueprint. Please confirm &quot;</span>
+                <span class="s2">&quot;they are correct and try again.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="c1"># Unknown error</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unknown error fetching </span><span class="si">{}</span><span class="s2"> archive from </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">archive_type</span><span class="p">,</span> <span class="n">remote_url</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown error fetching archive&quot;</span><span class="p">)</span>
+        <span class="n">remote_modified</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">parsedate</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last-modified&quot;</span><span class="p">))[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">local_modified</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">local_archive</span><span class="p">),</span> <span class="n">tz</span><span class="o">.</span><span class="n">tzlocal</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="c1"># File doesn&#39;t exist, use minimum possible time</span>
+            <span class="n">local_modified</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">MINYEAR</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">()</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">remote_modified</span> <span class="o">&lt;</span> <span class="n">local_modified</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using cached </span><span class="si">%r</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> archive&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">archive_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fetching </span><span class="si">%s</span><span class="s2"> archive from </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">archive_type</span><span class="p">,</span> <span class="n">remote_url</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">remote_url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_archive</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_pointer</span><span class="p">:</span>
+                    <span class="n">res</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">decode_content</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="n">file_pointer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">local_archive</span>
+
+
+<span class="n">blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">()</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+
+<div class="viewcode-block" id="configure_logs"><a class="viewcode-back" href="../../apidoc/mindmeld.html#mindmeld.configure_logs">[docs]</a><span class="k">def</span> <span class="nf">configure_logs</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper method for easily configuring logs from the python shell.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        level (TYPE, optional): A logging level recognized by python&#39;s logging module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log_format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">log_format</span><span class="p">)</span>
+    <span class="n">package_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>
+    <span class="n">package_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">load_configuration</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Loads a configuration file (mindmeld.cfg) for the current app. The</span>
+<span class="sd">    file is located by searching first in the current directory, and in parent</span>
+<span class="sd">    directories.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_file</span> <span class="o">=</span> <span class="n">_find_config_file</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config_file</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using config file at &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+        <span class="c1"># Do the thing</span>
+        <span class="n">iniconfig</span> <span class="o">=</span> <span class="n">py</span><span class="o">.</span><span class="n">iniconfig</span><span class="o">.</span><span class="n">IniConfig</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iniconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mindmeld&quot;</span><span class="p">,</span> <span class="s2">&quot;app_name&quot;</span><span class="p">)</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iniconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mindmeld&quot;</span><span class="p">,</span> <span class="s2">&quot;app_path&quot;</span><span class="p">)</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;use_quarry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iniconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mindmeld&quot;</span><span class="p">,</span> <span class="s2">&quot;use_quarry&quot;</span><span class="p">)</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;input_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iniconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mindmeld&quot;</span><span class="p">,</span> <span class="s2">&quot;input_method&quot;</span><span class="p">)</span>
+        <span class="c1"># resolve path if necessary</span>
+        <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_path&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_path&quot;</span><span class="p">]):</span>
+            <span class="n">config_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_dir</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;app_path&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">config</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No config file was found.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_config_file</span><span class="p">():</span>
+    <span class="n">prev_dir</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">prev_dir</span> <span class="o">!=</span> <span class="n">current_dir</span><span class="p">:</span>
+        <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="n">CONFIG_FILE_NAME</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config_file</span><span class="p">):</span>
+            <span class="c1"># found a config file!</span>
+            <span class="k">return</span> <span class="n">config_file</span>
+
+        <span class="c1"># go up one directory</span>
+        <span class="n">prev_dir</span> <span class="o">=</span> <span class="n">current_dir</span>
+        <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with the Preprocessor &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Natural Language Processor" href="nlp.html" />
+    <link rel="prev" title="Platform Architecture" href="architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with the Preprocessor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implement-the-preprocessor">Implement the preprocessor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-stemming-as-a-preprocessing-step">Example: Stemming as a preprocessing step</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#use-the-preprocessor">Use the preprocessor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with the Preprocessor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/preprocessor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-the-preprocessor">
+<h1>Working with the Preprocessor<a class="headerlink" href="#working-with-the-preprocessor" title="Permalink to this headline">¶</a></h1>
+<p>The Preprocessor</p>
+<blockquote>
+<div><ul class="simple">
+<li>is an optional module that is run before any component in the MindMeld pipeline</li>
+<li>uses app-specific logic defined by the developer to perform arbitrary text modifications on the user query before it is sent to the <a class="reference internal" href="nlp.html"><span class="doc">natural language processor</span></a></li>
+</ul>
+</div></blockquote>
+<p>Examples of some common preprocessing tasks include spelling correction, punctuation removal, handling special characters, sentence segmentation, and other kinds of application-specific text normalization.</p>
+<div class="section" id="implement-the-preprocessor">
+<h2>Implement the preprocessor<a class="headerlink" href="#implement-the-preprocessor" title="Permalink to this headline">¶</a></h2>
+<p>You can use the <code class="xref py py-class docutils literal"><span class="pre">Preprocessor</span></code> abstract class provided by MindMeld as a template for defining your own custom preprocessing logic.</p>
+<p>The base class contains two methods:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="xref py py-meth docutils literal"><span class="pre">process()</span></code>: takes in a text string and returns the processed string</li>
+<li><code class="xref py py-meth docutils literal"><span class="pre">get_char_index_map()</span></code>: generates the character mapping from the processed string to the original text string.</li>
+</ul>
+</div></blockquote>
+<p>While implementing the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method is mandatory and key to defining the functionality of your preprocessor, implementation of the <code class="xref py py-meth docutils literal"><span class="pre">get_char_index_map()</span></code> is optional. However, to ensure the proper functioning of downstream NLP components, it is essential that you implement this function whenever the length (character count) of the input query is changed by the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
+<div class="section" id="example-stemming-as-a-preprocessing-step">
+<h3>Example: Stemming as a preprocessing step<a class="headerlink" href="#example-stemming-as-a-preprocessing-step" title="Permalink to this headline">¶</a></h3>
+<p>In this example, we define a basic preprocessor that does <a class="reference external" href="https://en.wikipedia.org/wiki/Stemming">stemming</a> using the <a class="reference external" href="https://tartarus.org/martin/PorterStemmer/">Porter Stemmer</a> implementation from <a class="reference external" href="https://www.nltk.org/">NLTK</a>. Stemming reduces each word to a base or root form called the word stem. E.g., the words “fish”, “fishes” and “fishing” all have the same stem, “fish”. This kind of preprocessing is widely used in information retrieval systems as a <a class="reference external" href="https://en.wikipedia.org/wiki/Query_expansion">query expansion</a> technique to improve search engine recall.</p>
+<p>You will need to install the NLTK package to try out the example below. Add the following code to a file named <code class="docutils literal"><span class="pre">stem_processor.py</span></code> and put it in your application folder.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">stem_processor.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>  <span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">Preprocessor</span>
+  <span class="kn">from</span> <span class="nn">nltk.stem</span> <span class="kn">import</span> <span class="n">PorterStemmer</span>
+
+
+  <span class="k">class</span> <span class="nc">StemProcessor</span><span class="p">(</span><span class="n">Preprocessor</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      An example or preprocessor for stemming</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">=</span> <span class="n">PorterStemmer</span><span class="p">()</span>
+
+      <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot; StemProcessor will take in a query text and process it to return the stemmed version of the query.</span>
+<span class="sd">          Args:</span>
+<span class="sd">            text (str)</span>
+
+<span class="sd">          Returns:</span>
+<span class="sd">            (str)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+          <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+      <span class="k">def</span> <span class="nf">get_char_index_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_text</span><span class="p">,</span> <span class="n">processed_text</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot; This function is used to map between the raw text and the processed text, making certain assumptions between the raw text and the processed text.</span>
+<span class="sd">          We return the 1-1 mapping between the two strings, which the Dialogue Manager uses to compute the mapping between the entity spans in the processed text to the entity spans in the raw text.</span>
+
+<span class="sd">          Args:</span>
+<span class="sd">            raw_text (str)</span>
+<span class="sd">            processed_text (str)</span>
+
+<span class="sd">          Returns:</span>
+<span class="sd">            (dict)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+
+          <span class="n">raw_tokens</span> <span class="o">=</span> <span class="n">raw_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+          <span class="n">processed_tokens</span> <span class="o">=</span> <span class="n">processed_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_tokens</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_tokens</span><span class="p">):</span>
+              <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Stemming should not change the number of tokens!&#39;</span><span class="p">)</span>
+
+          <span class="n">forward</span> <span class="o">=</span> <span class="p">{}</span>
+          <span class="n">raw_index</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="n">processed_index</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">raw_token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_tokens</span><span class="p">):</span>
+              <span class="n">processed_token</span> <span class="o">=</span> <span class="n">processed_tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+              <span class="k">for</span> <span class="n">character_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_token</span><span class="p">)):</span>
+                  <span class="n">forward</span><span class="p">[</span><span class="n">raw_index</span> <span class="o">+</span> <span class="n">character_count</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">processed_index</span> <span class="o">+</span> <span class="n">character_count</span><span class="p">,</span>
+                                                             <span class="n">processed_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_token</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+              <span class="k">if</span> <span class="n">raw_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_token</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_text</span><span class="p">):</span>
+                  <span class="n">forward</span><span class="p">[</span><span class="n">raw_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_token</span><span class="p">)]</span> <span class="o">=</span> <span class="n">processed_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_token</span><span class="p">)</span>
+                  <span class="n">raw_index</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_token</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                  <span class="n">processed_index</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_token</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+          <span class="n">backward</span> <span class="o">=</span> <span class="p">{}</span>
+          <span class="k">for</span> <span class="n">character_index</span> <span class="ow">in</span> <span class="n">forward</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">forward</span><span class="p">[</span><span class="n">character_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backward</span><span class="p">:</span>
+                  <span class="n">backward</span><span class="p">[</span><span class="n">forward</span><span class="p">[</span><span class="n">character_index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">character_index</span>
+
+          <span class="k">return</span> <span class="n">forward</span><span class="p">,</span> <span class="n">backward</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="use-the-preprocessor">
+<h2>Use the preprocessor<a class="headerlink" href="#use-the-preprocessor" title="Permalink to this headline">¶</a></h2>
+<p>To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the <code class="xref py py-class docutils literal"><span class="pre">Application</span></code> object in the application container file, <code class="docutils literal"><span class="pre">__init__.py</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span> <span class="nn">.stem_processor</span> <span class="kn">import</span> <span class="n">StemProcessor</span>
+
+<span class="n">preprocessor</span> <span class="o">=</span> <span class="n">StemProcessor</span><span class="p">()</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">preprocessor</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nlp.html" class="btn btn-neutral float-right" title="Working with the Natural Language Processor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="architecture.html" class="btn btn-neutral float-left" title="Platform Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

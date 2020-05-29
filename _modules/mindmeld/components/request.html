@@ -1,0 +1,613 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.request &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.request</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.request</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">attr</span>
+<span class="kn">import</span> <span class="nn">immutables</span>
+<span class="kn">import</span> <span class="nn">pycountry</span>
+<span class="kn">from</span> <span class="nn">pytz</span> <span class="k">import</span> <span class="n">timezone</span>
+<span class="kn">from</span> <span class="nn">pytz.exceptions</span> <span class="k">import</span> <span class="n">UnknownTimeZoneError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="validate_language_code"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.validate_language_code">[docs]</a><span class="k">def</span> <span class="nf">validate_language_code</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validates language code parameters</span>
+<span class="sd">    Args:</span>
+<span class="sd">        param (str, optional): The language code parameter</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A validated language code or None if unvalidated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not of type </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="s2">&quot;language&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># The pycountry APIs need the param to be in lowercase for processing</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid ISO 639-1 or ISO 639-2 language code.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="n">param</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pycountry</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alpha_2</span><span class="o">=</span><span class="n">param</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid ISO 639-1 language code. &quot;</span>
+            <span class="s2">&quot;See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="n">param</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pycountry</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alpha_3</span><span class="o">=</span><span class="n">param</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid ISO 639-2 language code. &quot;</span>
+            <span class="s2">&quot;See https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes for valid codes.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="n">param</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">param</span></div>
+
+
+<div class="viewcode-block" id="validate_locale_code"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.validate_locale_code">[docs]</a><span class="k">def</span> <span class="nf">validate_locale_code</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validates the locale code parameters</span>
+<span class="sd">    Args:</span>
+<span class="sd">        param (str, optional): The locale code parameter</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A validated locale code or None if unvalidated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not of type </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="s2">&quot;locale&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: Not a valid locale.&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">language_code</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">validate_language_code</span><span class="p">(</span><span class="n">language_code</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid ISO 639-1 language code. &quot;</span>
+            <span class="s2">&quot;See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="n">language_code</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># pycountry requires the country code to be upper-cased</span>
+    <span class="n">country_code</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pycountry</span><span class="o">.</span><span class="n">countries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alpha_2</span><span class="o">=</span><span class="n">country_code</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid ISO3166 alpha 2 country code. &quot;</span>
+            <span class="s2">&quot;See https://www.iso.org/obp/ui/#search for valid codes.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="n">country_code</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># return the validated locale</span>
+    <span class="k">return</span> <span class="n">language_code</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">country_code</span></div>
+
+
+<span class="k">def</span> <span class="nf">_validate_time_zone</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validates time zone parameters</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param (str, optional): The time zone parameter</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The passed in time zone</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not of type </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="s2">&quot;time_zone&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="nb">str</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timezone</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">UnknownTimeZoneError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not a valid time zone.&quot;</span><span class="p">,</span> <span class="s2">&quot;time_zone&quot;</span><span class="p">,</span> <span class="n">param</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">param</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_generic</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ptype</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">ptype</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid </span><span class="si">%r</span><span class="s2"> param: </span><span class="si">%s</span><span class="s2"> is not of type </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ptype</span>
+            <span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">param</span>
+
+    <span class="k">return</span> <span class="n">validator</span>
+
+
+<span class="n">PARAM_VALIDATORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;allowed_intents&quot;</span><span class="p">:</span> <span class="n">_validate_generic</span><span class="p">(</span><span class="s2">&quot;allowed_intents&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span>
+    <span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">:</span> <span class="n">_validate_generic</span><span class="p">(</span><span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+    <span class="s2">&quot;time_zone&quot;</span><span class="p">:</span> <span class="n">_validate_time_zone</span><span class="p">,</span>
+    <span class="s2">&quot;language&quot;</span><span class="p">:</span> <span class="n">validate_language_code</span><span class="p">,</span>
+    <span class="s2">&quot;locale&quot;</span><span class="p">:</span> <span class="n">validate_locale_code</span><span class="p">,</span>
+    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">_validate_generic</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+    <span class="s2">&quot;dynamic_resource&quot;</span><span class="p">:</span> <span class="n">_validate_generic</span><span class="p">(</span><span class="s2">&quot;dynamic_resource&quot;</span><span class="p">,</span> <span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="Params"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Params">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Params</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that contains parameters that modify how the user query is parsed.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        allowed_intents (list, str): A list of intents that you can set to force the language</span>
+<span class="sd">            processor to choose from.</span>
+<span class="sd">        target_dialogue_state (str): The name of the dialogue handler that you want to reach in</span>
+<span class="sd">            the next turn.</span>
+<span class="sd">        time_zone (str):  The name of an IANA time zone, such as &#39;America/Los_Angeles&#39;, or</span>
+<span class="sd">            &#39;Asia/Kolkata&#39;.</span>
+<span class="sd">        timestamp (long): A unix time stamp for the request accurate to the nearest second.</span>
+<span class="sd">        locale (str, optional): The locale representing the ISO 639-1/2 language code and ISO3166</span>
+<span class="sd">            alpha 2 country code separated by an underscore character.</span>
+<span class="sd">        language (str, optional): The language code representing ISO 639-1/2</span>
+<span class="sd">            language codes.</span>
+<span class="sd">        dynamic_resource (dict): A dictionary containing data used to influence the language</span>
+<span class="sd">            classifiers by adding resource data for the given turn.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_intents</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">))</span>
+    <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">time_zone</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">language</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">locale</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">dynamic_resource</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">dict</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Params.validate_param"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Params.validate_param">[docs]</a>    <span class="k">def</span> <span class="nf">validate_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform validation on the value of a specific parameter in the Params object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the parameter to be validated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True/False depending on success of the validation, None if the param name does</span>
+<span class="sd">                not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validator</span> <span class="o">=</span> <span class="n">PARAM_VALIDATORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">validator</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">param</span></div>
+
+<div class="viewcode-block" id="Params.validate_dm_params"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Params.validate_dm_params">[docs]</a>    <span class="k">def</span> <span class="nf">validate_dm_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate that the value of the &#39;target_dialogue_state&#39; parameter is a valid dialogue state</span>
+<span class="sd">            for the application and returns that value in a dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            handler_map (dict): Mapping from dialogue state to the function handler that gets</span>
+<span class="sd">                called when in the state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: single item dictionary with the parameter value if valid and None if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_param</span><span class="p">(</span><span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_dialogue_state</span> <span class="ow">and</span> <span class="n">target_dialogue_state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">handler_map</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Target dialogue state </span><span class="si">%s</span><span class="s2"> does not match any dialogue state names &quot;</span>
+                <span class="s2">&quot;in for the application. Not applying the target dialogue state &quot;</span>
+                <span class="s2">&quot;this turn.&quot;</span><span class="p">,</span>
+                <span class="n">target_dialogue_state</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">:</span> <span class="n">target_dialogue_state</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Params.validate_nlp_params"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Params.validate_nlp_params">[docs]</a>    <span class="k">def</span> <span class="nf">validate_nlp_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate language, locale, time zone, timestamp, and dynamic resource parameters</span>
+<span class="sd">            and return the params as a dictionary.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Mapping from parameter name to bool depending on validation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">param</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_param</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s2">&quot;time_zone&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dynamic_resource&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;language&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Params.to_dict"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Params.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;allowed_intents&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_zone&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;language&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;locale&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dynamic_resource&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">_dic</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">}</span>
+        <span class="c1"># converting from immutable map to just dictionary</span>
+        <span class="n">_dic</span><span class="p">[</span><span class="s2">&quot;dynamic_resource&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">_dic</span><span class="p">[</span><span class="s2">&quot;dynamic_resource&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_dic</span><span class="p">[</span><span class="s2">&quot;dynamic_resource&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">_dic</span></div></div>
+
+
+<div class="viewcode-block" id="FrozenParams"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.FrozenParams">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">FrozenParams</span><span class="p">(</span><span class="n">Params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An immutable version of the Params object.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        allowed_intents (list, str): A list of intents that you can set to force the language</span>
+<span class="sd">            processor to choose from.</span>
+<span class="sd">        target_dialogue_state (str): The name of the dialogue handler that you want to reach in</span>
+<span class="sd">            the next turn.</span>
+<span class="sd">        time_zone (str):  The name of an IANA time zone, such as &#39;America/Los_Angeles&#39;, or</span>
+<span class="sd">            &#39;Asia/Kolkata&#39;.</span>
+<span class="sd">        language (str): The language code representing ISO 639-1/2 language codes</span>
+<span class="sd">        locale (str, optional): The locale representing the ISO 639-1/2 language code and</span>
+<span class="sd">            ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">        timestamp (long): A unix time stamp for the request accurate to the nearest second.</span>
+<span class="sd">        dynamic_resource (dict): A dictionary containing data used to influence the language</span>
+<span class="sd">            classifiers by adding resource data for the given turn.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_intents</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">time_zone</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">language</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">locale</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">dynamic_resource</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">(),</span> <span class="n">converter</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Request">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+<span class="k">class</span> <span class="nc">Request</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Request is an object passed in through the Dialogue Manager and contains all the</span>
+<span class="sd">    information provided by the application client for the dialogue handler to act on. Note: the</span>
+<span class="sd">    Request object is read-only since it represents the client state, which should not be mutated.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        domains (str): Domain of the current query.</span>
+<span class="sd">        intent (str): Intent of the current query.</span>
+<span class="sd">        entities (list): A list of entities in the current query.</span>
+<span class="sd">        history (list): List of previous and current responder objects (de-serialized) up to the</span>
+<span class="sd">            current conversation.</span>
+<span class="sd">        text (str): The query text.</span>
+<span class="sd">        frame (): Immutables Map of stored data across multiple dialogue turns.</span>
+<span class="sd">        params (Params): An object that modifies how MindMeld process the current turn.</span>
+<span class="sd">        context (): Immutables Map containing front-end client state that is passed to the</span>
+<span class="sd">            application from the client in the request.</span>
+<span class="sd">        confidences (): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles``</span>
+<span class="sd">            containing confidence probabilities across all labels for each classifier.</span>
+<span class="sd">        nbest_transcripts_text (tuple): List of alternate n-best transcripts from an ASR system</span>
+<span class="sd">        nbest_transcripts_entities (tuple): List of lists of extracted entities for each of the</span>
+<span class="sd">            n-best transcripts.</span>
+<span class="sd">        nbest_aligned_entities (tuple): List of lists of aligned entities for each of the n-best</span>
+<span class="sd">            transcripts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">domain</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">intent</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">(),</span> <span class="n">converter</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">FrozenParams</span><span class="p">())</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">(),</span> <span class="n">converter</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
+    <span class="n">confidences</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">(),</span> <span class="n">converter</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
+    <span class="n">nbest_transcripts_text</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">nbest_transcripts_entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">nbest_aligned_entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

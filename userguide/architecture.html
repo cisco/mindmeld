@@ -1,0 +1,527 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Platform Architecture &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Preprocessor" href="preprocessor.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Platform Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#natural-language-processor">Natural Language Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#domain-classifier">Domain Classifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intent-classifier">Intent Classifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#entity-recognizer">Entity Recognizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#role-classifier">Role Classifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#entity-resolver">Entity Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#language-parser">Language Parser</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#question-answerer">Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-manager">Dialogue Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-manager">Application Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Platform Architecture</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/architecture.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="platform-architecture">
+<h1>Platform Architecture<a class="headerlink" href="#platform-architecture" title="Permalink to this headline">¶</a></h1>
+<p>The MindMeld Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high-level architecture of the platform is illustrated below.</p>
+<img alt="../_images/architecture1.png" class="align-center" id="architecture-diagram" src="../_images/architecture1.png" />
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The Application Manager, while part of MindMeld, orchestrates behind the scenes and never needs developer attention.</p>
+</div>
+<p>We will now explore the platform component by component.</p>
+<div class="section" id="natural-language-processor">
+<span id="arch-nlp"></span><h2>Natural Language Processor<a class="headerlink" href="#natural-language-processor" title="Permalink to this headline">¶</a></h2>
+<p>The Natural Language Processor (NLP) understands the user’s query — that is, it produces a representation that captures all salient information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user’s goals. (Throughout this guide the terms <em>query</em> and <em>natural language input</em> are interchangeable.)</p>
+<p>The example below shows a user query and the resulting NLP output.</p>
+<img alt="../_images/nlp.png" class="align-center" id="nlp-output" src="../_images/nlp.png" />
+<p>The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a>. Apart from these classifiers, the NLP also has modules for entity resolution and language parsing. Altogether, this makes six subcomponents: a four-layer classification hierarchy, plus the entity resolution and language parsing modules.</p>
+<p>The pipeline processes the user query sequentially in the left-to-right order shown in the <a class="reference internal" href="#architecture-diagram"><span class="std std-ref">architecture diagram</span></a> above. In doing this, the NLP applies a combination of techniques such as <a class="reference external" href="https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings">pattern matching</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Information_extraction">information extraction</a>, and <a class="reference external" href="https://en.wikipedia.org/wiki/Parsing">parsing</a>.</p>
+<p>Next, we examine the role of each step in the NLP pipeline.</p>
+<div class="section" id="domain-classifier">
+<span id="arch-domain-model"></span><h3>Domain Classifier<a class="headerlink" href="#domain-classifier" title="Permalink to this headline">¶</a></h3>
+<p>The Domain Classifier performs the first level of categorization&nbsp;on a user query by assigning it to one of a pre-defined set of domains that the app can handle. Each domain constitutes a unique area of knowledge with its own vocabulary and specialized terminology.</p>
+<p>Consider a conversational app serving as a “Smart Home Assistant.” This app would be expected to handle several distinct tasks, such as:</p>
+<ul class="simple">
+<li>Setting the temperature on a thermostat</li>
+<li>Toggling lights on and off in different rooms</li>
+<li>Locking and unlocking different doors</li>
+<li>Controlling multimedia devices around the home</li>
+<li>Answering informational queries about time, weather, etc.</li>
+</ul>
+<p>The vocabularies for setting a thermostat and for interacting with a television are very different. These could therefore be modeled as separate domains — a <code class="docutils literal"><span class="pre">thermostat</span></code> domain and a <code class="docutils literal"><span class="pre">multimedia</span></code> domain (assuming that the TV is one of several media devices in the house). Personal assistants like Siri, Cortana, Google Assistant and Alexa are trained to handle more than a dozen different domains like <code class="docutils literal"><span class="pre">weather</span></code>, <code class="docutils literal"><span class="pre">navigation</span></code>, <code class="docutils literal"><span class="pre">sports</span></code>, <code class="docutils literal"><span class="pre">music</span></code>, <code class="docutils literal"><span class="pre">calendar</span></code>, etc.</p>
+<p>On the opposite end of the spectrum are apps with just one domain. Usually, all the functions that such apps provide are conceptually related and span a single realm of knowledge. For instance, a “Food Ordering” app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks is almost entirely shared, and hence could be modeled as one single domain called <code class="docutils literal"><span class="pre">food</span></code>. The number of domains thus depends on the scope of&nbsp;the application.</p>
+<p>To learn how to train a machine-learned domain classification model in MindMeld see the <a class="reference internal" href="domain_classifier.html"><span class="doc">Domain Classifier</span></a> section of this guide.</p>
+</div>
+<div class="section" id="intent-classifier">
+<span id="arch-intent-model"></span><h3>Intent Classifier<a class="headerlink" href="#intent-classifier" title="Permalink to this headline">¶</a></h3>
+<p>Once the NLP determines the domain to which a given query belongs, the Intent Classifier provides the next level of categorization by assigning the query to one of the intents defined for the app. Intents reflect what a user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, ask about the weather, or set the temperature on a home thermostat. Each of these is an example of a user intent. The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.</p>
+<p>Most domains in conversational apps have multiple intents. By convention, intent names are verbs that describe what the user is trying accomplish. Here are some example intents from the <code class="docutils literal"><span class="pre">food</span></code> domain in a “Food Ordering” app.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Intent</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>search_restaurant</td>
+<td>Searching for restaurants matching a particular set of criteria</td>
+</tr>
+<tr class="row-odd"><td>get_restaurant_info</td>
+<td>Get information about a selected restaurant like hours, cuisine, price range, etc</td>
+</tr>
+<tr class="row-even"><td>browse_dish</td>
+<td>List dishes available at a selected restaurant, filtered by given criteria</td>
+</tr>
+<tr class="row-odd"><td>place_order</td>
+<td>Place an order for pick up or delivery</td>
+</tr>
+</tbody>
+</table>
+<p>Every domain has its own separate intent classifier for categorizing the query into one of the intents defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query.</p>
+<p>To learn how to train intent classification models in MindMeld, see the <a class="reference internal" href="intent_classifier.html"><span class="doc">Intent Classifier</span></a> section of this guide.</p>
+</div>
+<div class="section" id="entity-recognizer">
+<span id="arch-entity-model"></span><h3>Entity Recognizer<a class="headerlink" href="#entity-recognizer" title="Permalink to this headline">¶</a></h3>
+<p>The next step in the NLP pipeline, the Entity Recognizer, identifies every entity in the query that belongs to an entity type pre-defined as relevant to a given intent. An entity is any word or phrase that provides information necessary to understand and fulfill the user’s end goal. For instance, if the intent is to search for movies, relevant entities would include movie titles, genres, and actor names. If the intent is to adjust a thermostat, the entity would be the numerical value for setting the thermostat to a desired temperature.</p>
+<p>Most intents have multiple entities. By convention, entity names are nouns that describe the entity type. Here are some examples of entity types that might be required for different conversational intents.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="19%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Domain</th>
+<th class="head">Intent</th>
+<th class="head">Entity Types</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>weather</td>
+<td>check_weather</td>
+<td>location, day</td>
+</tr>
+<tr class="row-odd"><td>movies</td>
+<td>find_movie</td>
+<td>movie_title, genre, cast, director, release_date, rating</td>
+</tr>
+<tr class="row-even"><td>food</td>
+<td>search_restaurant</td>
+<td>restaurant_name, cuisine, dish_name, location, price_range, rating</td>
+</tr>
+<tr class="row-odd"><td>food</td>
+<td>browse_dish</td>
+<td>dish_name, category, ingredient, spice_level, price_range</td>
+</tr>
+</tbody>
+</table>
+<p>Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own entity recognizer. Once the app establishes the domain and intent for a given query, the app then uses the appropriate entity model to detect entities in the query that are specific to the predicted intent.</p>
+<p>To learn how to build machine-learned entity recognition models in MindMeld, see the <a class="reference internal" href="entity_recognizer.html"><span class="doc">Entity Recognizer</span></a> section of this guide.</p>
+</div>
+<div class="section" id="role-classifier">
+<span id="arch-role-model"></span><h3>Role Classifier<a class="headerlink" href="#role-classifier" title="Permalink to this headline">¶</a></h3>
+<p>The Role Classifier is the last level in the four-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context.</p>
+<p>For example, “7 PM” and “midnight” could both be time entities. But in a query like “French restaurants open from 7 pm until midnight,” one plays the role of an opening time while the other plays the role of a closing time. In this situation, the entity recognizer would categorize both as time entities, then the role classifier would label each entity with the appropriate role. Role classifiers are trained separately for each entity that requires the additional categorization.</p>
+<p>Here are examples of some entity types that might require role classification when dealing with certain intents.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="29%" />
+<col width="21%" />
+<col width="35%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Domain</th>
+<th class="head">Intent</th>
+<th class="head">Entity Type</th>
+<th class="head">Role Types</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>meeting</td>
+<td>schedule_meeting</td>
+<td>time</td>
+<td>start_time, end_time</td>
+</tr>
+<tr class="row-odd"><td>travel</td>
+<td>book_flight</td>
+<td>location</td>
+<td>origin, destination</td>
+</tr>
+<tr class="row-even"><td>retail</td>
+<td>search_product</td>
+<td>price</td>
+<td>min_price, max_price</td>
+</tr>
+<tr class="row-odd"><td>banking</td>
+<td>transfer_funds</td>
+<td>account_num</td>
+<td>sender, recipient</td>
+</tr>
+</tbody>
+</table>
+<p>To learn how to build role classification models in MindMeld, see the <a class="reference internal" href="role_classifier.html"><span class="doc">Role Classifier</span></a> section of this guide.</p>
+</div>
+<div class="section" id="entity-resolver">
+<span id="arch-resolver"></span><h3>Entity Resolver<a class="headerlink" href="#entity-resolver" title="Permalink to this headline">¶</a></h3>
+<p>The Entity Resolver was introduced in Steps <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html#entity-mapping-files"><span class="std std-ref">6</span></a> and <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html#entity-resolution"><span class="std std-ref">7</span></a> of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity “lemon bread” could resolve to “Iced Lemon Pound Cake (Product ID: 470)” and “SF” could resolve to “San Francisco, CA.”</p>
+<p>Robust entity resolution is key to a seamless conversational experience because users generally refer to entities informally, using abbreviations, nicknames, and other aliases, rather than by official standardized names. The Entity Resolver in MindMeld ensures high resolution accuracy by applying text relevance algorithms similar to those used in state-of-the-art information retrieval systems. Each entity has its own resolver trained to capture all plausible names for the entity, and variants on those names.</p>
+<p>To learn how to build entity resolvers in MindMeld, see the <a class="reference internal" href="entity_resolver.html"><span class="doc">Entity Resolver</span></a> section of this guide.</p>
+</div>
+<div class="section" id="language-parser">
+<span id="arch-parser"></span><h3>Language Parser<a class="headerlink" href="#language-parser" title="Permalink to this headline">¶</a></h3>
+<p>As described in the <a class="reference internal" href="../quickstart/08_configure_the_language_parser.html"><span class="doc">Step-By-Step Guide</span></a>, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.</p>
+<p>The parser arranges the resolved entities in the <a class="reference internal" href="#nlp-output"><span class="std std-ref">example</span></a> above into three entity groups, where each group describes a distinct real-world concept:</p>
+<img alt="../_images/entity_groups.png" class="align-center" src="../_images/entity_groups.png" />
+<p>The first two groups represent products to be ordered, whereas the last group contains store information. We call the main entity at the top in each group the <em>parent</em> or the <a class="reference external" href="https://en.wikipedia.org/wiki/Head_(linguistics)">head</a> whose <em>children</em> or <a class="reference external" href="https://en.wikipedia.org/wiki/Dependent_(grammar)">dependents</a> are the other entities in the group. The app can interpret this structured representation of the user’s natural language input to decide on the next action and/or response. In the example, the next action might be to submit the order to a point-of-sale system, thus completing the user’s order.</p>
+<p>Most natural language parsers used in NLP academic research need to be trained using expensive <a class="reference external" href="https://en.wikipedia.org/wiki/Treebank">treebank</a> data, which is hard to find and annotate for custom conversational domains. The Language Parser in MindMeld, by contrast, is a configuration-driven rule-based parser which works out-of-the-box with no need for training.</p>
+<p>To learn how to configure the MindMeld parser for optimum performance in a specific app, see the <a class="reference internal" href="parser.html"><span class="doc">Language Parser</span></a> section of this guide.</p>
+<p>Now we have seen how the Natural Language Processor understands what the user wants. That is half of the job at hand. Responsibility for the other half — to respond appropriately to the user and advance the conversation —&nbsp;falls to the Question Answerer and the Dialogue Manager, respectively.</p>
+</div>
+</div>
+<div class="section" id="question-answerer">
+<span id="arch-qa"></span><h2>Question Answerer<a class="headerlink" href="#question-answerer" title="Permalink to this headline">¶</a></h2>
+<p>Most conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the world knowledge that is important for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps <a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html"><span class="doc">5</span></a> and <a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html"><span class="doc">9</span></a> of the Step-By-Step Guide.</p>
+<p>The question answerer retrieves information from the knowledge base to identify the best answer candidates that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify dishes the user requests and to answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.</p>
+<p>The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches.</p>
+<p>For documentation and examples, see the <a class="reference internal" href="kb.html"><span class="doc">Question Answerer</span></a> section of this guide.</p>
+</div>
+<div class="section" id="dialogue-manager">
+<span id="arch-dm"></span><h2>Dialogue Manager<a class="headerlink" href="#dialogue-manager" title="Permalink to this headline">¶</a></h2>
+<p>The Dialogue Manager directs the flow of the conversation. It is a stateful component which analyzes each incoming query, then assigns the query to a dialogue state handler which in turn executes appropriate logic and returns a response to the user.</p>
+<p>Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. MindMeld abstracts away many underlying complexities of dialogue management to offer a simple but powerful mechanism for defining application logic. MindMeld provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction, or obtaining the information necessary to formulate a response.</p>
+<p>For a practical introduction to dialogue state tracking in MindMeld, see <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>. The <a class="reference internal" href="dm.html"><span class="doc">Dialogue Manager</span></a> section of this guide provides further examples.</p>
+</div>
+<div class="section" id="application-manager">
+<span id="arch-app-manager"></span><h2>Application Manager<a class="headerlink" href="#application-manager" title="Permalink to this headline">¶</a></h2>
+<p>As the core orchestrator of the MindMeld platform, the Application Manager:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Receives the client request from a supported endpoint</li>
+<li>Processes the request by passing it through all the MindMeld-trained components of the MindMeld platform</li>
+<li>Returns the final response to the endpoint once processing is complete</li>
+</ul>
+</div></blockquote>
+<p>The application manager works behind the scenes, hidden from the MindMeld developer.</p>
+<p>That concludes our quick tour of the MindMeld Conversational AI platform. The rest of this guide consists of hands-on tutorials focusing on using MindMeld to build data-driven conversational apps that run on the MindMeld platform.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="preprocessor.html" class="btn btn-neutral float-right" title="Working with the Preprocessor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

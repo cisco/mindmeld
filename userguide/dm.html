@@ -1,0 +1,1150 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with the Dialogue Manager &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Internationalization support" href="internationalization.html" />
+    <link rel="prev" title="Working with the Knowledge Base and Question Answerer" href="kb.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with the Dialogue Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-states">Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-state-rules">Dialogue State Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tie-breaking">Tie Breaking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-state-handlers">Dialogue State Handlers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#request"><code class="docutils literal"><span class="pre">request</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#params"><code class="docutils literal"><span class="pre">params</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#responder"><code class="docutils literal"><span class="pre">responder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#targeted-dialogue-state-handling">Targeted Dialogue State Handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-a-target-dialogue-state">Specifying a target dialogue state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-a-list-of-allowable-intents">Specifying a list of allowable intents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-dynamic-gazetteers">Using Dynamic Gazetteers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-flows">Dialogue Flows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-dialogue-flow">Creating a dialogue flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#continuing-a-dialogue-flow">Continuing a dialogue flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exiting-a-dialogue-flow">Exiting a dialogue flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-slot-filling-for-entities">Automatic Slot Filling for Entities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-use-case">Example use-case</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-middleware">Dialogue Middleware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#uses-for-dialogue-middleware">Uses for Dialogue Middleware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#asynchronous-dialogue-state-handlers-and-middleware">Asynchronous Dialogue State Handlers and Middleware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-an-asynchronous-dialogue-manager">Writing an Asynchronous Dialogue Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with the Dialogue Manager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/dm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-the-dialogue-manager">
+<h1>Working with the Dialogue Manager<a class="headerlink" href="#working-with-the-dialogue-manager" title="Permalink to this headline">¶</a></h1>
+<p>The Dialogue Manager</p>
+<blockquote>
+<div><ul class="simple">
+<li>manages the conversational aspect of a mindmeld application</li>
+<li>uses pattern-based rules to determine the dialogue state for each incoming request</li>
+<li>implements handlers which execute business logic and return a natural language response to the user</li>
+</ul>
+</div></blockquote>
+<p>Developing a dialogue manager can be a daunting task for all but the simplest conversational apps. MindMeld mitigates the challenge by providing a pattern-matching system and helpers for generating responses.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to the section about defining the <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html#define-dialogue-state-handlers"><span class="std std-ref">Dialogue State Handlers</span></a>.</p>
+</div>
+<p>Let’s explore the main concepts you’ll apply when you develop a dialogue manager in MindMeld: <em>dialogue states</em>, <em>dialogue state rules</em>, <em>dialogue state handlers</em>, <em>targeted dialogue state handling</em>, <em>dialogue flows</em>, and <em>dialogue middleware</em>.</p>
+<div class="section" id="dialogue-states">
+<h2>Dialogue States<a class="headerlink" href="#dialogue-states" title="Permalink to this headline">¶</a></h2>
+<p>For every incoming request, the dialogue manager (DM) determines which dialogue state applies. When developing your application, you set up a system of rules to match requests to dialogue states, using a flexible syntax that MindMeld provides. Each dialogue state represents a task that the conversational agent can complete. Usually, you name the dialogue state for the task it represents, for example <cite>welcome</cite> or <cite>send_store_hours</cite>. Name the dialogue states from the conversational agent’s perspective. (By contrast, you name intents from the user’s perspective).</p>
+<p>Each dialogue state has a handler which contains logic to fulfill a user’s request or gather more information if necessary, and to generate a natural language response. Dialogue state rules and handlers are implemented in the <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html#app-container"><span class="std std-ref">application container</span></a>.</p>
+</div>
+<div class="section" id="dialogue-state-rules">
+<h2>Dialogue State Rules<a class="headerlink" href="#dialogue-state-rules" title="Permalink to this headline">¶</a></h2>
+<p>Dialogue state rules match requests to dialogue states based on attributes of the request object, including the output from the natural language processor. Each rule specifies what to match, in the following form: exactly one domain, one intent, and a set of entity types. In single-domain apps the domain is omitted; in all apps, the entity types are optional. The exception to all this is the <cite>default</cite> state, which must match all requests, and therefore has neither domain, intent, nor entity types. The first state registered without a domain, intent, and entity types is the implicit default.</p>
+<p>To better understand dialogue state rules, let’s jump into the skeleton of a dialogue manager for an app that provides store hours.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">prompt_for_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;store_name&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unsupported&#39;</span><span class="p">)</span>
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send_help</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">confirm_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This dialogue manager has seven dialogue states: <code class="docutils literal"><span class="pre">welcome</span></code>, <code class="docutils literal"><span class="pre">say_goodbye</span></code>, <code class="docutils literal"><span class="pre">prompt_for_store</span></code>, <code class="docutils literal"><span class="pre">send_store_hours</span></code>, <code class="docutils literal"><span class="pre">send_help</span></code>, <code class="docutils literal"><span class="pre">confirm_store</span></code>, and <code class="docutils literal"><span class="pre">default</span></code>.</p>
+<p>In each state:</p>
+<blockquote>
+<div><ul class="simple">
+<li>There is a function whose name is the name of the state. This function defines the handler. (In the example, <code class="docutils literal"><span class="pre">pass</span></code> substitutes for detailed definitions, since we explain handlers in the next section.)</li>
+<li>Rules are specified by decorating the handler with the <code class="xref py py-meth docutils literal"><span class="pre">app.handle()</span></code> method, whose parameters can include <code class="docutils literal"><span class="pre">domain</span></code>, <code class="docutils literal"><span class="pre">intent</span></code>, <code class="docutils literal"><span class="pre">has_entity</span></code>, <code class="docutils literal"><span class="pre">targeted_only</span></code>, and <code class="docutils literal"><span class="pre">default</span></code>. To specify multiple entities, we would use <code class="docutils literal"><span class="pre">has_entities</span></code>.</li>
+</ul>
+</div></blockquote>
+<p>When the same combination of domain, intent, and entity types appears in both (a) the NLP result of a request and (b) a dialogue state rule, then the request satisfies (matches) the rule. A dialogue state can have multiple rules, and if any of them match the request, the dialogue handler responds.</p>
+<div class="section" id="tie-breaking">
+<h3>Tie Breaking<a class="headerlink" href="#tie-breaking" title="Permalink to this headline">¶</a></h3>
+<p>The DM always resolves to exactly one dialogue state.</p>
+<p>Rules are considered more or less <em>specific</em> according to what parameters they have:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The least specific rule is one (like <code class="docutils literal"><span class="pre">default</span></code> in the example above) without domain, intent, or entities</li>
+<li>A rule with a domain has some specificity</li>
+<li>A rule with an intent is more specific</li>
+<li>A rule with entities is still more specific</li>
+<li>A rule with <em>the most</em> entities is the most specific</li>
+</ul>
+</div></blockquote>
+<p>When a single request satisfies multiple rules, the DM chooses the most specific rule. If a request matches two requests with the same specificity, the DM chooses the rule that is registered earliest with an application. Rules for which <code class="docutils literal"><span class="pre">targeted_only</span></code> has been set <code class="docutils literal"><span class="pre">True</span></code> are excluded from consideration for matching as explained later in the section on “Targeted Dialogue State Handling”. Passing <code class="docutils literal"><span class="pre">default=True</span></code> to the <code class="xref py py-meth docutils literal"><span class="pre">app.handle()</span></code> decorator explicitly denotes that handler as the default state regardless of when it is registered with the application or the existence of any other handlers without rules.</p>
+</div>
+</div>
+<div class="section" id="dialogue-state-handlers">
+<span id="id1"></span><h2>Dialogue State Handlers<a class="headerlink" href="#dialogue-state-handlers" title="Permalink to this headline">¶</a></h2>
+<p>Dialogue state handlers are the functions invoked when a request matches a rule for the handler’s corresponding dialogue state. MindMeld places no restrictions on the code within a handler. This is important because requirements differ for different applications, and developers must have the flexibility to organize code as they wish.</p>
+<p>Dialogue state handlers take two arguments: <code class="docutils literal"><span class="pre">request</span></code> and <code class="docutils literal"><span class="pre">responder</span></code>.</p>
+<div class="section" id="request">
+<h3><code class="docutils literal"><span class="pre">request</span></code><a class="headerlink" href="#request" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">request</span></code> is an immutable <code class="xref py py-class docutils literal"><span class="pre">Request</span></code> object containing the contextual information needed to manage dialogues. You can use this information to fulfill user requests, determine additional information needed from the user, set the state for the next turn or to fill slots in your natural language templates.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Attribute</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">frame</span></code></td>
+<td>Dictionary of stored data across multiple dialogue turns. You can set custom
+key, value pairs that can be tracked across multiple dialogue turns
+(not for use by front-end clients)</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">params</span></code></td>
+<td>An immutable <code class="xref py py-class docutils literal"><span class="pre">FrozenParams</span></code> object containing parameters which modify
+the way MindMeld processed the current turn. See schema of the <code class="docutils literal"><span class="pre">params</span></code>
+object below.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">domain</span></code></td>
+<td>Domain of the current message as classified by the natural
+language processor</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">intent</span></code></td>
+<td>Intent of the current message as classified by the natural
+language processor</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">entities</span></code></td>
+<td>Entities in the current message, as recognized by the natural
+language processor</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">history</span></code></td>
+<td>List of previous and current responder objects (de-serialized) upto the
+current conversation</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">text</span></code></td>
+<td>The query text, as passed in the request</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">confidences</span></code></td>
+<td>A dictionary of keys <code class="docutils literal"><span class="pre">domains</span></code>, <code class="docutils literal"><span class="pre">intents</span></code>, <code class="docutils literal"><span class="pre">entities</span></code> and <code class="docutils literal"><span class="pre">roles</span></code>
+containing confidence probabilities across all labels for each classifier.
+The  <code class="docutils literal"><span class="pre">entities</span></code> and <code class="docutils literal"><span class="pre">roles</span></code> keys represent a list of confidence payload,
+with each entry corresponding to the identically-indexed entity in the
+top-level <code class="docutils literal"><span class="pre">entities</span></code> key. This attribute is populated when the verbose flag
+is set to “True” in the incoming request.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">context</span></code></td>
+<td>A dictionary containing front-end client state that is passed to the
+application from the client in the request</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">nbest_transcripts_text</span></code></td>
+<td>List of alternate n-best transcripts from an
+<a class="reference external" href="https://en.wikipedia.org/wiki/Speech_recognition">ASR</a> system.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">nbest_transcripts_entities</span></code></td>
+<td>List of lists of extracted entities for each of the n-best transcripts</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">nbest_aligned_entities</span></code></td>
+<td>List of lists of aligned entities for each of the n-best transcripts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="params">
+<h3><code class="docutils literal"><span class="pre">params</span></code><a class="headerlink" href="#params" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">params</span></code> attribute of the <code class="docutils literal"><span class="pre">request</span></code> object is an immutable <code class="xref py py-class docutils literal"><span class="pre">FrozenParams</span></code> object that contains state information of how MindMeld processed the current turn.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Attribute</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">allowed_intents</span></code></td>
+<td>A list of intents that you can set to force the language processor to choose
+from</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">target_dialogue_state</span></code></td>
+<td>The name of the dialogue handler that you want to reach in the next turn</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">time_zone</span></code></td>
+<td>The name of an
+<a class="reference external" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">IANA time zone</a>,
+such as ‘America/Los_Angeles’, or ‘Asia/Kolkata’</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">timestamp</span></code></td>
+<td>A valid <a class="reference external" href="https://en.wikipedia.org/wiki/Unix_time">unix timestamp</a> of type Long
+for the current query. The timestamp is accurate to the nearest second.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">dynamic_resource</span></code></td>
+<td>A dictionary containing data used to influence the language classifiers
+by adding resource data for the given turn (see dynamic gazetteer documentation)</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">dialogue_flow</span></code></td>
+<td>The name of the current turn’s dialogue flow state</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="xref py py-class docutils literal"><span class="pre">FrozenParams</span></code> class has the same attributes tabulated above in the <code class="docutils literal"><span class="pre">params</span></code> table.</p>
+</div>
+</div>
+<div class="section" id="responder">
+<span id="id2"></span><h3><code class="docutils literal"><span class="pre">responder</span></code><a class="headerlink" href="#responder" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">responder</span></code> is a mutable object used to send actions, like templated natural language responses, to the client. The <code class="docutils literal"><span class="pre">responder</span></code> can also carry output state from the current handler’s processing to MindMeld for next-turn’s handling. It has attributes and methods listed below:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Attribute</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">frame</span></code></td>
+<td>Dictionary of stored data across multiple dialogue turns. You can set custom
+key, value pairs that can be tracked across multiple dialogue turns
+(not for use by front-end clients)</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">params</span></code></td>
+<td>A mutable <code class="xref py py-class docutils literal"><span class="pre">Params</span></code> object containing attributes which modify the way
+MindMeld processes the next turn. Note that the <code class="xref py py-class docutils literal"><span class="pre">Params</span></code> class has the
+exact same attributes as the <code class="xref py py-class docutils literal"><span class="pre">FrozenParams</span></code> class, except all the
+attribute types are mutable compared to the frozen params (e.g. list vs tuple)</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">dialogue_state</span></code></td>
+<td>The dialogue state name of the current turn</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">slots</span></code></td>
+<td>A dictionary containing key, value pairs used to fill NLR responses</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">history</span></code></td>
+<td>List of previous and current responder objects (de-serialized) upto the
+current conversation</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-data docutils literal"><span class="pre">request</span></code></td>
+<td>A reference to the immutable request object for the current turn</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-data docutils literal"><span class="pre">directives</span></code></td>
+<td>A list of sequentially executed dictionary-type payloads each containing
+the name and type of a directive. A directive is an action to be executed
+on the client, for example, a “listen” directive will instruct the client to
+listen for voice input. This list is populated from using the <code class="docutils literal"><span class="pre">responder</span></code>
+methods described in the next table. WARNING: Do not directly modify this
+list, use the directive methods detailed below instead.</td>
+</tr>
+</tbody>
+</table>
+<p>The table below details the <code class="docutils literal"><span class="pre">responder</span></code> methods to send actions, also termed <code class="docutils literal"><span class="pre">directives</span></code>, back to the client. You can invoke more than one directive method in a handler, but note that they are executed on a first-in-first-out basis. Internally, the following methods append dictionary-type payloads to the <code class="docutils literal"><span class="pre">directives</span></code> attribute of the <code class="docutils literal"><span class="pre">responder</span></code> object.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.reply()</span></code></td>
+<td>Used to send a text view directive</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.speak()</span></code></td>
+<td>Used to send a voice action directive</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.suggest()</span></code></td>
+<td>Used to send a suggestions view directive</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.list()</span></code></td>
+<td>Used to send a list view directive</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.listen()</span></code></td>
+<td>Used to send a directive to listen for user voice response</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.reset()</span></code></td>
+<td>Used to send a reset action directive, explicitly ending the
+conversation</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.display()</span></code></td>
+<td>Used to send a custom view directive</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.act()</span></code></td>
+<td>Used to send a custom action directive</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.direct()</span></code></td>
+<td>Used to send an arbitrary directive object</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-meth docutils literal"><span class="pre">responder.sleep()</span></code></td>
+<td>Used to put the client to sleep after a specified number of
+milliseconds</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="xref py py-meth docutils literal"><span class="pre">responder.reply()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">responder.speak()</span></code> accept a single template, or a list of templates. If a list is provided, the DM selects one item at random. This makes your conversational agent a little more varied and life-like.</p>
+</div>
+<p id="dialogue-example">Consider a basic dialogue state handler that greets a user by name, retrieving the user’s name from the request context.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello, {name}. &#39;</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello. &#39;</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="targeted-dialogue-state-handling">
+<span id="targeted-dialogue"></span><h2>Targeted Dialogue State Handling<a class="headerlink" href="#targeted-dialogue-state-handling" title="Permalink to this headline">¶</a></h2>
+<p>Any query that contains enough information to determine and fulfill an intent can also occur as a multi-query sequence.</p>
+<p>For example, <cite>Close the door to the bedroom</cite> could occur as a sequence of two queries with a prompt from the MindMeld app in between:</p>
+<a class="reference internal image-reference" href="../_images/deterministic_dialog_1.png"><img alt="../_images/deterministic_dialog_1.png" class="align-center" src="../_images/deterministic_dialog_1.png" style="width: 400px;" /></a>
+<p>Unless the app can “remember” the <cite>smart_home</cite> domain and <cite>close_door</cite> intent for two conversational turns instead of one, there is a danger of mis-classifying the content of the second query. That content, <cite>bedroom</cite>, could be an entity in other domains and intents besides the correct ones.</p>
+<p>This is a common pattern. Here is another example:</p>
+<a class="reference internal image-reference" href="../_images/deterministic_dialogue_1a.png"><img alt="../_images/deterministic_dialogue_1a.png" class="align-center" src="../_images/deterministic_dialogue_1a.png" style="width: 400px;" /></a>
+<p>To support this pattern, the app needs to “remember” the intent it detects in the first query, and then interpret entities detected in subsequent queries as belonging to that intent.</p>
+<p>In MindMeld, you do this by adding information to the params object of the responder to specify either (a) a target dialogue state, or (b) allowed domains and intents, for the next conversational turn. The first approach is simpler; the second is more flexible.</p>
+<div class="section" id="specifying-a-target-dialogue-state">
+<h3>Specifying a target dialogue state<a class="headerlink" href="#specifying-a-target-dialogue-state" title="Permalink to this headline">¶</a></h3>
+<p>In a dialogue state handler, we can set the <code class="docutils literal"><span class="pre">target_dialogue_state</span></code> attribute of the context object by invoking the <code class="docutils literal"><span class="pre">responder</span></code> object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="s1">&#39;close_door&#39;</span>
+</pre></div>
+</div>
+<p>Using this construct allows the dialogue handler to guide the user along a conversational path until the user provides the necessary information.</p>
+<p>For example, in this snippet, once the user enters the <code class="docutils literal"><span class="pre">close_door</span></code> state, the flow is directed to remain in the <code class="docutils literal"><span class="pre">close_door</span></code> state until the user either provides a particular location (“close door in the kitchen”), or specifies all doors (“close all doors”).</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">selected_all</span> <span class="o">=</span> <span class="n">_get_command_for_all</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selected_all</span> <span class="ow">or</span> <span class="n">selected_location</span><span class="p">:</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">_handle_door_lock_unlock_reply</span><span class="p">(</span><span class="n">selected_all</span><span class="p">,</span> <span class="n">selected_location</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">reply</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="s1">&#39;close_door&#39;</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;Of course, which door?&quot;</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Passing <code class="docutils literal"><span class="pre">targeted_only=True</span></code> to <code class="xref py py-meth docutils literal"><span class="pre">app.handle()</span></code> will make the handler reachable only if it is specified by setting <code class="docutils literal"><span class="pre">target_dialogue_state</span></code> in the params object. When <code class="docutils literal"><span class="pre">targeted_only</span></code> is <code class="docutils literal"><span class="pre">True</span></code>, <code class="docutils literal"><span class="pre">domain</span></code>, <code class="docutils literal"><span class="pre">intent</span></code>, <code class="docutils literal"><span class="pre">handle_entity</span></code>, and <code class="docutils literal"><span class="pre">has_entities</span></code> must not be passed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="c1"># only reachable via responder.params.target_dialogue_state = &#39;close_door&#39; in a prior turn</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>While this approach gives you perfect control of the dialogue state to apply to the second query, it is brittle when the conversation departs from the “happy path” where the user does everything that we expect.</p>
+<p>For example, what would happen if the user said “Close door” but then responded to the “Of course, which door?” prompt with something unexpected like “Hello”? In these cases, the user will be prompted back to ask for a location, which the user might not want.</p>
+<p>In such scenarios, the conversation is locked in a certain state, which could be frustrating to the user. In the next section, we will explore a more graceful alternative that will guide the user along a certain path but also handles the unexpected divergences and interruptions.</p>
+</div>
+<div class="section" id="specifying-a-list-of-allowable-intents">
+<h3>Specifying a list of allowable intents<a class="headerlink" href="#specifying-a-list-of-allowable-intents" title="Permalink to this headline">¶</a></h3>
+<p>Here is a variant of our multi-query-sequence case where the domain and intent do <em>not</em> remain the same:</p>
+<a class="reference internal image-reference" href="../_images/deterministic_dialog_2.png"><img alt="../_images/deterministic_dialog_2.png" class="align-center" src="../_images/deterministic_dialog_2.png" style="width: 400px;" /></a>
+<p>To support both the “happy path” scenario in the previous section and the unexpected scenario above, we can specify a list of domains and intents for the dialogue state handler to choose from.</p>
+<p>In a dialogue state handler, set the <code class="docutils literal"><span class="pre">allowed_intents</span></code> attribute of the params object. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;smart_home.close_door&#39;</span><span class="p">,</span> <span class="s1">&#39;greeting.*&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The first element in the list, <code class="docutils literal"><span class="pre">smart_home.close_door</span></code>, supports the “happy path.” The second, <code class="docutils literal"><span class="pre">greeting.*</span></code>, supports the unexpected “Hello” variant. The elements in the list must use dot-delimited notation to specify domains and intents. The asterisk (‘*’) wildcard means that <em>any</em> intent within the specified domain is allowed.</p>
+<p>Using this construct allows the dialogue handler to cover (1) the single-query case, (2) the “happy path” multi-query-sequence case, and (3) a variant of the multi-query-sequence case where the user unexpectedly responds to the “Of course, which door?” prompt by uttering a greeting:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">selected_all</span> <span class="o">=</span> <span class="n">_get_command_for_all</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selected_all</span> <span class="ow">or</span> <span class="n">selected_location</span><span class="p">:</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">_handle_door_lock_unlock_reply</span><span class="p">(</span><span class="n">selected_all</span><span class="p">,</span> <span class="n">selected_location</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">reply</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;smart_home.close_door&#39;</span><span class="p">,</span> <span class="s1">&#39;greeting.*&#39;</span><span class="p">]</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;Of course, which door?&quot;</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This example comes from the Home Assistant blueprint. It is simplistic in that if the conversation departs from the “happy path,” only one domain (<cite>greeting</cite>) is supported. A production application would need a longer list of allowed domains and intents.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line">If the <code class="docutils literal"><span class="pre">params</span></code> object specifies <em>both</em> <code class="docutils literal"><span class="pre">target_dialogue_state</span></code> and <code class="docutils literal"><span class="pre">allowed_intents</span></code>, MindMeld gives <code class="docutils literal"><span class="pre">target_dialogue_state</span></code> precedence.</div>
+<div class="line"><br /></div>
+<div class="line">Like other settings in <code class="docutils literal"><span class="pre">params</span></code>, <code class="docutils literal"><span class="pre">allowed_intents</span></code> and <code class="docutils literal"><span class="pre">target_dialogue_state</span></code> are one-turn operations, so you must re-assign them, if needed, in each subsequent turn.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="using-dynamic-gazetteers">
+<span id="dynamic-gaz"></span><h2>Using Dynamic Gazetteers<a class="headerlink" href="#using-dynamic-gazetteers" title="Permalink to this headline">¶</a></h2>
+<p>In cases where the training data has a low coverage of variations in queries, or the query contains only an entity with no surrounding words, presence of words in gazetteers serve as an important signal to the NLP models. This is especially true for named entity recognition.</p>
+<p>While it is difficult to enumerate every single possible entity in the gazetteer beforehand, the application may have contextual information about the entities that can be expected to occur in the next user query. Consider the following dialogue.</p>
+<a class="reference internal image-reference" href="../_images/dynamic_gaz_1.png"><img alt="../_images/dynamic_gaz_1.png" class="align-center" src="../_images/dynamic_gaz_1.png" style="width: 400px;" /></a>
+<p>In this conversation flow, the application retrieves places that serve pizza from its knowledge base and lists them in its response to the user. It is possible that word “Firetrail” has not been seen by the NLP models as part of their training data before and it is also absent from the “restaurant” gazetteer. This may result in the entity recognizer failing to recognize the word as the name of a restaurant in the next user query.</p>
+<p>In such a scenario, we can use information from the previous turn to help the NLP classification in the next turn. From the app’s response, we know the names of restaurants that the user is most likely&nbsp;to choose from in the follow-up turn. MindMeld allows you to dynamically inject these new entities into the gazetteer at prediction time, providing useful signals to the NLP models.</p>
+<p>You can pass the entities, along with their popularity information as a <code class="docutils literal"><span class="pre">dynamic_resource</span></code> to the responder object as shown below. This will allow the entity recognizer to boost n-grams associated with the entity data listed in the dynamic_resource. Currently, we only support the <code class="docutils literal"><span class="pre">'gazetteer'</span></code> key in the <code class="docutils literal"><span class="pre">dynamic_resource</span></code> attribute of the responder.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;place_order&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">place_order</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">restaurant_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extreme Pizza&#39;</span><span class="p">,</span> <span class="s1">&#39;Buca Di Beppo&#39;</span><span class="p">,</span> <span class="s1">&#39;Firetrail Pizza&#39;</span><span class="p">]</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">dynamic_resource</span><span class="p">[</span><span class="s1">&#39;gazetteers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;restaurant&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">((</span><span class="n">restaurant</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">restaurant</span> <span class="ow">in</span> <span class="n">restaurant_list</span><span class="p">)}</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;I found pizza at &quot;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">restaurant_list</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Where would you like to order from?&#39;</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above code block, if the user’s next query is <code class="docutils literal"><span class="pre">How</span> <span class="pre">about</span> <span class="pre">Firetrail</span></code>, the language processor has a very high likelihood of detecting <code class="docutils literal"><span class="pre">Firetrail</span></code> as a <code class="docutils literal"><span class="pre">restaurant</span></code> entity type. You can test how a dynamic gazetteer affects the behavior of your NLP models by passing it to <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.process()</span></code> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;How about Firetrail?&quot;</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;gazetteers&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;restaurant&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Extreme Pizza&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Buca Di Beppo&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Firetrail&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}}})</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;How about Firetrail?&#39;,</span>
+<span class="go"> &#39;domain&#39;: &#39;ordering&#39;,</span>
+<span class="go"> &#39;intent&#39;: &#39;build_order&#39;,</span>
+<span class="go"> &#39;entities&#39;: [{&#39;text&#39;: &#39;Firetrail&#39;,</span>
+<span class="go">   &#39;type&#39;: &#39;restaurant&#39;,</span>
+<span class="go">   &#39;role&#39;: None,</span>
+<span class="go">   &#39;value&#39;: [{&#39;cname&#39;: &#39;Firetrail Pizza&#39;,</span>
+<span class="go">     &#39;score&#39;: 27.906038,</span>
+<span class="go">     &#39;top_synonym&#39;: &#39;Firetrail&#39;,</span>
+<span class="go">     &#39;id&#39;: &#39;B01CT54GYE&#39;}],</span>
+<span class="go">   &#39;span&#39;: {&#39;start&#39;: 10, &#39;end&#39;: 18}}</span>
+<span class="go">   ]</span>
+<span class="go"> }</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dialogue-flows">
+<span id="dialogue-flow"></span><h2>Dialogue Flows<a class="headerlink" href="#dialogue-flows" title="Permalink to this headline">¶</a></h2>
+<p>The Dialogue Flow functionality helps in structuring conversation flows where the user needs to be directed towards a specific end goal in a focused manner.</p>
+<p>For example, let us take a look at a code snippet from the <code class="docutils literal"><span class="pre">kwik_e_mart</span></code> blueprint. Here we have implemented a flow where the user is prompted multiple times to get the store information.</p>
+<p>In this particular example, we want to structure the user experience of getting store hours with these particular requirements:</p>
+<ol class="arabic simple">
+<li>Once the <code class="docutils literal"><span class="pre">get_store_hours</span></code> intent is invoked, we want to stay in the <code class="docutils literal"><span class="pre">send_store_hours</span></code> flow where the user is prompted up to three times to provide the store information.</li>
+<li>After failing to fulfill the user’s request three times in a row, we gracefully end the interaction.</li>
+<li>If the user asks for anything else, we gently reprompt the user for store information.</li>
+<li>But if the user invokes the <code class="docutils literal"><span class="pre">goodbye</span></code> intent, we end the interaction immediately.</li>
+</ol>
+<p>We can organize this complex interaction in a straightforward manner using the dialogue flow construct.</p>
+<div class="section" id="creating-a-dialogue-flow">
+<h3>Creating a dialogue flow<a class="headerlink" href="#creating-a-dialogue-flow" title="Permalink to this headline">¶</a></h3>
+<p>To instantiate a dialogue flow, we first need to designate a handler function to be the entry point for the flow. We do so by decorating the desired dialogue state handler with the <code class="docutils literal"><span class="pre">&#64;app.dialogue_flow</span></code> method, which has the same signature as a normal handler and similar properties. The designated function (<code class="docutils literal"><span class="pre">send_store_hours</span></code> in the example below) will be invoked when the request matches the specified attributes such as domain and intent.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@app.dialogue_flow</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;store_info&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">active_store</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">store_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;store_name&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">store_entity</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">store_entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># failed to resolve entity</span>
+            <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">store_name</span><span class="o">=</span><span class="n">store_entity</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">active_store</span> <span class="o">=</span> <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c1"># No active store... continue</span>
+            <span class="k">pass</span>
+    <span class="k">elif</span> <span class="s1">&#39;target_store&#39;</span> <span class="ow">in</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">:</span>
+        <span class="n">active_store</span> <span class="o">=</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">active_store</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;The {store_name} Kwik-E-Mart opens at {open_time} and &#39;</span>
+                        <span class="s1">&#39;closes at {close_time}.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Which store would you like to know about?&#39;</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sorry I cannot help you. Please try again.&#39;</span><span class="p">)</span>
+<span class="hll">        <span class="n">responder</span><span class="o">.</span><span class="n">exit_flow</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>This code snippet introduces two new constructs:</p>
+<ul>
+<li><p class="first">The <code class="docutils literal"><span class="pre">&#64;app.dialogue_flow</span></code> decorator to designate the flow’s entry point</p>
+<blockquote>
+<div><p>Once the <code class="docutils literal"><span class="pre">send_store_hours</span></code> state is reached, the application will “enter” the dialogue flow, and every follow up turn will continue to be in this flow.</p>
+</div></blockquote>
+</li>
+<li><p class="first">The usage of <code class="docutils literal"><span class="pre">responder.frame</span></code> as a persistent storage mechanism</p>
+<p>The <code class="docutils literal"><span class="pre">responder</span></code> object’s <code class="docutils literal"><span class="pre">frame</span></code> attribute can be used to persist information across turns. Here, we are using it to store the count of the number of turns in this flow. If the number of turns exceeds three, we gracefully exit the flow.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="continuing-a-dialogue-flow">
+<h3>Continuing a dialogue flow<a class="headerlink" href="#continuing-a-dialogue-flow" title="Permalink to this headline">¶</a></h3>
+<p>Similar to the <code class="docutils literal"><span class="pre">&#64;app.handle</span></code> decorator for regular dialogue state handlers, we can use a <code class="docutils literal"><span class="pre">&#64;send_store_hours.handle</span></code> decorator to designate different handlers within this flow. We can also designate a default handler by setting <code class="docutils literal"><span class="pre">default=True</span></code>. The default handler is invoked if there is no matching handler for the request, for example, if the user asks about nearest store instead, which is a different intent that is not handled in this flow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">default_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sorry, I did not get you. Which store would you like to know about?&#39;</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sorry I cannot help you. Please try again.&#39;</span><span class="p">)</span>
+<span class="hll">        <span class="n">responder</span><span class="o">.</span><span class="n">exit_flow</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>An important caveat to note is that we also need to add a flow-specific handler for <cite>the original entry intent</cite> (in this case, <code class="docutils literal"><span class="pre">get_store_hours</span></code>).
+Otherwise, <code class="docutils literal"><span class="pre">get_store_hours</span></code> queries would be handled by the default handler.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">send_store_hours_in_flow_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="exiting-a-dialogue-flow">
+<span id="exiting-dialogue-flow"></span><h3>Exiting a dialogue flow<a class="headerlink" href="#exiting-a-dialogue-flow" title="Permalink to this headline">¶</a></h3>
+<p>There are three ways to exit a Dialogue Flow:</p>
+<ol class="arabic simple">
+<li>We can exit the flow by invoking the <code class="xref py py-meth docutils literal"><span class="pre">Responder.exit_flow()</span></code> method as shown in the <code class="docutils literal"><span class="pre">send_store_hours</span></code> and <code class="docutils literal"><span class="pre">default_handler</span></code> code snippets above. Once that method is called, subsequent turns are not bound to the flow.</li>
+<li>We can designate an exit state handler by setting <code class="docutils literal"><span class="pre">exit_flow=True</span></code>, as in the <code class="docutils literal"><span class="pre">exit_handler</span></code> code snippet below. After the dialogue manager enters this state, subsequent turns are not bound to the flow.</li>
+<li>We can force the current flow to exit immediately and return to the main dialogue manager flow by invoking <code class="xref py py-meth docutils literal"><span class="pre">Responder.reprocess()</span></code> method as shown in the <code class="docutils literal"><span class="pre">transition_flows</span></code> code snippet below.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">,</span> <span class="n">exit_flow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">exit_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Bye&#39;</span><span class="p">,</span> <span class="s1">&#39;Goodbye&#39;</span><span class="p">,</span> <span class="s1">&#39;Have a nice day.&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">transition_flows</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">del</span> <span class="n">request</span>
+    <span class="k">del</span> <span class="n">responder</span>
+    <span class="n">send_store_hours</span><span class="o">.</span><span class="n">reprocess</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As shown here, you can use the dialog flow functionality to effectively craft complex flows that gracefully direct the user to provide the desired information for your application.</p>
+</div>
+</div>
+<div class="section" id="automatic-slot-filling-for-entities">
+<span id="auto-slot-filling-for-entities"></span><h2>Automatic Slot Filling for Entities<a class="headerlink" href="#automatic-slot-filling-for-entities" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via applying the <code class="docutils literal"><span class="pre">&#64;app.auto_fill</span></code> decorator for the dialogue state handler requiring entities to be obtained prior to applying the functionality defined within.</p>
+<p>This decorator replaces the need to define the <code class="docutils literal"><span class="pre">&#64;app.handle</span></code> decorator. MindMeld will prompt the user for missing entities before applying the handler functionality by itself. The arguments required for this decorator are all the rules that would apply for that dialogue state (such as domain, intent, entities etc.), with the addition of a <code class="docutils literal"><span class="pre">form</span></code> argument.</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">form</span></code> is a dictionary containing the following entries:<ul>
+<li><code class="docutils literal"><span class="pre">entities</span></code> (list, required): List of <code class="docutils literal"><span class="pre">FormEntity</span></code> objects with each defined for one entity slot to be filled. The order of entities provided in this list is important as the slots will be prompted in that order. So the order should follow the flow of the dialogue intended for slot filling.</li>
+<li><code class="docutils literal"><span class="pre">max_retries</span></code> (int, optional, default 1): Maximum number of retries allowed per entity or slot if user response is invalid.</li>
+<li><code class="docutils literal"><span class="pre">exit_msg</span></code> (str, optional): If slot filling is exited abruptly without completion, define custom message to display.</li>
+<li><code class="docutils literal"><span class="pre">exit_keys</span></code> (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: [‘cancel’, ‘restart’, ‘exit’, ‘reset’].</li>
+</ul>
+</li>
+</ul>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">FormEntity</span></code> is a class that allows creation of entity objects for slot filling and comprises of the following attributes:<ul>
+<li><code class="docutils literal"><span class="pre">entity</span></code> (str, required): Entity name</li>
+<li><code class="docutils literal"><span class="pre">role</span></code> (str, optional): The role of the entity</li>
+<li><code class="docutils literal"><span class="pre">responses</span></code> (list or str, optional): Message for prompting the user for missing entities</li>
+<li><code class="docutils literal"><span class="pre">retry_response</span></code> (str, optional): Message for re-prompting users. If not provided, defaults to <code class="docutils literal"><span class="pre">responses</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">value</span></code> (str, optional): The resolved value of the entity</li>
+<li><code class="docutils literal"><span class="pre">default_eval</span></code> (bool, optional): Use system validation (default: True)</li>
+<li><code class="docutils literal"><span class="pre">hints</span></code> (list, optional): Developer defined list of keywords to verify the user input against</li>
+<li><code class="docutils literal"><span class="pre">custom_eval</span></code> (func, optional): Custom validation function (should return bool:
+validated or not)</li>
+</ul>
+</li>
+</ul>
+<p>Once the slot filling is complete, the filled in entities can be access through <code class="docutils literal"><span class="pre">request.entities</span></code> in the same manner as any other handler.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line">The order of entities provided in the <code class="docutils literal"><span class="pre">entities</span></code> list in the form is important as the slots will be prompted in that order.</div>
+</div>
+</div>
+<div class="section" id="example-use-case">
+<h3>Example use-case<a class="headerlink" href="#example-use-case" title="Permalink to this headline">¶</a></h3>
+<p>Transfer money in a banking app:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.core</span> <span class="kn">import</span> <span class="n">FormEntity</span>
+
+<span class="k">def</span> <span class="nf">test_for_money</span><span class="p">(</span><span class="n">ent</span><span class="p">):</span>
+  <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="s1">&#39;$&#39;</span> <span class="ow">in</span> <span class="n">ent</span> <span class="k">else</span> <span class="bp">False</span>
+
+<span class="n">form_transfermoney</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;entities&#39;</span><span class="p">:[</span>
+      <span class="n">FormEntity</span><span class="p">(</span>
+          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
+          <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_from&#39;</span><span class="p">,</span>
+          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sure. Transfer from which account?&#39;</span><span class="p">]</span>
+          <span class="p">),</span>
+      <span class="n">FormEntity</span><span class="p">(</span>
+          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
+          <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_to&#39;</span><span class="p">,</span>
+          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;To which account?&#39;</span><span class="p">]</span>
+          <span class="n">hints</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="s1">&#39;checkings&#39;</span><span class="p">,</span> <span class="o">....</span><span class="p">]</span> <span class="c1"># can be only from this list</span>
+          <span class="p">),</span>
+      <span class="n">FormEntity</span><span class="p">(</span>
+          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;sys_amount-of-money&#39;</span><span class="p">,</span>
+          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;And, how much do you want to transfer?&#39;</span><span class="p">],</span>
+          <span class="n">custom_eval</span><span class="o">=</span><span class="n">test_for_money</span> <span class="c1"># validates the user-response for this entity</span>
+          <span class="p">),</span>                         <span class="c1"># using this custom developer-defined function</span>
+                                     <span class="c1"># checking for &#39;$&#39; sign.</span>
+      <span class="p">],</span>
+  <span class="s1">&#39;max_retries&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="s1">&#39;exit_keys&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;quit&#39;</span><span class="p">,</span> <span class="s1">&#39;exit&#39;</span><span class="p">],</span>
+  <span class="s1">&#39;exit_msg&#39;</span><span class="p">:</span> <span class="s2">&quot;Sorry I cannot help you. Please try again.&quot;&quot;</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.auto_fill</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;transfermoney&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form_transfermoney</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">transfermoney_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_en&#39;</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_from&#39;</span><span class="p">:</span>
+              <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_from&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_to&#39;</span><span class="p">:</span>
+              <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+  <span class="n">replies</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;All right. So, you&#39;re transferring {amount} from your &quot;</span>
+             <span class="s2">&quot;{account_from} to a {account_to}. Is that right?&quot;</span><span class="p">]</span>
+  <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">replies</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="dialogue-middleware">
+<span id="id3"></span><h2>Dialogue Middleware<a class="headerlink" href="#dialogue-middleware" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld provides a useful mechanism for changing the behavior of many or all dialogue states via middleware. Dialogue middleware are like dialogue state handlers that get called for every request before the matched dialogue state handler. In addition to the <code class="docutils literal"><span class="pre">request</span></code> and <code class="docutils literal"><span class="pre">responder</span></code> arguments dialogue state handlers receive, dialogue middleware functions take a third argument: <code class="docutils literal"><span class="pre">handler</span></code>. The <code class="docutils literal"><span class="pre">handler</span></code> argument is a function containing either the next middleware or the dialogue state handler for the current request.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="docutils literal"><span class="pre">handler</span></code> argument is a keyword argument, and must always be named <code class="docutils literal"><span class="pre">handler</span></code>.</p>
+</div>
+<p>To register middleware with an application, decorate the middleware function with the <code class="xref py py-meth docutils literal"><span class="pre">app.middleware()</span></code> method. Here is an example middleware function which handles unexpected exceptions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.middleware</span>
+<span class="k">def</span> <span class="nf">error_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="c1"># log exception for later analysis</span>
+        <span class="n">log_unexpected_error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+        <span class="c1"># clear directives and communicate unexpected error</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">directives</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Something went wrong. Try asking me another way.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see the above middleware function calls the handler function. Middleware are called before dialogue state handlers in the order they are registered. Here is an example with two middleware functions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.middleware</span>
+<span class="k">def</span> <span class="nf">first_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+    <span class="c1"># this will be called first</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;hello from the first middleware&#39;</span><span class="p">)</span>
+    <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;goodbye from the first middleware&#39;</span><span class="p">)</span>
+
+<span class="nd">@app.middleware</span>
+<span class="k">def</span> <span class="nf">second_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+    <span class="c1"># this will be called second</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;hello from the second middleware&#39;</span><span class="p">)</span>
+    <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;goodbye from the second middleware&#39;</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;this is the default dialogue state&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The response from the previous example would be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/my/app&#39;</span><span class="p">)</span>
+<span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;hello from the first middleware&#39;,</span>
+<span class="go">&#39;hello from the second middleware&#39;,</span>
+<span class="go">&#39;this is the default dialogue state&#39;,</span>
+<span class="go">&#39;goodbye from the second middleware&#39;,</span>
+<span class="go">&#39;goodbye from the first middleware&#39;]</span>
+</pre></div>
+</div>
+<div class="section" id="uses-for-dialogue-middleware">
+<h3>Uses for Dialogue Middleware<a class="headerlink" href="#uses-for-dialogue-middleware" title="Permalink to this headline">¶</a></h3>
+<p>Some examples of useful middleware include the following:</p>
+<ul class="simple">
+<li>Custom handling for unexpected exceptions</li>
+<li>Validating incoming context</li>
+<li>Validating outgoing response directives</li>
+<li>Setting up custom context and responder features</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line">Application developers should use careful judgement when adding dialogue manager middleware. The added complexity can make reasoning about the behavior of a dialogue manager more difficult.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="asynchronous-dialogue-state-handlers-and-middleware">
+<span id="async-dialogue"></span><h2>Asynchronous Dialogue State Handlers and Middleware<a class="headerlink" href="#asynchronous-dialogue-state-handlers-and-middleware" title="Permalink to this headline">¶</a></h2>
+<p>Developers of more advanced applications may decide to leverage remote services from within their
+dialogue state handlers. This can cause issues with scalability as the process serving an
+application will wait idly until it receives a response from the third party. Newer versions of
+Python have language features to deal with this problem, like the
+<a class="reference external" href="https://docs.python.org/3/library/asyncio.html">asyncio</a> module and the <code class="docutils literal"><span class="pre">async</span></code> and <code class="docutils literal"><span class="pre">await</span></code>
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0492/">keywords</a>.</p>
+<div class="section" id="writing-an-asynchronous-dialogue-manager">
+<h3>Writing an Asynchronous Dialogue Manager<a class="headerlink" href="#writing-an-asynchronous-dialogue-manager" title="Permalink to this headline">¶</a></h3>
+<p>Asynchronous dialogue state handlers can be enabled with the following steps:</p>
+<ol class="arabic simple">
+<li>Set the <code class="docutils literal"><span class="pre">async_mode</span></code> keyword argument to true when creating the application.</li>
+<li>Define <strong>all</strong> dialogue middleware as asynchronous functions. When invoking the handler, make sure to await the result.</li>
+<li>Define <strong>all</strong> dialogue state handlers as asynchronous functions. If some dialogue states invoke others directly, make sure to await the result.</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line">Asynchronous function are sometimes also referred to as coroutines or coroutine functions.</div>
+</div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="nd">@app.middleware</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">middle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+    <span class="c1"># preprocessing</span>
+    <span class="c1"># …</span>
+
+    <span class="n">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="c1"># postprocessing</span>
+    <span class="c1"># …</span>
+
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+    <span class="n">await</span> <span class="n">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="line-block">
+<div class="line">When using the <code class="docutils literal"><span class="pre">Conversation</span></code> class with an application in asynchronous mode, the <code class="docutils literal"><span class="pre">say()</span></code>
+and <code class="docutils literal"><span class="pre">process()</span></code> methods are coroutine functions which return coroutines that must be awaited
+or processed by an event loop. If you would like to use them like normal methods, use the
+<cite>force_sync</cite> keyword argument when creating the conversation or when calling <code class="docutils literal"><span class="pre">say()</span></code>
+or <code class="docutils literal"><span class="pre">process()</span></code>.</div>
+</div>
+<blockquote class="last">
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="c1"># use force_sync at creation time</span>
+<span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/kwik_e_mart&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?&#39;,</span>
+<span class="go"> &#39;Listening...&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># use force_sync at invocation time</span>
+<span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/kwik_e_mart&#39;</span><span class="p">)</span>
+<span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?&#39;,</span>
+<span class="go"> &#39;Listening...&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+</div>
+<div class="section" id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<p>The concepts and techniques described above are exactly what you will use in coding the dialogue handlers you defined in <a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html#define-dialogue-state-handlers"><span class="std std-ref">Step 4</span></a> of the Step-By-Step Guide. Before you begin, study how MindMeld blueprint apps implement the dialogue managers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">Food Ordering</span></a></li>
+<li><a class="reference internal" href="../blueprints/video_discovery.html"><span class="doc">Video Discovery</span></a></li>
+<li><a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="internationalization.html" class="btn btn-neutral float-right" title="Internationalization support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kb.html" class="btn btn-neutral float-left" title="Working with the Knowledge Base and Question Answerer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

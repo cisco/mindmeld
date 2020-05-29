@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Package History &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Recent Changes" href="changes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Recent Changes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Package History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">4.2.0 (2019-09-16)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#major-features-and-improvements">Major Features and Improvements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">4.1.0 (2019-04-22)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Major Features and Improvements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#breaking-changes">Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bug-fixes-and-other-changes">Bug Fixes and Other Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">4.0.0 (2019-02-25)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Major Features and Improvements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Bug Fixes and Other Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">3.4.0 (2018-08-20)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enhancements">Enhancements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">3.3.0 (2018-05-10)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">3.2.0 (2017-10-23)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compatibility-notes">Compatibility Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">3.1.0 (2017-09-20)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Bug Fixes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Compatibility Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id17">3.0.0 (2017-08-14)</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Package History</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/versions/history.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="package-history">
+<h1>Package History<a class="headerlink" href="#package-history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>4.2.0 (2019-09-16)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="major-features-and-improvements">
+<h3>Major Features and Improvements<a class="headerlink" href="#major-features-and-improvements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application</li>
+<li>A built-in Question-Answering (QA) component for unstructured data using Elasticsearch</li>
+<li>A new Human Resources blueprint for enterprise use-cases</li>
+<li>Webex Teams Bot Integration</li>
+<li>MindMeld now supports internationalization through language and locale codes</li>
+<li>New built-in Spanish and English stemmers</li>
+<li>An improvement to DialogueFlow where the user can exit the current flow and return to the main dialogue flow</li>
+<li>Docker setup update that makes getting started with MindMeld much easier by removing the Elasticsearch dependency</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>4.1.0 (2019-04-22)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3>Major Features and Improvements<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>De-couple Duckling, the numerical parser, from the core MindMeld platform</li>
+<li>Configure the MindMeld project to support Apache 2.0 open-source license</li>
+</ul>
+</div>
+<div class="section" id="breaking-changes">
+<h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Replace all instances of the term <code class="docutils literal"><span class="pre">mmworkbench</span></code> to <code class="docutils literal"><span class="pre">mindmeld</span></code>. Older pickled models that refer to the old term will not load, so delete the <code class="docutils literal"><span class="pre">.generated</span></code> folder in application folder, and rebuild all classifiers.</li>
+</ul>
+</div>
+<div class="section" id="bug-fixes-and-other-changes">
+<h3>Bug Fixes and Other Changes<a class="headerlink" href="#bug-fixes-and-other-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The language parser component correctly handles role types</li>
+<li>Add documentation for Webex Teams Integration for MindMeld</li>
+<li>Add extensive documentation to all methods in the MindMeld project for API documentation viewing</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>4.0.0 (2019-02-25)<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h3>Major Features and Improvements<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Improved entity resolution for voice-based apps using n-best ASR transcripts</li>
+<li>Add support for user-defined custom feature extractors</li>
+<li>Replace wit-ai/duckling_old (deprecated numerical parser) with facebook/duckling (actively maintained library)</li>
+<li>Add support for Dialogue flows, an improved methodology for authoring constrained multi-turn dialogues</li>
+<li>Add support for entity recognition on n-best ASR transcripts</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h3>Breaking Changes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Refactor dialogue state handlers by adding a read-only request object and a writable responder object</li>
+<li>New modular project structure for MindMeld apps</li>
+<li>New model format using consistent internal feature representations</li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h3>Bug Fixes and Other Changes<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Implement the <code class="docutils literal"><span class="pre">predict_proba()</span></code> method for role classifiers and entity classifiers</li>
+<li>Add support for viewing feature weights for model introspection</li>
+<li>Improve support for MindMeld applications as python packages</li>
+<li>Add support for query&nbsp;stemming during feature extraction</li>
+<li>Add support for numerical parser features for domain and intent classification</li>
+<li>Add support for word shape features for domain and intent classification</li>
+<li>Add support for dynamic gazetteers, which are online gazetteers that bias the natural language processor’s prediction for the current turn</li>
+<li>Add support for asynchronous dialogue state handlers</li>
+<li>Refactor classifier features names to make them more consistent</li>
+<li>Re-enable automatic blueprint loading using the <code class="docutils literal"><span class="pre">blueprint</span></code> command</li>
+<li>Deprecate the <code class="docutils literal"><span class="pre">session</span></code> object and replace it with the <code class="docutils literal"><span class="pre">context</span></code> object</li>
+<li>Add support for parallel processing of entity recognition for n-best&nbsp;ASR transcripts</li>
+<li>MindMeld version compatibility checks are warnings, not exceptions</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>3.4.0 (2018-08-20)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="enhancements">
+<h3>Enhancements<a class="headerlink" href="#enhancements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Add the ability to add dialogue middleware to dialogue managers</li>
+<li>Add the ability to denote a handler as only reachable via target_dialogue_state</li>
+<li>Add the ability to explicitly denote a default handler</li>
+<li>Add the ability to specify different custom datasets for different NLP models</li>
+<li>Add support for frequency-based thresholding of n-gram features</li>
+<li>Add CLI command to generate predicted markup for queries</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>3.3.0 (2018-05-10)<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h3>Enhancements<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Add the ability to inspect learned feature weights for certain kinds of text classifiers</li>
+<li>Add character n-gram features to domain, intent, and entity models</li>
+<li>Add support for better management of multiple datasets within the same project</li>
+<li>Add the ability to override global classifier configurations with custom settings per domain, intent, or entity type</li>
+<li>Add the ability for incremental NLP model building to reduce overall training time</li>
+<li>Add the ability to specify the time zone and timestamp associated with each query to inform NLP predictions</li>
+<li>Add the ability to define custom preprocessors that can make arbitrary transformations on the input query before sending it to the NLP pipeline</li>
+</ul>
+</div>
+<div class="section" id="bug-fixes">
+<h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The help messages for MindMeld command line tools (<code class="docutils literal"><span class="pre">python</span> <span class="pre">app.py</span></code> and <code class="docutils literal"><span class="pre">mmworkbench</span></code>) should show the correct list of compatible commands</li>
+<li>Various fixes to improve the numerical parser’s robustness and logging</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id11">
+<h2>3.2.0 (2017-10-23)<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id12">
+<h3>Enhancements<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Add Long Short Term Memory (LSTM) network as a model option for the entity recognizer</li>
+<li>Add support for TensorFlow-based deep learning models in MindMeld</li>
+<li>Add the ability to evaluate all NLP models at once with a single method/command</li>
+<li>Add functionality to specify a target dialogue state or a set of allowable intents for the next turn</li>
+<li>Add in-built support for conversational history management instead of relying on the client to preserve history across turns</li>
+<li>Improve interfaces for constructing responses within the dialogue state handlers (see <strong>Compatibility Notes</strong> below)</li>
+</ul>
+</div>
+<div class="section" id="compatibility-notes">
+<h3>Compatibility Notes<a class="headerlink" href="#compatibility-notes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The <code class="docutils literal"><span class="pre">prompt()</span></code> and <code class="docutils literal"><span class="pre">respond()</span></code> methods of the <code class="docutils literal"><span class="pre">DialogueResponder</span></code> object are deprecated in MindMeld 3.2. See <a class="reference internal" href="../userguide/dm.html"><span class="doc">Working with the Dialogue Manager</span></a> to learn how to use new <code class="docutils literal"><span class="pre">DialogueResponder</span></code> methods in your dialogue state handlers.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id13">
+<h2>3.1.0 (2017-09-20)<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id14">
+<h3>Enhancements<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Add linear-chain conditional random field (CRF) as a model option for the entity recognizer</li>
+<li>Allow the role classifier to be trained with other text models (e.g. SVM, decision tree, etc.) in addition to logistic regression</li>
+<li>Make model configuration format for all classifiers consistent [See “Compatibility Notes” below]</li>
+<li>Add new metrics for better error analysis of entity recognition performance</li>
+<li>Add support for modularizing dialogue state handling logic by allowing arbitrary module imports in <code class="docutils literal"><span class="pre">app.py</span></code> (see <strong>Compatibility Notes</strong> below)</li>
+<li>Make blueprints check the current MindMeld package version to validate compatibility</li>
+<li>Only load NLP resources that are needed by active feature extractors (as defined in the model config) to improve runtime performance</li>
+</ul>
+</div>
+<div class="section" id="id15">
+<h3>Bug Fixes<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Correctly compute entity spans in queries with special characters</li>
+<li>Warn the developer and proceed with model training (if possible) when entity mapping or gazetteer files are missing</li>
+</ul>
+</div>
+<div class="section" id="id16">
+<h3>Compatibility Notes<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>To make the interfaces for NLP classifiers consistent, the model configuration formats for the entity recognizer and the role classifier have been updated to be in line with the domain and intent classifiers. The model configurations for entity recognizer and role classifier from MindMeld 3.0 <strong>will not</strong> work with MindMeld 3.1. Refer to the user guide for those components to learn how to rewrite your 3.0 configs in the new 3.1 format.</li>
+<li>To support modular organization of dialogue state handling logic by allowing arbitrary package/module imports in the application container (<code class="docutils literal"><span class="pre">app.py</span></code>), MindMeld now needs to load the project folder as a Python package. Every project in MindMeld 3.1 must hence have an empty <code class="docutils literal"><span class="pre">__init__.py</span></code> file at its root level. Projects created for MindMeld 3.0 <strong>will not</strong> work with MindMeld 3.1 unless an <code class="docutils literal"><span class="pre">__init__.py</span></code> file is added. Refer to the user guide for the dialogue manager to learn how to use imports in your application container.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id17">
+<h2>3.0.0 (2017-08-14)<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>First release of the MindMeld conversational AI toolkit</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="changes.html" class="btn btn-neutral float-left" title="Recent Changes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,883 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.path &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.path</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.path</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is responsible for locating various MindMeld app files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="k">import</span> <span class="n">SourceFileLoader</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">MindMeldImportError</span>
+
+<span class="n">MINDMELD_ROOT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+<span class="n">PACKAGE_ROOT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MINDMELD_ROOT</span><span class="p">,</span> <span class="s2">&quot;mindmeld&quot;</span><span class="p">)</span>
+
+<span class="n">APP_PATH</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{app_path}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Generated folder structure for models</span>
+<span class="n">GEN_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;.generated&quot;</span><span class="p">)</span>
+<span class="n">MODEL_CACHE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;cached_models&quot;</span><span class="p">)</span>
+<span class="n">QUERY_CACHE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;query_cache.pkl&quot;</span><span class="p">)</span>
+<span class="n">QUERY_CACHE_TMP_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;query_cache_tmp.pkl&quot;</span><span class="p">)</span>
+<span class="n">DOMAIN_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;domain.pkl&quot;</span><span class="p">)</span>
+<span class="n">GEN_DOMAINS_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">)</span>
+<span class="n">GEN_TIMESTAMP_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MODEL_CACHE_PATH</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{timestamp}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">DOMAIN_MODEL_TIMESTAMP_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_TIMESTAMP_FOLDER</span><span class="p">,</span> <span class="s2">&quot;domain.pkl&quot;</span><span class="p">)</span>
+<span class="n">GEN_DOMAINS_CHECKPOINT_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_TIMESTAMP_FOLDER</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">)</span>
+<span class="n">GEN_DOMAIN_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAINS_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{domain}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">GEN_DOMAIN_CHECKPOINT_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAINS_CHECKPOINT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{domain}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">INTENT_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAIN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;intent.pkl&quot;</span><span class="p">)</span>
+<span class="n">INTENT_MODEL_CHECKPOINT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAIN_CHECKPOINT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;intent.pkl&quot;</span><span class="p">)</span>
+<span class="n">GEN_INTENT_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAIN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{intent}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">GEN_INTENT_CHECKPOINT_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_DOMAIN_CHECKPOINT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{intent}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">ENTITY_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INTENT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;entity.pkl&quot;</span><span class="p">)</span>
+<span class="n">ENTITY_MODEL_CHECKPOINT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INTENT_CHECKPOINT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;entity.pkl&quot;</span><span class="p">)</span>
+<span class="n">ROLE_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INTENT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{entity}</span><span class="s2">-role.pkl&quot;</span><span class="p">)</span>
+<span class="n">ROLE_MODEL_CHECKPOINT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">GEN_INTENT_CHECKPOINT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{entity}</span><span class="s2">-role.pkl&quot;</span>
+<span class="p">)</span>
+<span class="n">GAZETTEER_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;gaz-</span><span class="si">{entity}</span><span class="s2">.pkl&quot;</span><span class="p">)</span>
+<span class="n">GEN_INDEXES_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;indexes&quot;</span><span class="p">)</span>
+<span class="n">GEN_INDEX_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INDEXES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{index}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">RANKING_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INDEX_FOLDER</span><span class="p">,</span> <span class="s2">&quot;ranking.pkl&quot;</span><span class="p">)</span>
+
+<span class="c1"># Domains sub tree for labeled queries</span>
+<span class="n">DOMAINS_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">)</span>
+<span class="n">DOMAIN_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DOMAINS_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{domain}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">INTENT_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DOMAIN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{intent}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">LABELED_QUERY_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INTENT_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{filename}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Entities sub tree</span>
+<span class="n">ENTITIES_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;entities&quot;</span><span class="p">)</span>
+<span class="n">ENTITY_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ENTITIES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{entity}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">GAZETTEER_TXT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ENTITY_FOLDER</span><span class="p">,</span> <span class="s2">&quot;gazetteer.txt&quot;</span><span class="p">)</span>
+<span class="n">ENTITY_MAP_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ENTITY_FOLDER</span><span class="p">,</span> <span class="s2">&quot;mapping.json&quot;</span><span class="p">)</span>
+
+<span class="c1"># Indexes sub tree</span>
+<span class="n">INDEXES_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;indexes&quot;</span><span class="p">)</span>
+<span class="n">INDEX_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INDEXES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{index}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">RANKING_FILE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INDEX_FOLDER</span><span class="p">,</span> <span class="s2">&quot;ranking.json&quot;</span><span class="p">)</span>
+
+<span class="c1"># App level files</span>
+<span class="n">APP_MODULE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;app.py&quot;</span><span class="p">)</span>
+<span class="n">CONFIG_MODULE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;config.py&quot;</span><span class="p">)</span>
+
+<span class="c1"># Default config files</span>
+<span class="n">RESOURCES_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PACKAGE_ROOT</span><span class="p">,</span> <span class="s2">&quot;resources&quot;</span><span class="p">)</span>
+<span class="n">DEFAULT_PROCESSOR_CONFIG_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;default_processor_config.json&quot;</span>
+<span class="p">)</span>
+<span class="n">DEFAULT_TOKENIZER_CONFIG_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;default_tokenizer_config.json&quot;</span>
+<span class="p">)</span>
+<span class="n">ASCII_FOLDING_DICT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;ascii_folding_dict.txt&quot;</span><span class="p">)</span>
+
+<span class="n">DUCKLING_UBUNTU16_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;duckling-x86_64-linux-ubuntu-16&quot;</span>
+<span class="p">)</span>
+<span class="n">DUCKLING_UBUNTU18_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;duckling-x86_64-linux-ubuntu-18&quot;</span>
+<span class="p">)</span>
+<span class="n">DUCKLING_OSX_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">RESOURCES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;duckling-x86_64-osx&quot;</span><span class="p">)</span>
+<span class="n">DUCKLING_UBUNTU16_MD5</span> <span class="o">=</span> <span class="s2">&quot;1688f12378a25c8662cf5fab053878e2&quot;</span>
+<span class="n">DUCKLING_UBUNTU18_MD5</span> <span class="o">=</span> <span class="s2">&quot;13e60318956e04bda561d8c36a29891c&quot;</span>
+<span class="n">DUCKLING_OSX_MD5</span> <span class="o">=</span> <span class="s2">&quot;e1f2a6654c3df0bd75cb8113e95c8508&quot;</span>
+<span class="n">DUCKLING_OS_MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;ubuntu-16.04&quot;</span><span class="p">:</span> <span class="n">DUCKLING_UBUNTU16_PATH</span><span class="p">,</span>
+    <span class="s2">&quot;ubuntu-18.04&quot;</span><span class="p">:</span> <span class="n">DUCKLING_UBUNTU18_PATH</span><span class="p">,</span>
+    <span class="s2">&quot;darwin&quot;</span><span class="p">:</span> <span class="n">DUCKLING_OSX_PATH</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">DUCKLING_PATH_TO_MD5_MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">DUCKLING_UBUNTU16_PATH</span><span class="p">:</span> <span class="n">DUCKLING_UBUNTU16_MD5</span><span class="p">,</span>
+    <span class="n">DUCKLING_UBUNTU18_PATH</span><span class="p">:</span> <span class="n">DUCKLING_UBUNTU18_MD5</span><span class="p">,</span>
+    <span class="n">DUCKLING_OSX_PATH</span><span class="p">:</span> <span class="n">DUCKLING_OSX_MD5</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">EMBEDDINGS_FOLDER_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MINDMELD_ROOT</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
+<span class="n">EMBEDDINGS_FILE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">,</span> <span class="s2">&quot;glove.6B.zip&quot;</span><span class="p">)</span>
+<span class="n">PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">,</span> <span class="s2">&quot;previously_used_char_embeddings.pkl&quot;</span>
+<span class="p">)</span>
+<span class="n">PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">,</span> <span class="s2">&quot;previously_used_word_embeddings.pkl&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># User specific directories</span>
+<span class="n">USER_CONFIG_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;.mindmeld&quot;</span><span class="p">)</span>
+<span class="n">USER_CONFIG_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_CONFIG_DIR</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">)</span>
+<span class="n">BLUEPRINTS_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_CONFIG_DIR</span><span class="p">,</span> <span class="s2">&quot;blueprints&quot;</span><span class="p">)</span>
+<span class="n">BLUEPRINT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BLUEPRINTS_PATH</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># Helpers</span>
+<div class="viewcode-block" id="safe_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.safe_path">[docs]</a><span class="k">def</span> <span class="nf">safe_path</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A decorator to make the path safe by replacing unsafe characters&quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">,</span> <span class="n">res</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">return</span> <span class="n">_wrapper</span></div>
+
+
+<span class="k">def</span> <span class="nf">_resolve_model_name</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">model_name</span><span class="p">:</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="c1"># Collections</span>
+
+
+<div class="viewcode-block" id="get_domains"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_domains">[docs]</a><span class="k">def</span> <span class="nf">get_domains</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets all domains for a given application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (set of str) A list of domain names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s1">&#39;No app found at &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="p">))</span>
+    <span class="n">domains_dir</span> <span class="o">=</span> <span class="n">DOMAINS_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">domains_dir</span><span class="p">))[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="get_intents"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_intents">[docs]</a><span class="k">def</span> <span class="nf">get_intents</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets all intents for a given domain and application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        domain (str): A domain under the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (set of str) A list of intent names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s1">&#39;Domain &quot;</span><span class="si">{}</span><span class="s1">&quot; not found in app at &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">app_path</span><span class="p">))</span>
+    <span class="n">domain_dir</span> <span class="o">=</span> <span class="n">DOMAIN_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">domain_dir</span><span class="p">))[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<span class="k">def</span> <span class="nf">_search_pattern</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">found_pattern</span><span class="p">):</span>
+    <span class="n">domain_intent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">app_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">domain_intent_dir</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">app_file</span><span class="p">):</span>
+                <span class="n">abs_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">domain_intent_dir</span><span class="p">,</span> <span class="n">app_file</span><span class="p">)</span>
+                <span class="n">mod_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">abs_filepath</span><span class="p">)</span>
+                <span class="n">tree</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="n">intent</span><span class="p">][</span><span class="n">abs_filepath</span><span class="p">]</span> <span class="o">=</span> <span class="n">mod_time</span>
+                <span class="n">found_pattern</span><span class="p">[</span><span class="n">pattern</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="get_labeled_query_tree"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_labeled_query_tree">[docs]</a><span class="k">def</span> <span class="nf">get_labeled_query_tree</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets labeled query files for a given domain and application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        patterns (list(str)): A list of file patterns to match</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict) A set of labeled query files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">domains_dir</span> <span class="o">=</span> <span class="n">DOMAINS_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="n">walker</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">domains_dir</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">found_pattern</span> <span class="o">=</span> <span class="p">{</span><span class="n">pattern</span><span class="p">:</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">}</span> <span class="k">if</span> <span class="n">patterns</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">parent</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walker</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">parent</span> <span class="o">!=</span> <span class="n">domains_dir</span><span class="p">:</span>
+            <span class="n">parent</span><span class="p">,</span> <span class="n">component</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">tree</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">intent</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">tree</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="n">intent</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">patterns</span><span class="p">:</span>
+                <span class="n">_search_pattern</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">found_pattern</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">abs_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                    <span class="n">mod_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">abs_filepath</span><span class="p">)</span>
+                    <span class="n">tree</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="n">intent</span><span class="p">][</span><span class="n">abs_filepath</span><span class="p">]</span> <span class="o">=</span> <span class="n">mod_time</span>
+
+    <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">found_pattern</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">found_pattern</span><span class="p">[</span><span class="n">pattern</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Couldn&#39;t find </span><span class="si">%s</span><span class="s2"> pattern files in </span><span class="si">%s</span><span class="s2"> directory&quot;</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">domains_dir</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tree</span></div>
+
+
+<div class="viewcode-block" id="get_entity_types"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_entity_types">[docs]</a><span class="k">def</span> <span class="nf">get_entity_types</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets all entities for an application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for this app&#39;s domain classifier model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s1">&#39;No app found at &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="p">))</span>
+    <span class="n">entities_dir</span> <span class="o">=</span> <span class="n">ENTITIES_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">entities_dir</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_indexes"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_indexes">[docs]</a><span class="k">def</span> <span class="nf">get_indexes</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets all indexes for an application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for this app&#39;s domain classifier model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s1">&#39;No app found at &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="p">))</span>
+    <span class="n">indexes_dir</span> <span class="o">=</span> <span class="n">INDEXES_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">indexes_dir</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<span class="c1"># Files and folders</span>
+
+
+<div class="viewcode-block" id="get_generated_data_folder"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_generated_data_folder">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_generated_data_folder</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the folder containing files the app generates.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The path for this app&#39;s generated files</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">GEN_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="get_domain_model_paths"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_domain_model_paths">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_domain_model_paths</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the domain classifier model as well as the path to a</span>
+<span class="sd">    timestamp-cached domain classifier model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        model_name (str): The name of the model. Allows multiple models to be stored.</span>
+<span class="sd">        timestamp (str): The timestamp string to store cached models in</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) A tuple with the main model path and the cached model path</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">DOMAIN_MODEL_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">main_path</span><span class="p">)</span>
+
+    <span class="n">ts_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">DOMAIN_MODEL_TIMESTAMP_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span>
+        <span class="p">)</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">ts_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">main_path</span><span class="p">,</span> <span class="n">ts_path</span></div>
+
+
+<div class="viewcode-block" id="get_intent_model_paths"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_intent_model_paths">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_intent_model_paths</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the intent classifier model as well as the path to a</span>
+<span class="sd">    timestamp-cached intent classifier model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        domain (str): A domain under the application.</span>
+<span class="sd">        model_name (str): The name of the model. Allows multiple models to be stored.</span>
+<span class="sd">        timestamp (str): The timestamp string to store cached models in</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple) A tuple with the main model path and the cached model path</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">INTENT_MODEL_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">main_path</span><span class="p">)</span>
+
+    <span class="n">ts_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">INTENT_MODEL_CHECKPOINT_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span>
+        <span class="p">)</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">ts_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">main_path</span><span class="p">,</span> <span class="n">ts_path</span></div>
+
+
+<div class="viewcode-block" id="get_entity_model_paths"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_entity_model_paths">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_entity_model_paths</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the entity recognizer model as well as the path to a</span>
+<span class="sd">    timestamp-cached entity recognizer model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        domain (str): A domain under the application.</span>
+<span class="sd">        intent (str): A intent under the domain.</span>
+<span class="sd">        model_name (str): The name of the model. Allows multiple models to be stored.</span>
+<span class="sd">        timestamp (str): The timestamp string to store cached models in</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple) A tuple with the main model path and the cached model path</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">ENTITY_MODEL_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">intent</span>
+    <span class="p">)</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">main_path</span><span class="p">)</span>
+
+    <span class="n">ts_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">ENTITY_MODEL_CHECKPOINT_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span>
+        <span class="p">)</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">ts_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">main_path</span><span class="p">,</span> <span class="n">ts_path</span></div>
+
+
+<div class="viewcode-block" id="get_role_model_paths"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_role_model_paths">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_role_model_paths</span><span class="p">(</span>
+    <span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the role classifier model as well as the path to a</span>
+<span class="sd">    timestamp-cached role classifier model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        domain (str): A domain under the application.</span>
+<span class="sd">        intent (str): A intent under the domain.</span>
+<span class="sd">        entity (str): An entity under the intent</span>
+<span class="sd">        model_name (str): The name of the model. Allows multiple models to be stored.</span>
+<span class="sd">        timestamp (str): The timestamp string to store cached models in</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple) A tuple with the main model path and the cached model path</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">ROLE_MODEL_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">entity</span>
+    <span class="p">)</span>
+    <span class="n">main_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">main_path</span><span class="p">)</span>
+
+    <span class="n">ts_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">ROLE_MODEL_CHECKPOINT_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span>
+            <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span>
+            <span class="n">entity</span><span class="o">=</span><span class="n">entity</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ts_path</span> <span class="o">=</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">ts_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">main_path</span><span class="p">,</span> <span class="n">ts_path</span></div>
+
+
+<div class="viewcode-block" id="get_gazetteer_data_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_gazetteer_data_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_gazetteer_data_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets path to the saved gazetteer pickle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        gaz_name (str): The name of the gazetteer.</span>
+<span class="sd">        model_name (str): The name of the model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for the gazetteer pickle.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">GAZETTEER_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">gaz_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_resolve_model_name</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_labeled_query_file_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_labeled_query_file_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_labeled_query_file_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets path to a labeled query file corresponding to a specific domain and intent.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        domain (str): A domain under the application.</span>
+<span class="sd">        intent (str): A intent under the domain.</span>
+<span class="sd">        filename (str): The name of the queries file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The full path of the specified file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LABELED_QUERY_FILE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="n">intent</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_entity_gaz_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_entity_gaz_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_entity_gaz_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the gazetteer text file for a given entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        entity (str): An entity under the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for a mapping of the entity</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">GAZETTEER_TXT_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_entity_folder"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_entity_folder">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_entity_folder</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the folder for a given entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        entity (str): An entity under the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for an entity folder</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ENTITY_FOLDER</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_entity_map_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_entity_map_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_entity_map_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the entity mapping file (mapping.json) for a given entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        entity (str): An entity under the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for a mapping of the entity</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ENTITY_MAP_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_ranking_file_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_ranking_file_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_ranking_file_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the ranking.json file for a given entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        index (str): A knowledge base index under the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for a mapping of the entity</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">RANKING_FILE_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_app_module_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_app_module_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_app_module_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the application file (app.py) for a given application if it exists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The path of the app module file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">APP_MODULE_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_config_module_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_config_module_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_config_module_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the configuration file (config.py) for a given application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The path of the config module file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">CONFIG_MODULE_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_cached_blueprint_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_cached_blueprint_path">[docs]</a><span class="k">def</span> <span class="nf">get_cached_blueprint_path</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to a cached version of the given blueprint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): The name of the blueprint</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The path to the blueprint archives.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">BLUEPRINT_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_user_config_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_user_config_path">[docs]</a><span class="k">def</span> <span class="nf">get_user_config_path</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the current configuration file used by MindMeld.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The path to the current user&#39;s MindMeld configuration file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">USER_CONFIG_PATH</span></div>
+
+
+<div class="viewcode-block" id="get_app"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_app">[docs]</a><span class="k">def</span> <span class="nf">get_app</span><span class="p">(</span><span class="n">app_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the Application instance for given application path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to an application on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        mindmeld.app.Application: the MindMeld application</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        MindMeldImportError: when the application can not be found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+    <span class="n">package_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># check if package is already imported</span>
+        <span class="k">if</span> <span class="n">package_name</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The application package </span><span class="si">%s</span><span class="s2"> is already imported.&quot;</span><span class="p">,</span> <span class="n">package_name</span>
+            <span class="p">)</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">mod</span><span class="o">.</span><span class="n">app</span>
+        <span class="c1"># try to load as package first</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span><span class="o">.</span><span class="n">app</span>  <span class="c1"># pylint: disable=deprecated-method</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># __init__.py exists but has no app attribute</span>
+        <span class="c1"># fallback to app.py, but emit warning</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;The application package at </span><span class="si">%r</span><span class="s2"> includes no </span><span class="si">%r</span><span class="s2"> attribute. Falling back to </span><span class="si">%r</span><span class="s2">.&quot;</span><span class="p">,</span>
+            <span class="n">app_path</span><span class="p">,</span>
+            <span class="s2">&quot;app&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;app.py&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="c1"># fallback to app.py</span>
+        <span class="k">pass</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># try to load &#39;app.py&#39;</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">get_app_module_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span><span class="o">.</span><span class="n">app</span>  <span class="c1"># pylint: disable=deprecated-method</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;Could not import application at </span><span class="si">{!r}</span><span class="s2">. Create a __init__.py or app.py file&quot;</span>
+            <span class="s2">&quot; containing the application.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">MindMeldImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

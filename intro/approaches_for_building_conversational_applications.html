@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Different Approaches for Building Conversational Applications &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Anatomy of a Conversational AI Interaction" href="anatomy_of_a_conversational_ai_interaction.html" />
+    <link rel="prev" title="Introduction to Conversational Applications" href="introduction_to_conversational_applications.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Different Approaches for Building Conversational Applications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rule-based-approaches">Rule-Based Approaches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloud-based-nlp-services">Cloud-Based NLP Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#machine-learning-toolkits">Machine Learning Toolkits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conversational-ai-platforms">Conversational AI Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-good-is-good-enough">How Good is Good Enough?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Different Approaches for Building Conversational Applications</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/approaches_for_building_conversational_applications.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="different-approaches-for-building-conversational-applications">
+<h1>Different Approaches for Building Conversational Applications<a class="headerlink" href="#different-approaches-for-building-conversational-applications" title="Permalink to this headline">¶</a></h1>
+<p>Developers and researchers have been building conversational applications, such as chatbots, for decades. Over the years, many different strategies have been considered. With the recent proliferation and widespread adoption of voice and chat assistants, standard approaches are finally emerging to help define the best practices for building useful, production-quality chatbots. This section outlines a few of the most common approaches for building conversational applications today and describes some of the pros and cons associated with each.</p>
+<div class="section" id="rule-based-approaches">
+<h2>Rule-Based Approaches<a class="headerlink" href="#rule-based-approaches" title="Permalink to this headline">¶</a></h2>
+<p>Prior to the machine learning advances of the past decade, conversational applications were most commonly built using rule-based approaches. Developers unfamiliar with machine learning usually begin their implementations with rule-based logic. Today, several software frameworks, such as <a class="reference external" href="https://botkit.ai">BotKit</a> or <a class="reference external" href="https://dev.botframework.com/">Microsoft Bot Framework</a> are available to help developers get simple conversational services up and running. These frameworks provide scaffolding to host message-handling logic and plumbing to integrate with various bot client endpoints. They simplify the task of setting up a server process which listens for incoming text messages, and streamline the effort required to integrate with popular clients like Slack or Facebook Messenger.</p>
+<p>With rule-based frameworks, the developer is responsible for implementing the core logic to interpret incoming messages and return helpful responses. This logic generally consists of a series of rules that specify which scripted response to return for a message that matches a specified pattern. Since rule-based frameworks provide no AI capabilities to parse or classify incoming messages, the developer must code all the necessary message processing and interaction logic by hand. Even simple applications commonly require hundreds of rules to handle the different dialogue states in a typical conversational interface.</p>
+<p>Rule-based approaches are often the quickest way to build and launch a basic demo of a voice or chat assistant. Moving from demo to production, however, almost always exposes a multitude of corner cases, each of which must be handled with different rules. Conflicts and redundancies between rules further complicate this undertaking. Even for simple applications, the growing list of rules can quickly become prohibitively complex. Seasoned developers, familiar with the pitfalls of rule-based approaches, typically opt for one of the more sophisticated approaches discussed below.</p>
+</div>
+<div class="section" id="cloud-based-nlp-services">
+<h2>Cloud-Based NLP Services<a class="headerlink" href="#cloud-based-nlp-services" title="Permalink to this headline">¶</a></h2>
+<p>In the past few years, a variety of cloud-based Natural Language Processing (NLP) services have emerged that aspire to reduce the complexity associated with building basic language understanding capabilities. These services are intended to enable developers without machine learning or NLP expertise to create useful NLP capabilities. All of these services provide browser-based consoles which assist developers in uploading and annotating training examples. They also streamline the task of launching a cloud-based web service to handle and parse natural language requests. These services are generally provided by large consumer internet companies to entice developers to upload their training data and thereby help the service provider improve their own conversational AI offerings in the process. Among the NLP services currently available are <a class="reference external" href="https://aws.amazon.com/lex/">Amazon Lex</a>, <a class="reference external" href="https://dialogflow.com/">Google’s Dialogflow</a>, <a class="reference external" href="https://wit.ai/">Facebook’s wit.ai</a>, <a class="reference external" href="https://www.luis.ai/">Microsoft LUIS</a>,  and <a class="reference external" href="https://www.ibm.com/cloud/watson-assistant/">IBM Watson Assistant</a>.</p>
+<p>Cloud-based NLP services offer a relatively straightforward path for developers to build conversational applications without requiring machine learning knowledge. As a result, they can be the fastest path for assembling a demo or prototype. Many of these services offer pre-trained models for popular consumer tasks like checking the weather, setting an alarm or timer, updating a to-do list, or sending a text message. This makes them well-suited for applications which simply need to replicate common consumer domains without customization. Since the pre-trained models generally offered by these services duplicate the freely available functionality in today’s widely used consumer virtual assistants, companies aiming to leverage these pre-trained models to monetize their own business are likely to face an uphill battle.</p>
+<p>For companies that need to build an application which goes beyond a simple demo and requires models other than generic, pre-trained consumer domains, cloud-based NLP services are typically not the best approach. Building language understanding models tailored to a particular application or domain requires training the models on thousands or millions of representative training examples. Cloud-based NLP services, since they are targeted at developers who are unlikely to have large amounts of training data, are generally intended for smaller data sets and simpler custom models. In addition, most cloud-based NLP services only support basic NLP tasks such as intent classification and entity recognition. Implementing the other required processing steps in a typical conversational workflow, such as entity resolution, language parsing, question answering, and knowledge base creation, is left up to the developer. Perhaps most importantly, for companies unable or unwilling to forego legal ownership of user data when it is uploaded to the service provider cloud, these NLP services are generally not a viable option.</p>
+</div>
+<div class="section" id="machine-learning-toolkits">
+<h2>Machine Learning Toolkits<a class="headerlink" href="#machine-learning-toolkits" title="Permalink to this headline">¶</a></h2>
+<p>Machine learning researchers working on NLP and conversational applications typically rely on versatile and advanced machine learning toolkits. These toolkits provide low-level access to state-of-the-art algorithms, including deep learning models like <a class="reference external" href="https://en.wikipedia.org/wiki/Long_short-term_memory">LSTMs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Recurrent_neural_network">RNNs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Convolutional_neural_network">CNNs</a>, and more. Popular machine learning toolkits include <a class="reference external" href="https://www.tensorflow.org/">Google’s TensorFlow</a> and <a class="reference external" href="https://www.microsoft.com/en-us/research/product/cognitive-toolkit/">Microsoft Cognitive Toolkit</a>.</p>
+<p>For machine learning researchers, toolkits like these are indispensable, and serve as the foundation for much cutting-edge AI research performed today. For companies looking to deploy production conversational services, though, the toolkits often provide little help.  First, although they provide access to the most advanced machine learning algorithms, they provide little or no representative training data likely to be useful for a given production application. This leaves developers to do all the heavy lifting associated with creating and managing training data themselves. Secondly, while the algorithm access they provide is low-level and deep, they offer none of the higher level abstractions which can greatly streamline the task of constructing a conversational interface. As a result, even the most skilled machine learning engineers rarely succeed in building production-quality conversational applications using today’s machine learning toolkits.</p>
+</div>
+<div class="section" id="conversational-ai-platforms">
+<h2>Conversational AI Platforms<a class="headerlink" href="#conversational-ai-platforms" title="Permalink to this headline">¶</a></h2>
+<p>With the rise of conversational applications in the past few years, a new technology approach has emerged that is geared toward companies and developers who need to create production-quality conversational experiences. Conversational AI platforms are machine learning platforms optimized for the task of creating conversational applications such as voice or chat assistants. While offering the flexibility and advanced capabilities of traditional machine learning toolkits, they are specifically adapted to streamline the task of building production conversational interfaces. <a class="reference external" href="https://www.mindmeld.com/">MindMeld</a>&nbsp;is widely recognized as a leading Conversational AI platform.</p>
+<p>Conversational AI platforms differ from pure machine learning platforms in that they offer tools expressly designed for the machine learning steps in a typical conversational workflow. For example, tools for intent classification, entity recognition, entity resolution, question answering, and dialogue management are common components in Conversational AI platforms. Unlike cloud-based NLP services, Conversational AI platforms are intended for machine learning engineers at least somewhat familiar with data science best practices. As a result, Conversational AI platforms offer more advanced tools and more flexibility to train and analyze custom language understanding models around large sets of training data. Also unlike cloud-based NLP services, Conversational AI platforms do not require training data to be uploaded to a shared cloud infrastructure. Instead, they provide a flexible and versatile platform which ensures that data sets and trained models are locally managed and always remain the intellectual property of the application developer.</p>
+</div>
+<div class="section" id="how-good-is-good-enough">
+<h2>How Good is Good Enough?<a class="headerlink" href="#how-good-is-good-enough" title="Permalink to this headline">¶</a></h2>
+<p>With so many different approaches for building conversational applications, it can be difficult for companies to know which strategy is best. An optimal strategy surpasses the threshold of performance that ensures a positive user experience. Determining this baseline level of acceptability can be an especially confusing or daunting undertaking for conversational applications.</p>
+<p>Conversational interfaces represent a new user interface paradigm that is unfamiliar and non-intuitive for many developers whose experience is in web or native applications. Conversational interfaces can be utterly unforgiving compared to traditional graphical user interfaces (GUIs). In a traditional GUI, the visual elements provide a mechanism to guide the user down an interaction path that leads to a positive experience. For conversational interfaces, no such visual guide exists. Instead, the user is typically presented with a microphone button or a text prompt and expected to figure out how to verbalize desired requests from scratch. Faced with such an open-ended prompt and little context, many users find themselves at a loss for words. Even worse, they tend to pose questions that the system is not designed to handle, leading to a fruitless and frustrating outcome.</p>
+<p>Developers building conversational interfaces for the first time often attempt to follow the same practices they know from building traditional GUIs. That means building a minimum viable product (MVP) to capture a small subset of the envisioned functionality, and then submitting the MVP for user testing. For conversational interfaces, this approach almost inevitably fails. A minimal implementation of a conversational interface is typically built using a small subset of the training data that will eventually be needed in a production application. For example, consider an MVP built using ten percent of the training data eventually required. This application could only understand around ten percent of the typical language variations verbalized by users when they invoke your app. As a result, when you submit your app for user testing, nine out of ten users will fail on their first request. This abysmal performance might quickly toll the death knell for your project.</p>
+<p>As it turns out, quick-and-dirty prototypes and limited-scale user testing are not particularly useful in assessing the utility of conversational applications. The only way to measure performance accurately is to enlist large-scale analytics to deterministically measure performance across the long tail of possible user interactions. This measurment methodology is what popular commercial virtual assistants like Siri, Cortana, Google Assistant, and Alexa rely on to ensure that their services meet a mimimum threshold of acceptability before they launch any new features publicly. The methodology requires, first, having a large enough set of ‘ground truth’ data to reflect the lion’s share of all possible user interaction patterns. Secondly, it requires automated testing, using the ‘ground truth’ data, to ensure that a high enough percentage of user queries return an acceptable response.</p>
+<p>Users are unforgiving when evaluating a conversational interface. They expect to verbalize requests just as if speaking with another person. They then expect the system to respond with human-like accuracy. This typically means that conversational applications must be near-perfect. In practice, when a conversational interface cannot achieve accuracy of at least 95%, users are likely conclude that the app is dimwitted and never use it again.</p>
+<p>Observe the following guidelines to ensure that your conversational interface accounts for the unique characteristics of conversational applications and meets a minimum threshold of acceptability before going live.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="1%" />
+<col width="99%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>1</td>
+<td>Select a use case that mimics a familiar, real-world interaction so that users intuitively know the types of questions to ask. Selecting an unrealistic or incorrect use case will render even the smartest app dead on arrival.</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>Generate a large enough set of ‘ground truth’ training data to ensure that the vast majority of user interactions can be captured and measured. Dipping your toe in the water does not work. Real-world accuracy can only be evaluated after you take the plunge.</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>Employ large-scale analytics to ensure that your application achieves at least 95% accuracy across the long tail of possible user interactions. Spot checking and small-scale user testing cannot expose long-tail corner cases which might fatally undermine overall accuracy.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="anatomy_of_a_conversational_ai_interaction.html" class="btn btn-neutral float-right" title="Anatomy of a Conversational AI Interaction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction_to_conversational_applications.html" class="btn btn-neutral float-left" title="Introduction to Conversational Applications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

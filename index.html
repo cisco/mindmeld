@@ -1,0 +1,672 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>About This Playbook &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction to Conversational Applications" href="intro/introduction_to_conversational_applications.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>About This Playbook</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="about-this-playbook">
+<h1>About This Playbook<a class="headerlink" href="#about-this-playbook" title="Permalink to this headline">¶</a></h1>
+<p>This playbook represents a first step toward defining the governing principles and best practices which will enable developers to build great conversational applications. It is the result of several years of practical experience building and deploying dozens of the most advanced conversational applications achievable. Cutting-edge research and state-of-the-art algorithms are not surveyed here; there are many other resources available for that purpose. Instead, this playbook focuses on helping developers and data scientists build real production applications. The detailed instructions, practical advice, and real-world examples provided here should empower developers to improve the quality and variety of conversational experiences of the coming months and years.</p>
+<p>The <a class="reference internal" href="#intro"><span class="std std-ref">Introduction</span></a> provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches.</p>
+<p>The <a class="reference internal" href="#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a> illustrates how to build an end-to-end conversational application using MindMeld, the Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of MindMeld.</p>
+<p>The <a class="reference internal" href="#blueprints"><span class="std std-ref">Blueprint Applications</span></a> section explains how to use MindMeld to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool.</p>
+<p>The <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a> covers each component of the MindMeld platform in depth and explains how to use MindMeld to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the <a class="reference internal" href="#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a> or the <a class="reference internal" href="#blueprints"><span class="std std-ref">Blueprint Applications</span></a>. The <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a> highlights many common techniques and best practices that contribute to successful conversational experiences today.</p>
+<p>The <a class="reference internal" href="#versions"><span class="std std-ref">Versions</span></a> section contains a Recent Changes section which you should always consult before installing or upgrading MindMeld.</p>
+<p>Readers should be familiar with <a class="reference external" href="https://www.coursera.org/learn/machine-learning">Machine Learning</a> and the <a class="reference external" href="https://www.python.org/">Python</a> programming language, including functional knowledge of the <a class="reference external" href="http://scikit-learn.org/">scikit-learn</a> python package.</p>
+<p>For those who wish to use the deep learning models included in MindMeld, familiarity with the <a class="reference external" href="https://www.tensorflow.org/">TensorFlow</a> library is recommended.</p>
+</div>
+<div class="section" id="how-to-use-these-docs">
+<h1>How to Use these Docs<a class="headerlink" href="#how-to-use-these-docs" title="Permalink to this headline">¶</a></h1>
+<p>The questions and answers below explain how to use this Conversational AI Playbook to support your individual needs as a developer and learner.</p>
+<hr class="docutils" />
+<p><strong>Q:</strong> What is Conversational AI? Why does MindMeld exist and what does it do?</p>
+<p><strong>A:</strong> Read the <a class="reference internal" href="#intro"><span class="std std-ref">Introduction</span></a>. This explains what MindMeld does differently from other platforms and toolkits.</p>
+<hr class="docutils" />
+<p><strong>Q:</strong> What is the methodology for building Conversational AI applications with MindMeld?</p>
+<p><strong>A:</strong> Read the <a class="reference internal" href="#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>. This and the <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a> together form the main body of knowledge for MindMeld developers.</p>
+<hr class="docutils" />
+<p><strong>Q:</strong> How do I quickly get a pre-built MindMeld app running, either as a learning exercise or as a baseline for my own application?</p>
+<p><strong>A:</strong> Follow the instructions in <a class="reference internal" href="#blueprints"><span class="std std-ref">Blueprint Applications</span></a>.</p>
+<hr class="docutils" />
+<p><strong>Q:</strong> How do I apply the Step-by-Step methodology to my own MindMeld app, either building from scratch or extending a Blueprint app?</p>
+<p><strong>A:</strong> Work through either the <a class="reference internal" href="#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a> or the section of <a class="reference internal" href="#blueprints"><span class="std std-ref">Blueprint Applications</span></a> that’s appropriate for your use case. Where those docs refer you to the <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a>, apply the in-depth material in the <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a> to improve your application’s performance or increase its sophistication, as needed.</p>
+<p>The <a class="reference internal" href="#userguide"><span class="std std-ref">User Guide</span></a> and the <a class="reference internal" href="#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a> together form the main body of knowledge for MindMeld developers.</p>
+<hr class="docutils" />
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound" id="intro">
+<p class="caption"><span class="caption-text">Introduction</span><a class="headerlink" href="#intro" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/introduction_to_conversational_applications.html#the-rise-of-the-conversational-interface">The Rise of the Conversational Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/introduction_to_conversational_applications.html#machine-learning-and-the-challenge-of-building-useful-conversational-applications">Machine Learning and the Challenge of Building Useful Conversational Applications</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html#rule-based-approaches">Rule-Based Approaches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html#cloud-based-nlp-services">Cloud-Based NLP Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html#machine-learning-toolkits">Machine Learning Toolkits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html#conversational-ai-platforms">Conversational AI Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/approaches_for_building_conversational_applications.html#how-good-is-good-enough">How Good is Good Enough?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/introducing_mindmeld.html">Introducing MindMeld</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/introducing_mindmeld.html#the-mindmeld-philosophy">The MindMeld Philosophy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="quickstart">
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span><a class="headerlink" href="#quickstart" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/03_define_the_hierarchy.html#the-example-nlp-model-hierarchy">The Example NLP Model Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/03_define_the_hierarchy.html#begin-implementation-with-mindmeld">Begin Implementation with MindMeld</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/04_define_the_dialogue_handlers.html#specify-the-superset-of-dialogue-states">Specify the Superset of Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/04_define_the_dialogue_handlers.html#create-the-application-container">Create the Application Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/04_define_the_dialogue_handlers.html#implement-the-dialogue-state-handlers">Implement the Dialogue State Handlers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/06_generate_representative_training_data.html#labeled-query-files">Labeled Query Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/06_generate_representative_training_data.html#entity-mapping-files">Entity Mapping Files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html#domain-classification">Domain Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html#intent-classification">Intent Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html#entity-recognition">Entity Recognition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html#role-classification">Role Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/07_train_the_natural_language_processing_classifiers.html#entity-resolution">Entity Resolution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/09_optimize_question_answering_performance.html#proximity-based-ranking">Proximity-Based Ranking</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="blueprints">
+<p class="caption"><span class="caption-text">Blueprint Applications</span><a class="headerlink" href="#blueprints" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/overview.html">MindMeld Blueprints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/overview.html#before-you-continue">Before you Continue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/overview.html#quick-start">Quick Start</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/food_ordering.html">Food Ordering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/food_ordering.html#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/video_discovery.html">Video Discovery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/video_discovery.html#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/home_assistant.html">Home Assistant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/home_assistant.html#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/hr_assistant.html">HR Assistant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="userguide">
+<p class="caption"><span class="caption-text">User Guide</span><a class="headerlink" href="#userguide" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="userguide/getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#install-mindmeld">Install MindMeld</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#begin-new-project">Begin New Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#upgrade-mindmeld">Upgrade Mindmeld</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#command-line-interfaces">Command-Line Interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#configure-logging">Configure Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/getting_started.html#environment-variables">Environment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/architecture.html">Platform Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/architecture.html#natural-language-processor">Natural Language Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/architecture.html#question-answerer">Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/architecture.html#dialogue-manager">Dialogue Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/architecture.html#application-manager">Application Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/preprocessor.html">Working with the Preprocessor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/preprocessor.html#implement-the-preprocessor">Implement the preprocessor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/preprocessor.html#use-the-preprocessor">Use the preprocessor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/nlp.html">Working with the Natural Language Processor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#instantiate-the-nlp-class">Instantiate the NLP class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#train-the-nlp-pipeline">Train the NLP pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#run-the-nlp-pipeline">Run the NLP pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#evaluate-nlp-performance">Evaluate NLP performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#optimize-the-nlp-models">Optimize the NLP models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#select-data-for-experiments">Select data for experiments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/nlp.html#save-models-for-future-use">Save models for future use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/domain_classifier.html">Working with the Domain Classifier</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#access-the-domain-classifier">Access the domain classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#train-the-domain-classifier">Train the domain classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#run-the-domain-classifier">Run the domain classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#evaluate-classifier-performance">Evaluate classifier performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#viewing-features-extracted-for-classification">Viewing features extracted for classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#inspect-features-and-their-importance">Inspect features and their importance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/domain_classifier.html#save-model-for-future-use">Save model for future use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/intent_classifier.html">Working with the Intent Classifier</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#access-an-intent-classifier">Access an intent classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#train-an-intent-classifier">Train an intent classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#run-the-intent-classifier">Run the intent classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#evaluate-classifier-performance">Evaluate classifier performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#viewing-features-extracted-for-classification">Viewing features extracted for classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#inspect-features-and-their-importance">Inspect features and their importance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/intent_classifier.html#save-model-for-future-use">Save model for future use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/entity_recognizer.html">Working with the Entity Recognizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#system-entities-and-custom-entities">System entities and custom entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#access-the-entity-recognizer">Access the entity recognizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#train-an-entity-recognizer">Train an entity recognizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#run-the-entity-recognizer">Run the entity recognizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#evaluate-classifier-performance">Evaluate classifier performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#viewing-features-extracted-for-entity-recognition">Viewing features extracted for entity recognition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#save-model-for-future-use">Save model for future use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_recognizer.html#more-about-system-entities">More about system entities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/lstm.html">Using LSTM for Entity Recognition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/lstm.html#lstm-network-overview">LSTM network overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/lstm.html#lstm-parameter-settings">LSTM parameter settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/role_classifier.html">Working with the Role Classifier</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#access-a-role-classifier">Access a role classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#train-a-role-classifier">Train a role classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#run-the-role-classifier">Run the role classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#evaluate-classifier-performance">Evaluate classifier performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#view-features-extracted-for-classification">View features extracted for classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/role_classifier.html#save-model-for-future-use">Save model for future use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/entity_resolver.html">Working with the Entity Resolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#understanding-the-entity-resolver">Understanding the entity resolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#prepare-data-for-the-entity-resolver">Prepare data for the Entity Resolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#train-the-entity-resolver">Train the entity resolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#run-the-entity-resolver">Run the entity resolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#consider-context-aware-entity-resolution">Consider context-aware entity resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/entity_resolver.html#about-the-exact-match-text-similarity-model">About the Exact Match text similarity model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/parser.html">Working with the Language Parser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#some-parsing-terminology">Some parsing terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#figure-out-whether-your-app-needs-a-parser">Figure out whether your app needs a parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#how-the-configuration-instructs-the-parser">How the configuration instructs the parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#learn-how-to-create-a-simple-parser-configuration">Learn how to create a simple parser configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#define-a-simple-parser-configuration">Define a simple parser configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#load-the-parser-configuration">Load the parser configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#run-the-parser">Run the parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#learn-how-to-create-an-advanced-parser-configuration-optional">Learn how to create an advanced parser configuration (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/parser.html#experimenting-with-an-advanced-configuration-optional">Experimenting with an advanced configuration (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/custom_features.html">Working with User-Defined Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_features.html#custom-features-file">Custom Features File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_features.html#example-of-a-query-feature-extractor">Example of a Query Feature Extractor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_features.html#example-of-an-entity-feature-extractor">Example of an Entity Feature Extractor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/kb.html">Working with the Knowledge Base and Question Answerer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#decide-whether-your-app-needs-a-knowledge-base">Decide Whether your App Needs a Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#decide-how-to-use-question-answering-in-your-application">Decide How to Use Question Answering in your Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#prepare-your-data-for-the-knowledge-base">Prepare your Data for the Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#verify-that-the-data-is-clean">Verify that the Data is Clean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#import-the-data-into-the-knowledge-base">Import the Data into the Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-simple-searches-with-the-get-api">Perform Simple Searches with the <code class="docutils literal"><span class="pre">get()</span></code> API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-advanced-searches-with-the-build-search-api">Perform Advanced Searches with the <code class="docutils literal"><span class="pre">build_search()</span></code> API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#dealing-with-unstructured-text">Dealing with unstructured text</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/dm.html">Working with the Dialogue Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-states">Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-state-rules">Dialogue State Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-state-handlers">Dialogue State Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#targeted-dialogue-state-handling">Targeted Dialogue State Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#using-dynamic-gazetteers">Using Dynamic Gazetteers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-flows">Dialogue Flows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#automatic-slot-filling-for-entities">Automatic Slot Filling for Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-middleware">Dialogue Middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#asynchronous-dialogue-state-handlers-and-middleware">Asynchronous Dialogue State Handlers and Middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/internationalization.html">Internationalization support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/internationalization.html#setting-up-language-configuration">Setting up language configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/internationalization.html#language-stemming">Language stemming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/internationalization.html#system-entity-resolution">System entity resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/internationalization.html#locale-based-resolution">Locale-based resolution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/voice.html">Dealing with Voice Inputs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/voice.html#challenges-with-speech-recognition">Challenges with speech recognition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/voice.html#phonetic-matching-in-entity-resolution">Phonetic matching in entity resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/voice.html#leveraging-asr-n-best-lists">Leveraging ASR n-best lists</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="integrations/webex_teams.html">Webex Teams Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="integrations/webex_teams.html#quick-start">Quick Start</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="integrations/whatsapp.html">WhatsApp Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="integrations/whatsapp.html#quick-start">Quick Start</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="internal">
+<p class="caption"><span class="caption-text">API</span><a class="headerlink" href="#internal" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="internal/api_reference.html">API Reference</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="mindmeld-ui">
+<p class="caption"><span class="caption-text">MindMeld UI</span><a class="headerlink" href="#mindmeld-ui" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mindmeld_ui/mindmeld_ui.html">MindMeld UI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mindmeld_ui/mindmeld_ui.html#quick-start">Quick Start</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="versions">
+<p class="caption"><span class="caption-text">Versions</span><a class="headerlink" href="#versions" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="versions/changes.html">Recent Changes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-4-2">MindMeld 4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-4-1">MindMeld 4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-4-0">MindMeld 4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-3-4">MindMeld 3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-3-3">MindMeld 3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-3-2">MindMeld 3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/changes.html#mindmeld-3-1">MindMeld 3.1</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="versions/history.html">Package History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id1">4.2.0 (2019-09-16)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id2">4.1.0 (2019-04-22)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id4">4.0.0 (2019-02-25)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id8">3.4.0 (2018-08-20)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id9">3.3.0 (2018-05-10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id11">3.2.0 (2017-10-23)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id13">3.1.0 (2017-09-20)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="versions/history.html#id17">3.0.0 (2017-08-14)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="intro/introduction_to_conversational_applications.html" class="btn btn-neutral float-right" title="Introduction to Conversational Applications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

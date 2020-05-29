@@ -1,0 +1,816 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.system_entity_recognizer module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.system_entity_recognizer module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.system_entity_recognizer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.system_entity_recognizer">
+<span id="mindmeld-system-entity-recognizer-module"></span><h1>mindmeld.system_entity_recognizer module<a class="headerlink" href="#module-mindmeld.system_entity_recognizer" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityError">
+<em class="property">exception </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">SystemEntityError</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension">
+<em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">DucklingDimension</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.AMOUNT_OF_MONEY">
+<code class="descname">AMOUNT_OF_MONEY</code><em class="property"> = 'amount-of-money'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.AMOUNT_OF_MONEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.DISTANCE">
+<code class="descname">DISTANCE</code><em class="property"> = 'distance'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.DISTANCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.DURATION">
+<code class="descname">DURATION</code><em class="property"> = 'duration'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.DURATION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.EMAIL">
+<code class="descname">EMAIL</code><em class="property"> = 'email'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.EMAIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.NUMERAL">
+<code class="descname">NUMERAL</code><em class="property"> = 'numeral'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.NUMERAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.ORDINAL">
+<code class="descname">ORDINAL</code><em class="property"> = 'ordinal'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.ORDINAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.PHONE_NUMBER">
+<code class="descname">PHONE_NUMBER</code><em class="property"> = 'phone-number'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.PHONE_NUMBER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.QUANTITY">
+<code class="descname">QUANTITY</code><em class="property"> = 'quantity'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.QUANTITY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.TEMPERATURE">
+<code class="descname">TEMPERATURE</code><em class="property"> = 'temperature'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.TEMPERATURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.TIME">
+<code class="descname">TIME</code><em class="property"> = 'time'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.TIME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.URL">
+<code class="descname">URL</code><em class="property"> = 'url'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.URL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.system_entity_recognizer.DucklingDimension.VOLUME">
+<code class="descname">VOLUME</code><em class="property"> = 'volume'</em><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension.VOLUME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer">
+<em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">DucklingRecognizer</code><span class="sig-paren">(</span><em>url='http://localhost:7151/parse'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates">
+<code class="descname">get_candidates</code><span class="sig-paren">(</span><em>query</em>, <em>entity_types=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.get_candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies candidate system entities in the given query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.
+If not specified, the system time zone is used.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix timestamp used as the reference time.
+If not specified, the current system time is used. If <cite>time_zone</cite>
+is not also specified, this parameter is ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of QueryEntity</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates_for_text">
+<code class="descname">get_candidates_for_text</code><span class="sig-paren">(</span><em>text</em>, <em>entity_types=None</em>, <em>language=None</em>, <em>locale=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.get_candidates_for_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates_for_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies candidate system entities in the given text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Language code</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Locale code</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the text</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.get_instance">
+<em class="property">static </em><code class="descname">get_instance</code><span class="sig-paren">(</span><em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.get_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.get_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static access method.
+We get an instance for the Duckling URL. If there is no URL being passed,</p>
+<blockquote>
+<div>default to DEFAULT_DUCKLING_URL.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> – Duckling URL.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DucklingRecognizer instance</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(DucklingRecognizer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.get_response">
+<code class="descname">get_response</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.get_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.get_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a post request to Duckling, data is a dictionary with field <cite>text</cite>.
+Return a tuple consisting the JSON response and a response code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dict, int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>sentence</em>, <em>dimensions=None</em>, <em>language=None</em>, <em>locale=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls System Entity Recognizer service API to extract numerical entities from a sentence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A raw sentence.</li>
+<li><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of str</em>) – The list of types (e.g. volume,                 temperature) to restrict the output to. If None, include all types.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language of the sentence specified using a 639-1/2 code.
+If both locale and language are provided, the locale is used. If neither are
+provided, the EN language code is used.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.                 If not specified, the system time zone is used.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix millisecond timestamp used as the reference time.                 If not specified, the current system time is used. If <cite>time_zone</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>A tuple containing:</dt>
+<dd><ul class="first last simple">
+<li>response (list, dict): Response from the System Entity Recognizer service that                 consists of a list of dicts, each corresponding to a single prediction or just a                 dict, corresponding to a single prediction.</li>
+<li>response_code (int): http status code.</li>
+</ul>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.resolve_system_entity">
+<code class="descname">resolve_system_entity</code><span class="sig-paren">(</span><em>query</em>, <em>entity_type</em>, <em>span</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.resolve_system_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.resolve_system_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolves a system entity in the provided query at the specified span.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) – The character span of the entity in the query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The resolved entity</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">SystemEntityResolutionError</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer">
+<em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">NoOpSystemEntityRecognizer</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
+<p>This is a no-ops recognizer which returns empty list and 200.</p>
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates">
+<code class="descname">get_candidates</code><span class="sig-paren">(</span><em>query</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates_for_text">
+<code class="descname">get_candidates_for_text</code><span class="sig-paren">(</span><em>text</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_candidates_for_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates_for_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_instance">
+<em class="property">static </em><code class="descname">get_instance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>sentence</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.resolve_system_entity">
+<code class="descname">resolve_system_entity</code><span class="sig-paren">(</span><em>query</em>, <em>entity_type</em>, <em>span</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.resolve_system_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.resolve_system_entity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer">
+<em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">SystemEntityRecognizer</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<p>SystemEntityRecognizer is the external parsing service used to extract
+system entities. It is intended to be used as a singleton, so it’s
+initialized only once during NLP object construction.</p>
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_candidates">
+<code class="descname">get_candidates</code><span class="sig-paren">(</span><em>query</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.get_candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_candidates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies candidate system entities in the given query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of QueryEntity</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_candidates_for_text">
+<code class="descname">get_candidates_for_text</code><span class="sig-paren">(</span><em>text</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.get_candidates_for_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_candidates_for_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies candidate system entities in the given text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the text</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_instance">
+<em class="property">static </em><code class="descname">get_instance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.get_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static access method. If there is no instance instantiated, we instantiate
+NoOpSystemEntityRecognizer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A SystemEntityRecognizer instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(SystemEntityRecognizer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.load_from_app_path">
+<em class="property">static </em><code class="descname">load_from_app_path</code><span class="sig-paren">(</span><em>app_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.load_from_app_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.load_from_app_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the application configuration is empty, we do not use Duckling.</p>
+<dl class="docutils">
+<dt>Otherwise, we return the Duckling recognizer with the URL defined in the application’s</dt>
+<dd>config, default to the DEFAULT_DUCKLING_URL.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Application path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(SystemEntityRecognizer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>sentence</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls System Entity Recognizer service API to extract numerical entities from a sentence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A raw sentence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A tuple containing:</dt>
+<dd><ul class="first last simple">
+<li>response (list, dict): Response from the System Entity Recognizer service that                 consists of a list of dicts, each corresponding to a single prediction or just a                 dict, corresponding to a single prediction.</li>
+<li>response_code (int): http status code.</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.resolve_system_entity">
+<code class="descname">resolve_system_entity</code><span class="sig-paren">(</span><em>query</em>, <em>entity_type</em>, <em>span</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.resolve_system_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.resolve_system_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolves a system entity in the provided query at the specified span.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) – The character span of the entity in the query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The resolved entity</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">SystemEntityResolutionError</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.set_system_entity_recognizer">
+<em class="property">static </em><code class="descname">set_system_entity_recognizer</code><span class="sig-paren">(</span><em>system_entity_recognizer=None</em>, <em>app_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.set_system_entity_recognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.set_system_entity_recognizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>We set the global System Entity Recognizer to be the one configured from the
+application’s path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>system_entity_recognizer</strong> – A system entity recognizer</li>
+<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The application path</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(SystemEntityRecognizer)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.system_entity_recognizer.dimensions_from_entity_types">
+<code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">dimensions_from_entity_types</code><span class="sig-paren">(</span><em>entity_types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#dimensions_from_entity_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.dimensions_from_entity_types" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(list)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.system_entity_recognizer.duckling_item_to_entity">
+<code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">duckling_item_to_entity</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#duckling_item_to_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.duckling_item_to_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an item from the output of duckling into an Entity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The duckling item</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The entity described by the duckling item</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Entity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.system_entity_recognizer.duckling_item_to_query_entity">
+<code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">duckling_item_to_query_entity</code><span class="sig-paren">(</span><em>query</em>, <em>item</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#duckling_item_to_query_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.duckling_item_to_query_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an item from the output of duckling into a QueryEntity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query to construct the QueryEntity from</li>
+<li><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The duckling item</li>
+<li><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – The offset into the query that the item’s
+indexing begins</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The query entity described by the duckling item or             None if no item is present</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">QueryEntity</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

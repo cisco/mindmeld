@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.ser &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.ser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.ser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the system entity recognizer.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">.system_entity_recognizer</span> <span class="k">import</span> <span class="n">DucklingRecognizer</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_candidates"><a class="viewcode-back" href="../../apidoc/mindmeld.ser.html#mindmeld.ser.get_candidates">[docs]</a><span class="k">def</span> <span class="nf">get_candidates</span><span class="p">(</span>
+    <span class="n">query</span><span class="p">,</span> <span class="n">entity_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Identifies candidate system entities in the given query.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query (Query): The query to examine</span>
+<span class="sd">        entity_types (list of str): The entity types to consider</span>
+<span class="sd">        locale (str, optional): The locale representing the ISO 639-1 language code and \</span>
+<span class="sd">            ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">        language (str, optional): Language as specified using a 639-1/2 code.</span>
+<span class="sd">        time_zone (str, optional): An IANA time zone id such as &#39;America/Los_Angeles&#39;.</span>
+<span class="sd">            If not specified, the system time zone is used.</span>
+<span class="sd">        timestamp (long, optional): A unix timestamp used as the reference time.</span>
+<span class="sd">            If not specified, the current system time is used. If `time_zone`</span>
+<span class="sd">            is not also specified, this parameter is ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of QueryEntity: The system entities found in the query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;get_candidates is deprecated in favor of DucklingRecognizer.get_candidates.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">DucklingRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">get_candidates</span><span class="p">(</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">entity_types</span><span class="o">=</span><span class="n">entity_types</span><span class="p">,</span>
+        <span class="n">locale</span><span class="o">=</span><span class="n">locale</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">time_zone</span><span class="o">=</span><span class="n">time_zone</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_candidates_for_text"><a class="viewcode-back" href="../../apidoc/mindmeld.ser.html#mindmeld.ser.get_candidates_for_text">[docs]</a><span class="k">def</span> <span class="nf">get_candidates_for_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">entity_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Identifies candidate system entities in the given text.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): The text to examine</span>
+<span class="sd">        entity_types (list of str): The entity types to consider</span>
+<span class="sd">        language (str): Language code</span>
+<span class="sd">        locale (str): Locale code</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list of dict: The system entities found in the text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;get_candiates_for_text is deprecated in favor of&quot;</span>
+        <span class="s2">&quot; DucklingRecognizer.get_candidates_for_text.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">DucklingRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">get_candidates_for_text</span><span class="p">(</span>
+        <span class="n">text</span><span class="p">,</span> <span class="n">entity_types</span><span class="o">=</span><span class="n">entity_types</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="n">locale</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_numerics"><a class="viewcode-back" href="../../apidoc/mindmeld.ser.html#mindmeld.ser.parse_numerics">[docs]</a><span class="k">def</span> <span class="nf">parse_numerics</span><span class="p">(</span>
+    <span class="n">sentence</span><span class="p">,</span>
+    <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calls System Entity Recognizer service API to extract numerical entities from a sentence.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sentence (str): A raw sentence.</span>
+<span class="sd">        dimensions (None or list of str): The list of types (e.g. volume, \</span>
+<span class="sd">            temperature) to restrict the output to. If None, include all types.</span>
+<span class="sd">        language (str, optional): Language of the sentence specified using a 639-1/2 code.</span>
+<span class="sd">            If both locale and language are provided, the locale is used. If neither are</span>
+<span class="sd">            provided, the EN language code is used.</span>
+<span class="sd">        locale (str, optional): The locale representing the ISO 639-1 language code and \</span>
+<span class="sd">            ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">        time_zone (str, optional): An IANA time zone id such as &#39;America/Los_Angeles&#39;. \</span>
+<span class="sd">            If not specified, the system time zone is used.</span>
+<span class="sd">        timestamp (long, optional): A unix millisecond timestamp used as the reference time. \</span>
+<span class="sd">            If not specified, the current system time is used. If `time_zone` \</span>
+<span class="sd">            is not also specified, this parameter is ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple): A tuple containing:</span>
+<span class="sd">            - response (list, dict): Response from the System Entity Recognizer service that \</span>
+<span class="sd">            consists of a list of dicts, each corresponding to a single prediction or just a \</span>
+<span class="sd">            dict, corresponding to a single prediction.</span>
+<span class="sd">            - response_code (int): http status code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;parse_numerics is deprecated in favor of DucklingRecognizer.parse.&quot;</span><span class="p">)</span>
+    <span class="n">DucklingRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+        <span class="n">sentence</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">locale</span><span class="o">=</span><span class="n">locale</span><span class="p">,</span>
+        <span class="n">time_zone</span><span class="o">=</span><span class="n">time_zone</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="resolve_system_entity"><a class="viewcode-back" href="../../apidoc/mindmeld.ser.html#mindmeld.ser.resolve_system_entity">[docs]</a><span class="k">def</span> <span class="nf">resolve_system_entity</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">span</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resolves a system entity in the provided query at the specified span.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query (Query): The query containing the entity</span>
+<span class="sd">        entity_type (str): The type of the entity</span>
+<span class="sd">        span (Span): The character span of the entity in the query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Entity: The resolved entity</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        SystemEntityResolutionError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;resolve_system_entity is deprecated in favor of DucklingRecognizer.resolve_system_entity.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">DucklingRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">resolve_system_entity</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

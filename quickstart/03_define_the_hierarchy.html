@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Step 3: Define the Domain, Intent, Entity, and Role Hierarchy &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Step 4: Define the Dialogue State Handlers" href="04_define_the_dialogue_handlers.html" />
+    <link rel="prev" title="Step 2: Script Your Ideal Dialogue Interactions" href="02_script_interactions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-example-nlp-model-hierarchy">The Example NLP Model Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#begin-implementation-with-mindmeld">Begin Implementation with MindMeld</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/03_define_the_hierarchy.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="step-3-define-the-domain-intent-entity-and-role-hierarchy">
+<h1>Step 3: Define the Domain, Intent, Entity, and Role Hierarchy<a class="headerlink" href="#step-3-define-the-domain-intent-entity-and-role-hierarchy" title="Permalink to this headline">¶</a></h1>
+<p>To model and understand natural language, every conversational application relies on a hierarchy of machine learning classifiers. This family of machine learning models, broadly defined as the Natural Language Processing (NLP) component of an application, sits at the core of all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has emerged in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.</p>
+<a class="reference internal image-reference" href="../_images/hierarchy.png"><img alt="../_images/hierarchy.png" class="align-center" src="../_images/hierarchy.png" style="width: 700px;" /></a>
+<p>The topmost layer in the model hierarchy is the <em>domain classifier</em>. The domain classifier performs the first-pass categorization, assigning each incoming query into one of a set of pre-defined buckets or <em>domains</em>.</p>
+<p>For any given domain, there may be one or more intents, like “order drink” or “cancel order,” which reflect what the user is trying to accomplish. You define the intents for your application by abstracting them from the dialogue states you scripted in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a>. The <em>intent classifiers</em> predict which of the intents is expressed in a given request.</p>
+<p>Next, the <em>entity recognizers</em> discern the words and phrases that must be identified to understand and fulfill the request. These identified words and phrases are called <em>entities</em>, and each intent may have zero or more types of entities which must be recognized.</p>
+<p>A fourth and final classification step, called role classification, is required when entities of the same type need to be interpreted differently to understand the request. For example, “9 AM” and “5 PM” could both be classified as <cite>time</cite> entities, but one might need to be interpreted as playing the role of an <cite>opening time</cite> and the other as playing the role of a <cite>closing time</cite>. The <em>role classifiers</em> label such entities with the appropriate roles.</p>
+<p><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a> and the <a class="reference internal" href="../userguide/nlp.html"><span class="doc">User Guide</span></a> provide more details on the NLP classifier hierarchy utilized by MindMeld.</p>
+<div class="section" id="the-example-nlp-model-hierarchy">
+<span id="model-hierarchy"></span><h2>The Example NLP Model Hierarchy<a class="headerlink" href="#the-example-nlp-model-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>We could design the NLP model hierarchy for our simple Kwik-E-Mart conversational application to resemble the illustration below.</p>
+<a class="reference internal image-reference" href="../_images/hierarchy2.png"><img alt="../_images/hierarchy2.png" class="align-center" src="../_images/hierarchy2.png" style="width: 700px;" /></a>
+<p>The single domain in this rudimentary application, <code class="docutils literal"><span class="pre">store_info</span></code>, encompasses all of the functionality required to find information about Kwik-E-Mart retail stores. The <code class="docutils literal"><span class="pre">store_info</span></code> domain supports five initial intents:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">greet</span></code> — Begins an interaction and welcomes the user</li>
+<li><code class="docutils literal"><span class="pre">get_store_hours</span></code> — Returns the opening and closing times for the specified store</li>
+<li><code class="docutils literal"><span class="pre">find_nearest_store</span></code> — Returns the closest store to the user</li>
+<li><code class="docutils literal"><span class="pre">exit</span></code> — Ends the current interaction</li>
+<li><code class="docutils literal"><span class="pre">help</span></code> — Provides help information in case the user gets stuck</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">By convention, intent names are verbs that describe what the user is trying accomplish.</p>
+</div>
+<p>In this basic example, only the <code class="docutils literal"><span class="pre">get_store_hours</span></code> intent requires entity recognition. This intent supports two entity types:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">store_name</span></code> — The name of a specific retail store location</li>
+<li><code class="docutils literal"><span class="pre">date</span></code> — The calendar date or day of the week</li>
+</ul>
+</div></blockquote>
+<p>Neither of these entity types require role classification.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">By convention, entity names are nouns that describe the entity type.</p>
+</div>
+<p>Having completed the design of the domain, intent, entity and role hierarchy for our example application, we can begin implementing the application using MindMeld.</p>
+</div>
+<div class="section" id="begin-implementation-with-mindmeld">
+<h2>Begin Implementation with MindMeld<a class="headerlink" href="#begin-implementation-with-mindmeld" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">install MindMeld</span></a> before proceeding with the instructions below.</p>
+</div>
+<p>Every MindMeld application begins with a <em>root folder</em> to contain all of the application’s training data files, configuration files and custom code. For our example, let’s define a root folder called <code class="docutils literal"><span class="pre">my_app</span></code>.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">MM_APP_ROOT</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/my_app&quot;</span>
+mkdir -p <span class="nv">$MM_APP_ROOT</span>
+<span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+</pre></div>
+</div>
+<p>The folder structure inside the root folder defines the domain and intent hierarchy for your application. Create it according to the following procedure:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Within the root folder, create a folder named <code class="docutils literal"><span class="pre">domains</span></code></li>
+<li>Use your domains as names for a set of folders that you create within the <code class="docutils literal"><span class="pre">domains</span></code> folder</li>
+<li>Create a set of folders within each folder you created in Step 2, giving each new folder the name of one intent from its parent domain</li>
+</ol>
+</div></blockquote>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mkdir domains
+<span class="nb">cd</span> domains
+mkdir store_info
+<span class="nb">cd</span> store_info
+mkdir greet
+mkdir get_store_hours
+</pre></div>
+</div>
+<p>This folder structure organizes the training data for the machine learning models in your application. Now, create a folder structure to organize the data files used by the entity recognizer, role classifier, and entity resolver models.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Within the root folder, create a folder named <code class="docutils literal"><span class="pre">entities</span></code></li>
+<li>Use your entities as names for a set of folders that you create within the <code class="docutils literal"><span class="pre">entities</span></code> folder</li>
+</ol>
+</div></blockquote>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+mkdir entities
+<span class="nb">cd</span> entities
+mkdir store_name
+</pre></div>
+</div>
+<p>MindMeld provides a faster way to create your application structure for common use cases. These are called application <em>blueprints</em>. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> method, as shown below.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you manually created a <code class="docutils literal"><span class="pre">my_app</span></code> folder following the instructions above, be sure to delete it before invoking the <code class="docutils literal"><span class="pre">blueprint</span></code> method.</p>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$HOME</span>
+python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;kwik_e_mart&#39;, &#39;my_app&#39;);&quot;</span>
+</pre></div>
+</div>
+<p>Running the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> method for our simple example application produces the root directory structure illustrated below.</p>
+<a class="reference internal image-reference" href="../_images/directory.png"><img alt="../_images/directory.png" class="align-center" src="../_images/directory.png" style="width: 350px;" /></a>
+<p>See the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">User Guide</span></a> for more about blueprints, and root folder organization and structure.</p>
+<p>Notice that there is no folder for the <code class="docutils literal"><span class="pre">date</span></code> entity. None is needed, because we can use the MindMeld <em>system entity</em> for time expressions, <code class="docutils literal"><span class="pre">sys_time</span></code>, to capture the date information. A system entity is one that it is already built into the MindMeld platform. MindMeld provides several different system entity types for common, domain-independent entities; see the MindMeld <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">User Guide</span></a> for details.</p>
+<p>Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.</p>
+<a class="reference internal image-reference" href="../_images/quickstart_parse_output.png"><img alt="../_images/quickstart_parse_output.png" class="align-center" src="../_images/quickstart_parse_output.png" style="width: 600px;" /></a>
+<p>Next, we explore how to introduce training data to the defined folders in order to build machine learning models that parse and understand user requests as shown above.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="04_define_the_dialogue_handlers.html" class="btn btn-neutral float-right" title="Step 4: Define the Dialogue State Handlers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="02_script_interactions.html" class="btn btn-neutral float-left" title="Step 2: Script Your Ideal Dialogue Interactions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,588 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.app_manager &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.app_manager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.app_manager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the application manager</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">.components</span> <span class="k">import</span> <span class="n">DialogueManager</span><span class="p">,</span> <span class="n">NaturalLanguageProcessor</span><span class="p">,</span> <span class="n">QuestionAnswerer</span>
+<span class="kn">from</span> <span class="nn">.components.dialogue</span> <span class="k">import</span> <span class="n">DialogueResponder</span>
+<span class="kn">from</span> <span class="nn">.components.request</span> <span class="k">import</span> <span class="n">FrozenParams</span><span class="p">,</span> <span class="n">Params</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">.resource_loader</span> <span class="k">import</span> <span class="n">ResourceLoader</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="freeze_params"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.freeze_params">[docs]</a><span class="k">def</span> <span class="nf">freeze_params</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If params is a dictionary or Params we convert it into FrozenParams.</span>
+<span class="sd">    Otherwise we raise a TypeError.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        params (dict, Params): The input params to convert</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        FrozenParams: The converted params object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="n">FrozenParams</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">==</span> <span class="n">Params</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">DialogueResponder</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">FrozenParams</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid type for params argument. &quot;</span>
+            <span class="s2">&quot;Should be dict or </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FrozenParams</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="ApplicationManager"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.ApplicationManager">[docs]</a><span class="k">class</span> <span class="nc">ApplicationManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The Application Manager is the core orchestrator of the MindMeld platform. It receives \</span>
+<span class="sd">    a client request, and processes that request by passing it through all the necessary \</span>
+<span class="sd">    components of MindMeld. Once processing is complete, the application manager returns \</span>
+<span class="sd">    the final response back to the client.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            async_mode (bool): Whether the application is asynchronous or synchronous.</span>
+<span class="sd">            nlp (NaturalLanguageProcessor): The natural language processor.</span>
+<span class="sd">            question_answerer (QuestionAnswerer): The question answerer.</span>
+<span class="sd">            request_class (Request): Any class that inherits \</span>
+<span class="sd">                from Request</span>
+<span class="sd">            responder_class (DialogueResponder): Any class \</span>
+<span class="sd">                that inherits from the DialogueResponder</span>
+<span class="sd">            dialogue_manager (DialogueManager): The application&#39;s dialogue manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MAX_HISTORY_LEN</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="sd">&quot;&quot;&quot;The max number of turns in history.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">app_path</span><span class="p">,</span>
+        <span class="n">nlp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">question_answerer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">request_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">responder_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">preprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">async_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span> <span class="o">=</span> <span class="n">async_mode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app_path</span> <span class="o">=</span> <span class="n">app_path</span>
+        <span class="c1"># If NLP or QA were passed in, use the resource loader from there</span>
+        <span class="k">if</span> <span class="n">nlp</span><span class="p">:</span>
+            <span class="n">resource_loader</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">resource_loader</span>
+            <span class="k">if</span> <span class="n">question_answerer</span><span class="p">:</span>
+                <span class="n">question_answerer</span><span class="o">.</span><span class="n">resource_loader</span> <span class="o">=</span> <span class="n">resource_loader</span>
+        <span class="k">elif</span> <span class="n">question_answerer</span><span class="p">:</span>
+            <span class="n">resource_loader</span> <span class="o">=</span> <span class="n">question_answerer</span><span class="o">.</span><span class="n">resource_loader</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resource_loader</span> <span class="o">=</span> <span class="n">ResourceLoader</span><span class="o">.</span><span class="n">create_resource_loader</span><span class="p">(</span>
+                <span class="n">app_path</span><span class="p">,</span> <span class="n">preprocessor</span><span class="o">=</span><span class="n">preprocessor</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_query_factory</span> <span class="o">=</span> <span class="n">resource_loader</span><span class="o">.</span><span class="n">query_factory</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span> <span class="o">=</span> <span class="n">nlp</span> <span class="ow">or</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question_answerer</span> <span class="o">=</span> <span class="n">question_answerer</span> <span class="ow">or</span> <span class="n">QuestionAnswerer</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="p">,</span> <span class="n">es_host</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_class</span> <span class="o">=</span> <span class="n">request_class</span> <span class="ow">or</span> <span class="n">Request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responder_class</span> <span class="o">=</span> <span class="n">responder_class</span> <span class="ow">or</span> <span class="n">DialogueResponder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span> <span class="o">=</span> <span class="n">DialogueManager</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">responder_class</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Whether the nlp component is ready.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">ready</span>
+
+<div class="viewcode-block" id="ApplicationManager.load"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.ApplicationManager.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads all resources required to run a MindMeld application.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_async</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="c1"># if we are ready, don&#39;t load again</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="c1"># if we are ready, don&#39;t load again</span>
+            <span class="k">return</span>
+        <span class="c1"># TODO: make an async nlp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_pre_dm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processed_query</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">history</span><span class="p">):</span>
+        <span class="c1"># We pass in the previous turn&#39;s responder&#39;s params to the current request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_class</span><span class="p">(</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">processed_query</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We reset the current turn&#39;s responder&#39;s params</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">responder_class</span><span class="p">(</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">Params</span><span class="p">(),</span>
+            <span class="n">slots</span><span class="o">=</span><span class="p">{},</span>
+            <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
+            <span class="n">directives</span><span class="o">=</span><span class="p">[],</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span>
+
+<div class="viewcode-block" id="ApplicationManager.parse"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.ApplicationManager.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of the message sent by the user</span>
+<span class="sd">            params (Params/dict, optional): Contains parameters which modify how text is parsed</span>
+<span class="sd">            params.allowed_intents (list, optional): A list of allowed intents \</span>
+<span class="sd">                for model consideration</span>
+<span class="sd">            params.target_dialogue_state (str, optional): The target dialogue state</span>
+<span class="sd">            params.time_zone (str, optional): The name of an IANA time zone, such as \</span>
+<span class="sd">                &#39;America/Los_Angeles&#39;, or &#39;Asia/Kolkata&#39; \</span>
+<span class="sd">                See the [tz database](https://www.iana.org/time-zones) for more information.</span>
+<span class="sd">            params.timestamp (long, optional): A unix time stamp for the request (in seconds).</span>
+<span class="sd">            frame (dict, optional): A dictionary specifying the frame of the conversation</span>
+<span class="sd">            context (dict, optional): A dictionary of app-specific data</span>
+<span class="sd">            history (list, optional): A list of previous and current responder objects \</span>
+<span class="sd">                                      through interactions with MindMeld</span>
+<span class="sd">            verbose (bool, optional): Flag to return confidence scores for domains and intents</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TODO: Convert to dict</span>
+<span class="sd">            (Responder): A Responder object</span>
+
+<span class="sd">        .. _IANA tz database:</span>
+<span class="sd">           https://www.iana.org/time-zones</span>
+
+<span class="sd">        .. _List of tz database time zones:</span>
+<span class="sd">           https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_async</span><span class="p">(</span>
+                <span class="n">text</span><span class="p">,</span>
+                <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+                <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span>
+                <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">freeze_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">history</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">allowed_intents</span><span class="p">,</span> <span class="n">nlp_params</span><span class="p">,</span> <span class="n">dm_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_nlp</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">processed_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span>
+            <span class="n">query_text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">allowed_intents</span><span class="o">=</span><span class="n">allowed_intents</span><span class="p">,</span> <span class="o">**</span><span class="n">nlp_params</span>
+        <span class="p">)</span>
+        <span class="n">request</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_dm</span><span class="p">(</span>
+            <span class="n">processed_query</span><span class="o">=</span><span class="n">processed_query</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dm_responder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">apply_handler</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">dm_params</span>
+        <span class="p">)</span>
+        <span class="n">modified_dm_responder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_dm</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">dm_responder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">modified_dm_responder</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_parse_async</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): The text of the message sent by the user</span>
+<span class="sd">            params (Params, optional): Contains parameters which modify how text is parsed</span>
+<span class="sd">            params.allowed_intents (list, optional): A list of allowed intents</span>
+<span class="sd">                for model consideration</span>
+<span class="sd">            params.target_dialogue_state (str, optional): The target dialogue state</span>
+<span class="sd">            params.time_zone (str, optional): The name of an IANA time zone, such as</span>
+<span class="sd">                &#39;America/Los_Angeles&#39;, or &#39;Asia/Kolkata&#39;</span>
+<span class="sd">                See the [tz database](https://www.iana.org/time-zones) for more information.</span>
+<span class="sd">            params.timestamp (long, optional): A unix time stamp for the request (in seconds).</span>
+<span class="sd">            context (dict, optional): A dictionary of app-specific data</span>
+<span class="sd">            history (list, optional): A list of previous and current responder objects</span>
+<span class="sd">                                      through interactions with MindMeld</span>
+<span class="sd">            verbose (bool, optional): Flag to return confidence scores for domains and intents</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            @TODO: Convert to dict</span>
+<span class="sd">            (Responder): A Responder object</span>
+
+<span class="sd">        .. _IANA tz database:</span>
+<span class="sd">           https://www.iana.org/time-zones</span>
+
+<span class="sd">        .. _List of tz database time zones:</span>
+<span class="sd">           https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">freeze_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">history</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">allowed_intents</span><span class="p">,</span> <span class="n">nlp_params</span><span class="p">,</span> <span class="n">dm_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_nlp</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="c1"># TODO: make an async nlp</span>
+        <span class="n">processed_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span>
+            <span class="n">query_text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">allowed_intents</span><span class="o">=</span><span class="n">allowed_intents</span><span class="p">,</span> <span class="o">**</span><span class="n">nlp_params</span>
+        <span class="p">)</span>
+        <span class="n">request</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_dm</span><span class="p">(</span>
+            <span class="n">processed_query</span><span class="o">=</span><span class="n">processed_query</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dm_responder</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">apply_handler</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">dm_params</span>
+        <span class="p">)</span>
+        <span class="n">modified_dm_responder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_dm</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">dm_responder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">modified_dm_responder</span>
+
+    <span class="k">def</span> <span class="nf">_pre_nlp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># validate params</span>
+        <span class="n">allowed_intents</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">validate_param</span><span class="p">(</span><span class="s2">&quot;allowed_intents&quot;</span><span class="p">)</span>
+        <span class="n">nlp_params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">validate_nlp_params</span><span class="p">()</span>
+        <span class="n">nlp_params</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">allowed_intents</span><span class="p">,</span>
+            <span class="n">nlp_params</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">validate_dm_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">handler_map</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_post_dm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">dm_response</span><span class="p">):</span>
+        <span class="c1"># Append this item to the history, but don&#39;t recursively store history</span>
+        <span class="n">prev_request</span> <span class="o">=</span> <span class="n">DialogueResponder</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">dm_response</span><span class="p">)</span>
+        <span class="n">prev_request</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;history&quot;</span><span class="p">)</span>
+
+        <span class="c1"># limit length of history</span>
+        <span class="n">new_history</span> <span class="o">=</span> <span class="p">(</span><span class="n">prev_request</span><span class="p">,)</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="n">history</span>
+        <span class="n">dm_response</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">new_history</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_HISTORY_LEN</span><span class="p">]</span>
+
+        <span class="c1"># validate outgoing params</span>
+        <span class="n">dm_response</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">validate_param</span><span class="p">(</span><span class="s2">&quot;allowed_intents&quot;</span><span class="p">)</span>
+        <span class="n">dm_response</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">validate_param</span><span class="p">(</span><span class="s2">&quot;target_dialogue_state&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dm_response</span>
+
+<div class="viewcode-block" id="ApplicationManager.add_middleware"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.ApplicationManager.add_middleware">[docs]</a>    <span class="k">def</span> <span class="nf">add_middleware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">middleware</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds middleware for the dialogue manager.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            middleware (callable): A dialogue manager middleware function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">middleware</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ApplicationManager.add_dialogue_rule"><a class="viewcode-back" href="../../apidoc/mindmeld.app_manager.html#mindmeld.app_manager.ApplicationManager.add_dialogue_rule">[docs]</a>    <span class="k">def</span> <span class="nf">add_dialogue_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a dialogue rule for the dialogue manager.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the dialogue state</span>
+<span class="sd">            handler (function): The dialogue state handler function</span>
+<span class="sd">            kwargs (dict): A list of options which specify the dialogue rule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">add_dialogue_rule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,772 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with the Language Parser &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with User-Defined Features" href="custom_features.html" />
+    <link rel="prev" title="Working with the Entity Resolver" href="entity_resolver.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with the Language Parser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#some-parsing-terminology">Some parsing terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#figure-out-whether-your-app-needs-a-parser">Figure out whether your app needs a parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-the-configuration-instructs-the-parser">How the configuration instructs the parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#learn-how-to-create-a-simple-parser-configuration">Learn how to create a simple parser configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simple-configuration-structure">Simple configuration structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-configuration-example">Simple configuration example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#define-a-simple-parser-configuration">Define a simple parser configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-the-parser-configuration">Load the parser configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-parser">Run the parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#learn-how-to-create-an-advanced-parser-configuration-optional">Learn how to create an advanced parser configuration (optional)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-configuration-structure">Advanced configuration structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-configuration-example">Advanced configuration example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimenting-with-an-advanced-configuration-optional">Experimenting with an advanced configuration (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with the Language Parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/parser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-the-language-parser">
+<h1>Working with the Language Parser<a class="headerlink" href="#working-with-the-language-parser" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="architecture.html#arch-parser"><span class="std std-ref">Language Parser</span></a></p>
+<blockquote>
+<div><ul class="simple">
+<li>is run as the sixth and final step in the <a class="reference internal" href="architecture.html#arch-nlp"><span class="std std-ref">natural language processing pipeline</span></a></li>
+<li>is a heuristic-driven <a class="reference external" href="https://en.wikipedia.org/wiki/Chart_parser">chart parser</a> that extracts the relationships between <a class="reference internal" href="../intro/key_concepts.html#term-entity"><span class="xref std std-term">entities</span></a> in a given <a class="reference internal" href="../intro/key_concepts.html#term-query-request"><span class="xref std std-term">query</span></a></li>
+<li>models the <a class="reference external" href="https://en.wikipedia.org/wiki/Dependency_grammar">dependencies</a> between different entity types in an application, based on a developer-provided configuration</li>
+<li>clusters the <a class="reference internal" href="entity_recognizer.html"><span class="doc">recognized entities</span></a> in a query together, grouping them into a meaningful hierarchy (called a <a class="reference internal" href="../intro/key_concepts.html#term-entity-group"><span class="xref std std-term">entity group</span></a>) that captures how different entities relate to each other</li>
+</ul>
+</div></blockquote>
+<p>Not every MindMeld app needs a parser.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to <a class="reference internal" href="../quickstart/08_configure_the_language_parser.html"><span class="doc">Step 8</span></a>.</p>
+</div>
+<div class="section" id="some-parsing-terminology">
+<h2>Some parsing terminology<a class="headerlink" href="#some-parsing-terminology" title="Permalink to this headline">¶</a></h2>
+<p>In this guide, the terms <em>language parser</em> and <em>parser</em> are interchangeable. To understand how the parser works, you need to understand <strong>entity groups</strong>.</p>
+<p>The main entity in an entity group is the <strong>head</strong> entity. The other, <strong>dependent</strong> entities, are attributes of the main entity. The terms, <em>head</em> and <em>dependent</em>, reflect the <a class="reference external" href="https://en.wikipedia.org/wiki/Dependency_grammar">linguistic (syntactic) function</a> of the entities within the group.</p>
+<p><strong>Head</strong> and <strong>dependent</strong> entities are also called <strong>parent</strong> and <strong>child</strong> entities, respectively. This is because the hierarchy inherent in any entity group can be seen as a tree data structure, where <strong>parent</strong> and <strong>child</strong> denote the relationship between the nodes in the <a class="reference external" href="https://en.wikipedia.org/wiki/Tree_(data_structure)">tree representation</a>.</p>
+</div>
+<div class="section" id="figure-out-whether-your-app-needs-a-parser">
+<h2>Figure out whether your app needs a parser<a class="headerlink" href="#figure-out-whether-your-app-needs-a-parser" title="Permalink to this headline">¶</a></h2>
+<p>Your MindMeld app needs a language parser only if <strong>both</strong> the conditions in the table below are true.</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #1</td>
+<td>The app has one or more <a class="reference internal" href="../intro/key_concepts.html#term-dependent-child"><span class="xref std std-term">dependent (child)</span></a>
+entity types that describe a
+<a class="reference internal" href="../intro/key_concepts.html#term-head-parent"><span class="xref std std-term">head (parent)</span></a> entity type.</td>
+</tr>
+<tr class="row-even"><td>Condition #2</td>
+<td>The app supports queries with multiple head entities of the same type.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>If the conditions are both true, your app needs a parser to identify the head-dependent relationships between the recognized entities in the query, and to cluster them together into meaningful entity groups.</p>
+<p>Consider the following explanatory examples.</p>
+<p><strong>a. Kwik-E-Mart</strong></p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #1</td>
+<td>✗</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>In the simple <a class="reference internal" href="../quickstart/03_define_the_hierarchy.html#model-hierarchy"><span class="std std-ref">Kwik-E-Mart store assistant app</span></a>, neither of the two entity types (<code class="docutils literal"><span class="pre">store_name</span></code>, <code class="docutils literal"><span class="pre">sys_time</span></code>) describes the other. No entity of one type is directly related to any entity of the other.</p>
+<p>The first condition is false, so there is no need for a parser.</p>
+<p><strong>b. Home assistant</strong></p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #1</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">turn_appliance_on</span></code> and <code class="docutils literal"><span class="pre">turn_appliance_off</span></code> intents in the <a class="reference internal" href="../blueprints/home_assistant.html#home-model-hierarchy"><span class="std std-ref">home assistant blueprint</span></a> have a pair of related entity types named <code class="docutils literal"><span class="pre">location</span></code> and <code class="docutils literal"><span class="pre">appliance</span></code>. The <code class="docutils literal"><span class="pre">location</span></code> entity describes where a specific <code class="docutils literal"><span class="pre">appliance</span></code> is located. This makes the <code class="docutils literal"><span class="pre">location</span></code> entity a dependent of the <code class="docutils literal"><span class="pre">appliance</span></code> head entity.</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #2</td>
+<td>✗</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The home assistant blueprint app is only designed to support the operation of one appliance per query. Queries in which a user references two different appliances, e.g., “Switch off the {living room|location} {tv|appliance} and turn on the {bedroom|location} {tv|appliance},” are not supported. For this reason, the app assumes that all dependents must refer to a single head entity in any query.</p>
+<p>Only one condition is true, so there is no need for a parser.</p>
+<p><strong>c. Food ordering</strong></p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #1</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>In the <a class="reference internal" href="../blueprints/food_ordering.html#food-ordering-parser"><span class="std std-ref">food ordering blueprint</span></a>, entities of type <code class="docutils literal"><span class="pre">option</span></code> and <code class="docutils literal"><span class="pre">sys_number</span></code> are dependents of <code class="docutils literal"><span class="pre">dish</span></code> entities, since they provide information about the <code class="docutils literal"><span class="pre">dish</span></code> being ordered.</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Condition #2</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Users can order multiple dishes in the same query, e.g., “Two hamburgers with extra cheese, an order of garlic fries, and a diet coke.” The app must determine which options and quantities apply to which dishes, and group them sensibly&nbsp;to ensure that the correct order is placed.</p>
+<p>Both conditions are true, so the app needs a parser.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The rest of this chapter assumes that your app needs a parser. If not, you can skip to the next chapter.</p>
+</div>
+</div>
+<div class="section" id="how-the-configuration-instructs-the-parser">
+<span id="simple-parser-config"></span><h2>How the configuration instructs the parser<a class="headerlink" href="#how-the-configuration-instructs-the-parser" title="Permalink to this headline">¶</a></h2>
+<p>What lets MindMeld know about the head and dependent entity types for your application is the <code class="xref py py-data docutils literal"><span class="pre">PARSER_CONFIG</span></code> dictionary in <code class="docutils literal"><span class="pre">config.py</span></code>, your app configuration file. In <code class="xref py py-data docutils literal"><span class="pre">PARSER_CONFIG</span></code>, the keys are the head entity types, and the values capture information about the corresponding dependent entity types.</p>
+<p>Using the head-dependent relationships defined in the configuration, the parser analyzes the detected entities in a query and hypothesizes different potential ways of grouping the entities together. Each such grouping is called a candidate <strong>parse</strong>. After generating these parse hypotheses, the parser uses a set of linguistically-motivated heuristics to pick the most likely candidate.</p>
+<p>MindMeld supports both simple and advanced forms of parser configuration. Recommended practice is to get the parser up and running with the simple configuration. If the app achieves satisfactory accuracy, you do not need to move on to the advanced configuration. If, however, you want to experiment with fine-tuned parsing, the advanced configuration makes that possible.</p>
+<p>Think about whether your app must support queries where (1) there are multiple head entities of the same type, and (2) those head entities have many potential dependents. For example, “Get me a pepperoni pizza with extra cheese, a calzone, and two diet cokes.” Such a query is inherently ambiguous because there is more than one way to group its entities that satisfies the head-dependent relationships a simple configuration can define. For apps that deal with queries like this, fine-tuning the settings available in the advanced configuration is highly recommended. <a class="reference internal" href="#food-parser-advanced-config"><span class="std std-ref">Later in this chapter</span></a>, we explore this issue in detail.</p>
+</div>
+<div class="section" id="learn-how-to-create-a-simple-parser-configuration">
+<span id="food-simple-parser-config"></span><h2>Learn how to create a simple parser configuration<a class="headerlink" href="#learn-how-to-create-a-simple-parser-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The first step toward running the parser is creating the simple configuration described in this section.</p>
+<div class="section" id="simple-configuration-structure">
+<h3>Simple configuration structure<a class="headerlink" href="#simple-configuration-structure" title="Permalink to this headline">¶</a></h3>
+<p>The configuration is a dictionary where each key-value pair instructs the parser to (1) look for a specific head&nbsp;entity in the query, and (2) cluster that head entity with one or more specified dependent entities to form an entity group.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The key is a string describing the entity type and optionally, the role type of the head entity. Whereas the key <code class="docutils literal"><span class="pre">'dish'</span></code> matches all entities of the type <code class="docutils literal"><span class="pre">dish</span></code>, the key <code class="docutils literal"><span class="pre">'dish|beverage'</span></code> only matches <code class="docutils literal"><span class="pre">dish</span></code> entities with a <code class="docutils literal"><span class="pre">beverage</span></code> role.</li>
+<li>The value is a list of strings, where each string describes the entity type and optionally, the role type of a dependent entity. The value <code class="docutils literal"><span class="pre">['size',</span> <span class="pre">'option|beverage']</span></code> instructs the parser to consider all <code class="docutils literal"><span class="pre">size</span></code> entities, and <code class="docutils literal"><span class="pre">option</span></code> entities with a <code class="docutils literal"><span class="pre">beverage</span></code> role, as potential dependents for the head entity.</li>
+<li>The point of defining roles is to prevent the parser from grouping incompatible options and dishes together, for example “extra cheese” with a “mocha” or “whipped cream” with a “lasagna”.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="simple-configuration-example">
+<h3>Simple configuration example<a class="headerlink" href="#simple-configuration-example" title="Permalink to this headline">¶</a></h3>
+<p>Let’s define a <code class="xref py py-data docutils literal"><span class="pre">PARSER_CONFIG</span></code> to see how to apply these principles. This example is for the <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">food ordering blueprint</span></a>.</p>
+<p>First, specify that a <code class="docutils literal"><span class="pre">dish</span></code> entity can have an <code class="docutils literal"><span class="pre">option</span></code> entity and a numeric quantity entity (<code class="docutils literal"><span class="pre">sys_number</span></code>) as its dependents. An <code class="docutils literal"><span class="pre">option</span></code> entity, in turn, can have its own associated quantity entity.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">PARSER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;dish&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;option&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_number&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;sys_number&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If the blueprint were to be extended with role types for subclassifying some of the entity types, you can additionally specify the <a class="reference internal" href="../intro/key_concepts.html#term-role"><span class="xref std std-term">role</span></a> for some head and dependent entities. We can say that <code class="docutils literal"><span class="pre">option</span></code> entities with a <code class="docutils literal"><span class="pre">beverage</span></code> role type can only be grouped with <code class="docutils literal"><span class="pre">dish</span></code> entities that also have a <code class="docutils literal"><span class="pre">beverage</span></code> role. Likewise, <code class="docutils literal"><span class="pre">option</span></code> entities with a <code class="docutils literal"><span class="pre">baked_good</span></code> role type can only be grouped with <code class="docutils literal"><span class="pre">dish</span></code> entities that also have a <code class="docutils literal"><span class="pre">baked_good</span></code> role. Now the parser will only group options with compatible dishes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">PARSER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;dish|beverage&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;option|beverage&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_number&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;dish|baked_good&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;option|baked_good&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_number&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;sys_number&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="define-a-simple-parser-configuration">
+<span id="define-config"></span><h2>Define a simple parser configuration<a class="headerlink" href="#define-a-simple-parser-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Write out (or better yet, diagram) the entities in your app and how they are related. Then think through how to capture those relationships in a <code class="xref py py-data docutils literal"><span class="pre">PARSER_CONFIG</span></code> dictionary that maps each head entity type to a list of related dependent entity types, as explained in the previous section.</p>
+<p>Define the simple <code class="xref py py-data docutils literal"><span class="pre">PARSER_CONFIG</span></code> dictionary and add it to your <code class="docutils literal"><span class="pre">config.py</span></code>.</p>
+</div>
+<div class="section" id="load-the-parser-configuration">
+<span id="load-config"></span><h2>Load the parser configuration<a class="headerlink" href="#load-the-parser-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Load the configuration by calling the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method on the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-parser">
+<span id="run-parser"></span><h2>Run the parser<a class="headerlink" href="#run-the-parser" title="Permalink to this headline">¶</a></h2>
+<p>The parser runs as the last step in the NLP pipeline, building on top of the information provided by all the previous NLP models. The most convenient way to run a configured parser is to use the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.process()</span></code> method, which sends the query for processing by each NLP pipeline component in sequence, then returns the aggregated output from all the components.</p>
+<p>In the output of <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.process()</span></code>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The entry relevant to the parser is the <code class="docutils literal"><span class="pre">'entities'</span></code> field.</li>
+<li>Each recognized entity is represented as a dictionary with entity-specific properties like the entity text, the entity type, the role type, and so on.</li>
+<li>For any entity the parser detects as a head, it adds a ‘children’ key whose value is a list of all the head’s dependent entities.</li>
+<li>An entity and its children together form an entity group.</li>
+<li>Each childless entity is considered to be in a singleton group of its own.</li>
+</ul>
+</div></blockquote>
+<p>For more about this output dictionary, see <a class="reference internal" href="nlp.html#run-nlp"><span class="std std-ref">Run the NLP pipeline</span></a>.</p>
+<p>Here’s an example from the <a class="reference internal" href="../blueprints/food_ordering.html#food-ordering-parser"><span class="std std-ref">food ordering</span></a> blueprint.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go"> &#39;domain&#39;: &#39;ordering&#39;,</span>
+<span class="go"> &#39;entities&#39;: [</span>
+<span class="go">   {</span>
+<span class="go">     &#39;role&#39;: None,</span>
+<span class="go">     &#39;span&#39;: {&#39;end&#39;: 24, &#39;start&#39;: 11},</span>
+<span class="go">     &#39;text&#39;: &#39;mujaddara wrap&#39;,</span>
+<span class="go">     &#39;type&#39;: &#39;dish&#39;,</span>
+<span class="go">     &#39;value&#39;: [{&#39;cname&#39;: &#39;Mujaddara Wrap&#39;, &#39;id&#39;: &#39;B01DEFNIRY&#39;}]</span>
+<span class="go">   },</span>
+<span class="go">   {</span>
+<span class="go">     &#39;role&#39;: None,</span>
+<span class="go">     &#39;span&#39;: {&#39;end&#39;: 32, &#39;start&#39;: 30},</span>
+<span class="go">     &#39;text&#39;: &#39;two&#39;,</span>
+<span class="go">     &#39;type&#39;: &#39;sys_number&#39;,</span>
+<span class="go">     &#39;value&#39;: {&#39;value&#39;: 2}</span>
+<span class="go">   },</span>
+<span class="go">   {</span>
+<span class="go">     &#39;children&#39;: [</span>
+<span class="go">       {</span>
+<span class="go">         &#39;role&#39;: None,</span>
+<span class="go">         &#39;span&#39;: {&#39;end&#39;: 32, &#39;start&#39;: 30},</span>
+<span class="go">         &#39;text&#39;: &#39;two&#39;,</span>
+<span class="go">         &#39;type&#39;: &#39;sys_number&#39;,</span>
+<span class="go">         &#39;value&#39;: {&#39;value&#39;: 2}</span>
+<span class="go">       }</span>
+<span class="go">     ],</span>
+<span class="go">     &#39;role&#39;: None,</span>
+<span class="go">     &#39;span&#39;: {&#39;end&#39;: 46, &#39;start&#39;: 34},</span>
+<span class="go">     &#39;text&#39;: &#39;chicken kebab&#39;,</span>
+<span class="go">     &#39;type&#39;: &#39;dish&#39;,</span>
+<span class="go">     &#39;value&#39;: [{&#39;cname&#39;: &#39;Chicken Kebab&#39;, &#39;id&#39;: &#39;B01DEFMUSW&#39;}]</span>
+<span class="go">   },</span>
+<span class="go">   {</span>
+<span class="go">     &#39;role&#39;: None,</span>
+<span class="go">     &#39;span&#39;: {&#39;end&#39;: 59, &#39;start&#39;: 53},</span>
+<span class="go">     &#39;text&#39;: &#39;palmyra&#39;,</span>
+<span class="go">     &#39;type&#39;: &#39;restaurant&#39;,</span>
+<span class="go">     &#39;value&#39;: [{&#39;cname&#39;: &#39;Palmyra&#39;, &#39;id&#39;: &#39;B01DEFLJIO&#39;}]</span>
+<span class="go">   }</span>
+<span class="go"> ],</span>
+<span class="go"> &#39;intent&#39;: &#39;build_order&#39;,</span>
+<span class="go"> &#39;text&#39;: &quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Inspect an individual entity. We’ll choose the only entity which has a dependent: “chicken kebab” (<code class="docutils literal"><span class="pre">dish</span></code>), whose dependent is the entity “two” (<code class="docutils literal"><span class="pre">sys_number</span></code>).</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
+<span class="n">results</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;chicken kebab&#39;,</span>
+<span class="hll"><span class="go"> &#39;children&#39;: [{&#39;text&#39;: &#39;two&#39;,</span>
+</span><span class="hll"><span class="go">   &#39;type&#39;: &#39;sys_number&#39;,</span>
+</span><span class="hll"><span class="go">   &#39;role&#39;: &#39;num_orders&#39;,</span>
+</span><span class="hll"><span class="go">   &#39;value&#39;: [{&#39;value&#39;: 2}],</span>
+</span><span class="hll"><span class="go">   &#39;span&#39;: {&#39;start&#39;: 30, &#39;end&#39;: 32}}],</span>
+</span><span class="go"> &#39;type&#39;: &#39;dish&#39;,</span>
+<span class="go"> &#39;role&#39;: None,</span>
+<span class="go"> &#39;value&#39;: [{&#39;cname&#39;: &#39;Chicken Kebab&#39;,</span>
+<span class="go">   &#39;score&#39;: 147.06445,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Chicken Kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01DEFMUSW&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Chicken Tikka Kabab&#39;,</span>
+<span class="go">   &#39;score&#39;: 99.278786,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;chicken kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01DN5635O&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Chicken Kebab Plate&#39;,</span>
+<span class="go">   &#39;score&#39;: 93.68581,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Chicken Kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01CK4ZQ7U&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Chicken Shish Kebab Plate&#39;,</span>
+<span class="go">   &#39;score&#39;: 31.71228,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;chicken kebab plate&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01N9Z1K2O&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Kebab Wrap&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.39855,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Kebab Wrap&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01CRF8ULQ&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Kofte Kebab&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.39855,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;beef kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01N4VET8U&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Lamb Kebab&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.39855,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Lamb Kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01DEFNQIA&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Kebab Platter&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.290503,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Kebab Dish&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01CRF8A7U&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Beef Kebab&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.290503,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Beef Kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01DEFL75Y&#39;},</span>
+<span class="go">  {&#39;cname&#39;: &#39;Prawns Kebab&#39;,</span>
+<span class="go">   &#39;score&#39;: 21.290503,</span>
+<span class="go">   &#39;top_synonym&#39;: &#39;Prawns Kebab&#39;,</span>
+<span class="go">   &#39;id&#39;: &#39;B01DEFO4ZY&#39;}],</span>
+<span class="go"> &#39;span&#39;: {&#39;start&#39;: 34, &#39;end&#39;: 46}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>The remaining entities in the query, “mujaddara wrap” (<code class="docutils literal"><span class="pre">dish</span></code>) and “palymra” (<code class="docutils literal"><span class="pre">restaurant</span></code>), are childless because the parser found no dependent entities for them. This example thus has three entity groups in total: {“two”, “chicken kebab”}, {“mujaddara wrap”}, and {“palmyra”}.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The parser does not assign a ‘children’ property to an entity when any of the following are true:</p>
+<ol class="last arabic simple">
+<li>The entity type is a potential head according to the configuration, but the parser finds no compatible dependents in the query.</li>
+<li>The entity type is not specified as a potential head in the configuration. By definition, the parser never attaches dependents to such entities.</li>
+<li>The entity type is absent from the configuration altogether. The parser ignores such entities.</li>
+</ol>
+</div>
+<p>Test out the preconfigured parser and experiment with different configuration settings, using the <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">food ordering blueprint</span></a> as a sandbox.
+Study the blueprint’s application file (<code class="docutils literal"><span class="pre">__init__.py</span></code>) for examples on how to use parser output within <a class="reference internal" href="../intro/key_concepts.html#term-dialogue-state-handler"><span class="xref std std-term">dialogue state handlers</span></a>. Continue this exercise until you the language parser and its capabilities feel familiar to you.</p>
+<p>Your app should exhibit decent baseline parsing&nbsp;accuracy out-of-the-box using default parser settings. To improve its accuracy further, you can optimize the parser settings for the nature of your data. If you decide to experiment in this way, run your parser using an advanced configuration as described in the next section.</p>
+</div>
+<div class="section" id="learn-how-to-create-an-advanced-parser-configuration-optional">
+<span id="advanced-parser-config"></span><h2>Learn how to create an advanced parser configuration (optional)<a class="headerlink" href="#learn-how-to-create-an-advanced-parser-configuration-optional" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld offers an advanced parser configuration format to provide fine-grained control over parser behavior. While both the simple and the advanced configurations define head-dependent relationships, in the advanced configuration you can specify that <em>only a dependent entity that satisfies certain constraints</em> can be attached to a compatible head entity. If chosen well, these constraints can help eliminate potentially incorrect parse hypotheses, resulting in significantly improved parsing accuracy.</p>
+<div class="section" id="advanced-configuration-structure">
+<h3>Advanced configuration structure<a class="headerlink" href="#advanced-configuration-structure" title="Permalink to this headline">¶</a></h3>
+<p>The advanced configuration, like the simple configuration, is a dictionary where each key-value pair instructs the parser to (1) look for a specific head&nbsp;entity in the query, and (2) cluster that head entity with one or more specified dependent entities to form an entity group. The advanced configuration also specifies constraints that a dependent must satisfy to be attached to a compatible head entity.</p>
+<blockquote>
+<div><ul class="simple">
+<li>In both simple and advanced configurations, the key is a string describing the entity type and optionally, the role type of the head entity.</li>
+<li>In the advanced configuration, the value is a rich object that maps each potential dependent to a configuration dictionary whose key/value pairs specify constraints to apply to candidate parses. We call this dictionary the <em>per-dependent configuration.</em></li>
+</ul>
+</div></blockquote>
+<p>The table below enumerates the settings you can define in the per-dependent configuration.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="12%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key</th>
+<th class="head">Value type</th>
+<th class="head">Value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'left'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a></td>
+<td><p class="first">Whether to allow attachment in the left direction. If <code class="docutils literal"><span class="pre">True</span></code>, a dependent entity of this type is
+permitted to attach to an instance of the head entity type on its left (as determined by their
+relative positions in the query text). If <code class="docutils literal"><span class="pre">False</span></code>, the parser disallows any candidate parses where
+this dependent type is grouped with the head entity to its left.</p>
+<p class="last">Default: <code class="docutils literal"><span class="pre">True</span></code>.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'right'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a></td>
+<td><p class="first">Whether to allow attachment in the right direction (analogous to the <code class="docutils literal"><span class="pre">'left'</span></code> setting above).</p>
+<p class="last">Default: <code class="docutils literal"><span class="pre">True</span></code>.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'min_instances'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a></td>
+<td><p class="first">The minimum number of dependent entities of this type that must be grouped with the head entity for
+a successful parse. The parser will not create an entity group unless it can link the required
+number of dependents to the head.</p>
+<p class="last">Default: 0.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'max_instances'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>
+or <code class="docutils literal"><span class="pre">NoneType</span></code></td>
+<td><p class="first">The maximum number of dependent entities of this type that can be grouped with the head entity. If
+the value is <code class="docutils literal"><span class="pre">None</span></code>, the parser does not impose any limits on the number of dependents of this
+type that can link with the head entity.</p>
+<p class="last">Default: <code class="docutils literal"><span class="pre">None</span></code>.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">'precedence'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a></td>
+<td><p class="first">The preferred direction of attachment for dependent entities of this type. The preferred direction
+determines the head to attach to, if there are <strong>equidistant</strong> compatible head entities in the query
+on either side of the dependent . Accepted values are <code class="docutils literal"><span class="pre">'left'</span></code>, to prefer the head to the left
+of the dependent entity, or <code class="docutils literal"><span class="pre">'right'</span></code>, to choose the one on the right.</p>
+<p class="last">Default: ‘left’.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'linking_words'</span></code></td>
+<td><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">set</span></code></a></td>
+<td><p class="first">A set of words, whose occurence between two entities increases the chance of the entities being
+in the specified head-dependent relationship. These linking words provide hints to the parser to
+prefer candidate parses where one of these words is present in the query text between a dependent
+entity of this type and the head entity.</p>
+<p class="last">Default: <code class="docutils literal"><span class="pre">set()</span></code> (an empty set).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="advanced-configuration-example">
+<span id="food-parser-advanced-config"></span><h3>Advanced configuration example<a class="headerlink" href="#advanced-configuration-example" title="Permalink to this headline">¶</a></h3>
+<p>Let’s define an advanced parser configuration that sets up the same head-dependent relationships as the <a class="reference internal" href="#food-simple-parser-config"><span class="std std-ref">simple configuration</span></a> for <a class="reference internal" href="../blueprints/food_ordering.html#food-ordering-parser"><span class="std std-ref">food ordering</span></a> in the previous section, but that defines constraints for each dependent.</p>
+<p>The desired per-dependent constraints are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>‘with’ should be treated as a linking word between <code class="docutils literal"><span class="pre">option</span></code> and <code class="docutils literal"><span class="pre">dish</span></code> entities.</li>
+<li>Only one quantity (<code class="docutils literal"><span class="pre">sys_number</span></code>) can be associated with a <code class="docutils literal"><span class="pre">dish</span></code>, and the quantity entity must be to its left.</li>
+<li>Only one quantity (<code class="docutils literal"><span class="pre">sys_number</span></code>) can be associated with an <code class="docutils literal"><span class="pre">option</span></code>, and the quantity entity must be to its left.</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">PARSER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;dish&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;linking_words&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;with&#39;</span><span class="p">}},</span>
+        <span class="s1">&#39;sys_number&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;max_instances&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;sys_number&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;max_instances&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The first constraint is motivated by natural language constructs like “a burger <cite>with</cite> a side of fries” or “chicken biriyani <cite>with</cite> cucumber raita” where the intervening word “with” implies a <code class="docutils literal"><span class="pre">dish</span></code>-<code class="docutils literal"><span class="pre">option</span></code> relationship. The other two settings embody real-world constraints (a thing cannot be described by more than one quantifying adjective) and English grammar rules (an adjective generally appears before the noun it describes).</p>
+<p>The syntactic and semantic cues that these constraints provide help the parser weed out nonsensical parses. To see this, consider three possible candidate parses for a sample food ordering query:</p>
+<img alt="../_images/candidate_parses.png" class="align-center" src="../_images/candidate_parses.png" />
+<p>A baseline parser using the <a class="reference internal" href="#food-simple-parser-config"><span class="std std-ref">simple configuration</span></a> will reject the incorrect third candidate and choose the second hypothesis, which is better, but still not fully correct. A parser configured using the <a class="reference internal" href="#food-parser-advanced-config"><span class="std std-ref">per-dependent settings</span></a>, on the other hand, will correctly choose the first parse based on its knowledge of the linking word, “with”.</p>
+<p>What is significant about the query above is that it contains multiple head entities of the same type with many potential dependents. It is inherently ambiguous because there is more than one way to group its entities that satisfies the head-dependent relationships a simple configuration can define. To optimize parser performance, we needed to define constraints that help the parser eliminate nonsensical candidate parses.</p>
+</div>
+</div>
+<div class="section" id="experimenting-with-an-advanced-configuration-optional">
+<h2>Experimenting with an advanced configuration (optional)<a class="headerlink" href="#experimenting-with-an-advanced-configuration-optional" title="Permalink to this headline">¶</a></h2>
+<p>Once you have defined an advanced configuration, <a class="reference internal" href="#load-config"><span class="std std-ref">load the configuration</span></a>, and <a class="reference internal" href="#run-parser"><span class="std std-ref">run the parser</span></a>. Observe the effects of your per-dependent configuration settings on parser accuracy, and if desired, iterate on the whole process.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="custom_features.html" class="btn btn-neutral float-right" title="Working with User-Defined Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="entity_resolver.html" class="btn btn-neutral float-left" title="Working with the Entity Resolver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

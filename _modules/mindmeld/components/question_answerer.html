@@ -1,0 +1,1347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.question_answerer &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.question_answerer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.question_answerer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the question answerer component of MindMeld.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">elasticsearch5</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch5</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
+
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">KnowledgeBaseConnectionError</span><span class="p">,</span> <span class="n">KnowledgeBaseError</span>
+<span class="kn">from</span> <span class="nn">..resource_loader</span> <span class="k">import</span> <span class="n">ResourceLoader</span>
+<span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span>
+    <span class="n">DEFAULT_RANKING_CONFIG</span><span class="p">,</span>
+    <span class="n">DOC_TYPE</span><span class="p">,</span>
+    <span class="n">get_app_namespace</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._elasticsearch_helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">create_es_client</span><span class="p">,</span>
+    <span class="n">delete_index</span><span class="p">,</span>
+    <span class="n">does_index_exist</span><span class="p">,</span>
+    <span class="n">get_scoped_index_name</span><span class="p">,</span>
+    <span class="n">load_index</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="QuestionAnswerer"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer">[docs]</a><span class="k">class</span> <span class="nc">QuestionAnswerer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The question answerer is primarily an information retrieval system that provides all the</span>
+<span class="sd">    necessary functionality for interacting with the application&#39;s knowledge base.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a question answerer</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_path (str): The path to the directory containing the app&#39;s data</span>
+<span class="sd">            resource_loader (ResourceLoader): An object which can load resources for the answerer</span>
+<span class="sd">            es_host (str): The Elasticsearch host server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">resource_loader</span> <span class="ow">or</span> <span class="n">ResourceLoader</span><span class="o">.</span><span class="n">create_resource_loader</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span> <span class="o">=</span> <span class="n">es_host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span> <span class="o">=</span> <span class="n">get_app_namespace</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_es_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Lazily connect to Elasticsearch</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span> <span class="o">=</span> <span class="n">create_es_client</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span>
+
+<div class="viewcode-block" id="QuestionAnswerer.get"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets a collection of documents from the knowledge base matching the provided</span>
+<span class="sd">        search criteria. This API provides a simple interface for developers to specify a list of</span>
+<span class="sd">        knowledge base field and query string pairs to find best matches in a similar way as in</span>
+<span class="sd">        common Web search interfaces. The knowledge base fields to be used depend on the mapping</span>
+<span class="sd">        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”</span>
+<span class="sd">        entity type can be mapped to either a knowledge base object or an attribute of a knowledge</span>
+<span class="sd">        base object. The mapping is often application specific and is dependent on the data model</span>
+<span class="sd">        developers choose to use when building the knowledge base.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; question_answerer.get(index=&#39;menu_items&#39;,</span>
+<span class="sd">                                      name=&#39;pork and shrimp&#39;,</span>
+<span class="sd">                                      restaurant_id=&#39;B01CGKGQ40&#39;,</span>
+<span class="sd">                                      _sort=&#39;price&#39;,</span>
+<span class="sd">                                      _sort_type=&#39;asc&#39;)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (str): The name of an index.</span>
+<span class="sd">            size (int): The maximum number of records, default to 10.</span>
+<span class="sd">            query_type (str): Whether the search is over structured or unstructured text.</span>
+<span class="sd">            id (str): The id of a particular document to retrieve.</span>
+<span class="sd">            _sort (str): Specify the knowledge base field for custom sort.</span>
+<span class="sd">            _sort_type (str): Specify custom sort type. Valid values are &#39;asc&#39;, &#39;desc&#39; and</span>
+<span class="sd">                              &#39;distance&#39;.</span>
+<span class="sd">            _sort_location (dict): The origin location to be used when sorting by distance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of matching documents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">doc_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If an id was passed in, simply retrieve the specified document</span>
+        <span class="k">if</span> <span class="n">doc_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Retrieve object from KB: index= &#39;</span><span class="si">%s</span><span class="s2">&#39;, id= &#39;</span><span class="si">%s</span><span class="s2">&#39;.&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">doc_id</span>
+            <span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">doc_id</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="n">sort_clause</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">query_clauses</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># iterate through keyword arguments to get KB field and value pairs for search and custom</span>
+        <span class="c1"># sort criteria</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing argument: key= </span><span class="si">%s</span><span class="s2"> value= </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;_sort&quot;</span><span class="p">:</span>
+                <span class="n">sort_clause</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;_sort_type&quot;</span><span class="p">:</span>
+                <span class="n">sort_clause</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;_sort_location&quot;</span><span class="p">:</span>
+                <span class="n">sort_clause</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Added query clause: field= </span><span class="si">%s</span><span class="s2"> value= </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Custom sort criteria </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">sort_clause</span><span class="p">)</span>
+
+        <span class="c1"># build Search object with overriding ranking setting to require all query clauses are</span>
+        <span class="c1"># matched.</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;query_clauses_operator&quot;</span><span class="p">:</span> <span class="s2">&quot;and&quot;</span><span class="p">})</span>
+
+        <span class="c1"># add query clauses to Search object.</span>
+        <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="n">query_clauses</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span> <span class="o">**</span><span class="n">clause</span><span class="p">)</span>
+
+        <span class="c1"># add custom sort clause if specified.</span>
+        <span class="k">if</span> <span class="n">sort_clause</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">field</span><span class="o">=</span><span class="n">sort_clause</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">),</span>
+                <span class="n">sort_type</span><span class="o">=</span><span class="n">sort_clause</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
+                <span class="n">location</span><span class="o">=</span><span class="n">sort_clause</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="QuestionAnswerer.build_search"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.build_search">[docs]</a>    <span class="k">def</span> <span class="nf">build_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">ranking_config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build a search object for advanced filtered search.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (str): index name of knowledge base object.</span>
+<span class="sd">            ranking_config (dict): overriding ranking configuration parameters.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Search: a Search object for filtered search.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">does_index_exist</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="n">index</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Knowledge base index &#39;</span><span class="si">{}</span><span class="s2">&#39; does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+
+        <span class="c1"># get index name with app scope</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">get_scoped_index_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="c1"># load knowledge base field information for the specified index.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_field_info</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Search</span><span class="p">(</span>
+            <span class="n">client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">ranking_config</span><span class="o">=</span><span class="n">ranking_config</span><span class="p">,</span>
+            <span class="n">field_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_field_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;load knowledge base field metadata information for the specified index.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (str): index name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># load field info from local cache</span>
+        <span class="n">index_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index_info</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># TODO: move the ES API call logic to ES helper</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">all_field_info</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">&quot;mappings&quot;</span><span class="p">][</span><span class="s2">&quot;document&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">all_field_info</span><span class="p">:</span>
+                    <span class="n">field_type</span> <span class="o">=</span> <span class="n">all_field_info</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">FieldInfo</span><span class="p">(</span>
+                        <span class="n">field_name</span><span class="p">,</span> <span class="n">field_type</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="n">EsConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Unable to connect to Elasticsearch: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">KnowledgeBaseConnectionError</span><span class="p">(</span>
+                    <span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">hosts</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">TransportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Unexpected error occurred when sending requests to Elasticsearch: </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                    <span class="s2">&quot;Status code: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">KnowledgeBaseError</span>
+            <span class="k">except</span> <span class="n">ElasticsearchException</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">KnowledgeBaseError</span>
+
+<div class="viewcode-block" id="QuestionAnswerer.config"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.config">[docs]</a>    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Summary</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: Description</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="QuestionAnswerer.load_kb"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.load_kb">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_kb</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">app_namespace</span><span class="p">,</span>
+        <span class="n">index_name</span><span class="p">,</span>
+        <span class="n">data_file</span><span class="p">,</span>
+        <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">es_client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">connect_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">clean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads documents from disk into the specified index in the knowledge</span>
+<span class="sd">        base. If an index with the specified name doesn&#39;t exist, a new index</span>
+<span class="sd">        with that name will be created in the knowledge base.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_namespace (str): The namespace of the app. Used to prevent</span>
+<span class="sd">                collisions between the indices of this app and those of other</span>
+<span class="sd">                apps.</span>
+<span class="sd">            index_name (str): The name of the new index to be created.</span>
+<span class="sd">            data_file (str): The path to the data file containing the documents</span>
+<span class="sd">                to be imported into the knowledge base index. It could be</span>
+<span class="sd">                either json or jsonl file.</span>
+<span class="sd">            es_host (str): The Elasticsearch host server.</span>
+<span class="sd">            es_client (Elasticsearch): The Elasticsearch client.</span>
+<span class="sd">            connect_timeout (int, optional): The amount of time for a</span>
+<span class="sd">                connection to the Elasticsearch host.</span>
+<span class="sd">            clean (bool): Set to true if you want to delete an existing index</span>
+<span class="sd">                and reindex it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_doc_count</span><span class="p">(</span><span class="n">data_file</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">data_fp</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="n">data_fp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>
+                    <span class="n">docs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data_fp</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data_fp</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">return</span> <span class="n">count</span>
+
+        <span class="k">def</span> <span class="nf">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">base</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">data_fp</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="n">data_fp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading data from a json file.&quot;</span><span class="p">)</span>
+                    <span class="n">docs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data_fp</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading data from a jsonl file.&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data_fp</span><span class="p">:</span>
+                        <span class="n">doc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+        <span class="n">docs</span> <span class="o">=</span> <span class="n">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+        <span class="n">docs_count</span> <span class="o">=</span> <span class="n">_doc_count</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">clean</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">delete_index</span><span class="p">(</span><span class="n">app_namespace</span><span class="p">,</span> <span class="n">index_name</span><span class="p">,</span> <span class="n">es_host</span><span class="p">,</span> <span class="n">es_client</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Index </span><span class="si">%s</span><span class="s2"> does not exist for app </span><span class="si">%s</span><span class="s2">, creating a new index&quot;</span><span class="p">,</span>
+                    <span class="n">index_name</span><span class="p">,</span>
+                    <span class="n">app_namespace</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">load_index</span><span class="p">(</span>
+            <span class="n">app_namespace</span><span class="p">,</span>
+            <span class="n">index_name</span><span class="p">,</span>
+            <span class="n">docs</span><span class="p">,</span>
+            <span class="n">docs_count</span><span class="p">,</span>
+            <span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span>
+            <span class="n">DOC_TYPE</span><span class="p">,</span>
+            <span class="n">es_host</span><span class="p">,</span>
+            <span class="n">es_client</span><span class="p">,</span>
+            <span class="n">connect_timeout</span><span class="o">=</span><span class="n">connect_timeout</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FieldInfo"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo">[docs]</a><span class="k">class</span> <span class="nc">FieldInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class models an information source of a knowledge base field metadata&quot;&quot;&quot;</span>
+
+    <span class="n">NUMBER_TYPES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;long&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;short&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;byte&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;double&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;float&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;half_float&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;scaled_float&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">TEXT_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;keyword&quot;</span><span class="p">}</span>
+    <span class="n">DATE_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;date&quot;</span><span class="p">}</span>
+    <span class="n">GEO_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;geo_point&quot;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">field_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">field_type</span>
+
+<div class="viewcode-block" id="FieldInfo.get_name"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.get_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns knowledge base field name&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+<div class="viewcode-block" id="FieldInfo.get_type"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.get_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns knowledge base field type&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span></div>
+
+<div class="viewcode-block" id="FieldInfo.is_number_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_number_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_number_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a number field, otherwise returns False&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_TYPES</span></div>
+
+<div class="viewcode-block" id="FieldInfo.is_date_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_date_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_date_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a date field, otherwise returns False&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATE_TYPES</span></div>
+
+<div class="viewcode-block" id="FieldInfo.is_location_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_location_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_location_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a location field, otherwise returns False&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GEO_TYPES</span></div>
+
+<div class="viewcode-block" id="FieldInfo.is_text_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_text_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_text_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a text, otherwise returns False&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEXT_TYPES</span></div></div>
+
+
+<div class="viewcode-block" id="Search"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search">[docs]</a><span class="k">class</span> <span class="nc">Search</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class models a generic filtered search in knowledge base. It allows developers to</span>
+<span class="sd">    construct more complex knowledge base search criteria based on the application requirements.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">SYN_FIELD_SUFFIX</span> <span class="o">=</span> <span class="s2">&quot;$whitelist&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">ranking_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a Search object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            client (Elasticsearch): Elasticsearch client.</span>
+<span class="sd">            index (str): index name of knowledge base object.</span>
+<span class="sd">            ranking_config (dict): overriding ranking configuration parameters for current search.</span>
+<span class="sd">            field_info (dict): dictionary contains knowledge base matadata objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;sort&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ranking_config</span> <span class="o">=</span> <span class="n">ranking_config</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ranking_config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ranking_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">DEFAULT_RANKING_CONFIG</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span> <span class="o">=</span> <span class="n">field_info</span>
+
+    <span class="k">def</span> <span class="nf">_clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clone a Search object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Search: cloned copy of the Search object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Search</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">_clauses</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">_ranking_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ranking_config</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">_kb_field_info</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">_build_query_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="n">field_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field_info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid knowledge base field &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+
+        <span class="c1"># check whether the synonym field is available. By default the synonyms are</span>
+        <span class="c1"># imported to &quot;&lt;field_name&gt;$whitelist&quot; field.</span>
+        <span class="n">synonym_field</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">field</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYN_FIELD_SUFFIX</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYN_FIELD_SUFFIX</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">clause</span> <span class="o">=</span> <span class="n">Search</span><span class="o">.</span><span class="n">QueryClause</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">query_type</span><span class="p">,</span> <span class="n">synonym_field</span><span class="p">)</span>
+        <span class="n">clause</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="n">clause</span><span class="o">.</span><span class="n">get_type</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_filter_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># set the filter type to be &#39;range&#39; if any range operator is specified.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gt&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gte&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lt&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lte&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">)</span>
+            <span class="n">gt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gt&quot;</span><span class="p">)</span>
+            <span class="n">gte</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gte&quot;</span><span class="p">)</span>
+            <span class="n">lt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lt&quot;</span><span class="p">)</span>
+            <span class="n">lte</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lte&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid knowledge base field &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+
+            <span class="n">clause</span> <span class="o">=</span> <span class="n">Search</span><span class="o">.</span><span class="n">FilterClause</span><span class="p">(</span>
+                <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
+                <span class="n">field_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">),</span>
+                <span class="n">range_gt</span><span class="o">=</span><span class="n">gt</span><span class="p">,</span>
+                <span class="n">range_gte</span><span class="o">=</span><span class="n">gte</span><span class="p">,</span>
+                <span class="n">range_lt</span><span class="o">=</span><span class="n">lt</span><span class="p">,</span>
+                <span class="n">range_lte</span><span class="o">=</span><span class="n">lte</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid knowledge base field &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">clause</span> <span class="o">=</span> <span class="n">Search</span><span class="o">.</span><span class="n">FilterClause</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">)</span>
+        <span class="n">clause</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="n">clause</span><span class="o">.</span><span class="n">get_type</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_sort_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">sort_field</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">)</span>
+        <span class="n">sort_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sort_type&quot;</span><span class="p">)</span>
+        <span class="n">sort_location</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">)</span>
+
+        <span class="n">field_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort_field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field_info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid knowledge base field &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sort_field</span><span class="p">))</span>
+
+        <span class="c1"># only compute field stats if sort field is number or date type.</span>
+        <span class="n">field_stats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">field_info</span><span class="o">.</span><span class="n">is_number_field</span><span class="p">()</span> <span class="ow">or</span> <span class="n">field_info</span><span class="o">.</span><span class="n">is_date_field</span><span class="p">():</span>
+            <span class="n">field_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_field_stats</span><span class="p">(</span><span class="n">sort_field</span><span class="p">)</span>
+
+        <span class="n">clause</span> <span class="o">=</span> <span class="n">Search</span><span class="o">.</span><span class="n">SortClause</span><span class="p">(</span>
+            <span class="n">sort_field</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">sort_type</span><span class="p">,</span> <span class="n">field_stats</span><span class="p">,</span> <span class="n">sort_location</span>
+        <span class="p">)</span>
+        <span class="n">clause</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="n">clause</span><span class="o">.</span><span class="n">get_type</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clause_type</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper method to build query, filter and sort clauses.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            clause_type (str): type of clause</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">clause_type</span> <span class="o">==</span> <span class="s2">&quot;query&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_build_query_clause</span><span class="p">(</span><span class="n">query_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">clause_type</span> <span class="o">==</span> <span class="s2">&quot;filter&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_build_filter_clause</span><span class="p">(</span><span class="n">query_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">clause_type</span> <span class="o">==</span> <span class="s2">&quot;sort&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_build_sort_clause</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown clause type.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Search.query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Specify the query text to match on a knowledge base text field. The query text is</span>
+<span class="sd">        normalized and processed (based on query_type) to find matches in knowledge base using</span>
+<span class="sd">        several text relevance scoring factors including exact matches, phrase matches and partial</span>
+<span class="sd">        matches.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; s = question_answerer.build_search(index=&#39;dish&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; s.query(name=&#39;pad thai&#39;)</span>
+
+<span class="sd">        In the example above the query text &quot;pad thai&quot; will be used to match against document field</span>
+<span class="sd">        &quot;name&quot; in knowledge base index &quot;dish&quot;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a keyword argument to specify the query text and the knowledge base document field along</span>
+<span class="sd">            with the query type (keyword/text).</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Search: a new Search object with added search criteria.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_search</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>
+        <span class="n">new_search</span><span class="o">.</span><span class="n">_build_clause</span><span class="p">(</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="n">query_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_search</span></div>
+
+<div class="viewcode-block" id="Search.filter"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Specify filter condition to be applied to specified knowledge base field. In MindMeld</span>
+<span class="sd">        two types of filters are supported: text filter and range filters.</span>
+
+<span class="sd">        Text filters are used to apply hard filters on specified knowledge base text fields.</span>
+<span class="sd">        The filter text value is normalized and matched using entire text span against the</span>
+<span class="sd">        knowledge base field.</span>
+
+<span class="sd">        It&#39;s common to have filter conditions based on other resolved canonical entities.</span>
+<span class="sd">        For example, in food ordering domain the resolved restaurant entity can be used as a filter</span>
+<span class="sd">        to resolve dish entities. The exact knowledge base field to apply these filters depends on</span>
+<span class="sd">        the knowledge base data model of the application.</span>
+<span class="sd">        If the entity is not in the canonical form, a fuzzy filter can be applied by setting the</span>
+<span class="sd">        query_type to &#39;text&#39;.</span>
+
+<span class="sd">        Range filters are used to filter with a value range on specified knowledge base number or</span>
+<span class="sd">        date fields. Example use cases include price range filters and date range filters.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">        add text filter:</span>
+<span class="sd">            &gt;&gt;&gt; s = question_answerer.build_search(index=&#39;menu_items&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; s.filter(restaurant_id=&#39;B01CGKGQ40&#39;)</span>
+
+<span class="sd">        add range filter:</span>
+<span class="sd">                &gt;&gt;&gt; s = question_answerer.build_search(index=&#39;menu_items&#39;)</span>
+<span class="sd">                &gt;&gt;&gt; s.filter(field=&#39;price&#39;, gte=1, lt=10)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query_type (str): Whether the filter is over structured or unstructured text.</span>
+<span class="sd">            kwargs: A keyword argument to specify the filter text and the knowledge base text field.</span>
+<span class="sd">            field (str): knowledge base field name for range filter.</span>
+<span class="sd">            gt (number or str): range filter operator for greater than.</span>
+<span class="sd">            gte (number or str): range filter operator for greater than or equal to.</span>
+<span class="sd">            lt (number or str): range filter operator for less than.</span>
+<span class="sd">            lte (number or str): range filter operator for less or equal to.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Search: A new Search object with added search criteria.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_search</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>
+        <span class="n">new_search</span><span class="o">.</span><span class="n">_build_clause</span><span class="p">(</span><span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="n">query_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_search</span></div>
+
+<div class="viewcode-block" id="Search.sort"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">sort_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Specify custom sort criteria.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            field (str): knowledge base field for sort.</span>
+<span class="sd">            sort_type (str): sorting type. valid values are &#39;asc&#39;, &#39;desc&#39; and &#39;distance&#39;. &#39;asc&#39; and</span>
+<span class="sd">                             &#39;desc&#39; can be used to sort numeric or date fields and &#39;distance&#39; can</span>
+<span class="sd">                             be used to sort by distance on geo_point fields. Default sort type</span>
+<span class="sd">                             is &#39;desc&#39; if not specified.</span>
+<span class="sd">            location (str): location (lat, lon) in geo_point format to be used as origin when</span>
+<span class="sd">                            sorting by &#39;distance&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_search</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>
+        <span class="n">new_search</span><span class="o">.</span><span class="n">_build_clause</span><span class="p">(</span>
+            <span class="s2">&quot;sort&quot;</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">sort_type</span><span class="o">=</span><span class="n">sort_type</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_search</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_field_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get knowledge field statistics for custom sort functions. The field statistics is</span>
+<span class="sd">        only available for number and date typed fields.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            field(str): knowledge base field name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: dictionary that contains knowledge base field statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">stats_query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;aggs&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">stats_query</span><span class="p">[</span><span class="s2">&quot;aggs&quot;</span><span class="p">][</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}}</span>
+        <span class="n">stats_query</span><span class="p">[</span><span class="s2">&quot;aggs&quot;</span><span class="p">][</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;_max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}}</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">stats_query</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;query_then_fetch&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;min_value&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;aggregations&quot;</span><span class="p">][</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;_min&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;max_value&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;aggregations&quot;</span><span class="p">][</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;_max&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_build_es_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build knowledge base search syntax based on provided search criteria.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (int): The maximum number of records to fetch, default to 10.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: knowledge base search syntax for the current search object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">es_query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;function_score&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s2">&quot;functions&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;score_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;boost_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;excludes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYN_FIELD_SUFFIX</span><span class="p">]},</span>
+            <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;filter&quot;</span><span class="p">]:</span>
+            <span class="c1"># no query/filter clauses - use match_all</span>
+            <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;match_all&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]:</span>
+                <span class="n">es_query_clauses</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">es_boost_functions</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]:</span>
+                    <span class="n">query_clause</span><span class="p">,</span> <span class="n">boost_functions</span> <span class="o">=</span> <span class="n">clause</span><span class="o">.</span><span class="n">build_query</span><span class="p">()</span>
+                    <span class="n">es_query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_clause</span><span class="p">)</span>
+                    <span class="n">es_boost_functions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">boost_functions</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ranking_config</span><span class="p">[</span><span class="s2">&quot;query_clauses_operator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>
+                    <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span>
+                        <span class="s2">&quot;must&quot;</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">es_query_clauses</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span>
+                        <span class="s2">&quot;should&quot;</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">es_query_clauses</span>
+
+                <span class="c1"># add all boost functions for the query clause</span>
+                <span class="c1"># right now the only boost functions supported are exact match boosting for</span>
+                <span class="c1"># CNAME and synonym whitelists.</span>
+                <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;functions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">es_boost_functions</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;filter&quot;</span><span class="p">]:</span>
+                <span class="n">es_filter_clauses</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;must&quot;</span><span class="p">:</span> <span class="p">[]}}</span>
+                <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;filter&quot;</span><span class="p">]:</span>
+                    <span class="n">es_filter_clauses</span><span class="p">[</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span><span class="s2">&quot;must&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="o">.</span><span class="n">build_query</span><span class="p">())</span>
+
+                <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;filter&quot;</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">es_filter_clauses</span>
+
+        <span class="c1"># add scoring function for custom sort criteria</span>
+        <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;sort&quot;</span><span class="p">]:</span>
+            <span class="n">sort_function</span> <span class="o">=</span> <span class="n">clause</span><span class="o">.</span><span class="n">build_query</span><span class="p">()</span>
+            <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;functions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sort_function</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ES query syntax: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">es_query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">es_query</span>
+
+<div class="viewcode-block" id="Search.execute"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Executes the knowledge base search with provided criteria and returns matching documents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (int): The maximum number of records to fetch, default to 10.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            a list of matching documents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># TODO: move the ES API call logic to ES helper</span>
+            <span class="n">es_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_es_query</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">es_query</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;hits&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">except</span> <span class="n">EsConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to connect to Elasticsearch: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">info</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">KnowledgeBaseConnectionError</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TransportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unexpected error occurred when sending requests to Elasticsearch: </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;Status code: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">KnowledgeBaseError</span>
+        <span class="k">except</span> <span class="n">ElasticsearchException</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">KnowledgeBaseError</span></div>
+
+<div class="viewcode-block" id="Search.Clause"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.Clause">[docs]</a>    <span class="k">class</span> <span class="nc">Clause</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class models an abstract knowledge base clause.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialize a knowledge base clause&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clause_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Search.Clause.validate"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.Clause.validate">[docs]</a>        <span class="nd">@abstractmethod</span>
+        <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Validate the clause.&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Must override validate()&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Search.Clause.build_query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.Clause.build_query">[docs]</a>        <span class="nd">@abstractmethod</span>
+        <span class="k">def</span> <span class="nf">build_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Build knowledge base query.&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Must override build_query()&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Search.Clause.get_type"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.Clause.get_type">[docs]</a>        <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Returns clause type&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">clause_type</span></div></div>
+
+<div class="viewcode-block" id="Search.QueryClause"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.QueryClause">[docs]</a>    <span class="k">class</span> <span class="nc">QueryClause</span><span class="p">(</span><span class="n">Clause</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class models a knowledge base query clause.&quot;&quot;&quot;</span>
+
+        <span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span> <span class="o">=</span> <span class="mi">100</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="n">synonym_field</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialize a knowledge base query clause.&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span> <span class="o">=</span> <span class="n">field_info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">=</span> <span class="n">query_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span> <span class="o">=</span> <span class="n">synonym_field</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">clause_type</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span>
+
+<div class="viewcode-block" id="Search.QueryClause.build_query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.QueryClause.build_query">[docs]</a>        <span class="k">def</span> <span class="nf">build_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;build knowledge base query for query clause&quot;&quot;&quot;</span>
+
+            <span class="c1"># ES syntax is generated based on specified knowledge base field</span>
+            <span class="c1"># the following ranking factors are considered:</span>
+            <span class="c1"># 1. exact matches (with boosted weight)</span>
+            <span class="c1"># 2. word N-gram matches</span>
+            <span class="c1"># 3. character N-gram matches</span>
+            <span class="c1"># 4. matches on synonym if available (exact, word N-gram and character N-gram):</span>
+            <span class="c1"># for a knowledge base text field the synonym are indexed in a separate field</span>
+            <span class="c1"># &quot;&lt;field name&gt;$whitelist&quot; if available.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+                <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}}},</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">field</span>
+                                    <span class="o">+</span> <span class="s2">&quot;.processed_text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">},</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;keyword&quot;</span><span class="p">:</span>
+                <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}}},</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">field</span>
+                                    <span class="o">+</span> <span class="s2">&quot;.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">},</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;.char_ngram&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">},</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown query type.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Boost function for boosting conditions, e.g. exact match boosting</span>
+            <span class="n">boost_functions</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;.normalized_keyword&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+
+            <span class="c1"># generate ES syntax for matching on synonym whitelist if available.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span><span class="p">:</span>
+                <span class="n">clause</span><span class="p">[</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span><span class="s2">&quot;should&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span><span class="p">,</span>
+                            <span class="s2">&quot;score_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                        <span class="p">{</span>
+                                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span>
+                                                <span class="o">+</span> <span class="s2">&quot;.name.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                                    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+                                                <span class="p">}</span>
+                                            <span class="p">}</span>
+                                        <span class="p">},</span>
+                                        <span class="p">{</span>
+                                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span>
+                                                <span class="o">+</span> <span class="s2">&quot;.name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                                            <span class="p">}</span>
+                                        <span class="p">},</span>
+                                        <span class="p">{</span>
+                                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span>
+                                                <span class="o">+</span> <span class="s2">&quot;.name.char_ngram&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                                    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+                                                <span class="p">}</span>
+                                            <span class="p">}</span>
+                                        <span class="p">},</span>
+                                    <span class="p">]</span>
+                                <span class="p">}</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;inner_hits&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+                <span class="n">boost_functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span><span class="p">,</span>
+                                <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span>
+                                        <span class="o">+</span> <span class="s2">&quot;.name.normalized_keyword&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">clause</span><span class="p">,</span> <span class="n">boost_functions</span></div>
+
+<div class="viewcode-block" id="Search.QueryClause.validate"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.QueryClause.validate">[docs]</a>        <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_text_field</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Query can only be defined on text field.&quot;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Search.FilterClause"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.FilterClause">[docs]</a>    <span class="k">class</span> <span class="nc">FilterClause</span><span class="p">(</span><span class="n">Clause</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class models a knowledge base filter clause.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">field</span><span class="p">,</span>
+            <span class="n">field_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span>
+            <span class="n">range_gt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">range_gte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">range_lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">range_lte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialize a knowledge base filter clause. The filter type is determined by whether</span>
+<span class="sd">            the range operators or value is passed in.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span> <span class="o">=</span> <span class="n">field_info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">=</span> <span class="n">query_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range_gt</span> <span class="o">=</span> <span class="n">range_gt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range_gte</span> <span class="o">=</span> <span class="n">range_gte</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range_lt</span> <span class="o">=</span> <span class="n">range_lt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range_lte</span> <span class="o">=</span> <span class="n">range_lte</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">=</span> <span class="s2">&quot;range&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">clause_type</span> <span class="o">=</span> <span class="s2">&quot;filter&quot;</span>
+
+<div class="viewcode-block" id="Search.FilterClause.build_query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.FilterClause.build_query">[docs]</a>        <span class="k">def</span> <span class="nf">build_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;build knowledge base query for filter clause&quot;&quot;&quot;</span>
+            <span class="n">clause</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span>
+                    <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+                        <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;.char_ngram&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}}</span>
+                        <span class="p">}</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">field</span>
+                                <span class="o">+</span> <span class="s2">&quot;.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;range&quot;</span><span class="p">:</span>
+                <span class="n">lower_bound</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">upper_bound</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gt</span><span class="p">:</span>
+                    <span class="n">lower_bound</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;gt&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gt</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gte</span><span class="p">:</span>
+                    <span class="n">lower_bound</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;gte&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gte</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lt</span><span class="p">:</span>
+                    <span class="n">upper_bound</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;lt&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lt</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lte</span><span class="p">:</span>
+                    <span class="n">upper_bound</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;lte&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lte</span><span class="p">)</span>
+
+                <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="p">{}}}</span>
+
+                <span class="k">if</span> <span class="n">lower_bound</span><span class="p">:</span>
+                    <span class="n">clause</span><span class="p">[</span><span class="s2">&quot;range&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">][</span><span class="n">lower_bound</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">lower_bound</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">upper_bound</span><span class="p">:</span>
+                    <span class="n">clause</span><span class="p">[</span><span class="s2">&quot;range&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">][</span><span class="n">upper_bound</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">upper_bound</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown filter type.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">clause</span></div>
+
+<div class="viewcode-block" id="Search.FilterClause.validate"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.FilterClause.validate">[docs]</a>        <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;range&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gt</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gte</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lt</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lte</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No range parameter is specified&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gte</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_gt</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Invalid range parameters. Cannot specify both &#39;gte&#39; and &#39;gt&#39;.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lte</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_lt</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Invalid range parameters. Cannot specify both &#39;lte&#39; and &#39;lt&#39;.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_number_field</span><span class="p">()</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_date_field</span><span class="p">()</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Range filter can only be defined for number or date field.&quot;</span>
+                    <span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Search.SortClause"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.SortClause">[docs]</a>    <span class="k">class</span> <span class="nc">SortClause</span><span class="p">(</span><span class="n">Clause</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class models a knowledge base sort clause.&quot;&quot;&quot;</span>
+
+        <span class="n">SORT_ORDER_ASC</span> <span class="o">=</span> <span class="s2">&quot;asc&quot;</span>
+        <span class="n">SORT_ORDER_DESC</span> <span class="o">=</span> <span class="s2">&quot;desc&quot;</span>
+        <span class="n">SORT_DISTANCE</span> <span class="o">=</span> <span class="s2">&quot;distance&quot;</span>
+        <span class="n">SORT_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">SORT_ORDER_ASC</span><span class="p">,</span> <span class="n">SORT_ORDER_DESC</span><span class="p">,</span> <span class="n">SORT_DISTANCE</span><span class="p">}</span>
+
+        <span class="c1"># default weight for adjusting sort scores so that they will be on the same scale when</span>
+        <span class="c1"># combined with text relevance scores.</span>
+        <span class="n">DEFAULT_SORT_WEIGHT</span> <span class="o">=</span> <span class="mi">30</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">field</span><span class="p">,</span>
+            <span class="n">field_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sort_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">field_stats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialize a knowledge base sort clause&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="o">=</span> <span class="n">sort_type</span> <span class="k">if</span> <span class="n">sort_type</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">SORT_ORDER_DESC</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_stats</span> <span class="o">=</span> <span class="n">field_stats</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span> <span class="o">=</span> <span class="n">field_info</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">clause_type</span> <span class="o">=</span> <span class="s2">&quot;sort&quot;</span>
+
+<div class="viewcode-block" id="Search.SortClause.build_query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.SortClause.build_query">[docs]</a>        <span class="k">def</span> <span class="nf">build_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;build knowledge base query for sort clause&quot;&quot;&quot;</span>
+
+            <span class="c1"># sort by distance based on passed in origin</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="o">==</span> <span class="s2">&quot;distance&quot;</span><span class="p">:</span>
+                <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="s2">&quot;5km&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_stats</span><span class="p">[</span><span class="s2">&quot;max_value&quot;</span><span class="p">]</span>
+                <span class="n">min_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_stats</span><span class="p">[</span><span class="s2">&quot;min_value&quot;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_date_field</span><span class="p">():</span>
+                    <span class="c1"># ensure the timestamps for date fields are integer values</span>
+                    <span class="n">max_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_value</span><span class="p">)</span>
+                    <span class="n">min_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_value</span><span class="p">)</span>
+
+                    <span class="c1"># add time unit for date field</span>
+                    <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">ms&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_value</span> <span class="o">-</span> <span class="n">min_value</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="n">max_value</span> <span class="o">!=</span> <span class="n">min_value</span>
+                        <span class="k">else</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_value</span> <span class="o">-</span> <span class="n">min_value</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_value</span> <span class="o">!=</span> <span class="n">min_value</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="o">==</span> <span class="s2">&quot;asc&quot;</span><span class="p">:</span>
+                    <span class="n">origin</span> <span class="o">=</span> <span class="n">min_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">origin</span> <span class="o">=</span> <span class="n">max_value</span>
+
+            <span class="n">sort_clause</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;linear&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;origin&quot;</span><span class="p">:</span> <span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale</span><span class="p">}},</span>
+                <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SORT_WEIGHT</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="n">sort_clause</span></div>
+
+<div class="viewcode-block" id="Search.SortClause.validate"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.SortClause.validate">[docs]</a>        <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># validate the sort type to be valid.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SORT_TYPES</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid value for sort type &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;location&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SORT_DISTANCE</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid value for sort type &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;location&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;No origin location specified for sorting by distance.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SORT_DISTANCE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">!=</span> <span class="s2">&quot;location&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sort by distance is only supported using &#39;location&#39; field.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># validate the sort field is number, date or location field</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_number_field</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_date_field</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_location_field</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Custom sort criteria can only be defined for&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; &#39;number&#39;, &#39;date&#39; or &#39;location&#39; fields.&quot;</span>
+                <span class="p">)</span></div></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

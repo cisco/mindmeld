@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Step 9: Optimize Question Answering Performance &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Step 10: Deploy Trained Models" href="10_deploy_to_production.html" />
+    <link rel="prev" title="Step 8: Configure the Language Parser" href="08_configure_the_language_parser.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step 9: Optimize Question Answering Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#proximity-based-ranking">Proximity-Based Ranking</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Step 9: Optimize Question Answering Performance</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/09_optimize_question_answering_performance.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="step-9-optimize-question-answering-performance">
+<h1>Step 9: Optimize Question Answering Performance<a class="headerlink" href="#step-9-optimize-question-answering-performance" title="Permalink to this headline">¶</a></h1>
+<p>The MindMeld question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.</p>
+<p>To leverage the MindMeld question answerer in your application, you must first create your knowledge base, as described in <a class="reference internal" href="05_create_the_knowledge_base.html"><span class="doc">Step 5</span></a>. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the <code class="xref py py-class docutils literal"><span class="pre">QuestionAnswerer</span></code> component.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send_nearest_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user_location</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;I&#39;m not sure. You haven&#39;t told me where you are!&quot;</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">suggest</span><span class="p">([{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;Share your location&#39;</span><span class="p">}])</span>
+        <span class="k">return</span>
+
+    <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span>
+                                       <span class="n">_sort_location</span><span class="o">=</span><span class="n">user_location</span><span class="p">)</span>
+    <span class="n">target_store</span> <span class="o">=</span> <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your nearest Kwik-E-Mart is located at {store_name}.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Assuming you have already created an index, such as <code class="docutils literal"><span class="pre">stores</span></code>, and uploaded the knowledge base data, the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method provides a flexible mechanism for retrieving relevant results.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+python
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
+<span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;store_name&quot;: &quot;23 Elm Street&quot;,</span>
+<span class="go">  &quot;open_time&quot;: &quot;7am&quot;,</span>
+<span class="go">  &quot;close_time&quot;: &quot;9pm&quot;,</span>
+<span class="go">  &quot;address&quot;: &quot;100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001&quot;,</span>
+<span class="go">  &quot;phone_number&quot;: &quot;(+1) 415-555-1100&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Similarly, to retrieve store locations on Market Street, you could use something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;market&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
+<span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;store_name&quot;: &quot;Pine and Market&quot;,</span>
+<span class="go">  &quot;open_time&quot;: &quot;6am&quot;,</span>
+<span class="go">  &quot;close_time&quot;: &quot;10pm&quot;,</span>
+<span class="go">  &quot;address&quot;: &quot;750 Market Street, Capital City, CA 94001&quot;,</span>
+<span class="go">  &quot;phone_number&quot;: &quot;(+1) 650-555-4500&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>By default, the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.</p>
+<div class="section" id="proximity-based-ranking">
+<h2>Proximity-Based Ranking<a class="headerlink" href="#proximity-based-ranking" title="Permalink to this headline">¶</a></h2>
+<p>Location-based ranking is fairly common in mobile applications. We have already seen an intent designed to provide the nearest retail locations for a given user in our Kwik-E-Mart example. Going further, to support proximity-based ranking, is straightforward to accomplish using the MindMeld question answerer.</p>
+<p>First, let’s assume that you have created a knowledge base for the <code class="docutils literal"><span class="pre">stores</span></code> index, which contains every retail location. Each store object also has a <code class="docutils literal"><span class="pre">location</span></code> field which contains latitude and longitude coordinates for each store.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;store_name&quot;</span><span class="o">:</span> <span class="s2">&quot;23 Elm Street&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;open_time&quot;</span><span class="o">:</span> <span class="s2">&quot;7am&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;close_time&quot;</span><span class="o">:</span> <span class="s2">&quot;9pm&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;address&quot;</span><span class="o">:</span> <span class="s2">&quot;100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;phone_number&quot;</span><span class="o">:</span> <span class="s2">&quot;(+1) 415-555-1100&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;location&quot;</span><span class="o">:</span> <span class="p">{</span><span class="s2">&quot;latitude&quot;</span><span class="o">:</span> <span class="mf">37.790683</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">122.403889</span><span class="p">}</span>
+<span class="p">},</span>
+<span class="p">{</span>
+  <span class="s2">&quot;store_name&quot;</span><span class="o">:</span> <span class="s2">&quot;Pine and Market&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;open_time&quot;</span><span class="o">:</span> <span class="s2">&quot;6am&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;close_time&quot;</span><span class="o">:</span> <span class="s2">&quot;10pm&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;address&quot;</span><span class="o">:</span> <span class="s2">&quot;750 Market Street, Capital City, CA 94001&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;phone_number&quot;</span><span class="o">:</span> <span class="s2">&quot;(+1) 650-555-4500&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;location&quot;</span><span class="o">:</span> <span class="p">{</span><span class="s2">&quot;latitude&quot;</span><span class="o">:</span> <span class="mf">37.790426</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">122.405752</span><span class="p">}</span>
+<span class="p">}</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>We can now retrieve the nearest stores using the <code class="docutils literal"><span class="pre">sort</span></code> argument of the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method
+as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_loc</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">37.790415</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">122.405218</span><span class="p">}</span>
+<span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">my_loc</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">)</span>
+<span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;store_name&quot;: &quot;Pine and Market&quot;,</span>
+<span class="go">  &quot;open_time&quot;: &quot;6am&quot;,</span>
+<span class="go">  &quot;close_time&quot;: &quot;10pm&quot;,</span>
+<span class="go">  &quot;address&quot;: &quot;750 Market Street, Capital City, CA 94001&quot;,</span>
+<span class="go">  &quot;phone_number&quot;: &quot;(+1) 650-555-4500&quot;,</span>
+<span class="go">  &quot;location&quot;: {&quot;latitude&quot;: 37.790426, &quot;longitude&quot;: -122.405752}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for more about how to use the Question Answerer to find answers to questions, validate user requests, disambiguate entities, and offer alternative suggestions.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="10_deploy_to_production.html" class="btn btn-neutral float-right" title="Step 10: Deploy Trained Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="08_configure_the_language_parser.html" class="btn btn-neutral float-left" title="Step 8: Configure the Language Parser" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

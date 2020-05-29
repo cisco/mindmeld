@@ -1,0 +1,1166 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.core &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains a collection of the core data structures used in MindMeld.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">TEXT_FORM_RAW</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">TEXT_FORM_PROCESSED</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">TEXT_FORM_NORMALIZED</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">TEXT_FORMS</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEXT_FORM_RAW</span><span class="p">,</span> <span class="n">TEXT_FORM_PROCESSED</span><span class="p">,</span> <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># The date keys are extracted from here</span>
+<span class="c1"># https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722</span>
+<span class="n">TIME_GRAIN_TO_ORDER</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;quarter&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;week&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;hour&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;minute&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">&quot;second&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="s2">&quot;milliseconds&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_sort_by_lowest_time_grain</span><span class="p">(</span><span class="n">system_entities</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">system_entities</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">query_entity</span><span class="p">:</span> <span class="n">TIME_GRAIN_TO_ORDER</span><span class="p">[</span>
+            <span class="n">query_entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;grain&quot;</span><span class="p">]</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="Bunch"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Bunch">[docs]</a><span class="k">class</span> <span class="nc">Bunch</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary-like object that exposes its keys as attributes.</span>
+
+<span class="sd">    Inspired by scikit learn&#39;s Bunches</span>
+
+<span class="sd">    &gt;&gt;&gt; b = Bunch(a=1, b=2)</span>
+<span class="sd">    &gt;&gt;&gt; b[&#39;b&#39;]</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; b.b</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; b.a = 3</span>
+<span class="sd">    &gt;&gt;&gt; b[&#39;a&#39;]</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; b.c = 6</span>
+<span class="sd">    &gt;&gt;&gt; b[&#39;c&#39;]</span>
+<span class="sd">    6</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Span"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Span">[docs]</a><span class="k">class</span> <span class="nc">Span</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Object representing a text span with start and end indices</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        start (int): The index from the original text that represents the start of the span</span>
+<span class="sd">        end (int): The index from the original text that represents the end of the span</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">start</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">,</span> <span class="s2">&quot;Span &#39;start&#39; must be less than or equal to &#39;end&#39;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
+
+<div class="viewcode-block" id="Span.to_dict"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Span.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the span into a dictionary&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Span.slice"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Span.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the slice of the object for this span</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj: The object to slice</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The slice of the passed in object for this span</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Span.shift"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Span.shift">[docs]</a>    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shifts a span by offset</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            offset (int): The number to change start and end by</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Span</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">index</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(start=</span><span class="si">{}</span><span class="s2">, end=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Query"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Query">[docs]</a><span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The query object is responsible for processing and normalizing raw user text input so that</span>
+<span class="sd">    classifiers can deal with it. A query stores three forms of text: raw text, processed text, and</span>
+<span class="sd">    normalized text. The query object is also responsible for translating text ranges across these</span>
+<span class="sd">    forms.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        raw_text (str): the original input text</span>
+<span class="sd">        processed_text (str): the text after it has been preprocessed. The pre-processing happens</span>
+<span class="sd">            at the application level and is generally used for special characters</span>
+<span class="sd">        normalized_tokens (tuple of str): a list of normalized tokens</span>
+<span class="sd">        system_entity_candidates (tuple): A list of system entities extracted from the text</span>
+<span class="sd">        locale (str, optional): The locale representing the ISO 639-1 language code and \</span>
+<span class="sd">            ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">        language (str, optional): The language code representing ISO 639-1 language codes.</span>
+<span class="sd">        time_zone (str): The IANA id for the time zone in which the query originated</span>
+<span class="sd">            such as &#39;America/Los_Angeles&#39;</span>
+<span class="sd">        timestamp (long, optional): A unix timestamp used as the reference time</span>
+<span class="sd">            If not specified, the current system time is used. If `time_zone`</span>
+<span class="sd">            is not also specified, this parameter is ignored</span>
+<span class="sd">        stemmed_tokens (list): A sequence of stemmed tokens for the query text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: look into using __slots__</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">raw_text</span><span class="p">,</span>
+        <span class="n">processed_text</span><span class="p">,</span>
+        <span class="n">normalized_tokens</span><span class="p">,</span>
+        <span class="n">char_maps</span><span class="p">,</span>
+        <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stemmed_tokens</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a query object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            raw_text (str): the original input text</span>
+<span class="sd">            processed_text (str): the input text after it has been preprocessed</span>
+<span class="sd">            normalized_tokens (list of dict): List tokens outputted by</span>
+<span class="sd">                a tokenizer</span>
+<span class="sd">            char_maps (dict): Mappings between character indices in raw,</span>
+<span class="sd">                processed and normalized text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalized_tokens</span> <span class="o">=</span> <span class="n">normalized_tokens</span>
+        <span class="n">norm_text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized_tokens</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw_text</span><span class="p">,</span> <span class="n">processed_text</span><span class="p">,</span> <span class="n">norm_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_char_maps</span> <span class="o">=</span> <span class="n">char_maps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_candidates</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_locale</span> <span class="o">=</span> <span class="n">locale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_zone</span> <span class="o">=</span> <span class="n">time_zone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="n">stemmed_tokens</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The original input text&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_RAW</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">processed_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The input text after it has been preprocessed&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The normalized input text&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stemmed_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The stemmed input text&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stemmed_tokens</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The tokens of the normalized input text&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">token</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized_tokens</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">language</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Language of the query specified using a 639-2 code.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_language</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">locale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The locale representing the ISO 639-1/2 language code and</span>
+<span class="sd">            ISO3166 alpha 2 country code separated by an underscore character.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_locale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The IANA id for the time zone in which the query originated</span>
+<span class="sd">        such as &#39;America/Los_Angeles&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_zone</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A unix timestamp for when the time query was created. If `time_zone` is None,</span>
+<span class="sd">        this parameter is ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span>
+
+<div class="viewcode-block" id="Query.get_text_form"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Query.get_text_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_text_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Programmatically retrieves text by form</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            form (int): A valid text form (TEXT_FORM_RAW, TEXT_FORM_PROCESSED, or</span>
+<span class="sd">                TEXT_FORM_NORMALIZED)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The requested text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">form</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Query.get_system_entity_candidates"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Query.get_system_entity_candidates">[docs]</a>    <span class="k">def</span> <span class="nf">get_system_entity_candidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_types</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            sys_types (set of str): A set of entity types to select</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Returns candidate system entities of the types specified</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_candidates</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">sys_types</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Query.transform_span"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Query.transform_span">[docs]</a>    <span class="k">def</span> <span class="nf">transform_span</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_span</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a text range from one form to another.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text_span (Span): the text span being transformed</span>
+<span class="sd">            form_in (int): the input text form. Should be one of TEXT_FORM_RAW, TEXT_FORM_PROCESSED</span>
+<span class="sd">                or TEXT_FORM_NORMALIZED</span>
+<span class="sd">            form_out (int): the output text form. Should be one of TEXT_FORM_RAW,</span>
+<span class="sd">                TEXT_FORM_PROCESSED or TEXT_FORM_NORMALIZED</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: the equivalent range of text in the output form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Span</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform_index</span><span class="p">(</span><span class="n">text_span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform_index</span><span class="p">(</span><span class="n">text_span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Query.transform_index"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Query.transform_index">[docs]</a>    <span class="k">def</span> <span class="nf">transform_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a text index from one form to another.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (int): the index being transformed</span>
+<span class="sd">            form_in (int): the input form. should be one of TEXT_FORM_RAW</span>
+<span class="sd">            form_out (int): the output form</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the equivalent index of text in the output form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">form_in</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TEXT_FORMS</span> <span class="ow">or</span> <span class="n">form_out</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TEXT_FORMS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid text form&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">form_in</span> <span class="o">&gt;</span> <span class="n">form_out</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">form_in</span> <span class="o">&gt;</span> <span class="n">form_out</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unprocess_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">form_in</span><span class="p">)</span>
+                <span class="n">form_in</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">form_in</span> <span class="o">&lt;</span> <span class="n">form_out</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">form_in</span><span class="p">)</span>
+                <span class="n">form_in</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">index</span></div>
+
+    <span class="k">def</span> <span class="nf">_process_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">form_in</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">form_in</span> <span class="o">==</span> <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; form cannot be processed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">mapping_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">form_in</span><span class="p">,</span> <span class="p">(</span><span class="n">form_in</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_char_maps</span><span class="p">[</span><span class="n">mapping_key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># mapping doesn&#39;t exist -&gt; use identity</span>
+            <span class="k">return</span> <span class="n">index</span>
+        <span class="c1"># None for mapping means 1-1 mapping</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="n">mapping</span> <span class="k">else</span> <span class="n">index</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid index </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_unprocess_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">form_in</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">form_in</span> <span class="o">==</span> <span class="n">TEXT_FORM_RAW</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; form cannot be unprocessed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">TEXT_FORM_RAW</span><span class="p">))</span>
+        <span class="n">mapping_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">form_in</span><span class="p">,</span> <span class="p">(</span><span class="n">form_in</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_char_maps</span><span class="p">[</span><span class="n">mapping_key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># mapping doesn&#39;t exist -&gt; use identity</span>
+            <span class="k">return</span> <span class="n">index</span>
+        <span class="c1"># None for mapping means 1-1 mapping</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="n">mapping</span> <span class="k">else</span> <span class="n">index</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid index </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{!r}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProcessedQuery"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.ProcessedQuery">[docs]</a><span class="k">class</span> <span class="nc">ProcessedQuery</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A processed query contains a query and the additional metadata that has been labeled or</span>
+<span class="sd">    predicted.</span>
+
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        query (Query): The underlying query object.</span>
+<span class="sd">        domain (str): The domain of the query</span>
+<span class="sd">        entities (list): A list of entities present in this query</span>
+<span class="sd">        intent (str): The intent of the query</span>
+<span class="sd">        is_gold (bool): Indicates whether the details in this query were predicted or human labeled</span>
+<span class="sd">        nbest_transcripts_queries (list): A list of n best transcript queries</span>
+<span class="sd">        nbest_transcripts_entities (list): A list of lists of entities for each query</span>
+<span class="sd">        nbest_aligned_entities (list): A list of lists of aligned entities</span>
+<span class="sd">        confidence (dict): A dictionary of the class probas for the domain and intent classifier</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: look into using __slots__</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">is_gold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nbest_transcripts_queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nbest_transcripts_entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nbest_aligned_entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">confidence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intent</span> <span class="o">=</span> <span class="n">intent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entities</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">entities</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_gold</span> <span class="o">=</span> <span class="n">is_gold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_queries</span> <span class="o">=</span> <span class="n">nbest_transcripts_queries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_entities</span> <span class="o">=</span> <span class="n">nbest_transcripts_entities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbest_aligned_entities</span> <span class="o">=</span> <span class="n">nbest_aligned_entities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span> <span class="o">=</span> <span class="n">confidence</span>
+
+<div class="viewcode-block" id="ProcessedQuery.to_dict"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.ProcessedQuery.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the processed query into a dictionary&quot;&quot;&quot;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="s2">&quot;intent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="s2">&quot;entities&quot;</span><span class="p">:</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entities</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entities</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_queries</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">[</span><span class="s2">&quot;nbest_transcripts_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">q</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_queries</span>
+            <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_entities</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">[</span><span class="s2">&quot;nbest_transcripts_entities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">n_entities</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">n_entities</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_transcripts_entities</span>
+            <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_aligned_entities</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">[</span><span class="s2">&quot;nbest_aligned_entities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">}</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">n_entities</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">n_entities</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbest_aligned_entities</span>
+            <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">[</span><span class="s2">&quot;confidences&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span>
+        <span class="k">return</span> <span class="n">base</span></div>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{!r}</span><span class="s2">, domain: </span><span class="si">{!r}</span><span class="s2">, intent: </span><span class="si">{!r}</span><span class="s2">, </span><span class="si">{!r}</span><span class="s2"> entities</span><span class="si">{}</span><span class="s2">&gt;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entities</span><span class="p">),</span>
+            <span class="s2">&quot;, gold&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_gold</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NestedEntity"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.NestedEntity">[docs]</a><span class="k">class</span> <span class="nc">NestedEntity</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An entity with the context of the query it came from, along with \</span>
+<span class="sd">        information like the entity&#39;s parent and children.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        texts (tuple): Tuple containing the three forms of text: raw text, \</span>
+<span class="sd">            processed text, and normalized text</span>
+<span class="sd">        spans (tuple): Tuple containing the character index spans of the \</span>
+<span class="sd">            text for this entity for each text form</span>
+<span class="sd">        token_spans (tuple): Tuple containing the token index spans of the \</span>
+<span class="sd">            text for this entity for each text form</span>
+<span class="sd">        entity (Entity): The entity object</span>
+<span class="sd">        parent (NestedEntity): The parent of the nested entity</span>
+<span class="sd">        children (tuple of NestedEntity): A tuple of children nested entities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">spans</span><span class="p">,</span> <span class="n">token_spans</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span> <span class="o">=</span> <span class="n">texts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spans</span> <span class="o">=</span> <span class="n">spans</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token_spans</span> <span class="o">=</span> <span class="n">token_spans</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entity</span> <span class="o">=</span> <span class="n">entity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span> <span class="ow">or</span> <span class="p">():</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="NestedEntity.with_children"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.NestedEntity.with_children">[docs]</a>    <span class="k">def</span> <span class="nf">with_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a copy of this entity with the provided children&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token_spans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="p">,</span> <span class="n">children</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="NestedEntity.from_query"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.NestedEntity.from_query">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_query</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">span</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalized_span</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">entity_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">role</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">entity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates an entity node using a parent entity node</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (Query): Description</span>
+<span class="sd">            span (Span): The span of the entity in the query&#39;s raw text</span>
+<span class="sd">            normalized_span (None, optional): The span of the entity in the</span>
+<span class="sd">                query&#39;s normalized text</span>
+<span class="sd">            entity_type (str, optional): The entity type. One of this and entity</span>
+<span class="sd">                must be provided</span>
+<span class="sd">            role (str, optional): The entity role. Ignored if entity is provided.</span>
+<span class="sd">            entity (Entity, optional): The entity. One of this and entity must</span>
+<span class="sd">                be provided</span>
+<span class="sd">            parent_offset (int): The offset of the parent in the query</span>
+<span class="sd">            children (None, optional): Description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the created entity</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_get_form_details</span><span class="p">(</span><span class="n">query_span</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">):</span>
+            <span class="n">span_out</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">transform_span</span><span class="p">(</span><span class="n">query_span</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">)</span>
+            <span class="n">full_text</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_text_form</span><span class="p">(</span><span class="n">form_out</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">span_out</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">full_text</span><span class="p">)</span>
+            <span class="n">tok_start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_text</span><span class="p">[:</span> <span class="n">span_out</span><span class="o">.</span><span class="n">start</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="n">tok_span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">tok_start</span><span class="p">,</span> <span class="n">tok_start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+
+            <span class="c1"># convert span from query&#39;s indexing to parent&#39;s indexing</span>
+            <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">offset_out</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">transform_index</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">)</span>
+                <span class="n">span_out</span> <span class="o">=</span> <span class="n">span_out</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">offset_out</span><span class="p">)</span>
+                <span class="n">tok_offset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_text</span><span class="p">[:</span><span class="n">offset_out</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+                <span class="n">tok_span</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">tok_offset</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">text</span><span class="p">,</span> <span class="n">span_out</span><span class="p">,</span> <span class="n">tok_span</span>
+
+        <span class="k">if</span> <span class="n">span</span><span class="p">:</span>
+            <span class="n">query_span</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">span</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">parent_offset</span><span class="p">)</span> <span class="k">if</span> <span class="n">parent_offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">span</span>
+            <span class="p">)</span>
+            <span class="n">form_in</span> <span class="o">=</span> <span class="n">TEXT_FORM_RAW</span>
+        <span class="k">elif</span> <span class="n">normalized_span</span><span class="p">:</span>
+            <span class="n">query_span</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">normalized_span</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">parent_offset</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">parent_offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">normalized_span</span>
+            <span class="p">)</span>
+            <span class="n">form_in</span> <span class="o">=</span> <span class="n">TEXT_FORM_NORMALIZED</span>
+
+        <span class="n">texts</span><span class="p">,</span> <span class="n">spans</span><span class="p">,</span> <span class="n">tok_spans</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">_get_form_details</span><span class="p">(</span><span class="n">query_span</span><span class="p">,</span> <span class="n">parent_offset</span><span class="p">,</span> <span class="n">form_in</span><span class="p">,</span> <span class="n">form_out</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">form_out</span> <span class="ow">in</span> <span class="n">TEXT_FORMS</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">entity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either &#39;entity&#39; or &#39;entity_type&#39; must be specified&quot;</span><span class="p">)</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">Entity</span><span class="p">(</span><span class="n">texts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">spans</span><span class="p">,</span> <span class="n">tok_spans</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NestedEntity.to_dict"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.NestedEntity.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the query entity into a dictionary&quot;&quot;&quot;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">base</span><span class="p">[</span><span class="s2">&quot;span&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">base</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The original input text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_RAW</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">processed_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The input text after it has been preprocessed&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The normalized input text&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_texts</span><span class="p">[</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The span of original input text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spans</span><span class="p">[</span><span class="n">TEXT_FORM_RAW</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">processed_span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The span of the preprocessed text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spans</span><span class="p">[</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The span of the normalized text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spans</span><span class="p">[</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">token_span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The token_span of original input text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token_spans</span><span class="p">[</span><span class="n">TEXT_FORM_RAW</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">processed_token_span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The token_span of the preprocessed text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token_spans</span><span class="p">[</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_token_span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The token_span of the normalized text span&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token_spans</span><span class="p">[</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2"> &#39;</span><span class="si">{}</span><span class="s2">&#39; </span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">role</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{!r}</span><span class="s2"> (</span><span class="si">{!r}</span><span class="s2">) char: [</span><span class="si">{!r}</span><span class="s2">-</span><span class="si">{!r}</span><span class="s2">], tok: [</span><span class="si">{!r}</span><span class="s2">-</span><span class="si">{!r}</span><span class="s2">]&gt;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QueryEntity"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.QueryEntity">[docs]</a><span class="k">class</span> <span class="nc">QueryEntity</span><span class="p">(</span><span class="n">NestedEntity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An entity with the context of the query it came from.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        text (str): The raw text that was processed into this entity</span>
+<span class="sd">        processed_text (str): The processed text that was processed into</span>
+<span class="sd">            this entity</span>
+<span class="sd">        normalized_text (str): The normalized text that was processed into</span>
+<span class="sd">            this entity</span>
+<span class="sd">        span (Span): The character index span of the raw text that was</span>
+<span class="sd">            processed into this entity</span>
+<span class="sd">        processed_span (Span): The character index span of the raw text that was</span>
+<span class="sd">            processed into this entity</span>
+<span class="sd">        span (Span): The character index span of the raw text that was</span>
+<span class="sd">            processed into this entity</span>
+<span class="sd">        start (int): The character index start of the text range that was processed into this</span>
+<span class="sd">            entity. This index is based on the normalized text of the query passed in.</span>
+<span class="sd">        end (int): The character index end of the text range that was processed into this</span>
+<span class="sd">            entity. This index is based on the normalized text of the query passed in.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An Entity is any important piece of text that provides more information about the user</span>
+<span class="sd">    intent.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        text (str): The text contents that span the entity</span>
+<span class="sd">        type (str): The type of the entity</span>
+<span class="sd">        role (str): The role of the entity</span>
+<span class="sd">        value (str): The resolved value of the entity</span>
+<span class="sd">        display_text (str): A human readable text representation of the entity for use in natural</span>
+<span class="sd">            language responses.</span>
+<span class="sd">        confidence (float): A confidence value from 0 to 1 about how confident the entity</span>
+<span class="sd">            recognizer was for the given class label.</span>
+<span class="sd">        is_system_entity (bool): True if the entity is a system entity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: look into using __slots__</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">,</span>
+        <span class="n">entity_type</span><span class="p">,</span>
+        <span class="n">role</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">display_text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">confidence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">entity_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display_text</span> <span class="o">=</span> <span class="n">display_text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span> <span class="o">=</span> <span class="n">confidence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_system_entity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">is_system_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Entity.is_system_entity"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Entity.is_system_entity">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_system_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>  <span class="c1"># pylint: disable=method-hidden</span>
+        <span class="sd">&quot;&quot;&quot;Checks whether the provided entity type is a MindMeld-recognized system entity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_type (str): An entity type</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the entity is a system entity type, else False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">entity_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sys_&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Entity.to_dict"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.Entity.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the entity into a dictionary&quot;&quot;&quot;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;display_text&quot;</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">]:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">base</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">base</span></div>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_text</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{!r}</span><span class="s2"> (</span><span class="si">{!r}</span><span class="s2">)&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FormEntity"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.FormEntity">[docs]</a><span class="k">class</span> <span class="nc">FormEntity</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A form entity is used for defining custom objects for the entity form used in</span>
+<span class="sd">    AutoEntityFilling (slot-filling).</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        entity (str): Entity name</span>
+<span class="sd">        role (str, optional): The role of the entity</span>
+<span class="sd">        responses(list, optional): NLR for prompting the user for missing entities</span>
+<span class="sd">        value (str, optional): The resolved value of the entity</span>
+<span class="sd">        default_eval(bool, optional): Use system validation (default: True)</span>
+<span class="sd">        hints(list, optional): Developer defined list of keywords to verify the</span>
+<span class="sd">        user input against</span>
+<span class="sd">        custom_eval(func, optional): custom validation function (should return bool:</span>
+<span class="sd">        validated or not)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">entity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">role</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">responses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">retry_response</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_eval</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_eval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entity</span> <span class="o">=</span> <span class="n">entity</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Entity cannot be empty.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="n">responses</span> <span class="ow">or</span> <span class="p">[</span>
+            <span class="s2">&quot;Please provide value for: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_response</span> <span class="o">=</span> <span class="n">retry_response</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_eval</span> <span class="o">=</span> <span class="n">default_eval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hints</span> <span class="o">=</span> <span class="n">hints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_eval</span> <span class="o">=</span> <span class="n">custom_eval</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_eval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">custom_eval</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid custom validation function type.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="resolve_entity_conflicts"><a class="viewcode-back" href="../../apidoc/mindmeld.core.html#mindmeld.core.resolve_entity_conflicts">[docs]</a><span class="k">def</span> <span class="nf">resolve_entity_conflicts</span><span class="p">(</span><span class="n">query_entities</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This method takes a list containing query entities for a query, and resolves</span>
+<span class="sd">    any entity conflicts. The resolved list is returned.</span>
+
+<span class="sd">    If two entities in a query conflict with each other, use the following logic:</span>
+<span class="sd">        - If the target entity is a subset of another entity, then delete the</span>
+<span class="sd">          target entity.</span>
+<span class="sd">        - If the target entity shares the identical span as another entity,</span>
+<span class="sd">          then keep the one with the highest confidence.</span>
+<span class="sd">        - If the target entity overlaps with another entity, then keep the one</span>
+<span class="sd">          with the highest confidence.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        entities (list of QueryEntity): A list of query entities to resolve</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of QueryEntity: A filtered list of query entities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="n">query_entities</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">):</span>
+        <span class="n">include_target</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">):</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">_is_superset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_same_span</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Removing {{</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">}} entity in query </span><span class="si">%d</span><span class="s2"> since it is a &quot;</span>
+                    <span class="s2">&quot;subset of another.&quot;</span><span class="p">,</span>
+                    <span class="n">other</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">other</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                    <span class="n">i</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="n">filtered</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">_is_subset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_same_span</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Removing {{</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">}} entity in query </span><span class="si">%d</span><span class="s2"> since it is a &quot;</span>
+                    <span class="s2">&quot;subset of another.&quot;</span><span class="p">,</span>
+                    <span class="n">target</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">target</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                    <span class="n">i</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="n">filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">include_target</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">_is_same_span</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_is_overlapping</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">confidence</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">confidence</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s2">&quot;Removing {{</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">}} entity in query </span><span class="si">%d</span><span class="s2"> since it overlaps &quot;</span>
+                        <span class="s2">&quot;with another.&quot;</span><span class="p">,</span>
+                        <span class="n">other</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                        <span class="n">other</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                        <span class="n">i</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">del</span> <span class="n">filtered</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">confidence</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">confidence</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s2">&quot;Removing {{</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">}} entity in query </span><span class="si">%d</span><span class="s2"> since it overlaps &quot;</span>
+                        <span class="s2">&quot;with another.&quot;</span><span class="p">,</span>
+                        <span class="n">target</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                        <span class="n">target</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                        <span class="n">i</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">del</span> <span class="n">filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">include_target</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">include_target</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">filtered</span></div>
+
+
+<span class="k">def</span> <span class="nf">_is_subset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">end</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_is_superset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">start</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">end</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_is_same_span</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_is_superset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_is_subset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_is_overlapping</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="n">target_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">predicted_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">overlap</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_range</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">predicted_range</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">overlap</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_subset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_superset</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

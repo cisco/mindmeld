@@ -1,0 +1,754 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.text_models &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.text_models</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.text_models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains all code required to perform multinomial classification</span>
+<span class="sd">of text.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction</span> <span class="k">import</span> <span class="n">DictVectorizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="k">import</span> <span class="n">SelectFromModel</span><span class="p">,</span> <span class="n">SelectPercentile</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">LabelEncoder</span> <span class="k">as</span> <span class="n">SKLabelEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">MaxAbsScaler</span><span class="p">,</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="k">import</span> <span class="n">SVC</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="k">import</span> <span class="n">DecisionTreeClassifier</span>
+
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">QUERY_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">WORD_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">register_model</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.model</span> <span class="k">import</span> <span class="n">EvaluatedExample</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">StandardModelEvaluation</span>
+
+<span class="n">_NEG_INF</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span>
+
+<span class="c1"># classifier types</span>
+<span class="n">LOG_REG_TYPE</span> <span class="o">=</span> <span class="s2">&quot;logreg&quot;</span>
+<span class="n">DECISION_TREE_TYPE</span> <span class="o">=</span> <span class="s2">&quot;dtree&quot;</span>
+<span class="n">RANDOM_FOREST_TYPE</span> <span class="o">=</span> <span class="s2">&quot;rforest&quot;</span>
+<span class="n">SVM_TYPE</span> <span class="o">=</span> <span class="s2">&quot;svm&quot;</span>
+<span class="n">SUPER_LEARNER_TYPE</span> <span class="o">=</span> <span class="s2">&quot;super-learner&quot;</span>
+<span class="n">BASE_MODEL_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="n">LOG_REG_TYPE</span><span class="p">,</span> <span class="n">DECISION_TREE_TYPE</span><span class="p">,</span> <span class="n">RANDOM_FOREST_TYPE</span><span class="p">,</span> <span class="n">SVM_TYPE</span><span class="p">]</span>
+
+<span class="c1"># default model scoring type</span>
+<span class="n">ACCURACY_SCORING</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TextModel"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel">[docs]</a><span class="k">class</span> <span class="nc">TextModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span> <span class="o">=</span> <span class="n">SKLabelEncoder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_vectorizer</span> <span class="o">=</span> <span class="n">DictVectorizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_selector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_scaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta_feat_vectorizer</span> <span class="o">=</span> <span class="n">DictVectorizer</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_clfs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_loss_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_acc_</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the information needed pickle an instance of this class.</span>
+
+<span class="sd">        By default, pickling removes attributes with names starting with</span>
+<span class="sd">        underscores. This overrides that behavior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;_resources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">rname</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">rname</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">for</span> <span class="n">rname</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">WORD_FREQ_RSC</span><span class="p">,</span>
+                <span class="n">QUERY_FREQ_RSC</span><span class="p">,</span>
+                <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">,</span>
+                <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">attributes</span>
+
+    <span class="k">def</span> <span class="nf">_get_model_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the class of the actual underlying model&quot;&quot;&quot;</span>
+        <span class="n">classifier_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;classifier_type&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="n">LOG_REG_TYPE</span><span class="p">:</span> <span class="n">LogisticRegression</span><span class="p">,</span>
+                <span class="n">DECISION_TREE_TYPE</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">,</span>
+                <span class="n">RANDOM_FOREST_TYPE</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">,</span>
+                <span class="n">SVM_TYPE</span><span class="p">:</span> <span class="n">SVC</span><span class="p">,</span>
+            <span class="p">}[</span><span class="n">classifier_type</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: Classifier type </span><span class="si">{!r}</span><span class="s2"> not recognized&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">classifier_type</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get_cv_scorer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection_settings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the scorer to use based on the selection settings and classifier type,</span>
+<span class="sd">        defaulting to accuracy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">selection_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scoring&quot;</span><span class="p">,</span> <span class="n">ACCURACY_SCORING</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextModel.evaluate"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluates a model against the given examples and labels</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples: A list of examples to predict</span>
+<span class="sd">            labels: A list of expected labels</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ModelEvaluation: an object containing information about the \</span>
+<span class="sd">                evaluation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: also expose feature weights?</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+
+        <span class="c1"># Create a model config object for the current effective config (after param selection)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_effective_config</span><span class="p">()</span>
+
+        <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">EvaluatedExample</span><span class="p">(</span>
+                <span class="n">e</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">config</span><span class="o">.</span><span class="n">label_type</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">model_eval</span> <span class="o">=</span> <span class="n">StandardModelEvaluation</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">evaluations</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model_eval</span></div>
+
+<div class="viewcode-block" id="TextModel.fit"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains this model.</span>
+
+<span class="sd">        This method inspects instance attributes to determine the classifier</span>
+<span class="sd">        object and cross-validation strategy, and then fits the model to the</span>
+<span class="sd">        training examples passed in.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list): A list of examples.</span>
+<span class="sd">            labels (list): A parallel list to examples. The gold labels</span>
+<span class="sd">                for each example.</span>
+<span class="sd">            params (dict, optional): Parameters to use when training. Parameter</span>
+<span class="sd">                selection will be bypassed if this is provided</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (TextModel): Returns self to match classifier scikit-learn \</span>
+<span class="sd">                interfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span>
+        <span class="n">skip_param_selection</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="c1"># Shuffle to prevent order effects</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)))</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[</span><span class="n">examples</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="n">distinct_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">distinct_labels</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="c1"># Extract features and classes</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_matrix</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">skip_param_selection</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># run cross validation to select params</span>
+            <span class="n">best_clf</span><span class="p">,</span> <span class="n">best_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_cv</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="n">best_clf</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="n">best_params</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="TextModel.select_params"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.select_params">[docs]</a>    <span class="k">def</span> <span class="nf">select_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">selection_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_matrix</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">clf</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_cv</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">selection_settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="n">clf</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains a classifier without cross-validation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (numpy.matrix): The feature matrix for a dataset.</span>
+<span class="sd">            labels (numpy.array): The target output values.</span>
+<span class="sd">            params (dict): Parameters of the classifier</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">is_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">model_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_constructor</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_params</span><span class="p">(</span><span class="n">model_class</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextModel.predict"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_matrix</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TextModel.predict_proba"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_matrix</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TextModel.predict_log_proba"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.predict_log_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_log_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_matrix</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict_log_proba</span><span class="p">)</span>
+
+        <span class="c1"># JSON can&#39;t reliably encode infinity, so replace it with large number</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">probas</span> <span class="o">=</span> <span class="n">row</span>
+            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">proba</span> <span class="ow">in</span> <span class="n">probas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">proba</span> <span class="o">==</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">Infinity</span><span class="p">:</span>
+                    <span class="n">probas</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NEG_INF</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+<div class="viewcode-block" id="TextModel.view_extracted_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.view_extracted_features">[docs]</a>    <span class="k">def</span> <span class="nf">view_extracted_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_features</span><span class="p">(</span>
+            <span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_feature_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">label_class</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Retrieves the feature weight from the coefficient matrix. If there are only two</span>
+<span class="sd">         classes, the feature vector is actually collapsed into one so we need some logic to</span>
+<span class="sd">         handle that case.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feat_name (str) : The feature name</span>
+<span class="sd">            label_class (int): The index of the label</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (ndarray float): The ndarray with a single float element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">label_class</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span>
+                <span class="n">label_class</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_vectorizer</span><span class="o">.</span><span class="n">vocabulary_</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span>
+            <span class="p">]</span>
+
+<div class="viewcode-block" id="TextModel.inspect"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.inspect">[docs]</a>    <span class="k">def</span> <span class="nf">inspect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">gold_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class takes an example and returns a 2D list for every feature with feature</span>
+<span class="sd">          name, feature value, feature weight and their product for the predicted label. If gold</span>
+<span class="sd">          label is passed in, we will also include the feature value and weight for the gold</span>
+<span class="sd">          label and returns the log probability of the difference.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example (Query): The query to be predicted</span>
+<span class="sd">            gold_label (str): The gold label for this string</span>
+<span class="sd">            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of lists): A 2D array that includes every feature, their value, weight and \</span>
+<span class="sd">             probability</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Currently inspection is only available for Logistic Regression Model&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gold_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">gold_label</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to decode label `</span><span class="si">%s</span><span class="s2">`&quot;</span><span class="p">,</span> <span class="n">gold_label</span><span class="p">)</span>
+            <span class="n">gold_class</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">pred_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="n">example</span><span class="p">],</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pred_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">pred_label</span><span class="p">])</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_features</span><span class="p">(</span>
+            <span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+        <span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Predicted: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">pred_label</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gold_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Pred_W(</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pred_label</span><span class="p">),</span> <span class="s2">&quot;Pred_P&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Pred_W(</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pred_label</span><span class="p">),</span>
+                <span class="s2">&quot;Pred_P&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Gold_W(</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gold_label</span><span class="p">),</span>
+                <span class="s2">&quot;Gold_P&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Diff&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Gold: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">gold_label</span><span class="p">)</span>
+
+        <span class="n">inspect_table</span> <span class="o">=</span> <span class="p">[</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="c1"># Get all active features sorted alphabetically by name</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">feat_name</span> <span class="o">=</span> <span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">feat_value</span> <span class="o">=</span> <span class="n">feature</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Features we haven&#39;t seen before won&#39;t be in our vectorizer</span>
+            <span class="c1"># e.g., an exact match feature for a query we&#39;ve never seen before</span>
+            <span class="k">if</span> <span class="n">feat_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_vectorizer</span><span class="o">.</span><span class="n">vocabulary_</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_weight</span><span class="p">(</span><span class="n">feat_name</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">)</span>
+            <span class="n">product</span> <span class="o">=</span> <span class="n">feat_value</span> <span class="o">*</span> <span class="n">weight</span>
+
+            <span class="k">if</span> <span class="n">gold_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">feat_name</span><span class="p">,</span>
+                    <span class="nb">round</span><span class="p">(</span><span class="n">feat_value</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="n">weight</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="n">product</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">gold_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_weight</span><span class="p">(</span><span class="n">feat_name</span><span class="p">,</span> <span class="n">gold_class</span><span class="p">)</span>
+                <span class="n">gold_p</span> <span class="o">=</span> <span class="n">feat_value</span> <span class="o">*</span> <span class="n">gold_w</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">gold_p</span> <span class="o">-</span> <span class="n">product</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">feat_name</span><span class="p">,</span>
+                    <span class="nb">round</span><span class="p">(</span><span class="n">feat_value</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="n">weight</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="n">product</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="n">gold_w</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="n">gold_p</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                    <span class="n">diff</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+                <span class="p">]</span>
+
+            <span class="n">inspect_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">inspect_table</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">predictor</span><span class="p">):</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">predictor</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">top_class</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">class_index</span><span class="p">,</span> <span class="n">proba</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="n">raw_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">([</span><span class="n">class_index</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">decoded_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">([</span><span class="n">raw_class</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">probabilities</span><span class="p">[</span><span class="n">decoded_class</span><span class="p">]</span> <span class="o">=</span> <span class="n">proba</span>
+                <span class="k">if</span> <span class="n">proba</span> <span class="o">&gt;</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">top_class</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">):</span>
+                    <span class="n">top_class</span> <span class="o">=</span> <span class="n">decoded_class</span>
+            <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">top_class</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">predictions</span>
+
+<div class="viewcode-block" id="TextModel.get_feature_matrix"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.text_models.html#mindmeld.models.text_models.TextModel.get_feature_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a list of examples into a feature matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list): The examples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * (numpy.matrix): The feature matrix.</span>
+<span class="sd">                * (numpy.array): The group labels for examples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">feats</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">):</span>
+            <span class="n">feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extract_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data</span><span class="p">(</span><span class="n">feats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="n">fit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span></div>
+
+    <span class="k">def</span> <span class="nf">_preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">_convert_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the params from the style given by the config to the style</span>
+<span class="sd">        passed in to the actual classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param_grid (dict): lists of classifier parameter values, keyed by parameter name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): revised param_grid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;class_weight&quot;</span> <span class="ow">in</span> <span class="n">param_grid</span><span class="p">:</span>
+            <span class="n">raw_weights</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_weight&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">is_grid</span> <span class="k">else</span> <span class="p">[</span><span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_weight&quot;</span><span class="p">]]</span>
+            <span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="n">k</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">((</span><span class="n">k</span><span class="p">,))[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cw_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">cw_dict</span> <span class="ow">in</span> <span class="n">raw_weights</span>
+            <span class="p">]</span>
+            <span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">is_grid</span> <span class="k">else</span> <span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;class_bias&quot;</span> <span class="ow">in</span> <span class="n">param_grid</span><span class="p">:</span>
+            <span class="c1"># interpolate between class_bias=0 =&gt; class_weight=None</span>
+            <span class="c1"># and class_bias=1 =&gt; class_weight=&#39;balanced&#39;</span>
+            <span class="n">class_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_encoder</span><span class="o">.</span><span class="n">classes_</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">raw_bias</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_bias&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">is_grid</span> <span class="k">else</span> <span class="p">[</span><span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_bias&quot;</span><span class="p">]]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">class_bias</span> <span class="ow">in</span> <span class="n">raw_bias</span><span class="p">:</span>
+                <span class="c1"># these weights are same as sklearn&#39;s class_weight=&#39;balanced&#39;</span>
+                <span class="n">balanced_w</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_count</span><span class="p">]</span>
+                <span class="n">balanced_tuples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))),</span> <span class="n">balanced_w</span><span class="p">))</span>
+
+                <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">class_bias</span><span class="p">)</span> <span class="o">+</span> <span class="n">class_bias</span> <span class="o">*</span> <span class="n">w</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">balanced_tuples</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">is_grid</span> <span class="k">else</span> <span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">param_grid</span><span class="p">[</span><span class="s2">&quot;class_bias&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">param_grid</span>
+
+    <span class="k">def</span> <span class="nf">_get_feature_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a feature selector instance based on the feature_selector model</span>
+<span class="sd">        parameter</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Object): a feature selector which returns a reduced feature matrix, \</span>
+<span class="sd">                given the full feature matrix, X and the class labels, y</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">selector_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">selector_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;feature_selector&quot;</span><span class="p">)</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;l1&quot;</span><span class="p">:</span> <span class="n">SelectFromModel</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="n">SelectPercentile</span><span class="p">(),</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">selector_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">selector</span>
+
+    <span class="k">def</span> <span class="nf">_get_feature_scaler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a feature value scaler based on the model settings&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scale_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scale_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;feature_scaler&quot;</span><span class="p">)</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;std-dev&quot;</span><span class="p">:</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;max-abs&quot;</span><span class="p">:</span> <span class="n">MaxAbsScaler</span><span class="p">(),</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scale_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scaler</span></div>
+
+
+<span class="n">register_model</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">TextModel</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Step 4: Define the Dialogue State Handlers &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Step 5: Create the Knowledge Base" href="05_create_the_knowledge_base.html" />
+    <link rel="prev" title="Step 3: Define the Domain, Intent, Entity, and Role Hierarchy" href="03_define_the_hierarchy.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step 4: Define the Dialogue State Handlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#specify-the-superset-of-dialogue-states">Specify the Superset of Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-application-container">Create the Application Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implement-the-dialogue-state-handlers">Implement the Dialogue State Handlers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Step 4: Define the Dialogue State Handlers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/04_define_the_dialogue_handlers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="step-4-define-the-dialogue-state-handlers">
+<span id="define-dialogue-state-handlers"></span><h1>Step 4: Define the Dialogue State Handlers<a class="headerlink" href="#step-4-define-the-dialogue-state-handlers" title="Permalink to this headline">¶</a></h1>
+<p>Today’s commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. Conversational interactions consist of steps called <em>dialogue states</em>. For each dialogue state, a particular form of response is appropriate, and, particular logic may be invoked to determine certain parts of the content of the response. A set of dialogue state handlers define the logic and response required for every dialogue state that a given application supports.</p>
+<p>A <em>dialogue manager</em> is at the core of every conversational application. The dialogue manager analyzes each incoming request and assigns it to a dialogue state handler which then executes the required logic and returns a response. The task of mapping incoming requests to appropriate dialogue states is called <em>dialogue state tracking</em>. Applying large-scale machine learning techniques for dialogue state tracking is an active area of research today. For now, however, nearly all commercial applications rely heavily on rule-based and pattern-matching approaches to accomplish dialogue state tracking.</p>
+<p>For most use cases, the procedures described in this section suffice to configure the dialogue manager, which you need not deal with directly.</p>
+<p>MindMeld provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. And because MindMeld is fully extensible, you can supplement MindMeld’s built-in pattern matching capabilities with whatever custom logic you need.</p>
+<div class="section" id="specify-the-superset-of-dialogue-states">
+<h2>Specify the Superset of Dialogue States<a class="headerlink" href="#specify-the-superset-of-dialogue-states" title="Permalink to this headline">¶</a></h2>
+<p>Before you can begin to implement dialogue state handlers, you must first define the dialogue states your application requires. For simple conversational interactions, the set of dialogue states can be straightforward, as illustrated in the flow diagram below.</p>
+<a class="reference internal image-reference" href="../_images/simple_dialogue_states.png"><img alt="../_images/simple_dialogue_states.png" class="align-center" src="../_images/simple_dialogue_states.png" style="width: 700px;" /></a>
+<p>The power of conversational applications lies in providing minimal constraints on what a user can say during an interaction. Users can shortcut directly to the functionality they want. They are also free to change topics or otherwise throw a curve ball at your application at any point in the interaction without warning. All of this means that in practice, dialogue flows can become quite convoluted, as suggested below.</p>
+<a class="reference internal image-reference" href="../_images/complex_dialogue_states.png"><img alt="../_images/complex_dialogue_states.png" class="align-center" src="../_images/complex_dialogue_states.png" style="width: 700px;" /></a>
+<p>For our example, we need to define the dialogue states that the scripted conversational interaction in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a> requires. To capture the functionality we envision, we need four different dialogue states: <code class="docutils literal"><span class="pre">welcome</span></code>, <code class="docutils literal"><span class="pre">send_store_hours</span></code>, <code class="docutils literal"><span class="pre">send_nearest_store</span></code>, and <code class="docutils literal"><span class="pre">say_goodbye</span></code>, as shown in the diagram below.</p>
+<a class="reference internal image-reference" href="../_images/quickstart_dialogue_states.png"><img alt="../_images/quickstart_dialogue_states.png" class="align-center" src="../_images/quickstart_dialogue_states.png" style="width: 700px;" /></a>
+<p>As the diagram illustrates, each dialogue state prescribes a natural language template that defines the form of the system response, and the template is populated on-the-fly using contextual state information gleaned from the conversation. The filled-in template represents an appropriate reply to, or a prompt for more information from, the user. The response may also include additional information to render client-side interactive elements such as image carousels or quick reply buttons.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">By convention, dialogue state names are verbs that describe the action your application should take at particular points in the interaction.</p>
+</div>
+</div>
+<div class="section" id="create-the-application-container">
+<span id="app-container"></span><h2>Create the Application Container<a class="headerlink" href="#create-the-application-container" title="Permalink to this headline">¶</a></h2>
+<p>In MindMeld, every project is also a Python package and therefore must have an <code class="docutils literal"><span class="pre">__init.py__</span></code> file at the root level. This package must contain an <em>application container</em> – a container for all of the logic and functionality for your application. This application container enumerates all of the dialogue states and their associated handlers, and should be defined as <code class="docutils literal"><span class="pre">app</span></code> in the application’s Python package. If you based your application structure on a blueprint, you will see two python files in the root directory: <code class="docutils literal"><span class="pre">__init__.py</span></code> and <code class="docutils literal"><span class="pre">__main__.py</span></code>. If not, you need to create these files with the following minimal implementation.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">__main__.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">app</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Your directory structure should now resemble the following.</p>
+<a class="reference internal image-reference" href="../_images/directory2.png"><img alt="../_images/directory2.png" class="align-center" src="../_images/directory2.png" style="width: 400px;" /></a>
+<p>The above code snippet illustrates the conventions for implementing dialogue state tracking and dialogue state handling logic in MindMeld. The code is written to perform four steps:</p>
+<ol class="arabic simple">
+<li>Import the <code class="docutils literal"><span class="pre">Application</span></code> class from the MindMeld package.</li>
+<li>Define an <code class="docutils literal"><span class="pre">Application</span></code> instance to serve as the parent container for the application.</li>
+<li>Using the <code class="docutils literal"><span class="pre">&#64;app.handle()</span></code> decorator, define a pattern which, when matched, invokes the associated handler function.</li>
+<li>Specify the handler function <code class="xref py py-func docutils literal"><span class="pre">welcome()</span></code> to define the <code class="docutils literal"><span class="pre">welcome</span></code> dialogue state and return the desired response. We decided that <code class="docutils literal"><span class="pre">welcome</span></code> would be one of our dialogue states based on the scripting exercise in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a>. For now, we are responding with a simple “Hello”.</li>
+</ol>
+<p>The patterns and associated handlers which you enumerate using this straighforward application structure constitute the core interaction logic for your application. The structure described above should suffice if you plan to contain all the functionality needed for your app’s interactions within a single file (<code class="docutils literal"><span class="pre">__init__.py</span></code>). It is often useful for large applications to break the application logic into multiple modules. Because the application is a Python package there is flexibility in how you accomplish this. Here is one approach which defines dialogue handlers in a <code class="docutils literal"><span class="pre">handlers</span></code> submodule.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="hll"><span class="c1"># import modules containing dialogue handlers</span>
+</span><span class="hll"><span class="kn">import</span> <span class="nn">my_app.handlers</span>
+</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">handlers.py</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">app</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Avoiding Circular Imports</p>
+<p>While the simple example above will work, it is possible to introduce circular imports with this structure. To avoid circular imports, you can create the application container in a submodule instead of the <code class="docutils literal"><span class="pre">__init__.py</span></code> module, as in the following example.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span> <span class="nn">my_app.root</span> <span class="kn">import</span> <span class="n">app</span>
+</span>
+<span class="c1"># import modules containing dialogue handlers</span>
+<span class="kn">import</span> <span class="nn">my_app.handlers</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">root.py</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper last docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">handlers.py</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span> <span class="nn">.root</span> <span class="kn">import</span> <span class="n">app</span>
+</span>
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="implement-the-dialogue-state-handlers">
+<h2>Implement the Dialogue State Handlers<a class="headerlink" href="#implement-the-dialogue-state-handlers" title="Permalink to this headline">¶</a></h2>
+<p>We have already defined the dialogue handlers that the interaction in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a> requires.</p>
+<p>Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of MindMeld which are explained further in the <a class="reference internal" href="../userguide/dm.html"><span class="doc">User Guide</span></a>.</p>
+<p>First, consider the handler for the <code class="docutils literal"><span class="pre">welcome</span></code> dialogue state.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Hello, {name}. I can help you find store hours &#39;</span>
+                    <span class="s1">&#39;for your local Kwik-E-Mart. How can I help?&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Following convention, we use the dialogue state name, <code class="docutils literal"><span class="pre">welcome</span></code>, as the method name of the dialogue state handler, <code class="xref py py-func docutils literal"><span class="pre">welcome()</span></code>.</p>
+<p>The <code class="docutils literal"><span class="pre">&#64;app.handle()</span></code> decorator specifies the pattern which must be matched to invoke the handler method. Here, the pattern specified is simply <code class="docutils literal"><span class="pre">intent='greet'</span></code>. In other words, if the natural language processor predicts that the intent of the incoming request is <code class="docutils literal"><span class="pre">greet</span></code>, the <code class="xref py py-func docutils literal"><span class="pre">welcome()</span></code> handler is invoked.</p>
+<p>Every dialogue handler uses the <code class="docutils literal"><span class="pre">responder</span></code> object to specify the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like <code class="docutils literal"><span class="pre">'Hello,</span> <span class="pre">{name}.'</span></code> in our example. Templated expressions are populated with real values before the response is returned to the client. MindMeld uses the <code class="docutils literal"><span class="pre">responder</span></code>’s <code class="xref py py-data docutils literal"><span class="pre">slots</span></code> attribute to store the named string values which populate the templates.</p>
+<p>The code snippet also introduces the <code class="xref py py-data docutils literal"><span class="pre">request</span></code> object, which stores all data passed in by the client to the application in the form of a dictionary attribute called <code class="xref py py-data docutils literal"><span class="pre">context</span></code>, as well as application logic state that MindMeld uses to process the conversational interaction. The application logic state can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information.
+The <code class="xref py py-data docutils literal"><span class="pre">request</span></code> object is immutable to the dialogue handler since it’s the source of truth for all conversational information up to that point in the handler, so you cannot write to it. Instead, use the <code class="xref py py-data docutils literal"><span class="pre">responder</span></code> object to store any state information for future turns, resulting from operations in the current handler. See the <a class="reference internal" href="../userguide/dm.html"><span class="doc">User Guide</span></a> for details.</p>
+<p>Let’s follow this same approach to define handlers for the dialogue states <code class="docutils literal"><span class="pre">send_store_hours</span></code>, <code class="docutils literal"><span class="pre">send_nearest_store</span></code>, and <code class="docutils literal"><span class="pre">say_goodbye</span></code>. The resulting <cite>__init__.py</cite> file looks like the following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello, {name}. &#39;</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello. &#39;</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;I can help you find store hours &#39;</span>
+                             <span class="s1">&#39;for your local Kwik-E-Mart. How can I help?&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">active_store</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">store_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;store_name&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">store_entity</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">store_entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># failed to resolve entity</span>
+            <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">store_name</span><span class="o">=</span><span class="n">store_entity</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">active_store</span> <span class="o">=</span> <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c1"># No active store... continue</span>
+            <span class="k">pass</span>
+    <span class="k">elif</span> <span class="s1">&#39;target_store&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">frame</span><span class="p">:</span>
+        <span class="n">active_store</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">active_store</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;The {store_name} Kwik-E-Mart opens at {open_time} and &#39;</span>
+                        <span class="s1">&#39;closes at {close_time}.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Which store would you like to know about?&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send_nearest_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user_location</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;I&#39;m not sure. You haven&#39;t told me where you are!&quot;</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">suggest</span><span class="p">([{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;Share your location&#39;</span><span class="p">}])</span>
+        <span class="k">return</span>
+
+    <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span>
+                                       <span class="n">_sort_location</span><span class="o">=</span><span class="n">user_location</span><span class="p">)</span>
+    <span class="n">target_store</span> <span class="o">=</span> <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your nearest Kwik-E-Mart is located at {store_name}.&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Bye&#39;</span><span class="p">,</span> <span class="s1">&#39;Goodbye&#39;</span><span class="p">,</span> <span class="s1">&#39;Have a nice day.&#39;</span><span class="p">])</span>
+
+<span class="nd">@app.handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sorry, not sure what you meant there. I can help you find &#39;</span>
+                    <span class="s1">&#39;store hours for your local Kwik-E-Mart.&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This code snippet introduces the <cite>QuestionAnswerer</cite> class. In MindMeld, <cite>QuestionAnswerer</cite> is the module that creates and searches across a knowledge base of information relevant to your application. In this example, the <code class="docutils literal"><span class="pre">send_nearest_store</span></code> dialogue state relies on the <cite>QuestionAnswerer</cite> component to retrieve the closest retail store location from the knowledge base. The <cite>QuestionAnswerer</cite> is discussed further in the next section.</p>
+<p>The snippet also demonstrates the use of a default handler. The <code class="docutils literal"><span class="pre">&#64;app.handle()</span></code> decorator serves as a ‘catchall’ pattern that returns a default response if no other specified patterns are matched.</p>
+<p>Now that our initial set of dialogue handlers are in place, we can begin building a knowledge base and training machine learning models to understand natural language requests.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="05_create_the_knowledge_base.html" class="btn btn-neutral float-right" title="Step 5: Create the Knowledge Base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="03_define_the_hierarchy.html" class="btn btn-neutral float-left" title="Step 3: Define the Domain, Intent, Entity, and Role Hierarchy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

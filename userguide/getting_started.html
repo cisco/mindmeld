@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Getting Started &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Platform Architecture" href="architecture.html" />
+    <link rel="prev" title="HR Assistant" href="../blueprints/hr_assistant.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-mindmeld">Install MindMeld</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-with-docker">Install with Docker</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pull-and-run-docker-container">1. Pull and run Docker container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#install-prerequisites">2. Install prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-up-a-virtual-environment">3. Set up a virtual environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#install-the-mindmeld-package">4. Install the MindMeld package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#install-with-virtualenv">Install with virtualenv</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">1. Install prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">2. Set up a virtual environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">3. Install the MindMeld package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#start-the-numerical-parser">4. Start the numerical parser</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#begin-new-project">Begin New Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-with-a-blueprint">Start with a blueprint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-the-command-line">Using the command-line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-the-python-shell">Using the Python shell</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#start-with-a-new-project">Start with a new project</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Using the command-line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Using the Python shell</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrade-mindmeld">Upgrade Mindmeld</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interfaces">Command-Line Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mindmeld">mindmeld</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-m-app-name">python -m &lt;app_name&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-logging">Configure Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mm-subprocess-count">MM_SUBPROCESS_COUNT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mm-sys-entity-request-timeout">MM_SYS_ENTITY_REQUEST_TIMEOUT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/getting_started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>These instructions explain how to install MindMeld on a Unix-based system and set up your first MindMeld project. Users of other operating systems like Windows can use Docker to get started.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">MindMeld requires Python 3.5, 3.6 or 3.7.</p>
+</div>
+<div class="section" id="install-mindmeld">
+<h2>Install MindMeld<a class="headerlink" href="#install-mindmeld" title="Permalink to this headline">¶</a></h2>
+<p>You must choose the mechanism by which you install MindMeld. The supported choices are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#getting-started-docker-setup"><span class="std std-ref">Docker</span></a></li>
+<li><a class="reference internal" href="#getting-started-virtualenv-setup"><span class="std std-ref">virtualenv</span></a></li>
+</ul>
+</div></blockquote>
+<p>If you’re going to be using MindMeld often, <strong>we recommend you do the virtualenv installation</strong> and setup all dependencies locally. That will provide the optimal performance and experience. But if you want to get a taste of MindMeld with minimal effort, you can get started quickly using Docker.</p>
+<div class="section" id="install-with-docker">
+<span id="getting-started-docker-setup"></span><h3>Install with Docker<a class="headerlink" href="#install-with-docker" title="Permalink to this headline">¶</a></h3>
+<p>In the Docker setup, we use Docker only for running MindMeld dependencies, namely, Elasticsearch and the Numerical Parser service. The developer will then use their local machine to run the MindMeld project.</p>
+<div class="section" id="pull-and-run-docker-container">
+<h4>1. Pull and run Docker container<a class="headerlink" href="#pull-and-run-docker-container" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li>First, <a class="reference external" href="https://www.docker.com/community-edition#/download">install Docker</a>, and run it.</li>
+<li>Then, open a terminal (shell) and run these commands:</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>docker pull mindmeldworkbench/dep:latest
+docker run -p <span class="m">0</span>.0.0.0:9200:9200 -p <span class="m">0</span>.0.0.0:7151:7151 -p <span class="m">0</span>.0.0.0:9300:9300 mindmeldworkbench/dep -ti -d
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-prerequisites">
+<h4>2. Install prerequisites<a class="headerlink" href="#install-prerequisites" title="Permalink to this headline">¶</a></h4>
+<p>Next, we install <code class="docutils literal"><span class="pre">python</span></code>, <code class="docutils literal"><span class="pre">pip</span></code> and <code class="docutils literal"><span class="pre">virtualenv</span></code> on the local machine using a script we made. These are pre-requisite libraries needed for most python projects. Currently, the script works for Mac and Ubuntu 16/18 operating systems:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_lite_init.sh<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>If you encounter any issues, see <a class="reference internal" href="#getting-started-troubleshooting"><span class="std std-ref">Troubleshooting</span></a>.</p>
+</div>
+<div class="section" id="set-up-a-virtual-environment">
+<h4>3. Set up a virtual environment<a class="headerlink" href="#set-up-a-virtual-environment" title="Permalink to this headline">¶</a></h4>
+<p>To prepare an isolated environment for MindMeld installation using <code class="docutils literal"><span class="pre">virtualenv</span></code>, follow the following steps.</p>
+<ul class="simple">
+<li>Create a folder for containing all your MindMeld projects, and navigate to it:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mkdir my_mm_workspace
+<span class="nb">cd</span> my_mm_workspace
+</pre></div>
+</div>
+<ul class="simple">
+<li>Setup a virtual environment by running one of the following commands:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>virtualenv -p python3 .
+</pre></div>
+</div>
+<ul class="simple">
+<li>Activate the virtual environment:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">source</span> bin/activate
+</pre></div>
+</div>
+<p>Later, when you’re done working with MindMeld, you can deactivate the virtual environment with the <code class="docutils literal"><span class="pre">deactivate</span></code> command.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>deactivate
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-the-mindmeld-package">
+<h4>4. Install the MindMeld package<a class="headerlink" href="#install-the-mindmeld-package" title="Permalink to this headline">¶</a></h4>
+<p>Now that your environment is set up, you can install MindMeld just as you would any other Python package. This may take a few minutes.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld
+</pre></div>
+</div>
+<p>If you see errors here, make sure that your <code class="docutils literal"><span class="pre">pip</span></code> package is up to date and your connection is active. If the error is a dependency error (tensorflow, scikitlearn, etc), you can try to install/reinstall the specific dependency before installing MindMeld.</p>
+<p>To verify your setup is good, run this command. If there is no error, the installation was successful:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mindmeld
+</pre></div>
+</div>
+<p>A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>bot<span class="o">]</span>
+</pre></div>
+</div>
+<p>If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>tensorflow<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="install-with-virtualenv">
+<span id="getting-started-virtualenv-setup"></span><h3>Install with virtualenv<a class="headerlink" href="#install-with-virtualenv" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id1">
+<h4>1. Install prerequisites<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the <a class="reference external" href="https://devcenter.mindmeld.com/scripts/mindmeld_init.sh">mindmeld_init.sh script</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The script installs the following components after a confirmation prompt: <code class="docutils literal"><span class="pre">docker</span></code>, <code class="docutils literal"><span class="pre">python3.6</span></code>, <code class="docutils literal"><span class="pre">python-pip</span></code>, <code class="docutils literal"><span class="pre">virtualenv</span></code> and Elasticsearch 6.7.</p>
+</div>
+<p>If you are using a Ubuntu 16/18 machine, when you’re ready to go, open a terminal (shell) and run this command:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_init.sh<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>If you encounter any issues, see <a class="reference internal" href="#getting-started-troubleshooting"><span class="std std-ref">Troubleshooting</span></a>.</p>
+<p>For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 6.7 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:</p>
+<p>macOS:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="87%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Component</th>
+<th class="head">Command</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>brew</td>
+<td><code class="docutils literal"><span class="pre">/usr/bin/ruby</span> <span class="pre">-e</span> <span class="pre">&quot;$(curl</span> <span class="pre">-fsSL</span> <span class="pre">https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span></code></td>
+</tr>
+<tr class="row-odd"><td>python3</td>
+<td><code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">python3</span></code></td>
+</tr>
+<tr class="row-even"><td>pip</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">-H</span> <span class="pre">easy_install</span> <span class="pre">pip</span></code></td>
+</tr>
+<tr class="row-odd"><td>virtualenv</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">-H</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">virtualenv</span></code></td>
+</tr>
+<tr class="row-even"><td>Elasticsearch</td>
+<td>See instructions below to download Elasticsearch 6.7</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.7.0.tar.gz -o elasticsearch-6.7.0.tar.gz
+tar -zxvf elasticsearch-6.7.0.tar.gz
+<span class="nb">cd</span> elasticsearch-6.7.0/bin
+./elasticsearch-6.7.0/bin/elasticsearch
+</pre></div>
+</div>
+<p>Ubuntu:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="93%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Component</th>
+<th class="head">Command</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>python3</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python3.6</span></code></td>
+</tr>
+<tr class="row-odd"><td>pip</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python-pip</span></code></td>
+</tr>
+<tr class="row-even"><td>virtualenv</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">virtualenv</span></code></td>
+</tr>
+<tr class="row-odd"><td>Elasticsearch</td>
+<td><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">docker.elastic.co/elasticsearch/elasticsearch:6.7.0</span> <span class="pre">&amp;&amp;</span> <span class="pre">sudo</span> <span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">-p</span> <span class="pre">9200:9200</span> <span class="pre">-p</span> <span class="pre">9300:9300</span> <span class="pre">-e</span> <span class="pre">&quot;discovery.type=single-node&quot;</span> <span class="pre">docker.elastic.co/elasticsearch/elasticsearch:6.7.0</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We use docker for Elasticsearch in Ubuntu since provisioning it for the Ubuntu OS is convoluted. See here for more details if you want to set up
+Elasticsearch from scratch on <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elastic-stack-on-ubuntu-18-04">Linux</a>.:</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h4>2. Set up a virtual environment<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>To prepare an isolated environment for MindMeld installation using <code class="docutils literal"><span class="pre">virtualenv</span></code>, follow the following steps.</p>
+<ul class="simple">
+<li>Create a folder for containing all your MindMeld projects, and navigate to it:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mkdir my_mm_workspace
+<span class="nb">cd</span> my_mm_workspace
+</pre></div>
+</div>
+<ul class="simple">
+<li>Setup a virtual environment by running one of the following commands:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>virtualenv -p python3 .
+</pre></div>
+</div>
+<ul class="simple">
+<li>Activate the virtual environment:</li>
+</ul>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">source</span> bin/activate
+</pre></div>
+</div>
+<p>Later, when you’re done working with MindMeld, you can deactivate the virtual environment with the <code class="docutils literal"><span class="pre">deactivate</span></code> command.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>deactivate
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h4>3. Install the MindMeld package<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>Now that your environment is set up, you can install MindMeld just as you would any other Python package. This may take a few minutes.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld
+</pre></div>
+</div>
+<p>If you see errors here, make sure that your <code class="docutils literal"><span class="pre">pip</span></code> package is up to date and your connection is active. If the error is a dependency error (tensorflow, scikitlearn, etc), you can try to install/reinstall the specific dependency before installing MindMeld.</p>
+<p>To verify your setup is good, run this command. If there is no error, the installation was successful:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mindmeld
+</pre></div>
+</div>
+<p>A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>bot<span class="o">]</span>
+</pre></div>
+</div>
+<p>If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>tensorflow<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-the-numerical-parser">
+<span id="duckling"></span><h4>4. Start the numerical parser<a class="headerlink" href="#start-the-numerical-parser" title="Permalink to this headline">¶</a></h4>
+<p>MindMeld uses a Haskell-based numerical parser for detecting certain numeric expressions like times, dates, and quantities in user queries. The numerical parser is locally started on default port 7151 with this command:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mindmeld num-parse --start
+</pre></div>
+</div>
+<p>You can start the numerical parser on a different port using the <code class="docutils literal"><span class="pre">-p</span></code> command-line flag, for example, <code class="docutils literal"><span class="pre">mindmeld</span> <span class="pre">num-parse</span> <span class="pre">--start</span> <span class="pre">-p</span> <span class="pre">9000</span></code> starts the service on port 9000.
+If you encounter an error like <code class="docutils literal"><span class="pre">OS</span> <span class="pre">is</span> <span class="pre">incompatible</span> <span class="pre">with</span> <span class="pre">duckling</span> <span class="pre">executable</span></code>, it means that your operating system is
+not compatible with the pre-compiled numerical parser binary distributed with MindMeld. You instead need to run the
+numerical parser using Docker as shown below.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>docker pull mindmeldworkbench/duckling:master <span class="o">&amp;&amp;</span> docker run -p <span class="m">0</span>.0.0.0:7151:7151 mindmeldworkbench/duckling:master -ti -d
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The numerical parser is a critical component that MindMeld relies on. <strong>Do not skip this step</strong>
+.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="begin-new-project">
+<span id="getting-started-begin-new-project"></span><h2>Begin New Project<a class="headerlink" href="#begin-new-project" title="Permalink to this headline">¶</a></h2>
+<p>With the setup out of the way, you are now ready to get your feet wet. You can proceed in one of two ways:</p>
+<ol class="arabic simple">
+<li>Try out a <a class="reference internal" href="#getting-started-blueprint"><span class="std std-ref">blueprint application</span></a>. This is the <strong>recommended approach</strong> for beginners to familiarize themselves with MindMeld. This is also a good starting point if your use case matches one of the <a class="reference internal" href="../blueprints/overview.html"><span class="doc">blueprint scenarios</span></a>.</li>
+<li>Start a <a class="reference internal" href="#getting-started-template"><span class="std std-ref">brand new project</span></a>. This is the approach to take if your specific use case isn’t covered by an existing blueprint, or if you prefer to build out your app from scratch.</li>
+</ol>
+<p>MindMeld is designed so you can keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in your command-line shell using the <code class="docutils literal"><span class="pre">mindmeld</span></code> command. But to really take advantage of the power of MindMeld, the Python shell is where all the action is at. The examples in this section are accompanied by code samples from both shells.</p>
+<div class="section" id="start-with-a-blueprint">
+<span id="getting-started-blueprint"></span><h3>Start with a blueprint<a class="headerlink" href="#start-with-a-blueprint" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Blueprints are simple example apps that are intentionally limited in scope.&nbsp;They provide you with a baseline to bootstrap upon for common conversational use cases. To improve upon them and convert them into production-quality apps, follow the exercises in the <a class="reference internal" href="../blueprints/overview.html"><span class="doc">individual blueprint sections</span></a>.</p>
+</div>
+<div class="section" id="using-the-command-line">
+<h4>Using the command-line<a class="headerlink" href="#using-the-command-line" title="Permalink to this headline">¶</a></h4>
+<p>To try out the <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">Food Ordering blueprint</span></a>, run these commands on the command line:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mindmeld blueprint food_ordering
+python -m food_ordering build   <span class="c1"># this will take a few minutes</span>
+python -m food_ordering converse
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading intent classifier: domain=&#39;ordering&#39;</span>
+<span class="go">...</span>
+<span class="go">You:</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">converse</span></code> command loads the machine learning models and starts an interactive session with the “You:” prompt.
+Here you can enter your own input and get an immediate response back. Try “hi”, for example, and see what you get.</p>
+</div>
+<div class="section" id="using-the-python-shell">
+<h4>Using the Python shell<a class="headerlink" href="#using-the-python-shell" title="Permalink to this headline">¶</a></h4>
+<p>To try out the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant blueprint</span></a>, run these commands in your Python shell:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">blueprint</span> <span class="o">=</span> <span class="s1">&#39;home_assistant&#39;</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">blueprint</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">blueprint</span><span class="p">)</span>
+<span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">blueprint</span><span class="p">)</span>
+<span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hello!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>MindMeld provides several different blueprint applications to support many common use cases for
+conversational applications. See <a class="reference internal" href="../blueprints/overview.html"><span class="doc">MindMeld Blueprints</span></a> for more usage examples.</p>
+</div>
+</div>
+<div class="section" id="start-with-a-new-project">
+<span id="getting-started-template"></span><h3>Start with a new project<a class="headerlink" href="#start-with-a-new-project" title="Permalink to this headline">¶</a></h3>
+<p>There is a special <code class="docutils literal"><span class="pre">template</span></code> blueprint that sets up the scaffolding for a blank project. The example below creates a new empty project in a local folder named <code class="docutils literal"><span class="pre">my_app</span></code>.</p>
+<div class="section" id="id4">
+<h4>Using the command-line<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>mindmeld blueprint template myapp
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h4>Using the Python shell<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="s1">&#39;template&#39;</span><span class="p">,</span> <span class="s1">&#39;my_app&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="../quickstart/00_overview.html"><span class="doc">Step-By-Step guide</span></a> walks through the methodology for building conversational apps using MindMeld.</p>
+</div>
+</div>
+</div>
+<div class="section" id="upgrade-mindmeld">
+<h2>Upgrade Mindmeld<a class="headerlink" href="#upgrade-mindmeld" title="Permalink to this headline">¶</a></h2>
+<p>To upgrade to the latest version of MindMeld, run <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld</span> <span class="pre">--upgrade</span></code></p>
+<p>Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>As of version 3.3, we have moved the MindMeld package from the MindMeld-hosted PyPI to Cisco’s PyPI server. If you are using the old <code class="docutils literal"><span class="pre">~/.pip/pip.conf</span></code>, please re-run <a class="reference internal" href="#getting-started-virtualenv-setup"><span class="std std-ref">Step 1</span></a> to update your installation path.</li>
+<li>Before re-downloading a <a class="reference internal" href="../blueprints/overview.html"><span class="doc">blueprint</span></a> using an upgraded version of MindMeld, please remove the blueprint cache by running this command: <code class="docutils literal"><span class="pre">rm</span> <span class="pre">-r</span> <span class="pre">~/.mindmeld/blueprints/*</span></code></li>
+</ul>
+</div>
+</div>
+<div class="section" id="command-line-interfaces">
+<span id="cli"></span><h2>Command-Line Interfaces<a class="headerlink" href="#command-line-interfaces" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld has two command-line interfaces for some of the common workflow tasks you’ll be doing often:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">mindmeld</span></code></li>
+<li><code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">&lt;app_name&gt;</span></code></li>
+</ol>
+<p>Built-in help is available with the standard <a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-h" title="(in Python v3.8)"><code class="xref std std-option docutils literal"><span class="pre">-h</span></code></a> flag.</p>
+<div class="section" id="mindmeld">
+<h3>mindmeld<a class="headerlink" href="#mindmeld" title="Permalink to this headline">¶</a></h3>
+<p>The command-line interface (CLI) for MindMeld can be accessed with the <code class="docutils literal"><span class="pre">mindmeld</span></code> command.
+This is most suitable for use in an app-agnostic context.</p>
+<p>The commands available are:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">blueprint</span></code> : Downloads all the training data for an existing <a class="reference internal" href="../blueprints/overview.html"><span class="doc">blueprint</span></a> and sets it up for use in your own project.</li>
+<li><code class="docutils literal"><span class="pre">num-parse</span></code> : Starts or stops the numerical parser service.</li>
+</ol>
+</div>
+<div class="section" id="python-m-app-name">
+<h3>python -m &lt;app_name&gt;<a class="headerlink" href="#python-m-app-name" title="Permalink to this headline">¶</a></h3>
+<p>When you’re in the context of a specific app, <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">&lt;app_name&gt;</span></code> is more appropriate to use.</p>
+<p>The commands available are:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">build</span></code> : Builds the artifacts and machine learning models and persists them.</li>
+<li><code class="docutils literal"><span class="pre">clean</span></code> : Deletes the generated artifacts and takes the system back to a pristine state.</li>
+<li><code class="docutils literal"><span class="pre">converse</span></code> : Begins an interactive conversational session with the user at the command line.</li>
+<li><code class="docutils literal"><span class="pre">evaluate</span></code> : Evaluates each of the classifiers in the NLP pipeline against the test set.</li>
+<li><code class="docutils literal"><span class="pre">load-kb</span></code> : Populates the knowledge base.</li>
+<li><code class="docutils literal"><span class="pre">predict</span></code> : Runs model predictions on queries from a given file.</li>
+<li><code class="docutils literal"><span class="pre">run</span></code> : Starts the MindMeld service as a REST API.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="configure-logging">
+<h2>Configure Logging<a class="headerlink" href="#configure-logging" title="Permalink to this headline">¶</a></h2>
+<p>MindMeld adheres to the standard <a class="reference external" href="https://docs.python.org/3/howto/logging.html">Python logging mechanism</a>.
+The default logging level is <code class="docutils literal"><span class="pre">WARNING</span></code>, which can be overridden with a config file or from code.
+The <code class="docutils literal"><span class="pre">INFO</span></code> logging level can be useful to see what’s going on:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;mindmeld&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There is a handy <code class="docutils literal"><span class="pre">configure_logs()</span></code> function available that wraps this and accepts 2 parameters:</p>
+<ol class="arabic simple">
+<li><code class="xref py py-data docutils literal"><span class="pre">format</span></code>: The <a class="reference external" href="https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages">logging format</a>.</li>
+<li><code class="xref py py-data docutils literal"><span class="pre">level</span></code>: The <a class="reference external" href="https://docs.python.org/3/howto/logging.html#logging-levels">logging level</a>.</li>
+</ol>
+<p>Here’s an example usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="troubleshooting">
+<span id="getting-started-troubleshooting"></span><h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="42%" />
+<col width="44%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Context</th>
+<th class="head">Error</th>
+<th class="head">Resolution</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>any</td>
+<td>Code issue</td>
+<td>Upgrade to latest build:
+<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld</span> <span class="pre">-U</span></code></td>
+</tr>
+<tr class="row-odd"><td>Elasticsearch</td>
+<td><code class="docutils literal"><span class="pre">KnowledgeBaseConnectionError</span></code></td>
+<td>Run <code class="docutils literal"><span class="pre">curl</span> <span class="pre">localhost:9200</span></code> to
+verify that Elasticsearch is
+running.
+If you’re using Docker, you can
+increase memory to 4GB from
+<em>Preferences | Advanced</em>.</td>
+</tr>
+<tr class="row-even"><td>Numerical
+Parser</td>
+<td><code class="docutils literal"><span class="pre">OS</span> <span class="pre">is</span> <span class="pre">incompatible</span> <span class="pre">with</span> <span class="pre">duckling</span> <span class="pre">binary</span></code></td>
+<td>Run the numerical parser via
+Docker.
+<a class="reference internal" href="#duckling"><span class="std std-ref">More details</span></a>.</td>
+</tr>
+<tr class="row-odd"><td>Blueprints</td>
+<td><code class="docutils literal"><span class="pre">ValueError:</span> <span class="pre">Unknown</span>
+<span class="pre">error</span> <span class="pre">fetching</span> <span class="pre">archive</span></code> when running
+<code class="docutils literal"><span class="pre">mm.blueprint(bp_name)</span></code></td>
+<td>Run the mindmeld_init.sh found
+<a class="reference internal" href="#getting-started-virtualenv-setup"><span class="std std-ref">here</span></a></td>
+</tr>
+<tr class="row-even"><td>Blueprints</td>
+<td><code class="docutils literal"><span class="pre">JSONDecodeError:</span> <span class="pre">Expecting</span> <span class="pre">value:</span> <span class="pre">line</span> <span class="pre">1</span>
+<span class="pre">column</span> <span class="pre">1</span> <span class="pre">(char</span> <span class="pre">0)</span></code></td>
+<td>Remove the cached version of the app:
+<code class="docutils literal"><span class="pre">rm</span> <span class="pre">~/.mindmeld/blueprints/bp_name</span></code> and
+re-download the blueprint.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mm-subprocess-count">
+<span id="parallel-processing"></span><h3>MM_SUBPROCESS_COUNT<a class="headerlink" href="#mm-subprocess-count" title="Permalink to this headline">¶</a></h3>
+<p>MindMeld supports parallel processing via process forking when the input is a list of queries, as is the case when <a class="reference internal" href="voice.html#nbest-lists"><span class="std std-ref">leveraging n-best ASR transcripts for entity resolution</span></a>. Set this variable to an integer value to adjust the number of subprocesses. The default is <code class="docutils literal"><span class="pre">4</span></code>. Setting it to <code class="docutils literal"><span class="pre">0</span></code> will turn off the feature.</p>
+</div>
+<div class="section" id="mm-sys-entity-request-timeout">
+<h3>MM_SYS_ENTITY_REQUEST_TIMEOUT<a class="headerlink" href="#mm-sys-entity-request-timeout" title="Permalink to this headline">¶</a></h3>
+<p>This variable sets the request timeout value for the <a class="reference internal" href="entity_recognizer.html#configuring-system-entities"><span class="std std-ref">system entity recognition service</span></a> . The default float value is <code class="docutils literal"><span class="pre">1.0</span> <span class="pre">seconds</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="architecture.html" class="btn btn-neutral float-right" title="Platform Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../blueprints/hr_assistant.html" class="btn btn-neutral float-left" title="HR Assistant" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

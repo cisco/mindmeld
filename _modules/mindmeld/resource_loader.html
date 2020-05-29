@@ -1,0 +1,1077 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.resource_loader &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.resource_loader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.resource_loader</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the processor resource loader.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">markup</span><span class="p">,</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="k">import</span> <span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">Entity</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">MindMeldError</span>
+<span class="kn">from</span> <span class="nn">.gazetteer</span> <span class="k">import</span> <span class="n">Gazetteer</span>
+<span class="kn">from</span> <span class="nn">.models.helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">ENABLE_STEMMING</span><span class="p">,</span>
+    <span class="n">GAZETTEER_RSC</span><span class="p">,</span>
+    <span class="n">QUERY_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">SYS_TYPES_RSC</span><span class="p">,</span>
+    <span class="n">WORD_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">,</span>
+    <span class="n">mask_numerics</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.path</span> <span class="k">import</span> <span class="n">MODEL_CACHE_PATH</span>
+<span class="kn">from</span> <span class="nn">.query_cache</span> <span class="k">import</span> <span class="n">QueryCache</span>
+<span class="kn">from</span> <span class="nn">.query_factory</span> <span class="k">import</span> <span class="n">QueryFactory</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">ENABLE_STEMMING_ARGS</span> <span class="o">=</span> <span class="s2">&quot;enable_stemming&quot;</span>
+
+
+<div class="viewcode-block" id="ResourceLoader"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader">[docs]</a><span class="k">class</span> <span class="nc">ResourceLoader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;ResourceLoader objects are responsible for loading resources necessary for nlp components</span>
+<span class="sd">    (classifiers, entity recognizer, parsers, etc).</span>
+
+<span class="sd">    Note: we need to keep resource helpers as instance methods, as ``load_feature_resource``</span>
+<span class="sd">    assumes all helpers to be instance methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">query_factory</span><span class="p">,</span> <span class="n">query_cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_path</span> <span class="o">=</span> <span class="n">app_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span> <span class="o">=</span> <span class="n">query_factory</span>
+
+        <span class="c1"># Example Layout: {</span>
+        <span class="c1">#   &#39;entity_type&#39;: {</span>
+        <span class="c1">#     &#39;entity_data&#39;: {  # for gazetteer.txt</span>
+        <span class="c1">#        &#39;loaded&#39;: &#39;&#39;,  # the time the file was last loaded</span>
+        <span class="c1">#        &#39;modified&#39;: &#39;&#39;,  # the time the file was last modified</span>
+        <span class="c1">#        &#39;data&#39;: contents of file</span>
+        <span class="c1">#     },</span>
+        <span class="c1">#     &#39;mapping&#39;: {  # for mapping.json</span>
+        <span class="c1">#        &#39;loaded&#39;: &#39;&#39;,  # the time the file was last loaded</span>
+        <span class="c1">#        &#39;modified&#39;: &#39;&#39;,  # the time the file was last modified</span>
+        <span class="c1">#     },</span>
+        <span class="c1">#     &#39;gazetteer&#39;: {  # for pickled gazetteer</span>
+        <span class="c1">#        &#39;loaded&#39;: &#39;&#39;,  # the time the file was last loaded</span>
+        <span class="c1">#        &#39;modified&#39;: &#39;&#39;,  # the time the file was last modified</span>
+        <span class="c1">#     }</span>
+        <span class="c1">#   }</span>
+        <span class="c1"># }</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Example layout: {</span>
+        <span class="c1">#   &#39;domain&#39;: {</span>
+        <span class="c1">#     &#39;intent&#39;: {</span>
+        <span class="c1">#       &#39;filename&#39;: {</span>
+        <span class="c1">#         &#39;modified&#39;: &#39;&#39;,  # the time the file was last modified</span>
+        <span class="c1">#         &#39;loaded&#39;: &#39;&#39;,  # the time the file was last loaded</span>
+        <span class="c1">#         &#39;queries&#39;: [],  # the queries loaded from the file</span>
+        <span class="c1">#         &#39;loaded_raw&#39;: &#39;&#39;,  # the time the raw queries were last loaded</span>
+        <span class="c1">#         &#39;raw_queries&#39;: []  # the time the raw queries were last loaded</span>
+        <span class="c1">#       }</span>
+        <span class="c1">#     }</span>
+        <span class="c1">#   }</span>
+        <span class="c1"># }</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span> <span class="o">=</span> <span class="n">Hasher</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_cache</span> <span class="o">=</span> <span class="n">query_cache</span> <span class="ow">or</span> <span class="n">QueryCache</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hash_to_model_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;dict: A dictionary that maps hashes to the file path of the classifier.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_models</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span>
+
+<div class="viewcode-block" id="ResourceLoader.get_gazetteers"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_gazetteers">[docs]</a>    <span class="k">def</span> <span class="nf">get_gazetteers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets gazetteers for all entities.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Gazetteer data keyed by entity type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: get role gazetteers</span>
+        <span class="k">del</span> <span class="n">kwargs</span>
+        <span class="n">entity_types</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_types</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">entity_type</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gazetteer</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="n">force_reload</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">entity_types</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.get_gazetteer"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_gazetteer">[docs]</a>    <span class="k">def</span> <span class="nf">get_gazetteer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets a gazetteers by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gaz_name (str): The name of the entity the gazetteer corresponds to</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Gazetteer data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_entity_file_dates</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span>
+        <span class="c1"># TODO: get role gazetteers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gaz_needs_build</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">force_reload</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_gazetteer</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="n">force_reload</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_file_needs_load</span><span class="p">(</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_gazetteer</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.get_tokenizer"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_tokenizer">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the tokenizer from the query_factory attribute</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tokenizer (Tokenizer): The resource loaders tokenizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">tokenizer</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.get_gazetteers_hash"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_gazetteers_hash">[docs]</a>    <span class="k">def</span> <span class="nf">get_gazetteers_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a single hash of all the gazetteer ordered by alphabetical entity type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Hash of a list of gazetteer hashes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">entity_types</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_types</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash_list</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_gazetteer_hash</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">entity_types</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.get_gazetteer_hash"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_gazetteer_hash">[docs]</a>    <span class="k">def</span> <span class="nf">get_gazetteer_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the hash of a gazetteer by entity name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gaz_name (str): The name of the entity the gazetteer corresponds to</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Hash of a gazetteer specified by name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_entity_file_dates</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">entity_data_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_gaz_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">entity_data_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash_file</span><span class="p">(</span><span class="n">entity_data_path</span><span class="p">)</span>
+
+        <span class="n">mapping_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_map_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">mapping_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash_file</span><span class="p">(</span><span class="n">mapping_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash_list</span><span class="p">([</span><span class="n">entity_data_hash</span><span class="p">,</span> <span class="n">mapping_hash</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.build_gazetteer"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.build_gazetteer">[docs]</a>    <span class="k">def</span> <span class="nf">build_gazetteer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">,</span> <span class="n">exclude_ngrams</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Builds the specified gazetteer using the entity data and mapping files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gaz_name (str): The name of the entity the gazetteer corresponds to</span>
+<span class="sd">            exclude_ngrams (bool, optional): Whether partial matches of</span>
+<span class="sd">                 entities should be included in the gazetteer</span>
+<span class="sd">            force_reload (bool, optional): Whether file should be forcefully</span>
+<span class="sd">                 reloaded from disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">popularity_cutoff</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Building gazetteer &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+
+        <span class="c1"># TODO: support role gazetteers</span>
+        <span class="n">gaz</span> <span class="o">=</span> <span class="n">Gazetteer</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">,</span> <span class="n">exclude_ngrams</span><span class="p">)</span>
+
+        <span class="n">entity_data_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_gaz_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">gaz</span><span class="o">.</span><span class="n">update_with_entity_data_file</span><span class="p">(</span>
+            <span class="n">entity_data_path</span><span class="p">,</span> <span class="n">popularity_cutoff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">normalize</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;entity_data&quot;</span><span class="p">][</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entity_map</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="n">force_reload</span><span class="p">)</span>
+        <span class="n">gaz</span><span class="o">.</span><span class="n">update_with_entity_map</span><span class="p">(</span>
+            <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">normalize</span>
+        <span class="p">)</span>
+
+        <span class="n">gaz_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_gazetteer_data_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">gaz</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">gaz_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gaz</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.load_gazetteer"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.load_gazetteer">[docs]</a>    <span class="k">def</span> <span class="nf">load_gazetteer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a gazetteer specified by the entity name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gaz_name (str): The name of the entity the gazetteer corresponds to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gaz</span> <span class="o">=</span> <span class="n">Gazetteer</span><span class="p">(</span><span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">gaz_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_gazetteer_data_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">)</span>
+        <span class="n">gaz</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">gaz_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gaz</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.get_entity_map"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_entity_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a mapping file for a given entity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_type (str): The name of the entity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_entity_file_dates</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_file_needs_load</span><span class="p">(</span><span class="s2">&quot;mapping&quot;</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span> <span class="ow">or</span> <span class="n">force_reload</span><span class="p">:</span>
+            <span class="c1"># file is out of date, load it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_entity_map</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.load_entity_map"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.load_entity_map">[docs]</a>    <span class="k">def</span> <span class="nf">load_entity_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads an entity mapping file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_type (str): The name of the entity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_map_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading entity map from file &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Entity map file not found at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+            <span class="n">json_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                    <span class="n">json_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MindMeldError</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not load entity map (Invalid JSON): </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_cached_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">MODEL_CACHE_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">file_names</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">cache_path</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">file_names</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.hash&quot;</span><span class="p">)]:</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="n">hash_val</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">classifier_file_path</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.hash&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">classifier_file_path</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not find the serialized model&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hash_to_model_path</span><span class="p">[</span><span class="n">hash_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier_file_path</span>
+
+    <span class="k">def</span> <span class="nf">_gaz_needs_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaz_name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">build_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># gazetteer hasn&#39;t been built</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">data_modified</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;entity_data&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+        <span class="n">mapping_modified</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">gaz_name</span><span class="p">][</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+
+        <span class="c1"># If entity data or mapping modified after gaz build -&gt; stale</span>
+        <span class="k">return</span> <span class="n">build_time</span> <span class="o">&lt;</span> <span class="n">data_modified</span> <span class="ow">or</span> <span class="n">build_time</span> <span class="o">&lt;</span> <span class="n">mapping_modified</span>
+
+    <span class="k">def</span> <span class="nf">_entity_file_needs_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+        <span class="n">mod_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="n">file_type</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">load_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">][</span><span class="n">file_type</span><span class="p">][</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># file hasn&#39;t been loaded</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">load_time</span> <span class="o">&lt;</span> <span class="n">mod_time</span>
+
+    <span class="k">def</span> <span class="nf">_update_entity_file_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+        <span class="c1"># TODO: handle deleted entity</span>
+        <span class="n">file_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">entity_type</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;entity_data&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;mapping&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;gazetteer&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_files</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_table</span>
+
+        <span class="c1"># update entity data</span>
+        <span class="n">entity_data_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_gaz_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;entity_data&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">entity_data_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="c1"># required file doesnt exist -- notify and error out</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Entity data file not found at </span><span class="si">%r</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;Proceeding with empty entity data.&quot;</span><span class="p">,</span>
+                <span class="n">entity_data_path</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># mark the modified time as now if the entity file does not exist</span>
+            <span class="c1"># so that the gazetteer gets rebuilt properly.</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;entity_data&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># update mapping</span>
+        <span class="n">mapping_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_map_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">mapping_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="c1"># required file doesnt exist</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Entity mapping file not found at </span><span class="si">%r</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;Proceeding with empty entity data.&quot;</span><span class="p">,</span>
+                <span class="n">mapping_path</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># mark the modified time as now if the entity mapping file does not exist</span>
+            <span class="c1"># so that the gazetteer gets rebuilt properly.</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># update gaz data</span>
+        <span class="n">gazetteer_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_gazetteer_data_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">gazetteer_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+            <span class="c1"># gaz not yet built so set to a time impossibly long ago</span>
+            <span class="n">file_table</span><span class="p">[</span><span class="s2">&quot;gazetteer&quot;</span><span class="p">][</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="ResourceLoader.get_labeled_queries"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.get_labeled_queries">[docs]</a>    <span class="k">def</span> <span class="nf">get_labeled_queries</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets labeled queries from the cache, or loads them from disk.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            domain (str): The domain of queries to load</span>
+<span class="sd">            intent (str): The intent of queries to load</span>
+<span class="sd">            force_reload (bool): Will not load queries from the cache when True</span>
+<span class="sd">            raw (bool): Will return raw query strings instead of ProcessedQuery objects when true</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: ProcessedQuery objects (or strings) loaded from labeled query files, organized by</span>
+<span class="sd">                domain and intent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">label_set</span> <span class="o">=</span> <span class="n">label_set</span> <span class="ow">or</span> <span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+        <span class="n">query_tree</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">loaded_key</span> <span class="o">=</span> <span class="s2">&quot;loaded_raw&quot;</span> <span class="k">if</span> <span class="n">raw</span> <span class="k">else</span> <span class="s2">&quot;loaded&quot;</span>
+        <span class="n">file_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traverse_labeled_queries_files</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">label_set</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a_domain</span><span class="p">,</span> <span class="n">an_intent</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">file_iter</span><span class="p">:</span>
+            <span class="n">file_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">force_reload</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">file_info</span><span class="p">[</span><span class="n">loaded_key</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">file_info</span><span class="p">[</span><span class="n">loaded_key</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">file_info</span><span class="p">[</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="c1"># file is out of date, load it</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">load_query_file</span><span class="p">(</span><span class="n">a_domain</span><span class="p">,</span> <span class="n">an_intent</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">a_domain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="p">:</span>
+                <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="n">an_intent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">]:</span>
+                <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">][</span><span class="n">an_intent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">queries</span> <span class="o">=</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">][</span><span class="n">an_intent</span><span class="p">]</span>
+            <span class="n">queries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">file_info</span><span class="p">[</span><span class="s2">&quot;raw_queries&quot;</span> <span class="k">if</span> <span class="n">raw</span> <span class="k">else</span> <span class="s2">&quot;queries&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">query_tree</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.flatten_query_tree"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.flatten_query_tree">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">flatten_query_tree</span><span class="p">(</span><span class="n">query_tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a query tree and returns the elements in list form.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query_tree (dict): A nested dictionary that organizes queries by domain then intent.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of Query objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">flattened</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">intent_queries</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">queries</span> <span class="ow">in</span> <span class="n">intent_queries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">flattened</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flattened</span></div>
+
+    <span class="k">def</span> <span class="nf">_traverse_labeled_queries_files</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_pattern</span><span class="o">=</span><span class="n">DEFAULT_TRAIN_SET_REGEX</span>
+    <span class="p">):</span>
+        <span class="n">provided_intent</span> <span class="o">=</span> <span class="n">intent</span>
+        <span class="n">query_tree</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_labeled_query_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_query_file_dates</span><span class="p">(</span><span class="n">query_tree</span><span class="p">)</span>
+        <span class="n">domains</span> <span class="o">=</span> <span class="p">[</span><span class="n">domain</span><span class="p">]</span> <span class="k">if</span> <span class="n">domain</span> <span class="k">else</span> <span class="n">query_tree</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">a_domain</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">domains</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">provided_intent</span><span class="p">:</span>
+                <span class="n">intents</span> <span class="o">=</span> <span class="p">[</span><span class="n">provided_intent</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">intents</span> <span class="o">=</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">an_intent</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">intents</span><span class="p">):</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">a_domain</span><span class="p">][</span><span class="n">an_intent</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="c1"># filter to files which belong to the label set</span>
+                <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">file_pattern</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">)):</span>
+                        <span class="k">yield</span> <span class="n">a_domain</span><span class="p">,</span> <span class="n">an_intent</span><span class="p">,</span> <span class="n">file_path</span>
+
+<div class="viewcode-block" id="ResourceLoader.load_query_file"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.load_query_file">[docs]</a>    <span class="k">def</span> <span class="nf">load_query_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads the queries from the specified file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            domain (str): The domain of the query file</span>
+<span class="sd">            intent (str): The intent of the query file</span>
+<span class="sd">            file_path (str): The name of the query file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading </span><span class="si">%s</span><span class="s2">queries from file </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;raw &quot;</span> <span class="k">if</span> <span class="n">raw</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="n">file_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="p">[</span><span class="n">file_path</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="c1"># Only load</span>
+            <span class="n">queries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">markup</span><span class="o">.</span><span class="n">read_query_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+                <span class="n">queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="n">file_data</span><span class="p">[</span><span class="s2">&quot;raw_queries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">queries</span>
+            <span class="n">file_data</span><span class="p">[</span><span class="s2">&quot;loaded_raw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">queries</span> <span class="o">=</span> <span class="n">markup</span><span class="o">.</span><span class="n">load_query_file</span><span class="p">(</span>
+                <span class="n">file_path</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">,</span>
+                <span class="n">domain</span><span class="p">,</span>
+                <span class="n">intent</span><span class="p">,</span>
+                <span class="n">is_gold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">query_cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query_cache</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_check_query_entities</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MindMeldError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">file_data</span><span class="p">[</span><span class="s2">&quot;queries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">queries</span>
+            <span class="n">file_data</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">):</span>
+        <span class="n">entity_types</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_entity_types</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entity_types</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">is_system_entity</span>
+                <span class="p">):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unknown entity </span><span class="si">{!r}</span><span class="s2"> found in query </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                    <span class="k">raise</span> <span class="n">MindMeldError</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_query_file_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_tree</span><span class="p">):</span>
+        <span class="c1"># We can just use this if it this is the first check</span>
+        <span class="n">new_query_files</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">intent</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">domain</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="n">intent</span><span class="p">]:</span>
+                    <span class="c1"># filename needs to be full path</span>
+                    <span class="n">new_query_files</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;modified&quot;</span><span class="p">:</span> <span class="n">query_tree</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="n">intent</span><span class="p">][</span><span class="n">filename</span><span class="p">],</span>
+                        <span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s2">&quot;loaded_raw&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">}</span>
+
+        <span class="n">all_filenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">new_query_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">all_filenames</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">all_filenames</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_file_info</span> <span class="o">=</span> <span class="n">new_query_files</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># an old file that was removed</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">old_file_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># a new file</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_to_query_info</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_info</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># file existed before and now -&gt; update</span>
+            <span class="n">old_file_info</span><span class="p">[</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_info</span><span class="p">[</span><span class="s2">&quot;modified&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_build_word_freq_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Compiles unigram frequency dictionary of normalized query tokens</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            queries (list of Query): A list of all queries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING_ARGS</span><span class="p">)</span>
+
+        <span class="c1"># Unigram frequencies</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;queries&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">)):</span>
+                <span class="n">tok</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask_numerics</span><span class="p">(</span><span class="n">tok</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">enable_stemming</span><span class="p">:</span>
+                    <span class="c1"># We only add stemmed tokens that are not the same</span>
+                    <span class="c1"># as the original token to reduce the impact on</span>
+                    <span class="c1"># word frequencies</span>
+                    <span class="n">stemmed_tok</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">stemmed_tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">stemmed_tok</span> <span class="o">!=</span> <span class="n">tok</span><span class="p">:</span>
+                        <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask_numerics</span><span class="p">(</span><span class="n">stemmed_tok</span><span class="p">))</span>
+
+        <span class="n">freq_dict</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">freq_dict</span>
+
+    <span class="k">def</span> <span class="nf">_build_char_ngram_freq_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Compiles n-gram character frequency dictionary of normalized query tokens</span>
+
+<span class="sd">           Args:</span>
+<span class="sd">               queries (list of Query): A list of all queries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">char_freq_dict</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lengths&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresholds&quot;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;queries&quot;</span><span class="p">):</span>
+                    <span class="n">character_tokens</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">q</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">])</span> <span class="o">==</span> <span class="n">length</span>
+                    <span class="p">]</span>
+                    <span class="n">char_freq_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">character_tokens</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">char_freq_dict</span>
+
+    <span class="k">def</span> <span class="nf">_build_word_ngram_freq_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Compiles n-gram frequency dictionary of normalized query tokens</span>
+
+<span class="sd">           Args:</span>
+<span class="sd">               queries (list of Query): A list of all queries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING_ARGS</span><span class="p">)</span>
+        <span class="n">word_freq_dict</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lengths&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresholds&quot;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ngram_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;queries&quot;</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">)):</span>
+                        <span class="n">ngram_query</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">])</span>
+                        <span class="n">ngram_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ngram_query</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">enable_stemming</span><span class="p">:</span>
+                            <span class="n">stemmed_ngram_query</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                <span class="n">query</span><span class="o">.</span><span class="n">stemmed_tokens</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="k">if</span> <span class="n">stemmed_ngram_query</span> <span class="o">!=</span> <span class="n">ngram_query</span><span class="p">:</span>
+                                <span class="n">ngram_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stemmed_ngram_query</span><span class="p">)</span>
+                <span class="n">word_freq_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ngram_tokens</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">word_freq_dict</span>
+
+    <span class="k">def</span> <span class="nf">_build_query_freq_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Compiles frequency dictionary of normalized and stemmed query strings</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            queries (list of Query): A list of all queries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enable_stemming</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENABLE_STEMMING_ARGS</span><span class="p">)</span>
+
+        <span class="c1"># Whole query frequencies, with singletons removed</span>
+        <span class="n">query_dict</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="n">stemmed_query_dict</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;queries&quot;</span><span class="p">):</span>
+            <span class="n">query_dict</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">normalized_text</span><span class="p">)])</span>
+
+            <span class="k">if</span> <span class="n">enable_stemming</span><span class="p">:</span>
+                <span class="n">stemmed_query_dict</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">stemmed_text</span><span class="p">)])</span>
+
+        <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">query_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">query_dict</span><span class="p">[</span><span class="n">query</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">query_dict</span><span class="p">[</span><span class="n">query</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">enable_stemming</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">stemmed_query_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">stemmed_query_dict</span><span class="p">[</span><span class="n">query</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">stemmed_query_dict</span><span class="p">[</span><span class="n">query</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">query_dict</span> <span class="o">+=</span> <span class="n">stemmed_query_dict</span>
+
+        <span class="n">query_dict</span> <span class="o">+=</span> <span class="n">Counter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">query_dict</span>
+
+    <span class="k">def</span> <span class="nf">_get_sys_entity_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Get all system entity types from the entity labels.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            labels (list of QueryEntity): a list of labeled entities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build entity types set</span>
+        <span class="n">entity_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+                <span class="n">entity_types</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">set</span><span class="p">((</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">entity_types</span> <span class="k">if</span> <span class="n">Entity</span><span class="o">.</span><span class="n">is_system_entity</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="ResourceLoader.load_feature_resource"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.load_feature_resource">[docs]</a>    <span class="k">def</span> <span class="nf">load_feature_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load specified resource for feature extractor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): resource name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resource_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEATURE_RSC_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resource_loader</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resource_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid resource name </span><span class="si">{!r}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.hash_feature_resource"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.hash_feature_resource">[docs]</a>    <span class="k">def</span> <span class="nf">hash_feature_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hashes the named resource.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the resource to hash</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The hash result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hash_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RSC_HASH_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hash_func</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">hash_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid resource name </span><span class="si">{!r}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.hash_string"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.hash_string">[docs]</a>    <span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hashes a string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            string (str): The string to hash</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The hash result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.hash_list"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.hash_list">[docs]</a>    <span class="k">def</span> <span class="nf">hash_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hashes the list of items.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            items (list[str]): A list of strings to hash</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The hash result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasher</span><span class="o">.</span><span class="n">hash_list</span><span class="p">(</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResourceLoader.create_resource_loader"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.ResourceLoader.create_resource_loader">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_resource_loader</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">query_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">preprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates the resource loader for the app at app path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_path (str): The path to the directory containing the app&#39;s data</span>
+<span class="sd">            query_factory (QueryFactory): The app&#39;s query factory</span>
+<span class="sd">            preprocessor (Preprocessor): The app&#39;s preprocessor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ResourceLoader: a resource loader</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query_factory</span> <span class="o">=</span> <span class="n">query_factory</span> <span class="ow">or</span> <span class="n">QueryFactory</span><span class="o">.</span><span class="n">create_query_factory</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="p">,</span> <span class="n">preprocessor</span><span class="o">=</span><span class="n">preprocessor</span>
+        <span class="p">)</span>
+        <span class="n">query_cache</span> <span class="o">=</span> <span class="n">QueryCache</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ResourceLoader</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">query_factory</span><span class="p">,</span> <span class="n">query_cache</span><span class="p">)</span></div>
+
+    <span class="c1"># resource loader map</span>
+    <span class="n">FEATURE_RSC_MAP</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">GAZETTEER_RSC</span><span class="p">:</span> <span class="n">get_gazetteers</span><span class="p">,</span>
+        <span class="n">WORD_FREQ_RSC</span><span class="p">:</span> <span class="n">_build_word_freq_dict</span><span class="p">,</span>
+        <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">:</span> <span class="n">_build_char_ngram_freq_dict</span><span class="p">,</span>
+        <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">:</span> <span class="n">_build_word_ngram_freq_dict</span><span class="p">,</span>
+        <span class="n">QUERY_FREQ_RSC</span><span class="p">:</span> <span class="n">_build_query_freq_dict</span><span class="p">,</span>
+        <span class="n">SYS_TYPES_RSC</span><span class="p">:</span> <span class="n">_get_sys_entity_types</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">RSC_HASH_MAP</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">GAZETTEER_RSC</span><span class="p">:</span> <span class="n">get_gazetteers_hash</span><span class="p">,</span>
+        <span class="c1"># the following resources only vary based on the queries used for training</span>
+        <span class="n">WORD_FREQ_RSC</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">WORD_NGRAM_FREQ_RSC</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">CHAR_NGRAM_FREQ_RSC</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">QUERY_FREQ_RSC</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">SYS_TYPES_RSC</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">ENABLE_STEMMING</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Hasher"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.Hasher">[docs]</a><span class="k">class</span> <span class="nc">Hasher</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An thin wrapper around hashlib. Uses cache for commonly hashed strings.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        algorithm (str): The hashing algorithm to use. Defaults to</span>
+<span class="sd">            &#39;sha1&#39;. See `hashlib.algorithms_available` for a list of</span>
+<span class="sd">            options.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;sha1&quot;</span><span class="p">):</span>
+        <span class="c1"># TODO consider alternative data structure so cache doesnt get too big</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># intentionally using the setter to check value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_algorithm</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Getter for algorithm property.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: the hashing algorithm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algorithm</span>
+
+    <span class="k">def</span> <span class="nf">_set_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setter for algorithm property.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (str): The hashing algorithm to use. Defaults</span>
+<span class="sd">                to sha1. See `hashlib.algorithms_available` for a list of</span>
+<span class="sd">                options.</span>
+<span class="sd">            value (str): The hashing algorithm to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">algorithms_available</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid hashing algorithm: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algorithm</span><span class="p">:</span>
+            <span class="c1"># reset cache when changing algorithm</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algorithm</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">algorithm</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_algorithm</span><span class="p">,</span> <span class="n">_set_algorithm</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Hasher.hash"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.Hasher.hash">[docs]</a>    <span class="k">def</span> <span class="nf">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hashes a string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            string (str): The string to hash</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The hash result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">string</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">string</span><span class="p">]</span>
+
+        <span class="n">hash_obj</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="n">hash_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">hash_obj</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">string</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="Hasher.hash_list"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.Hasher.hash_list">[docs]</a>    <span class="k">def</span> <span class="nf">hash_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hashes a list of strings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            strings (list[str]): The strings to hash</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The hash result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hash_obj</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
+            <span class="n">hash_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">hash_obj</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Hasher.hash_file"><a class="viewcode-back" href="../../apidoc/mindmeld.resource_loader.html#mindmeld.resource_loader.Hasher.hash_file">[docs]</a>    <span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a hash of the file. If the file does not exist, use the empty string instead</span>
+<span class="sd">        and return the resulting hash digest.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): The path of a file to hash.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: A hex digest of the file hash</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hash_obj</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_p</span><span class="p">:</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">buf</span> <span class="o">=</span> <span class="n">file_p</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4096</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">hash_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">hash_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">hash_obj</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Key Concepts &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building a Conversational Interface in 10 Steps" href="../quickstart/00_overview.html" />
+    <link rel="prev" title="Introducing MindMeld" href="introducing_mindmeld.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Key Concepts</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/key_concepts.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="key-concepts">
+<h1>Key Concepts<a class="headerlink" href="#key-concepts" title="Permalink to this headline">¶</a></h1>
+<p>Every MindMeld developer should know the terms defined in this section. It’s best to read the entire section through, since later definitions build on earlier ones.</p>
+<dl class="glossary docutils">
+<dt id="term-app">app</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A conversational application built using the MindMeld framework. Examples include voice and chat assistants deployed on messaging platforms like <a class="reference external" href="https://apphub.webex.com/bots">Webex Teams</a>, <a class="reference external" href="https://slack.com/apps/category/At0MQP5BEF-bots">Slack</a>, <a class="reference external" href="https://messenger.fb.com">Messenger</a>, or <a class="reference external" href="https://bots.botframework.com">Skype</a>; or, on voice-activated devices like <a class="reference external" href="https://developer.amazon.com/alexa-skills-kit">Alexa</a> or <a class="reference external" href="https://developers.google.com/actions/">Google Home</a>.</div>
+</div>
+</dd>
+<dt id="term-project">project</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A collection of all the data and code necessary to build a conversational app for a particular use case, stored in the MindMeld-specified directory structure.</div>
+</div>
+</dd>
+<dt id="term-blueprint">blueprint</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A pre-configured project, distributed with MindMeld as an example app. Available blueprints include <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">Food Ordering</span></a>, <a class="reference internal" href="../blueprints/video_discovery.html"><span class="doc">Video Discovery</span></a>, and <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a>.</div>
+</div>
+</dd>
+<dt id="term-query-request">query / request</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A user’s spoken or typed natural language input to the conversational app. MindMeld apps use statistical <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_processing">natural language processing</a> models to understand the query and determine what the user wants.</div>
+</div>
+</dd>
+<dt id="term-domain">domain</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A distinct area of knowledge with its own vocabulary, such as <code class="docutils literal"><span class="pre">weather</span></code>, <code class="docutils literal"><span class="pre">sports</span></code>, <code class="docutils literal"><span class="pre">traffic</span></code>, <code class="docutils literal"><span class="pre">movies</span></code>, or <code class="docutils literal"><span class="pre">travel</span></code>.</div>
+</div>
+</dd>
+<dt id="term-intent">intent</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">Something that the user wants to accomplish, expressed as a short phrase, and associated with a domain. For example, the <code class="docutils literal"><span class="pre">book_flight</span></code> intent could be defined for the <code class="docutils literal"><span class="pre">travel</span></code> domain, and could be detected in query like ‘Get me on the redeye to New York tonight.’ Most domains have multiple intents.</div>
+<div class="line"><br /></div>
+<div class="line">The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.</div>
+</div>
+</dd>
+<dt id="term-entity">entity</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A word or phrase that provides information necessary to fulfill a particular intent. Each entity belongs to a category specified by the entity’s associated <em>type</em>.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, a <code class="docutils literal"><span class="pre">book_flight</span></code> intent could have a <code class="docutils literal"><span class="pre">location</span></code> type for entities like ‘Miami’ and ‘Chicago O’Hare’, an <code class="docutils literal"><span class="pre">airline</span></code> type for entities like ‘Air India’ and ‘Southwest’, and a <code class="docutils literal"><span class="pre">date</span></code> type for entities like ‘July 4th’ and ‘New Years Day’.</div>
+</div>
+</dd>
+<dt id="term-system-entity">system entity</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">An application-agnostic entity that is automatically detected by MindMeld. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">More about system entities</span></a>.</div>
+</div>
+</dd>
+<dt id="term-role">role</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A label that specifies a sub-category in entities of the same type. Roles are used when identically-typed entities need to be interpreted differently in different contexts.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, in the query ‘Book a flight from SFO to JFK’, both ‘SFO’ and ‘JFK’ are location entities, but they would be assigned different roles: SFO would have the <code class="docutils literal"><span class="pre">origin</span></code> role, while ‘JFK’ would have the <code class="docutils literal"><span class="pre">destination</span></code> role.</div>
+</div>
+</dd>
+<dt id="term-knowledge-base-kb">knowledge base (KB)</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A comprehensive repository containing the universe of information an app needs to understand user queries and answer questions successfully.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, the knowledge base for a restaurant chain’s food ordering app might require a directory of its branch locations and details of the menu served at each store.</div>
+</div>
+</dd>
+<dt id="term-knowledge-base-index">knowledge base index</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A collection of objects of the same type within the knowledge base. MindMeld organizes the knowledge base as a set of indexes for efficient retrieval and ranking based on developer-supplied search criteria.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, a food ordering app might have a <code class="docutils literal"><span class="pre">restaurant</span></code> index for storing the details of its branch locations, including metadata like name, address, phone number, cuisine type, and ratings for each entry. It might also have a separate <code class="docutils literal"><span class="pre">menu_items</span></code> index that stores all the dishes offered at its restaurant location with details like name, price, description and add-ons.</div>
+</div>
+</dd>
+<dt id="term-canonical-name">canonical name</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">The standardized or official name under which an entity is stored in the knowledge base. For instance, the beverage commonly known as ‘vanilla frappe’ or ‘vanilla frappuccino’ might have the canonical name of ‘Caffè Vanilla Frappuccino® Blended Coffee’ in the app’s <a class="reference external" href="https://www.starbucks.com/menu/drinks/frappuccino-blended-beverages/caffe-vanilla-frappuccino-blended-beverage">official catalog</a>.</div>
+</div>
+</dd>
+<dt id="term-entity-synonym">entity synonym</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">An alternate way of referring to an entity, apart from its canonical name. Synonyms can be abbreviated forms, nicknames, slang terms, translations, semantically equivalent expressions or just different names for the same entity.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, ‘vanilla frappuccino’, ‘vanilla frap’ and ‘iced vanilla frappe’ are all synonyms for the canonical name, ‘Caffè Vanilla Frappuccino® Blended Coffee’.</div>
+</div>
+</dd>
+<dt id="term-entity-group">entity group</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A group of entities that together form a meaningful real-world concept. Each entity group has one main entity. Other entities in the group (if any) are considered attributes of the main entity.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, the query ‘Order one large squishee and a dozen donuts’ contains two entity groups. The order details for the ‘squishee’ product, including quantity and size, make up the entity group {‘one’, ‘large’, ‘squishee’}. The order details for the ‘donuts’ make up the entity group {‘a dozen’, ‘donuts’}.</div>
+</div>
+</dd>
+<dt id="term-head-parent">head / parent</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">The principal entity being described in an entity group. In the entity group {‘one’, ‘large’, ‘squishee’}, ‘squishee’ is the head entity. Similarly, ‘donuts’ heads the entity group {‘a dozen’, ‘donuts’}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Head_(linguistics)">head (linguistics)</a>.</div>
+</div>
+</dd>
+<dt id="term-dependent-child">dependent / child</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">An entity that describes or <a class="reference external" href="https://en.wikipedia.org/wiki/Grammatical_modifier">modifies</a> the principal entity (head) in an entity group.</div>
+<div class="line"><br /></div>
+<div class="line">For instance, in the group {‘one’, ‘large’, ‘squishee’} the entities ‘one’ and ‘large’ are the dependents of the head entity ‘squishee’. Similarly, ‘a dozen’ depends on the head ‘donuts’ in the entity group {‘a dozen’, ‘donuts’}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Dependent_(grammar)">dependent (linguistics)</a>.</div>
+</div>
+</dd>
+<dt id="term-natural-language-response-nlr">natural language response (NLR)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+<div class="line">The app’s natural language reply to the user. It could be in the form of a text-based response, a spoken voice response, or both, depending on the platform capabilities. Fully automated <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_generation">natural language response generation</a> is still an area of active academic research. Real-world applications today, including all the popular personal assistants, instead rely on canned responses (<strong>templates</strong>) with placeholders (<strong>slots</strong>) that are filled in by the app at runtime.</div>
+<div class="line"><br /></div>
+</div>
+<table border="1" class="last docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Template with unfilled slots</td>
+<td>‘<code class="docutils literal"><span class="pre">{flight}</span></code> will depart from <code class="docutils literal"><span class="pre">{gate}</span></code> of <code class="docutils literal"><span class="pre">{terminal}</span></code> at <code class="docutils literal"><span class="pre">{time}</span></code>.’</td>
+</tr>
+<tr class="row-even"><td>NLR with filled slots</td>
+<td>‘AA 20 will depart from gate 56A of terminal 2 at 3:30 PM’.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt id="term-conversational-turn">conversational turn</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A single instance of either dialogue participant (the user or the app) communicating with the other. The dialogue between a user and the app proceeds as a series of back and forth communication with each party <a class="reference external" href="https://en.wikipedia.org/wiki/Turn-taking">taking turns</a> to advance the conversation.</div>
+</div>
+</dd>
+<dt id="term-dialogue-state">dialogue state</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">The state of the application at a given moment in the dialogue. The app transitions from one dialogue state to another with every turn in the conversation.</div>
+</div>
+</dd>
+<dt id="term-dialogue-state-handler">dialogue state handler</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">The code to be executed when the app is in a particular dialogue state. It determines the appropriate form of response for that state, and invokes any logic necessary to determine the content of the response.</div>
+</div>
+</dd>
+<dt id="term-dialogue-frame">dialogue frame</dt>
+<dd><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line">A container for any information that the app needs to persist across turns over the course of a single conversational interaction with a user. The dialogue frame serves as the app’s short-term memory and allows it to hold a coherent conversation with the user.</div>
+</div>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../quickstart/00_overview.html" class="btn btn-neutral float-right" title="Building a Conversational Interface in 10 Steps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introducing_mindmeld.html" class="btn btn-neutral float-left" title="Introducing MindMeld" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

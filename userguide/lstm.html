@@ -1,0 +1,653 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Using LSTM for Entity Recognition &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Role Classifier" href="role_classifier.html" />
+    <link rel="prev" title="Working with the Entity Recognizer" href="entity_recognizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using LSTM for Entity Recognition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#lstm-network-overview">LSTM network overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lstm-parameter-settings">LSTM parameter settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Using LSTM for Entity Recognition</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/lstm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="using-lstm-for-entity-recognition">
+<h1>Using LSTM for Entity Recognition<a class="headerlink" href="#using-lstm-for-entity-recognition" title="Permalink to this headline">¶</a></h1>
+<p>Entity recognition is the one task within the NLP pipeline where deep learning models are among the available classification models. In particular, MindMeld provides a <a class="reference external" href="https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks">Bi-Directional Long Short-Term Memory (LSTM) Network</a>, which has been shown to perform well on sequence labeling tasks such as entity recognition. The model is implemented in <a class="reference external" href="https://www.tensorflow.org/get_started/">TensorFlow</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please make sure to install the Tensorflow requirement by running in the shell: <code class="code docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[tensorflow]</span></code>.</p>
+</div>
+<div class="section" id="lstm-network-overview">
+<h2>LSTM network overview<a class="headerlink" href="#lstm-network-overview" title="Permalink to this headline">¶</a></h2>
+<p>The MindMeld Bi-Directional LSTM network</p>
+<blockquote>
+<div><ul class="simple">
+<li>encodes words as pre-trained word embeddings using Stanford’s <a class="reference external" href="https://nlp.stanford.edu/projects/glove/">GloVe representation</a></li>
+<li>encodes characters using a convolutional network trained on the training data</li>
+<li>concatenates the word and character embeddings together and feeds them into the bi-directional LSTM</li>
+<li>couples the forget and input gates of the LSTM using a peephole connection, to improve overall accuracies on downstream NLP tasks</li>
+<li>feeds the output of the LSTM into a <a class="reference external" href="https://en.wikipedia.org/wiki/Conditional_random_field">linear chain Conditional Random Field</a> (CRF) or <a class="reference external" href="https://en.wikipedia.org/wiki/Softmax_function">Softmax layer</a>  which labels the target word as a particular entity</li>
+</ul>
+</div></blockquote>
+<p>The diagram below describes the architecture of a typical Bi-Directional LSTM network.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/lstm_architecture_fix.png"><img alt="LSTM architecture diagram" src="../_images/lstm_architecture_fix.png" style="width: 487.0px; height: 513.0px;" /></a>
+<p class="caption"><span class="caption-text">Courtesy: Guillaume Genthial</span></p>
+</div>
+<p>This design has these possible advantages:</p>
+<ul class="simple">
+<li>Deep neural networks (DNNs) outperform traditional machine learning models on training sets with about 1,000 or more queries, according to many research papers.</li>
+<li>DNNs require less feature engineering work than traditional machine learning models, because they use only two input features (word embeddings and gazetteers) compared to several hundred (n-grams, system entities, and so on).</li>
+<li>On GPU-enabled devices, the network can achieve training time comparable to some of the traditional models in MindMeld.</li>
+</ul>
+<p>The possible disadvantages are:</p>
+<ul class="simple">
+<li>Performance may be no better than traditional machine learning models for training sets of about 1,000 queries or fewer.</li>
+<li>Training time on CPU-only machines is a lot slower than for traditional machine learning models.</li>
+<li>No automated hyperparameter tuning methods like <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html">sklearn.model_selection.GridSearchCV</a> are available for LSTMs.</li>
+</ul>
+</div>
+<div class="section" id="lstm-parameter-settings">
+<h2>LSTM parameter settings<a class="headerlink" href="#lstm-parameter-settings" title="Permalink to this headline">¶</a></h2>
+<p>Parameter tuning for an LSTM is more complex than for traditional machine learning models. A good starting point for understanding this subject is Andrej Karpathy’s <a class="reference external" href="https://cs231n.github.io/neural-networks-3/#baby">course notes</a> from the Convolutional Neural Networks for Visual Recognition course at Stanford University.</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last">A dictionary of values to be used for model hyperparameters during training.</p>
+</dd>
+</dl>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">padding_length</span></code></td>
+<td><p class="first">The sequence model treats this as the maximum number of words in a query.
+If a query has more words than <code class="docutils literal"><span class="pre">padding_length</span></code>, the surplus words are discarded.</p>
+<p>Typically set to the maximum word length of query expected both at train and predict time.</p>
+<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'padding_length':</span> <span class="pre">20}</span></code></dt>
+<dd><ul class="first last simple">
+<li>a query can have a maximum of twenty words</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">batch_size</span></code></td>
+<td><p class="first">Size of each batch of training data to feed into the network (which uses mini-batch learning).</p>
+<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'batch_size':</span> <span class="pre">20}</span></code></dt>
+<dd><ul class="first last simple">
+<li>feed twenty training queries to the network for each learning step</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">display_epoch</span></code></td>
+<td><p class="first">The network displays training accuracy statistics at this interval, measured in epochs.</p>
+<p>Default: <code class="docutils literal"><span class="pre">5</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'display_epoch':</span> <span class="pre">5}</span></code></dt>
+<dd><ul class="first last simple">
+<li>display accuracy statistics every five epochs</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">number_of_epochs</span></code></td>
+<td><p class="first">Total number of complete iterations of the training data to feed into the network.
+In each iteration, the data is shuffled to break any prior sequence patterns.</p>
+<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'number_of_epochs':</span> <span class="pre">20}</span></code></dt>
+<dd><ul class="first last simple">
+<li>iterate through the training data twenty times</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">optimizer</span></code></td>
+<td><p class="first">Optimizer to use to minimize the network’s stochastic objective function.</p>
+<p>Default: <code class="docutils literal"><span class="pre">'adam'</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'optimizer':</span> <span class="pre">'adam'}</span></code></dt>
+<dd><ul class="first last simple">
+<li>use the Adam optimizer to minimize the objective function</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">learning_rate</span></code></td>
+<td><p class="first">Parameter to control the size of weight and bias changes
+of the training algorithm as it learns.</p>
+<p><a class="reference external" href="https://en.wikibooks.org/wiki/Artificial_Neural_Networks/Error-Correction_Learning">This</a>
+article explains Learning Rate in technical terms.</p>
+<p>Default: <code class="docutils literal"><span class="pre">0.005</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'learning_rate':</span> <span class="pre">0.005}</span></code></dt>
+<dd><ul class="first last simple">
+<li>set learning rate to 0.005</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">dense_keep_prob</span></code></td>
+<td><p class="first">In the context of the ‘’dropout’’ technique (a regularization method to prevent overfitting),
+keep probability specifies the proportion of nodes to “keep”—that is, to exempt from dropout
+during the network’s learning phase.</p>
+<p>The <code class="docutils literal"><span class="pre">dense_keep_prob</span></code> parameter sets the keep probability of the nodes
+in the dense network layer that connects the output of the LSTM layer
+to the nodes that predict the named entities.</p>
+<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'dense_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dd><ul class="first last simple">
+<li>50% of the nodes in the dense layer will not be turned off by dropout</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">lstm_input_keep_prob</span></code></td>
+<td><p class="first">Keep probability for the nodes that constitute the inputs to the LSTM cell.</p>
+<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'lstm_input_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dd><ul class="first last simple">
+<li>50% of the nodes that are inputs to the LSTM cell will not be turned off by dropout</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">lstm_output_keep_prob</span></code></td>
+<td><p class="first">Keep probability for the nodes that constitute the outputs of the LSTM cell.</p>
+<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'lstm_output_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dd><ul class="first last simple">
+<li>50% of the nodes that are outputs of the LSTM cell will not be turned off by dropout</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">token_lstm_hidden_state_dimension</span></code></td>
+<td><p class="first">Number of states per LSTM cell.</p>
+<p>Default: <code class="docutils literal"><span class="pre">300</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'token_lstm_hidden_state_dimension':</span> <span class="pre">300}</span></code></dt>
+<dd><ul class="first last simple">
+<li>an LSTM cell will have 300 states</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">token_embedding_dimension</span></code></td>
+<td><p class="first">Number of dimensions for word embeddings.</p>
+<p>Allowed values: [50, 100, 200, 300].</p>
+<p>Default: <code class="docutils literal"><span class="pre">300</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'token_embedding_dimension':</span> <span class="pre">300}</span></code></dt>
+<dd><ul class="first last simple">
+<li>each word embedding will have 300 dimensions</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">gaz_encoding_dimension</span></code></td>
+<td><p class="first">Number of nodes to connect to the gazetteer encodings in a fully-connected network.</p>
+<p>Default: <code class="docutils literal"><span class="pre">100</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'gaz_encoding_dimension':</span> <span class="pre">100}</span></code></dt>
+<dd><ul class="first last simple">
+<li>100 nodes will be connected to the gazetteer encodings in a fully-connected network</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">max_char_per_word</span></code></td>
+<td><p class="first">The sequence model treats this as the maximum number of characters in a word.
+If a word has more characters than <code class="docutils literal"><span class="pre">max_char_per_word</span></code>, the surplus characters are discarded.</p>
+<p>Usually set to the size of the longest word in the training and test sets.</p>
+<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'max_char_per_word':</span> <span class="pre">20}</span></code></dt>
+<dd><ul class="first last simple">
+<li>a word can have a maximum of twenty characters</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">use_crf_layer</span></code></td>
+<td><p class="first">If set to <code class="docutils literal"><span class="pre">True</span></code>, use a linear chain Conditional Random Field layer for the final layer,
+which predicts sequence tags.</p>
+<p>If set to <code class="docutils literal"><span class="pre">False</span></code>, use a softmax layer to predict sequence tags.</p>
+<p>Default: <code class="docutils literal"><span class="pre">False</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'use_crf_layer':</span> <span class="pre">True}</span></code></dt>
+<dd><ul class="first last simple">
+<li>use the CRF layer</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">use_character_embeddings</span></code></td>
+<td><p class="first">If set to <code class="docutils literal"><span class="pre">True</span></code>, use the character embedding trained on the training data
+using a convolutional network.</p>
+<p>If set to <code class="docutils literal"><span class="pre">False</span></code>, do not use character embeddings.</p>
+<p>Note: Using character embedding significantly increases training time
+compared to vanilla word embeddings only.</p>
+<p>Default: <code class="docutils literal"><span class="pre">False</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'use_character_embeddings':</span> <span class="pre">True}</span></code></dt>
+<dd><ul class="first last simple">
+<li>use character embeddings</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">char_window_sizes</span></code></td>
+<td><p class="first">List of window sizes for convolutions that the network should use
+to build the character embeddings.
+Usually in decreasing numerical order.</p>
+<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal"><span class="pre">[5]</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'char_window_sizes':</span> <span class="pre">[5,</span> <span class="pre">3]}</span></code></dt>
+<dd><ul class="first last simple">
+<li>first, use a convolution of size 5</li>
+<li>next, feed the output of that convolution through a convolution of size 3</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">character_embedding_dimension</span></code></td>
+<td><p class="first">Initial dimension of each character before it is fed into the convolutional network.</p>
+<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal"><span class="pre">10</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'character_embedding_dimension':</span> <span class="pre">10}</span></code></dt>
+<dd><ul class="first last simple">
+<li>initialize the dimension of each character to ten</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">word_level_character_embedding_size</span></code></td>
+<td><p class="first">The final dimension of each character after it is transformed
+by the convolutional network.</p>
+<p>Usually greater than <code class="docutils literal"><span class="pre">character_embedding_dimension</span></code> since it encodes
+more information about orthography and semantics.</p>
+<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal"><span class="pre">40</span></code></p>
+<p>Example:</p>
+<dl class="last docutils">
+<dt><code class="docutils literal"><span class="pre">{'word_level_character_embedding_size':</span> <span class="pre">40}</span></code></dt>
+<dd><ul class="first last simple">
+<li>each character should have dimension of forty, after convolutional network training</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="role_classifier.html" class="btn btn-neutral float-right" title="Working with the Role Classifier" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="entity_recognizer.html" class="btn btn-neutral float-left" title="Working with the Entity Recognizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

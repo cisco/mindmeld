@@ -1,0 +1,959 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.nlp module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.components.nlp module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.components.nlp.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.components.nlp">
+<span id="mindmeld-components-nlp-module"></span><h1>mindmeld.components.nlp module<a class="headerlink" href="#module-mindmeld.components.nlp" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the natural language processor.</p>
+<dl class="class">
+<dt id="mindmeld.components.nlp.DomainProcessor">
+<em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">DomainProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#DomainProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<p>The domain processor houses the hierarchy of domain-specific natural language processing
+models required for understanding the user input for a particular domain.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.DomainProcessor.name">
+<code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the domain.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.DomainProcessor.intent_classifier">
+<code class="descname">intent_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.intent_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>IntentClassifier</em> – The intent classifier for this domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.DomainProcessor.inspect">
+<code class="descname">inspect</code><span class="sig-paren">(</span><em>query</em>, <em>intent=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#DomainProcessor.inspect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.inspect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inspects the query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query to be predicted.</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The expected intent label for this query.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">2D list that includes every feature, their value, weight and              probability</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of lists)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.DomainProcessor.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>query_text</em>, <em>allowed_nlp_classes=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#DomainProcessor.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given input text using the hierarchy of natural language processing models         trained for this domain.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, or </em><em>list/tuple</em>) – The raw user text input, or a list of the n-best                 query transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example:                     {                         close_door: {}                     }                 where close_door is the intent. The intent belongs to the smart_home domain.                 If allowed_nlp_classes is None, we use the normal model predict functionality.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the hierarchy of natural language processing models to the input text.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.DomainProcessor.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>query</em>, <em>allowed_nlp_classes=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#DomainProcessor.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the full hierarchy of natural language processing models         trained for this application.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'close_door':</span> <span class="pre">{}}</span></code>
+where close_door is the intent. The intent belongs to the smart_home domain.                 If allowed_nlp_classes is None, we use the normal model predict functionality.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the full hierarchy of natural language processing models to the input                 query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.DomainProcessor.intents">
+<code class="descname">intents</code><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.intents" title="Permalink to this definition">¶</a></dt>
+<dd><p>The intents supported within this domain (dict).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.nlp.EntityProcessor">
+<em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">EntityProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>intent</em>, <em>entity_type</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#EntityProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<p>The entity processor houses the hierarchy of entity-specific natural language processing
+models required for analyzing a specific entity type in the user input.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.EntityProcessor.domain">
+<code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.domain" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The domain this entity belongs to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.EntityProcessor.intent">
+<code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.intent" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The intent this entity belongs to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.EntityProcessor.type">
+<code class="descname">type</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.type" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The type of this entity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.EntityProcessor.name">
+<code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The type of this entity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.EntityProcessor.role_classifier">
+<code class="descname">role_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.role_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>RoleClassifier</em> – The role classifier for this entity type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.EntityProcessor.process_entity">
+<code class="descname">process_entity</code><span class="sig-paren">(</span><em>query</em>, <em>entities</em>, <em>entity_index</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#EntityProcessor.process_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.process_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given entity using the hierarchy of natural language processing models         trained for this entity type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – The query the entity originated from.</li>
+<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – All entities recognized in the query.</li>
+<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the entity to process.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If set to True, returns confidence scores of classes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Tuple containing:                 * ProcessedQuery: A processed query object that contains the prediction results                      from applying the hierarchy of natural language processing models to the                         input entity.</dt>
+<dd><ul class="first last simple">
+<li>confidence_score: confidence scores returned by classifier.</li>
+</ul>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.EntityProcessor.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>query</em>, <em>allowed_nlp_classes=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#EntityProcessor.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.EntityProcessor.resolve_entity">
+<code class="descname">resolve_entity</code><span class="sig-paren">(</span><em>entity</em>, <em>aligned_entity_spans=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#EntityProcessor.resolve_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.resolve_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the resolution of a single entity. If aligned_entity_spans is not None,
+the resolution leverages the n-best transcripts entity spans. Otherwise, it does the
+resolution on just the text of the entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity</strong> (<em>QueryEntity</em>) – The entity to process.</li>
+<li><strong>aligned_entity_spans</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>QueryEntity</em><em>]</em>) – The list of aligned n-best entity spans
+to improve resolution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The entity populated with the resolved values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(Entity)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.nlp.IntentProcessor">
+<em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">IntentProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>intent</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#IntentProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<p>The intent processor houses the hierarchy of intent-specific natural language processing
+models required for understanding the user input for a particular intent.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.IntentProcessor.domain">
+<code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.domain" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The domain this intent belongs to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.IntentProcessor.name">
+<code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of this intent.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.IntentProcessor.entity_recognizer">
+<code class="descname">entity_recognizer</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.entity_recognizer" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>EntityRecognizer</em> – The entity recognizer for this intent.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.IntentProcessor.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>query_text</em>, <em>allowed_nlp_classes=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#IntentProcessor.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given input text using the hierarchy of natural language processing models
+trained for this intent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query
+transcripts from ASR.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
+‘America/Los_Angeles’, or ‘Asia/Kolkata’
+See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class as well as predict probabilities.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the hierarchy of natural language processing models to the input text.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.IntentProcessor.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>query</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#IntentProcessor.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the hierarchy of natural language processing models         trained for this intent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal"><span class="pre">True</span></code>, returns class as well as predict probabilities.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the hierarchy of natural language processing models to the input query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.IntentProcessor.entities">
+<code class="descname">entities</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>The entity types associated with this intent (list).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.IntentProcessor.nbest_transcripts_enabled">
+<code class="descname">nbest_transcripts_enabled</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.nbest_transcripts_enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether or not to run processing on the n-best transcripts for this intent (bool).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor">
+<em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">NaturalLanguageProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader=None</em>, <em>config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<p>The natural language processor is the MindMeld component responsible for understanding
+the user input using a hierarchy of natural language processing models.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.domain_classifier">
+<code class="descname">domain_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.domain_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>DomainClassifier</em> – The domain classifier for this application.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.extract_allowed_intents">
+<code class="descname">extract_allowed_intents</code><span class="sig-paren">(</span><em>allowed_intents</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.extract_allowed_intents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.extract_allowed_intents" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function validates a user inputted list of allowed_intents against the NLP
+hierarchy and construct a hierarchy dictionary as follows: <code class="docutils literal"><span class="pre">{domain:</span> <span class="pre">{intent:</span> <span class="pre">{}}</span></code> if
+the validation of allowed_intents has passed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of allowable intents in the format “domain.intent”.                 If all intents need to be included, the syntax is “domain.*”.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of NLP hierarchy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.inspect">
+<code class="descname">inspect</code><span class="sig-paren">(</span><em>markup</em>, <em>domain=None</em>, <em>intent=None</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.inspect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.inspect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inspect the marked up query and print the table of features and weights.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>markup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The marked up query string.</li>
+<li><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The gold value for domain classification.</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The gold value for intent classification.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.print_inspect_stats">
+<em class="property">static </em><code class="descname">print_inspect_stats</code><span class="sig-paren">(</span><em>stats</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.print_inspect_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.print_inspect_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints formatted output matrix</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>query_text</em>, <em>allowed_nlp_classes=None</em>, <em>allowed_intents=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the full hierarchy of natural language processing models         trained for this application.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A list of allowed intents to use for                 the NLP processing.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and
+ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code. This parameter is
+ignored deprecated this is an application level parameter.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the full hierarchy of natural language processing models to the input                 query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>query</em>, <em>allowed_nlp_classes=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the full hierarchy of natural language processing models         trained for this application.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent. If                 <code class="docutils literal"><span class="pre">allowed_nlp_classes</span></code> is <code class="docutils literal"><span class="pre">None</span></code>, we just use the normal model predict                 functionality.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the full hierarchy of natural language processing models to the input                 query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.NaturalLanguageProcessor.domains">
+<code class="descname">domains</code><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>The domains supported by this application.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.nlp.Processor">
+<em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">Processor</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader=None</em>, <em>config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<p>A generic base class for processing queries through the MindMeld NLP
+components.</p>
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.Processor.resource_loader">
+<code class="descname">resource_loader</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.resource_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>ResourceLoader</em> – An object which can load resources for the processor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.Processor.dirty">
+<code class="descname">dirty</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.dirty" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Indicates whether the processor has unsaved changes to
+its models.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.Processor.ready">
+<code class="descname">ready</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.ready" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Indicates whether the processor is ready to process
+messages.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.build">
+<code class="descname">build</code><span class="sig-paren">(</span><em>incremental=False</em>, <em>label_set=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds all the natural language processing models for this processor and its children.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>incremental</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – When <code class="docutils literal"><span class="pre">True</span></code>, only build models whose training data or
+configuration has changed since the last build. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.8)"><em>string</em></a><em>, </em><em>optional</em>) – The label set from which to train all classifiers.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.create_query">
+<code class="descname">create_query</code><span class="sig-paren">(</span><em>query_text</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.create_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.create_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a query with the given text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – Text or list of texts to create a query object for.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
+‘America/Los_Angeles’, or ‘Asia/Kolkata’
+See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A newly constructed query or tuple of queries.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(Query)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves all the natural language processing models for this processor and its children to
+disk.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>print_stats=False</em>, <em>label_set=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates all the natural language processing models for this processor and its
+children.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>print_stats</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, prints the full stats table. Otherwise prints just
+the accuracy</li>
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The label set from which to evaluate
+all classifiers.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>incremental_timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads all the natural language processing models for this processor and its children
+from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The incremental timestamp value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>query_text</em>, <em>allowed_nlp_classes=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the full hierarchy of natural language processing models         trained for this application.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code. This parameter is
+deprecated deprecated this is an application level parameter.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                  applying the full hierarchy of natural language processing models to the input                  query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.nlp.Processor.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>query</em>, <em>allowed_nlp_classes=None</em>, <em>dynamic_resource=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the given query using the full hierarchy of natural language processing models         trained for this application.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference             verbose (bool, optional): If True, returns class probabilities along with class                 prediction.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A processed query object that contains the prediction results from                 applying the full hierarchy of natural language processing models to the input                 query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ProcessedQuery)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.Processor.incremental_timestamp">
+<code class="descname">incremental_timestamp</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.incremental_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>The incremental timestamp of this processor (str).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.nlp.Processor.instance_map">
+<code class="descname">instance_map</code><em class="property"> = {}</em><a class="headerlink" href="#mindmeld.components.nlp.Processor.instance_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>The map of identity to instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.components.nlp.restart_subprocesses">
+<code class="descclassname">mindmeld.components.nlp.</code><code class="descname">restart_subprocesses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#restart_subprocesses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.restart_subprocesses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restarts the process pool executor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.components.nlp.subproc_call_instance_function">
+<code class="descclassname">mindmeld.components.nlp.</code><code class="descname">subproc_call_instance_function</code><span class="sig-paren">(</span><em>instance_id</em>, <em>func_name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#subproc_call_instance_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.subproc_call_instance_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>A module function used as a trampoline to call an instance function
+from within a long running child process.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>instance_id</strong> (<em>number</em>) – id(inst) of the Processor instance that needs called</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The result of the called function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

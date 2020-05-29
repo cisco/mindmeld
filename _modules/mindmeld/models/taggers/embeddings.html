@@ -1,0 +1,635 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.embeddings &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.embeddings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.taggers.embeddings</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlretrieve</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">...exceptions</span> <span class="k">import</span> <span class="n">EmbeddingDownloadError</span>
+<span class="kn">from</span> <span class="nn">...path</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+    <span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">,</span>
+    <span class="n">PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+    <span class="n">PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">GLOVE_DOWNLOAD_LINK</span> <span class="o">=</span> <span class="s2">&quot;http://nlp.stanford.edu/data/glove.6B.zip&quot;</span>
+<span class="n">EMBEDDING_FILE_PATH_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;glove.6B.</span><span class="si">{}</span><span class="s2">d.txt&quot;</span>
+<span class="n">ALLOWED_WORD_EMBEDDING_DIMENSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="TqdmUpTo"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.TqdmUpTo">[docs]</a><span class="k">class</span> <span class="nc">TqdmUpTo</span><span class="p">(</span><span class="n">tqdm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provides `update_to(n)` which uses `tqdm.update(delta_n)`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TqdmUpTo.update_to"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.TqdmUpTo.update_to">[docs]</a>    <span class="k">def</span> <span class="nf">update_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bsize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reports update statistics on the download progress.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            b (int): Number of blocks transferred so far [default: 1].</span>
+<span class="sd">            bsize (int): Size of each block (in tqdm units) [default: 1].</span>
+<span class="sd">            tsize (int): Total size (in tqdm units). If [default: None] remains unchanged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">tsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">bsize</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># will also set self.n = b * bsize</span></div></div>
+
+
+<div class="viewcode-block" id="GloVeEmbeddingsContainer"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer">[docs]</a><span class="k">class</span> <span class="nc">GloVeEmbeddingsContainer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class is responsible for the downloading, extraction and storing of</span>
+<span class="sd">    word embeddings based on the GloVe format.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_dimension</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">token_pretrained_embedding_filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_pretrained_embedding_filepath</span> <span class="o">=</span> <span class="n">token_pretrained_embedding_filepath</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span> <span class="o">=</span> <span class="n">token_dimension</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_WORD_EMBEDDING_DIMENSIONS</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Token dimension </span><span class="si">%s</span><span class="s2"> not supported, &quot;</span>
+                <span class="s2">&quot;chose from these dimensions: </span><span class="si">%s</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;Selected 300 by default&quot;</span><span class="p">,</span>
+                <span class="n">token_dimension</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">ALLOWED_WORD_EMBEDDING_DIMENSIONS</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span> <span class="o">=</span> <span class="mi">300</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">word_to_embedding</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GloVeEmbeddingsContainer.get_pretrained_word_to_embeddings_dict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.GloVeEmbeddingsContainer.get_pretrained_word_to_embeddings_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_pretrained_word_to_embeddings_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the word to embedding dict.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): word to embedding mapping.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_to_embedding</span></div>
+
+    <span class="k">def</span> <span class="nf">_download_embeddings_and_return_zip_handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Downloading embedding from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">GLOVE_DOWNLOAD_LINK</span><span class="p">)</span>
+
+        <span class="c1"># Make the folder that will contain the embeddings</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">EMBEDDINGS_FOLDER_PATH</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">TqdmUpTo</span><span class="p">(</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">unit_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">miniters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">GLOVE_DOWNLOAD_LINK</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">urlretrieve</span><span class="p">(</span>
+                    <span class="n">GLOVE_DOWNLOAD_LINK</span><span class="p">,</span> <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="n">reporthook</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">update_to</span>
+                <span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;There was an issue downloading from this &quot;</span>
+                    <span class="s2">&quot;link </span><span class="si">%s</span><span class="s2"> with the following error: &quot;</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">GLOVE_DOWNLOAD_LINK</span><span class="p">,</span>
+                    <span class="n">e</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">EMBEDDING_FILE_PATH_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span><span class="p">)</span>
+            <span class="n">zip_file_object</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">file_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">zip_file_object</span><span class="o">.</span><span class="n">namelist</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Embedding file with </span><span class="si">%s</span><span class="s2"> dimensions &quot;</span> <span class="s2">&quot;not found&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="k">return</span> <span class="n">zip_file_object</span>
+
+    <span class="k">def</span> <span class="nf">_extract_and_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glove_file</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">glove_file</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">word_to_embedding</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="o">=</span> <span class="n">coefs</span>
+
+    <span class="k">def</span> <span class="nf">_extract_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_pretrained_embedding_filepath</span>
+
+        <span class="k">if</span> <span class="n">file_location</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_location</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Extracting embeddings from provided &quot;</span> <span class="s2">&quot;file location </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">file_location</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_location</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">embedding_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extract_and_map</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Provided file location </span><span class="si">%s</span><span class="s2"> does not exist.&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_location</span><span class="p">))</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">EMBEDDING_FILE_PATH_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_dimension</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Extracting embeddings from default folder &quot;</span> <span class="s2">&quot;location </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">zip_file_object</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">zip_file_object</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">embedding_file</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_extract_and_map</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is corrupt. Deleting the zip file and attempting to&quot;</span>
+                    <span class="s2">&quot; download the embedding file again&quot;</span><span class="p">,</span>
+                    <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;An error occurred when reading </span><span class="si">%s</span><span class="s2"> zip file. The file might&quot;</span>
+                    <span class="s2">&quot; be corrupt, so try deleting the file and running the program &quot;</span>
+                    <span class="s2">&quot;again&quot;</span><span class="p">,</span>
+                    <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Default folder location </span><span class="si">%s</span><span class="s2"> does not exist.&quot;</span><span class="p">,</span> <span class="n">EMBEDDINGS_FILE_PATH</span><span class="p">)</span>
+
+        <span class="n">zip_file_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_embeddings_and_return_zip_handle</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zip_file_object</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EmbeddingDownloadError</span><span class="p">(</span><span class="s2">&quot;Failed to download embeddings.&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">zip_file_object</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">embedding_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extract_and_map</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="WordSequenceEmbedding"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.WordSequenceEmbedding">[docs]</a><span class="k">class</span> <span class="nc">WordSequenceEmbedding</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;WordSequenceEmbedding encodes a sequence of words into a sequence of fixed</span>
+<span class="sd">    dimension real-numbered vectors by mapping each word as a vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sequence_padding_length</span><span class="p">,</span>
+        <span class="n">token_embedding_dimension</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">token_pretrained_embedding_filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the WordSequenceEmbedding class</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_padding_length (int): padding length of the sequence after which</span>
+<span class="sd">            the sequence is cut off</span>
+<span class="sd">            token_embedding_dimension (int): The embedding dimension of the token</span>
+<span class="sd">            token_pretrained_embedding_filepath (str): The embedding filepath to</span>
+<span class="sd">            extract the embeddings from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span> <span class="o">=</span> <span class="n">token_embedding_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span> <span class="o">=</span> <span class="n">sequence_padding_length</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span> <span class="o">=</span> <span class="n">GloVeEmbeddingsContainer</span><span class="p">(</span>
+            <span class="n">token_embedding_dimension</span><span class="p">,</span> <span class="n">token_pretrained_embedding_filepath</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">get_pretrained_word_to_embeddings_dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_historic_embeddings</span><span class="p">()</span>
+
+<div class="viewcode-block" id="WordSequenceEmbedding.encode_sequence_of_tokens"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.WordSequenceEmbedding.encode_sequence_of_tokens">[docs]</a>    <span class="k">def</span> <span class="nf">encode_sequence_of_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_sequence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Encodes a sequence of tokens into real value vectors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token_sequence (list): A sequence of tokens.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): Encoded sequence of tokens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">default_encoding</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">)</span>
+        <span class="n">encoded_query</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_encoding</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">token_sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">encoded_query</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">encoded_query</span></div>
+
+    <span class="k">def</span> <span class="nf">_encode_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Encodes a token to its corresponding embedding</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token (str): Individual token</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            corresponding embedding</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">:</span>
+            <span class="n">random_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">,)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">token</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_vector</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_add_historic_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">historic_word_embeddings</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># load historic word embeddings</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH</span><span class="p">):</span>
+            <span class="n">pkl_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">historic_word_embeddings</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pkl_file</span><span class="p">)</span>
+            <span class="n">pkl_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">historic_word_embeddings</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">historic_word_embeddings</span><span class="p">[</span><span class="n">word</span><span class="p">])</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="o">=</span> <span class="n">historic_word_embeddings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">word</span>
+                <span class="p">)</span>
+
+<div class="viewcode-block" id="WordSequenceEmbedding.save_embeddings"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.WordSequenceEmbedding.save_embeddings">[docs]</a>    <span class="k">def</span> <span class="nf">save_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save extracted embeddings to historic pickle file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="CharacterSequenceEmbedding"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding">[docs]</a><span class="k">class</span> <span class="nc">CharacterSequenceEmbedding</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;CharacterSequenceEmbedding encodes a sequence of words into a sequence of fixed</span>
+<span class="sd">    dimension real-numbered vectors by mapping each character in the words as vectors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sequence_padding_length</span><span class="p">,</span>
+        <span class="n">token_embedding_dimension</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_char_per_word</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the CharacterSequenceEmbedding class</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_padding_length (int): padding length of the sequence after which</span>
+<span class="sd">            the sequence is cut off</span>
+<span class="sd">            token_embedding_dimension (int): The embedding dimension of the token</span>
+<span class="sd">            max_char_per_word (int): The maximum number of characters per word</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span> <span class="o">=</span> <span class="n">token_embedding_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span> <span class="o">=</span> <span class="n">sequence_padding_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span> <span class="o">=</span> <span class="n">max_char_per_word</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_historic_embeddings</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CharacterSequenceEmbedding.encode_sequence_of_tokens"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.encode_sequence_of_tokens">[docs]</a>    <span class="k">def</span> <span class="nf">encode_sequence_of_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_sequence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Encodes a sequence of tokens into real value vectors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token_sequence (list): A sequence of tokens.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): Encoded sequence of tokens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">default_encoding</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">)</span>
+        <span class="n">default_char_word</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_encoding</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span>
+        <span class="n">encoded_query</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_char_word</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word_token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">token_sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_padding_length</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">encoded_word</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_encoding</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span>
+            <span class="k">for</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">char_token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">word_token</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx2</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_char_per_word</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_encode_token</span><span class="p">(</span><span class="n">char_token</span><span class="p">)</span>
+                <span class="n">encoded_word</span><span class="p">[</span><span class="n">idx2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">char_token</span><span class="p">]</span>
+
+            <span class="n">encoded_query</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_word</span>
+        <span class="k">return</span> <span class="n">encoded_query</span></div>
+
+    <span class="k">def</span> <span class="nf">_encode_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Encodes a token to its corresponding embedding</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token (str): Individual token</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            corresponding embedding</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">:</span>
+            <span class="n">random_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_embedding_dimension</span><span class="p">,)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">token</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_vector</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_add_historic_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">historic_char_embeddings</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># load historic word embeddings</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH</span><span class="p">):</span>
+            <span class="n">pkl_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">historic_char_embeddings</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pkl_file</span><span class="p">)</span>
+            <span class="n">pkl_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">historic_char_embeddings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">[</span><span class="n">char</span><span class="p">]</span> <span class="o">=</span> <span class="n">historic_char_embeddings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CharacterSequenceEmbedding.save_embeddings"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.embeddings.html#mindmeld.models.taggers.embeddings.CharacterSequenceEmbedding.save_embeddings">[docs]</a>    <span class="k">def</span> <span class="nf">save_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save extracted embeddings to historic pickle file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_to_embedding_mapping</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

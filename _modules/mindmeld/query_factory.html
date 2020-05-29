@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.query_factory &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.query_factory</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.query_factory</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the query factory class.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">,</span> <span class="n">TEXT_FORM_PROCESSED</span><span class="p">,</span> <span class="n">TEXT_FORM_RAW</span><span class="p">,</span> <span class="n">Query</span>
+<span class="kn">from</span> <span class="nn">.stemmers</span> <span class="k">import</span> <span class="n">get_language_stemmer</span>
+<span class="kn">from</span> <span class="nn">.tokenizer</span> <span class="k">import</span> <span class="n">Tokenizer</span>
+<span class="kn">from</span> <span class="nn">.components._config</span> <span class="k">import</span> <span class="n">get_language_config</span>
+<span class="kn">from</span> <span class="nn">.system_entity_recognizer</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">NoOpSystemEntityRecognizer</span><span class="p">,</span>
+    <span class="n">SystemEntityRecognizer</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="QueryFactory"><a class="viewcode-back" href="../../apidoc/mindmeld.query_factory.html#mindmeld.query_factory.QueryFactory">[docs]</a><span class="k">class</span> <span class="nc">QueryFactory</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An object which encapsulates the components required to create a Query object.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        preprocessor (Preprocessor): the object responsible for processing raw text</span>
+<span class="sd">        tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed</span>
+<span class="sd">            text</span>
+<span class="sd">        stemmer (Stemmer): the object responsible for stemming the text</span>
+<span class="sd">        language (str): the language of the text</span>
+<span class="sd">        locale (str): the locale of the text</span>
+<span class="sd">        system_entity_recognizer (SystemEntityRecognizer): default to NoOpSystemEntityRecognizer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">,</span>
+        <span class="n">preprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stemmer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">system_entity_recognizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">preprocessor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">=</span> <span class="n">stemmer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locale</span> <span class="o">=</span> <span class="n">locale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_recognizer</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">system_entity_recognizer</span> <span class="ow">or</span> <span class="n">NoOpSystemEntityRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="QueryFactory.create_query"><a class="viewcode-back" href="../../apidoc/mindmeld.query_factory.html#mindmeld.query_factory.QueryFactory.create_query">[docs]</a>    <span class="k">def</span> <span class="nf">create_query</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a query with the given text.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Text to create a query object for</span>
+<span class="sd">            time_zone (str, optional): An IANA time zone id to create the query relative to.</span>
+<span class="sd">            timestamp (int, optional): A reference unix timestamp to create the query relative to,</span>
+<span class="sd">                in seconds.</span>
+<span class="sd">            locale (str, optional): The locale representing the ISO 639-1 language code and \</span>
+<span class="sd">                ISO3166 alpha 2 country code separated by an underscore character.</span>
+<span class="sd">            language (str, optional): Language as specified using a 639-1/2 code</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Query: A newly constructed query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">language</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">locale</span><span class="p">:</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span>
+            <span class="n">locale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">locale</span>
+
+        <span class="n">raw_text</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="n">char_maps</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># create raw, processed maps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="p">:</span>
+            <span class="n">processed_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">raw_text</span><span class="p">)</span>
+            <span class="n">maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">get_char_index_map</span><span class="p">(</span><span class="n">raw_text</span><span class="p">,</span> <span class="n">processed_text</span><span class="p">)</span>
+            <span class="n">forward</span><span class="p">,</span> <span class="n">backward</span> <span class="o">=</span> <span class="n">maps</span>
+            <span class="n">char_maps</span><span class="p">[(</span><span class="n">TEXT_FORM_RAW</span><span class="p">,</span> <span class="n">TEXT_FORM_PROCESSED</span><span class="p">)]</span> <span class="o">=</span> <span class="n">forward</span>
+            <span class="n">char_maps</span><span class="p">[(</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">,</span> <span class="n">TEXT_FORM_RAW</span><span class="p">)]</span> <span class="o">=</span> <span class="n">backward</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">processed_text</span> <span class="o">=</span> <span class="n">raw_text</span>
+
+        <span class="n">normalized_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">processed_text</span><span class="p">)</span>
+        <span class="n">normalized_text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">normalized_tokens</span><span class="p">])</span>
+
+        <span class="c1"># stemmed tokens</span>
+        <span class="n">stemmed_tokens</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem_word</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">normalized_tokens</span>
+        <span class="p">]</span>
+
+        <span class="c1"># create normalized maps</span>
+        <span class="n">maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_char_index_map</span><span class="p">(</span><span class="n">processed_text</span><span class="p">,</span> <span class="n">normalized_text</span><span class="p">)</span>
+        <span class="n">forward</span><span class="p">,</span> <span class="n">backward</span> <span class="o">=</span> <span class="n">maps</span>
+
+        <span class="n">char_maps</span><span class="p">[(</span><span class="n">TEXT_FORM_PROCESSED</span><span class="p">,</span> <span class="n">TEXT_FORM_NORMALIZED</span><span class="p">)]</span> <span class="o">=</span> <span class="n">forward</span>
+        <span class="n">char_maps</span><span class="p">[(</span><span class="n">TEXT_FORM_NORMALIZED</span><span class="p">,</span> <span class="n">TEXT_FORM_PROCESSED</span><span class="p">)]</span> <span class="o">=</span> <span class="n">backward</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span>
+            <span class="n">raw_text</span><span class="p">,</span>
+            <span class="n">processed_text</span><span class="p">,</span>
+            <span class="n">normalized_tokens</span><span class="p">,</span>
+            <span class="n">char_maps</span><span class="p">,</span>
+            <span class="n">locale</span><span class="o">=</span><span class="n">locale</span><span class="p">,</span>
+            <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+            <span class="n">time_zone</span><span class="o">=</span><span class="n">time_zone</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">stemmed_tokens</span><span class="o">=</span><span class="n">stemmed_tokens</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">query</span><span class="o">.</span><span class="n">system_entity_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_entity_recognizer</span><span class="o">.</span><span class="n">get_candidates</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="n">locale</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">language</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">query</span></div>
+
+<div class="viewcode-block" id="QueryFactory.normalize"><a class="viewcode-back" href="../../apidoc/mindmeld.query_factory.html#mindmeld.query_factory.QueryFactory.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Normalizes the given text.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Text to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Normalized text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> id: </span><span class="si">{!r}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+<div class="viewcode-block" id="QueryFactory.create_query_factory"><a class="viewcode-back" href="../../apidoc/mindmeld.query_factory.html#mindmeld.query_factory.QueryFactory.create_query_factory">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_query_factory</span><span class="p">(</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">preprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stemmer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">system_entity_recognizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a query factory for the application.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_path (str, optional): The path to the directory containing the</span>
+<span class="sd">                app&#39;s data. If None is passed, a default query factory will be</span>
+<span class="sd">                returned.</span>
+<span class="sd">            tokenizer (Tokenizer, optional): The app&#39;s tokenizer. One will be</span>
+<span class="sd">                created if none is provided</span>
+<span class="sd">            preprocessor (Processor, optional): The app&#39;s preprocessor.</span>
+<span class="sd">            stemmer (Stemmer, optional): The stemmer to use for stemming</span>
+<span class="sd">            system_entity_recognizer (SystemEntityRecognizer): If not passed, we use either the one</span>
+<span class="sd">                from the application&#39;s configuration or NoOpSystemEntityRecognizer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QueryFactory: A QueryFactory object that is used to create Query objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">language</span><span class="p">,</span> <span class="n">locale</span> <span class="o">=</span> <span class="n">get_language_config</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span> <span class="ow">or</span> <span class="n">Tokenizer</span><span class="o">.</span><span class="n">create_tokenizer</span><span class="p">()</span>
+        <span class="n">stemmer</span> <span class="o">=</span> <span class="n">stemmer</span> <span class="ow">or</span> <span class="n">get_language_stemmer</span><span class="p">(</span><span class="n">language_code</span><span class="o">=</span><span class="n">language</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">system_entity_recognizer</span><span class="p">:</span>
+            <span class="n">sys_entity_recognizer</span> <span class="o">=</span> <span class="n">system_entity_recognizer</span>
+        <span class="k">elif</span> <span class="n">app_path</span><span class="p">:</span>
+            <span class="n">sys_entity_recognizer</span> <span class="o">=</span> <span class="n">SystemEntityRecognizer</span><span class="o">.</span><span class="n">load_from_app_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys_entity_recognizer</span> <span class="o">=</span> <span class="n">NoOpSystemEntityRecognizer</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">QueryFactory</span><span class="p">(</span>
+            <span class="n">tokenizer</span><span class="p">,</span>
+            <span class="n">preprocessor</span><span class="p">,</span>
+            <span class="n">stemmer</span><span class="p">,</span>
+            <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+            <span class="n">locale</span><span class="o">=</span><span class="n">locale</span><span class="p">,</span>
+            <span class="n">system_entity_recognizer</span><span class="o">=</span><span class="n">sys_entity_recognizer</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

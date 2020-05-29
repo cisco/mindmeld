@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.memm &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.memm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.taggers.memm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the Memm entity recognizer.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction</span> <span class="k">import</span> <span class="n">DictVectorizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="k">import</span> <span class="n">SelectFromModel</span><span class="p">,</span> <span class="n">SelectPercentile</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">LabelEncoder</span> <span class="k">as</span> <span class="n">SKLabelEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">MaxAbsScaler</span><span class="p">,</span> <span class="n">StandardScaler</span>
+
+<span class="kn">from</span> <span class="nn">.taggers</span> <span class="k">import</span> <span class="n">START_TAG</span><span class="p">,</span> <span class="n">Tagger</span><span class="p">,</span> <span class="n">extract_sequence_features</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MemmModel"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel">[docs]</a><span class="k">class</span> <span class="nc">MemmModel</span><span class="p">(</span><span class="n">Tagger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A maximum-entropy Markov model.&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">X</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="MemmModel.load"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">model_path</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="MemmModel.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="MemmModel.set_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="MemmModel.get_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MemmModel.predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MemmModel.extract_example_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.extract_example_features">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">extract_example_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extracts feature dicts for each token in an example.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example (mindmeld.core.Query): A query.</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature \</span>
+<span class="sd">                                  extraction.</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[dict]): Features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">extract_sequence_features</span><span class="p">(</span>
+            <span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">example_type</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">resources</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MemmModel.extract_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.extract_features">[docs]</a>    <span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a list of examples into a feature matrix. Use extract_and_predict if you are</span>
+<span class="sd">        extracting features for an example at test time, since the previous tag prediction is needed</span>
+<span class="sd">        as a feature of the next tag.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of core.Query): The examples.</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): tuple containing:</span>
+
+<span class="sd">                * (numpy.matrix): The feature matrix.</span>
+<span class="sd">                * (numpy.array): The group labels for examples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y_flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">y</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">example</span><span class="p">]</span>
+        <span class="n">y_offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">):</span>
+            <span class="n">features_by_segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_example_features</span><span class="p">(</span>
+                <span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span>
+            <span class="p">)</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">features_by_segment</span><span class="p">)</span>
+            <span class="n">groups</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">features_by_segment</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">segment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features_by_segment</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">segment</span><span class="p">[</span><span class="s2">&quot;prev_tag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">START_TAG</span>
+                <span class="k">elif</span> <span class="n">fit</span><span class="p">:</span>
+                    <span class="n">segment</span><span class="p">[</span><span class="s2">&quot;prev_tag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_flat</span><span class="p">[</span><span class="n">y_offset</span> <span class="o">+</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">y_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">features_by_segment</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_flat</span><span class="p">,</span> <span class="n">fit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span></div>
+
+<div class="viewcode-block" id="MemmModel.extract_and_predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.extract_and_predict">[docs]</a>    <span class="k">def</span> <span class="nf">extract_and_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_predict_example</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span>
+        <span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">features_by_segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_example_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features_by_segment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">predicted_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">prev_tag</span> <span class="o">=</span> <span class="n">START_TAG</span>
+        <span class="k">for</span> <span class="n">features</span> <span class="ow">in</span> <span class="n">features_by_segment</span><span class="p">:</span>
+            <span class="n">features</span><span class="p">[</span><span class="s2">&quot;prev_tag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_tag</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data</span><span class="p">([</span><span class="n">features</span><span class="p">])</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">predicted_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">prediction</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">predicted_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predicted_tag</span><span class="p">)</span>
+            <span class="n">prev_tag</span> <span class="o">=</span> <span class="n">predicted_tag</span>
+
+        <span class="k">return</span> <span class="n">predicted_tags</span>
+
+<div class="viewcode-block" id="MemmModel.predict_proba"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_predict_proba_example</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span>
+        <span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict_proba_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">features_by_segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_example_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features_by_segment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">prev_tag</span> <span class="o">=</span> <span class="n">START_TAG</span>
+        <span class="n">seq_log_probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">features</span> <span class="ow">in</span> <span class="n">features_by_segment</span><span class="p">:</span>
+            <span class="n">features</span><span class="p">[</span><span class="s2">&quot;prev_tag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_tag</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data</span><span class="p">([</span><span class="n">features</span><span class="p">])</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">predicted_tag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+            <span class="n">prev_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">predicted_tag</span><span class="p">)</span>
+            <span class="n">seq_log_probs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prev_tag</span><span class="p">,</span> <span class="n">prediction</span><span class="p">[</span><span class="n">predicted_tag</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">seq_log_probs</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_feature_selector</span><span class="p">(</span><span class="n">selector_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a feature selector instance based on the feature_selector model</span>
+<span class="sd">        parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Object): A feature selector which returns a reduced feature matrix, \</span>
+<span class="sd">                given the full feature matrix, X and the class labels, y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;l1&quot;</span><span class="p">:</span> <span class="n">SelectFromModel</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="n">SelectPercentile</span><span class="p">(),</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">selector_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">selector</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_feature_scaler</span><span class="p">(</span><span class="n">scale_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a feature value scaler based on the model settings&quot;&quot;&quot;</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;std-dev&quot;</span><span class="p">:</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;max-abs&quot;</span><span class="p">:</span> <span class="n">MaxAbsScaler</span><span class="p">(),</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scale_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scaler</span>
+
+<div class="viewcode-block" id="MemmModel.setup_model"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.memm.html#mindmeld.models.taggers.memm.MemmModel.setup_model">[docs]</a>    <span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">model_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">selector_type</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">scale_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">selector_type</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;feature_selector&quot;</span><span class="p">)</span>
+            <span class="n">scale_type</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;feature_scaler&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_encoder</span> <span class="o">=</span> <span class="n">SKLabelEncoder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feat_vectorizer</span> <span class="o">=</span> <span class="n">DictVectorizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_selector</span><span class="p">(</span><span class="n">selector_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_scaler</span><span class="p">(</span><span class="n">scale_type</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_selector</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

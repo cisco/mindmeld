@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.converter.dialogflow module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.converter.dialogflow module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.converter.dialogflow.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.converter.dialogflow">
+<span id="mindmeld-converter-dialogflow-module"></span><h1>mindmeld.converter.dialogflow module<a class="headerlink" href="#module-mindmeld.converter.dialogflow" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the DialogflowConverter class used to convert Dialogflow projects
+into Mindmeld projects</p>
+<dl class="class">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter">
+<em class="property">class </em><code class="descclassname">mindmeld.converter.dialogflow.</code><code class="descname">DialogflowConverter</code><span class="sig-paren">(</span><em>dialogflow_project_directory</em>, <em>mindmeld_project_directory</em>, <em>custom_config_file_path=None</em>, <em>language='en'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.converter.converter.html#mindmeld.converter.converter.Converter" title="mindmeld.converter.converter.Converter"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.converter.converter.Converter</span></code></a></p>
+<p>The class is a sub class of the abstract Converter class. This class
+contains the methods required to convert a Dialogflow project into a MindMeld project</p>
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.clean_check">
+<code class="descname">clean_check</code><span class="sig-paren">(</span><em>name</em>, <em>lst</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.clean_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.clean_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a list of strings and a name.
+Returns name cleaned if the cleaned name is not found in lst.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.clean_name">
+<em class="property">static </em><code class="descname">clean_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.clean_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.clean_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a string and returns a valid folder name (no spaces, all lowercase).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.convert_project">
+<code class="descname">convert_project</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.convert_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.convert_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Dialogflow project into a MindMeld project.</p>
+<dl class="docutils">
+<dt>Dialogflow projects consist of entities and intents.</dt>
+<dd><dl class="first last docutils">
+<dt>note on languages:</dt>
+<dd>Dialogflow supports multiple languages and locales. They store their training
+data for different languages in different files. So, the name of each training
+file ends with a meta tag, two letters long for language, and an additional
+two letters for dialect (if applicable). For example, a file ending in “_en-au”
+indicates it’s in English (Australia). Below we use “la” to represent this
+meta tag.</dd>
+<dt>entities folder contains:</dt>
+<dd>entityName.json - Meta data about entityName for all languages.
+entityName_la.json - One for each language, contains entitiy mappings.</dd>
+<dt>intents folder contain:</dt>
+<dd><dl class="first last docutils">
+<dt>intentName.json - Contains rules, information about conversation flow, meta data.</dt>
+<dd>Contains previously mentioned information and responses for all languages.</dd>
+<dt>intentName_usersays_la.json - one for each language,</dt>
+<dd>contains training data to recognize intentName</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Limitations:
+- The converter is unable to create an entity when it encounters an
+unrecognized entity (an entity not defined under entities folder</p>
+<blockquote>
+<div>or system entities), and labels such entities as DNE in training data.</div></blockquote>
+<ul class="simple">
+<li>The converter currently does not automatically convert features like</li>
+</ul>
+<p>slot filling, contexts, and follow-up intents. Users can still implement such
+features and more.
+- Information in agent.json are not copied over.
+- There is no official support for different languages. Users can still
+implement this. The converter is able to successfully convert dialogflow
+bots that support multiple languages.</p>
+<p>Mindmeld:
+- Users can store data locally
+- Users can build a knowledge base (currently beta in Dialogflow).
+- Users can configure the machine learning models to best suit their needs.
+- Users have more flexibility in defining their own features, including</p>
+<blockquote>
+<div>ones like slot filling, contexts, and follow-up intents.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_directory">
+<code class="descname">create_mindmeld_directory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_init">
+<code class="descname">create_mindmeld_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_training_data">
+<code class="descname">create_mindmeld_training_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_training_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_training_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.generate_handlers">
+<code class="descname">generate_handlers</code><span class="sig-paren">(</span><em>intent</em>, <em>response</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.generate_handlers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.generate_handlers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map">
+<code class="descname">sys_entity_map</code><em class="property"> = {'&#64;sys.date-time': 'sys_interval', '&#64;sys.date': 'sys_time', '&#64;sys.date-period': 'sys_interval', '&#64;sys.time': 'sys_time', '&#64;sys.time-period': 'sys_duration', '&#64;sys.duration': 'sys_duration', '&#64;sys.number': 'sys_number', '&#64;sys.cardinal': 'sys_number', '&#64;sys.ordinal': 'sys_ordinal', '&#64;sys.unit-currency': 'sys_amount-of-money', '&#64;sys.unit-volume': 'sys_volume', '&#64;sys.email': 'sys_email', '&#64;sys.phone-number': 'sys_phone-number', '&#64;sys.url': 'sys_url', '&#64;sys.temperature': 'sys_temperature'}</em><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map_todo">
+<code class="descname">sys_entity_map_todo</code><em class="property"> = ['&#64;sys.number-integer', '&#64;sys.number-sequence', '&#64;sys.flight-number', '&#64;sys.unit-area', '&#64;sys.unit-length', '&#64;sys.unit-speed', '&#64;sys.unit-information', '&#64;sys.percentage', '&#64;sys.age', '&#64;sys.currency-name', '&#64;sys.unit-area-name', '&#64;sys.unit-length-name', '&#64;sys.unit-speed-name', '&#64;sys.unit-volume-name', '&#64;sys.unit-weight-name', '&#64;sys.unit-information-name', '&#64;sys.address', '&#64;sys.zip-code', '&#64;sys.geo-capital', '&#64;sys.geo-country', '&#64;sys.geo-country-code', '&#64;sys.geo-city', '&#64;sys.geo-state', '&#64;sys.geo-city', '&#64;sys.geo-state', '&#64;sys.place-attraction', '&#64;sys.airport', '&#64;sys.location', '&#64;sys.given-name', '&#64;sys.last-name', '&#64;sys.person', '&#64;sys.music-artist', '&#64;sys.music-genre', '&#64;sys.color', '&#64;sys.language', '&#64;sys.any']</em><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map_todo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

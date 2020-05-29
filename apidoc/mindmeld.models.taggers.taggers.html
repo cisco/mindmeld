@@ -1,0 +1,679 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.taggers module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.taggers module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.models.taggers.taggers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.models.taggers.taggers">
+<span id="mindmeld-models-taggers-taggers-module"></span><h1>mindmeld.models.taggers.taggers module<a class="headerlink" href="#module-mindmeld.models.taggers.taggers" title="Permalink to this headline">¶</a></h1>
+<p>This module contains all code required to perform sequence tagging.</p>
+<dl class="class">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">BoundaryCounts</code><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#BoundaryCounts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class stores the counts of the boundary evaluation metrics.</p>
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.le">
+<code class="descname">le</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.le" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Label error count. This is when the span is the same but the entity
+label is incorrect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.be">
+<code class="descname">be</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.be" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Boundary error count. This is when the entity type is correct but the span is
+incorrect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.lbe">
+<code class="descname">lbe</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.lbe" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Label boundary error count. This is when both the entity type and span are
+incorrect, but there was an entity predicted</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.tp">
+<code class="descname">tp</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.tp" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – True positive count. When an entity was correctly predicted</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.tn">
+<code class="descname">tn</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.tn" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – True negative count. Count of times it was correctly predicted that there is no
+entity</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.fp">
+<code class="descname">fp</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.fp" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – False positive count. When an entity was predicted but one shouldn’t have been</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.fn">
+<code class="descname">fn</code><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.fn" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – False negative count. When an entity was not predicted where one should have been</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.BoundaryCounts.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#BoundaryCounts.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.BoundaryCounts.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the object to a dictionary</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.models.taggers.taggers.Tagger">
+<em class="property">class </em><code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">Tagger</code><span class="sig-paren">(</span><em>**parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A class for all sequence tagger models implemented in house.
+It is importent to follow this interface exactly when implementing a new model so that your
+model is configured and trained as expected in the MindMeld pipeline. Note that this follows
+the sklearn estimator interface so that GridSearchCV can be used on our sequence models.</p>
+<dl class="staticmethod">
+<dt id="mindmeld.models.taggers.taggers.Tagger.dump">
+<em class="property">static </em><code class="descname">dump</code><span class="sig-paren">(</span><em>model_path</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since traditional SKLearn models are easily serializable, we can
+use JobLib to serialize them. So we alter the context object to make
+this explicit.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to dump the model to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The altered config object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">config (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.extract_and_predict">
+<code class="descname">extract_and_predict</code><span class="sig-paren">(</span><em>examples</em>, <em>config</em>, <em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.extract_and_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.extract_and_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does both feature extraction and prediction. Often necessary for sequence models when the
+prediction of the previous example is used as a feature for the next example. If this is
+not the case, extract is simply called before predict here. Note that the MindMeld config
+and resources are passed in each time to make the underlying model implementation stateless.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – A list of queries to extract features for and
+predict</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+extraction</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of predicted labels (in encoded format)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of classification labels)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.extract_features">
+<code class="descname">extract_features</code><span class="sig-paren">(</span><em>examples</em>, <em>config</em>, <em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.extract_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.extract_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts all features from a list of MindMeld examples. Processes the data and returns the
+features in the format that is expected as an input to fit(). Note that the MindMeld config
+and resources are passed in each time to make the underlying model implementation stateless.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – A list of queries to extract features for</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+extraction</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple containing:</p>
+<blockquote>
+<div><ul class="simple">
+<li>(list of feature vectors): X</li>
+<li>(list of labels): y</li>
+<li>(list of groups): A list of groups to be used for splitting with                     sklearn GridSearchCV</li>
+</ul>
+</div></blockquote>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the model. X and y are the format of what is returned by extract_features. There is no
+restriction on their type or content. X should be the fully processed data with extracted
+features that are ready to be used to train the model. y should be a list of classes as
+encoded by the label_encoder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Generally a list of feature vectors, one for each training example</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of classification labels (encoded by the label_encoder, NOT MindMeld
+entity objects)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary of all of the current model parameters and their values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>deep</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Not used, needed for sklearn compatibility</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of the model parameter names as keys and their set values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mindmeld.models.taggers.taggers.Tagger.load">
+<em class="property">static </em><code class="descname">load</code><span class="sig-paren">(</span><em>model_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the model state to memory. This is a no-op since we do not
+have to do anything special to load default serializable models
+for SKLearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to dump the model to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the labels from a feature matrix X. Again X is the format of what is returned by
+extract_features.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of feature vectors, one for each example</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of predicted labels (in an encoded format)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(list of classification labels)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>examples</em>, <em>config</em>, <em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – A list of queries to extract features for and
+predict</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+extraction</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of predicted labels (in encoded format) and confidence scores</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of lists)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.set_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the model parameters. Defaults should be set for all parameters such that a model
+is initialized with reasonable default parameters if none are explicitly passed in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**parameters</strong> – Arbitrary keyword arguments. The keys are model parameter names and the
+values are what they should be set to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.taggers.taggers.Tagger.setup_model">
+<code class="descname">setup_model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#Tagger.setup_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.Tagger.setup_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Not implemented.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.taggers.taggers.extract_sequence_features">
+<code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">extract_sequence_features</code><span class="sig-paren">(</span><em>example</em>, <em>example_type</em>, <em>feature_config</em>, <em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#extract_sequence_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.extract_sequence_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts feature dicts for each token in an example.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>example</strong> (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.Query" title="mindmeld.core.Query"><em>mindmeld.core.Query</em></a>) – a query</li>
+<li><strong>example_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of example</li>
+<li><strong>feature_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The config for features</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources of this model</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">features</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of dict)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.taggers.taggers.get_boundary_counts">
+<code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">get_boundary_counts</code><span class="sig-paren">(</span><em>expected_sequence</em>, <em>predicted_sequence</em>, <em>boundary_counts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#get_boundary_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.get_boundary_counts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the boundary counts for the expected and predicted sequence of entities.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.taggers.taggers.get_entities_from_tags">
+<code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">get_entities_from_tags</code><span class="sig-paren">(</span><em>query</em>, <em>tags</em>, <em>system_entity_recognizer</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#get_entities_from_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.get_entities_from_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a set of joint IOB tags, parse the app and system entities.</p>
+<p>This performs the reverse operation of get_tags_from_entities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – Any query instance.</li>
+<li><strong>tags</strong> (<em>list of str</em>) – Joint app and system tags, like those
+created by get_tags_from_entities.</li>
+<li><strong>system_entity_recognizer</strong> (<em>SystemEntityRecognizer</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(list of QueryEntity) The tuple containing the list of entities.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.taggers.taggers.get_tags_from_entities">
+<code class="descclassname">mindmeld.models.taggers.taggers.</code><code class="descname">get_tags_from_entities</code><span class="sig-paren">(</span><em>query</em>, <em>entities</em>, <em>scheme='IOB'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/taggers.html#get_tags_from_entities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.taggers.get_tags_from_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get joint app and system IOB tags from a query’s entities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) – A query instance.</li>
+<li><strong>entities</strong> (<em>List of QueryEntity</em>) – A list of queries found in the query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The tags for each token in the query. A tag has four             parts separated by ‘|’. The first two are the IOB status for             app entities followed by the type of app entity or             ‘’ if the IOB status is ‘O’. The last two are like the first two,             but for system entities.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

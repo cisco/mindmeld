@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with User-Defined Features &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Knowledge Base and Question Answerer" href="kb.html" />
+    <link rel="prev" title="Working with the Language Parser" href="parser.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with User-Defined Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-features-file">Custom Features File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-of-a-query-feature-extractor">Example of a Query Feature Extractor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-of-an-entity-feature-extractor">Example of an Entity Feature Extractor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with User-Defined Features</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/custom_features.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-user-defined-features">
+<h1>Working with User-Defined Features<a class="headerlink" href="#working-with-user-defined-features" title="Permalink to this headline">¶</a></h1>
+<p>In addition to the features available for each NLP classifier in MindMeld,
+you can also define your own custom feature extractors that are relevant to your application.
+User-defined features must follow the same format as MindMeld’s in-built features.
+In this section, we will examine the components of a feature extractor function and
+explain how to write your own custom features.</p>
+<div class="section" id="custom-features-file">
+<h2>Custom Features File<a class="headerlink" href="#custom-features-file" title="Permalink to this headline">¶</a></h2>
+<p>Start by creating a new Python file, say <code class="docutils literal"><span class="pre">custom_features.py</span></code>, that will contain the definitions
+of all your custom feature extractors. If your MindMeld project was created using the “template”
+blueprint or adapted from an existing blueprint application, you should already have this file at
+the root level of your project directory. If you created your
+MindMeld project from scratch, you can refer to any of the blueprints for an example of the
+custom features file.</p>
+<p>In order to use your custom features, the custom features file must be imported in the
+<code class="docutils literal"><span class="pre">__init__.py</span></code> file. For example, in the Home Assistant blueprint app you can import
+a custom features file named <code class="docutils literal"><span class="pre">custom_features.py</span></code> by adding the following line to the
+<code class="docutils literal"><span class="pre">__init__.py</span></code> file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">home_assistant.custom_features</span>
+</pre></div>
+</div>
+<p>You can then reference your newly defined features in the classifier
+configurations you specify in the application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>.</p>
+<p>The Natural Language Processor uses two kinds of features. <strong>Query features</strong> can be used in
+domain, intent, and entity model configs, and are extracted by feature extractors that operate on
+the entire input query. <strong>Entity Features</strong>, on the other hand, can only be used in the role
+classifier config, and are extracted by feature extractors that operate on a single extracted
+entity. An example for each kind of feature extractor is provided in the following sections.</p>
+<p>To summarize, in order to implement and use your own custom features, you must do the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Define your feature extractors in a <code class="docutils literal"><span class="pre">.py</span></code> file (referred to as the <em>custom features file</em>)</li>
+<li>Import the custom features file in <code class="docutils literal"><span class="pre">__init__.py</span></code>.</li>
+<li>Add your newly defined feature names to the <code class="docutils literal"><span class="pre">'features'</span></code> dictionary within a classifier
+configuration.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="example-of-a-query-feature-extractor">
+<h2>Example of a Query Feature Extractor<a class="headerlink" href="#example-of-a-query-feature-extractor" title="Permalink to this headline">¶</a></h2>
+<p>Each feature extractor is defined as a Python function that returns an inner <code class="docutils literal"><span class="pre">_extractor</span></code>
+function. This <code class="docutils literal"><span class="pre">_extractor</span></code> function performs the actual feature extraction. The following code
+block shows an example of a query feature extractor that computes the average token length of
+an input query.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_average_token_length</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example query feature that gets the average length of normalized tokens in the query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) A feature extraction function that takes a query and</span>
+<span class="sd">            returns the average normalized token length</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">normalized_tokens</span>
+        <span class="n">average_token_length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;average_token_length&#39;</span><span class="p">:</span> <span class="n">average_token_length</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span>
+</pre></div>
+</div>
+<p>Let’s take a closer look at the salient parts of a feature extractor.</p>
+<ol class="arabic simple">
+<li>The <code class="docutils literal"><span class="pre">&#64;register_query_feature</span></code> decorator at the top registers the feature with MindMeld.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">feature_name</span></code> parameter specifies the name by which the extractor will be referenced in the
+app’s configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>. The feature name must be added as a key within the
+‘features’ dictionary of the classifier config, as shown below. If the feature extractor function
+has parameters, the corresponding value in the key-value pair must specify these parameters. If
+there are no parameters, as in this case, an empty dictionary is sufficient.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span> <span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="o">...</span>
+     <span class="o">...</span>
+     <span class="o">...</span>
+
+     <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s2">&quot;bag-of-words&quot;</span><span class="p">:</span> <span class="p">{</span>
+             <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+         <span class="p">},</span>
+         <span class="s2">&quot;edge-ngrams&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span>
+         <span class="s2">&quot;in-gaz&quot;</span><span class="p">:</span> <span class="p">{},</span>
+         <span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;scaling&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+         <span class="s2">&quot;gaz-freq&quot;</span><span class="p">:</span> <span class="p">{},</span>
+         <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bins&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+<span class="hll">         <span class="s2">&quot;average-token-length&quot;</span><span class="p">:</span> <span class="p">{},</span>
+</span>     <span class="p">}</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<p>2. The arguments passed to the feature extractor can be accessed by the inner <code class="docutils literal"><span class="pre">_extractor</span></code>
+function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">extract_average_token_length</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>The values of the parameters must be specified in the ‘features’ dictionary of the classifier
+config as values corresponding to the appropriate feature keys.</p>
+<p>3. The feature extractor returns an <code class="docutils literal"><span class="pre">_extractor</span></code> function which encapsulates the actual feature
+extraction logic.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>Query feature extractors have access to the <code class="docutils literal"><span class="pre">query</span></code> object, which contains the query text,
+normalized query tokens, and system entity candidates.</p>
+<ol class="arabic simple" start="4">
+<li>The <code class="docutils literal"><span class="pre">_extractor</span></code> function must return a dictionary mapping feature names to their corresponding values.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="p">{</span><span class="s1">&#39;average_token_length&#39;</span><span class="p">:</span> <span class="n">average_token_length</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-of-an-entity-feature-extractor">
+<h2>Example of an Entity Feature Extractor<a class="headerlink" href="#example-of-an-entity-feature-extractor" title="Permalink to this headline">¶</a></h2>
+<p>Entity features are similar to the query features described above with a few key differences. The
+most important distinction is that entity features can only be used by the role classifier.
+Specifying an entity feature in the domain classifier, intent classifier, or entity recognizer
+config specifications will raise an error.</p>
+<p>There are two other differences.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Entity features are registered using a different decorator, <code class="docutils literal"><span class="pre">&#64;register_entity_feature</span></code>.</li>
+<li>The inner <code class="docutils literal"><span class="pre">_extractor</span></code> function of an entity feature extractor receives an <code class="docutils literal"><span class="pre">example</span></code>
+object that contains information about the query and the extracted entities.</li>
+</ol>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+    <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span> <span class="o">=</span> <span class="n">example</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">query</span></code> object is the same as above, <code class="docutils literal"><span class="pre">entities</span></code> is a list of all the entities detected in
+the query, and the <code class="docutils literal"><span class="pre">entity_index</span></code> specifies which of the <code class="docutils literal"><span class="pre">entities</span></code> the extractor function is
+currently operating on.</p>
+<p>Here’s an example of an entity feature extractor that computes the starting character index for a
+given entity.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_entity_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;entity-span-start&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">extract_entity_span_start</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example entity feature that gets the start span for the given entity</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function) A feature extraction function that returns the span start of the entity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span> <span class="o">=</span> <span class="n">example</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">current_entity</span> <span class="o">=</span> <span class="n">entities</span><span class="p">[</span><span class="n">entity_index</span><span class="p">]</span>
+        <span class="n">current_entity_token_start</span> <span class="o">=</span> <span class="n">current_entity</span><span class="o">.</span><span class="n">token_span</span><span class="o">.</span><span class="n">start</span>
+
+        <span class="n">features</span><span class="p">[</span><span class="s1">&#39;entity_span_start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_entity_token_start</span>
+        <span class="k">return</span> <span class="n">features</span>
+
+    <span class="k">return</span> <span class="n">_extractor</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kb.html" class="btn btn-neutral float-right" title="Working with the Knowledge Base and Question Answerer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="parser.html" class="btn btn-neutral float-left" title="Working with the Language Parser" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

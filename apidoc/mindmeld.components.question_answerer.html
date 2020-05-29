@@ -1,0 +1,752 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.question_answerer module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mindmeld.components.question_answerer module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/mindmeld.components.question_answerer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-mindmeld.components.question_answerer">
+<span id="mindmeld-components-question-answerer-module"></span><h1>mindmeld.components.question_answerer module<a class="headerlink" href="#module-mindmeld.components.question_answerer" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the question answerer component of MindMeld.</p>
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.FieldInfo">
+<em class="property">class </em><code class="descclassname">mindmeld.components.question_answerer.</code><code class="descname">FieldInfo</code><span class="sig-paren">(</span><em>name</em>, <em>field_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class models an information source of a knowledge base field metadata</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.get_name">
+<code class="descname">get_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.get_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns knowledge base field name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.get_type">
+<code class="descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.get_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns knowledge base field type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.is_date_field">
+<code class="descname">is_date_field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.is_date_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.is_date_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the knowledge base field is a date field, otherwise returns False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.is_location_field">
+<code class="descname">is_location_field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.is_location_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.is_location_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the knowledge base field is a location field, otherwise returns False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.is_number_field">
+<code class="descname">is_number_field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.is_number_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.is_number_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the knowledge base field is a number field, otherwise returns False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.FieldInfo.is_text_field">
+<code class="descname">is_text_field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#FieldInfo.is_text_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.is_text_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the knowledge base field is a text, otherwise returns False</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.FieldInfo.DATE_TYPES">
+<code class="descname">DATE_TYPES</code><em class="property"> = {'date'}</em><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.DATE_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.FieldInfo.GEO_TYPES">
+<code class="descname">GEO_TYPES</code><em class="property"> = {'geo_point'}</em><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.GEO_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.FieldInfo.NUMBER_TYPES">
+<code class="descname">NUMBER_TYPES</code><em class="property"> = {'half_float', 'long', 'integer', 'short', 'double', 'byte', 'float', 'scaled_float'}</em><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.NUMBER_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.FieldInfo.TEXT_TYPES">
+<code class="descname">TEXT_TYPES</code><em class="property"> = {'text', 'keyword'}</em><a class="headerlink" href="#mindmeld.components.question_answerer.FieldInfo.TEXT_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.QuestionAnswerer">
+<em class="property">class </em><code class="descclassname">mindmeld.components.question_answerer.</code><code class="descname">QuestionAnswerer</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader=None</em>, <em>es_host=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#QuestionAnswerer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.QuestionAnswerer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The question answerer is primarily an information retrieval system that provides all the
+necessary functionality for interacting with the application’s knowledge base.</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.QuestionAnswerer.build_search">
+<code class="descname">build_search</code><span class="sig-paren">(</span><em>index</em>, <em>ranking_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#QuestionAnswerer.build_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.QuestionAnswerer.build_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a search object for advanced filtered search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – index name of knowledge base object.</li>
+<li><strong>ranking_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – overriding ranking configuration parameters.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a Search object for filtered search.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Search</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.QuestionAnswerer.config">
+<code class="descname">config</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#QuestionAnswerer.config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.QuestionAnswerer.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> – Description</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.QuestionAnswerer.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>index</em>, <em>size=10</em>, <em>query_type='keyword'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#QuestionAnswerer.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.QuestionAnswerer.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a collection of documents from the knowledge base matching the provided
+search criteria. This API provides a simple interface for developers to specify a list of
+knowledge base field and query string pairs to find best matches in a similar way as in
+common Web search interfaces. The knowledge base fields to be used depend on the mapping
+between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
+entity type can be mapped to either a knowledge base object or an attribute of a knowledge
+base object. The mapping is often application specific and is dependent on the data model
+developers choose to use when building the knowledge base.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">,</span>
+<span class="go">                          name=&#39;pork and shrimp&#39;,</span>
+<span class="go">                          restaurant_id=&#39;B01CGKGQ40&#39;,</span>
+<span class="go">                          _sort=&#39;price&#39;,</span>
+<span class="go">                          _sort_type=&#39;asc&#39;)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of an index.</li>
+<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The maximum number of records, default to 10.</li>
+<li><strong>query_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Whether the search is over structured or unstructured text.</li>
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The id of a particular document to retrieve.</li>
+<li><strong>_sort</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Specify the knowledge base field for custom sort.</li>
+<li><strong>_sort_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Specify custom sort type. Valid values are ‘asc’, ‘desc’ and
+‘distance’.</li>
+<li><strong>_sort_location</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The origin location to be used when sorting by distance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of matching documents.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mindmeld.components.question_answerer.QuestionAnswerer.load_kb">
+<em class="property">classmethod </em><code class="descname">load_kb</code><span class="sig-paren">(</span><em>app_namespace</em>, <em>index_name</em>, <em>data_file</em>, <em>es_host=None</em>, <em>es_client=None</em>, <em>connect_timeout=2</em>, <em>clean=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#QuestionAnswerer.load_kb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.QuestionAnswerer.load_kb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads documents from disk into the specified index in the knowledge
+base. If an index with the specified name doesn’t exist, a new index
+with that name will be created in the knowledge base.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>app_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The namespace of the app. Used to prevent
+collisions between the indices of this app and those of other
+apps.</li>
+<li><strong>index_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the new index to be created.</li>
+<li><strong>data_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to the data file containing the documents
+to be imported into the knowledge base index. It could be
+either json or jsonl file.</li>
+<li><strong>es_host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The Elasticsearch host server.</li>
+<li><strong>es_client</strong> (<em>Elasticsearch</em>) – The Elasticsearch client.</li>
+<li><strong>connect_timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – The amount of time for a
+connection to the Elasticsearch host.</li>
+<li><strong>clean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Set to true if you want to delete an existing index
+and reindex it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.Search">
+<em class="property">class </em><code class="descclassname">mindmeld.components.question_answerer.</code><code class="descname">Search</code><span class="sig-paren">(</span><em>client</em>, <em>index</em>, <em>ranking_config=None</em>, <em>field_info=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class models a generic filtered search in knowledge base. It allows developers to
+construct more complex knowledge base search criteria based on the application requirements.</p>
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.Search.Clause">
+<em class="property">class </em><code class="descname">Clause</code><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.Clause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.Clause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<p>This class models an abstract knowledge base clause.</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.Clause.build_query">
+<code class="descname">build_query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.Clause.build_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.Clause.build_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build knowledge base query.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.Clause.get_type">
+<code class="descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.Clause.get_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.Clause.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns clause type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.Clause.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.Clause.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.Clause.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate the clause.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.Search.FilterClause">
+<em class="property">class </em><code class="descname">FilterClause</code><span class="sig-paren">(</span><em>field</em>, <em>field_info=None</em>, <em>value=None</em>, <em>query_type='keyword'</em>, <em>range_gt=None</em>, <em>range_gte=None</em>, <em>range_lt=None</em>, <em>range_lte=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.FilterClause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.FilterClause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.question_answerer.Clause</span></code></p>
+<p>This class models a knowledge base filter clause.</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.FilterClause.build_query">
+<code class="descname">build_query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.FilterClause.build_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.FilterClause.build_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>build knowledge base query for filter clause</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.FilterClause.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.FilterClause.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.FilterClause.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.Search.QueryClause">
+<em class="property">class </em><code class="descname">QueryClause</code><span class="sig-paren">(</span><em>field</em>, <em>field_info</em>, <em>value</em>, <em>query_type='keyword'</em>, <em>synonym_field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.QueryClause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.QueryClause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.question_answerer.Clause</span></code></p>
+<p>This class models a knowledge base query clause.</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.QueryClause.build_query">
+<code class="descname">build_query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.QueryClause.build_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.QueryClause.build_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>build knowledge base query for query clause</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.QueryClause.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.QueryClause.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.QueryClause.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.QueryClause.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT">
+<code class="descname">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</code><em class="property"> = 100</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.QueryClause.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mindmeld.components.question_answerer.Search.SortClause">
+<em class="property">class </em><code class="descname">SortClause</code><span class="sig-paren">(</span><em>field</em>, <em>field_info=None</em>, <em>sort_type=None</em>, <em>field_stats=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.SortClause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.question_answerer.Clause</span></code></p>
+<p>This class models a knowledge base sort clause.</p>
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.build_query">
+<code class="descname">build_query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.SortClause.build_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.build_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>build knowledge base query for sort clause</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.SortClause.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.DEFAULT_SORT_WEIGHT">
+<code class="descname">DEFAULT_SORT_WEIGHT</code><em class="property"> = 30</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.DEFAULT_SORT_WEIGHT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.SORT_DISTANCE">
+<code class="descname">SORT_DISTANCE</code><em class="property"> = 'distance'</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.SORT_DISTANCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.SORT_ORDER_ASC">
+<code class="descname">SORT_ORDER_ASC</code><em class="property"> = 'asc'</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.SORT_ORDER_ASC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.SORT_ORDER_DESC">
+<code class="descname">SORT_ORDER_DESC</code><em class="property"> = 'desc'</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.SORT_ORDER_DESC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SortClause.SORT_TYPES">
+<code class="descname">SORT_TYPES</code><em class="property"> = {'asc', 'desc', 'distance'}</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SortClause.SORT_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><em>size=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the knowledge base search with provided criteria and returns matching documents.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The maximum number of records to fetch, default to 10.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of matching documents.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>query_type='keyword'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify filter condition to be applied to specified knowledge base field. In MindMeld
+two types of filters are supported: text filter and range filters.</p>
+<p>Text filters are used to apply hard filters on specified knowledge base text fields.
+The filter text value is normalized and matched using entire text span against the
+knowledge base field.</p>
+<p>It’s common to have filter conditions based on other resolved canonical entities.
+For example, in food ordering domain the resolved restaurant entity can be used as a filter
+to resolve dish entities. The exact knowledge base field to apply these filters depends on
+the knowledge base data model of the application.
+If the entity is not in the canonical form, a fuzzy filter can be applied by setting the
+query_type to ‘text’.</p>
+<p>Range filters are used to filter with a value range on specified knowledge base number or
+date fields. Example use cases include price range filters and date range filters.</p>
+<p>Examples:</p>
+<dl class="docutils">
+<dt>add text filter:</dt>
+<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">question_answerer</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">restaurant_id</span><span class="o">=</span><span class="s1">&#39;B01CGKGQ40&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>add range filter:</dt>
+<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">question_answerer</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="n">gte</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Whether the filter is over structured or unstructured text.</li>
+<li><strong>kwargs</strong> – A keyword argument to specify the filter text and the knowledge base text field.</li>
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – knowledge base field name for range filter.</li>
+<li><strong>gt</strong> (<em>number</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range filter operator for greater than.</li>
+<li><strong>gte</strong> (<em>number</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range filter operator for greater than or equal to.</li>
+<li><strong>lt</strong> (<em>number</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range filter operator for less than.</li>
+<li><strong>lte</strong> (<em>number</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range filter operator for less or equal to.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new Search object with added search criteria.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Search</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>query_type='keyword'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify the query text to match on a knowledge base text field. The query text is
+normalized and processed (based on query_type) to find matches in knowledge base using
+several text relevance scoring factors including exact matches, phrase matches and partial
+matches.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">question_answerer</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;dish&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pad thai&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the example above the query text “pad thai” will be used to match against document field
+“name” in knowledge base index “dish”.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>keyword argument to specify the query text and the knowledge base document field along</strong> (<em>a</em>) – </li>
+<li><strong>the query type</strong> (<em>with</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a new Search object with added search criteria.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Search</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.question_answerer.Search.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><em>field</em>, <em>sort_type=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/question_answerer.html#Search.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.question_answerer.Search.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify custom sort criteria.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – knowledge base field for sort.</li>
+<li><strong>sort_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – sorting type. valid values are ‘asc’, ‘desc’ and ‘distance’. ‘asc’ and
+‘desc’ can be used to sort numeric or date fields and ‘distance’ can
+be used to sort by distance on geo_point fields. Default sort type
+is ‘desc’ if not specified.</li>
+<li><strong>location</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – location (lat, lon) in geo_point format to be used as origin when
+sorting by ‘distance’</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.question_answerer.Search.SYN_FIELD_SUFFIX">
+<code class="descname">SYN_FIELD_SUFFIX</code><em class="property"> = '$whitelist'</em><a class="headerlink" href="#mindmeld.components.question_answerer.Search.SYN_FIELD_SUFFIX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

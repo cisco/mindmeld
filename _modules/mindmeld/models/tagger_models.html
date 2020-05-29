@@ -1,0 +1,673 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.tagger_models &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.tagger_models</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.tagger_models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;This module contains the Memm entity recognizer.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.externals</span> <span class="k">import</span> <span class="n">joblib</span>
+
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">MindMeldError</span>
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">get_label_encoder</span><span class="p">,</span>
+    <span class="n">get_seq_accuracy_scorer</span><span class="p">,</span>
+    <span class="n">get_seq_tag_accuracy_scorer</span><span class="p">,</span>
+    <span class="n">ingest_dynamic_gazetteer</span><span class="p">,</span>
+    <span class="n">register_model</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.model</span> <span class="k">import</span> <span class="n">EntityModelEvaluation</span><span class="p">,</span> <span class="n">EvaluatedExample</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ModelConfig</span>
+<span class="kn">from</span> <span class="nn">.taggers.crf</span> <span class="k">import</span> <span class="n">ConditionalRandomFields</span>
+<span class="kn">from</span> <span class="nn">.taggers.memm</span> <span class="k">import</span> <span class="n">MemmModel</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.taggers.lstm</span> <span class="k">import</span> <span class="n">LstmModel</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">LstmModel</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># classifier types</span>
+<span class="n">CRF_TYPE</span> <span class="o">=</span> <span class="s2">&quot;crf&quot;</span>
+<span class="n">MEMM_TYPE</span> <span class="o">=</span> <span class="s2">&quot;memm&quot;</span>
+<span class="n">LSTM_TYPE</span> <span class="o">=</span> <span class="s2">&quot;lstm&quot;</span>
+
+<span class="c1"># for default model scoring types</span>
+<span class="n">ACCURACY_SCORING</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
+<span class="n">SEQ_ACCURACY_SCORING</span> <span class="o">=</span> <span class="s2">&quot;seq_accuracy&quot;</span>
+<span class="n">SEQUENCE_MODELS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;crf&quot;</span><span class="p">]</span>
+
+<span class="n">DEFAULT_FEATURES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;bag-of-words-seq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ngram_lengths_to_start_positions&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;in-gaz-span-seq&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;sys-candidates-seq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;start_positions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="TaggerModel"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel">[docs]</a><span class="k">class</span> <span class="nc">TaggerModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A machine learning classifier for tags.</span>
+
+<span class="sd">    This class manages feature extraction, training, cross-validation, and</span>
+<span class="sd">    prediction. The design goal is that after providing initial settings like</span>
+<span class="sd">    hyperparameters, grid-searchable hyperparameters, feature extractors, and</span>
+<span class="sd">    cross-validation settings, TaggerModel manages all of the details</span>
+<span class="sd">    involved in training and prediction such that the input to training or</span>
+<span class="sd">    prediction is Query objects, and the output is class names, and no data</span>
+<span class="sd">    manipulation is needed from the client.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        classifier_type (str): The name of the classifier type. Currently</span>
+<span class="sd">            recognized values are &quot;memm&quot;,&quot;crf&quot;, and &quot;lstm&quot;</span>
+<span class="sd">        hyperparams (dict): A kwargs dict of parameters that will be used to</span>
+<span class="sd">            initialize the classifier object.</span>
+<span class="sd">        grid_search_hyperparams (dict): Like &#39;hyperparams&#39;, but the values are</span>
+<span class="sd">            lists of parameters. The training process will grid search over the</span>
+<span class="sd">            Cartesian product of these parameter lists and select the best via</span>
+<span class="sd">            cross-validation.</span>
+<span class="sd">        feat_specs (dict): A mapping from feature extractor names, as given in</span>
+<span class="sd">            FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the</span>
+<span class="sd">            associated feature extractor function.</span>
+<span class="sd">        cross_validation_settings (dict): A dict that contains &quot;type&quot;, which</span>
+<span class="sd">            specifies the name of the cross-validation strategy, such as</span>
+<span class="sd">            &quot;k-folds&quot; or &quot;shuffle&quot;. The remaining keys are parameters</span>
+<span class="sd">            specific to the cross-validation type, such as &quot;k&quot; when the type is</span>
+<span class="sd">            &quot;k-folds&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_FEATURES</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="o">**</span><span class="n">config_dict</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># Get model classifier and initialize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_constructor</span><span class="p">()()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">setup_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the information needed to pickle an instance of this class.</span>
+
+<span class="sd">        By default, pickling removes attributes with names starting with</span>
+<span class="sd">        underscores. This overrides that behavior. For the _resources field,</span>
+<span class="sd">        we save the resources that are memory intensive</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;_resources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">resources_to_persist</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;sys_types&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">resources_to_persist</span><span class="p">:</span>
+            <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;_resources&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_resources&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">attributes</span>
+
+<div class="viewcode-block" id="TaggerModel.fit"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): A list of queries to train on.</span>
+<span class="sd">            labels (list of tuples of mindmeld.core.QueryEntity): A list of expected labels.</span>
+<span class="sd">            params (dict): Parameters of the classifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">skip_param_selection</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="c1"># Shuffle to prevent order effects</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)))</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[</span><span class="n">examples</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span> <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">label</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="n">types</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">types</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;There are no labels in this label set, so we don&#39;t &quot;</span> <span class="s2">&quot;fit the model.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="c1"># Extract labels - label encoders are the same accross all entity recognition models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">get_label_encoder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">examples</span><span class="p">)</span>
+
+        <span class="c1"># Extract features</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span>
+            <span class="n">examples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fit the model</span>
+        <span class="k">if</span> <span class="n">skip_param_selection</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># run cross validation to select params</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">==</span> <span class="n">LstmModel</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MindMeldError</span><span class="p">(</span><span class="s2">&quot;The LSTM model does not support cross-validation&quot;</span><span class="p">)</span>
+
+            <span class="n">_</span><span class="p">,</span> <span class="n">best_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_cv</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">best_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="n">best_params</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="TaggerModel.view_extracted_features"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.view_extracted_features">[docs]</a>    <span class="k">def</span> <span class="nf">view_extracted_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a dictionary of extracted features and their weights for a given query</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (mindmeld.core.Query): The query to extract features from</span>
+<span class="sd">            dynamic_resource (dict): The dynamic resource used along with the query</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of dictionaries of extracted features and their weights</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workspace_resource</span> <span class="o">=</span> <span class="n">ingest_dynamic_gazetteer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">extract_example_features</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">workspace_resource</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trains a classifier without cross-validation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries to train on</span>
+<span class="sd">            labels (list of tuples of mindmeld.core.QueryEntity): a list of expected labels</span>
+<span class="sd">            params (dict): Parameters of the classifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the params from the style given by the config to the style</span>
+<span class="sd">        passed in to the actual classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param_grid (dict): lists of classifier parameter values, keyed by parameter name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict): revised param_grid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">param_grid</span>
+
+<div class="viewcode-block" id="TaggerModel.predict"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries to train on</span>
+<span class="sd">            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of tuples of mindmeld.core.QueryEntity): a list of predicted labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[()]</span>
+
+        <span class="n">workspace_resource</span> <span class="o">=</span> <span class="n">ingest_dynamic_gazetteer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+        <span class="p">)</span>
+        <span class="n">predicted_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">extract_and_predict</span><span class="p">(</span>
+            <span class="n">examples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">workspace_resource</span>
+        <span class="p">)</span>
+        <span class="c1"># Decode the tags to labels</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">([</span><span class="n">example_predicted_tags</span><span class="p">],</span> <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">example</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">example_predicted_tags</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">predicted_tags</span><span class="p">,</span> <span class="n">examples</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">labels</span></div>
+
+<div class="viewcode-block" id="TaggerModel.predict_proba"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries to train on</span>
+<span class="sd">            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \</span>
+<span class="sd">            with confidence scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">workspace_resource</span> <span class="o">=</span> <span class="n">ingest_dynamic_gazetteer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="n">dynamic_resource</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+        <span class="p">)</span>
+        <span class="n">predicted_tags_probas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+            <span class="n">examples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">workspace_resource</span>
+        <span class="p">)</span>
+        <span class="n">tags</span><span class="p">,</span> <span class="n">probas</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">predicted_tags_probas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">entity_confidence</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">([</span><span class="n">tags</span><span class="p">],</span> <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">examples</span><span class="p">[</span><span class="mi">0</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+            <span class="n">entity_proba</span> <span class="o">=</span> <span class="n">probas</span><span class="p">[</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">start</span> <span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">normalized_token_span</span><span class="o">.</span><span class="n">end</span>
+                <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">]</span>
+            <span class="c1"># We assume that the score of the least likely tag in the sequence as the confidence</span>
+            <span class="c1"># score of the entire entity sequence</span>
+            <span class="n">entity_confidence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">entity_proba</span><span class="p">))</span>
+        <span class="n">predicted_labels_scores</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">entity_confidence</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">predicted_labels_scores</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_cv_scorer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection_settings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the scorer to use based on the selection settings and classifier type,</span>
+<span class="sd">        defaulting to tag accuracy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">classifier_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;classifier_type&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Sets the default scorer based on the classifier type</span>
+        <span class="k">if</span> <span class="n">classifier_type</span> <span class="ow">in</span> <span class="n">SEQUENCE_MODELS</span><span class="p">:</span>
+            <span class="n">default_scorer</span> <span class="o">=</span> <span class="n">get_seq_tag_accuracy_scorer</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">default_scorer</span> <span class="o">=</span> <span class="n">ACCURACY_SCORING</span>
+
+        <span class="c1"># Gets the scorer based on what is passed in to the selection settings (reverts to</span>
+        <span class="c1"># default if nothing is passed in)</span>
+        <span class="n">scorer</span> <span class="o">=</span> <span class="n">selection_settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scoring&quot;</span><span class="p">,</span> <span class="n">default_scorer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scorer</span> <span class="o">==</span> <span class="n">SEQ_ACCURACY_SCORING</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">classifier_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SEQUENCE_MODELS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Sequence accuracy is only available for the following models: &quot;</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">. Using tag level accuracy instead...&quot;</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">SEQUENCE_MODELS</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">ACCURACY_SCORING</span>
+            <span class="k">return</span> <span class="n">get_seq_accuracy_scorer</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">scorer</span> <span class="o">==</span> <span class="n">ACCURACY_SCORING</span> <span class="ow">and</span> <span class="n">classifier_type</span> <span class="ow">in</span> <span class="n">SEQUENCE_MODELS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">get_seq_tag_accuracy_scorer</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">scorer</span>
+
+<div class="viewcode-block" id="TaggerModel.evaluate"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluates a model against the given examples and labels</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples: A list of examples to predict</span>
+<span class="sd">            labels: A list of expected labels</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ModelEvaluation: an object containing information about the \</span>
+<span class="sd">                evaluation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;There are no labels in this label set, so we don&#39;t &quot;</span>
+                <span class="s2">&quot;run model evaluation.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+
+        <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">EvaluatedExample</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_effective_config</span><span class="p">()</span>
+        <span class="n">model_eval</span> <span class="o">=</span> <span class="n">EntityModelEvaluation</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">evaluations</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model_eval</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_model_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the python class of the actual underlying model&quot;&quot;&quot;</span>
+        <span class="n">classifier_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;classifier_type&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">classifier_type</span> <span class="o">==</span> <span class="n">LSTM_TYPE</span> <span class="ow">and</span> <span class="n">LstmModel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: Classifier type </span><span class="si">{!r}</span><span class="s2"> dependencies not found. Install the &quot;</span>
+                    <span class="s2">&quot;mindmeld[tensorflow] extra to use this classifier type.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">classifier_type</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="n">MEMM_TYPE</span><span class="p">:</span> <span class="n">MemmModel</span><span class="p">,</span>
+                <span class="n">CRF_TYPE</span><span class="p">:</span> <span class="n">ConditionalRandomFields</span><span class="p">,</span>
+                <span class="n">LSTM_TYPE</span><span class="p">:</span> <span class="n">LstmModel</span><span class="p">,</span>
+            <span class="p">}[</span><span class="n">classifier_type</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: Classifier type </span><span class="si">{!r}</span><span class="s2"> not recognized&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">classifier_type</span><span class="p">))</span>
+
+<div class="viewcode-block" id="TaggerModel.dump"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dumps the model using joblib for the config and call&#39;s the underlying model</span>
+<span class="sd">        to dump its state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to dump the model to</span>
+<span class="sd">            config (dict): The config containing the model configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;model&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="c1"># If the model path is not populated, the model is serializable, so</span>
+            <span class="c1"># we just pass the entire model to the dictionary</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variables_to_dump</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;current_params&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span><span class="p">,</span>
+                <span class="s2">&quot;label_encoder&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="p">,</span>
+                <span class="s2">&quot;no_entities&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
+                <span class="n">variables_to_dump</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span> <span class="s2">&quot;.tagger_vars&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TaggerModel.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the model state to memory. This method is strictly for non-serializable models</span>
+<span class="sd">        like tensorflow models</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to dump the model to</span>
+<span class="sd">            config (dict): The config containing the model configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">variables_to_load</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span> <span class="s2">&quot;.tagger_vars&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_params</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;current_params&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;label_encoder&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_entities</span> <span class="o">=</span> <span class="n">variables_to_load</span><span class="p">[</span><span class="s2">&quot;no_entities&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TaggerModel.get_feature_matrix"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.get_feature_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="TaggerModel.select_params"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.tagger_models.html#mindmeld.models.tagger_models.TaggerModel.select_params">[docs]</a>    <span class="k">def</span> <span class="nf">select_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">selection_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<span class="n">register_model</span><span class="p">(</span><span class="s2">&quot;tagger&quot;</span><span class="p">,</span> <span class="n">TaggerModel</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1139 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with the Knowledge Base and Question Answerer &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with the Dialogue Manager" href="dm.html" />
+    <link rel="prev" title="Working with User-Defined Features" href="custom_features.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with the Knowledge Base and Question Answerer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#decide-whether-your-app-needs-a-knowledge-base">Decide Whether your App Needs a Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#decide-how-to-use-question-answering-in-your-application">Decide How to Use Question Answering in your Application</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#answer-questions">1. Answer Questions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validate-questions">2. Validate Questions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disambiguate-entities">3. Disambiguate Entities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#suggest-alternatives">4. Suggest Alternatives</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-your-data-for-the-knowledge-base">Prepare your Data for the Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verify-that-the-data-is-clean">Verify that the Data is Clean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-the-data-into-the-knowledge-base">Import the Data into the Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#perform-simple-searches-with-the-get-api">Perform Simple Searches with the <code class="docutils literal"><span class="pre">get()</span></code> API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#perform-advanced-searches-with-the-build-search-api">Perform Advanced Searches with the <code class="docutils literal"><span class="pre">build_search()</span></code> API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#query">Query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filter">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sort">Sort</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dealing-with-unstructured-text">Dealing with unstructured text</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with the Knowledge Base and Question Answerer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/kb.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="working-with-the-knowledge-base-and-question-answerer">
+<h1>Working with the Knowledge Base and Question Answerer<a class="headerlink" href="#working-with-the-knowledge-base-and-question-answerer" title="Permalink to this headline">¶</a></h1>
+<p>The knowledge base</p>
+<blockquote>
+<div><ul class="simple">
+<li>is a comprehensive repository that contains the universe of helpful information needed to understand requests and answer questions</li>
+<li>reflects, in the way we structure its content, our understanding of domain- and application-specific concepts and relationships</li>
+<li>enables us to optimize natural language processing and question answering to achieve human-like accuracy</li>
+</ul>
+</div></blockquote>
+<p>The question answerer</p>
+<blockquote>
+<div><ul class="simple">
+<li>answers and validates questions, disambiguates entities, and suggests alternatives</li>
+<li>is designed to work with custom knowledge bases derived from large content catalogs, for production-grade applications</li>
+</ul>
+</div></blockquote>
+<p>Not every MindMeld application needs these two components. An app always has either both or neither one.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to Steps <a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html"><span class="doc">5</span></a> and <a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html"><span class="doc">9</span></a>.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The QuestionAnswerer requires Elasticsearch. Make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer.</p>
+</div>
+<div class="section" id="decide-whether-your-app-needs-a-knowledge-base">
+<h2>Decide Whether your App Needs a Knowledge Base<a class="headerlink" href="#decide-whether-your-app-needs-a-knowledge-base" title="Permalink to this headline">¶</a></h2>
+<p>The first question to answer before you start building your application is: <em>Do we need a knowledge base or not?</em></p>
+<p>For applications with large- or medium-vocabulary content, having a knowledge base is critical and can be the differentiating factor for the best conversational applications. For example, video discovery applications typically need to find movie or TV shows from a catalog containing hundred of thousands or even millions of records. The knowledge base provides information about important entities to fulfill users’ requests.</p>
+<p>For applications with small-vocabulary content, it is not necessary to have a knowledge base, especially when ranking and disambiguating entities is not required. One example is a home assistant for smart home automation.</p>
+<p>In its most basic form, a knowledge base is just a repository of objects of specified types. For example, a knowledge base that contains a large entertainment content catalog could include <code class="docutils literal"><span class="pre">movie</span></code> and <code class="docutils literal"><span class="pre">tv_show</span></code> among the types of its objects. A knowledge base that contains a directory of local businesses could have object types like <code class="docutils literal"><span class="pre">restaurant</span></code>, <code class="docutils literal"><span class="pre">hardware_store</span></code>, and so on. Objects typically have attributes which capture salient aspects of the concepts they describe. For example, a <code class="docutils literal"><span class="pre">restaurant</span></code> object might have attributes for <code class="docutils literal"><span class="pre">address</span></code> and <code class="docutils literal"><span class="pre">phone_number</span></code>; a <code class="docutils literal"><span class="pre">movie</span></code> object might have attributes like <code class="docutils literal"><span class="pre">cast_list</span></code>, <code class="docutils literal"><span class="pre">runtime</span></code>, and <code class="docutils literal"><span class="pre">release_date</span></code>.</p>
+</div>
+<div class="section" id="decide-how-to-use-question-answering-in-your-application">
+<h2>Decide How to Use Question Answering in your Application<a class="headerlink" href="#decide-how-to-use-question-answering-in-your-application" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of the MindMeld question answerer is to map natural language queries to a query which is then run over a structured database. (This is called <em>knowledge-based question answering</em>.) The question answerer is designed to work with custom knowledge bases derived from large content catalogs, for production-grade applications.</p>
+<p>Catalogs containing even up to hundreds of millions of unique, domain-specific entity objects can easily be handled by MindMeld in production. The number of unique entities typical scales up to tens of thousands for restaurant menus processed by food delivery services, millions for product retail catalogs, and tens or hundreds of millions for media entertainment libraries. The MindMeld knowledge base and question answering systems have been successfully applied to all of the above use cases.</p>
+<p>The question answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below. Decide which purposes are most important to your use case and incorporate those priorities into the way you code your dialogue state handlers.</p>
+<div class="section" id="answer-questions">
+<h3>1. Answer Questions<a class="headerlink" href="#answer-questions" title="Permalink to this headline">¶</a></h3>
+<p>Providing relevant results as answers to user requests is a basic use case for the question answerer. Knowledge base searches can be constructed using the entities extracted from NLP pipeline. The form of the answer depends on the nature of the application. For instance, in a food ordering app the answer could be a dish with attributes matching the criteria provided by users, while in a video discovery app the answer could be a list of movies or TV shows that best match the user request.</p>
+</div>
+<div class="section" id="validate-questions">
+<h3>2. Validate Questions<a class="headerlink" href="#validate-questions" title="Permalink to this headline">¶</a></h3>
+<p>The knowledge base can contain information to help inform users when requests are out of scope. For example, if a user orders pizza from a coffee shop in a food ordering app, the question answerer would be unable to find an entity matching the user request, but could provide information to help steer the conversation in the right direction. Other examples of this kind include the user asking for a customization option that is not available for the desired dish, or asking for campsite information from a travel app that only offers hotels and motels.</p>
+</div>
+<div class="section" id="disambiguate-entities">
+<h3>3. Disambiguate Entities<a class="headerlink" href="#disambiguate-entities" title="Permalink to this headline">¶</a></h3>
+<p>We often need to disambiguate entities based on application requirements and context. For example, a food ordering app could offer dozens of <code class="docutils literal"><span class="pre">Pad</span> <span class="pre">Thai</span></code> dishes from a number of restaurants. In a travel booking app it is impossible to book the right flight without knowing which of multiple cities named <code class="docutils literal"><span class="pre">Springfield</span></code> the user is asking for. In a music discovery app a request for <code class="docutils literal"><span class="pre">thriller</span></code> could refer to a song or an album. In such cases we are unable to retrieve the exact entities that the users mean without taking into account contextual information like entity relationships and hierarchy, user preferences, or application business logic.</p>
+<p>This disambiguation task can be formulated as a knowledge base search with constraints derived from contextual information. For the food ordering example, the selected restaurant can be added as a filter to the knowledge base search to find the best-matching dishes from that restaurant.</p>
+</div>
+<div class="section" id="suggest-alternatives">
+<h3>4. Suggest Alternatives<a class="headerlink" href="#suggest-alternatives" title="Permalink to this headline">¶</a></h3>
+<p>The question answerer can suggest the closest matches when exactly correct matches cannot be found. For example, if a user requests ‘Star Wars Rogue One’ and that movie is not available, the knowledge base could suggest other available Star Wars titles. The question answerer uses scoring factors including text relevance and location proximity to retrieve and suggest the most relevant information from the knowledge base.</p>
+<p>The question answerer can also suggest alternatives based on custom logic in the application. Taking food ordering application as an example, we may want to:</p>
+<blockquote>
+<div><ul class="simple">
+<li>suggest dishes in nearby restaurants when they cannot be found in the desired restaurant</li>
+<li>suggest alternative dishes in the desired restaurant when the specified dishes cannot be found</li>
+</ul>
+</div></blockquote>
+<p>In such cases, you would use the question answerer to formulate knowledge base searches with modified constraints to find and suggest the best matches.</p>
+</div>
+</div>
+<div class="section" id="prepare-your-data-for-the-knowledge-base">
+<h2>Prepare your Data for the Knowledge Base<a class="headerlink" href="#prepare-your-data-for-the-knowledge-base" title="Permalink to this headline">¶</a></h2>
+<p>Building a custom knowledge base using application content data is straightforward in MindMeld. The content data can be restaurant menus, retailing product catalogs, or any custom data that users would like to interact with through conversational interfaces. This data is often stored in large-scale databases with application-specific data models. The question answerer can build a knowledge base using either (1) data dumps from a database, or (2) the output of a data pipeline which handles more complex data transformations.</p>
+<p>The question answerer takes in data files that contain knowledge base objects, which are the basic unit of information in knowledge base indexes. Each data file contains objects of a specified type.</p>
+<p>Each object has:</p>
+<blockquote>
+<div><ul class="simple">
+<li>an <code class="docutils literal"><span class="pre">id</span></code> field as the unique identifier</li>
+<li>an optional <code class="docutils literal"><span class="pre">location</span></code> field for location information if available, and</li>
+<li>a list of arbitrary data fields of different types that contain information about the object, or about relationships with other object types.</li>
+</ul>
+</div></blockquote>
+<p>To efficiently and accurately retrieve the most relevant information, the question answerer creates optimized indexes for objects. The question answerer processes all fields in the data, determining the data field types and indexing them accordingly.</p>
+<p>The following data types are supported:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="25%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field Type</th>
+<th class="head">Data Format</th>
+<th class="head">Description or Examples</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><strong>id</strong></td>
+<td>string</td>
+<td>unique identifier</td>
+</tr>
+<tr class="row-odd"><td><strong>text</strong></td>
+<td>string</td>
+<td>full-text values, for example dish names like <code class="docutils literal"><span class="pre">Pad</span> <span class="pre">Thai</span></code>
+or movie names like <code class="docutils literal"><span class="pre">Star</span> <span class="pre">Wars</span></code></td>
+</tr>
+<tr class="row-even"><td><strong>number</strong></td>
+<td><code class="docutils literal"><span class="pre">long</span></code>, <code class="docutils literal"><span class="pre">integer</span></code>,
+<code class="docutils literal"><span class="pre">short</span></code>, <code class="docutils literal"><span class="pre">byte</span></code>,
+<code class="docutils literal"><span class="pre">double</span></code>, or <code class="docutils literal"><span class="pre">float</span></code></td>
+<td>numeric values</td>
+</tr>
+<tr class="row-odd"><td><strong>date</strong></td>
+<td>string</td>
+<td>formatted dates like “2017-07-31” or “2017/07/31 12:10:30”</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>long number</td>
+<td>milliseconds-since-the-epoch</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>integer</td>
+<td>seconds-since-the-epoch</td>
+</tr>
+<tr class="row-even"><td><strong>location</strong></td>
+<td>string</td>
+<td>latitude/longitude pair like “37.77,122.41”</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>array</td>
+<td>latitude/longitude pair like [37.77, 122.41]</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>object</td>
+<td>latitude/longitude pair like {“lat”: 37.77, “lon”: 122.41}</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that the location information of a knowledge base object is specified in the <code class="docutils literal"><span class="pre">location</span></code> field. Specifying additional location fields or using custom field names for location are currently not supported.</p>
+</div>
+<p>The question answerer supports whatever data model the application uses. Developers must decide what data model suits their apps best. For example, a food ordering app could model <code class="docutils literal"><span class="pre">cuisine</span></code> types either as information-rich objects with a list of attributes, or simply as a string (the cuisine type name) which is an attribute of dish objects.</p>
+<p>Mapping between NLP entity types and knowledge base objects is often application-specific, and knowledge base searches need to be formulated accordingly. For example, a food ordering application may have <code class="docutils literal"><span class="pre">restaurant</span></code> and <code class="docutils literal"><span class="pre">menu_item</span></code> objects, while a video discovery application has <code class="docutils literal"><span class="pre">cast</span></code> and <code class="docutils literal"><span class="pre">title</span></code> objects. The <code class="docutils literal"><span class="pre">menu_item</span></code> object in the food ordering app could have the following fields:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="23%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field</th>
+<th class="head">Type</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>id</td>
+<td>id</td>
+<td>unique identifier string</td>
+</tr>
+<tr class="row-odd"><td>name</td>
+<td>text</td>
+<td>name of the dish</td>
+</tr>
+<tr class="row-even"><td>description</td>
+<td>text</td>
+<td>description of the dish</td>
+</tr>
+<tr class="row-odd"><td>category</td>
+<td>text</td>
+<td>dish category</td>
+</tr>
+<tr class="row-even"><td>price</td>
+<td>number</td>
+<td>dish price</td>
+</tr>
+<tr class="row-odd"><td>img_url</td>
+<td>text</td>
+<td>dish image URL</td>
+</tr>
+<tr class="row-even"><td>restaurant_id</td>
+<td>text</td>
+<td>ID of the restaurant</td>
+</tr>
+</tbody>
+</table>
+<p>The JSON data file for a <code class="docutils literal"><span class="pre">menu_item</span></code> object of this kind would look like the following:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;category&quot;</span><span class="o">:</span> <span class="s2">&quot;Makimono-Sushi Rolls (6 Pcs)&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;description&quot;</span><span class="o">:</span> <span class="s2">&quot;Makimono-Sushi Rolls (6 Pcs)\nDeep-fried shrimp, avocado, cucumber&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;price&quot;</span><span class="o">:</span> <span class="mf">6.5</span><span class="p">,</span>
+  <span class="s2">&quot;restaurant_id&quot;</span><span class="o">:</span> <span class="s2">&quot;B01N97KQNJ&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;img_url&quot;</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span>
+  <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="s2">&quot;B01N0KXELH&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Shrimp Tempura Roll&quot;</span>
+<span class="p">},</span>
+<span class="p">{</span>
+  <span class="s2">&quot;category&quot;</span><span class="o">:</span> <span class="s2">&quot;Special Rolls&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;description&quot;</span><span class="o">:</span> <span class="s2">&quot;California roll topped w/ cooked salmon, mayo and masago&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;price&quot;</span><span class="o">:</span> <span class="mf">9.95</span><span class="p">,</span>
+  <span class="s2">&quot;restaurant_id&quot;</span><span class="o">:</span> <span class="s2">&quot;B01N97KQNJ&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;img_url&quot;</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span>
+  <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="s2">&quot;B01MYTS7W4&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Pink Salmon Roll&quot;</span>
+<span class="p">}</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="verify-that-the-data-is-clean">
+<h2>Verify that the Data is Clean<a class="headerlink" href="#verify-that-the-data-is-clean" title="Permalink to this headline">¶</a></h2>
+<p>For the question answerer to achieve the best possible performance, it’s critical to have clean data in the knowledge base. You should not assume that the generic text processing and normalization that the MindMeld knowledge base performs is sufficient. Domain- or application-specific normalizations are often necessary. For example, in a food ordering app, menus from different restaurants could differ in format and the conventions they use.</p>
+<p>Good practice dictates that you inspect the data to identify noise and inconsistency in the dataset, then clean up and normalize the data as needed. In order for your app to achieve high accuracy, it’s important to do this as a pre-processing task.</p>
+</div>
+<div class="section" id="import-the-data-into-the-knowledge-base">
+<h2>Import the Data into the Knowledge Base<a class="headerlink" href="#import-the-data-into-the-knowledge-base" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>For this tutorial, we will be using the <code class="docutils literal"><span class="pre">food_ordering</span></code> blueprint application. You can download this application by running these commands:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">load_kb()</span></code> API loads data into the knowledge base from JSON-formatted data files. If the index of specified objects is already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one.</p>
+<p>Use <code class="xref py py-meth docutils literal"><span class="pre">load_kb()</span></code> to load a data file from a path and create an index for the objects in the data file. Substitute a data file, index name, and app name for those used in the example.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">data_file</span><span class="o">=</span><span class="s1">&#39;food_ordering/data/restaurants.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, use the MindMeld command line tool to perform the same operation.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -m food_ordering load-kb my_app restaurants food_ordering/data/restaurants.json</span>
+</pre></div>
+</div>
+<p>Verify that the index was created successfully using the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method of the question answerer:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">restaurants</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">)</span>
+<span class="n">restaurants</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go">  {</span>
+<span class="go">    &#39;categories&#39;: [&#39;Beverages&#39;, &#39;Pizzas&#39;, &#39;Sides&#39;, &#39;Popular Dishes&#39;],</span>
+<span class="go">    &#39;cuisine_types&#39;: [&#39;Pizza&#39;],</span>
+<span class="go">    &#39;id&#39;: &#39;B01CT54GYE&#39;,</span>
+<span class="go">    &#39;image_url&#39;: &#39;https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png&#39;,</span>
+<span class="go">    &#39;menus&#39;: [</span>
+<span class="go">      {</span>
+<span class="go">        &#39;id&#39;: &#39;127c097e-2d9d-4880-99ac-f1688909af07&#39;,</span>
+<span class="go">        &#39;option_groups&#39;: [</span>
+<span class="go">          {</span>
+<span class="go">            &#39;id&#39;: &#39;ToppingsGF&#39;,</span>
+<span class="go">            &#39;max_selected&#39;: 9,</span>
+<span class="go">            &#39;min_selected&#39;: 0,</span>
+<span class="go">            &#39;name&#39;: &#39;Add Some Extra Toppings&#39;,</span>
+<span class="go">            &#39;options&#39;: [</span>
+<span class="go">              {</span>
+<span class="go">                &#39;description&#39;: None,</span>
+<span class="go">                &#39;id&#39;: &#39;B01D8TDFV0&#39;,</span>
+<span class="go">                &#39;name&#39;: &#39;Goat Cheese&#39;,</span>
+<span class="go">                &#39;price&#39;: 2.0</span>
+<span class="go">              },</span>
+<span class="go">              {</span>
+<span class="go">                &#39;description&#39;: None,</span>
+<span class="go">                &#39;id&#39;: &#39;B01D8TCH3M&#39;,</span>
+<span class="go">                &#39;name&#39;: &#39;Olives&#39;,</span>
+<span class="go">                &#39;price&#39;: 1.0</span>
+<span class="go">              },</span>
+<span class="go">              ...</span>
+<span class="go">            ]</span>
+<span class="go">          }</span>
+<span class="go">          ...</span>
+<span class="go">        ]</span>
+<span class="go">      }</span>
+<span class="go">    ],</span>
+<span class="go">    &#39;name&#39;: &#39;Firetrail Pizza&#39;,</span>
+<span class="go">    &#39;num_reviews&#39;: 13,</span>
+<span class="go">    &#39;price_range&#39;: 2.0,</span>
+<span class="go">    &#39;rating&#39;: 4.1</span>
+<span class="go">  },</span>
+<span class="go">  ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p id="import-kb">To fully recreate an existing index from scratch, you can run a clean load as follows.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">data_file</span><span class="o">=</span><span class="s1">&#39;food_ordering/data/restaurants.json&#39;</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will internally delete the existing index, create a new index and load the specified objects.</p>
+</div>
+<div class="section" id="perform-simple-searches-with-the-get-api">
+<h2>Perform Simple Searches with the <code class="docutils literal"><span class="pre">get()</span></code> API<a class="headerlink" href="#perform-simple-searches-with-the-get-api" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method is the basic API for searching the knowledge base, with a simple and intuitive interface similar to those of common web search interfaces.</p>
+<p>As arguments, <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> takes in one or more <em>knowledge base field/text query</em> pairs. The knowledge base fields to be used depend on the mapping between NLP entity types and knowledge base objects, which is often application-specific since it depends, in turn, on the data model of the application. For example, in a food ordering app, a <code class="docutils literal"><span class="pre">cuisine</span></code> entity type could be mapped to a knowledge base object or to an attribute of a knowledge base object.</p>
+<p>Use <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> to retrieve a knowledge base object whose ID is already known:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;B01N97KQNJ&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Hawaiian Style Poke (HP)&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01CGKGQ40&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;78eb0100-029d-4efc-8b8c-77f97dc875b5&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Spicy Creamy Salmon Poke&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 6.5,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01N97KQNJ&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: [],</span>
+<span class="go">  &#39;syn_whitelist&#39;: [{&#39;name&#39;: &#39;special fish&#39;}]}]</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> to search the knowledge base for objects that best match all of several <em>knowledge base field/text query</em> pairs.  In the following example we try to find dishes (that is, items in the <code class="docutils literal"><span class="pre">menu_items</span></code> index) whose name matches <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code> from a restaurant whose ID matches <code class="docutils literal"><span class="pre">B01DEEGQBK</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">,</span> <span class="n">restaurant_id</span><span class="o">=</span><span class="s1">&#39;B01N97KQNJ&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;size_group&#39;: None,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;price&#39;: 6.5,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01N97KQNJ&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Soyu Salmon Poke&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N9BO8RC&#39;,</span>
+<span class="go">  &#39;category&#39;: &#39;Hawaiian Style Poke (HP)&#39;,</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;78eb0100-029d-4efc-8b8c-77f97dc875b5&#39;},</span>
+<span class="go"> {&#39;size_group&#39;: None,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;price&#39;: 3.95,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01N97KQNJ&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Maguro (Tuna)&#39;,</span>
+<span class="go">  &#39;description&#39;: &#39;Nigiri Sushi&#39;,</span>
+<span class="go">  &#39;id&#39;: &#39;B01MZZCKDX&#39;,</span>
+<span class="go">  &#39;category&#39;: &#39;Nigiri Sushi (2 Pcs)&#39;,</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;78eb0100-029d-4efc-8b8c-77f97dc875b5&#39;},</span>
+<span class="go"> {&#39;size_group&#39;: None,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;price&#39;: 4.95,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01N97KQNJ&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Unagi (Sea Eel)&#39;,</span>
+<span class="go">  &#39;description&#39;: &#39;Nigiri Sushi&#39;,</span>
+<span class="go">  &#39;id&#39;: &#39;B01MYTS99Z&#39;,</span>
+<span class="go">  &#39;category&#39;: &#39;Nigiri Sushi (2 Pcs)&#39;,</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;78eb0100-029d-4efc-8b8c-77f97dc875b5&#39;},</span>
+<span class="go">      ...</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method also supports custom sort criteria, limited to the following:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="8%" />
+<col width="92%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>_sort</strong></td>
+<td>the knowledge base field on which to sort</td>
+</tr>
+<tr class="row-even"><td><strong>_sort_type</strong></td>
+<td>type of sort to perform. valid values are <code class="docutils literal"><span class="pre">asc</span></code>, <code class="docutils literal"><span class="pre">desc</span></code> and <code class="docutils literal"><span class="pre">distance</span></code>. <code class="docutils literal"><span class="pre">asc</span></code> and <code class="docutils literal"><span class="pre">desc</span></code> specifies the sort order for sorting on number or date fields, while <code class="docutils literal"><span class="pre">distance</span></code> indicates sorting by distance based on <code class="docutils literal"><span class="pre">location</span></code> field.</td>
+</tr>
+<tr class="row-odd"><td><strong>_sort_location</strong></td>
+<td>origin location for sorting by distance</td>
+</tr>
+</tbody>
+</table>
+<p>When you use custom sort criteria, ranking is a optimized blend of sort score and text relevance scores.</p>
+<p>Use <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> to search the knowledge base for objects that best match all of several <em>knowledge base field/text query</em> pairs, including custom sort criteria. The example below shows a search for <code class="docutils literal"><span class="pre">menu_items</span></code> objects that best match <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code> on <code class="docutils literal"><span class="pre">name</span></code>, <code class="docutils literal"><span class="pre">B01CGKGQ40</span></code> on <code class="docutils literal"><span class="pre">restaurant_id</span></code>, ordered from lowest to highest price.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">,</span> <span class="n">restaurant_id</span><span class="o">=</span><span class="s1">&#39;B01CGKGQ40&#39;</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;asc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Appetizers and Side Orders&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N3BB0PK&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;57572a43-f9fc-4a1c-96fe-788d544b1f2d&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 9.99,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01DEEGQBK&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go"> {&#39;category&#39;: &#39;Appetizers and Side Orders&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N9Z38XT&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;57572a43-f9fc-4a1c-96fe-788d544b1f2d&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Chicken Tenders and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 9.99,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01DEEGQBK&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []}]</span>
+<span class="go">  ...</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> to search the knowledge base for objects that best match all of several <em>knowledge base field/text query</em> pairs, including a custom sort criterion of distance from a specified location. The example below shows a search for the restaurant closest to the center of San Francisco:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="n">_sort_location</span><span class="o">=</span><span class="s1">&#39;37.77,122.41&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go">  {</span>
+<span class="go">    &#39;categories&#39;: [&#39;Beverages&#39;, &#39;Pizzas&#39;, &#39;Sides&#39;, &#39;Popular Dishes&#39;],</span>
+<span class="go">    &#39;cuisine_types&#39;: [&#39;Pizza&#39;],</span>
+<span class="go">    &#39;id&#39;: &#39;B01CT54GYE&#39;,</span>
+<span class="go">    &#39;image_url&#39;: &#39;https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png&#39;,</span>
+<span class="go">    &#39;menus&#39;: [</span>
+<span class="go">      {</span>
+<span class="go">        &#39;id&#39;: &#39;127c097e-2d9d-4880-99ac-f1688909af07&#39;,</span>
+<span class="go">        &#39;option_groups&#39;: [</span>
+<span class="go">          {</span>
+<span class="go">            &#39;id&#39;: &#39;ToppingsGF&#39;,</span>
+<span class="go">            &#39;max_selected&#39;: 9,</span>
+<span class="go">            &#39;min_selected&#39;: 0,</span>
+<span class="go">            &#39;name&#39;: &#39;Add Some Extra Toppings&#39;,</span>
+<span class="go">            &#39;options&#39;: [</span>
+<span class="go">              {</span>
+<span class="go">                &#39;description&#39;: None,</span>
+<span class="go">                &#39;id&#39;: &#39;B01D8TDFV0&#39;,</span>
+<span class="go">                &#39;name&#39;: &#39;Goat Cheese&#39;,</span>
+<span class="go">                &#39;price&#39;: 2.0</span>
+<span class="go">              },</span>
+<span class="go">              {</span>
+<span class="go">                &#39;description&#39;: None,</span>
+<span class="go">                &#39;id&#39;: &#39;B01D8TCH3M&#39;,</span>
+<span class="go">                &#39;name&#39;: &#39;Olives&#39;,</span>
+<span class="go">                &#39;price&#39;: 1.0</span>
+<span class="go">              },</span>
+<span class="go">              ...</span>
+<span class="go">            ]</span>
+<span class="go">          }</span>
+<span class="go">          ...</span>
+<span class="go">        ]</span>
+<span class="go">      }</span>
+<span class="go">    ],</span>
+<span class="go">    &#39;name&#39;: &#39;Firetrail Pizza&#39;,</span>
+<span class="go">    &#39;num_reviews&#39;: 13,</span>
+<span class="go">    &#39;price_range&#39;: 2.0,</span>
+<span class="go">    &#39;rating&#39;: 4.1,</span>
+<span class="go">    &#39;location&#39;: [37.77, 122.39]</span>
+<span class="go">  },</span>
+<span class="go">  ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>By default, the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method will return a maximum list of 10 records per search. We can change the number of records per search by setting the <code class="docutils literal"><span class="pre">size</span></code> parameter.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="n">_sort_location</span><span class="o">=</span><span class="s1">&#39;37.77,122.41&#39;</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">20</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="perform-advanced-searches-with-the-build-search-api">
+<h2>Perform Advanced Searches with the <code class="docutils literal"><span class="pre">build_search()</span></code> API<a class="headerlink" href="#perform-advanced-searches-with-the-build-search-api" title="Permalink to this headline">¶</a></h2>
+<p>While the basic search API described above covers the most common use cases in conversational applications, it can’t help in scenarios like the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li>sorting on more than one custom criterion</li>
+<li>filtering on number or date ranges</li>
+<li>controlling search behavior in a fine-grained manner</li>
+</ul>
+</div></blockquote>
+<p>To support these more complex knowledge base searches, the question answerer provides advanced search APIs which allow you to create a Search object, which is an abstraction of a knowledge base search. You then apply text query, text and range filters, and custom sort criteria using the Search object’s own APIs, which are chainable. This approach offers powerful and precise search in a compact and readable syntax.</p>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">build_search()</span></code> API to create a Search object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="query">
+<h3>Query<a class="headerlink" href="#query" title="Permalink to this headline">¶</a></h3>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">query()</span></code> API to run an advanced text query search. For each query, specify a text field in the knowledge base, and a query string for the text relevance match. The question answerer ranks results using several factors including exact matches, phrase matches, and partial matches on the text.</p>
+<p>In the following example, the question answerer returns the dishes that best match the name <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code>. We specify the query string <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code> on the knowledge base field <code class="docutils literal"><span class="pre">name</span></code> in the <code class="docutils literal"><span class="pre">menu_items</span></code> index (which contains all available dishes). The top two results are from two different restaurants, and both match the name <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code> exactly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Appetizers and Side Orders&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N3BB0PK&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;57572a43-f9fc-4a1c-96fe-788d544b1f2d&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 9.99,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01DEEGQBK&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go"> {&#39;category&#39;: &#39;Entrees&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01CH0SUMA&#39;,</span>
+<span class="go">  &#39;img_url&#39;: &#39;http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/V_Cafe/VCafe_FishandChips_640x480._V286448998_.jpg&#39;,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;17612bcf-307a-4098-828e-329dd0962182&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [&#39;dressing&#39;],</span>
+<span class="go">  &#39;popular&#39;: True,</span>
+<span class="go">  &#39;price&#39;: 13.0,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01CH0RZOE&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go">  ...</span>
+</pre></div>
+</div>
+<p>Similarly to the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method, the <code class="xref py py-meth docutils literal"><span class="pre">query()</span></code> method by default will return a list of up to 10 records. We can set the <code class="docutils literal"><span class="pre">size</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">execute()</span></code> method to specify a different maximum number of records.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">20</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="filter">
+<h3>Filter<a class="headerlink" href="#filter" title="Permalink to this headline">¶</a></h3>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">filter()</span></code> API to add filters to an advanced text query search.</p>
+<p>Two types of filters are supported: <strong>text filter</strong> and <strong>range filter</strong>. For text filter, specify a knowledge base text field name and the filtering text string. The text string is normalized and the entire text string is used to filter the results, like SQL predicates in relational databases. For example, in food ordering apps, users often request dishes of a particular cuisine type or from a specific restaurant.</p>
+<p>In the example below we try to find dishes (that is, items in the <code class="docutils literal"><span class="pre">menu_items</span></code> index) whose names best match <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code>, from a restaurant whose ID matches <code class="docutils literal"><span class="pre">B01DEEGQBK</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">restaurant_id</span><span class="o">=</span><span class="s1">&#39;B01DEEGQBK&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Appetizers and Side Orders&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N3BB0PK&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;57572a43-f9fc-4a1c-96fe-788d544b1f2d&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 9.99,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01DEEGQBK&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go">  ...</span>
+</pre></div>
+</div>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">filter()</span></code> API to apply filters on number or date ranges in an advanced search.</p>
+<p>To define a filter on ranges, specify a knowledge base field and one or more of the following range operators:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="75%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>gt</strong></td>
+<td>greater than</td>
+</tr>
+<tr class="row-even"><td><strong>gte</strong></td>
+<td>greater than or equal to</td>
+</tr>
+<tr class="row-odd"><td><strong>lt</strong></td>
+<td>less than</td>
+</tr>
+<tr class="row-even"><td><strong>lte</strong></td>
+<td>less than or equal to</td>
+</tr>
+</tbody>
+</table>
+<p>Use cases for this kind of filtering include finding products within certain price ranges in a retailing app, and finding movies released in the past five years in a video discovery app.</p>
+<p>In the example below we filter on price range to find dishes priced below five dollars:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="n">lte</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Makimono-Sushi Rolls (6 Pcs)&#39;,</span>
+<span class="go">  &#39;description&#39;: &#39;Makimono-Sushi Rolls (6 Pcs)&#39;,</span>
+<span class="go">  &#39;id&#39;: &#39;B01MXSBGG0&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;78eb0100-029d-4efc-8b8c-77f97dc875b5&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Sake Maki-Salmon&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 3.95,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01N97KQNJ&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go"> {&#39;category&#39;: &#39;Popular Dishes&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01CUUCX7K&#39;,</span>
+<span class="go">  &#39;img_url&#39;: &#39;http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/TheSaladPlace/TheSaladPlace_Potatosalad_640x480._V295354393_.jpg&#39;,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;1e6f9732-4d87-4e08-ac8c-c6198b2645cc&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Potato&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: True,</span>
+<span class="go">  &#39;price&#39;: 3.95,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01CUUBQC8&#39;,</span>
+<span class="go">  &#39;size_group&#39;: &#39;SaladSize&#39;,</span>
+<span class="go">  &#39;size_prices&#39;: [{&#39;id&#39;: &#39;B01CUUC10O&#39;, &#39;name&#39;: &#39;Small&#39;, &#39;price&#39;: 3.95},</span>
+<span class="go">   {&#39;id&#39;: &#39;B01CUUBPYM&#39;, &#39;name&#39;: &#39;Medium&#39;, &#39;price&#39;: 4.95},</span>
+<span class="go">   {&#39;id&#39;: &#39;B01CUUD9FA&#39;, &#39;name&#39;: &#39;Large&#39;, &#39;price&#39;: 5.95}]},</span>
+<span class="go">   ...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Range filters are only valid for number and date knowledge base fields.</p>
+<p class="last">We can set the <code class="docutils literal"><span class="pre">size</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">execute()</span></code> method to specify the maximum number of records.</p>
+</div>
+</div>
+<div class="section" id="sort">
+<h3>Sort<a class="headerlink" href="#sort" title="Permalink to this headline">¶</a></h3>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">sort()</span></code> API to add one or more custom sort criteria to an advanced search.</p>
+<p>Custom sort</p>
+<blockquote>
+<div><ul class="simple">
+<li>can be used with number, date or location knowledge base fields</li>
+<li>takes in three parameters: <code class="docutils literal"><span class="pre">field</span></code>, <code class="docutils literal"><span class="pre">sort_type</span></code>, and <code class="docutils literal"><span class="pre">location</span></code></li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">field</span></code> parameter specifies the knowledge base field for sort, the <code class="docutils literal"><span class="pre">sort_type</span></code> parameter can be either <code class="docutils literal"><span class="pre">asc</span></code> or <code class="docutils literal"><span class="pre">desc</span></code> to indicate sort order for number or date fields and <code class="docutils literal"><span class="pre">distance</span></code> to indicate sorting by distance using location field, and the <code class="docutils literal"><span class="pre">location</span></code> field parameter specifies the origin location when sorting by distance.</p>
+<p>The custom sort can be applied to any number or date fields desirable and the score for ranking will be a optimized blend of sort score with other scoring factors including text relevance scores when available.</p>
+<p>In the example below, we search for <code class="docutils literal"><span class="pre">menu_item</span></code> objects that best match the text query <code class="docutils literal"><span class="pre">fish</span> <span class="pre">and</span> <span class="pre">chips</span></code>, priced from lowest to highest. TO do this, we combining the text relevance and sort scores on the <code class="docutils literal"><span class="pre">price</span></code> field:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;fish and chips&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="n">sort_type</span><span class="o">=</span><span class="s1">&#39;asc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{&#39;category&#39;: &#39;Appetizers and Side Orders&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01N3BB0PK&#39;,</span>
+<span class="go">  &#39;img_url&#39;: None,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;57572a43-f9fc-4a1c-96fe-788d544b1f2d&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [],</span>
+<span class="go">  &#39;popular&#39;: False,</span>
+<span class="go">  &#39;price&#39;: 9.99,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01DEEGQBK&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go"> {&#39;category&#39;: &#39;Entrees&#39;,</span>
+<span class="go">  &#39;description&#39;: None,</span>
+<span class="go">  &#39;id&#39;: &#39;B01CH0SUMA&#39;,</span>
+<span class="go">  &#39;img_url&#39;: &#39;http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/V_Cafe/VCafe_FishandChips_640x480._V286448998_.jpg&#39;,</span>
+<span class="go">  &#39;menu_id&#39;: &#39;17612bcf-307a-4098-828e-329dd0962182&#39;,</span>
+<span class="go">  &#39;name&#39;: &#39;Fish and Chips&#39;,</span>
+<span class="go">  &#39;option_groups&#39;: [&#39;dressing&#39;],</span>
+<span class="go">  &#39;popular&#39;: True,</span>
+<span class="go">  &#39;price&#39;: 13.0,</span>
+<span class="go">  &#39;restaurant_id&#39;: &#39;B01CH0RZOE&#39;,</span>
+<span class="go">  &#39;size_group&#39;: None,</span>
+<span class="go">  &#39;size_prices&#39;: []},</span>
+<span class="go">  ...</span>
+</pre></div>
+</div>
+<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">sort()</span></code> API to sort by distance in an advanced text search.</p>
+<p>To define sorting by distance, specify <code class="docutils literal"><span class="pre">location</span></code> as a sort field, with <code class="docutils literal"><span class="pre">distance</span></code> as the <code class="docutils literal"><span class="pre">sort_type</span></code> parameter, and the origin location latitude and longitude in the object passed to the <code class="docutils literal"><span class="pre">location</span></code> parameter. Proximity is an important sorting factor for conversational applications designed for use on the go.</p>
+<p>In the example below, we search for restaurants whose names best match <code class="docutils literal"><span class="pre">firetrail</span></code>, in order of nearest to to furthest from the center of San Francisco:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;firetrail&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="n">sort_type</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;37.77,122.41&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<span class="go">    {</span>
+<span class="go">          &#39;categories&#39;: [&#39;Beverages&#39;, &#39;Pizzas&#39;, &#39;Sides&#39;, &#39;Popular Dishes&#39;],</span>
+<span class="go">          &#39;cuisine_types&#39;: [&#39;Pizza&#39;],</span>
+<span class="go">          &#39;id&#39;: &#39;B01CT54GYE&#39;,</span>
+<span class="go">          &#39;image_url&#39;: &#39;https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png&#39;,</span>
+<span class="go">          &#39;menus&#39;: [{&#39;id&#39;: &#39;127c097e-2d9d-4880-99ac-f1688909af07&#39;,</span>
+<span class="go">            &#39;option_groups&#39;: [{&#39;id&#39;: &#39;ToppingsGF&#39;,</span>
+<span class="go">                  &#39;max_selected&#39;: 9,</span>
+<span class="go">                  &#39;min_selected&#39;: 0,</span>
+<span class="go">                  &#39;name&#39;: &#39;Add Some Extra Toppings&#39;,</span>
+<span class="go">                  &#39;options&#39;: [{&#39;description&#39;: None,</span>
+<span class="go">                    &#39;id&#39;: &#39;B01D8TDFV0&#39;,</span>
+<span class="go">                    &#39;name&#39;: &#39;Goat Cheese&#39;,</span>
+<span class="go">                    &#39;price&#39;: 2.0},</span>
+<span class="go">                   {&#39;description&#39;: None,</span>
+<span class="go">                    &#39;id&#39;: &#39;B01D8TCH3M&#39;,</span>
+<span class="go">                    &#39;name&#39;: &#39;Olives&#39;,</span>
+<span class="go">                    &#39;price&#39;: 1.0},</span>
+<span class="go">                   ...</span>
+<span class="go">          &#39;name&#39;: &#39;Firetrail Pizza&#39;,</span>
+<span class="go">          &#39;num_reviews&#39;: 13,</span>
+<span class="go">          &#39;price_range&#39;: 2.0,</span>
+<span class="go">          &#39;rating&#39;: 4.1,</span>
+<span class="go">          &#39;location&#39;: [37.77, 122.39]</span>
+<span class="go">        },</span>
+<span class="go">        ...</span>
+<span class="go">  ]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We can set the <code class="docutils literal"><span class="pre">size</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">execute()</span></code> method to specify the maximum number of records.</p>
+</div>
+</div>
+</div>
+<div class="section" id="dealing-with-unstructured-text">
+<span id="unstructured-data"></span><h2>Dealing with unstructured text<a class="headerlink" href="#dealing-with-unstructured-text" title="Permalink to this headline">¶</a></h2>
+<p>The knowledge bases described in the previous sections are comprised of clearly defined data types that are easily searchable. This kind of data is known as <cite>structured data</cite>.</p>
+<p>In this section we describe how to use the question answerer on knowledge bases with long, free-form text or <cite>unstructured data</cite>. For example, a company’s Human Resources (HR) team could have documents about general policies of the company. We can use this data to develop an HR assistant that automatically answers any policy-related questions.</p>
+<p>To use the question answerer on unstructured text, we would follow the same steps mentioned before to prepare, index and load the knowledge base.</p>
+<p>Here is an example of what the knowledge base can look like for the HR assistant use case. It consists of frequently asked question and answer pairs.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="kn">from</span> <span class="nn">mm.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+
+<span class="c1"># Download hr assistant blueprint</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">bp_name</span> <span class="o">=</span> <span class="s1">&#39;hr_assistant&#39;</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
+
+<span class="c1"># Query KB</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">,</span> <span class="n">data_file</span><span class="o">=</span><span class="s1">&#39;hr_assistant/data/hr_faq_data.json&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{</span>
+<span class="go">    &#39;question&#39;: &#39;What if I did not receive a form W2?&#39;,</span>
+<span class="go">    &#39;answer&#39;: &#39;W2s are mailed to home addresses of employees as of a date in mid-January each year. If you did not receive a form W2, you may access it online (beginning with 2008 W2s), similar to employee Pay Statements. Search for and click on the W-2 task. Enter the year for the W-2 you are wanting to locate and the last 4 digits of your Social Security Number. You then will have access to the W-2 in a format that can be used for filing paper versions of federal and state tax returns.&#39;,</span>
+<span class="go">    &#39;id&#39;: &#39;hrfaq6&#39;</span>
+<span class="go"> },</span>
+<span class="go"> {</span>
+<span class="go">    &#39;question&#39;: &#39;Are employers expected to hire the less qualified over the more qualified to meet affirmative action goals?&#39;,</span>
+<span class="go">    &#39;answer&#39;: &#39;Employers are not expected to establish any hiring practices that conflict with the principles of sound personnel management. No one should be hired unless there is a basis for believing the individual is the best-qualified candidate. In fact, affirmative action calls for the hiring of qualified people.&#39;,</span>
+<span class="go">    &#39;id&#39;: &#39;hrfaq12&#39;</span>
+<span class="go"> },</span>
+<span class="go"> ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>The difference between a structured knowledge base and an unstructured one is in how MindMeld handles the search query. Internally, while the ranking algorithm remains the same for both cases, the features extracted for ranking are different and are optimized to handle long text passages rather than keyword phrases.</p>
+<p>To search the knowledge base for the answer to a policy question, we will use the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> API as before with one small modification. We specify that the query is against unstructured text by setting the <code class="docutils literal"><span class="pre">query_type</span></code> parameter to <cite>text</cite> (by default the <code class="docutils literal"><span class="pre">query_type</span></code> is set to <cite>keyword</cite>).</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;what is phase 2 of the review cycle&#39;</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">answer</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{</span>
+<span class="go">    &#39;question&#39;: &#39;What is the performance cycle?&#39;,</span>
+<span class="go">    &#39;answer&#39;: &#39;The intent of the performance cycle is to identify the key parts of each employee’s job, identify what it looks like when that is done well (meets your expectations as a manager), and how both you as manager and your employee will know when that is achieved (measurements).Phase 1 - Planning:  Creating goals and expectations between the employee and manager for the current year. Phase 2 - Check-Ins:  Giving ongoing feedback throughout the year; identifying acomplishments, areas for improvement and adjusting the goals/expectations as necessary. Phase 3 - Review:  Reviewing the year at the end of the performance period.&#39;,</span>
+<span class="go">    &#39;id&#39;: &#39;hrfaq24&#39;</span>
+<span class="go"> }</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>In the above example, we try to find the best answer for the given user query by matching against both the <cite>question</cite> and <cite>answer</cite> field of the knowledge base. Using the <cite>answer</cite> field enables the question answerer to find matches even when the query does not have matches against the <cite>question</cite> field.</p>
+<p>We can perform the same search using the <code class="xref py py-meth docutils literal"><span class="pre">query()</span></code> API as well.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">build_search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">)</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;when do i get my w2 form&#39;</span>
+<span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">answer</span><span class="o">=</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[{</span>
+<span class="go">    &#39;question&#39;: &#39;When can I expect my annual form W2?&#39;,</span>
+<span class="go">    &#39;answer&#39;: &#39;All employee W2s are mailed on or around January 31 for the prior calendar year.&#39;,</span>
+<span class="go">    &#39;id&#39;: &#39;hrfaq5&#39;</span>
+<span class="go"> },</span>
+<span class="go"> {</span>
+<span class="go">    &#39;question&#39;: &#39;What if I did not receive a form W2?&#39;,</span>
+<span class="go">    &#39;answer&#39;: &#39;W2s are mailed to home addresses of employees as of a date in mid-January each year. If you did not receive a form W2, you may access it online (beginning with 2008 W2s), similar to employee Pay Statements. Search for and click on the W-2 task. Enter the year for the W-2 you are wanting to locate and the last 4 digits of your Social Security Number. You then will have access to the W-2 in a format that can be used for filing paper versions of federal and state tax returns.&#39;,</span>
+<span class="go">    &#39;id&#39;: &#39;hrfaq6&#39;</span>
+<span class="go"> }</span>
+<span class="go"> ...</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>For knowledge bases indexed prior to MindMeld 4.2, you will have to delete and reindex all the data to use this feature.</p>
+<p class="last">To delete and reindex your data, follow the steps mentioned <a class="reference internal" href="#import-kb"><span class="std std-ref">here</span></a>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dm.html" class="btn btn-neutral float-right" title="Working with the Dialogue Manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="custom_features.html" class="btn btn-neutral float-left" title="Working with User-Defined Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,857 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.entity_resolver &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.entity_resolver</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.entity_resolver</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the entity resolver component of the MindMeld natural language processor.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">elasticsearch5.exceptions</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch5.exceptions</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
+
+<span class="kn">from</span> <span class="nn">..core</span> <span class="k">import</span> <span class="n">Entity</span>
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">EntityResolverConnectionError</span><span class="p">,</span> <span class="n">EntityResolverError</span>
+<span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DEFAULT_ES_SYNONYM_MAPPING</span><span class="p">,</span>
+    <span class="n">DOC_TYPE</span><span class="p">,</span>
+    <span class="n">PHONETIC_ES_SYNONYM_MAPPING</span><span class="p">,</span>
+    <span class="n">get_app_namespace</span><span class="p">,</span>
+    <span class="n">get_classifier_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._elasticsearch_helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">INDEX_TYPE_KB</span><span class="p">,</span>
+    <span class="n">INDEX_TYPE_SYNONYM</span><span class="p">,</span>
+    <span class="n">create_es_client</span><span class="p">,</span>
+    <span class="n">delete_index</span><span class="p">,</span>
+    <span class="n">does_index_exist</span><span class="p">,</span>
+    <span class="n">get_field_names</span><span class="p">,</span>
+    <span class="n">get_scoped_index_name</span><span class="p">,</span>
+    <span class="n">load_index</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="EntityResolver"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.entity_resolver.html#mindmeld.components.EntityResolver">[docs]</a><span class="k">class</span> <span class="nc">EntityResolver</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An entity resolver is used to resolve entities in a given query to their canonical values</span>
+<span class="sd">    (usually linked to specific entries in a knowledge base).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># prefix for Elasticsearch indices used to store synonyms for entity resolution</span>
+    <span class="n">ES_SYNONYM_INDEX_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;synonym&quot;</span>
+    <span class="sd">&quot;&quot;&quot;The prefix of the ES index.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an entity resolver</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_path (str): The application path</span>
+<span class="sd">            resource_loader (ResourceLoader): An object which can load resources for the resolver</span>
+<span class="sd">            entity_type: The entity type associated with this entity resolver</span>
+<span class="sd">            es_host (str): The Elasticsearch host server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span> <span class="o">=</span> <span class="n">get_app_namespace</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span> <span class="o">=</span> <span class="n">resource_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span> <span class="o">=</span> <span class="n">resource_loader</span><span class="o">.</span><span class="n">query_factory</span><span class="o">.</span><span class="n">normalize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">entity_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_system_entity</span> <span class="o">=</span> <span class="n">Entity</span><span class="o">.</span><span class="n">is_system_entity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exact_match_mapping</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_er_config</span> <span class="o">=</span> <span class="n">get_classifier_config</span><span class="p">(</span><span class="s2">&quot;entity_resolution&quot;</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span> <span class="o">=</span> <span class="n">es_host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_es_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;client&quot;</span><span class="p">:</span> <span class="n">es_client</span><span class="p">,</span> <span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_es_index_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">EntityResolver</span><span class="o">.</span><span class="n">ES_SYNONYM_INDEX_PREFIX</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_use_text_rel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_er_config</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;text_relevance&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_use_double_metaphone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;double_metaphone&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_er_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;phonetic_match_types&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_es_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Lazily connect to Elasticsearch.  Make sure each subprocess gets it&#39;s own connection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_config</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_config</span><span class="p">[</span><span class="s2">&quot;pid&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_es_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="s2">&quot;client&quot;</span><span class="p">:</span> <span class="n">create_es_client</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_config</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EntityResolver.ingest_synonym"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.entity_resolver.html#mindmeld.components.EntityResolver.ingest_synonym">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">ingest_synonym</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">app_namespace</span><span class="p">,</span>
+        <span class="n">index_name</span><span class="p">,</span>
+        <span class="n">index_type</span><span class="o">=</span><span class="n">INDEX_TYPE_SYNONYM</span><span class="p">,</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">es_client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_double_metaphone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads synonym documents from the mapping.json data into the</span>
+<span class="sd">        specified index. If an index with the specified name doesn&#39;t exist, a</span>
+<span class="sd">        new index with that name will be created.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_namespace (str): The namespace of the app. Used to prevent</span>
+<span class="sd">                collisions between the indices of this app and those of other</span>
+<span class="sd">                apps.</span>
+<span class="sd">            index_name (str): The name of the new index to be created.</span>
+<span class="sd">            index_type (str): specify whether to import to synonym index or</span>
+<span class="sd">                knowledge base object index. INDEX_TYPE_SYNONYM is the default</span>
+<span class="sd">                which indicates the synonyms to be imported to synonym index,</span>
+<span class="sd">                while INDEX_TYPE_KB indicates that the synonyms should be</span>
+<span class="sd">                imported into existing knowledge base index.</span>
+<span class="sd">            field_name (str): specify name of the knowledge base field that the</span>
+<span class="sd">                synonym list corresponds to when index_type is</span>
+<span class="sd">                INDEX_TYPE_SYNONYM.</span>
+<span class="sd">            data (list): A list of documents to be loaded into the index.</span>
+<span class="sd">            es_host (str): The Elasticsearch host server.</span>
+<span class="sd">            es_client (Elasticsearch): The Elasticsearch client.</span>
+<span class="sd">            use_double_metaphone (bool): Whether to use the phonetic mapping or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">_action_generator</span><span class="p">(</span><span class="n">docs</span><span class="p">):</span>
+
+            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="c1"># id</span>
+                <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span>
+                    <span class="n">action</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># generate hash from canonical name as ID</span>
+                    <span class="n">action</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span>
+                        <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cname&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+                <span class="c1"># synonym whitelist</span>
+                <span class="n">whitelist</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;whitelist&quot;</span><span class="p">]</span>
+                <span class="n">syn_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">syn_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;cname&quot;</span><span class="p">]})</span>
+                <span class="k">for</span> <span class="n">syn</span> <span class="ow">in</span> <span class="n">whitelist</span><span class="p">:</span>
+                    <span class="n">syn_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">syn</span><span class="p">})</span>
+
+                <span class="c1"># If index type is INDEX_TYPE_KB  we import the synonym into knowledge base object</span>
+                <span class="c1"># index by updating the knowledge base object with additional synonym whitelist</span>
+                <span class="c1"># field. Otherwise, by default we import to synonym index in ES.</span>
+                <span class="k">if</span> <span class="n">index_type</span> <span class="o">==</span> <span class="n">INDEX_TYPE_KB</span> <span class="ow">and</span> <span class="n">field_name</span><span class="p">:</span>
+                    <span class="n">syn_field</span> <span class="o">=</span> <span class="n">field_name</span> <span class="o">+</span> <span class="s2">&quot;$whitelist&quot;</span>
+                    <span class="n">action</span><span class="p">[</span><span class="s2">&quot;_op_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;update&quot;</span>
+                    <span class="n">action</span><span class="p">[</span><span class="s2">&quot;doc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">syn_field</span><span class="p">:</span> <span class="n">syn_list</span><span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">action</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                    <span class="n">action</span><span class="p">[</span><span class="s2">&quot;whitelist&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">syn_list</span>
+
+                <span class="k">yield</span> <span class="n">action</span>
+
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">PHONETIC_ES_SYNONYM_MAPPING</span>
+            <span class="k">if</span> <span class="n">use_double_metaphone</span>
+            <span class="k">else</span> <span class="n">DEFAULT_ES_SYNONYM_MAPPING</span>
+        <span class="p">)</span>
+        <span class="n">load_index</span><span class="p">(</span>
+            <span class="n">app_namespace</span><span class="p">,</span>
+            <span class="n">index_name</span><span class="p">,</span>
+            <span class="n">_action_generator</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">mapping</span><span class="p">,</span>
+            <span class="n">DOC_TYPE</span><span class="p">,</span>
+            <span class="n">es_host</span><span class="p">,</span>
+            <span class="n">es_client</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EntityResolver.fit"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.entity_resolver.html#mindmeld.components.EntityResolver.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.</span>
+
+<span class="sd">        In addition, the synonyms in entity mapping are imported to knowledge base indexes if the</span>
+<span class="sd">        corresponding knowledge base object index and field name are specified for the entity type.</span>
+<span class="sd">        The synonym info is then used by Question Answerer for text relevance matches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            clean (bool): If ``True``, deletes and recreates the index from scratch instead of</span>
+<span class="sd">                          updating the existing index with synonyms in the mapping.json.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_system_entity</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_text_rel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_exact_match</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">clean</span><span class="p">:</span>
+            <span class="n">delete_index</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_index_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span>
+            <span class="p">)</span>
+        <span class="n">entity_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_entity_map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="c1"># list of canonical entities and their synonyms</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="n">entity_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="c1"># create synonym index and import synonyms</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Importing synonym data to synonym index &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_index_name</span><span class="p">)</span>
+        <span class="n">EntityResolver</span><span class="o">.</span><span class="n">ingest_synonym</span><span class="p">(</span>
+            <span class="n">app_namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span>
+            <span class="n">index_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_index_name</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">entities</span><span class="p">,</span>
+            <span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">,</span>
+            <span class="n">es_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="p">,</span>
+            <span class="n">use_double_metaphone</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_double_metaphone</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># It&#39;s supported to specify the KB object type and field name that the NLP entity type</span>
+        <span class="c1"># corresponds to in the mapping.json file. In this case the synonym whitelist is also</span>
+        <span class="c1"># imported to KB object index and the synonym info will be used when using Question Answerer</span>
+        <span class="c1"># for text relevance matches.</span>
+        <span class="n">kb_index</span> <span class="o">=</span> <span class="n">entity_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kb_index_name&quot;</span><span class="p">)</span>
+        <span class="n">kb_field</span> <span class="o">=</span> <span class="n">entity_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kb_field_name&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if KB index and field name is specified then also import synonyms into KB object index.</span>
+        <span class="k">if</span> <span class="n">kb_index</span> <span class="ow">and</span> <span class="n">kb_field</span><span class="p">:</span>
+            <span class="c1"># validate the KB index and field are valid.</span>
+            <span class="c1"># TODO: this validation can probably be in some other places like resource loader.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">does_index_exist</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="n">kb_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot import synonym data to knowledge base. The knowledge base &quot;</span>
+                    <span class="s2">&quot;index name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not valid.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kb_index</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">kb_field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">get_field_names</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="n">kb_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot import synonym data to knowledge base. The knowledge base &quot;</span>
+                    <span class="s2">&quot;field name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not valid.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kb_field</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">entities</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Knowledge base index and field cannot be specified for entities &quot;</span>
+                    <span class="s2">&quot;without ID.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Importing synonym data to knowledge base index &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">kb_index</span><span class="p">)</span>
+            <span class="n">EntityResolver</span><span class="o">.</span><span class="n">ingest_synonym</span><span class="p">(</span>
+                <span class="n">app_namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span>
+                <span class="n">index_name</span><span class="o">=</span><span class="n">kb_index</span><span class="p">,</span>
+                <span class="n">index_type</span><span class="o">=</span><span class="s2">&quot;kb&quot;</span><span class="p">,</span>
+                <span class="n">field_name</span><span class="o">=</span><span class="n">kb_field</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">entities</span><span class="p">,</span>
+                <span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">,</span>
+                <span class="n">es_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="p">,</span>
+                <span class="n">use_double_metaphone</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_double_metaphone</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_entity_map</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_map</span><span class="p">,</span> <span class="n">normalizer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads in the mapping.json file and stores the synonym mappings in a item_map and a</span>
+<span class="sd">        synonym_map for exact match entity resolution when Elasticsearch is unavailable</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_type: The entity type associated with this entity resolver</span>
+<span class="sd">            entity_map: The loaded mapping.json file for the given entity type</span>
+<span class="sd">            normalizer: The normalizer to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">syn_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">seen_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">entity_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">):</span>
+            <span class="n">cname</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;cname&quot;</span><span class="p">]</span>
+            <span class="n">item_id</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cname</span> <span class="ow">in</span> <span class="n">item_map</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Canonical name </span><span class="si">%s</span><span class="s2"> specified in </span><span class="si">%s</span><span class="s2"> entity map multiple times&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">cname</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">seen_ids</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Item id </span><span class="si">{!r}</span><span class="s2"> specified in </span><span class="si">{!r}</span><span class="s2"> entity map multiple times&quot;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">))</span>
+                <span class="n">seen_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+
+            <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="n">cname</span><span class="p">]</span> <span class="o">+</span> <span class="n">item</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;whitelist&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">items_for_cname</span> <span class="o">=</span> <span class="n">item_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cname</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">items_for_cname</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">item_map</span><span class="p">[</span><span class="n">cname</span><span class="p">]</span> <span class="o">=</span> <span class="n">items_for_cname</span>
+            <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+                <span class="n">norm_alias</span> <span class="o">=</span> <span class="n">normalizer</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">norm_alias</span> <span class="ow">in</span> <span class="n">syn_map</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Synonym </span><span class="si">%s</span><span class="s2"> specified in </span><span class="si">%s</span><span class="s2"> entity map multiple times&quot;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">cname</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">)</span>
+                <span class="n">cnames_for_syn</span> <span class="o">=</span> <span class="n">syn_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">norm_alias</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">cnames_for_syn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cname</span><span class="p">)</span>
+                <span class="n">syn_map</span><span class="p">[</span><span class="n">norm_alias</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cnames_for_syn</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="n">item_map</span><span class="p">,</span> <span class="s2">&quot;synonyms&quot;</span><span class="p">:</span> <span class="n">syn_map</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_fit_exact_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fits a simple exact match entity resolution model when Elasticsearch is not available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">entity_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resource_loader</span><span class="o">.</span><span class="n">get_entity_map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exact_match_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_entity_map</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">entity_map</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="EntityResolver.predict"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.entity_resolver.html#mindmeld.components.EntityResolver.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predicts the resolved value(s) for the given entity using the loaded entity map or the</span>
+<span class="sd">        trained entity resolution model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \</span>
+<span class="sd">                objects.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): The top 20 resolved values for the provided entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">top_entity</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">top_entity</span> <span class="o">=</span> <span class="n">entity</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">entity</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_system_entity</span><span class="p">:</span>
+            <span class="c1"># system entities are already resolved</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">top_entity</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_text_rel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_exact_match</span><span class="p">(</span><span class="n">top_entity</span><span class="p">)</span>
+
+        <span class="n">weight_factors</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">))]</span>
+
+        <span class="k">def</span> <span class="nf">_construct_match_query</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;cname.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">weight</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;cname.raw&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">weight</span><span class="p">}}},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;cname.char_ngram&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+            <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">_construct_nbest_match_query</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;cname.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">_construct_phonetic_match_query</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;cname.double_metaphone&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">weight</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">_construct_whitelist_query</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_phons</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;whitelist&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;score_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="s2">&quot;whitelist.name.normalized_keyword&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">weight</span><span class="p">,</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="s2">&quot;whitelist.name&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="s2">&quot;whitelist.name.char_ngram&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                            <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                            <span class="p">]</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;inner_hits&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">use_phons</span><span class="p">:</span>
+                <span class="n">query</span><span class="p">[</span><span class="s2">&quot;nested&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span><span class="s2">&quot;should&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;whitelist.double_metaphone&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                <span class="s2">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">weight</span><span class="p">,</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">query</span>
+
+        <span class="n">text_relevance_query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;function_score&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[]}},</span>
+                    <span class="s2">&quot;field_value_factor&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;sort_factor&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;modifier&quot;</span><span class="p">:</span> <span class="s2">&quot;log1p&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;factor&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                        <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;boost_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;score_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">match_query</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">top_transcript</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">weight_factors</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">top_transcript</span><span class="p">:</span>
+                <span class="n">match_query</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_construct_match_query</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">weight</span><span class="p">))</span>
+                <span class="n">top_transcript</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">match_query</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_construct_nbest_match_query</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">weight</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_double_metaphone</span><span class="p">:</span>
+                <span class="n">match_query</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_construct_phonetic_match_query</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">weight</span><span class="p">))</span>
+        <span class="n">text_relevance_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;should&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="n">match_query</span><span class="p">}})</span>
+
+        <span class="n">whitelist_query</span> <span class="o">=</span> <span class="n">_construct_whitelist_query</span><span class="p">(</span>
+            <span class="n">top_entity</span><span class="p">,</span> <span class="n">use_phons</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_double_metaphone</span>
+        <span class="p">)</span>
+        <span class="n">text_relevance_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;bool&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;should&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">whitelist_query</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">get_scoped_index_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_index_name</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">text_relevance_query</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">EsConnectionError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to connect to Elasticsearch: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">info</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EntityResolverConnectionError</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TransportError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unexpected error occurred when sending requests to Elasticsearch: </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;Status code: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EntityResolverError</span><span class="p">(</span>
+                <span class="s2">&quot;Unexpected error occurred when sending requests to &quot;</span>
+                <span class="s2">&quot;Elasticsearch: </span><span class="si">{}</span><span class="s2"> Status code: </span><span class="si">{}</span><span class="s2"> details: &quot;</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">ElasticsearchException</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EntityResolverError</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hits</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;hits&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">]</span>
+
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_double_metaphone</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_score&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
+                        <span class="k">continue</span>
+
+                <span class="n">top_synonym</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">synonym_hits</span> <span class="o">=</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;inner_hits&quot;</span><span class="p">][</span><span class="s2">&quot;whitelist&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">synonym_hits</span><span class="p">:</span>
+                    <span class="n">top_synonym</span> <span class="o">=</span> <span class="n">synonym_hits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;_source&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;cname&quot;</span><span class="p">:</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">][</span><span class="s2">&quot;cname&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_score&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;top_synonym&quot;</span><span class="p">:</span> <span class="n">top_synonym</span><span class="p">,</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sort_factor&quot;</span><span class="p">):</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;sort_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sort_factor&quot;</span><span class="p">)</span>
+
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict_exact_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predicts the resolved value(s) for the given entity using the loaded entity map.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity (Entity): An entity found in an input query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">normed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cnames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exact_match_mapping</span><span class="p">[</span><span class="s2">&quot;synonyms&quot;</span><span class="p">][</span><span class="n">normed</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to resolve entity </span><span class="si">%r</span><span class="s2"> for type </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">entity</span><span class="o">.</span><span class="n">type</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cnames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Multiple possible canonical names for </span><span class="si">%r</span><span class="s2"> entity for type </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cname</span> <span class="ow">in</span> <span class="n">cnames</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exact_match_mapping</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">][</span><span class="n">cname</span><span class="p">]:</span>
+                <span class="n">item_value</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">item_value</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;whitelist&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">values</span>
+
+<div class="viewcode-block" id="EntityResolver.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.entity_resolver.html#mindmeld.components.EntityResolver.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads the trained entity resolution model from disk.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_text_rel</span><span class="p">:</span>
+                <span class="n">scoped_index_name</span> <span class="o">=</span> <span class="n">get_scoped_index_name</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_index_name</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">scoped_index_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="n">EsConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to connect to Elasticsearch: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">info</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EntityResolverConnectionError</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TransportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Unexpected error occurred when sending requests to Elasticsearch: </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;Status code: </span><span class="si">%s</span><span class="s2"> details: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EntityResolverError</span>
+        <span class="k">except</span> <span class="n">ElasticsearchException</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EntityResolverError</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

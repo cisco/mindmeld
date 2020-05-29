@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>MindMeld Blueprints &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Food Ordering" href="food_ordering.html" />
+    <link rel="prev" title="Step 10: Deploy Trained Models" href="../quickstart/10_deploy_to_production.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MindMeld Blueprints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#before-you-continue">Before you Continue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#download">1. Download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build">2. Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run">3. Run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>MindMeld Blueprints</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/blueprints/overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mindmeld-blueprints">
+<h1>MindMeld Blueprints<a class="headerlink" href="#mindmeld-blueprints" title="Permalink to this headline">¶</a></h1>
+<p>MindMeld provides example applications, called <em>MindMeld blueprints</em>, that cover common conversational use cases. Each blueprint comes with a pre-configured application structure and a pre-built set of code samples and data sets.</p>
+<p>The blueprint allows you to quickly build and test a fully working conversational app without writing code or collecting training data. If desired, you can then treat the blueprint app as a baseline for improvement and customization by adding data and logic specific to your business or application needs.</p>
+<p>Blueprints are also ideal when you want to:</p>
+<blockquote>
+<div><ul class="simple">
+<li>work through a tutorial on building practical applications using the MindMeld toolkit, or</li>
+<li>bootstrap your app on MindMeld (assuming your app fits one of the MindMeld blueprint use cases)</li>
+</ul>
+</div></blockquote>
+<p>MindMeld provides four blueprints:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="34%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><div class="first last line-block">
+<div class="line">Blueprint</div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Use Case</div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Blueprint Name</div>
+<div class="line">in Python</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><a class="reference internal" href="food_ordering.html"><span class="doc">Food Ordering</span></a></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Users order food for delivery</div>
+<div class="line">from nearby restaurants</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">food_ordering</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><a class="reference internal" href="home_assistant.html"><span class="doc">Home Assistant</span></a></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Users control devices</div>
+<div class="line">and appliances in a smart home</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">home_assistant</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><a class="reference internal" href="video_discovery.html"><span class="doc">Video Discovery</span></a></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Users search for, ask questions about,</div>
+<div class="line">and ask to view movies and TV shows</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">video_discovery</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><a class="reference internal" href="../quickstart/00_overview.html"><span class="doc">Kwik-E-Mart</span></a></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">The Kwik-E-Mart app described</div>
+<div class="line">in the Step-by-Step Guide</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">kwik_e_mart</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>You can use the Quick Start below to get any blueprint up and running.</p>
+<p>Each of the sections beyond the Quick Start covers one blueprint in depth, with exercises that explain what you need to know to convert the blueprint into a production-quality app.</p>
+<p>You’ll be guided through the following steps:</p>
+<blockquote>
+<div><ul class="simple">
+<li>define the app scope clearly in terms of domains, intents, entities and roles</li>
+<li>set up a MindMeld project by creating the app directory structure</li>
+<li>create the knowledge base for the app</li>
+<li>acquire and annotate training data for the statistical NLP models</li>
+<li>train, tune and test the NLP models</li>
+<li>configure the language parser</li>
+<li>design and implement the dialogue states</li>
+<li>deploy the app to a conversational platform or device</li>
+</ul>
+</div></blockquote>
+<div class="section" id="before-you-continue">
+<h2>Before you Continue<a class="headerlink" href="#before-you-continue" title="Permalink to this headline">¶</a></h2>
+<p>All blueprints require you to install MindMeld and its required dependencies before you begin.</p>
+<p>See the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">Getting Started</span></a> page for instructions on acquiring and installing the MindMeld toolkit on your system.</p>
+<p>The Home Assistant blueprint requires you to register for an <a class="reference external" href="https://openweathermap.org/appid">Open Weather Map</a> API key, and then set an environment variable with the command <code class="docutils literal"><span class="pre">export</span> <span class="pre">OPEN_WEATHER_KEY=[YOUR-KEY]</span></code>. If you skip this step, the app can run but cannot retrieve weather forecasts.</p>
+</div>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<p>Depending on which blueprint you choose to run, this Quick Start should take between five and fifteen minutes to complete.</p>
+<div class="section" id="download">
+<h3>1. Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h3>
+<p>Open a Python shell and type the following commands to download and set up the blueprint application of your choice.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Use the appropriate Python blueprint name as the value of the <code class="docutils literal"><span class="pre">bp_name</span></code> variable (either <code class="docutils literal"><span class="pre">food_ordering</span></code>, <code class="docutils literal"><span class="pre">home_assistant</span></code>, <code class="docutils literal"><span class="pre">video_assistant</span></code>, or <code class="docutils literal"><span class="pre">kwik_e_mart</span></code>). In the example, we specify the Food Ordering blueprint.</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
+<span class="n">bp_name</span> <span class="o">=</span> <span class="s1">&#39;food_ordering&#39;</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build">
+<h3>2. Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
+<p>Build the Natural Language Processing models that power the app.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
+<span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run">
+<h3>3. Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h3>
+<p>Interact with the app in the Python shell using the commands below. Try the queries shown in the examples, then try some queries of your own invention.</p>
+<p><em>Food Ordering example</em></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">bp_name</span><span class="p">)</span>
+<span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hello!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&quot;Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma&#39;s Deli &amp; Cafe, The Salad Place&quot;]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Get me a pepperoni pizza from firetrail pizza&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Sure, I have 1 order of Pepperoni Pizza from Firetrail Pizza for a total price of $11.00. Would you like to place the order?&#39;, &#39;Listening...&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Bye&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Goodbye!&#39;]</span>
+</pre></div>
+</div>
+<p><em>Home Assistant example</em></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">bp_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi&#39;</span><span class="p">)</span>
+<span class="go">[&#39;Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;What is the weather today?&#39;</span><span class="p">)</span>
+<span class="go">[&#39;The weather forecast in San Francisco is haze with a min of 66.2 F and a max of 89.6 F&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Set the temperature to 72&#39;</span><span class="p">)</span>
+<span class="go">[&#39;The thermostat temperature in the home is now 72 degrees F.&#39;]</span>
+</pre></div>
+</div>
+<p><em>Video Discovery example</em></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi&#39;</span><span class="p">)</span>
+<span class="go">[&#39;Hello.&#39;, &#39;I can help you find movies and TV shows. What do you feel like watching today?&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Wonder Woman&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Beauty and the Beast&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Transformers: The Last Knight&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Logan&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Mummy&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Kong: Skull Island&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Doctor Who&#39;, &#39;release_year&#39;: 2005}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Game of Thrones&#39;, &#39;release_year&#39;: 2011}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;The Walking Dead&#39;, &#39;release_year&#39;: 2010}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Pirates of the Caribbean: Dead Men Tell No Tales&#39;, &#39;release_year&#39;: 2017}]}&quot;, &quot;Suggestions: &#39;Most popular&#39;, &#39;Most recent&#39;, &#39;Movies&#39;, &#39;TV Shows&#39;, &#39;Action&#39;, &#39;Dramas&#39;, &#39;Sci-Fi&#39;&quot;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Show me movies with Tom Hanks&#39;</span><span class="p">)</span>
+<span class="go">[&#39;Perfect. Here are some movies with Tom Hanks:&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Forrest Gump&#39;, &#39;release_year&#39;: 1994}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story&#39;, &#39;release_year&#39;: 1995}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Inferno&#39;, &#39;release_year&#39;: 2016}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Cars&#39;, &#39;release_year&#39;: 2006}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 3&#39;, &#39;release_year&#39;: 2010}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 2&#39;, &#39;release_year&#39;: 1999}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Sully&#39;, &#39;release_year&#39;: 2016}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Saving Private Ryan&#39;, &#39;release_year&#39;: 1998}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Catch Me If You Can&#39;, &#39;release_year&#39;: 2002}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Green Mile&#39;, &#39;release_year&#39;: 1999}]}&quot;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;romantic&#39;</span><span class="p">)</span>
+<span class="go">[&#39;Perfect. Here are some romance movies with Tom Hanks:&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Forrest Gump&#39;, &#39;release_year&#39;: 1994}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Big&#39;, &#39;release_year&#39;: 1988}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Larry Crowne&#39;, &#39;release_year&#39;: 2011}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Joe Versus the Volcano&#39;, &#39;release_year&#39;: 1990}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Splash&#39;, &#39;release_year&#39;: 1984}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Sleepless in Seattle&#39;, &#39;release_year&#39;: 1993}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Money Pit&#39;, &#39;release_year&#39;: 1986}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 4&#39;, &#39;release_year&#39;: 2019}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &quot;You&#39;ve Got Mail&quot;, &#39;release_year&#39;: 1998}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Nothing in Common&#39;, &#39;release_year&#39;: 1986}]}&quot;]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="food_ordering.html" class="btn btn-neutral float-right" title="Food Ordering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../quickstart/10_deploy_to_production.html" class="btn btn-neutral float-left" title="Step 10: Deploy Trained Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

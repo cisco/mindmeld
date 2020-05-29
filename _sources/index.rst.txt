@@ -1,0 +1,548 @@
+About This Playbook
+
+
+This playbook represents a first step toward defining the governing
+principles and best practices which will enable developers to build
+great conversational applications. It is the result of several years
+of practical experience building and deploying dozens of the most
+advanced conversational applications achievable. Cutting-edge research
+and state-of-the-art algorithms are not surveyed here; there are many
+other resources available for that purpose. Instead, this playbook
+focuses on helping developers and data scientists build real
+production applications. The detailed instructions, practical advice,
+and real-world examples provided here should empower developers to
+improve the quality and variety of conversational experiences of the
+coming months and years.
+
+The Introduction provides an overview of the state of the art in
+building conversational applications and discusses tradeoffs
+associated with different implementation approaches.
+
+The Step-by-Step Guide illustrates how to build an end-to-end
+conversational application using MindMeld, the Conversational AI
+toolkit. You can apply it directly while building a conversational
+application, or just read it to learn the essentials of MindMeld.
+
+The Blueprint Applications section explains how to use MindMeld to
+quickly build and test a fully working conversational application
+without writing code or collecting training data. You can bootstrap a
+Blueprint app into a more specialized and powerful conversational
+application, or just use the Blueprint app as a demo or research tool.
+
+The User Guide covers each component of the MindMeld platform in depth
+and explains how to use MindMeld to build and configure each component
+for optimal performance. It functions as a technical supplement that
+details how to improve an application built following either the Step-
+by-Step Guide or the Blueprint Applications. The User Guide highlights
+many common techniques and best practices that contribute to
+successful conversational experiences today.
+
+The Versions section contains a Recent Changes section which you
+should always consult before installing or upgrading MindMeld.
+
+Readers should be familiar with Machine Learning and the Python
+programming language, including functional knowledge of the scikit-
+learn python package.
+
+For those who wish to use the deep learning models included in
+MindMeld, familiarity with the TensorFlow library is recommended.
+
+
+How to Use these Docs
+
+
+The questions and answers below explain how to use this Conversational
+AI Playbook to support your individual needs as a developer and
+learner.
+
+
+
+Q: What is Conversational AI? Why does MindMeld exist and what
+does it do?
+
+A: Read the Introduction. This explains what MindMeld does
+differently from other platforms and toolkits.
+
+
+
+Q: What is the methodology for building Conversational AI
+applications with MindMeld?
+
+A: Read the Step-by-Step Guide. This and the User Guide together
+form the main body of knowledge for MindMeld developers.
+
+
+
+Q: How do I quickly get a pre-built MindMeld app running, either
+as a learning exercise or as a baseline for my own application?
+
+A: Follow the instructions in Blueprint Applications.
+
+
+
+Q: How do I apply the Step-by-Step methodology to my own MindMeld
+app, either building from scratch or extending a Blueprint app?
+
+A: Work through either the Step-by-Step Guide or the section of
+Blueprint Applications that’s appropriate for your use case. Where
+those docs refer you to the User Guide, apply the in-depth material in
+the User Guide to improve your application’s performance or increase
+its sophistication, as needed.
+
+The User Guide and the Step-by-Step Guide together form the main body
+of knowledge for MindMeld developers.
+
+
+
+
+Contents
+
+
+Introduction
+
+ Introduction to Conversational Applications
+
+   The Rise of the Conversational Interface
+
+   Machine Learning and the Challenge of Building Useful
+    Conversational Applications
+
+ Different Approaches for Building Conversational Applications
+
+   Rule-Based Approaches
+
+   Cloud-Based NLP Services
+
+   Machine Learning Toolkits
+
+   Conversational AI Platforms
+
+   How Good is Good Enough?
+
+ Anatomy of a Conversational AI Interaction
+
+ Introducing MindMeld
+
+   The MindMeld Philosophy
+
+ Key Concepts
+
+Step-by-Step Guide
+
+ Building a Conversational Interface in 10 Steps
+
+ Step 1: Select the Right Use Case
+
+ Step 2: Script Your Ideal Dialogue Interactions
+
+ Step 3: Define the Domain, Intent, Entity, and Role Hierarchy
+
+   The Example NLP Model Hierarchy
+
+   Begin Implementation with MindMeld
+
+ Step 4: Define the Dialogue State Handlers
+
+   Specify the Superset of Dialogue States
+
+   Create the Application Container
+
+   Implement the Dialogue State Handlers
+
+ Step 5: Create the Knowledge Base
+
+ Step 6: Generate Representative Training Data
+
+   Labeled Query Files
+
+   Entity Mapping Files
+
+ Step 7: Train the Natural Language Processing Classifiers
+
+   Domain Classification
+
+   Intent Classification
+
+   Entity Recognition
+
+   Role Classification
+
+   Entity Resolution
+
+ Step 8: Configure the Language Parser
+
+ Step 9: Optimize Question Answering Performance
+
+   Proximity-Based Ranking
+
+ Step 10: Deploy Trained Models
+
+Blueprint Applications
+
+ MindMeld Blueprints
+
+   Before you Continue
+
+   Quick Start
+
+ Food Ordering
+
+   1. The Use Case
+
+   2. Example Dialogue Interactions
+
+   3. Domain-Intent-Entity Hierarchy
+
+   4. Dialogue States
+
+   5. Knowledge Base
+
+   6. Training Data
+
+   7. Training the NLP Classifiers
+
+   8. Parser Configuration
+
+   9. Using the Question Answerer
+
+   10. Testing and Deployment
+
+ Video Discovery
+
+   1. The Use Case
+
+   2. Example Dialogue Interactions
+
+   3. Domain-Intent-Entity Hierarchy
+
+   4. Dialogue States
+
+   5. Knowledge Base
+
+   6. Training Data
+
+   7. Training the NLP Classifiers
+
+   8. Parser Configuration
+
+   9. Using the Question Answerer
+
+   10. Testing and Deployment
+
+ Home Assistant
+
+   1. The Use Case
+
+   2. Example Dialogue Interactions
+
+   3. Domain-Intent-Entity Hierarchy
+
+   4. Dialogue States
+
+   5. Knowledge Base
+
+   6. Training Data
+
+   7. Training the NLP Classifiers
+
+   8. Parser Configuration
+
+   9. Using the Question Answerer
+
+   10. Testing and Deployment
+
+ HR Assistant
+
+   1. The Use Case
+
+   2. Example Dialogue Interactions
+
+   3. Domain-Intent-Entity Hierarchy
+
+   4. Dialogue States
+
+   5. Knowledge Base
+
+   6. Training Data
+
+   7. Training the NLP Classifiers
+
+   8. Parser Configuration
+
+   9. Using the Question Answerer
+
+   10. Testing and Deployment
+
+User Guide
+
+ Getting Started
+
+   Install MindMeld
+
+   Begin New Project
+
+   Upgrade Mindmeld
+
+   Command-Line Interfaces
+
+   Configure Logging
+
+   Troubleshooting
+
+   Environment Variables
+
+ Platform Architecture
+
+   Natural Language Processor
+
+   Question Answerer
+
+   Dialogue Manager
+
+   Application Manager
+
+ Working with the Preprocessor
+
+   Implement the preprocessor
+
+   Use the preprocessor
+
+ Working with the Natural Language Processor
+
+   Instantiate the NLP class
+
+   Train the NLP pipeline
+
+   Run the NLP pipeline
+
+   Evaluate NLP performance
+
+   Optimize the NLP models
+
+   Select data for experiments
+
+   Save models for future use
+
+ Working with the Domain Classifier
+
+   Access the domain classifier
+
+   Train the domain classifier
+
+   Run the domain classifier
+
+   Evaluate classifier performance
+
+   Viewing features extracted for classification
+
+   Inspect features and their importance
+
+   Save model for future use
+
+ Working with the Intent Classifier
+
+   Access an intent classifier
+
+   Train an intent classifier
+
+   Run the intent classifier
+
+   Evaluate classifier performance
+
+   Viewing features extracted for classification
+
+   Inspect features and their importance
+
+   Save model for future use
+
+ Working with the Entity Recognizer
+
+   System entities and custom entities
+
+   Access the entity recognizer
+
+   Train an entity recognizer
+
+   Run the entity recognizer
+
+   Evaluate classifier performance
+
+   Viewing features extracted for entity recognition
+
+   Save model for future use
+
+   More about system entities
+
+ Using LSTM for Entity Recognition
+
+   LSTM network overview
+
+   LSTM parameter settings
+
+ Working with the Role Classifier
+
+   Access a role classifier
+
+   Train a role classifier
+
+   Run the role classifier
+
+   Evaluate classifier performance
+
+   View features extracted for classification
+
+   Save model for future use
+
+ Working with the Entity Resolver
+
+   Understanding the entity resolver
+
+   Prepare data for the Entity Resolver
+
+   Train the entity resolver
+
+   Run the entity resolver
+
+   Consider context-aware entity resolution
+
+   About the Exact Match text similarity model
+
+ Working with the Language Parser
+
+   Some parsing terminology
+
+   Figure out whether your app needs a parser
+
+   How the configuration instructs the parser
+
+   Learn how to create a simple parser configuration
+
+   Define a simple parser configuration
+
+   Load the parser configuration
+
+   Run the parser
+
+   Learn how to create an advanced parser configuration (optional)
+
+   Experimenting with an advanced configuration (optional)
+
+ Working with User-Defined Features
+
+   Custom Features File
+
+   Example of a Query Feature Extractor
+
+   Example of an Entity Feature Extractor
+
+ Working with the Knowledge Base and Question Answerer
+
+   Decide Whether your App Needs a Knowledge Base
+
+   Decide How to Use Question Answering in your Application
+
+   Prepare your Data for the Knowledge Base
+
+   Verify that the Data is Clean
+
+   Import the Data into the Knowledge Base
+
+   Perform Simple Searches with the "get()" API
+
+   Perform Advanced Searches with the "build_search()" API
+
+   Dealing with unstructured text
+
+ Working with the Dialogue Manager
+
+   Dialogue States
+
+   Dialogue State Rules
+
+   Dialogue State Handlers
+
+   Targeted Dialogue State Handling
+
+   Using Dynamic Gazetteers
+
+   Dialogue Flows
+
+   Automatic Slot Filling for Entities
+
+   Dialogue Middleware
+
+   Asynchronous Dialogue State Handlers and Middleware
+
+   Next Steps
+
+ Internationalization support
+
+   Setting up language configuration
+
+   Language stemming
+
+   System entity resolution
+
+   Locale-based resolution
+
+ Dealing with Voice Inputs
+
+   Challenges with speech recognition
+
+   Phonetic matching in entity resolution
+
+   Leveraging ASR n-best lists
+
+ Webex Teams Integration
+
+   Quick Start
+
+ WhatsApp Integration
+
+   Quick Start
+
+API
+
+ API Reference
+
+MindMeld UI
+
+ MindMeld UI
+
+   Quick Start
+
+Versions
+
+ Recent Changes
+
+   MindMeld 4.2
+
+   MindMeld 4.1
+
+   MindMeld 4.0
+
+   MindMeld 3.4
+
+   MindMeld 3.3
+
+   MindMeld 3.2
+
+   MindMeld 3.1
+
+ Package History
+
+   4.2.0 (2019-09-16)
+
+   4.1.0 (2019-04-22)
+
+   4.0.0 (2019-02-25)
+
+   3.4.0 (2018-08-20)
+
+   3.3.0 (2018-05-10)
+
+   3.2.0 (2017-10-23)
+
+   3.1.0 (2017-09-20)
+
+   3.0.0 (2017-08-14)

@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.taggers.crf &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.taggers.crf</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.taggers.crf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the CRF entity recognizer.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn_crfsuite</span> <span class="k">import</span> <span class="n">CRF</span>
+
+<span class="kn">from</span> <span class="nn">.taggers</span> <span class="k">import</span> <span class="n">Tagger</span><span class="p">,</span> <span class="n">extract_sequence_features</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">ZERO</span> <span class="o">=</span> <span class="mf">1e-20</span>
+
+
+<div class="viewcode-block" id="ConditionalRandomFields"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields">[docs]</a><span class="k">class</span> <span class="nc">ConditionalRandomFields</span><span class="p">(</span><span class="n">Tagger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Conditional Random Fields model.&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">X</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="ConditionalRandomFields.load"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">model_path</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.set_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span> <span class="o">=</span> <span class="n">CRF</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.get_params"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.predict"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dynamic_resource</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.predict_proba"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries to predict on</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \</span>
+<span class="sd">             with confidence scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span><span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">marginals_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clf</span><span class="o">.</span><span class="n">predict_marginals</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">marginal_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">query_index</span><span class="p">,</span> <span class="n">query_seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+            <span class="n">query_marginal_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">query_seq</span><span class="p">):</span>
+                <span class="n">query_marginal_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tag</span><span class="p">,</span> <span class="n">marginals_dict</span><span class="p">[</span><span class="n">query_index</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">tag</span><span class="p">]])</span>
+            <span class="n">marginal_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_marginal_tuples</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">marginal_tuples</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.extract_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.extract_features">[docs]</a>    <span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms a list of examples into a feature matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            examples (list of mindmeld.core.Query): a list of queries</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature</span>
+<span class="sd">                                  extraction</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of list of str): features in CRF suite format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract features and classes</span>
+        <span class="n">feats</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">):</span>
+            <span class="n">feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_example_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">))</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data</span><span class="p">(</span><span class="n">feats</span><span class="p">,</span> <span class="n">fit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ConditionalRandomFields.extract_example_features"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.extract_example_features">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">extract_example_features</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extracts feature dicts for each token in an example.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example (mindmeld.core.Query): A query.</span>
+<span class="sd">            config (ModelConfig): The ModelConfig which may contain information used for feature \</span>
+<span class="sd">                                  extraction.</span>
+<span class="sd">            resources (dict): Resources which may be used for this model&#39;s feature extraction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict]: Features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">extract_sequence_features</span><span class="p">(</span>
+            <span class="n">example</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">example_type</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">resources</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts data into formats of CRF suite.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (list of dict): features of an example</span>
+<span class="sd">            fit (bool, optional): True if processing data at fit time, false for predict time.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of list of str): features in CRF suite format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_feat_binner</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">new_X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feat_seq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_binner</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">feat_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">feat_seq</span><span class="p">:</span>
+                <span class="n">temp_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">feat_type</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feat_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="n">feat_type</span><span class="p">])))</span>
+                <span class="n">feat_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
+            <span class="n">new_X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_X</span>
+
+<div class="viewcode-block" id="ConditionalRandomFields.setup_model"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.ConditionalRandomFields.setup_model">[docs]</a>    <span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feat_binner</span> <span class="o">=</span> <span class="n">FeatureBinner</span><span class="p">()</span></div></div>
+
+
+<span class="c1"># Feature extraction for CRF</span>
+
+
+<div class="viewcode-block" id="FeatureMapper"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureMapper">[docs]</a><span class="k">class</span> <span class="nc">FeatureMapper</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mapper for one feature to map numerical values to corresponding bins which are generated</span>
+<span class="sd">    by the mean and standard deviation of this feature.</span>
+
+<span class="sd">    The size and number of bins are decided by num_std and size_std. For example, say</span>
+<span class="sd">    num_std = 2 and size_std = 0.5, then the bins would look like:</span>
+
+<span class="sd">    * bucket 0: (-INF, mean - std * 2)</span>
+<span class="sd">    * bucket 1: [mean - std * 2, mean - std * 1.5)</span>
+<span class="sd">    * bucket 2: [mean - std * 1.5, mean - std * 1)</span>
+<span class="sd">    * ...</span>
+<span class="sd">    * bucket 8: [mean + std * 1.5, mean + std * 2)</span>
+<span class="sd">    * bucket 9: [mean + std * 2, INF)</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        _num_std (int): number of standard deviations to generate the bins</span>
+<span class="sd">        _size_std (float): size of each bin in standard deviation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_std</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">size_std</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_std</span> <span class="o">=</span> <span class="n">num_std</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size_std</span> <span class="o">=</span> <span class="n">size_std</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_std_bins</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="FeatureMapper.add_value"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureMapper.add_value">[docs]</a>    <span class="k">def</span> <span class="nf">add_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Collect values for this feature.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (numeric): A numeric value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FeatureMapper.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureMapper.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate statistics and then create the bins.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">range_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_std</span>
+        <span class="n">num_bin</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_std</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_std</span><span class="p">)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">range_start</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="n">num_bin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">&gt;</span> <span class="n">ZERO</span><span class="p">:</span>
+            <span class="n">range_start</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_std</span>
+            <span class="n">bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">range_start</span><span class="p">)</span>
+            <span class="n">num_bin</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_std_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FeatureMapper.map_bucket"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureMapper.map_bucket">[docs]</a>    <span class="k">def</span> <span class="nf">map_bucket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get corresponding bucket number for this value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           value (float): numerical value of this feature</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_std_bins</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FeatureBinner"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureBinner">[docs]</a><span class="k">class</span> <span class="nc">FeatureBinner</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to convert features with numerical values to categorical values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="FeatureBinner.fit"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureBinner.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and fit FeatureMapper for numerical features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X_train (list of list of dict): training data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">X_train</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">sentence</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span> <span class="ow">in</span> <span class="n">word</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_collect_feature</span><span class="p">(</span><span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">mapper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FeatureBinner.transform"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureBinner.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert numerical values to categorical values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X_train (list of list of dict): training data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_X_train</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">X_train</span><span class="p">:</span>
+            <span class="n">new_sentence</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">sentence</span><span class="p">:</span>
+                <span class="n">new_word</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span> <span class="ow">in</span> <span class="n">word</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">new_feats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_feature</span><span class="p">(</span><span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_feats</span><span class="p">:</span>
+                        <span class="n">new_word</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_feats</span><span class="p">)</span>
+                <span class="n">new_sentence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_word</span><span class="p">)</span>
+            <span class="n">new_X_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sentence</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_X_train</span></div>
+
+<div class="viewcode-block" id="FeatureBinner.fit_transform"><a class="viewcode-back" href="../../../../apidoc/mindmeld.models.taggers.crf.html#mindmeld.models.taggers.crf.FeatureBinner.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run fit and transform at once.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X_train (list of list of dict): training data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_collect_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collect numerical feature values to fit corresponding mapper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feat_name (str): feature name</span>
+<span class="sd">            feat_value (any): feature value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">feat_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">feat_value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Skip collection of non numerical features</span>
+            <span class="k">return</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">feat_name</span><span class="p">,</span> <span class="n">FeatureMapper</span><span class="p">())</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="n">feat_name</span> <span class="o">=</span> <span class="n">feat_name</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="n">feat_value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapper</span>
+
+    <span class="k">def</span> <span class="nf">_map_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">feat_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Map numerical feature values to categorical values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feat_name (str): feature name</span>
+<span class="sd">            feat_value (any): feature value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">feat_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">feat_value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t do bucketing of non numerical features</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">feat_name</span><span class="p">:</span> <span class="n">feat_value</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">feat_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">feat_name</span><span class="p">:</span> <span class="n">feat_value</span><span class="p">}</span>
+
+        <span class="n">mapper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span>
+        <span class="n">new_feat_value</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">map_bucket</span><span class="p">(</span><span class="n">feat_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">feat_name</span><span class="p">:</span> <span class="n">new_feat_value</span><span class="p">}</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

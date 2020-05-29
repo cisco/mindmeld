@@ -1,0 +1,1077 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Video Discovery &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.2.11',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Home Assistant" href="home_assistant.html" />
+    <link rel="prev" title="Food Ordering" href="food_ordering.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2.11
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Video Discovery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hr_assistant.html">HR Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Video Discovery</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/blueprints/video_discovery.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="video-discovery">
+<h1>Video Discovery<a class="headerlink" href="#video-discovery" title="Permalink to this headline">¶</a></h1>
+<p>In this step-by-step walkthrough, you’ll build a conversational application that allows users to browse and find movies and TV shows from a large content catalog, using the MindMeld blueprint for this purpose.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please make sure to install and run all of the <a class="reference internal" href="../userguide/getting_started.html#getting-started-virtualenv-setup"><span class="std std-ref">pre-requisites</span></a> for MindMeld before continuing on with this blueprint tutorial.</p>
+</div>
+<div class="section" id="the-use-case">
+<h2>1. The Use Case<a class="headerlink" href="#the-use-case" title="Permalink to this headline">¶</a></h2>
+<p>Through a conversational interface, users should be able to browse a content catalog of movies and TV shows, then play what they find through a service similar to Netflix, Hulu, or Amazon Video.</p>
+</div>
+<div class="section" id="example-dialogue-interactions">
+<h2>2. Example Dialogue Interactions<a class="headerlink" href="#example-dialogue-interactions" title="Permalink to this headline">¶</a></h2>
+<p>The conversational flows for video discovery can&nbsp;be highly complex, depending on the desired app functionality and the amount of user guidance required at each step. Enumerating and finalizing all anticipated user interactions requires multiple iterations.</p>
+<p>Here are some examples of scripted dialogue interactions for conversational flows.</p>
+<a class="reference internal image-reference" href="../_images/video_dicovery_interactions.png"><img alt="../_images/video_dicovery_interactions.png" class="align-center" src="../_images/video_dicovery_interactions.png" style="width: 700px;" /></a>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with too many filters so there are no results, asking for something that is not in the app’s catalog, and so on.</p>
+</div>
+</div>
+<div class="section" id="domain-intent-entity-hierarchy">
+<h2>3. Domain-Intent-Entity Hierarchy<a class="headerlink" href="#domain-intent-entity-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>Users should be able to search for video content using common filters such as: <code class="docutils literal"><span class="pre">genre</span></code>, <code class="docutils literal"><span class="pre">cast</span></code>, <code class="docutils literal"><span class="pre">release_year</span></code>, and so on. They should be able to continue refining their search until they find the right content, and to restart the search whenever they like. Generic actions like greeting the user, providing help, and responding to insults and compliments should also be supported.</p>
+<p>Based on this desired functionality, the developers of the video discovery app created the NLP model hierarchy below.</p>
+<a class="reference internal image-reference" href="../_images/video_discovery_hierarchy.png"><img alt="../_images/video_discovery_hierarchy.png" class="align-center" src="../_images/video_discovery_hierarchy.png" style="width: 700px;" /></a>
+<p>The are two domains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">video_content</span></code> — Supports browsing the video catalog</li>
+<li><code class="docutils literal"><span class="pre">unrelated</span></code> — Handles all requests not about video content</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">video_content</span></code> domain supports the following intents:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">greet</span></code> — User greets the app</li>
+<li><code class="docutils literal"><span class="pre">help</span></code> — User is confused or needs instructions on how to proceed</li>
+<li><code class="docutils literal"><span class="pre">start_over</span></code> — User wants to abandon current selections and restart the ordering process</li>
+<li><code class="docutils literal"><span class="pre">exit</span></code> — User wants to end the current conversation</li>
+<li><code class="docutils literal"><span class="pre">browse</span></code> — User is searching for content, either for a specific movie or TV show, or for a set of results</li>
+<li><code class="docutils literal"><span class="pre">unsupported</span></code> — User is asking for information related to movies or TV shows, but the app does not support those questions<ul>
+<li>for example, asking when a movie was released, or when it will be shown on a given channel</li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">unrelated</span></code> domain supports the intents:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">general</span></code> — User asks general questions unrelated to video content<ul>
+<li>for example questions about weather, food, sports, etc.</li>
+</ul>
+</li>
+<li><code class="docutils literal"><span class="pre">compliment</span></code> — User says something flattering to the app</li>
+<li><code class="docutils literal"><span class="pre">insult</span></code> — User says something hostile to the app</li>
+</ul>
+</div></blockquote>
+<p>Only the <code class="docutils literal"><span class="pre">browse</span></code> intent requires entity recognition; it supports the following entity types:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">cast</span></code> — The name of an actor</li>
+<li><code class="docutils literal"><span class="pre">country</span></code> — The name of the country of origin of a movie or TV show</li>
+<li><code class="docutils literal"><span class="pre">director</span></code> — The name of a director</li>
+<li><code class="docutils literal"><span class="pre">genre</span></code> — The name of a video genre</li>
+<li><code class="docutils literal"><span class="pre">sort</span></code> — How the users want to sort the results: by most recent, most popular, etc.</li>
+<li><code class="docutils literal"><span class="pre">title</span></code> — The title of a video in the catalog</li>
+<li><code class="docutils literal"><span class="pre">type</span></code> — The type of video the user is looking for: <cite>movie</cite> or <cite>TV show</cite></li>
+</ul>
+</div></blockquote>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., <code class="docutils literal"><span class="pre">get_cast_in_video</span></code>, <code class="docutils literal"><span class="pre">get_release_year_for_video</span></code>, and so on) and entities (e.g., <code class="docutils literal"><span class="pre">writers</span></code>, <code class="docutils literal"><span class="pre">budget</span></code>, and so on) that make sense for a video discovery use case.</p>
+</div>
+<p>To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This application requires Elasticsearch for the QuestionAnswerer. Please make sure that Elasticsearch is running in another shell before proceeding to setup this blueprint.</p>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;video_discovery&#39;);&quot;</span>
+</pre></div>
+</div>
+<p>This should create a MindMeld project folder called <code class="docutils literal"><span class="pre">video_discovery</span></code> in your current directory with the following structure:</p>
+<a class="reference internal image-reference" href="../_images/directory_video_discovery.png"><img alt="../_images/directory_video_discovery.png" class="align-center" src="../_images/directory_video_discovery.png" style="width: 250px;" /></a>
+</div>
+<div class="section" id="dialogue-states">
+<h2>4. Dialogue States<a class="headerlink" href="#dialogue-states" title="Permalink to this headline">¶</a></h2>
+<p>To support the functionality we envision, our app needs one dialogue state for each intent, as shown in the table below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="28%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><div class="first last line-block">
+<div class="line">Intent</div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Dialogue State</div>
+<div class="line">name</div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Dialogue State</div>
+<div class="line">function</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">greet</span></code></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">welcome</span></code></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Begin an interaction and welcome the user</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">browse</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">show_content</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Show the user a set of results and</div>
+<div class="line">refine them as the user provides more details</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">start_over</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">start_over</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Cancel the ongoing search</div>
+<div class="line">and prompt the user for a new request</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">exit</span></code></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">say_goodbye</span></code></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">End the current interaction</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">help</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">provide_help</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Provide help information</div>
+<div class="line">in case the user gets stuck</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">unsupported</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">handle_unsupported</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Inform user the app does not provide that</div>
+<div class="line">information and get them back to video search</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">compliment</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">say_something_nice</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Compliment the user back and prompt the user</div>
+<div class="line">to get back to video search</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">insult</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">handle_insult</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Handle the insult and prompt the user</div>
+<div class="line">to get back to video search</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">other intents</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">default</span></code></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Prompt a user who has gone off-topic</div>
+<div class="line">to get back to video search</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>All dialogue states and their associated handlers are defined in the <code class="docutils literal"><span class="pre">__init__.py</span></code> application container file at the top level of the blueprint folder.</p>
+<p>Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.</p>
+<p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal"><span class="pre">welcome</span></code>, <code class="docutils literal"><span class="pre">start_over</span></code>, <code class="docutils literal"><span class="pre">say_goodbye</span></code>, <code class="docutils literal"><span class="pre">provide_help</span></code>, <code class="docutils literal"><span class="pre">handle_unsupported</span></code>, <code class="docutils literal"><span class="pre">say_something_nice</span></code>, <code class="docutils literal"><span class="pre">handle_insult</span></code> and <code class="docutils literal"><span class="pre">default</span></code>.</p>
+<p>For example, here’s the <code class="docutils literal"><span class="pre">say_goodbye</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted “goodbye” responses:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When the user ends a conversation, clear the dialogue frame and say goodbye.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">goodbyes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Bye!&#39;</span><span class="p">,</span> <span class="s1">&#39;Goodbye!&#39;</span><span class="p">,</span> <span class="s1">&#39;Have a nice day.&#39;</span><span class="p">,</span> <span class="s1">&#39;See you later.&#39;</span><span class="p">]</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">goodbyes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By contrast, the handler logic for the <code class="docutils literal"><span class="pre">show_content</span></code> dialogue state is more substantial, because it contains the core business logic for our application. In this dialogue state handler, we use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to process the transaction.</p>
+<p>You can see this in the general implementation of the <code class="docutils literal"><span class="pre">show_content</span></code> handler:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;browse&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">show_content</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When the user looks for a movie or TV show, fetch the documents from the knowledge base</span>
+<span class="sd">    with all entities we have so far.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Update the frame with the new entities extracted.</span>
+    <span class="n">update_frame</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">,</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">)</span>
+
+    <span class="c1"># Fetch results from the knowledge base using all entities in frame as filters.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">get_video_content</span><span class="p">(</span><span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">)</span>
+
+    <span class="c1"># Fill the slots with the frame.</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">browse_slots_for_frame</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">frame</span><span class="p">))</span>
+
+    <span class="c1"># Build response based on available slots and results.</span>
+    <span class="n">reply</span><span class="p">,</span> <span class="n">video_payload</span> <span class="o">=</span> <span class="n">build_browse_response</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">reply</span><span class="p">)</span>
+
+    <span class="c1"># Build and return the directive</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">video_payload</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This code follows a series of steps to build the final answer to the user: it updates the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> with the new found entities, fetches results from the knowledge base (in the <code class="docutils literal"><span class="pre">get_video_content</span></code> method), builds a response with the new entities (done in <code class="docutils literal"><span class="pre">browse_slots_for_frame</span></code> and <code class="docutils literal"><span class="pre">build_browse_response</span></code>), and sends a response to the user.</p>
+<p>For more information on the <code class="docutils literal"><span class="pre">show_content</span></code> method and the functions it uses, see the <code class="docutils literal"><span class="pre">__init__.py</span></code> file in the blueprint folder.</p>
+</div>
+<div class="section" id="knowledge-base">
+<h2>5. Knowledge Base<a class="headerlink" href="#knowledge-base" title="Permalink to this headline">¶</a></h2>
+<p>The knowledge base for our video discovery app leverages publicly available information about movies and TV shows from the <a class="reference external" href="https://www.themoviedb.org/">The Movie DB</a> website. The knowledge base comprises one index in <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">videos</span></code> — information about movies and TV shows</li>
+</ul>
+</div></blockquote>
+<p>For example, here’s the knowledge base entry in the <code class="docutils literal"><span class="pre">videos</span></code> index for “Minions,” a comedy movie in 2015:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;genres&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;Family&#39;</span><span class="p">,</span> <span class="s1">&#39;Animation&#39;</span><span class="p">,</span> <span class="s1">&#39;Adventure&#39;</span><span class="p">,</span> <span class="s1">&#39;Comedy&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;movie_211672&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;countries&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;US&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;vote_count&#39;</span><span class="o">:</span> <span class="mi">3660</span><span class="p">,</span>
+    <span class="s1">&#39;runtime&#39;</span><span class="o">:</span> <span class="mi">91</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="o">:</span> <span class="s1">&#39;Minions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;overview&#39;</span><span class="o">:</span> <span class="s1">&#39;Minions Stuart, Kevin and Bob are recruited by Scarlet Overkill, a super-villain who, alongside her inventor husband Herb, hatches a plot to take over the world.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;doc_type&#39;</span><span class="o">:</span> <span class="s1">&#39;movie&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;release_date&#39;</span><span class="o">:</span> <span class="s1">&#39;2015-06-17&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;img_url&#39;</span><span class="o">:</span> <span class="s1">&#39;http://image.tmdb.org/t/p/w185//q0R4crx2SehcEEQEkYObktdeFy.jpg&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;vote_average&#39;</span><span class="o">:</span> <span class="mf">6.4</span><span class="p">,</span>
+    <span class="s1">&#39;release_year&#39;</span><span class="o">:</span> <span class="mi">2015</span><span class="p">,</span>
+    <span class="s1">&#39;cast&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;Sandra Bullock&#39;</span><span class="p">,</span> <span class="s1">&#39;Jon Hamm&#39;</span><span class="p">,</span> <span class="s1">&#39;Michael Keaton&#39;</span><span class="p">,</span> <span class="s1">&#39;Allison Janney&#39;</span><span class="p">,</span> <span class="s1">&#39;Steve Coogan&#39;</span><span class="p">,</span> <span class="s1">&#39;Jennifer Saunders&#39;</span><span class="p">,</span> <span class="s1">&#39;Geoffrey Rush&#39;</span><span class="p">,</span> <span class="s1">&#39;Steve Carell&#39;</span><span class="p">,</span> <span class="s1">&#39;Pierre Coffin&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;Katy Mixon&#39;</span><span class="p">,</span> <span class="s1">&#39;Michael Beattie&#39;</span><span class="p">,</span> <span class="s1">&#39;Hiroyuki Sanada&#39;</span><span class="p">,</span> <span class="s1">&#39;Dave Rosenbaum&#39;</span><span class="p">,</span> <span class="s1">&#39;Alex Dowding&#39;</span><span class="p">,</span> <span class="s1">&#39;Paul Thornley&#39;</span><span class="p">,</span> <span class="s1">&#39;Kyle Balda&#39;</span><span class="p">,</span> <span class="s1">&#39;Ava Acres&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;directors&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;Kyle Balda&#39;</span><span class="p">,</span> <span class="s1">&#39;Pierre Coffin&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;imdb_id&#39;</span><span class="o">:</span> <span class="s1">&#39;tt2293640&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;popularity&#39;</span><span class="o">:</span> <span class="mf">2.295467321653707</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Another entry in the <code class="docutils literal"><span class="pre">videos</span></code> index is for “The Big Bang Theory,” a comedy TV show from 2007:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;genres&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;Comedy&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;tv-show_1418&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;countries&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;US&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;vote_count&#39;</span><span class="o">:</span> <span class="mi">1698</span><span class="p">,</span>
+    <span class="s1">&#39;runtime&#39;</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="o">:</span> <span class="s1">&#39;The Big Bang Theory&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;number_of_seasons&#39;</span><span class="o">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;overview&#39;</span><span class="o">:</span> <span class="s1">&#39;The Big Bang Theory is centered on five characters living in Pasadena, California: roommates Leonard Hofstadter and Sheldon Cooper; Penny, a waitress and aspiring actress who lives across the hall; and Leonard and Sheldon&#39;</span><span class="nx">s</span> <span class="nx">equally</span> <span class="nx">geeky</span> <span class="nx">and</span> <span class="nx">socially</span> <span class="nx">awkward</span> <span class="nx">friends</span> <span class="nx">and</span> <span class="nx">co</span><span class="o">-</span><span class="nx">workers</span><span class="p">,</span> <span class="nx">mechanical</span> <span class="nx">engineer</span> <span class="nx">Howard</span> <span class="nx">Wolowitz</span> <span class="nx">and</span> <span class="nx">astrophysicist</span> <span class="nx">Raj</span> <span class="nx">Koothrappali</span><span class="p">.</span> <span class="nx">The</span> <span class="nx">geekiness</span> <span class="nx">and</span> <span class="nx">intellect</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">four</span> <span class="nx">guys</span> <span class="nx">is</span> <span class="nx">contrasted</span> <span class="k">for</span> <span class="nx">comic</span> <span class="nx">effect</span> <span class="kd">with</span> <span class="nx">Penny</span><span class="s1">&#39;s social skills and common sense.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;doc_type&#39;</span><span class="o">:</span> <span class="s1">&#39;tv-show&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;release_date&#39;</span><span class="o">:</span> <span class="s1">&#39;2007-09-24&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;img_url&#39;</span><span class="o">:</span> <span class="s1">&#39;http://image.tmdb.org/t/p/w185//wQoosZYg9FqPrmI4zeCLRdEbqAB.jpg&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;vote_average&#39;</span><span class="o">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="s1">&#39;release_year&#39;</span><span class="o">:</span> <span class="mi">2007</span><span class="p">,</span>
+    <span class="s1">&#39;cast&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;Johnny Galecki&#39;</span><span class="p">,</span> <span class="s1">&#39;Jim Parsons&#39;</span><span class="p">,</span> <span class="s1">&#39;Kaley Cuoco&#39;</span><span class="p">,</span> <span class="s1">&#39;Simon Helberg&#39;</span><span class="p">,</span> <span class="s1">&#39;Kunal Nayyar&#39;</span><span class="p">,</span> <span class="s1">&#39;Mayim Bialik&#39;</span><span class="p">,</span> <span class="s1">&#39;Melissa Rauch&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;directors&#39;</span><span class="o">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;number_of_episodes&#39;</span><span class="o">:</span> <span class="mi">231</span><span class="p">,</span>
+    <span class="s1">&#39;popularity&#39;</span><span class="o">:</span> <span class="mf">3.2740931003620037</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Assuming that you have Elasticsearch installed, running the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> command described above should build the knowledge base for the video discovery app by creating the one index and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to query the indexes.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;videos&#39;</span><span class="p">,</span> <span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;popularity&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;desc&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &#39;cast&#39;: [&#39;Gal Gadot&#39;, &#39;Chris Pine&#39;, &#39;Connie Nielsen&#39;, ...],</span>
+<span class="go">  &#39;countries&#39;: [&#39;US&#39;],</span>
+<span class="go">  &#39;directors&#39;: [&#39;Patty Jenkins&#39;],</span>
+<span class="go">  &#39;doc_type&#39;: &#39;movie&#39;,</span>
+<span class="go">  &#39;genres&#39;: [&#39;Action&#39;, &#39;Adventure&#39;, &#39;Fantasy&#39;, &#39;Science Fiction&#39;],</span>
+<span class="go">  &#39;id&#39;: &#39;movie_297762&#39;,</span>
+<span class="go">  &#39;imdb_id&#39;: &#39;tt0451279&#39;,</span>
+<span class="go">  &#39;img_url&#39;: &#39;http://image.tmdb.org/t/p/w185//gfJGlDaHuWimErCr5Ql0I8x9QSy.jpg&#39;,</span>
+<span class="go">  &#39;overview&#39;: &#39;An Amazon princess comes to the world of Man to become the greatest of the female superheroes.&#39;,</span>
+<span class="go">  &#39;popularity&#39;: 4.904354681204688,</span>
+<span class="go">  &#39;release_date&#39;: &#39;2017-05-30&#39;,</span>
+<span class="go">  &#39;release_year&#39;: 2017,</span>
+<span class="go">  &#39;runtime&#39;: 141,</span>
+<span class="go">  &#39;title&#39;: &#39;Wonder Woman&#39;,</span>
+<span class="go">  &#39;vote_average&#39;: 7.1,</span>
+<span class="go">  &#39;vote_count&#39;: 1979</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running quickly. Read the User Guide section on <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to learn how to create knowledge base indexes from scratch. Then, try creating one or more knowledge base indexes for your own data.</p>
+</div>
+</div>
+<div class="section" id="training-data">
+<h2>6. Training Data<a class="headerlink" href="#training-data" title="Permalink to this headline">¶</a></h2>
+<p>The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> of the Step-By-Step Guide for a full description of this highly important, multi-step process. Be aware that at minimum, the following data generation tasks are required:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><div class="first last line-block">
+<div class="line">Purpose</div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Question (for crowdsourced data generators)</div>
+<div class="line">or instruction (for annotators)</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Exploratory data generation</div>
+<div class="line">for guiding the app design</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">“How would you talk to a conversational app</div>
+<div class="line">to search for movies and TV shows?”</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">Targeted query generation</div>
+<div class="line">for training the Intent Classifier</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">browse</span></code>: “What would you say to the app</div>
+<div class="line">to find movies and TV shows you want to watch?</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Targeted query annotation</div>
+<div class="line">for training the Entity Recognizer</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">browse</span></code>: “Annotate all occurrences of cast,</div>
+<div class="line">country, director, genre, sort, title, and type</div>
+<div class="line">names in the given query.”</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">Targeted synonym generation</div>
+<div class="line">for training the Entity Resolver</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal"><span class="pre">country</span></code>: “What names would you use to refer</div>
+<div class="line">to this country?”</div>
+<div class="line"><br /></div>
+<div class="line"><code class="docutils literal"><span class="pre">genre</span></code>: “What are the different ways in which</div>
+<div class="line">you would refer to this genre?”</div>
+<div class="line"><br /></div>
+<div class="line"><code class="docutils literal"><span class="pre">sort</span></code>: “What are the different ways in which</div>
+<div class="line">you would speficy to sort movies or TV shows?”</div>
+<div class="line"><br /></div>
+<div class="line"><code class="docutils literal"><span class="pre">type</span></code>: “What are the different ways in which</div>
+<div class="line">you would refer to this type?”</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal"><span class="pre">domains</span></code> directory contains the training data for domain and intent classification and entity recognition. The <code class="docutils literal"><span class="pre">entities</span></code> directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.</p>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<ul class="last simple">
+<li>Study the best practices around training data generation and annotation for conversational apps in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> of the Step-By-Step Guide. Following those principles, create additional labeled data for all the intents in this blueprint. Read more about <a class="reference internal" href="../userguide/nlp.html"><span class="doc">NLP model evaluation and error analysis</span></a> in the User Guide. Then apply what you have learned in evaluating your app, using your newly-created labeled data as held-out validation data.</li>
+<li>Complete the following exercise if you are extending the blueprint to build your own video discovery app. For app-agnostic, generic intents like <code class="docutils literal"><span class="pre">greet</span></code>, <code class="docutils literal"><span class="pre">exit</span></code>, and <code class="docutils literal"><span class="pre">help</span></code>, start by simply reusing the blueprint data to train NLP models for your video discovery app. For <code class="docutils literal"><span class="pre">show_content</span></code> and any other app-specific intents, gather new training data tailored to the relevant entities (title, cast, genre, etc.). Apply the approach you learned in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a>.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="training-the-nlp-classifiers">
+<h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
+<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, trains the NLP system using the annotated data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<span class="go">No domain model configuration set. Using default.</span>
+<span class="go">Loading queries from file unrelated/insult/train.txt</span>
+<span class="go">Loading queries from file unrelated/general/train.txt</span>
+<span class="go">Loading queries from file unrelated/compliment/train.txt</span>
+<span class="go">Loading queries from file video_content/greet/train.txt</span>
+<span class="go">Loading queries from file video_content/browse/train_00.txt</span>
+<span class="go">...</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
+<span class="go">Best accuracy: 96.89%, params: {&#39;fit_intercept&#39;: True, &#39;C&#39;: 10}</span>
+<span class="go">Fitting intent classifier: domain=&#39;unrelated&#39;</span>
+<span class="go">No intent model configuration set. Using default.</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
+<span class="go">Best accuracy: 79.29%, params: {&#39;class_weight&#39;: {0: 0.9618644067796609, 1: 1.0089999999999999, 2: 1.0395604395604394}, &#39;fit_intercept&#39;: False, &#39;C&#39;: 1000000}</span>
+<span class="go">Fitting entity recognizer: domain=&#39;unrelated&#39;, intent=&#39;insult&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">There are no labels in this label set, so we don&#39;t fit the model.</span>
+<span class="go">Fitting entity recognizer: domain=&#39;unrelated&#39;, intent=&#39;general&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">There are no labels in this label set, so we don&#39;t fit the model.</span>
+<span class="go">Fitting entity recognizer: domain=&#39;unrelated&#39;, intent=&#39;compliment&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">There are no labels in this label set, so we don&#39;t fit the model.</span>
+<span class="go">Fitting intent classifier: domain=&#39;video_content&#39;</span>
+<span class="go">No intent model configuration set. Using default.</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
+<span class="go">Best accuracy: 96.50%, params: {&#39;class_weight&#39;: {0: 0.58072419281491583, 1: 3.4295944233206592, 2: 0.98992735400949983, 3: 5.1416666666666666, 4: 2.904694092827004, 5: 0.67738804829588872}, &#39;fit_intercept&#39;: False, &#39;C&#39;: 1000000}</span>
+<span class="go">Fitting entity recognizer: domain=&#39;video_content&#39;, intent=&#39;greet&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">There are no labels in this label set, so we don&#39;t fit the model.</span>
+<span class="go">Fitting entity recognizer: domain=&#39;video_content&#39;, intent=&#39;help&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">There are no labels in this label set, so we don&#39;t fit the model.</span>
+<span class="go">Fitting entity recognizer: domain=&#39;video_content&#39;, intent=&#39;browse&#39;</span>
+<span class="go">No entity model configuration set. Using default.</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 97.43%, params: {&#39;penalty&#39;: &#39;l2&#39;, &#39;C&#39;: 100000000}</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">During active development, it helps to increase the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">MindMeld logging level</span></a> to better understand what’s happening behind the scenes. All code snippets here assume that logging level has been set to verbose.</p>
+</div>
+<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;Show me movies with Brad Pitt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;intent&quot;: &quot;browse&quot;,</span>
+<span class="go">  &quot;entities&quot;: [</span>
+<span class="go">    {</span>
+<span class="go">      &quot;role&quot;: null,</span>
+<span class="go">      &quot;type&quot;: &quot;type&quot;,</span>
+<span class="go">      &quot;span&quot;: {</span>
+<span class="go">        &quot;start&quot;: 8,</span>
+<span class="go">        &quot;end&quot;: 13</span>
+<span class="go">      },</span>
+<span class="go">      &quot;text&quot;: &quot;movies&quot;,</span>
+<span class="go">      &quot;value&quot;: [</span>
+<span class="go">        {</span>
+<span class="go">          &quot;cname&quot;: &quot;movie&quot;,</span>
+<span class="go">          &quot;top_synonym&quot;: &quot;movies&quot;,</span>
+<span class="go">          &quot;score&quot;: 18.921387</span>
+<span class="go">        },</span>
+<span class="go">        {</span>
+<span class="go">          &quot;cname&quot;: &quot;tv-show&quot;,</span>
+<span class="go">          &quot;top_synonym&quot;: &quot;tv miniseries&quot;,</span>
+<span class="go">          &quot;score&quot;: 1.684855</span>
+<span class="go">        }</span>
+<span class="go">      ]</span>
+<span class="go">    },</span>
+<span class="go">    {</span>
+<span class="go">      &quot;role&quot;: null,</span>
+<span class="go">      &quot;type&quot;: &quot;cast&quot;,</span>
+<span class="go">      &quot;span&quot;: {</span>
+<span class="go">        &quot;start&quot;: 20,</span>
+<span class="go">        &quot;end&quot;: 28</span>
+<span class="go">      },</span>
+<span class="go">      &quot;text&quot;: &quot;Brad Pitt&quot;,</span>
+<span class="go">      &quot;value&quot;: []</span>
+<span class="go">    }</span>
+<span class="go">  ],</span>
+<span class="go">  &quot;text&quot;: &quot;Show me movies with Brad Pitt&quot;,</span>
+<span class="go">  &quot;domain&quot;: &quot;video_content&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom video discovery data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.</p>
+<p>Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;video_content&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">  &quot;edge-ngrams&quot;: {</span>
+<span class="go">    &quot;lengths&quot;: [</span>
+<span class="go">      1,</span>
+<span class="go">      2</span>
+<span class="go">    ]</span>
+<span class="go">  },</span>
+<span class="go">  &quot;bag-of-words&quot;: {</span>
+<span class="go">    &quot;lengths&quot;: [</span>
+<span class="go">      1,</span>
+<span class="go">      2</span>
+<span class="go">    ]</span>
+<span class="go">  },</span>
+<span class="go">  &quot;in-gaz&quot;: {},</span>
+<span class="go">  &quot;gaz-freq&quot;: {},</span>
+<span class="go">  &quot;freq&quot;: {</span>
+<span class="go">    &quot;bins&quot;: 5</span>
+<span class="go">  },</span>
+<span class="go">  &quot;exact&quot;: {</span>
+<span class="go">    &quot;scaling&quot;: 10</span>
+<span class="go">  }</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier’s <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method.</p>
+<p>For example, you can change the feature extraction settings to use bag of trigrams in addition to the default bag of words:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;video_content&#39;</span>
+<span class="go">Selecting hyperparameters using k-fold cross-validation with 5 splits</span>
+<span class="go">Best accuracy: 98.36%, params: {&#39;C&#39;: 10, &#39;class_weight&#39;: {0: 0.5805006811989102, 1: 3.431368821292776, 2: 0.9903185247275775, 3: 5.1444117647058825, 4: 2.906170886075949, 5: 0.6776020174232005}, &#39;fit_intercept&#39;: False}</span>
+</pre></div>
+</div>
+<p>You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various MindMeld classifiers.</p>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the <a class="reference internal" href="../userguide/nlp.html"><span class="doc">User Guide</span></a> for examples and discussion.</p>
+</div>
+</div>
+<div class="section" id="parser-configuration">
+<h2>8. Parser Configuration<a class="headerlink" href="#parser-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The relationships between entities in the video discovery queries are simple ones. For example, in the annotated query <code class="docutils literal"><span class="pre">content</span> <span class="pre">with</span> <span class="pre">{Tom</span> <span class="pre">Hanks|cast}</span></code>, the <code class="docutils literal"><span class="pre">cast</span></code> entity is self-sufficient, in that it is not described by any other entity.</p>
+<p>If you extended the app to support queries with more complex entity relationships, it would be necessary to specify <em>entity groups</em> and configure the parser accordingly. For example, in the query <code class="docutils literal"><span class="pre">show</span> <span class="pre">me</span> <span class="pre">a</span> <span class="pre">{Tom</span> <span class="pre">Hanks|cast}</span> <span class="pre">{movie|type}</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">{Jim</span> <span class="pre">Parsons|cast}</span> <span class="pre">{TV</span> <span class="pre">show|type}</span></code>, we would need to relate the <code class="docutils literal"><span class="pre">cast</span></code> entities to the <code class="docutils literal"><span class="pre">type</span></code> entities, because one kind of entity describes the other. Each pair of related entities would form an entity group. For more about entity groups and parser configurations, see the <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> chapter of the User Guide.</p>
+<p>Since we do not have entity groups in the video discovery app, we do not need a parser configuration.</p>
+</div>
+<div class="section" id="using-the-question-answerer">
+<h2>9. Using the Question Answerer<a class="headerlink" href="#using-the-question-answerer" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our <code class="docutils literal"><span class="pre">welcome</span></code> dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our <code class="docutils literal"><span class="pre">videos</span></code> index and present them as suggestions to the user. For that, we sort the videos by popularity when using the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;videos&#39;</span><span class="p">,</span><span class="n">_sort</span><span class="o">=</span><span class="s1">&#39;popularity&#39;</span><span class="p">,</span> <span class="n">_sort_type</span><span class="o">=</span><span class="s1">&#39;desc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In general the <code class="docutils literal"><span class="pre">show_content</span></code> handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user’s queries.</p>
+<p>Look at the <code class="docutils literal"><span class="pre">show_content</span></code> implementation in <code class="docutils literal"><span class="pre">__init__.py</span></code> to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.</p>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">Think of other important data that would be useful to have in the knowledge base for a video discovery use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.</p>
+</div>
+</div>
+<div class="section" id="testing-and-deployment">
+<h2>10. Testing and Deployment<a class="headerlink" href="#testing-and-deployment" title="Permalink to this headline">¶</a></h2>
+<p>Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the <code class="xref py py-class docutils literal"><span class="pre">Conversation</span></code> class in MindMeld to perform an end-to-end test of your conversational app.</p>
+<p>For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Show me movies with Tom Hanks&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 2.421098262038164,</span>
+<span class="go">    &quot;release_year&quot;: 1994,</span>
+<span class="go">    &quot;title&quot;: &quot;Forrest Gump&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 2.0508595659379023,</span>
+<span class="go">    &quot;release_year&quot;: 1995,</span>
+<span class="go">    &quot;title&quot;: &quot;Toy Story&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.9535944065231545,</span>
+<span class="go">    &quot;release_year&quot;: 2016,</span>
+<span class="go">    &quot;title&quot;: &quot;Inferno&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.7609147922705308,</span>
+<span class="go">    &quot;release_year&quot;: 2006,</span>
+<span class="go">    &quot;title&quot;: &quot;Cars&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.6671147585314865,</span>
+<span class="go">    &quot;release_year&quot;: 2010,</span>
+<span class="go">    &quot;title&quot;: &quot;Toy Story 3&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.6247940018503824,</span>
+<span class="go">    &quot;release_year&quot;: 1999,</span>
+<span class="go">    &quot;title&quot;: &quot;Toy Story 2&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.5488280905081466,</span>
+<span class="go">    &quot;release_year&quot;: 2016,</span>
+<span class="go">    &quot;title&quot;: &quot;Sully&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.511799504408644,</span>
+<span class="go">    &quot;release_year&quot;: 1998,</span>
+<span class="go">    &quot;title&quot;: &quot;Saving Private Ryan&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.5008401625832901,</span>
+<span class="go">    &quot;release_year&quot;: 2002,</span>
+<span class="go">    &quot;title&quot;: &quot;Catch Me If You Can&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+<span class="go">{</span>
+<span class="go">    &quot;popularity&quot;: 1.4618024954460482,</span>
+<span class="go">    &quot;release_year&quot;: 1999,</span>
+<span class="go">    &quot;title&quot;: &quot;The Green Mile&quot;,</span>
+<span class="go">    &quot;type&quot;: &quot;movie&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">say()</span></code> method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app’s Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.</p>
+<p>You can also try out multi-turn dialogues:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
+<span class="go">    &gt;&gt;&gt; conv.say(&#39;Hi there!&#39;)</span>
+<span class="go">    [&#39;Hey.&#39;, &#39;Tell me what you would like to watch today.&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Wonder Woman&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Beauty and the Beast&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Transformers: The Last Knight&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Logan&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Mummy&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Kong: Skull Island&#39;}, {&#39;release_year&#39;: 2005, &#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Doctor Who&#39;}, {&#39;release_year&#39;: 2011, &#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Game of Thrones&#39;}, {&#39;release_year&#39;: 2010, &#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;The Walking Dead&#39;}, {&#39;release_year&#39;: 2017, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Pirates of the Caribbean: Dead Men Tell No Tales&#39;}]}&quot;, &quot;Suggestions: &#39;Most popular&#39;, &#39;Most recent&#39;, &#39;Movies&#39;, &#39;TV Shows&#39;, &#39;Action&#39;, &#39;Dramas&#39;, &#39;Sci-Fi&#39;&quot;]</span>
+<span class="go">    &gt;&gt;&gt; conv.say(&#39;Show me Tom Hanks movies&#39;)</span>
+<span class="go">    [&#39;Done. Here are some movies starring Tom Hanks:&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;release_year&#39;: 1994, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Forrest Gump&#39;}, {&#39;release_year&#39;: 1995, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story&#39;}, {&#39;release_year&#39;: 2016, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Inferno&#39;}, {&#39;release_year&#39;: 2006, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Cars&#39;}, {&#39;release_year&#39;: 2010, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 3&#39;}, {&#39;release_year&#39;: 1999, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 2&#39;}, {&#39;release_year&#39;: 2016, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Sully&#39;}, {&#39;release_year&#39;: 1998, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Saving Private Ryan&#39;}, {&#39;release_year&#39;: 2002, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Catch Me If You Can&#39;}, {&#39;release_year&#39;: 1999, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Green Mile&#39;}]}&quot;]</span>
+<span class="go">    &gt;&gt;&gt; conv.say(&#39;romantic&#39;)</span>
+<span class="go">    [&#39;Done. Here are some romance movies with Tom Hanks:&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;release_year&#39;: 1994, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Forrest Gump&#39;}, {&#39;release_year&#39;: 1988, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Big&#39;}, {&#39;release_year&#39;: 2011, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Larry Crowne&#39;}, {&#39;release_year&#39;: 1990, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Joe Versus the Volcano&#39;}, {&#39;release_year&#39;: 1984, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Splash&#39;}, {&#39;release_year&#39;: 1993, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Sleepless in Seattle&#39;}, {&#39;release_year&#39;: 1986, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Money Pit&#39;}, {&#39;release_year&#39;: 2019, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Toy Story 4&#39;}, {&#39;release_year&#39;: 1998, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &quot;You&#39;ve Got Mail&quot;}, {&#39;release_year&#39;: 1986, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Nothing in Common&#39;}]}&quot;</span>
+<span class="go">    &gt;&gt;&gt; conv.say(&#39;from 2011&#39;)</span>
+<span class="go">    [&#39;Perfect. Here are some romance movies with Tom Hanks from 2011:&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;release_year&#39;: 2011, &#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Larry Crowne&#39;}]}&quot;]]</span>
+</pre></div>
+</div>
+<div class="admonition-exercise admonition">
+<p class="first admonition-title">Exercise</p>
+<p class="last">Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those&nbsp;cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.</p>
+</div>
+<p>Refer to the User Guide for tips and best practices on testing your app before launch.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="home_assistant.html" class="btn btn-neutral float-right" title="Home Assistant" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="food_ordering.html" class="btn btn-neutral float-left" title="Food Ordering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
