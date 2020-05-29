@@ -129,7 +129,9 @@ class DialogueStateRule:
                     raise ValueError(msg.format(single, plural))
                 elif single in kwargs and isinstance(kwargs[single], str):
                     resolved[plural] = {kwargs[single]}
-                elif plural in kwargs and isinstance(kwargs[plural], (list, set, tuple)):
+                elif plural in kwargs and isinstance(
+                    kwargs[plural], (list, set, tuple)
+                ):
                     resolved[plural] = set(kwargs[plural])
                 else:
                     if single in kwargs:
@@ -718,17 +720,23 @@ class AutoEntityFilling:
         self._check_attr()
 
     def _check_attr(self):
-        if not ('entities' in self._form and len(self._form['entities']) > 0):
+        if not ("entities" in self._form and len(self._form["entities"]) > 0):
             raise KeyError("Entity list cannot be empty.")
 
-        self._entity_form = self._form['entities']
+        self._entity_form = self._form["entities"]
         self._max_retries = (
-            self._form['max_retries'] if 'max_retries' in self._form else 1)
+            self._form["max_retries"] if "max_retries" in self._form else 1
+        )
         self._exit_response = (
-            self._form['exit_msg'] if 'exit_msg' in self._form else 'How may I help you?')
+            self._form["exit_msg"]
+            if "exit_msg" in self._form
+            else "How may I help you?"
+        )
         self._exit_keys = (
-            self._form['exit_keys'] if 'exit_keys' in self._form else
-            ['cancel', 'restart', 'exit', 'reset'])
+            self._form["exit_keys"]
+            if "exit_keys" in self._form
+            else ["cancel", "restart", "exit", "reset"]
+        )
 
         if not isinstance(self._max_retries, int):
             raise TypeError("'max_retries' should be of type: int.")
@@ -741,7 +749,9 @@ class AutoEntityFilling:
 
     def _set_next_turn(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
-        responder.params.allowed_intents = tuple(['{}.{}'.format(request.domain, request.intent)])
+        responder.params.allowed_intents = tuple(
+            ["{}.{}".format(request.domain, request.intent)]
+        )
         responder.params.target_dialogue_state = self._entrance_handler.__name__
 
     def _exit_flow(self, responder):
@@ -803,29 +813,34 @@ class AutoEntityFilling:
                 # system entity validation - checks for presence of required system entity
                 resources = {}
                 extracted_feature = dict(
-                    query_features.extract_sys_candidates([entity_type])(query, resources)
+                    query_features.extract_sys_candidates([entity_type])(
+                        query, resources
+                    )
                 )
 
             else:
                 # gazetteer validation
-                gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
+                gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(
+                    entity_type
+                )
 
                 if len(gaz) > 0:
-                    gazetteer = {'gazetteers': {entity_type: gaz}}
-                    extracted_feature = (
-                        entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
+                    gazetteer = {"gazetteers": {entity_type: gaz}}
+                    extracted_feature = entity_features.extract_in_gaz_features()(
+                        formatted_payload, gazetteer
+                    )
 
             if not extracted_feature:
                 return False, _resolved_value
 
             if request.entities:
-                if request.entities[0]['text'] == text:
-                    _resolved_value = request.entities[0]['value']
+                if request.entities[0]["text"] == text:
+                    _resolved_value = request.entities[0]["value"]
 
         if slot.hints:
             # hints / user-list validation
             if text in slot.hints:
-                extracted_feature.update({'hint_validated_entity': text})
+                extracted_feature.update({"hint_validated_entity": text})
             else:
                 return False, _resolved_value
 
@@ -833,10 +848,13 @@ class AutoEntityFilling:
             # Custom validation using function provided by developer. Should return True/False
             # for validation status. If true, then continue, else fail overall validation.
 
-            if (slot.custom_eval(text) not in (True, False) or slot.custom_eval(text) is False):
+            if (
+                slot.custom_eval(text) not in (True, False)
+                or slot.custom_eval(text) is False
+            ):
                 return False, _resolved_value
             else:
-                extracted_feature.update({'custom_validated_entity': text})
+                extracted_feature.update({"custom_validated_entity": text})
 
         # return True iff user input results in extracted features (i.e. successfully validated)
         return len(extracted_feature) > 0, _resolved_value
@@ -849,8 +867,8 @@ class AutoEntityFilling:
             request (Request): The request object.
         """
         for entity in request.entities:
-            entity_type = entity['type']
-            role = entity['role']
+            entity_type = entity["type"]
+            role = entity["role"]
 
             for slot in self._local_form:
                 if entity_type == slot.entity:
@@ -866,7 +884,7 @@ class AutoEntityFilling:
             context=request.context or {},
             history=request.history or [],
             frame=responder.frame or {},
-            params=request.params
+            params=request.params,
         )
 
         self._exit_flow(responder)
@@ -932,7 +950,8 @@ class AutoEntityFilling:
                     text=request.text,
                     entity_type=slot.entity,
                     role=slot.role,
-                    value=_resolved_value).to_dict()
+                    value=_resolved_value,
+                ).to_dict()
 
                 # Reset prompt for next slot
                 self._prompt_turn = True

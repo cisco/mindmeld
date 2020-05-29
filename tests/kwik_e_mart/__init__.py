@@ -142,14 +142,17 @@ def send_store_hours_in_flow_handler(request, responder):
 
 
 form_store_phone = {
-    'entities': [
+    "entities": [
         FormEntity(
-            entity='store_name',
-            responses='Which store would you like to know about?',
+            entity="store_name",
+            responses="Which store would you like to know about?",
             retry_response="Sorry, I did not get you. "
-                           "Which store would you like to know about?")],
-    'max_retries': 1,
-    'exit_msg': "Sorry I cannot help you. Please try again."}
+            "Which store would you like to know about?",
+        )
+    ],
+    "max_retries": 1,
+    "exit_msg": "Sorry I cannot help you. Please try again.",
+}
 
 
 @app.auto_fill(domain="store_info", intent="get_store_number", form=form_store_phone)

@@ -617,7 +617,7 @@ def test_sys_entity_feature(kwik_e_mart_nlp):
 
 
 test_data_dyn = [
-    ("kadubeesanahalli", None, "store_info", "", ""),
+    ("kadubeesanahalli", None, "store_info", "get_store_hours", ""),
     ("45 Fifth", None, "store_info", "get_store_hours", "45 Fifth"),
     (
         "kadubeesanahalli",
@@ -637,7 +637,9 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
 ):
     """Tests user specified allowed_nlp_classes and dynamic_resource"""
     response = kwik_e_mart_nlp.process(
-        query, dynamic_resource=dyn_gaz, allowed_nlp_classes={"store_info": {}}
+        query,
+        dynamic_resource=dyn_gaz,
+        allowed_nlp_classes={"store_info": {"get_store_hours": {}}},
     )
 
     if dyn_gaz:
@@ -655,10 +657,7 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
 
     assert response["domain"] == expected_domain
 
-    if expected_intent != "get_store_hours":
-        assert response["intent"] != "get_store_hours"
-    else:
-        assert response["intent"] == expected_intent
+    assert response["intent"] == expected_intent
 
     if expected_entity == "":
         assert response["entities"] == []
