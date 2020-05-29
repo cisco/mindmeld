@@ -805,12 +805,12 @@ class AutoEntityFilling:
             if entity_type in DEFAULT_SYS_ENTITIES:
                 # system entity validation - checks for presence of required system entity
 
-                if request.entities:
-                    query = self._extract_query_features(
-                        str(request.entities[0]["value"][0]["value"])
-                    )
-                else:
-                    query = self._extract_query_features(text)
+                entity_text = (
+                    str(request.entities[0]["value"][0]["value"])
+                    if request.entities
+                    else text
+                )
+                query = self._extract_query_features(entity_text)
 
                 resources = {}
                 extracted_feature = dict(
@@ -995,7 +995,7 @@ class AutoEntityFilling:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
         """
-        await self.__call__(request, responder)
+        self.__call__(request, responder)
 
 
 class DialogueResponder:
