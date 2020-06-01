@@ -163,7 +163,7 @@ class CustomActionSequence:
         for action in self.actions:
             result = action.invoke(request, responder)
             if not result:
-                logger.warning("Failed to invoke action:", action)
+                logger.warning("Failed to invoke action %s.", action)
                 return False
         return True
 
@@ -171,7 +171,7 @@ class CustomActionSequence:
         for action in self.actions:
             result = await action.invoke_async(request, responder)
             if not result:
-                logger.warning("Failed to invoke action:", action)
+                logger.warning("Failed to invoke action %s.", action)
                 return False
         return True
 

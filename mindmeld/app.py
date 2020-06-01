@@ -21,7 +21,11 @@ import sys
 from .app_manager import ApplicationManager
 from .cli import app_cli
 from .components._config import get_custom_action_config
-from .components.custom_action import CustomAction, CustomActionException
+from .components.custom_action import (
+    CustomAction,
+    CustomActionException,
+    CustomActionSequence,
+)
 from .components.dialogue import DialogueFlow, DialogueResponder, AutoEntityFilling
 from .components.request import Request
 from .server import MindMeldServer
@@ -172,15 +176,30 @@ class Application:
             app.custom_action(intent='greeting', action='say_greeting')
             app.custom_action(entity='person', action='greet_person')
         """
-        if "action" not in kwargs:
-            raise CustomActionException("`action` is a required argument.")
-        self.add_custom_action(
-            kwargs.pop("action"),
-            asynch=kwargs.pop("asynch", False),
-            overwrite=kwargs.pop("overwrite", False),
-            config=kwargs.pop("config", None),
-            **kwargs
-        )
+        action = kwargs.pop("action", None)
+        actions = kwargs.pop("actions", None)
+
+        if not (action or actions):
+            raise CustomActionException(
+                "`action` or `actions` must be present in arguments."
+            )
+
+        if action:
+            self.add_custom_action(
+                action,
+                asynch=kwargs.pop("asynch", False),
+                overwrite=kwargs.pop("overwrite", False),
+                config=kwargs.pop("config", None),
+                **kwargs
+            )
+        else:
+            self.add_custom_action_sequence(
+                actions,
+                asynch=kwargs.pop("asynch", False),
+                overwrite=kwargs.pop("overwrite", False),
+                config=kwargs.pop("config", None),
+                **kwargs
+            )
 
     def add_custom_action(
         self, action, asynch=False, overwrite=False, config=None, **kwargs
@@ -210,6 +229,35 @@ class Application:
             self.add_dialogue_rule(state_name, custom_action.invoke_async, **kwargs)
         else:
             self.add_dialogue_rule(state_name, custom_action.invoke, **kwargs)
+
+    def add_custom_action_sequence(
+        self, actions, asynch=False, overwrite=False, config=None, **kwargs
+    ):
+        """Adds a custom action sequence handler for the dialogue manager.
+
+        Whenever the user hits this state, we invoke the sequence of custom actions and returns
+            the appropriate responder.
+
+        Args:
+            actions (list): A list of custom actions
+            asynch (bool): Whether we should invoke this custom action asynchronously
+            overwrite (bool): Whether we should overwrite the Responder with fields from the
+                response, otherwise we will extend the fields (frame, directives) accordingly.
+            config (dict): The custom action config, if different from the application's.
+        """
+        if not actions:
+            raise CustomActionException("Argument `actions` should not be empty.")
+
+        config = config or self.custom_action_config
+        if not config:
+            raise CustomActionException("Argument `config` should not be empty.")
+
+        action_seq = CustomActionSequence(actions, config, overwrite=overwrite)
+        state_name = kwargs.pop("name", "custom_actions_{}".format(actions))
+        if asynch:
+            self.add_dialogue_rule(state_name, action_seq.invoke_async, **kwargs)
+        else:
+            self.add_dialogue_rule(state_name, action_seq.invoke, **kwargs)
 
     def dialogue_flow(self, **kwargs):
         """Creates a dialogue flow for the application"""
