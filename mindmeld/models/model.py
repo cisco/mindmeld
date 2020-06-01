@@ -1295,9 +1295,10 @@ class EntityLabelEncoder(LabelEncoder):
             list: A list of decoded labels per query
         """
         # TODO: support decoding multiple queries at once
+        system_entity_recognizer = SystemEntityRecognizer.get_instance()
         examples = kwargs["examples"]
         labels = [
-            get_entities_from_tags(examples[idx], tags, self.system_entity_recognizer)
+            get_entities_from_tags(examples[idx], tags, system_entity_recognizer)
             for idx, tags in enumerate(tags_by_example)
         ]
         return labels

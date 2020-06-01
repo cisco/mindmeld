@@ -117,6 +117,19 @@ class RasaConverter(Converter):
             else:
                 intent_f.write(intent_example)
 
+    def _get_action_endpoint(self):
+        for file_ending in ["yaml", "yml"]:
+            file_name = self.rasa_project_directory + "/endpoints." + file_ending
+            if os.path.isfile(file_name):
+                try:
+                    with open(file_name, "r") as stream:
+                        data = yaml.safe_load(stream)
+                        return data.get("action_endpoint", {}).get("url")
+                except IOError as e:
+                    logger.error("Can not open endpoints.yml file at %s", file_name)
+                    logger.error(e)
+        logger.error("Could not find endpoints.yml file in project directory")
+
     def _read_domain_file(self):
         for file_ending in ["yaml", "yml"]:
             file_name = self.rasa_project_directory + "/domain." + file_ending
@@ -155,13 +168,14 @@ class RasaConverter(Converter):
 
     def _read_templates(self):
         domain_file = self._read_domain_file()
-        if "templates" in domain_file:
-            return domain_file["templates"]
-        else:
-            return []
+        templates = {}
+        for field in ["templates", "responses"]:
+            templates.update(domain_file.get(field, {}))
+        return templates
 
     def create_entity_files(self, mm_entry):
         entity_value, entity = mm_entry.strip("{}").split("|")
+
         gazetteer_location = os.path.join(
             self.mindmeld_project_directory, "entities", entity, "gazetteer.txt"
         )
@@ -200,7 +214,7 @@ class RasaConverter(Converter):
 
     @staticmethod
     def _is_action(stories_line):
-        return stories_line[0:3] == " - "
+        return "- " in stories_line
 
     @staticmethod
     def _does_intent_have_entity(stories_line):
@@ -351,14 +365,18 @@ class RasaConverter(Converter):
 
     def _write_init_header(self):
         string = """from mindmeld import Application
+from mindmeld.components.custom_action import CustomAction
 from . import custom_features  # noqa: F401
 
 app = Application(__name__)
 
 __all__ = ['app']
-
-
 """
+        url = self._get_action_endpoint()
+        if url:
+            action_config = "action_config = {{'url': '{url}'}}\n".format(url=url)
+            string += action_config
+        string += "\n\n"
         f = open(self.mindmeld_project_directory + "/__init__.py", "w+")
         f.write(string)
         return f
@@ -398,21 +416,29 @@ __all__ = ['app']
         # check if prompts contain any entities
         for prompt in prompts:
             entities = re.findall(r"\{.*\}", prompt)
-            entities_list = []
-            newprompt = prompt
-            for i, entity in enumerate(entities, start=0):
-                newprompt = prompt.replace(entity, "{" + str(i) + "}")
-                entities_list.append(entity.replace("{", "").replace("}", ""))
-            entities_args = ", ".join(map(str, entities_list))
-            prompts_list.append('"' + newprompt + '".format({})'.format(entities_args))
-            for entity in entities_list:
-                newentity = entity.replace("{", "").replace("}", "")
-                entities_string = "    {}_s = [e['text'] for e in ".format(
-                    newentity
-                ) + "request.entities if e['type'] == '{}']\n".format(newentity)
-                entity_string = "    {0} = {0}_s[0]\n".format(newentity)
-                f.write(entities_string)
-                f.write(entity_string)
+
+            # If we have entities, we do string format with entities; otherwise
+            # just simple string prompts
+            if len(entities) > 0:
+                entities_list = []
+                newprompt = prompt
+                for i, entity in enumerate(entities, start=0):
+                    newprompt = prompt.replace(entity, "{" + str(i) + "}")
+                    entities_list.append(entity.replace("{", "").replace("}", ""))
+                entities_args = ", ".join(map(str, entities_list))
+                prompts_list.append(
+                    '"' + newprompt + '".format({})'.format(entities_args)
+                )
+                for entity in entities_list:
+                    newentity = entity.replace("{", "").replace("}", "")
+                    entities_string = "    {}_s = [e['text'] for e in ".format(
+                        newentity
+                    ) + "request.entities if e['type'] == '{}']\n".format(newentity)
+                    entity_string = "    {0} = {0}_s[0]\n".format(newentity)
+                    f.write(entities_string)
+                    f.write(entity_string)
+            else:
+                prompts_list.append('"' + prompt + '"')
         prompts_string = "    prompts = [{}]\n".format(", ".join(prompts_list))
         f.write(prompts_string)
 
@@ -437,6 +463,21 @@ __all__ = ['app']
         with open(self.mindmeld_project_directory + "/__init__.py", "r+") as f:
             return f.readlines()
 
+    @staticmethod
+    def _is_custom_action(action):
+        return action[0:6] == "action"
+
+    @staticmethod
+    def _get_custom_action(action):
+        lines = [
+            "    # This is a custom action from rasa\n",
+            "    action = CustomAction(name='{action}', config=action_config)\n".format(
+                action=action
+            ),
+            "    action.invoke(request, responder)\n",
+        ]
+        return lines
+
     def _write_functions(self, actions, templates, f):
         for action in actions:
             self._write_function_declaration(action, f)
@@ -447,9 +488,8 @@ __all__ = ['app']
                 self._write_function_body_prompt(prompts_list, f)
                 self._write_responder_lines(f)
             else:
-                if action[0:6] == "action":
-                    f.write("    # This is a custom action from rasa\n")
-                    f.write("    pass\n")
+                if self._is_custom_action(action):
+                    f.writelines(self._get_custom_action(action))
                 else:
                     # If no templates, write a blank function
                     f.write("    # No templates were provided for action\n")
@@ -461,7 +501,7 @@ __all__ = ['app']
     @staticmethod
     def _attach_handle_to_function(handle, action, file_lines):
         for i, line in enumerate(file_lines):
-            if len(re.findall("def {}".format(action), line)) > 0:
+            if "def {}(request, responder):".format(action) in line:
                 insert_line = i
                 while file_lines[i - 1].strip() != "":
                     if file_lines[i - 1] == handle:
@@ -485,10 +525,24 @@ __all__ = ['app']
             logger.warning("Action handler not found for %s.", current_action)
             return
 
-        file_lines.insert(
-            current_line + 1,
-            "    additional_actions = {actions}\n".format(actions=actions),
-        )
+        additional_actions = []
+        # for the rest of the actions, add any custom action here
+        for action in actions:
+            custom_action = RasaConverter._get_custom_action(action)
+            if RasaConverter._is_custom_action(action):
+                file_lines[current_line + 1 : current_line + 1] = custom_action
+                current_line += len(custom_action)
+            else:
+                additional_actions.append(action)
+
+        if additional_actions:
+            # we note non-custom actions as a string list
+            file_lines.insert(
+                current_line + 1,
+                "    additional_actions = {actions}\n".format(
+                    actions=additional_actions
+                ),
+            )
 
     def create_mindmeld_init(self):
         f = self._write_init_header()
@@ -505,9 +559,9 @@ __all__ = ['app']
             # Loop through steps for each story
             for step in item[1]:
                 # Get intent, any entities, and actions
-                intent = step["intent"]
+                intent = step["intent"].strip()
                 entities = step["entities"]
-                actions = step["actions"]
+                actions = [action.strip() for action in step["actions"]]
                 # attach handle to correct function
                 app_handle_string = RasaConverter._get_app_handle(intent, entities)
                 self._attach_handle_to_function(

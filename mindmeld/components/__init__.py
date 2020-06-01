@@ -18,9 +18,11 @@ from .nlp import NaturalLanguageProcessor
 from .preprocessor import Preprocessor
 from .question_answerer import QuestionAnswerer
 from .request import Request
+from .custom_action import CustomAction
 
 __all__ = [
     "Conversation",
+    "CustomAction",
     "DialogueResponder",
     "DialogueManager",
     "NaturalLanguageProcessor",

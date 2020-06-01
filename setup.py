@@ -8,6 +8,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    "aiohttp>=3.6.2",
     "attrs>=18.2",  # attrs has a stable API and does not use semver
     "Click~=6.0",
     "click-log==0.1.8",
