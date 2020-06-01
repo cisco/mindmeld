@@ -104,6 +104,18 @@ pytest .
 
 After making changes and all tests are passing locally, commit the code to your fork and issue a PR against the [cisco/mindmeld](https://github.com/cisco/mindmeld) repo.
 
+## Documentation
+You can view the documentation for the latest stable release on [mindmeld.com/docs](http://mindmeld.com/docs) and the documentation for the latest change off the master change on our [Github Page](https://cisco.github.io/mindmeld/).
+
+You can contribute to the documentation under `sources` directory.
+
+To generate the documentation, please follow these steps:
+
+```
+pip install -r docs-requirements.txt
+make apidoc
+```
+
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
