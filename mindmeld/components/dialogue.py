@@ -861,7 +861,7 @@ class AutoEntityFilling:
             # Custom validation using function provided by developer. Should return True/False
             # for validation status. If true, then continue, else fail overall validation.
 
-            if slot.custom_eval(text, request) is not True:
+            if not slot.custom_eval(text, request):
                 return False, _resolved_value
             else:
                 extracted_feature.update({"custom_validated_entity": text})
