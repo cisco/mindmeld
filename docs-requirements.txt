@@ -1,6 +1,6 @@
 mindmeld
-Sphinx==1.6.3
-nbsphinx==0.2.11
+Sphinx==1.7.9
+nbsphinx==0.4
 sphinx-autobuild==0.6.0
 sphinx_rtd_theme==0.4.3
 pandoc==1.0.0b2
