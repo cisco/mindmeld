@@ -12,7 +12,7 @@ def test_auto_fill_happy_path(kwik_e_mart_app, kwik_e_mart_app_path, qa_kwik_e_m
     assert_target_dialogue_state(convo, "send_store_phone")
     assert_reply(directives, "Which store would you like to know about?")
 
-    response = convo.process("elm street")
+    convo.process("elm street")
     assert_target_dialogue_state(convo, None)
 
 
@@ -26,7 +26,7 @@ def test_auto_fill_happy_path_validation(
     assert_target_dialogue_state(convo, "send_store_phone")
     assert_reply(directives, "Which store would you like to know about?")
 
-    response = convo.process("the store on elm street")
+    convo.process("the store on elm street")
     assert_target_dialogue_state(convo, None)
 
 
@@ -45,7 +45,7 @@ def test_auto_fill_retry(kwik_e_mart_app, kwik_e_mart_app_path, qa_kwik_e_mart):
         "Sorry, I did not get you. " "Which store would you like to know about?",
     )
 
-    response = convo.process("elm street")
+    convo.process("elm street")
     assert_target_dialogue_state(convo, None)
 
 

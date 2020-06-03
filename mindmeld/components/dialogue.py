@@ -822,8 +822,6 @@ class AutoEntityFilling:
             else:
                 # gazetteer validation
 
-                # payload format for entity feature extractors:
-                # tuple(query (Query Object), list of entities, entity index)
                 if request.entities:
                     query = self._extract_query_features(
                         request.entities[0]["value"][0]["cname"]
@@ -832,16 +830,18 @@ class AutoEntityFilling:
                 if not query:
                     query = self._extract_query_features(text)
 
-                formatted_payload = (query, [query], 0)
-
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(
                     entity_type
                 )
 
+                # payload format for entity feature extractors:
+                # tuple(query (Query Object), list of entities, entity index)
+                _payload = (query, [query], 0)
+
                 if len(gaz) > 0:
                     gazetteer = {"gazetteers": {entity_type: gaz}}
                     extracted_feature = entity_features.extract_in_gaz_features()(
-                        formatted_payload, gazetteer
+                        _payload, gazetteer
                     )
 
             if not extracted_feature:
@@ -861,7 +861,7 @@ class AutoEntityFilling:
             # Custom validation using function provided by developer. Should return True/False
             # for validation status. If true, then continue, else fail overall validation.
 
-            if not slot.custom_eval(text, request):
+            if not slot.custom_eval(request):
                 return False, _resolved_value
             else:
                 extracted_feature.update({"custom_validated_entity": text})
