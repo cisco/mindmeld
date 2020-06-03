@@ -589,13 +589,13 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
 - ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
   
-  - ``entity`` (str, required): Entity name
-  - ``role`` (str, optional): The role of the entity
-  - ``responses`` (list or str, optional): Message for prompting the user for missing entities
-  - ``retry_response`` (str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
-  - ``value`` (str, optional): The resolved value of the entity
-  - ``default_eval`` (bool, optional): Use system validation (default: True)
-  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
+  - ``entity`` (str, required): Entity name.
+  - ``role`` (str, optional): The role of the entity.
+  - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
+  - ``retry_response`` (list or str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
+  - ``value`` (str, optional): The resolved value of the entity.
+  - ``default_eval`` (bool, optional): Use system validation (default: True).
+  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
   - ``custom_eval`` (func, optional): Custom validation function (should return bool:
     validated or not). For this function, the developer is provided with the current turn's ``request`` object.
 
