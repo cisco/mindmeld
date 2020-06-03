@@ -23,6 +23,7 @@ from elasticsearch import (
     TransportError,
 )
 from elasticsearch.helpers import streaming_bulk
+
 from tqdm import tqdm
 
 from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 INDEX_TYPE_SYNONYM = "syn"
 INDEX_TYPE_KB = "kb"
+DOC_TYPE = "document"
 
 
 def get_scoped_index_name(app_namespace, index_name):
@@ -58,6 +60,25 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         raise KnowledgeBaseError
     except ImproperlyConfigured:
         raise KnowledgeBaseError
+
+
+def is_es_version_7(es_client):
+    major_version = int(es_client.info()["version"]["number"].split(".")[0])
+    if major_version < 5:
+        logger.warning(
+            "Major version of ElasticSearch %d is not officially supported.",
+            major_version,
+        )
+    if major_version >= 7:
+        return True
+    return False
+
+
+def resolve_es_config_for_version(config, es_client):
+    if not is_es_version_7(es_client):
+        mappings = config.pop("mappings")
+        config["mappings"] = {DOC_TYPE: mappings}
+    return config
 
 
 def does_index_exist(
@@ -107,7 +128,11 @@ def get_field_names(
             )
 
         res = es_client.indices.get(index=scoped_index_name)
-        all_field_info = res[scoped_index_name]["mappings"]["properties"]
+
+        if is_es_version_7(es_client):
+            all_field_info = res[scoped_index_name]["mappings"]["properties"]
+        else:
+            all_field_info = res[scoped_index_name]["mappings"][DOC_TYPE]["properties"]
         return all_field_info.keys()
     except EsConnectionError as e:
         logger.debug(
@@ -148,8 +173,11 @@ def create_index(
         if not does_index_exist(
             app_namespace, index_name, es_host, es_client, connect_timeout
         ):
+            template = resolve_es_config_for_version(
+                DEFAULT_ES_INDEX_TEMPLATE, es_client
+            )
             es_client.indices.put_template(
-                name=DEFAULT_ES_INDEX_TEMPLATE_NAME, body=DEFAULT_ES_INDEX_TEMPLATE
+                name=DEFAULT_ES_INDEX_TEMPLATE_NAME, body=template
             )
             logger.info("Creating index %r", index_name)
             es_client.indices.create(scoped_index_name, body=mapping)
@@ -240,12 +268,36 @@ def create_index_mapping(base_mapping, mapping_data):
     return base_mapping
 
 
+def version_compatible_streaming_bulk(
+    es_client, docs, index, chunck_size, raise_on_error, doc_type
+):
+
+    if is_es_version_7(es_client):
+        return streaming_bulk(
+            es_client,
+            docs,
+            index=index,
+            chunk_size=chunck_size,
+            raise_on_error=raise_on_error,
+        )
+    else:
+        return streaming_bulk(
+            es_client,
+            docs,
+            index=index,
+            doc_type=doc_type,
+            chunk_size=chunck_size,
+            raise_on_error=raise_on_error,
+        )
+
+
 def load_index(
     app_namespace,
     index_name,
     docs,
     docs_count,
     mapping,
+    doc_type=None,
     es_host=None,
     es_client=None,
     connect_timeout=2,
@@ -288,16 +340,16 @@ def load_index(
         # create the progess bar with docs count
         pbar = tqdm(total=docs_count)
 
-        for okay, result in streaming_bulk(
-            es_client,
-            docs,
-            index=scoped_index_name,
-            chunk_size=50,
-            raise_on_error=False,
+        es_version_7 = is_es_version_7(es_client)
+        for okay, result in version_compatible_streaming_bulk(
+            es_client, docs, scoped_index_name, 50, False, DOC_TYPE
         ):
-
             action, result = result.popitem()
-            doc_id = "/%s/%s" % (index_name, result["_id"])
+            if es_version_7:
+                doc_id = "/%s/%s" % (index_name, result["_id"])
+            else:
+                doc_id = "/%s/%s/%s" % (index_name, doc_type, result["_id"])
+
             # process the information from ES whether the document has been
             # successfully indexed
             if not okay:
@@ -305,6 +357,7 @@ def load_index(
             else:
                 count += 1
             pbar.update(1)
+
         # close the progress bar and flush all output
         pbar.close()
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")

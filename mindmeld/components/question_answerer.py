@@ -32,12 +32,15 @@ from ._config import (
     get_classifier_config,
 )
 from ._elasticsearch_helpers import (
+    DOC_TYPE,
     create_es_client,
     delete_index,
     does_index_exist,
     get_scoped_index_name,
     load_index,
     create_index_mapping,
+    is_es_version_7,
+    resolve_es_config_for_version,
 )
 from ..models import create_embedder_model
 
@@ -284,7 +287,7 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
         """
         embedder_model = None
-        embedding_fields = None
+        embedding_fields = []
         if not app_path:
             logger.warning(
                 "You must provide the application path to upload embeddings as specified"
@@ -362,7 +365,7 @@ class QuestionAnswerer:
                         yield transform(doc, embedder_model, embedding_fields)
 
         docs_count, embedding_fields = _doc_data(data_file, embedding_fields)
-        if len(embedding_fields) == 0:
+        if embedder_model and len(embedding_fields) == 0:
             logger.warning(
                 "No matching embedding fields found from the app config, "
                 "continuing without generating embeddings..."
@@ -401,8 +404,16 @@ class QuestionAnswerer:
 
             return mapping_data
 
-        mapping_data = _generate_mapping_data(embedder_model, embedding_fields)
-        qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
+        es_client = es_client or create_es_client(es_host)
+        if is_es_version_7(es_client):
+            mapping_data = _generate_mapping_data(embedder_model, embedding_fields)
+            qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
+        else:
+            if embedder_model:
+                logger.error(
+                    "You must upgrade to ElasticSearch 7 to use the embedding features."
+                )
+            qa_mapping = resolve_es_config_for_version(DEFAULT_ES_QA_MAPPING, es_client)
 
         load_index(
             app_namespace,
@@ -410,6 +421,7 @@ class QuestionAnswerer:
             docs,
             docs_count,
             qa_mapping,
+            DOC_TYPE,
             es_host,
             es_client,
             connect_timeout=connect_timeout,
