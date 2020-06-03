@@ -5,7 +5,7 @@ from .test_dialogue_flow import assert_target_dialogue_state, assert_reply
 
 
 @pytest.mark.conversation
-def test_auto_fill_happy_path(kwik_e_mart_app):
+def test_auto_fill_happy_path(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests a happy path for the app."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
@@ -17,7 +17,7 @@ def test_auto_fill_happy_path(kwik_e_mart_app):
 
 
 @pytest.mark.conversation
-def test_auto_fill_happy_path_validation(kwik_e_mart_app):
+def test_auto_fill_happy_path_validation(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests a happy path for the app with gazetter validation."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
@@ -29,7 +29,7 @@ def test_auto_fill_happy_path_validation(kwik_e_mart_app):
 
 
 @pytest.mark.conversation
-def test_auto_fill_retry(kwik_e_mart_app):
+def test_auto_fill_retry(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests that the retry logic for slots/entities."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
@@ -48,7 +48,7 @@ def test_auto_fill_retry(kwik_e_mart_app):
 
 
 @pytest.mark.conversation
-def test_auto_fill_exit_flow(kwik_e_mart_app):
+def test_auto_fill_exit_flow(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests slot-fill exit flow logic."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
@@ -62,7 +62,7 @@ def test_auto_fill_exit_flow(kwik_e_mart_app):
 
 @pytest.mark.conversation
 @pytest.mark.asyncio
-async def test_auto_exit_flow_async(async_kwik_e_mart_app):
+async def test_auto_exit_flow_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests auto fill for async apps."""
     convo = Conversation(app=async_kwik_e_mart_app)
     response = await convo.process("What's the store phone number?")
@@ -78,7 +78,7 @@ async def test_auto_exit_flow_async(async_kwik_e_mart_app):
 
 @pytest.mark.conversation
 @pytest.mark.asyncio
-async def test_auto_fill_happy_path_async(async_kwik_e_mart_app):
+async def test_auto_fill_happy_path_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests auto fill happy path for async apps."""
     convo = Conversation(app=async_kwik_e_mart_app)
     response = await convo.process("What's the store phone number?")
@@ -92,7 +92,7 @@ async def test_auto_fill_happy_path_async(async_kwik_e_mart_app):
 
 @pytest.mark.conversation
 @pytest.mark.asyncio
-async def test_auto_fill_validation_async(async_kwik_e_mart_app):
+async def test_auto_fill_validation_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests a happy path for the async app with gazetter validation."""
     convo = Conversation(app=async_kwik_e_mart_app)
     response = await convo.process("What's the store phone number?")
@@ -106,7 +106,7 @@ async def test_auto_fill_validation_async(async_kwik_e_mart_app):
 
 @pytest.mark.conversation
 @pytest.mark.asyncio
-async def test_auto_fill_retry_async(async_kwik_e_mart_app):
+async def test_auto_fill_retry_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests that the retry logic for slots/entities in async app."""
     convo = Conversation(app=async_kwik_e_mart_app)
     response = await convo.process("What's the store phone number?")
