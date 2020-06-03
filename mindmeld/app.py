@@ -182,7 +182,7 @@ class Application:
             if self.async_mode:
                 self.add_dialogue_rule(func_name, auto_fill.call_async, **kwargs)
             else:
-                self.add_dialogue_rule(func_name, auto_fill.call_sync, **kwargs)
+                self.add_dialogue_rule(func_name, auto_fill, **kwargs)
             return func
 
         return _decorator

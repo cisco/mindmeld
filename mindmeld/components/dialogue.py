@@ -979,14 +979,14 @@ class AutoEntityFilling:
         # Finish slot-filling and return to handler
         return self._end_slot_fill(request, responder, self._app.async_mode)
 
-    def call_sync(self, request, responder):
-        """The slot-filling call for synchronous apps
+    # def call_sync(self, request, responder):
+    #     """The slot-filling call for synchronous apps
 
-        Args:
-            request (Request): The request object.
-            responder (DialogueResponder): The responder object.
-        """
-        self.__call__(request, responder)
+    #     Args:
+    #         request (Request): The request object.
+    #         responder (DialogueResponder): The responder object.
+    #     """
+    #     self.__call__(request, responder)
 
     async def call_async(self, request, responder):
         """The slot-filling call for asynchronous apps
@@ -995,7 +995,7 @@ class AutoEntityFilling:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
         """
-        self.__call__(request, responder)
+        self(request, responder)
 
 
 class DialogueResponder:
