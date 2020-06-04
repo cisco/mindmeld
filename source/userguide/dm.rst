@@ -589,15 +589,15 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
 - ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
   
-  - ``entity`` (str, required): Entity name
-  - ``role`` (str, optional): The role of the entity
-  - ``responses`` (list or str, optional): Message for prompting the user for missing entities
-  - ``retry_response`` (str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
-  - ``value`` (str, optional): The resolved value of the entity
-  - ``default_eval`` (bool, optional): Use system validation (default: True)
-  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
+  - ``entity`` (str, required): Entity name.
+  - ``role`` (str, optional): The role of the entity.
+  - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
+  - ``retry_response`` (list or str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
+  - ``value`` (str, optional): The resolved value of the entity.
+  - ``default_eval`` (bool, optional): Use system validation (default: True).
+  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
   - ``custom_eval`` (func, optional): Custom validation function (should return bool:
-    validated or not)
+    validated or not). For this function, the developer is provided with the current turn's ``request`` object.
 
 .. |br| raw:: html
 
@@ -618,8 +618,8 @@ Transfer money in a banking app:
 
     from mindmeld.core import FormEntity
 
-    def test_for_money(ent):
-      return True if '$' in ent else False
+    def test_for_money(request):
+      return True if '$' in request.text else False
 
     form_transfermoney = {
       'entities':[
