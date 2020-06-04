@@ -70,8 +70,6 @@ class CustomAction:
                 return self._process_async(json_data, responder)
             else:
                 return self._process(json_data, responder)
-
-            return self._process_post_response(status_code, result_json, responder)
         except ConnectionError:
             logger.error(
                 "Connection error trying to reach custom action server %s.", self.url
@@ -90,7 +88,7 @@ class CustomAction:
         Returns:
             (bool)
         """
-        return self.invoke(request, responder, async_mode=True)
+        return await self.invoke(request, responder, async_mode=True)
 
     def _process(self, json_data, responder):
         status_code, result_json = self.post(json_data)
@@ -133,7 +131,7 @@ class CustomAction:
 
     async def post_async(self, json_data):
         async with aiohttp.ClientSession() as session:
-            async with await session.post(self.url, json=json_data) as response:
+            async with session.post(self.url, json=json_data) as response:
                 if response.status == 200:
                     return 200, await response.json()
                 else:
