@@ -754,7 +754,9 @@ class FormEntity:
     Attributes:
         entity (str): Entity name
         role (str, optional): The role of the entity
-        responses(list, optional): NLR for prompting the user for missing entities
+        responses(list/str, optional): Message(s) for prompting the user for missing entities
+        retry_response (list/str, optional): Message(s) for re-prompting users. If not provided,
+        defaults to responses
         value (str, optional): The resolved value of the entity
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
