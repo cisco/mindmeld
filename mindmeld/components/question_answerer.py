@@ -219,7 +219,10 @@ class QuestionAnswerer:
                 # TODO: move the ES API call logic to ES helper
                 self._es_field_info[index] = {}
                 res = self._es_client.indices.get(index=index)
-                all_field_info = res[index]["mappings"]["properties"]
+                if is_es_version_7(self._es_client):
+                    all_field_info = res[index]["mappings"]["properties"]
+                else:
+                    all_field_info = res[index]["mappings"][DOC_TYPE]["properties"]
                 for field_name in all_field_info:
                     field_type = all_field_info[field_name].get("type")
                     self._es_field_info[index][field_name] = FieldInfo(
