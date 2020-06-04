@@ -796,21 +796,22 @@ class AutoEntityFilling:
         """
         text = request.text
         entity_type = slot.entity
-        query = self._extract_query_features(text)
-
-        # payload format for entity feature extractors:
-        #     tuple(query (Query Object), list of entities, entity index)
-
-        # For slot filling, the user query will consist of the prompted entity.
-        # Hence `entity = [query]` and `entity_index = 0`.
-        formatted_payload = (query, [query], 0)
 
         extracted_feature = {}
         _resolved_value = {}
+        query = None
 
         if slot.default_eval:
             if entity_type in DEFAULT_SYS_ENTITIES:
                 # system entity validation - checks for presence of required system entity
+
+                entity_text = (
+                    str(request.entities[0]["value"][0]["value"])
+                    if request.entities
+                    else text
+                )
+                query = self._extract_query_features(entity_text)
+
                 resources = {}
                 extracted_feature = dict(
                     query_features.extract_sys_candidates([entity_type])(
@@ -820,22 +821,34 @@ class AutoEntityFilling:
 
             else:
                 # gazetteer validation
+
+                if request.entities:
+                    query = self._extract_query_features(
+                        request.entities[0]["value"][0]["cname"]
+                    )
+
+                if not query:
+                    query = self._extract_query_features(text)
+
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(
                     entity_type
                 )
 
+                # payload format for entity feature extractors:
+                # tuple(query (Query Object), list of entities, entity index)
+                _payload = (query, [query], 0)
+
                 if len(gaz) > 0:
                     gazetteer = {"gazetteers": {entity_type: gaz}}
                     extracted_feature = entity_features.extract_in_gaz_features()(
-                        formatted_payload, gazetteer
+                        _payload, gazetteer
                     )
 
             if not extracted_feature:
                 return False, _resolved_value
 
             if request.entities:
-                if request.entities[0]["text"] == text:
-                    _resolved_value = request.entities[0]["value"]
+                _resolved_value = request.entities[0]["value"]
 
         if slot.hints:
             # hints / user-list validation
@@ -848,10 +861,7 @@ class AutoEntityFilling:
             # Custom validation using function provided by developer. Should return True/False
             # for validation status. If true, then continue, else fail overall validation.
 
-            if (
-                slot.custom_eval(text) not in (True, False)
-                or slot.custom_eval(text) is False
-            ):
+            if not slot.custom_eval(request):
                 return False, _resolved_value
             else:
                 extracted_feature.update({"custom_validated_entity": text})
@@ -876,7 +886,7 @@ class AutoEntityFilling:
                         slot.value = entity
                         break
 
-    def _end_slot_fill(self, request, responder):
+    def _end_slot_fill(self, request, responder, async_mode):
         # Returns filled entity objects as request.entities
         # We pass in the previous turn's responder's params to the current request
         request = self._app.app_manager.request_class(
@@ -888,7 +898,16 @@ class AutoEntityFilling:
         )
 
         self._exit_flow(responder)
+
+        if async_mode:
+            return self._end_slot_fill_async(request, responder)
+        return self._end_slot_fill_sync(request, responder)
+
+    def _end_slot_fill_sync(self, request, responder):
         return self._entrance_handler(request, responder)
+
+    async def _end_slot_fill_async(self, request, responder):
+        return await self._entrance_handler(request, responder)
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
@@ -906,7 +925,8 @@ class AutoEntityFilling:
             self._app.app_manager.dialogue_manager.reprocess()
 
     def __call__(self, request, responder):
-        """The iterative call to fill missing slots in the entity form till all slots have been
+        """
+        The iterative call to fill missing slots in the entity form till all slots have been
         filled up or the flow has been exited.
 
         Args:
@@ -957,7 +977,16 @@ class AutoEntityFilling:
                 self._prompt_turn = True
 
         # Finish slot-filling and return to handler
-        return self._end_slot_fill(request, responder)
+        return self._end_slot_fill(request, responder, self._app.async_mode)
+
+    async def call_async(self, request, responder):
+        """The slot-filling call for asynchronous apps
+
+        Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
+        """
+        self(request, responder)
 
 
 class DialogueResponder:
