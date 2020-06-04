@@ -9,7 +9,7 @@ from .dialogue import DialogueResponder
 logger = logging.getLogger(__name__)
 
 
-RESPONSE_FIELDS = ["frame", "directives"]
+RESPONSE_FIELDS = ["frame", "directives", "params"]
 
 
 class CustomActionException(Exception):
@@ -44,7 +44,7 @@ class CustomAction:
             "action": self._name,
         }
 
-    def invoke(self, request, responder):
+    def invoke(self, request, responder, async_mode=False):
         """Invoke the custom action with Request and Responder and return True if the action is
         executed successfully, False otherwise. Upon successful execution, we update the Frame
         and Directives of the Responder object.
@@ -52,6 +52,7 @@ class CustomAction:
         Args:
             request (Request)
             responder (DialogueResponder)
+            async_mode (bool)
 
         Returns:
             (bool)
@@ -64,9 +65,13 @@ class CustomAction:
         json_data = self.get_json_payload(request, responder)
 
         try:
-            status_code, result_json = self.post(json_data)
+            if async_mode:
+                # returning the coroutine to be awaited elsewhere
+                return self._process_async(json_data, responder)
+            else:
+                return self._process(json_data, responder)
 
-            return self._process_response(status_code, result_json, responder)
+            return self._process_post_response(status_code, result_json, responder)
         except ConnectionError:
             logger.error(
                 "Connection error trying to reach custom action server %s.", self.url
@@ -85,24 +90,17 @@ class CustomAction:
         Returns:
             (bool)
         """
-        if not self.url:
-            raise CustomActionException(
-                "No URL is given for custom action {}.".format(self._name)
-            )
+        return self.invoke(request, responder, async_mode=True)
 
-        json_data = self.get_json_payload(request, responder)
+    def _process(self, json_data, responder):
+        status_code, result_json = self.post(json_data)
+        return self._process_post_response(status_code, result_json, responder)
 
-        try:
-            status_code, result_json = await self.post_async(json_data)
+    async def _process_async(self, json_data, responder):
+        status_code, result_json = await self.post_async(json_data)
+        return self._process_post_response(status_code, result_json, responder)
 
-            return self._process_response(status_code, result_json, responder)
-        except ConnectionError:
-            logger.error(
-                "Connection error trying to reach custom action server %s.", self.url
-            )
-            return False
-
-    def _process_response(self, status_code, result_json, responder):
+    def _process_post_response(self, status_code, result_json, responder):
         if status_code == 200:
             for field in RESPONSE_FIELDS:
                 if field not in result_json:
@@ -135,10 +133,9 @@ class CustomAction:
 
     async def post_async(self, json_data):
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.url, json=json_data) as response:
+            async with await session.post(self.url, json=json_data) as response:
                 if response.status == 200:
-                    json_response = await response.json()
-                    return 200, json_response
+                    return 200, await response.json()
                 else:
                     return response.status, {}
 
