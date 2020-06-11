@@ -184,25 +184,16 @@ class Application:
                 "`action` or `actions` must be present in arguments."
             )
 
-        if action:
-            self.add_custom_action(
-                action,
-                asynch=kwargs.pop("asynch", False),
-                overwrite=kwargs.pop("overwrite", False),
-                config=kwargs.pop("config", None),
-                **kwargs
-            )
-        else:
-            self.add_custom_action_sequence(
-                actions,
-                asynch=kwargs.pop("asynch", False),
-                overwrite=kwargs.pop("overwrite", False),
-                config=kwargs.pop("config", None),
-                **kwargs
-            )
+        self.add_custom_action_sequence(
+            [action] if action else actions,
+            async_mode=kwargs.pop("async_mode", False),
+            overwrite=kwargs.pop("overwrite", False),
+            config=kwargs.pop("config", None),
+            **kwargs
+        )
 
     def add_custom_action(
-        self, action, asynch=False, overwrite=False, config=None, **kwargs
+        self, action, async_mode=False, overwrite=False, config=None, **kwargs
     ):
         """Adds a custom action handler for the dialogue manager.
 
@@ -211,7 +202,7 @@ class Application:
 
         Args:
             action (str): The name of the custom action
-            asynch (bool): Whether we should invoke this custom action asynchronously
+            async_mode (bool): Whether we should invoke this custom action asynchronously
             overwrite (bool): Whether we should overwrite the Responder with fields from the
                 response, otherwise we will extend the fields (frame, directives) accordingly.
             config (dict): The custom action config, if different from the application's.
@@ -225,13 +216,13 @@ class Application:
 
         custom_action = CustomAction(action, config, overwrite=overwrite)
         state_name = kwargs.pop("name", "custom_action_{}".format(action))
-        if asynch:
+        if async_mode:
             self.add_dialogue_rule(state_name, custom_action.invoke_async, **kwargs)
         else:
             self.add_dialogue_rule(state_name, custom_action.invoke, **kwargs)
 
     def add_custom_action_sequence(
-        self, actions, asynch=False, overwrite=False, config=None, **kwargs
+        self, actions, async_mode=False, overwrite=False, config=None, **kwargs
     ):
         """Adds a custom action sequence handler for the dialogue manager.
 
@@ -240,7 +231,7 @@ class Application:
 
         Args:
             actions (list): A list of custom actions
-            asynch (bool): Whether we should invoke this custom action asynchronously
+            async_mode (bool): Whether we should invoke this custom action asynchronously
             overwrite (bool): Whether we should overwrite the Responder with fields from the
                 response, otherwise we will extend the fields (frame, directives) accordingly.
             config (dict): The custom action config, if different from the application's.
@@ -254,7 +245,7 @@ class Application:
 
         action_seq = CustomActionSequence(actions, config, overwrite=overwrite)
         state_name = kwargs.pop("name", "custom_actions_{}".format(actions))
-        if asynch:
+        if async_mode:
             self.add_dialogue_rule(state_name, action_seq.invoke_async, **kwargs)
         else:
             self.add_dialogue_rule(state_name, action_seq.invoke, **kwargs)

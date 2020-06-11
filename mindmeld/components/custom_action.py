@@ -4,12 +4,13 @@ import aiohttp
 import requests
 
 from .dialogue import DialogueResponder
+from .request import Params
 
 
 logger = logging.getLogger(__name__)
 
 
-RESPONSE_FIELDS = ["frame", "directives", "params"]
+RESPONSE_FIELDS = ["frame", "directives", "params", "slots"]
 
 
 class CustomActionException(Exception):
@@ -26,17 +27,12 @@ class CustomAction:
         self._name = name
         self._config = config or {}
         self.url = self._config.get("url")
+        self._cert = self._config.get("cert")
+        self._key = self._config.get("key")
         self.overwrite = overwrite
 
     def get_json_payload(self, request, responder):
-        request_json = {
-            "text": request.text,
-            "domain": request.domain,
-            "intent": request.intent,
-            "context": dict(request.context),
-            "params": request.params.to_dict(),
-            "frame": dict(request.frame),
-        }
+        request_json = request.to_dict()
         responder_json = DialogueResponder.to_json(responder)
         return {
             "request": request_json,
@@ -110,9 +106,12 @@ class CustomAction:
             if self.overwrite:
                 responder.frame = result_json.get("frame", {})
                 responder.directives = result_json.get("directives", [])
+                responder.slots = result_json.get("slots", {})
             else:
                 responder.frame.update(result_json.get("frame", {}))
                 responder.directives.extend(result_json.get("directives", []))
+                responder.slots.update(result_json.get("slots", {}))
+            responder.params = Params(**result_json.get("params", {}))
             return True
         else:
             logger.error(
@@ -123,7 +122,14 @@ class CustomAction:
             return False
 
     def post(self, json_data):
-        result = requests.post(url=self.url, json=json_data)
+        if self._cert and self._key:
+            result = requests.post(
+                url=self.url, json=json_data, cert=(self._cert, self._key)
+            )
+        elif self._cert:
+            result = requests.post(url=self.url, json=json_data, cert=self._cert)
+        else:
+            result = requests.post(url=self.url, json=json_data)
         if result.status_code == 200:
             return 200, result.json()
         else:
@@ -178,12 +184,10 @@ class CustomActionSequence:
 
 
 def invoke_custom_action(name, config, request, responder, overwrite=False):
-    return CustomAction(name, config=config, overwrite=overwrite).invoke(
-        request, responder
-    )
+    return CustomAction(name, config, overwrite=overwrite).invoke(request, responder)
 
 
 async def invoke_custom_action_async(name, config, request, responder, overwrite=False):
-    return await CustomAction(name, config=config, overwrite=overwrite).invoke_async(
+    return await CustomAction(name, config, overwrite=overwrite).invoke_async(
         request, responder
     )
