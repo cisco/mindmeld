@@ -933,7 +933,7 @@ class AutoEntityFilling:
                 **processed_query,
             )
 
-        self._app.app_manager.dialogue_manager.apply_handler(request, responder)
+            self._app.app_manager.dialogue_manager.apply_handler(request, responder)
 
     def __call__(self, request, responder):
         """
