@@ -17,13 +17,14 @@ jobs:
       matrix:
         python-version: [3.5, 3.6]
         mm-extras: ["true", "false"]
+        es_version: [5.6.16, 6.8.10, 7.7.1]
 
     steps:
     - uses: actions/checkout@v2
   
     - uses: nyaruka/elasticsearch-action@v1
       with:
-        elastic version: '6.8.5'
+        elastic version: ${{ matrix.es_version }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1

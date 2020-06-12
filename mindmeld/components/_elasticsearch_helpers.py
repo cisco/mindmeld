@@ -76,8 +76,9 @@ def is_es_version_7(es_client):
 
 def resolve_es_config_for_version(config, es_client):
     if not is_es_version_7(es_client):
-        mappings = config.pop("mappings")
-        config["mappings"] = {DOC_TYPE: mappings}
+        if DOC_TYPE not in config.get("mappings", {}):
+            mappings = config.pop("mappings")
+            config["mappings"] = {DOC_TYPE: mappings}
     return config
 
 
