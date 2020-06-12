@@ -69,6 +69,50 @@ def food_ordering_answerer(food_ordering_app_path, es_client):
     return qa
 
 
+@pytest.mark.extras
+@pytest.fixture
+def food_ordering_with_bert(food_ordering_app_path, es_client):
+    bert_qa_config = {
+        "model_type": "embedder",
+        "model_settings": {
+            "embedder_type": "bert",
+            "embedding_fields": {"menu_items_bert": ["name"]},
+        },
+    }
+    QuestionAnswerer.load_kb(
+        app_namespace="food_ordering",
+        index_name="menu_items_bert",
+        data_file=DISH_DATA_FILE_PATH,
+        config=bert_qa_config,
+    )
+    es_client.indices.flush(index="_all")
+
+    qa = QuestionAnswerer(food_ordering_app_path, config=bert_qa_config)
+    return qa
+
+
+@pytest.mark.extras
+@pytest.fixture
+def food_ordering_with_glove(food_ordering_app_path, es_client):
+    glove_qa_config = {
+        "model_type": "embedder",
+        "model_settings": {
+            "embedder_type": "glove",
+            "embedding_fields": {"menu_items_glove": ["name"]},
+        },
+    }
+    QuestionAnswerer.load_kb(
+        app_namespace="food_ordering",
+        index_name="menu_items_glove",
+        data_file=DISH_DATA_FILE_PATH,
+        config=glove_qa_config,
+    )
+    es_client.indices.flush(index="_all")
+
+    qa = QuestionAnswerer(food_ordering_app_path, config=glove_qa_config)
+    return qa
+
+
 def test_basic_search(answerer):
     """Test basic search."""
 
@@ -229,3 +273,56 @@ def test_advanced_search_validation(answerer):
     with pytest.raises(ValueError):
         s = answerer.build_search(index="store_name")
         s.sort(field="location", sort_type="distance")
+
+
+@pytest.mark.extras
+@pytest.mark.bert
+def test_embedder_search_bert(food_ordering_with_bert):
+    BERT_EMBEDDING_LEN = 768
+    res = food_ordering_with_bert.get(
+        index="menu_items_bert", query_type="embedder", name="pasta with tomato sauce"
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
+
+    res = food_ordering_with_bert.get(
+        index="menu_items_bert",
+        query_type="embedder_keyword",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
+
+    res = food_ordering_with_bert.get(
+        index="menu_items_bert",
+        query_type="embedder_text",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
+
+
+@pytest.mark.extras
+def test_embedder_search_glove(food_ordering_with_glove):
+    GLOVE_EMBEDDING_LEN = 300
+    res = food_ordering_with_glove.get(
+        index="menu_items_glove", query_type="embedder", name="pasta with tomato sauce"
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN
+
+    res = food_ordering_with_glove.get(
+        index="menu_items_glove",
+        query_type="embedder_keyword",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN
+
+    res = food_ordering_with_glove.get(
+        index="menu_items_glove",
+        query_type="embedder_text",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0
+    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN

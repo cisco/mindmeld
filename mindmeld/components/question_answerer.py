@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 DEFAULT_QUERY_TYPE = "keyword"
-ALL_QUERY_TYPES = ["keyword", "text", "embedder"]
+ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
 EMBEDDING_FIELD_STRING = "_embedding"
 
 
@@ -57,7 +57,7 @@ class QuestionAnswerer:
     necessary functionality for interacting with the application's knowledge base.
     """
 
-    def __init__(self, app_path, resource_loader=None, es_host=None):
+    def __init__(self, app_path, resource_loader=None, es_host=None, config=None):
         """Initializes a question answerer
 
         Args:
@@ -72,7 +72,12 @@ class QuestionAnswerer:
         self.__es_client = None
         self._app_namespace = get_app_namespace(app_path)
         self._es_field_info = {}
-        self._qa_config = get_classifier_config("question_answering", app_path=app_path)
+        if config:
+            self._qa_config = config
+        else:
+            self._qa_config = get_classifier_config(
+                "question_answering", app_path=app_path
+            )
 
         self._embedder_model = None
         if self._qa_config.get("model_type") == "embedder":
@@ -150,9 +155,12 @@ class QuestionAnswerer:
                 sort_clause["type"] = value
             elif key == "_sort_location":
                 sort_clause["location"] = value
-            elif EMBEDDING_FIELD_STRING in key and self._embedder_model:
+            elif "embedder" in query_type and self._embedder_model:
+                if "text" in query_type or "keyword" in query_type:
+                    query_clauses.append({key: value})
                 embedded_value = self._embedder_model.get_encodings([value])[0]
-                query_clauses.append({key: embedded_value})
+                embedded_key = key + EMBEDDING_FIELD_STRING
+                query_clauses.append({embedded_key: embedded_value})
             else:
                 query_clauses.append({key: value})
                 logger.debug("Added query clause: field= %s value= %s.", key, value)
@@ -257,6 +265,9 @@ class QuestionAnswerer:
         """
         raise NotImplementedError
 
+    def save_embedder_model(self):
+        self._embedder_model.dump()
+
     @classmethod
     def load_kb(
         cls,
@@ -268,6 +279,7 @@ class QuestionAnswerer:
         connect_timeout=2,
         clean=False,
         app_path=None,
+        config=None,
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -288,16 +300,22 @@ class QuestionAnswerer:
             clean (bool): Set to true if you want to delete an existing index
                 and reindex it
             app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
         """
         embedder_model = None
         embedding_fields = []
-        if not app_path:
+        if not app_path and not config:
             logger.warning(
-                "You must provide the application path to upload embeddings as specified"
-                " in the app config."
+                "You must provide either the application path to upload embeddings as specified"
+                " in the app config or directly provide the QA config."
             )
         else:
-            qa_config = get_classifier_config("question_answering", app_path=app_path)
+            if config:
+                qa_config = config
+            else:
+                qa_config = get_classifier_config(
+                    "question_answering", app_path=app_path
+                )
             embedder_model = create_embedder_model(app_path, qa_config)
             embedding_fields = (
                 qa_config.get("model_settings", {})
@@ -891,7 +909,24 @@ class Search:
             # "<field name>$whitelist" if available.
             functions = []
 
-            if self.query_type == "text":
+            if "embedder" in self.query_type and self.field_info.is_vector_field():
+                clause = None
+                functions = [
+                    {
+                        "script_score": {
+                            "script": {
+                                "source": "cosineSimilarity(params.field_embedding,"
+                                " doc[params.matching_field]) + 1.0",
+                                "params": {
+                                    "field_embedding": self.value.tolist(),
+                                    "matching_field": self.field,
+                                },
+                            }
+                        },
+                        "weight": 10,
+                    }
+                ]
+            elif "text" in self.query_type:
                 clause = {
                     "bool": {
                         "should": [
@@ -905,7 +940,7 @@ class Search:
                         ]
                     }
                 }
-            elif self.query_type == "keyword":
+            elif "keyword" in self.query_type:
                 clause = {
                     "bool": {
                         "should": [
@@ -924,39 +959,6 @@ class Search:
                         ]
                     }
                 }
-            elif self.query_type == "embedder":
-                if self.field_info.is_vector_field():
-                    clause = None
-                    functions = [
-                        {
-                            "script_score": {
-                                "script": {
-                                    "source": "cosineSimilarity(params.field_embedding,"
-                                    " doc[params.matching_field]) + 1.0",
-                                    "params": {
-                                        "field_embedding": self.value.tolist(),
-                                        "matching_field": self.field,
-                                    },
-                                }
-                            },
-                            "weight": 10,
-                        }
-                    ]
-                else:
-                    clause = {
-                        "bool": {
-                            "should": [
-                                {"match": {self.field: {"query": self.value}}},
-                                {
-                                    "match": {
-                                        self.field
-                                        + ".processed_text": {"query": self.value}
-                                    }
-                                },
-                            ]
-                        }
-                    }
-
             else:
                 raise Exception("Unknown query type.")
 

@@ -42,12 +42,12 @@ class Embedder(ABC):
     Base class for embedder model
     """
 
-    def __init__(self, app_path, embedder_type, **kwargs):
+    def __init__(self, app_path, **kwargs):
         """Initializes an embedder.
         """
         self.model_name = kwargs.get("model_name", "default")
         self.cache_path = path.get_embedder_cache_file_path(
-            app_path, embedder_type, self.model_name
+            app_path, kwargs.get("embedder_type", "default"), self.model_name
         )
 
         folder = os.path.dirname(self.cache_path)

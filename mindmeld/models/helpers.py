@@ -109,12 +109,12 @@ def create_embedder_model(app_path, config):
         # No embedding fields specified in the app config, continuing without embedder model.
         return None
     try:
-        embedder_type = embedder_config.pop("embedder_type")
+        embedder_type = embedder_config["embedder_type"]
     except KeyError:
         raise ValueError("Invalid model configuration: No provided embedder type.")
 
     try:
-        return EMBEDDER_MAP[embedder_type](app_path, embedder_type, **embedder_config)
+        return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
     except KeyError:
         msg = "Invalid model configuration: Unknown embedder type {!r}"
         raise ValueError(msg.format(embedder_type))
