@@ -805,11 +805,11 @@ class AutoEntityFilling:
             if entity_type in DEFAULT_SYS_ENTITIES:
                 # system entity validation - checks for presence of required system entity
 
-                entity_text = (
-                    str(request.entities[0]["value"][0]["value"])
-                    if request.entities
-                    else text
-                )
+                try:
+                    entity_text = str(request.entities[0]["value"][0]["value"])
+                except (KeyError, IndexError):
+                    entity_text = text
+
                 query = self._extract_query_features(entity_text)
 
                 resources = {}
@@ -822,12 +822,11 @@ class AutoEntityFilling:
             else:
                 # gazetteer validation
 
-                if request.entities:
+                try:
                     query = self._extract_query_features(
                         request.entities[0]["value"][0]["cname"]
                     )
-
-                if not query:
+                except (KeyError, IndexError):
                     query = self._extract_query_features(text)
 
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(
@@ -890,6 +889,7 @@ class AutoEntityFilling:
         # Returns filled entity objects as request.entities
         # We pass in the previous turn's responder's params to the current request
         request = self._app.app_manager.request_class(
+            text=request.text,
             entities=[slot.value for slot in self._local_form],
             context=request.context or {},
             history=request.history or [],
@@ -914,7 +914,7 @@ class AutoEntityFilling:
         self._retry_attempts = 0
         self._prompt_turn = False
 
-    def _retry_logic(self, responder, nlr):
+    def _retry_logic(self, request, responder, nlr):
         if self._retry_attempts < self._max_retries:
             self._retry_attempts += 1
             responder.reply(nlr)
@@ -922,7 +922,18 @@ class AutoEntityFilling:
             # max attempts exceeded, reset counter, exit auto_fill.
             self._retry_attempts = 0
             self._exit_flow(responder)
-            self._app.app_manager.dialogue_manager.reprocess()
+
+            processed_query = self._app.app_manager.nlp.process(query_text=request.text)
+
+            request = self._app.app_manager.request_class(
+                context=request.context or {},
+                history=request.history or [],
+                frame=responder.frame or {},
+                params=FrozenParams(**DialogueResponder.to_json(responder.params)),
+                **processed_query,
+            )
+
+        self._app.app_manager.dialogue_manager.apply_handler(request, responder)
 
     def __call__(self, request, responder):
         """
@@ -963,7 +974,7 @@ class AutoEntityFilling:
 
                 if not _is_valid:
                     # retry logic
-                    self._retry_logic(responder, slot.retry_response)
+                    self._retry_logic(request, responder, slot.retry_response)
                     return
 
                 slot.value = Entity(

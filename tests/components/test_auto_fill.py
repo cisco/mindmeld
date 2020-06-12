@@ -61,6 +61,24 @@ def test_auto_fill_exit_flow(kwik_e_mart_app, qa_kwik_e_mart):
 
 
 @pytest.mark.conversation
+def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
+    """Tests slot-fill switch flow logic."""
+    convo = Conversation(app=kwik_e_mart_app)
+    directives = convo.process("What's the store phone number?").directives
+    assert_target_dialogue_state(convo, "send_store_phone")
+    assert_reply(directives, "Which store would you like to know about?")
+
+    directives = convo.process("goodbye").directives
+    assert_reply(
+        directives,
+        "Sorry, I did not get you. " "Which store would you like to know about?",
+    )
+
+    directives = convo.process("goodbye").directives
+    assert_reply(directives, ["Bye", "Goodbye", "Have a nice day."])
+
+
+@pytest.mark.conversation
 @pytest.mark.asyncio
 async def test_auto_exit_flow_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests auto fill for async apps."""
