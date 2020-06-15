@@ -1,7 +1,7 @@
 Banking Assistant
 =================
 
-In this step-by-step walkthrough, you'll build a conversational application that allows users to complete common banking tasks that include transferring money and paying bills, using the MindMeld blueprint for this purpose.
+In this step-by-step walkthrough, you will use a MindMeld blueprint to build a conversational application that allows users to complete common banking tasks that include transferring money and paying bills.
 
 .. note::
 
@@ -11,14 +11,14 @@ In this step-by-step walkthrough, you'll build a conversational application that
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on day to day basis. In a production application the frontend would likely handle the secure user authenication and pass a token to the MindMeld server, which would allow the application to make calls to a banks REST API.
+Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on day to day basis. In a production application, the frontend would likely handle the secure user authentication and pass a token to the MindMeld server, which would allow the application to make calls to a bank's REST API.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational flows for the banking assistant can be highly complex, depending on the desired app functionality and the amount of user guidance required at each step. Enumerating and finalizing all anticipated user interactions requires multiple iterations. 
+The conversational flows for the banking assistant can be highly complex, depending on the desired application functionality and the amount of user guidance required at each step. Anticipating all user interactions requires multiple iterations. 
 
-When using the application, we have given the option to choose 3 sample users. You can provide the specified user you would like to interact as a parameter in the request context and if a user is not specified a random user from the 3 will be chosen. 
+When using the application, we have given the option to choose three sample users. You can provide the specified user you would like to interact as a parameter in the request context and if a user is not specified a random user from the sample users will be chosen. 
 
 
 Sample User Usernames: ``splashbro30``, ``larry_l24``, ``johndoe123``
@@ -36,12 +36,12 @@ Here are some examples of scripted dialogue interactions for conversational flow
 
 .. admonition:: Exercise
 
-   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: trying to transfer money you don't have, reporting a fraudulent charge on your credit card, asking for your routing number, and so on. 
+   Pick a convenient textual or graphical representation. Try to design as many flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: trying to transfer the money you do not have, reporting a fraudulent charge on your credit card, asking for your routing number, and so on. 
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The banking assistant is organized into five domains: ``Greeting``, ``Accounts & Credit Cards``, ``FAQ``, and ``Unsupported``. The main domain, ``accounts_creditcards``, encompasses all of the functionality required to perform tasks that require personal user banking information. The ``accounts_creditcards`` domain supports the following intents:
+The banking assistant is organized into four domains: ``Greeting``, ``Accounts & Credit Cards``, ``FAQ``, and ``Unsupported``. The main domain, ``accounts_creditcards``, encompasses all of the functionality required to perform tasks that require personal user banking information. The ``accounts_creditcards`` domain supports the following intents:
 
    - ``transfer_balances`` — User wants to transfer money from one account to another
    - ``check_balances`` — User wants the current balance for a particular account
@@ -183,7 +183,7 @@ We can illustrate this with an implementation of the ``setup_autopay`` handler:
 
 This code is a simpler example of how to incorporate a third party API, the ``_get`` and ``_put`` methods are used here to mimic an API calls to get information and push an update. 
 
-Here we illustrate a simplistic version of the ``pay_creditcard`` handler, which is more complex than the prior handler and uses custom and system entities:
+Here we will illustrate a simple version of the ``pay_creditcard`` handler, which is more complex than the prior handler and uses custom and system entities:
 
 .. code:: python
 
@@ -207,7 +207,7 @@ Here we illustrate a simplistic version of the ``pay_creditcard`` handler, which
 		    _put('checking', get('checking') - responder.slots['min'])
 		#if it is balance handle it similar to minimum but with the amount being the total credit debt
                 else:
-                    responder.reply(['Ok we have scheduled your credit card payment for your {payment} of ${total_balance}'])
+                    responder.reply(['Sure, we have scheduled your credit card payment for your {payment} of ${total_balance}.'])
                     _put('credit', 0)
 		    _put('checking', get('checking') - responder.slots['total_balance'])
 	    #handle the system entity of the exact dollar amount they want to pay off
@@ -226,9 +226,9 @@ For a more realistic implementation of ``pay_creditcard`` that deals with varied
 5. Slot Filling
 ^^^^^^^^^^^^^^^
 
-Slot filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent. More detailed information on slot filling is below along with an example from the banking assistant. 
+Slot/entity filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent. More detailed information on slot filling is below along with an example from the banking assistant. 
 
-Removes the need to provide @app.handle if @app.auto_fill is being called.
+The ``@app.auto_fill`` decorator enables the slot filling logic for the handler and sees it out to completion before handing over control to the handler.
 The handler functionality will be called by the slot filling class once that process is completed.
 
 Form is a dictionary containing the following entries:
@@ -243,7 +243,7 @@ FormEntity is a class that allows creation of entity objects for slot filling an
   - ``entity``  - (str, required): Entity name
   - ``role`` - (str, optional): The role of the entity
   - ``responses`` - (list or str, optional): message for prompting the user for missing entities
-  - ``retry_response`` - (str, optional): message for re-prompting users. If not provided, defaults to responses.
+  - ``retry_response`` - (list or str, optional): message for re-prompting users. If not provided, defaults to responses.
   - ``value`` - (str, optional): The resolved value of the entity
   - ``default_eval`` - (bool, optional): Use system validation (default: True)
   - ``hints`` - (list, optional): Developer defined list of keywords to verify theuser input against
@@ -271,9 +271,9 @@ A simple example of slot filling logic is shown below:
 	'max_retries' = 1
     }
 
-    #the app auto fill indicates it is a dialogue state which requires a form and uses slot filling logic	
+    #the @app.auto_fill decorator indicates it is a dialogue state handler that requires a form and uses the slot filling logic	
     @app.auto_fill(intent='check_balances', form=balance_form)
-    #the function will work as if the required entity has been provided 
+    #Control is passed on to this dialogue state handler one the slot-filling process is completed and all required entities in this form have been obtained.
     def check_balances_handler(request, responder):
         if not user_data: 
             _pull_data(request)
@@ -290,7 +290,7 @@ A simple example of slot filling logic is shown below:
 ^^^^^^^^^^^^^^^^^
 
 Since the banking assistant will require personal information we have decided to not include a knowledge base to mimic how this data may be received from an
-external api. Most likely the frontend would handle the user authenication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint we demonstrate how this can be done by simply passing the user_name in the context and using it to retrieve information from a simple database. For a production app, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at bank organizations.
+external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at bank organizations.
 
 7. Training Data
 ^^^^^^^^^^^^^^^^
@@ -327,7 +327,7 @@ The ``domains`` directory contains the training data for intent classification a
 
    - Study the best practices around training data generation and annotation for conversational apps in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide. Following those principles, create additional labeled data for all the intents in this blueprint. Read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the User Guide. Then apply what you have learned in evaluating your app, using your newly-created labeled data as held-out validation data.
 
-   - Complete the following exercise if you are extending the blueprint to build your own banking assistant. For app-agnostic, generic intents like ``greet``, ``exit``, and ``help``, start by simply reusing the blueprint data to train NLP models for your banking assistant. For ``pay_creditcard`` and any other app-specific intents, gather new training data tailored to the relevant entities (credit card, balance, etc.). Apply the approach you learned in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
+   - Complete the following exercise if you are extending the blueprint to build your own banking assistant. For common intents like ``greet``, ``exit``, and ``help``, start by simply reusing the blueprint data to train NLP models for your banking assistant. For ``pay_creditcard`` and any other app-specific intents, gather new training data tailored to the relevant entities (credit card, balance, etc.). Apply the approach you learned in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
 
 8. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -365,7 +365,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. tip::
 
-  During active development, it's helpful to increase the :doc:`MindMeld logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+  During active development, it is helpful to increase the :doc:`MindMeld logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that the logging level has been set to verbose.
 
 To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
 
@@ -516,9 +516,9 @@ For instance:
 
    ['Ok we have scheduled your credit card payment for your balance of $5000']
 
-The :meth:`say()` method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested to pay off our credit debt, in a single query. The app responded, as expected, with the amount that will be paid off.
+The :meth:`say()` method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the application's Dialogue Manager. In the above example, we requested to pay off our credit debt, in a single query. The app responded, as expected, with the amount that will be paid off.
 
-You can also try out multi-turn dialogues(transfer balances):
+You can also try out multi-turn dialogues (transfer balances):
 
 .. code:: python
 
