@@ -35,7 +35,7 @@ def answerer(kwik_e_mart_app_path, es_client):
         index_name="store_name",
         data_file=STORE_DATA_FILE_PATH,
     )
-    es_client.indices.flush(index="_all")
+    es_client.indices.flush(index="_all", force=True)
 
     qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
@@ -48,7 +48,7 @@ def relative_answerer(kwik_e_mart_app_path, es_client):
         index_name="store_name",
         data_file=STORE_DATA_FILE_PATH,
     )
-    es_client.indices.flush(index="_all")
+    es_client.indices.flush(index="_all", force=True)
     old_cwd = os.getcwd()
     os.chdir(kwik_e_mart_app_path)
     qa = QuestionAnswerer(".")
@@ -63,7 +63,7 @@ def food_ordering_answerer(food_ordering_app_path, es_client):
         index_name="menu_items",
         data_file=DISH_DATA_FILE_PATH,
     )
-    es_client.indices.flush(index="_all")
+    es_client.indices.flush(index="_all", force=True)
 
     qa = QuestionAnswerer(food_ordering_app_path)
     return qa
@@ -85,7 +85,7 @@ def food_ordering_with_bert(food_ordering_app_path, es_client):
         data_file=DISH_DATA_FILE_PATH,
         config=bert_qa_config,
     )
-    es_client.indices.flush(index="_all")
+    es_client.indices.flush(index="_all", force=True)
 
     qa = QuestionAnswerer(food_ordering_app_path, config=bert_qa_config)
     return qa
@@ -107,7 +107,7 @@ def food_ordering_with_glove(food_ordering_app_path, es_client):
         data_file=DISH_DATA_FILE_PATH,
         config=glove_qa_config,
     )
-    es_client.indices.flush(index="_all")
+    es_client.indices.flush(index="_all", force=True)
 
     qa = QuestionAnswerer(food_ordering_app_path, config=glove_qa_config)
     return qa
