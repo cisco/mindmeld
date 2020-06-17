@@ -50,17 +50,15 @@ test_data_8 = [
 
 @pytest.mark.parametrize("example,role_type", test_data_8)
 def test_nlp_process_for_roles(home_assistant_nlp, example, role_type):
-    # result = home_assistant_nlp.process(example)
-    #
-    # assert result["entities"][0]["role"] == role_type[0]
-    # assert result["entities"][1]["role"] == role_type[1]
+    result = home_assistant_nlp.process(example)
+
+    assert result["entities"][0]["role"] == role_type[0]
+    assert result["entities"][1]["role"] == role_type[1]
 
     result = home_assistant_nlp.process(example, verbose=True)
 
     assert result["entities"][0]["role"] == role_type[0]
     assert result["entities"][1]["role"] == role_type[1]
-    print(result["confidences"]["roles"][0])
-    print(result["confidences"]["roles"][1])
 
 
 def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_app_path):
