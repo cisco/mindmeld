@@ -498,6 +498,7 @@ The application configuration file, ``config.py``, at the top level of the home 
            'type': 'k-fold',
            'k': 5,
            'grid': {
+               'solver': ['liblinear'],
                'fit_intercept': [True, False],
                'C': [0.01, 1, 10, 100],
                'class_bias': [0.7, 0.3, 0]

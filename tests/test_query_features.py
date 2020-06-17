@@ -118,7 +118,7 @@ def test_domain_query_features(
     domain_classifier_config_all_features = {
         "model_type": "text",
         "model_settings": {"classifier_type": "logreg"},
-        "params": {"C": 10,},
+        "params": {"solver": "liblinear", "C": 10},
         "features": {
             "char-ngrams": {"lengths": [1, 2], "thresholds": [0]},
             "bag-of-words": {"lengths": [1, 2]},
@@ -229,7 +229,7 @@ def test_entity_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2"},
+        "params": {"solver": "liblinear", "C": 10, "penalty": "l2"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},
@@ -406,7 +406,7 @@ def test_entity_gaz_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2"},
+        "params": {"solver": "liblinear", "C": 10, "penalty": "l2"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},

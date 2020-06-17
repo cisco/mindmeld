@@ -42,11 +42,11 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {"classifier_type": "logreg", },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
-        "grid": {"fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"solver": ["liblinear"], "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {"bag-of-words": {"lengths": [1]}, "freq": {"bins": 5}, "in-gaz": {}},
 }
@@ -58,6 +58,7 @@ DEFAULT_INTENT_CLASSIFIER_CONFIG = {
         "type": "k-fold",
         "k": 10,
         "grid": {
+            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [0.01, 1, 100, 10000, 1000000],
             "class_bias": [1, 0.7, 0.3, 0],
@@ -84,6 +85,7 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
         "k": 5,
         "scoring": "accuracy",
         "grid": {
+            "solver": ["liblinear"],
             "penalty": ["l1", "l2"],
             "C": [0.01, 1, 100, 10000, 1000000, 100000000],
         },
@@ -236,7 +238,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 100, "penalty": "l1"},
+    "params": {"solver": "liblinear", "C": 100, "penalty": "l1"},
     "features": {
         "bag-of-words-before": {
             "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
@@ -406,7 +408,6 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
 }
 
-
 # Elasticsearch mapping to define knowledge base index specific configuration:
 # - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
 # - location field
@@ -566,8 +567,8 @@ def get_system_entity_url_config(app_path):
 
     return (
         get_nlp_config(app_path)
-        .get("system_entity_recognizer", {})
-        .get("url", DEFAULT_DUCKLING_URL)
+            .get("system_entity_recognizer", {})
+            .get("url", DEFAULT_DUCKLING_URL)
     )
 
 

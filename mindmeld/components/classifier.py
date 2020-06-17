@@ -19,7 +19,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 
-from sklearn.externals import joblib
+import joblib
 
 from .. import markup
 from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX

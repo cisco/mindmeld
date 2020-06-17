@@ -16,7 +16,7 @@ import os
 import re
 
 import numpy as np
-from sklearn.externals import joblib
+import joblib
 from sklearn.preprocessing import LabelBinarizer
 import tensorflow as tf
 

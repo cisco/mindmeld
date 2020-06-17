@@ -16,7 +16,7 @@ import logging
 import os
 import random
 
-from sklearn.externals import joblib
+import joblib
 
 from ..exceptions import MindMeldError
 from .helpers import (

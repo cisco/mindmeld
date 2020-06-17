@@ -150,7 +150,8 @@ class MemmModel(Tagger):
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
-            prev_tag = self.class_encoder.inverse_transform(predicted_tag)
+            # prev_tag = self.class_encoder.inverse_transform(predicted_tag)
+            prev_tag = self.class_encoder.inverse_transform(np.asarray([predicted_tag]))[0]
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 

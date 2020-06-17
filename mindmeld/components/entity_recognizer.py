@@ -16,7 +16,7 @@ This module contains the entity recognizer component of the MindMeld natural lan
 """
 import logging
 
-from sklearn.externals import joblib
+import joblib
 
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Entity, Query

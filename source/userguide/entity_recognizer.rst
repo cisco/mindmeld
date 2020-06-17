@@ -172,6 +172,7 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
      'model_type': 'tagger',
      'param_selection': {
        'grid': {
+         'solver': ['liblinear'],
          'C': [0.01, 1, 100, 10000, 1000000, 100000000],
          'penalty': ['l1', 'l2']
        },
@@ -485,6 +486,7 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'k': 5,
            'scoring': 'accuracy',
            'grid': {
+               'solver': ['liblinear'],
                'penalty': ['l1', 'l2'],
                'C': [0.01, 1, 100, 10000]
            },

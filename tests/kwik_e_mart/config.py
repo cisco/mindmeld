@@ -6,14 +6,14 @@ NLP_CONFIG = {
 
 DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {"classifier_type": "logreg", },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
-        "grid": {"fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"solver": ["liblinear"], "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {
-        "bag-of-words": {"lengths": [1],},
+        "bag-of-words": {"lengths": [1], },
         "freq": {"bins": 5},
         "in-gaz": {},
         "exact": {},
@@ -28,6 +28,7 @@ INTENT_CLASSIFIER_CONFIG = {
         "type": "k-fold",
         "k": 10,
         "grid": {
+            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [0.01, 1, 100, 10000, 1000000],
             "class_bias": [1, 0.7, 0.3, 0],
@@ -58,6 +59,7 @@ ENTITY_RECOGNIZER_CONFIG = {
         "k": 5,
         "scoring": "accuracy",
         "grid": {
+            "solver": ["liblinear"],
             "penalty": ["l1", "l2"],
             "C": [0.01, 1, 100, 10000, 1000000, 100000000],
         },
@@ -75,7 +77,6 @@ ENTITY_RECOGNIZER_CONFIG = {
     },
 }
 
-
 TEST_ENTITY_RECOGNIZER_CONFIG = {
     "model_type": "tagger",
     "label_type": "entities",
@@ -84,7 +85,7 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
-    "params": {"penalty": "l1", "C": 50},
+    "params": {"solver": "liblinear", "penalty": "l1", "C": 50},
     "features": {
         "bag-of-words-seq": {
             "ngram_lengths_to_start_positions": {

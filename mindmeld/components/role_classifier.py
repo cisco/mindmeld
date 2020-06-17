@@ -16,7 +16,7 @@ This module contains the role classifier component of the MindMeld natural langu
 """
 import logging
 
-from sklearn.externals import joblib
+import joblib
 
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Query

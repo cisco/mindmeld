@@ -11,7 +11,7 @@ Tests the generated query cache has to correct key value types.
 # pylint: disable=locally-disabled,redefined-outer-name
 import os
 
-from sklearn.externals import joblib
+import joblib
 
 from mindmeld.core import ProcessedQuery
 

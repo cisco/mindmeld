@@ -5,6 +5,7 @@ INTENT_CLASSIFIER_CONFIG = {
         "type": "k-fold",
         "k": 5,
         "grid": {
+            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [1, 20, 300],
             "class_bias": [1, 0],
@@ -31,7 +32,7 @@ def get_entity_recognizer_config(domain, intent):
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"penalty": "l2", "C": 100},
+        "params": {"solver": "liblinear", "penalty": "l2", "C": 100},
         "features": {
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {
@@ -53,7 +54,7 @@ ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
-    "params": {"error": "intent", "penalty": "l2", "C": 100},
+    "params": {"solver": "liblinear", "error": "intent", "penalty": "l2", "C": 100},
     "features": {
         "bag-of-words-seq": {
             "ngram_lengths_to_start_positions": {

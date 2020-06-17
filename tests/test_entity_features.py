@@ -42,7 +42,7 @@ def test_entity_features(
     role_classifier_config_all_features = {
         "model_type": "text",
         "model_settings": {"classifier_type": "logreg"},
-        "params": {"C": 100, "penalty": "l1"},
+        "params": {"solver": "liblinear", "C": 100, "penalty": "l1"},
         "features": {
             "in-gaz": {},
             "bag-of-words-before": {
