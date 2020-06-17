@@ -114,7 +114,8 @@ class TestTextModel:
                 "param_selection": {
                     "type": "k-fold",
                     "k": 10,
-                    "grid": {"solver": ["liblinear"], "C": [10, 100, 1000], "fit_intercept": [True, False]},
+                    "grid": {"solver": ["liblinear"],
+                             "C": [10, 100, 1000], "fit_intercept": [True, False]},
                 },
                 "features": {
                     "bag-of-words": {"lengths": [1]},

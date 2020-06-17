@@ -10,7 +10,8 @@ DOMAIN_CLASSIFIER_CONFIG = {
     "param_selection": {
         "type": "k-fold",
         "k": 10,
-        "grid": {"solver": ["liblinear"], "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"solver": ["liblinear"],
+                 "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {
         "bag-of-words": {"lengths": [1], },

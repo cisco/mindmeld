@@ -46,7 +46,8 @@ DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "param_selection": {
         "type": "k-fold",
         "k": 10,
-        "grid": {"solver": ["liblinear"], "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"solver": ["liblinear"],
+                 "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {"bag-of-words": {"lengths": [1]}, "freq": {"bins": 5}, "in-gaz": {}},
 }
@@ -567,8 +568,8 @@ def get_system_entity_url_config(app_path):
 
     return (
         get_nlp_config(app_path)
-            .get("system_entity_recognizer", {})
-            .get("url", DEFAULT_DUCKLING_URL)
+        .get("system_entity_recognizer", {})
+        .get("url", DEFAULT_DUCKLING_URL)
     )
 
 
