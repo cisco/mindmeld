@@ -24,8 +24,9 @@ requirements = [
     "python-dateutil~=2.6",
     "pytz",  # uses calendar versioning
     "scipy>=0.13.3,<2.0",
-    'scikit-learn>=0.23.1',
-    'joblib>=0.15.1',
+    'scikit-learn>=0.23.1; python_version >= "3.6"',
+    'scikit-learn~=0.19.2, <20.0; python_version < "3.6"',
+    'joblib>=0.14.1',
     "requests>=2.20.1,<3.0",
     "tqdm~=4.15",
     'python-crfsuite~=0.9; python_version < "3.7"',
