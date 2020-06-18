@@ -1,7 +1,7 @@
 Banking Assistant
 =================
 
-In this step-by-step walkthrough, you will use a MindMeld blueprint to build a conversational application that allows users to complete common banking tasks that include transferring money and paying bills.
+In this step-by-step walkthrough, you will build a conversational application that allows users to complete common banking tasks that include transferring money and paying bills.
 
 .. note::
 
@@ -11,17 +11,17 @@ In this step-by-step walkthrough, you will use a MindMeld blueprint to build a c
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on day to day basis. In a production application, the frontend would likely handle the secure user authentication and pass a token to the MindMeld server, which would allow the application to make calls to a bank's REST API.
+Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on a day to day basis. In a production application, the frontend would likely handle the secure user authentication and pass a token to the MindMeld server, which would allow the application to make calls to a bank's REST APIs.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational flows for the banking assistant can be highly complex, depending on the desired application functionality and the amount of user guidance required at each step. Anticipating all user interactions requires multiple iterations. 
+The conversational flows for a banking assistant can be highly complex, depending on the desired application functionality and the amount of user guidance required at each step. Anticipating all user interactions requires multiple iterations. 
 
-When using the application, we have given the option to choose three sample users. You can provide the specified user you would like to interact as a parameter in the request context and if a user is not specified a random user from the sample users will be chosen. 
+While a real production application will securely authenticate users, for this blueprint, we have given the option to choose from three sample users. You can specify the desired username as a parameter in the request context and if a user is not specified a random user from the sample users will be chosen.
 
 
-Sample User Usernames: ``splashbro30``, ``larry_l24``, ``johndoe123``
+Sample usernames: ``splashbro30``, ``larry_l24``, ``johndoe123``
 
 .. code-block:: console
 
@@ -62,7 +62,7 @@ The banking assistant defines and uses the following custom entities in the acco
 
 The banking assistant uses one system entity ``sys_amount-of-money`` (money). Some examples for annotation with system entities: "please transfer {20k|sys_amount-of-money}" and "pay {two hundred dollars|sys_amount-of-money} towards my credit bill".
 
-Queries can include more than one entity of the same type. In "transfer money from checking to savings.", for example, both "checking" and "savings" are ``account_type`` entities. Just labeling both entities with the same type does not give MindMeld enough information to understand the meaning of the query. We need to show the different *roles* that these two ``account_type`` entities play in creating meaning. One is an "origin" that the money is coming from, and the other is a "destination" where the user wants to move the money to. We annotate the example as "transfer money from {checking|account_type|origin} to {savings|account_type|dest}." This way, MindMeld can interpret each entity correctly. See :doc:`Role Classifier <../userguide/role_classifier>`.
+Queries can include more than one entity of the same type. In "transfer money from checking to savings", for example, both "checking" and "savings" are ``account_type`` entities. Simply detecting these two entities as ``account_type`` doesn't provide us with all the information we need to fully understand the user query and execute the desired action. We therefore use *roles* to further classify the ``account_type`` entities - an "origin" role that represents where the money is coming from, and a "destination" role that indicates where the money needs to be moved to. Accordingly, we annotate the example as "transfer money from {checking|account_type|origin} to {savings|account_type|dest}." This way, we can interpret each entity correctly and better understand the meaning of the full query. See :doc:`Role Classifier <../userguide/role_classifier>`.
 
 .. admonition:: Exercise
 
@@ -226,7 +226,7 @@ For a more realistic implementation of ``pay_creditcard`` that deals with varied
 5. Slot Filling
 ^^^^^^^^^^^^^^^
 
-Slot/entity filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent. More detailed information on slot filling is below along with an example from the banking assistant. 
+Slot/entity filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent.
 
 The ``@app.auto_fill`` decorator enables the slot filling logic for the handler and sees it out to completion before handing over control to the handler.
 The handler functionality will be called by the slot filling class once that process is completed.
@@ -290,7 +290,7 @@ A simple example of slot filling logic is shown below:
 ^^^^^^^^^^^^^^^^^
 
 Since the banking assistant will require personal information we have decided to not include a knowledge base to mimic how this data may be received from an
-external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at bank organizations.
+external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at financial institutions.
 
 7. Training Data
 ^^^^^^^^^^^^^^^^
@@ -496,7 +496,7 @@ Since we do not have entity groups in the banking assistant, we do not need a pa
 10. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the banking assistant has no knowledge base, no question answerer is not needed.
+The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the banking assistant has no knowledge base, question answerer is not needed.
 
 
 11. Testing and Deployment
