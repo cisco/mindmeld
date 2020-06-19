@@ -888,8 +888,11 @@ class AutoEntityFilling:
     def _end_slot_fill(self, request, responder, async_mode):
         # Returns filled entity objects as request.entities
         # We pass in the previous turn's responder's params to the current request
+
         request = self._app.app_manager.request_class(
             text=request.text,
+            domain=request.domain,
+            intent=request.intent,
             entities=[slot.value for slot in self._local_form],
             context=request.context or {},
             history=request.history or [],
@@ -923,16 +926,19 @@ class AutoEntityFilling:
             self._retry_attempts = 0
             self._exit_flow(responder)
 
+            # reprocess query to obtain intended nlp config, ignoring previous config.
             processed_query = self._app.app_manager.nlp.process(query_text=request.text)
 
+            # create new request object from the current responder object.
             request = self._app.app_manager.request_class(
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
-                params=FrozenParams(**DialogueResponder.to_json(responder.params)),
+                params=FrozenParams(**responder.params.to_dict()),
                 **processed_query,
             )
 
+            # call intended handler from reprocessed query.
             self._app.app_manager.dialogue_manager.apply_handler(request, responder)
 
     def __call__(self, request, responder):
