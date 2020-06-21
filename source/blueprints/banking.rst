@@ -3,6 +3,13 @@ Banking Assistant
 
 In this step-by-step walkthrough, you will build a conversational application that allows users to complete common banking tasks that include transferring money and paying bills.
 
+Working through this blueprint will teach you how to
+
+   - obtain missing information (entities) using a slot/entity filling form
+   - query and update external data storage with the dialogue manager
+   - pass immutable information, like a user token, from a client application to your MindMeld application server
+   - use roles in entity hierarchy
+
 .. note::
 
    Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing on with this blueprint tutorial.
@@ -223,31 +230,10 @@ Here we will illustrate a simple version of the ``pay_creditcard`` handler, whic
 For a more realistic implementation of ``pay_creditcard`` that deals with varied user flows and the full code behind all the dialogue state handlers, see the ``__init__.py`` file in the blueprint folder.
 
 
-5. Slot Filling
-^^^^^^^^^^^^^^^
+Slot Filling
+""""""""""""
 
 Slot/entity filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent.
-
-The ``@app.auto_fill`` decorator enables the slot filling logic for the handler and sees it out to completion before handing over control to the handler.
-The handler functionality will be called by the slot filling class once that process is completed.
-
-Form is a dictionary containing the following entries:
-
-  - ``entities`` - (list, required): List of FormEntity objects with each defined for one entity slot to be filled.
-  - ``max_retries`` - (int, optional, default 1): maximum number of retries allowed per entity or slot if user response is invalid.
-  - ``exit_msg`` - (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
-  - ``exit_keys`` - (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
-
-FormEntity is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
-
-  - ``entity``  - (str, required): Entity name
-  - ``role`` - (str, optional): The role of the entity
-  - ``responses`` - (list or str, optional): message for prompting the user for missing entities
-  - ``retry_response`` - (list or str, optional): message for re-prompting users. If not provided, defaults to responses.
-  - ``value`` - (str, optional): The resolved value of the entity
-  - ``default_eval`` - (bool, optional): Use system validation (default: True)
-  - ``hints`` - (list, optional): Developer defined list of keywords to verify theuser input against
-  - ``custom_eval`` - (func, optional): custom validation function (should return bool:validated or not)
 
 A simple example of slot filling logic is shown below:
 
@@ -289,8 +275,7 @@ A simple example of slot filling logic is shown below:
 6. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-Since the banking assistant will require personal information we have decided to not include a knowledge base to mimic how this data may be received from an
-external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at financial institutions.
+Since the banking assistant will require personal information we have decided to not include a knowledge base to mimic how this data may be received from an external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at financial institutions.
 
 7. Training Data
 ^^^^^^^^^^^^^^^^
@@ -476,7 +461,7 @@ Change the classification model to random forest instead of the default logistic
     Selecting hyperparameters using k-fold cross-validation with 10 splits
     Best accuracy: 92.46%, params: {'class_weight': {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0}}
 
-You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various MindMeld classifiers.
+You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the :doc:`User Guide <../userguide/nlp>` for more about training, tuning, and evaluating the various MindMeld classifiers.
 
 .. admonition:: Exercise
 
@@ -522,7 +507,7 @@ You can also try out multi-turn dialogues (transfer balances):
 
 .. code:: python
 
-   >>> conv = Conversation(nlp=nlp, app_path='banking_assistant')
+   >>> conv = Conversation(nlp=nlp, app_path='banking_assistant', context={'user_name' : 'splashbro30'})
    >>> conv.say('Hi there!')
    ['Thanks for using MindMeld Bank Stephen! What would you like to do today? A few things I can help with are, checking balances, paying off your credit card, and setting up a new card.']
    >>> conv.say("I'd like to transfer some money")
