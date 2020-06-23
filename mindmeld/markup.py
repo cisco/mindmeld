@@ -262,7 +262,7 @@ def process_markup(markup, query_factory, query_options):
         entities = _process_annotations(
             query, annotations, query_factory.system_entity_recognizer,
         )
-    except MarkupError as exc:
+    except (MarkupError, IndexError) as exc:
         msg = "Invalid markup in query {!r}: {}"
         raise MarkupError(msg.format(markup, exc)) from exc
     except SystemEntityResolutionError as exc:
@@ -448,7 +448,7 @@ def _tokenize_markup(markup):
                     open_annotations["entity"] += 1
                 yield char
             elif char == META_SPLIT:
-                # TODO: improve this check
+                # TODO: improve this check to accept {{a|b}|c} but reject {|c} and {a||c}
                 # if not token:
                 #     raise MarkupError('Entity or group text is empty at position {}'.format(idx))
                 if token:

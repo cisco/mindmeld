@@ -9,7 +9,7 @@ Tests for `markup` module.
 """
 import pytest
 
-from mindmeld import markup
+from mindmeld import exceptions, markup
 from mindmeld.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [
@@ -68,6 +68,26 @@ def test_load_entity(query_factory):
     assert entity.normalized_text == "elm street"
     assert entity.entity.type == "store_name"
     assert entity.entity.text == "Elm Street"
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "book from now|sys_time} until kingdom come",
+        "book {now|sys_time|}",
+        "book {now|sys|[time]}",
+        "book [{now|sys_time} until {later|ref}|range]",
+        "book [{now|sys_time}|range]",
+        "book {now|sys_time]",
+        "book {now|}",
+        "book {now}",
+        "book {now|",
+    ]
+)
+@pytest.mark.load
+def test_load_markup_error(query_factory, query):
+
+    with pytest.raises(exceptions.MarkupError):
+        markup.load_query(query, query_factory)
 
 
 @pytest.mark.load
