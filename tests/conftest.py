@@ -11,6 +11,7 @@ import asyncio
 import codecs
 from distutils.util import strtobool
 import os
+import sys
 import warnings
 
 import pytest
@@ -220,6 +221,12 @@ def pytest_collection_modifyitems(config, items):
             else "Skipping tests which require mindmeld extras"
         )
     )
+
+    version = sys.version_info
+
+    # skip bert test for python 3.5 and below with extras
+    if version.minor < 6 and use_extras:
+        skip_markers.append('bert')
 
     for item in items:
         for marker in skip_markers:
