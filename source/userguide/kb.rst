@@ -842,14 +842,14 @@ There are three available model types which leverage semantic embedders. The spe
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | Model type            | Description                                                                                                |
   +=======================+============================================================================================================+
-  | embedder              | For leveraging deep semantic embedders. This option allows for using deep semantic embedders like          |
-  |                       | sentence bert for doing vector-based retrieval                                                             |
+  | embedder              | Only leverage deep semantic embedders. This option allows for using deep semantic embedders like           |
+  |                       | Sentence-BERT or GloVe for doing vector-based retrieval                                                    |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | embedder_keyword      | For leveraging deep semantic embedders and text signals for structured search on keywords or short spans   |
-  |                       | of text. GloVe as an additional signal has shown improvements in this use case.                            |
+  | embedder_keyword      | Leverage a combination of deep semantic embedders and text signals in a way that's optimized for search on |
+  |                       | keywords or short spans of text. GloVe may be preferable for this use case.                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | embedder_text         | For leveraging deep semantic embedders and text signals for unstructured search on larger paragraphs or    |
-  |                       | passages. BERT as an additional signal has shown improvements in this use case.                            |
+  | embedder_text         | Leverage a combination of deep semantic embedders and text signals in a way that's optimized for search on |
+  |                       | larger paragraphs or passages of unstructured text. Sentence-BERT is preferable for this use case.         |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 
@@ -861,14 +861,14 @@ Multiple models fine-tuned on BERT / RoBERTa / DistilBERT / ALBERT / XLNet are p
 
 The provided GloVe embeddings are word vectors trained on the `Wikipedia <https://dumps.wikimedia.org/>`_ and `Gigaword 5 <https://catalog.ldc.upenn.edu/LDC2011T07>`_ datasets. To use this embedder type, specify ``glove`` as the ``embedder_type`` in the ``model_settings``.
 
-The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the ``token_embedding_dimension`` in the ``model_settings`` section of the config. For fields with more than one token, word vector averaging is used. 
+The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the ``token_embedding_dimension`` in the ``model_settings`` section of the config (defaults to 300). For fields with more than one token, word vector averaging is used. 
 
 Once your config file is specified, you can load the Knowledge Base and the embeddings will automatically be generated as specified in the config and stored in your index as dense vectors. Note that you must pass the application path in order for the config to be processed. This can be done via the CLI command with the ``--app-path`` option or via the ``app_path`` parameter for the ``load_kb`` method.
 
 
 .. code-block:: console
 
-  mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl --app_path ./
+  mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl --app_path .
 
 All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache. 
 
