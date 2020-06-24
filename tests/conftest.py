@@ -133,7 +133,6 @@ def qa_kwik_e_mart(kwik_e_mart_app_path, es_client):
         index_name="stores",
         data_file=STORE_DATA_FILE_PATH,
     )
-    es_client.indices.flush(index="_all")
     qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
 
