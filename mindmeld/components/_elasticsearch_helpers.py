@@ -321,6 +321,9 @@ def load_index(
     """
     scoped_index_name = get_scoped_index_name(app_namespace, index_name)
     es_client = es_client or create_es_client(es_host)
+    import pdb
+
+    pdb.set_trace()
     try:
         # create index if specified index does not exist
         if does_index_exist(
@@ -360,7 +363,9 @@ def load_index(
             pbar.update(1)
 
         # close the progress bar and flush all output
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         pbar.close()
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:

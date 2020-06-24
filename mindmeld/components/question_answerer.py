@@ -435,7 +435,9 @@ class QuestionAnswerer:
                     "You must upgrade to ElasticSearch 7 to use the embedding features."
                 )
             qa_mapping = resolve_es_config_for_version(DEFAULT_ES_QA_MAPPING, es_client)
+        import pdb
 
+        pdb.set_trace()
         load_index(
             app_namespace,
             index_name,
