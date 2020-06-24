@@ -277,6 +277,7 @@ def test_advanced_search_validation(answerer):
 
 @pytest.mark.extras
 @pytest.mark.bert
+@pytest.mark.es7
 def test_embedder_search_bert(food_ordering_with_bert):
     BERT_EMBEDDING_LEN = 768
     res = food_ordering_with_bert.get(
@@ -303,6 +304,7 @@ def test_embedder_search_bert(food_ordering_with_bert):
 
 
 @pytest.mark.extras
+@pytest.mark.es7
 def test_embedder_search_glove(food_ordering_with_glove):
     GLOVE_EMBEDDING_LEN = 300
     res = food_ordering_with_glove.get(
