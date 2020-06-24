@@ -234,9 +234,9 @@ def pytest_collection_modifyitems(config, items):
         es = Elasticsearch()
         es_version = es.info()["version"]["number"]
         (major, _, _) = es_version.split(".")
-        if major < 7:
+        if int(major) < 7:
             skip_markers.append("es7")
-    except:
+    except ModuleNotFoundError:
         skip_markers.append("es7")
 
     for item in items:

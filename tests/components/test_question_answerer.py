@@ -116,6 +116,14 @@ def food_ordering_with_glove(food_ordering_app_path, es_client):
 def test_basic_search(answerer):
     """Test basic search."""
 
+    from elasticsearch import Elasticsearch
+
+    es = Elasticsearch()
+    es_version = es.info()["version"]["number"]
+    (major, _, _) = es_version.split(".")
+
+    assert int(major) == 7
+
     # retrieve object using ID
     res = answerer.get(index="store_name", id="20")
     assert len(res) > 0
