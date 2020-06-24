@@ -361,6 +361,8 @@ def load_index(
 
         # close the progress bar and flush all output
         pbar.close()
+        es_client.indices.flush(index=index_name)
+        es_client.indices.refresh(index=index_name)
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:
         logger.debug(
