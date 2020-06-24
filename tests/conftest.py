@@ -222,11 +222,22 @@ def pytest_collection_modifyitems(config, items):
         )
     )
 
-    version = sys.version_info
+    py_version = sys.version_info
 
     # skip bert test for python 3.5 and below with extras
-    if version.minor < 6 and use_extras:
-        skip_markers.append('bert')
+    if py_version.minor < 6 and use_extras:
+        skip_markers.append("bert")
+
+    try:
+        from elasticsearch import Elasticsearch
+
+        es = Elasticsearch()
+        es_version = es.info()["version"]["number"]
+        (major, _, _) = es_version.split(".")
+        if major < 7:
+            skip_markers.append("es7")
+    except:
+        skip_markers.append("es7")
 
     for item in items:
         for marker in skip_markers:
