@@ -360,6 +360,7 @@ def load_index(
             pbar.update(1)
 
         # close the progress bar and flush all output
+        import pdb; pdb.set_trace()
         pbar.close()
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:

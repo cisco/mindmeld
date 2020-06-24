@@ -36,6 +36,7 @@ def answerer(kwik_e_mart_app_path, es_client):
         data_file=STORE_DATA_FILE_PATH,
     )
     es_client.indices.flush(index="_all", force=True)
+    import pdb; pdb.set_trace()
 
     qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
