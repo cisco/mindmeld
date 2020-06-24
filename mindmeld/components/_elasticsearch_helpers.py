@@ -362,10 +362,7 @@ def load_index(
         # close the progress bar and flush all output
         pbar.close()
         es_client.indices.flush(index=scoped_index_name)
-        if es_version_7:
-            # need to explicitly refresh for ES7, see https://www.elastic.co/guide/en/
-            # elasticsearch/reference/current/breaking-changes-7.0.html#breaking_70_indices_changes
-            es_client.indices.refresh(index=scoped_index_name)
+        es_client.indices.refresh(index=scoped_index_name)
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:
         logger.debug(
