@@ -11,6 +11,7 @@ import asyncio
 import codecs
 from distutils.util import strtobool
 import os
+import sys
 import warnings
 
 import pytest
@@ -132,7 +133,6 @@ def qa_kwik_e_mart(kwik_e_mart_app_path, es_client):
         index_name="stores",
         data_file=STORE_DATA_FILE_PATH,
     )
-    es_client.indices.flush(index="_all")
     qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
 
@@ -220,6 +220,23 @@ def pytest_collection_modifyitems(config, items):
             else "Skipping tests which require mindmeld extras"
         )
     )
+
+    py_version = sys.version_info
+
+    # skip bert test for python 3.5 and below with extras
+    if py_version.minor < 6 and use_extras:
+        skip_markers.append("bert")
+
+    try:
+        from elasticsearch import Elasticsearch
+
+        es = Elasticsearch()
+        es_version = es.info()["version"]["number"]
+        (major, _, _) = es_version.split(".")
+        if int(major) < 7:
+            skip_markers.append("es7")
+    except ModuleNotFoundError:
+        skip_markers.append("es7")
 
     for item in items:
         for marker in skip_markers:
