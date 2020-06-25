@@ -24,6 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
@@ -45,12 +46,12 @@ LOG_REG_TYPE = "logreg"
 DECISION_TREE_TYPE = "dtree"
 RANDOM_FOREST_TYPE = "rforest"
 SVM_TYPE = "svm"
+MLP_TYPE = "mlp"
 SUPER_LEARNER_TYPE = "super-learner"
 BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
 # default model scoring type
 ACCURACY_SCORING = "accuracy"
-
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,7 @@ class TextModel(Model):
                 DECISION_TREE_TYPE: DecisionTreeClassifier,
                 RANDOM_FOREST_TYPE: RandomForestClassifier,
                 SVM_TYPE: SVC,
+                MLP_TYPE: MLPClassifier
             }[classifier_type]
         except KeyError:
             msg = "{}: Classifier type {!r} not recognized"
