@@ -361,6 +361,8 @@ def load_index(
 
         # close the progress bar and flush all output
         pbar.close()
+        # Flush and refresh to make sure all data is stored in the Lucene index and
+        # available for search.
         es_client.indices.flush(index=scoped_index_name)
         es_client.indices.refresh(index=scoped_index_name)
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
