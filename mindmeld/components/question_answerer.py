@@ -23,7 +23,11 @@ from abc import ABC, abstractmethod
 from elasticsearch import ConnectionError as EsConnectionError
 from elasticsearch import ElasticsearchException, TransportError
 
-from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
+from ..exceptions import (
+    KnowledgeBaseConnectionError,
+    KnowledgeBaseError,
+    ElasticsearchVersionError,
+)
 from ..resource_loader import ResourceLoader
 from ._config import (
     DEFAULT_ES_QA_MAPPING,
@@ -118,7 +122,8 @@ class QuestionAnswerer:
         Args:
             index (str): The name of an index.
             size (int): The maximum number of records, default to 10.
-            query_type (str): Whether the search is over structured or unstructured text.
+            query_type (str): Whether the search is over structured, unstructured and whether to use
+                              text signals for ranking, embedder signals, or both.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -434,6 +439,7 @@ class QuestionAnswerer:
                 logger.error(
                     "You must upgrade to ElasticSearch 7 to use the embedding features."
                 )
+                raise ElasticsearchVersionError
             qa_mapping = resolve_es_config_for_version(DEFAULT_ES_QA_MAPPING, es_client)
 
         load_index(
@@ -653,7 +659,7 @@ class Search:
 
         Args:
             a keyword argument to specify the query text and the knowledge base document field along
-            with the query type (keyword/text).
+            with the query type (keyword/text/embedder/embedder_keyword/embedder_text).
         Returns:
             Search: a new Search object with added search criteria.
         """

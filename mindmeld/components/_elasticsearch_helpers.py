@@ -75,6 +75,8 @@ def is_es_version_7(es_client):
 
 
 def resolve_es_config_for_version(config, es_client):
+    """ElasticSearch 7 no longer supports mapping types: https://www.elastic.co/guide/en/
+    elasticsearch/reference/current/removal-of-types.html#removal-of-types"""
     if not is_es_version_7(es_client):
         if DOC_TYPE not in config.get("mappings", {}):
             mappings = config.pop("mappings")
@@ -270,7 +272,7 @@ def create_index_mapping(base_mapping, mapping_data):
 
 
 def version_compatible_streaming_bulk(
-    es_client, docs, index, chunck_size, raise_on_error, doc_type
+    es_client, docs, index, chunk_size, raise_on_error, doc_type
 ):
 
     if is_es_version_7(es_client):
@@ -278,7 +280,7 @@ def version_compatible_streaming_bulk(
             es_client,
             docs,
             index=index,
-            chunk_size=chunck_size,
+            chunk_size=chunk_size,
             raise_on_error=raise_on_error,
         )
     else:
@@ -287,7 +289,7 @@ def version_compatible_streaming_bulk(
             docs,
             index=index,
             doc_type=doc_type,
-            chunk_size=chunck_size,
+            chunk_size=chunk_size,
             raise_on_error=raise_on_error,
         )
 
@@ -361,9 +363,7 @@ def load_index(
 
         # close the progress bar and flush all output
         pbar.close()
-        # Flush and refresh to make sure all data is stored in the Lucene index and
-        # available for search.
-        es_client.indices.flush(index=scoped_index_name)
+        # Refresh to make sure all data stored is available for search.
         es_client.indices.refresh(index=scoped_index_name)
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:
