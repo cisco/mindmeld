@@ -258,7 +258,7 @@ def evaluate(ctx, verbose):
 @click.option(
     "-G", "--no_group", is_flag=True, help="Suppress predicted group annotations"
 )
-@click.argument("input", required=True)
+@click.argument("input_file", envvar="INPUT", metavar="INPUT", required=True)
 def predict(
     ctx,
     input_file,
