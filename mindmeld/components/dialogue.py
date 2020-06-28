@@ -1211,7 +1211,7 @@ class Conversation:
         params (FrozenParams): The params returned by the most recent turn.
         force_sync (bool): Force synchronous return for `say()` and `process()` \
             even when app is in async mode.
-	verbose (bool, optional): If True, returns class probabilities along with class \
+        verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction.
     """
 
@@ -1225,7 +1225,7 @@ class Conversation:
         context=None,
         default_params=None,
         force_sync=False,
-	verbose=False
+        verbose=False
     ):
         """
         Args:
@@ -1240,11 +1240,11 @@ class Conversation:
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
-	    verbose (bool, optional): If True, returns class probabilities along with class \
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction.
         """
         app = app or path.get_app(app_path)
-        app.lazy_init(nlp, verbose=verbose)
+        app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
             self._app_manager.load()
@@ -1254,7 +1254,7 @@ class Conversation:
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
-	self.verbose = verbose	
+        self.verbose = verbose	
 
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
@@ -1346,7 +1346,7 @@ class Conversation:
             frame=self.frame,
             history=self.history,
             verbose=self.verbose
-	)
+        )
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
