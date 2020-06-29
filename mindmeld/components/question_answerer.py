@@ -328,38 +328,31 @@ class QuestionAnswerer:
                 .get(index_name, [])
             )
 
-        def _doc_data(data_file, embedding_fields):
-            def match_regex(string, pattern_list):
-                for pattern in pattern_list:
-                    if re.match(pattern, string):
-                        return True
-
+        def _doc_data(data_file):
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
                 if line.strip() == "[":
                     docs = json.load(data_fp)
                     count = len(docs)
-                    doc_example = docs[0]
                 else:
                     count = 0
                     for line in data_fp:
                         count += 1
-                    doc_example = json.loads(line)
-                embedding_fields = [
-                    key
-                    for key in doc_example.keys()
-                    if match_regex(key, embedding_fields)
-                ]
-                return count, embedding_fields
+                return count
 
         def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
+            def match_regex(string, pattern_list):
+                for pattern in pattern_list:
+                    if re.match(pattern, string):
+                        return True
+
             def transform(doc, embedder_model, embedding_fields):
                 if embedder_model:
                     embed_fields = [
                         (key, str(val))
                         for key, val in doc.items()
-                        if key in embedding_fields
+                        if match_regex(key, embedding_fields)
                     ]
                     embed_keys = list(zip(*embed_fields))[0]
                     embed_vals = embedder_model.get_encodings(
@@ -390,10 +383,10 @@ class QuestionAnswerer:
                         doc = json.loads(line)
                         yield transform(doc, embedder_model, embedding_fields)
 
-        docs_count, embedding_fields = _doc_data(data_file, embedding_fields)
+        docs_count = _doc_data(data_file)
         if embedder_model and len(embedding_fields) == 0:
             logger.warning(
-                "No matching embedding fields found from the app config, "
+                "No embedding fields specified in the app config, "
                 "continuing without generating embeddings..."
             )
             embedder_model = None

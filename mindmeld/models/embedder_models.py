@@ -141,10 +141,10 @@ class GloveEmbedder(Embedder):
 
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
-        self.tokenizer = Tokenizer()
+        self.glove_tokenizer = Tokenizer()
 
     def tokenize(self, text):
-        tokens = self.tokenizer.tokenize(text, keep_special_chars=False)
+        tokens = self.glove_tokenizer.tokenize(text, keep_special_chars=False)
         token_list = [t["entity"] for t in tokens]
         return token_list
 
