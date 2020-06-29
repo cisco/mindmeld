@@ -18,12 +18,12 @@ from abc import ABC, abstractmethod
 import pickle
 import logging
 import os
-import string
 import numpy as np
 
 from .. import path
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
+from ..tokenizer import Tokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -118,10 +118,11 @@ class BertEmbedder(Embedder):
     Encoder class for bert models as described here: https://github.com/UKPLab/sentence-transformers
     """
 
+    DEFAULT_BERT = "bert-base-nli-mean-tokens"
+
     def load(self, **kwargs):
-        DEFAULT_BERT = "bert-base-nli-mean-tokens"
         if self.model_name == "default":
-            bert_model_name = DEFAULT_BERT
+            bert_model_name = self.DEFAULT_BERT
             logger.info("No bert model specifications passed, using default.")
         else:
             bert_model_name = self.model_name
@@ -131,24 +132,25 @@ class BertEmbedder(Embedder):
         return self.model.encode(text_list)
 
 
-def get_query_tokens(query):
-    """Splits into tokens, removes punctuation, and removes whitespace.
-    """
-    query = query.translate(str.maketrans("", "", string.punctuation))
-    tokens = query.split()
-    tokens = [t.strip() for t in tokens]
-    return tokens
-
-
 class GloveEmbedder(Embedder):
     """
     Encoder class for GloVe embeddings as described here: https://nlp.stanford.edu/projects/glove/
     """
 
+    DEFAULT_EMBEDDING_DIM = 300
+
+    def __init__(self, app_path, **kwargs):
+        super().__init__(app_path, **kwargs)
+        self.tokenizer = Tokenizer()
+
+    def tokenize(self, text):
+        tokens = self.tokenizer.tokenize(text, keep_special_chars=False)
+        token_list = [t["entity"] for t in tokens]
+        return token_list
+
     def load(self, **kwargs):
-        DEFAULT_EMBEDDING_DIM = 300
         token_embedding_dimension = kwargs.get(
-            "token_embedding_dimension", DEFAULT_EMBEDDING_DIM
+            "token_embedding_dimension", self.DEFAULT_EMBEDDING_DIM
         )
         token_pretrained_embedding_filepath = kwargs.get(
             "token_pretrained_embedding_filepath"
@@ -161,7 +163,7 @@ class GloveEmbedder(Embedder):
         )
 
     def encode(self, text_list):
-        token_list = [get_query_tokens(text) for text in text_list]
+        token_list = [self.tokenize(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []
         for vl in vector_list:
