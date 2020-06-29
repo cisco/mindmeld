@@ -54,9 +54,6 @@ jobs:
       uses: jakejarvis/wait-action@master
       with:
         time: '30s'
-    
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v2
 
     - name: Test with pytest
       run: |
