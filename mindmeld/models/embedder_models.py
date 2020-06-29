@@ -23,7 +23,7 @@ import numpy as np
 from .. import path
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
-from ..tokenizer import Tokenizer
+from ..tokenizer import Tokenizer as GloveTokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -141,7 +141,7 @@ class GloveEmbedder(Embedder):
 
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
-        self.glove_tokenizer = Tokenizer()
+        self.glove_tokenizer = GloveTokenizer()
 
     def tokenize(self, text):
         tokens = self.glove_tokenizer.tokenize(text, keep_special_chars=False)

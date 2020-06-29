@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6]
-        mm-extras: ["true", "false"]
+        python-version: [3.6]
+        mm-extras: ["true"]
         es_version: [5.6.16, 6.8.10, 7.7.1]
 
     steps:
@@ -55,6 +55,9 @@ jobs:
       with:
         time: '30s'
     
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v2
+
     - name: Test with pytest
       run: |
         mkdir ~/test-reports
