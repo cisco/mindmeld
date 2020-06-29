@@ -60,12 +60,12 @@ The full list of intents for all domains is illustrated below.
 
 .. image:: /images/banking_hierarchy.png
 
-There are two types of entities in MindMeld: :ref:System Entities <system-entities> and :doc:Custom Entities <../userguide/entity_recognizer>. System entities are pre-defined and automatically detected by MindMeld. Examples include sys_amount-of-money, sys_time, and sys_interval. Custom entities are defined by the developers of each application and detected by the models trained on the labeled data and entity gazetteer files.
+There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined and automatically detected by MindMeld. Examples include sys_amount-of-money, sys_time, and sys_interval. Custom entities are defined by the developers of each application and detected by the models trained on the labeled data and entity gazetteer files.
 
 The banking assistant defines and uses the following custom entities in the accounts_creditcards domain:
 
-    - ``account_type``: detects which account you are referring to, for example: "what is my {savings|account_type} balance?"
-    - ``credit_amount``: detects the amount you would like to pay off your credit bill, for example: "can you make a {minimum|credit_amount} payment for my card?"
+    - ``account_type``: detects which account you are referring to, for example: ``what is my {savings|account_type} balance?``
+    - ``credit_amount``: detects the amount you would like to pay off your credit bill, for example: ``can you make a {minimum|credit_amount} payment for my card?``
 
 The banking assistant uses one system entity ``sys_amount-of-money`` (money). Some examples for annotation with system entities: "please transfer {20k|sys_amount-of-money}" and "pay {two hundred dollars|sys_amount-of-money} towards my credit bill".
 
@@ -233,7 +233,7 @@ For a more realistic implementation of ``pay_creditcard`` that deals with varied
 Slot Filling
 """"""""""""
 
-Slot/entity filling logic allows you to easily request for a missing entity. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent.
+Slot/entity filling logic allows you to easily request for missing entities. You can set custom responses in the slot filling form to prompt the user with when an entity is missing in the user request. Once the missing entities in the form have been provided you can handle the rest of the logic as you would in the handler function of your intent.
 
 A simple example of slot filling logic is shown below:
 
@@ -272,12 +272,12 @@ A simple example of slot filling logic is shown below:
         
 
 
-6. Knowledge Base
+5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
 Since the banking assistant will require personal information we have decided to not include a knowledge base to mimic how this data may be received from an external API. Most likely the frontend would handle the user authentication and pass on a token to the request context, which is immutable once the conversation has started. The MindMeld server can then use this token to retrieve user information from a secure database. In this blueprint, we demonstrate how this can be done by simply passing the `user_name` in the context and using it to retrieve information from a simple database. For a production application, these can be replaced by a secure token and an API call to a secure database. These databases and APIs likely already exist internally at financial institutions.
 
-7. Training Data
+6. Training Data
 ^^^^^^^^^^^^^^^^
 
 The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for a full description of this highly important, multi-step process. Be aware that at minimum, the following data generation tasks are required:
@@ -314,7 +314,7 @@ The ``domains`` directory contains the training data for intent classification a
 
    - Complete the following exercise if you are extending the blueprint to build your own banking assistant. For common intents like ``greet``, ``exit``, and ``help``, start by simply reusing the blueprint data to train NLP models for your banking assistant. For ``pay_creditcard`` and any other app-specific intents, gather new training data tailored to the relevant entities (credit card, balance, etc.). Apply the approach you learned in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
 
-8. Training the NLP Classifiers
+7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies MindMeld's default machine learning settings.
@@ -468,7 +468,7 @@ You can use similar options to inspect and experiment with the Entity Recognizer
    Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
 
 
-9. Parser Configuration
+8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The relationships between entities in the banking assistant queries are simple ones. For example, in the annotated query ``can you pay my {minimum|credit_amount} bill``, the ``credit amount`` entity is self-sufficient, in that it is not described by any other entity.
@@ -478,13 +478,13 @@ If you extended the app to support queries with more complex entity relationship
 Since we do not have entity groups in the banking assistant, we do not need a parser configuration.
 
 
-10. Using the Question Answerer
+9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the banking assistant has no knowledge base, question answerer is not needed.
 
 
-11. Testing and Deployment
+10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in MindMeld to perform an end-to-end test of your conversational app.
