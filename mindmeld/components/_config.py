@@ -42,7 +42,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {"classifier_type": "logreg", },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -84,7 +84,7 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
         "k": 5,
         "scoring": "accuracy",
         "grid": {
-            "penalty": ["none", "l2"],
+            "penalty": ["l2"],
             "C": [0.01, 1, 100, 10000, 1000000, 100000000],
         },
     },
@@ -565,8 +565,8 @@ def get_system_entity_url_config(app_path):
 
     return (
         get_nlp_config(app_path)
-        .get("system_entity_recognizer", {})
-        .get("url", DEFAULT_DUCKLING_URL)
+            .get("system_entity_recognizer", {})
+            .get("url", DEFAULT_DUCKLING_URL)
     )
 
 
