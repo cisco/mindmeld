@@ -143,7 +143,7 @@ class GloveEmbedder(Embedder):
         super().__init__(app_path, **kwargs)
         self.glove_tokenizer = GloveTokenizer()
 
-    def tokenize(self, text):
+    def tokenize_for_glove(self, text):
         tokens = self.glove_tokenizer.tokenize(text, keep_special_chars=False)
         token_list = [t["entity"] for t in tokens]
         return token_list
@@ -163,7 +163,7 @@ class GloveEmbedder(Embedder):
         )
 
     def encode(self, text_list):
-        token_list = [self.tokenize(text) for text in text_list]
+        token_list = [self.tokenize_for_glove(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []
         for vl in vector_list:
