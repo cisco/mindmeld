@@ -17,7 +17,7 @@ from __future__ import absolute_import, unicode_literals
 
 from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
 from .stemmers import get_language_stemmer
-from .tokenizer import Tokenizer
+from .tokenizer import MindMeldTokenizer
 from .components._config import get_language_config
 from .system_entity_recognizer import (
     NoOpSystemEntityRecognizer,
@@ -160,7 +160,7 @@ class QueryFactory:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
         language, locale = get_language_config(app_path)
-        tokenizer = tokenizer or Tokenizer.create_tokenizer()
+        tokenizer = tokenizer or MindMeldTokenizer.create_tokenizer()
         stemmer = stemmer or get_language_stemmer(language_code=language)
         if system_entity_recognizer:
             sys_entity_recognizer = system_entity_recognizer

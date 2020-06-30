@@ -33,7 +33,7 @@ from sklearn.model_selection import (
 )
 
 from .._version import get_mm_version
-from ..tokenizer import Tokenizer
+from ..tokenizer import MindMeldTokenizer
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
@@ -855,7 +855,7 @@ class Model:
                 "The tokenizer resource has not been registered "
                 "to the model. Using default tokenizer."
             )
-            tokenizer = Tokenizer()
+            tokenizer = MindMeldTokenizer()
         return tokenizer
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):

@@ -23,7 +23,7 @@ import numpy as np
 from .. import path
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
-# from ..tokenizer import Tokenizer as GloveTokenizer
+from ..tokenizer import MindMeldTokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -142,7 +142,7 @@ class GloveEmbedder(Embedder):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
         # self.glove_tokenizer = GloveTokenizer()
-        self.tokenizer = None
+        self.tokenizer = MindMeldTokenizer()
 
     def tokenize(self, text):
         tokens = self.tokenizer.tokenize(text, keep_special_chars=False)

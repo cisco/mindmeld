@@ -22,7 +22,7 @@ from .path import ASCII_FOLDING_DICT_PATH
 logger = logging.getLogger(__name__)
 
 
-class Tokenizer:
+class MindMeldTokenizer:
     """The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
     given piece of text."""
 
@@ -493,4 +493,4 @@ class Tokenizer:
         Returns:
             Tokenizer: a tokenizer
         """
-        return Tokenizer()
+        return MindMeldTokenizer()

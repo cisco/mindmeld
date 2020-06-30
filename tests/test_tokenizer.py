@@ -10,12 +10,12 @@ Tests for `markup` module.
 # pylint: disable=I0011,W0621
 import pytest
 
-from mindmeld.tokenizer import Tokenizer
+from mindmeld.tokenizer import MindMeldTokenizer
 
 
 @pytest.fixture
 def tokenizer():
-    return Tokenizer()
+    return MindMeldTokenizer()
 
 
 def test_tokenize_raw(tokenizer):

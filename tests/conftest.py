@@ -22,7 +22,7 @@ from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
 from mindmeld.system_entity_recognizer import DucklingRecognizer
-from mindmeld.tokenizer import Tokenizer
+from mindmeld.tokenizer import MindMeldTokenizer
 
 
 warnings.filterwarnings(
@@ -152,7 +152,7 @@ class GhostPreprocessor(Preprocessor):
 @pytest.fixture
 def tokenizer():
     """A tokenizer for normalizing text"""
-    return Tokenizer()
+    return MindMeldTokenizer()
 
 
 @pytest.fixture

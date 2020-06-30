@@ -17,7 +17,7 @@ import re
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
-from ..tokenizer import Tokenizer
+from ..tokenizer import MindMeldTokenizer
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -392,7 +392,7 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None, tokenizer=None):
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    tokenizer = tokenizer or Tokenizer()
+    tokenizer = tokenizer or MindMeldTokenizer()
     workspace_resource = merge_gazetteer_resource(resource, dynamic_resource, tokenizer)
     return workspace_resource
 
