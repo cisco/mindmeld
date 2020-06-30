@@ -10,7 +10,7 @@ DOMAIN_CLASSIFIER_CONFIG = {
     "param_selection": {
         "type": "k-fold",
         "k": 10,
-        "grid": {"fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"solver": ["liblinear"], "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {
         "bag-of-words": {"lengths": [1], },
@@ -28,6 +28,7 @@ INTENT_CLASSIFIER_CONFIG = {
         "type": "k-fold",
         "k": 10,
         "grid": {
+            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [0.01, 1, 100, 10000, 1000000],
             "class_bias": [1, 0.7, 0.3, 0],
@@ -58,7 +59,8 @@ ENTITY_RECOGNIZER_CONFIG = {
         "k": 5,
         "scoring": "accuracy",
         "grid": {
-            "penalty": ["l2"],
+            "solver": ["liblinear"],
+            "penalty": ["l1", "l2"],
             "C": [0.01, 1, 100, 10000, 1000000, 100000000],
         },
     },

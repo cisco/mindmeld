@@ -118,7 +118,7 @@ def test_domain_query_features(
     domain_classifier_config_all_features = {
         "model_type": "text",
         "model_settings": {"classifier_type": "logreg"},
-        "params": {"C": 10},
+        "params": {"C": 10,},
         "features": {
             "char-ngrams": {"lengths": [1, 2], "thresholds": [0]},
             "bag-of-words": {"lengths": [1, 2]},
