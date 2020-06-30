@@ -56,7 +56,7 @@ setup(
     author="Cisco Systems, Inc.",
     author_email="contact@mindmeld.com",
     url="https://github.com/cisco/mindmeld",
-    packages=["mindmeld", ],
+    packages=["mindmeld",],
     package_dir={"mindmeld": "mindmeld"},
     entry_points={"console_scripts": ["mindmeld=mindmeld.cli:cli"]},
     include_package_data=True,

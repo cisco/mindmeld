@@ -92,8 +92,7 @@ def test_get_classifier_config():
     expected = {
         "type": "k-fold",
         "k": 10,
-        "grid": {"solver": ["liblinear"],
-                 "fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
+        "grid": {"fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     }
 
     assert actual == expected
@@ -109,7 +108,6 @@ def test_get_classifier_config2():
         "type": "k-fold",
         "k": 5,
         "grid": {
-            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [1, 20, 300],
             "class_bias": [1, 0],
@@ -125,7 +123,7 @@ def test_get_classifier_config_func():
         "entity", APP_PATH, domain="domain", intent="intent"
     )["params"]
 
-    expected = {"solver": "liblinear", "penalty": "l2", "C": 100}
+    expected = {"penalty": "l2", "C": 100}
 
     assert actual == expected
 
@@ -136,6 +134,6 @@ def test_get_classifier_config_func_error():
         "params"
     ]
 
-    expected = {"solver": "liblinear", "error": "intent", "penalty": "l2", "C": 100}
+    expected = {"error": "intent", "penalty": "l2", "C": 100}
 
     assert actual == expected

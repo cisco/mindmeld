@@ -87,7 +87,7 @@ class TestTextModel:
                 "example_type": QUERY_EXAMPLE_TYPE,
                 "label_type": CLASS_LABEL_TYPE,
                 "model_settings": {"classifier_type": "logreg"},
-                "params": {"solver": "liblinear", "fit_intercept": True, "C": 100},
+                "params": {"fit_intercept": True, "C": 100},
                 "features": {
                     "bag-of-words": {"lengths": [1]},
                     "freq": {"bins": 5},
@@ -101,7 +101,7 @@ class TestTextModel:
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
-        assert model._current_params == {"solver": "liblinear", "fit_intercept": True, "C": 100}
+        assert model._current_params == {"fit_intercept": True, "C": 100}
 
     def test_fit_cv(self, resource_loader):
         """Tests fitting with param selection"""
@@ -114,8 +114,7 @@ class TestTextModel:
                 "param_selection": {
                     "type": "k-fold",
                     "k": 10,
-                    "grid": {"solver": ["liblinear"],
-                             "C": [10, 100, 1000], "fit_intercept": [True, False]},
+                    "grid": {"C": [10, 100, 1000], "fit_intercept": [True, False]},
                 },
                 "features": {
                     "bag-of-words": {"lengths": [1]},
@@ -140,7 +139,7 @@ class TestTextModel:
                 "example_type": QUERY_EXAMPLE_TYPE,
                 "label_type": CLASS_LABEL_TYPE,
                 "model_settings": {"classifier_type": "logreg"},
-                "params": {"solver": "liblinear", "fit_intercept": True, "C": 100},
+                "params": {"fit_intercept": True, "C": 100},
                 "features": {
                     "bag-of-words": {"lengths": [1]},
                     "freq": {"bins": 5},
@@ -165,8 +164,8 @@ class TestTextModel:
                 "example_type": QUERY_EXAMPLE_TYPE,
                 "label_type": CLASS_LABEL_TYPE,
                 "model_settings": {"classifier_type": "logreg"},
-                "params": {"solver": "liblinear", "fit_intercept": True, "C": 100},
-                "features": {"bag-of-words": {"lengths": [1]}, },
+                "params": {"fit_intercept": True, "C": 100},
+                "features": {"bag-of-words": {"lengths": [1]},},
             }
         )
         model = TextModel(config)

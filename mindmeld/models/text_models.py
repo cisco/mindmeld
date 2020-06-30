@@ -47,7 +47,6 @@ DECISION_TREE_TYPE = "dtree"
 RANDOM_FOREST_TYPE = "rforest"
 SVM_TYPE = "svm"
 MLP_TYPE = "mlp"
-SUPER_LEARNER_TYPE = "super-learner"
 BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
 # default model scoring type

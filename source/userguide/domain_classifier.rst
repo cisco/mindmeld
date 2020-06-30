@@ -113,7 +113,6 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
     'model_type': 'text',
     'param_selection': {
         'grid': {
-          'solver': ['liblinear'],
           'C': [10, 100, 1000, 10000, 100000],
           'fit_intercept': [True, False]
         },
@@ -448,7 +447,6 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'type': 'k-fold',
            'k': 10,
            'grid': {
-               'solver': ['liblinear'],
                'fit_intercept': [True, False],
                'C': [10, 100, 1000, 10000, 100000]
            },

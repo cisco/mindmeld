@@ -183,7 +183,6 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'classifier_type': 'logreg'
        },
        'params': {
-           'solver': 'liblinear',
            'C': 10,
        },
        'features': {
@@ -204,7 +203,6 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'classifier_type': 'logreg'
        },
        'params': {
-           'solver': 'liblinear',
            'C': 10,
            "class_bias": 0.3
        },

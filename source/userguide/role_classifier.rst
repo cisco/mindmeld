@@ -159,7 +159,7 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
      'model_settings': {'classifier_type': 'logreg'},
      'model_type': 'text',
      'param_selection': None,
-     'params': {'solver': 'liblinear', 'C': 100, 'penalty': 'l1'}
+     'params': {'C': 100, 'penalty': 'l1'}
    }
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
@@ -340,7 +340,6 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
        'model_type': 'text',
        'model_settings': {'classifier_type': 'logreg'}
        'params': {
-           'solver': 'liblinear',
            'C': 10,
            'penalty': 'l2'
        },

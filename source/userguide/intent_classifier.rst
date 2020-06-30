@@ -132,7 +132,6 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
     'model_type': 'text',
     'param_selection': {
       'grid': {
-        'solver': ['liblinear'],
         'C': [0.01, 1, 100, 10000, 1000000],
         'class_weight': [
           ...
@@ -468,7 +467,6 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'classifier_type': 'logreg'
        },
        'params': {
-           'solver': 'liblinear',
            'C': 10,
            "class_bias": 0.3
        },

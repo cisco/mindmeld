@@ -22,6 +22,7 @@ test_data_7 = [
 
 @pytest.mark.parametrize("example,role_order_0,role_order_1", test_data_7)
 def test_role_classifier(home_assistant_nlp, example, role_order_0, role_order_1):
+
     intent = home_assistant_nlp.domains[example[1]].intents[example[2]]
     entity_recognizer = intent.entity_recognizer
     role_classifier = intent.entities[example[3]].role_classifier
@@ -78,15 +79,15 @@ def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_ap
 
     entity_eval = (
         nlp.domains["times_and_dates"]
-            .intents["change_alarm"]
-            .entity_recognizer.evaluate()
+        .intents["change_alarm"]
+        .entity_recognizer.evaluate()
     )
 
     role_eval = (
         nlp.domains["times_and_dates"]
-            .intents["change_alarm"]
-            .entities["sys_time"]
-            .role_classifier.evaluate()
+        .intents["change_alarm"]
+        .entities["sys_time"]
+        .role_classifier.evaluate()
     )
 
     entity_accuracy_no_cache = entity_eval.get_accuracy()
@@ -103,15 +104,15 @@ def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_ap
 
     entity_eval = (
         nlp.domains["times_and_dates"]
-            .intents["change_alarm"]
-            .entity_recognizer.evaluate()
+        .intents["change_alarm"]
+        .entity_recognizer.evaluate()
     )
 
     role_eval = (
         nlp.domains["times_and_dates"]
-            .intents["change_alarm"]
-            .entities["sys_time"]
-            .role_classifier.evaluate()
+        .intents["change_alarm"]
+        .entities["sys_time"]
+        .role_classifier.evaluate()
     )
 
     entity_accuracy_cached = entity_eval.get_accuracy()

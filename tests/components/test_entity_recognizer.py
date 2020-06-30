@@ -11,8 +11,7 @@ def test_memm_model(kwik_e_mart_app_path):
         "k": 5,
         "scoring": "accuracy",
         "grid": {
-            "solver": ["liblinear"],
-            "penalty": ["l1", "l2"],
+            "penalty": ["none", "l2"],
             "C": [0.01, 1, 100, 10000, 1000000, 100000000],
         },
     }

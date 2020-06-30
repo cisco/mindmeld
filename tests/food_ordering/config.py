@@ -12,7 +12,6 @@ INTENT_MODEL_CONFIG = {
         "type": "k-fold",
         "k": 5,
         "grid": {
-            "solver": ["liblinear"],
             "fit_intercept": [True, False],
             "C": [0.01, 1, 10, 100],
             "class_bias": [0.7, 0.3, 0],
@@ -31,7 +30,7 @@ INTENT_MODEL_CONFIG = {
 DOMAIN_MODEL_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"solver": "liblinear", "C": 10},
+    "params": {"C": 10},
     "features": {
         "bag-of-words": {"lengths": [1, 2]},
         "edge-ngrams": {"lengths": [1, 2]},
