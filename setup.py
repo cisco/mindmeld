@@ -84,9 +84,9 @@ setup(
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
         "bert": [
-            'sentence-transformers==0.2.6.1; python_version>="3.6"',
-            "elasticsearch>=7.0",
             "transformers~=2.11.0",
+            'sentence-transformers~=0.2.6; python_version>="3.6"',
+            "elasticsearch>=7.0",
         ],
     },
 )
