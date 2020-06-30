@@ -181,7 +181,7 @@ class MindMeldTokenizer:
     # TODO investigate necessity of deepcopy in train-roles
     def __deepcopy__(self, memo):
         # TODO: optimize this
-        return Tokenizer(exclude_from_norm=self.exclude_from_norm)
+        return MindMeldTokenizer(exclude_from_norm=self.exclude_from_norm)
 
     @staticmethod
     def load_ascii_folding_table():
