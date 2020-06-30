@@ -1,5 +1,6 @@
 import logging
 
+import ssl
 import aiohttp
 import requests
 
@@ -28,7 +29,8 @@ class CustomAction:
         self._config = config or {}
         self.url = self._config.get("url")
         self._cert = self._config.get("cert")
-        self._key = self._config.get("key")
+        self._public_key = self._config.get("public_key")
+        self._private_key = self._config.get("private_key")
         self.overwrite = overwrite
 
     def get_json_payload(self, request, responder):
@@ -122,12 +124,12 @@ class CustomAction:
             return False
 
     def post(self, json_data):
-        if self._cert and self._key:
+        if self._public_key and self._private_key:
             result = requests.post(
-                url=self.url, json=json_data, cert=(self._cert, self._key)
+                url=self.url, json=json_data, cert=(self._public_key, self._private_key)
             )
-        elif self._cert:
-            result = requests.post(url=self.url, json=json_data, cert=self._cert)
+        elif self._public_key:
+            result = requests.post(url=self.url, json=json_data, cert=self._public_key)
         else:
             result = requests.post(url=self.url, json=json_data)
         if result.status_code == 200:
@@ -136,8 +138,17 @@ class CustomAction:
             return result.status_code, {}
 
     async def post_async(self, json_data):
+        ssl_context = None
+        if self._cert:
+            ssl_context = ssl.create_default_context(cafile=self._cert)
+
+        if self._public_key and self._private_key:
+            ssl_context.load_cert_chain(self._public_key, self._private_key)
+
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.url, json=json_data) as response:
+            async with session.post(
+                self.url, json=json_data, ssl=ssl_context
+            ) as response:
                 if response.status == 200:
                     return 200, await response.json()
                 else:

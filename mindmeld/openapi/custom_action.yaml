@@ -179,6 +179,9 @@ definitions:
         type: object
         $ref: '#/definitions/Params'
         description: "The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager"
+      slots:
+        type: object
+        description: "The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses"
 externalDocs:
   description: "Find out more about MindMeld"
   url: "http://www.mindmeld.com"
