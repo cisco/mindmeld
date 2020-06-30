@@ -1288,17 +1288,16 @@ class EntityLabelEncoder(LabelEncoder):
 
         Args:
             tags_by_example (list): A list of tags per query
-            kwargs (dict): A dict containing atleast the "examples" key, which is a
+            kwargs (dict): A dict containing at least the "examples" key, which is a
                 list of queries to process
 
         Returns:
             list: A list of decoded labels per query
         """
         # TODO: support decoding multiple queries at once
-        system_entity_recognizer = SystemEntityRecognizer.get_instance()
         examples = kwargs["examples"]
         labels = [
-            get_entities_from_tags(examples[idx], tags, system_entity_recognizer)
+            get_entities_from_tags(examples[idx], tags, self.system_entity_recognizer)
             for idx, tags in enumerate(tags_by_example)
         ]
         return labels
