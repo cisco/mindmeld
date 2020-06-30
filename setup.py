@@ -86,7 +86,7 @@ setup(
         "bert": [
             'sentence-transformers==0.2.6.1; python_version>="3.6"',
             "elasticsearch>=7.0",
-            "tokenizers==0.7.0",
+            "transformers~=2.11.0",
         ],
     },
 )
