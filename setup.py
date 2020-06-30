@@ -83,6 +83,10 @@ setup(
             'tensorflow~=1.2; python_version < "3.7"',
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
-        "bert": ['sentence-transformers; python_version>="3.6"', "elasticsearch>=7.0"],
+        "bert": [
+            "transformers~=2.11.0",
+            'sentence-transformers~=0.2.6; python_version>="3.6"',
+            "elasticsearch>=7.0",
+        ],
     },
 )
