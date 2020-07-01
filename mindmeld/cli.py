@@ -111,8 +111,18 @@ def run_server(ctx, port, no_debug, reloader):
 @_app_cli.command("converse", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option("--context", help="JSON object to be used as the context")
-def converse(ctx, context):
-    """Starts a conversation with the app."""
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    help="Print the full metrics instead of just accuracy.",
+)
+def converse(ctx, context, verbose):
+    """
+    Starts a conversation with the app.
+    When the verbose flag is set to true, the confidences are included 
+    in the request objects passed to the intents 
+    """
 
     try:
         app = ctx.obj.get("app")
@@ -132,7 +142,7 @@ def converse(ctx, context):
             loop.run_until_complete(_converse_async(app, context))
             return
 
-        convo = Conversation(app=app, context=context)
+        convo = Conversation(app=app, context=context, verbose=verbose)
 
         while True:
             message = click.prompt("You")
