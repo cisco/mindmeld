@@ -22,7 +22,6 @@ from .app_manager import ApplicationManager
 from .cli import app_cli
 from .components._config import get_custom_action_config
 from .components.custom_action import (
-    CustomAction,
     CustomActionException,
     CustomActionSequence,
 )
@@ -168,82 +167,41 @@ class Application:
         else:
             self._dialogue_rules.append((name, handler, kwargs))
 
-    def custom_action(self, **kwargs):
-        """Adds a custom action, similar to `add_custom_action` but allows the ordering
-        of nlp entities to be more flexible.
+    def custom_action(
+        self,
+        action=None,
+        actions=None,
+        async_mode=False,
+        merge=True,
+        config=None,
+        **kwargs
+    ):
+        """Adds a custom action sequence handler for the dialogue manager.
 
-        Examples:
-            app.custom_action(intent='greeting', action='say_greeting')
-            app.custom_action(entity='person', action='greet_person')
+        Whenever the user hits this state, we invoke the sequence of custom action(s) and returns
+            the appropriate responder.
+
+        Args:
+            action (str): The name of a custom action.
+            actions (list): A list of names of custom actions.
+            async_mode (bool): Whether we should invoke this custom action asynchronously.
+            merge (bool): Whether we should merge the Responder with fields from the
+                response, otherwise we will overwrite the fields (frame, directives) accordingly.
+            config (dict): The custom action config, if different from the application's.
         """
-        action = kwargs.pop("action", None)
-        actions = kwargs.pop("actions", None)
-
         if not (action or actions):
             raise CustomActionException(
                 "`action` or `actions` must be present in arguments."
             )
 
-        self.add_custom_action_sequence(
-            [action] if action else actions,
-            async_mode=kwargs.pop("async_mode", False),
-            overwrite=kwargs.pop("overwrite", False),
-            config=kwargs.pop("config", None),
-            **kwargs
-        )
-
-    def add_custom_action(
-        self, action, async_mode=False, overwrite=False, config=None, **kwargs
-    ):
-        """Adds a custom action handler for the dialogue manager.
-
-        Whenever the user hits this state, we invoke the custom action instead and returns
-            the appropriate responder.
-
-        Args:
-            action (str): The name of the custom action
-            async_mode (bool): Whether we should invoke this custom action asynchronously
-            overwrite (bool): Whether we should overwrite the Responder with fields from the
-                response, otherwise we will extend the fields (frame, directives) accordingly.
-            config (dict): The custom action config, if different from the application's.
-        """
-        if not action:
-            raise CustomActionException("Argument `action` should not be empty.")
-
         config = config or self.custom_action_config
         if not config:
-            raise CustomActionException("Argument `config` should not be empty.")
+            raise CustomActionException(
+                "There is no configuration specified for this action."
+            )
 
-        custom_action = CustomAction(action, config, overwrite=overwrite)
-        state_name = kwargs.pop("name", "custom_action_{}".format(action))
-        if async_mode:
-            self.add_dialogue_rule(state_name, custom_action.invoke_async, **kwargs)
-        else:
-            self.add_dialogue_rule(state_name, custom_action.invoke, **kwargs)
-
-    def add_custom_action_sequence(
-        self, actions, async_mode=False, overwrite=False, config=None, **kwargs
-    ):
-        """Adds a custom action sequence handler for the dialogue manager.
-
-        Whenever the user hits this state, we invoke the sequence of custom actions and returns
-            the appropriate responder.
-
-        Args:
-            actions (list): A list of custom actions
-            async_mode (bool): Whether we should invoke this custom action asynchronously
-            overwrite (bool): Whether we should overwrite the Responder with fields from the
-                response, otherwise we will extend the fields (frame, directives) accordingly.
-            config (dict): The custom action config, if different from the application's.
-        """
-        if not actions:
-            raise CustomActionException("Argument `actions` should not be empty.")
-
-        config = config or self.custom_action_config
-        if not config:
-            raise CustomActionException("Argument `config` should not be empty.")
-
-        action_seq = CustomActionSequence(actions, config, overwrite=overwrite)
+        actions = [action] or actions
+        action_seq = CustomActionSequence(actions, config, merge=merge)
         state_name = kwargs.pop("name", "custom_actions_{}".format(actions))
         if async_mode:
             self.add_dialogue_rule(state_name, action_seq.invoke_async, **kwargs)

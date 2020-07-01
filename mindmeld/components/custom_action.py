@@ -24,14 +24,14 @@ class CustomAction:
       the directives and frame in the response.
     """
 
-    def __init__(self, name: str, config: dict, overwrite: bool = False):
+    def __init__(self, name: str, config: dict, merge: bool = True):
         self._name = name
         self._config = config or {}
         self.url = self._config.get("url")
         self._cert = self._config.get("cert")
         self._public_key = self._config.get("public_key")
         self._private_key = self._config.get("private_key")
-        self.overwrite = overwrite
+        self.merge = merge
 
     def get_json_payload(self, request, responder):
         request_json = request.to_dict()
@@ -105,14 +105,14 @@ class CustomAction:
                         field,
                         self._name,
                     )
-            if self.overwrite:
-                responder.frame = result_json.get("frame", {})
-                responder.directives = result_json.get("directives", [])
-                responder.slots = result_json.get("slots", {})
-            else:
+            if self.merge:
                 responder.frame.update(result_json.get("frame", {}))
                 responder.directives.extend(result_json.get("directives", []))
                 responder.slots.update(result_json.get("slots", {}))
+            else:
+                responder.frame = result_json.get("frame", {})
+                responder.directives = result_json.get("directives", [])
+                responder.slots = result_json.get("slots", {})
             responder.params = Params(**result_json.get("params", {}))
             return True
         else:
@@ -166,10 +166,8 @@ class CustomActionSequence:
     This class implements a sequence of custom actions
     """
 
-    def __init__(self, actions, config, overwrite=None):
-        self.actions = [
-            CustomAction(action, config, overwrite=overwrite) for action in actions
-        ]
+    def __init__(self, actions, config, merge=True):
+        self.actions = [CustomAction(action, config, merge=merge) for action in actions]
 
     def invoke(self, request, responder):
         for action in self.actions:
@@ -194,11 +192,11 @@ class CustomActionSequence:
         return "action_seq=" + str(self.actions)
 
 
-def invoke_custom_action(name, config, request, responder, overwrite=False):
-    return CustomAction(name, config, overwrite=overwrite).invoke(request, responder)
+def invoke_custom_action(name, config, request, responder, merge=True):
+    return CustomAction(name, config, merge=merge).invoke(request, responder)
 
 
-async def invoke_custom_action_async(name, config, request, responder, overwrite=False):
-    return await CustomAction(name, config, overwrite=overwrite).invoke_async(
+async def invoke_custom_action_async(name, config, request, responder, merge=True):
+    return await CustomAction(name, config, merge=merge).invoke_async(
         request, responder
     )
