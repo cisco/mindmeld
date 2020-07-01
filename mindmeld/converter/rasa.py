@@ -596,8 +596,6 @@ __all__ = ['app']
             training data may contain entities
 
         limitations:
-        - Rasa has the ability to have custom actions, which is not supported by
-        the converter.
         - Rasa has the ability to handle multiple intents per query, while Mindmeld
         does not.
         - Rasa training data may be json format, which is not currently supported.

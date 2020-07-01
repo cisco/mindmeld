@@ -200,7 +200,7 @@ class Application:
                 "There is no configuration specified for this action."
             )
 
-        actions = [action] or actions
+        actions = [action] if action else actions
         action_seq = CustomActionSequence(actions, config, merge=merge)
         state_name = kwargs.pop("name", "custom_actions_{}".format(actions))
         if async_mode:
