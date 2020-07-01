@@ -819,7 +819,7 @@ Leveraging semantic embeddings
 ------------------------------
 The question answerer capabilities described so far rely purely on text-based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the knowledge base even if the search token wasn’t present in the uploaded data.
 
-To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of provided embedders may work well enough, but if the text you are searching against has quite a bit of domain specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
+To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
 
 The settings for semantic embeddings are part of the ``QUESTION_ANSWERER_CONFIG`` in the app configuration file, ``config.py``. To use semantic embeddings, you need to specify a supported ``model_type``,  the ``model_settings``, and the fields you would like to generate embeddings for in ``embedding_fields``. The ``embedding_fields`` parameter takes a dictionary where the key is the name of your index, and the value is a list of field names or regexes to match against the field names for that index.
 
@@ -843,7 +843,7 @@ There are three available model types which leverage semantic embedders. The spe
   | Model type            | Description                                                                                                |
   +=======================+============================================================================================================+
   | embedder              | Only leverage deep semantic embedders. This option allows for using deep semantic embedders like           |
-  |                       | Sentence-BERT or GloVe for doing vector-based retrieval                                                    |
+  |                       | Sentence-BERT or GloVe for doing vector-based retrieval.                                                   |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | embedder_keyword      | Leverage a combination of deep semantic embedders and text signals in a way that's optimized for search on |
   |                       | keywords or short spans of text. GloVe may be preferable for this use case.                                |
