@@ -1387,6 +1387,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
+            verbose=self.verbose
         )
         self.history = response.history
         self.frame = response.frame
