@@ -118,7 +118,11 @@ def run_server(ctx, port, no_debug, reloader):
     help="Print the full metrics instead of just accuracy.",
 )
 def converse(ctx, context, verbose):
-    """Starts a conversation with the app."""
+    """
+    Starts a conversation with the app.
+    When the verbose flag is set to true, the confidences are included 
+    in the request objects passed to the intents 
+    """
 
     try:
         app = ctx.obj.get("app")
