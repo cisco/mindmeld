@@ -109,11 +109,19 @@ class CustomAction:
                 responder.frame.update(result_json.get("frame", {}))
                 responder.directives.extend(result_json.get("directives", []))
                 responder.slots.update(result_json.get("slots", {}))
+                params = Params(**result_json.get("params", {}))
+                responder.params.allowed_intents += tuple(params.allowed_intents)
+                responder.params.dynamic_resource.update(params.dynamic_resource)
+                responder.params.time_zone = params.time_zone
+                responder.params.language = params.language
+                responder.params.locale = params.locale
+                responder.params.target_dialogue_state = params.target_dialogue_state
+                responder.params.timestamp = params.timestamp
             else:
                 responder.frame = result_json.get("frame", {})
                 responder.directives = result_json.get("directives", [])
                 responder.slots = result_json.get("slots", {})
-            responder.params = Params(**result_json.get("params", {}))
+                responder.params = Params(**result_json.get("params", {}))
             return True
         else:
             logger.error(

@@ -481,7 +481,7 @@ def get_custom_action_config(app_path):
         )
         return custom_action_config
     except (OSError, IOError):
-        logger.info("No app configuration file found.")
+        logger.error("No app configuration file found.")
         return None
 
 
