@@ -424,7 +424,8 @@ class DialogueManager:
         res = handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if res and "dialogue_state" in res:
+        if res and isinstance(res, dict) and "dialogue_state" in res:
+            # TODO: check if this flow is executed, currently not covered in tests
             dialogue_state = ".".join([dialogue_state, res["dialogue_state"]])
         responder.dialogue_state = dialogue_state
         return responder

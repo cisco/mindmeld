@@ -10,6 +10,7 @@ Tests for custom actions.
 import pytest
 from unittest.mock import Mock, patch
 
+from mindmeld import Application
 from mindmeld.components import (
     CustomAction,
     invoke_custom_action,
@@ -217,3 +218,34 @@ async def test_invoke_custom_action_async():
         assert "request" in call_args
         assert "responder" in call_args
         assert call_args["action"] == "action_call_people"
+
+
+def test_custom_action_handler(home_assistant_nlp):
+    """Test Application.custom_action function"""
+    app = Application("home_assistant")
+    app.lazy_init(home_assistant_nlp)
+    app.custom_action_config = {"url": "some-url"}
+    app.custom_action(intent="set_thermostat", action="set-thermostat")
+    app.custom_action(default=True, action="times-and-dates")
+
+    app.app_manager.load()
+    with patch("requests.post") as mock_object:
+        mock_object.return_value = Mock()
+        mock_object.return_value.status_code = 200
+        mock_object.return_value.json.return_value = {
+            "directives": ["set-thermostat-action"]
+        }
+        # invoke set thermostat intent
+        res = app.app_manager.parse("turn it to 70 degrees")
+        assert res.directives == ["set-thermostat-action"]
+        assert mock_object.call_args[1]["url"] == "some-url"
+        assert mock_object.call_args[1]["json"]["action"] == "set-thermostat"
+
+        mock_object.return_value.json.return_value = {
+            "directives": ["time-and-dates-action"]
+        }
+        # invoke time & dates intent
+        res = app.app_manager.parse("change my alarm to 9")
+        assert res.directives == ["time-and-dates-action"]
+        assert mock_object.call_args[1]["url"] == "some-url"
+        assert mock_object.call_args[1]["json"]["action"] == "times-and-dates"
