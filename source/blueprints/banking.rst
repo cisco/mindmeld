@@ -25,15 +25,7 @@ Users should be able to securely access their banking information and complete t
 
 The conversational flows for a banking assistant can be highly complex, depending on the desired application functionality and the amount of user guidance required at each step. Anticipating all user interactions requires multiple iterations. 
 
-While a real production application will securely authenticate users, for this blueprint, we have given the option to choose from three sample users. You can specify the desired username as a parameter in the request context and if a user is not specified a random user from the sample users will be chosen.
-
-
-Sample usernames: ``splashbro30``, ``larry_l24``, ``johndoe123``
-
-.. code-block:: console
-
-  conv = Conversation(nlp=nlp, app_path='banking_assistant', context={'user_name' : 'alice'})
-
+While a real production application will securely authenticate users, for this blueprint, we have given the option to choose from three sample users: ``larry_l24``, ``johndoe123`` and ``splashbro30``. You can specify the desired username as a parameter in the request context and if a user is not specified a random user from the sample users will be chosen.
 
 Here are some examples of scripted dialogue interactions for conversational flows.
 
