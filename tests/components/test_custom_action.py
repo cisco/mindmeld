@@ -221,14 +221,13 @@ async def test_invoke_custom_action_async():
 
 
 def test_custom_action_handler(home_assistant_nlp):
-    """Test Application.custom_action function"""
+    """Test Application.custom_action handle"""
     app = Application("home_assistant")
     app.lazy_init(home_assistant_nlp)
     app.custom_action_config = {"url": "some-url"}
     app.custom_action(intent="set_thermostat", action="set-thermostat")
     app.custom_action(default=True, action="times-and-dates")
 
-    app.app_manager.load()
     with patch("requests.post") as mock_object:
         mock_object.return_value = Mock()
         mock_object.return_value.status_code = 200
@@ -249,3 +248,43 @@ def test_custom_action_handler(home_assistant_nlp):
         assert res.directives == ["time-and-dates-action"]
         assert mock_object.call_args[1]["url"] == "some-url"
         assert mock_object.call_args[1]["json"]["action"] == "times-and-dates"
+
+
+def test_custom_action_sequence(home_assistant_nlp):
+    """Test Application.custom_action handle for a sequence of actions"""
+    app = Application("home_assistant")
+    app.lazy_init(home_assistant_nlp)
+    app.custom_action_config = {"url": "some-url"}
+    app.custom_action(
+        intent="set_thermostat", actions=["set-thermostat", "clear-thermostat"]
+    )
+
+    with patch("requests.post") as mock_object:
+        mock_object.return_value = Mock()
+        mock_object.return_value.status_code = 200
+        mock_object.return_value.json.return_value = {"directives": ["some-directive"]}
+        # invoke set thermostat intent and we should expect two directives
+        res = app.app_manager.parse("turn it to 70 degrees")
+        assert res.directives == ["some-directive", "some-directive"]
+        assert mock_object.call_args[1]["url"] == "some-url"
+
+
+@pytest.mark.asyncio
+async def test_custom_action_handler_async(home_assistant_nlp):
+    """Test Application.custom_action handle with async mode"""
+    app = Application("home_assistant", async_mode=True)
+    app.lazy_init(home_assistant_nlp)
+    app.custom_action_config = {"url": "some-url"}
+    app.custom_action(intent="set_thermostat", action="set-thermostat", async_mode=True)
+    app.custom_action(default=True, action="times-and-dates", async_mode=True)
+
+    with patch("mindmeld.components.CustomAction.post_async") as mock_object:
+
+        async def mock_coroutine():
+            return 200, {"directives": ["set-thermostat-action"]}
+
+        mock_object.return_value = mock_coroutine()
+
+        # invoke set thermostat intent
+        res = await app.app_manager.parse("turn it to 70 degrees")
+        assert res.directives == ["set-thermostat-action"]
