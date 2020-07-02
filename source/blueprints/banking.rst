@@ -60,7 +60,7 @@ The full list of intents for all domains is illustrated below.
 
 .. image:: /images/banking_hierarchy.png
 
-There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined and automatically detected by MindMeld. Examples include sys_amount-of-money, sys_time, and sys_interval. Custom entities are defined by the developers of each application and detected by the models trained on the labeled data and entity gazetteer files.
+There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined and automatically detected by MindMeld. Examples include ``sys_amount-of-money``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application and detected by the models trained on the labeled data and entity gazetteer files.
 
 The banking assistant defines and uses the following custom entities in the accounts_creditcards domain:
 
