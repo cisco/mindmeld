@@ -32,7 +32,7 @@ Sample usernames: ``splashbro30``, ``larry_l24``, ``johndoe123``
 
 .. code-block:: console
 
-  conv = Conversation(nlp=nlp, app_path='banking_assistant', context={'user_name' : 'splashbro30'})
+  conv = Conversation(nlp=nlp, app_path='banking_assistant', context={'user_name' : 'alice'})
 
 
 Here are some examples of scripted dialogue interactions for conversational flows.
