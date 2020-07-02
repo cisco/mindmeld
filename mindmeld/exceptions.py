@@ -84,6 +84,13 @@ class KnowledgeBaseError(MindMeldError):
     pass
 
 
+class ElasticsearchVersionError(MindMeldError):
+    """An exception for when the user would like to use funtionality not
+    available with their version of ElasticSearch."""
+
+    pass
+
+
 class KnowledgeBaseConnectionError(KnowledgeBaseError):
     """An exception for problem connecting to knowledge base."""
 

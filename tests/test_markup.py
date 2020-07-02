@@ -69,6 +69,7 @@ def test_load_entity(query_factory):
     assert entity.entity.type == "store_name"
     assert entity.entity.text == "Elm Street"
 
+
 @pytest.mark.parametrize(
     "query",
     [
@@ -81,7 +82,7 @@ def test_load_entity(query_factory):
         "book {now|}",
         "book {now}",
         "book {now|",
-    ]
+    ],
 )
 @pytest.mark.load
 def test_load_markup_error(query_factory, query):

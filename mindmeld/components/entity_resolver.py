@@ -19,14 +19,13 @@ import hashlib
 import logging
 import os
 
-from elasticsearch5.exceptions import ConnectionError as EsConnectionError
-from elasticsearch5.exceptions import ElasticsearchException, TransportError
+from elasticsearch.exceptions import ConnectionError as EsConnectionError
+from elasticsearch.exceptions import ElasticsearchException, TransportError
 
 from ..core import Entity
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ._config import (
     DEFAULT_ES_SYNONYM_MAPPING,
-    DOC_TYPE,
     PHONETIC_ES_SYNONYM_MAPPING,
     get_app_namespace,
     get_classifier_config,
@@ -34,12 +33,14 @@ from ._config import (
 from ._elasticsearch_helpers import (
     INDEX_TYPE_KB,
     INDEX_TYPE_SYNONYM,
+    DOC_TYPE,
     create_es_client,
     delete_index,
     does_index_exist,
     get_field_names,
     get_scoped_index_name,
     load_index,
+    resolve_es_config_for_version,
 )
 
 logger = logging.getLogger(__name__)
@@ -169,6 +170,8 @@ class EntityResolver:
             if use_double_metaphone
             else DEFAULT_ES_SYNONYM_MAPPING
         )
+        es_client = es_client or create_es_client(es_host)
+        mapping = resolve_es_config_for_version(mapping, es_client)
         load_index(
             app_namespace,
             index_name,

@@ -411,15 +411,23 @@ def shared_cli():
 
 @shared_cli.command("load-kb", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option("-n", "--es-host", required=False)
+@click.option("-n", "--es-host", required=False, help="The ElasticSearch hostname.")
 @click.argument("app_namespace", required=True)
 @click.argument("index_name", required=True)
 @click.argument("data_file", required=True)
-def load_index(ctx, es_host, app_namespace, index_name, data_file):
+@click.option(
+    "--app-path",
+    required=False,
+    default=None,
+    help="Needed to access app config to generating embeddings.",
+)
+def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
     """Loads data into a question answerer index."""
 
     try:
-        QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
+        QuestionAnswerer.load_kb(
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
+        )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
