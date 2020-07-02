@@ -18,7 +18,7 @@ Working through this blueprint will teach you how to
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on a day to day basis. In a production application, the frontend would likely handle the secure user authentication and pass a token to the MindMeld server, which would allow the application to make calls to a bank's REST APIs.
+Users should be able to securely access their banking information and complete tasks as if they are conversing with a teller. They should be able to check balances, pay off credit card debt, transfer money, and carry out various other banking operations they may perform on a day to day basis. In a production application, the frontend would handle user authentication and pass a token to the MindMeld server, which would allow the application to make calls to a bank's REST APIs.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
