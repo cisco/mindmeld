@@ -460,6 +460,19 @@ class NlpConfigError(Exception):
     pass
 
 
+def get_custom_action_config(app_path):
+    if not app_path:
+        return None
+    try:
+        custom_action_config = getattr(
+            _get_config_module(app_path), "CUSTOM_ACTION_CONFIG", None
+        )
+        return custom_action_config
+    except (OSError, IOError):
+        logger.error("No app configuration file found.")
+        return None
+
+
 def get_language_config(app_path):
     if not app_path:
         return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE

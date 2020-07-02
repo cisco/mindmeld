@@ -334,3 +334,13 @@ class Request:
     nbest_transcripts_text = attr.ib(default=attr.Factory(tuple), converter=tuple)
     nbest_transcripts_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
     nbest_aligned_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
+
+    def to_dict(self):
+        return {
+            "text": self.text,
+            "domain": self.domain,
+            "intent": self.intent,
+            "context": dict(self.context),
+            "params": self.params.to_dict(),
+            "frame": dict(self.frame),
+        }

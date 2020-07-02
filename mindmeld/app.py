@@ -20,6 +20,11 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
+from .components._config import get_custom_action_config
+from .components.custom_action import (
+    CustomActionException,
+    CustomActionSequence,
+)
 from .components.dialogue import DialogueFlow, DialogueResponder, AutoEntityFilling
 from .components.request import Request
 from .server import MindMeldServer
@@ -64,6 +69,7 @@ class Application:
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
         self.async_mode = async_mode
+        self.custom_action_config = get_custom_action_config(self.app_path)
 
     @property
     def question_answerer(self):
@@ -160,6 +166,47 @@ class Application:
             self.app_manager.add_dialogue_rule(name, handler, **kwargs)
         else:
             self._dialogue_rules.append((name, handler, kwargs))
+
+    def custom_action(
+        self,
+        action=None,
+        actions=None,
+        async_mode=False,
+        merge=True,
+        config=None,
+        **kwargs
+    ):
+        """Adds a custom action sequence handler for the dialogue manager.
+
+        Whenever the user hits this state, we invoke the sequence of custom action(s) and returns
+            the appropriate responder.
+
+        Args:
+            action (str): The name of a custom action.
+            actions (list): A list of names of custom actions.
+            async_mode (bool): Whether we should invoke this custom action asynchronously.
+            merge (bool): Whether we should merge the Responder with fields from the
+                response, otherwise we will overwrite the fields (frame, directives) accordingly.
+            config (dict): The custom action config, if different from the application's.
+        """
+        if not (action or actions):
+            raise CustomActionException(
+                "`action` or `actions` must be present in arguments."
+            )
+
+        config = config or self.custom_action_config
+        if not config:
+            raise CustomActionException(
+                "There is no configuration specified for this action."
+            )
+
+        actions = [action] if action else actions
+        action_seq = CustomActionSequence(actions, config, merge=merge)
+        state_name = kwargs.pop("name", "custom_actions_{}".format(actions))
+        if async_mode:
+            self.add_dialogue_rule(state_name, action_seq.invoke_async, **kwargs)
+        else:
+            self.add_dialogue_rule(state_name, action_seq.invoke, **kwargs)
 
     def dialogue_flow(self, **kwargs):
         """Creates a dialogue flow for the application"""

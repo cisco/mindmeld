@@ -18,9 +18,17 @@ from .nlp import NaturalLanguageProcessor
 from .preprocessor import Preprocessor
 from .question_answerer import QuestionAnswerer
 from .request import Request
+from .custom_action import (
+    CustomAction,
+    CustomActionSequence,
+    invoke_custom_action,
+    invoke_custom_action_async,
+)
 
 __all__ = [
     "Conversation",
+    "CustomAction",
+    "CustomActionSequence",
     "DialogueResponder",
     "DialogueManager",
     "NaturalLanguageProcessor",
@@ -28,4 +36,6 @@ __all__ = [
     "EntityResolver",
     "Preprocessor",
     "Request",
+    "invoke_custom_action",
+    "invoke_custom_action_async",
 ]
