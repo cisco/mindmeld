@@ -28,6 +28,11 @@ Entities in MindMeld are categorized into two types:
 
 This chapter focuses on training entity recognition models for detecting all the custom entities used by your app.
 
+.. note::
+   - Currently MindMeld uses a fork of Duckling for system entity recognition. However, MindMeld Duckling binaries are only available in certain operating systems.
+   - If Duckling is not available for your OS, you can either use a dockerized version of Duckling or turn it off completely (see section below).
+   - Turning off Duckling will not have any impact on Custom Entities.
+
 Access the entity recognizer
 ----------------------------
 
