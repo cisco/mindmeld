@@ -8,7 +8,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # Pull base image.
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 ENV ES_PKG_NAME elasticsearch-5.5.1
 
@@ -21,7 +21,7 @@ RUN mkdir /root/.pip /root/.mindmeld /data
 
 # Install python pip
 RUN apt-get -y install python-pip python3-pip python-dev build-essential && \
-    apt-get -y install python-software-properties
+    apt-get -y install software-properties-common
 
 # Install Java
 RUN apt update
@@ -31,7 +31,7 @@ RUN apt install openjdk-8-jdk -y
 
 # Install duckling dependency
 RUN apt-get -y update && \
-    apt-get -y upgrade tzdata
+    DEBIAN_FRONTEND="noninteractive" apt-get -y upgrade tzdata
 
 # set JAVA_HOME
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
