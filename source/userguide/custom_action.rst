@@ -1,4 +1,4 @@
-Working with Custom Action
+Working with Custom Actions
 ==========================
 
 MindMeld 4.3 introduces Custom Actions which allow MindMeld developers to further separate their business
@@ -10,13 +10,13 @@ Why Custom Actions?
 -------------------
 
 Suppose that a team is working to build a MindMeld application and integrate it the rest of their microservices.
-However, since the rest of the microservices are written in Java, the developers want to reuse as much logic as
-possible. Since the MindMeld application is in Python, it will be a steep curve to reimplement
+Since the microservices are written in Java, the developers want to reuse as much logic as
+possible. Since the MindMeld application is in Python, they would have to re-implement their Java code to Python code.
 
 With Custom Actions, the developers can now shift the responsibility of fulfilling business logic to services that
-are outside of MindMeld applications, and these services can be implemented in any language that the developers
-desire. The developers can specify the exact conditions (for example, matching a certain domain or intent) to execute
-the custom actions and the MindMeld application will interact with the custom action servers through http requests.
+are outside of MindMeld applications, and these services can be implemented in any language.
+. The developers can specify the exact conditions (for example, matching a certain domain or intent) to execute
+the custom actions and the MindMeld application will interact with the custom action servers through http(s) requests.
 
 
 OpenAPI Specification for client-server interaction
@@ -26,7 +26,7 @@ Our client – server protocol is documented `here <https://github.com/cisco/min
 For easy viewing you can check out Swagger UI, which can also help to render OpenAPI protocol into client and server
 stubs in a variety of languages.
 
-In a broad view, each request to the Custom Action Server includes two fields: ``request`` and ``responder``. The
+Each request to the Custom Action Server includes two fields: ``request`` and ``responder``. The
 ``request`` field encapsulates information from the ``Request`` object (text, NLP information, etc.) and the
 ``responder`` field the ``Responder`` object (directives, frame, slots, params).
 
@@ -100,7 +100,7 @@ In this example, the server simply returns a reply directive for each action req
 Using Custom Actions with MindMeld applications
 -----------------------------------------------
 
-Adding a call to a custom action is simple and straight-forward:
+Add a call to a custom action as follows:
 
 .. code-block:: python
 
