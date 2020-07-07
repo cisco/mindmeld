@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.ser module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.ser module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.ser">
@@ -281,13 +273,13 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.
+<li><strong>query</strong> (<em>Query</em>) -- The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- An IANA time zone id such as 'America/Los_Angeles'.
 If not specified, the system time zone is used.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix timestamp used as the reference time.
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix timestamp used as the reference time.
 If not specified, the current system time is used. If <cite>time_zone</cite>
 is not also specified, this parameter is ignored.</li>
 </ul>
@@ -312,10 +304,10 @@ is not also specified, this parameter is ignored.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Language code</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Locale code</li>
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Language code</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Locale code</li>
 </ul>
 </td>
 </tr>
@@ -338,14 +330,14 @@ is not also specified, this parameter is ignored.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A raw sentence.</li>
-<li><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of str</em>) – The list of types (e.g. volume,             temperature) to restrict the output to. If None, include all types.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language of the sentence specified using a 639-1/2 code.
+<li><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- A raw sentence.</li>
+<li><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of str</em>) -- The list of types (e.g. volume,             temperature) to restrict the output to. If None, include all types.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language of the sentence specified using a 639-1/2 code.
 If both locale and language are provided, the locale is used. If neither are
 provided, the EN language code is used.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.             If not specified, the system time zone is used.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix millisecond timestamp used as the reference time.             If not specified, the current system time is used. If <cite>time_zone</cite>             is not also specified, this parameter is ignored.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- An IANA time zone id such as 'America/Los_Angeles'.             If not specified, the system time zone is used.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix millisecond timestamp used as the reference time.             If not specified, the current system time is used. If <cite>time_zone</cite>             is not also specified, this parameter is ignored.</li>
 </ul>
 </td>
 </tr>
@@ -376,9 +368,9 @@ provided, the EN language code is used.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query containing the entity</li>
-<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the entity</li>
-<li><strong>span</strong> (<em>Span</em>) – The character span of the entity in the query</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) -- The character span of the entity in the query</li>
 </ul>
 </td>
 </tr>
@@ -388,7 +380,7 @@ provided, the EN language code is used.</li>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">SystemEntityResolutionError</span></code></p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemEntityResolutionError</span></code></p>
 </td>
 </tr>
 </tbody>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.taggers.lstm module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.taggers.lstm module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.taggers.lstm">
@@ -274,7 +266,7 @@
 <dl class="class">
 <dt id="mindmeld.models.taggers.lstm.LstmModel">
 <em class="property">class </em><code class="descclassname">mindmeld.models.taggers.lstm.</code><code class="descname">LstmModel</code><span class="sig-paren">(</span><em>**parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/lstm.html#LstmModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.lstm.LstmModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger" title="mindmeld.models.taggers.taggers.Tagger"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.taggers.taggers.Tagger</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger" title="mindmeld.models.taggers.taggers.Tagger"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.taggers.taggers.Tagger</span></code></a></p>
 <p>This class encapsulates the bi-directional LSTM model and provides
 the correct interface for use by the tagger model</p>
 <dl class="method">
@@ -286,9 +278,9 @@ the correct interface for use by the tagger model</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_tensor</strong> (<em>tensor</em>) – The input tensor to the network</li>
-<li><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The batch size of the training data</li>
-<li><strong>char_window_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The character window size of each stride</li>
+<li><strong>input_tensor</strong> (<em>tensor</em>) -- The input tensor to the network</li>
+<li><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The batch size of the training data</li>
+<li><strong>char_window_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The character window size of each stride</li>
 </ul>
 </td>
 </tr>
@@ -311,11 +303,11 @@ the correct interface for use by the tagger model</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>batch_examples</strong> (<em>ndarray</em>) – A batch of examples</li>
-<li><strong>batch_char</strong> (<em>ndarray</em>) – A batch of character features</li>
-<li><strong>batch_gaz</strong> (<em>ndarray</em>) – A batch of gazetteer features</li>
-<li><strong>batch_seq_len</strong> (<em>ndarray</em>) – A batch of sequence length of each query</li>
-<li><strong>batch_labels</strong> (<em>ndarray</em>) – A batch of labels</li>
+<li><strong>batch_examples</strong> (<em>ndarray</em>) -- A batch of examples</li>
+<li><strong>batch_char</strong> (<em>ndarray</em>) -- A batch of character features</li>
+<li><strong>batch_gaz</strong> (<em>ndarray</em>) -- A batch of gazetteer features</li>
+<li><strong>batch_seq_len</strong> (<em>ndarray</em>) -- A batch of sequence length of each query</li>
+<li><strong>batch_labels</strong> (<em>ndarray</em>) -- A batch of labels</li>
 </ul>
 </td>
 </tr>
@@ -341,8 +333,8 @@ the correct interface for use by the tagger model</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the folder path for the entity model folder</li>
-<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The model config</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- the folder path for the entity model folder</li>
+<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The model config</li>
 </ul>
 </td>
 </tr>
@@ -360,11 +352,11 @@ deep learning model.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries</li>
-<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) -- The ModelConfig which may contain information used for feature
 extraction</li>
-<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
-<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of label sequences</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Resources which may be used for this model's feature extraction</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of label sequences</li>
 </ul>
 </td>
 </tr>
@@ -381,12 +373,45 @@ extraction</li>
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.fit">
 <code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/lstm.html#LstmModel.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.lstm.LstmModel.fit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Trains the model. X and y are the format of what is returned by extract_features. There is no
+restriction on their type or content. X should be the fully processed data with extracted
+features that are ready to be used to train the model. y should be a list of classes as
+encoded by the label_encoder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- Generally a list of feature vectors, one for each training example</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of classification labels (encoded by the label_encoder, NOT MindMeld
+entity objects)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.get_params">
 <code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/lstm.html#LstmModel.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.lstm.LstmModel.get_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets a dictionary of all of the current model parameters and their values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>deep</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- Not used, needed for sklearn compatibility</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of the model parameter names as keys and their set values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.load">
@@ -396,7 +421,7 @@ extraction</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the folder path for the entity model folder</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- the folder path for the entity model folder</td>
 </tr>
 </tbody>
 </table>
@@ -405,7 +430,21 @@ extraction</li>
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/lstm.html#LstmModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.lstm.LstmModel.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Predicts the labels from a feature matrix X. Again X is the format of what is returned by
+extract_features.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of feature vectors, one for each example</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of predicted labels (in an encoded format)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(list of classification labels)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.set_params">
@@ -417,26 +456,26 @@ are as follows:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The keys in the parameters dictionary are as follows:</li>
-<li><strong>number_of_epochs</strong> – The number of epochs to run (int)</li>
-<li><strong>batch_size</strong> – The batch size for mini-batch training (int)</li>
-<li><strong>token_lstm_hidden_state_dimension</strong> – The hidden state
+<li><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The keys in the parameters dictionary are as follows:</li>
+<li><strong>number_of_epochs</strong> -- The number of epochs to run (int)</li>
+<li><strong>batch_size</strong> -- The batch size for mini-batch training (int)</li>
+<li><strong>token_lstm_hidden_state_dimension</strong> -- The hidden state
 dimension of the LSTM cell (int)</li>
-<li><strong>learning_rate</strong> – The learning rate of the optimizer (int)</li>
-<li><strong>optimizer</strong> – The optimizer used to train the network
+<li><strong>learning_rate</strong> -- The learning rate of the optimizer (int)</li>
+<li><strong>optimizer</strong> -- The optimizer used to train the network
 is the number of entities in the dataset (str)</li>
-<li><strong>display_epoch</strong> – The number of epochs after which the
+<li><strong>display_epoch</strong> -- The number of epochs after which the
 network displays common stats like accuracy (int)</li>
-<li><strong>padding_length</strong> – The length of each query, which is
+<li><strong>padding_length</strong> -- The length of each query, which is
 fixed, so some queries will be cut short in length
 representing the word embedding, the row index
-is the word’s index (int)</li>
-<li><strong>token_embedding_dimension</strong> – The embedding dimension of the word (int)</li>
-<li><strong>token_pretrained_embedding_filepath</strong> – The pretrained embedding file-path (str)</li>
-<li><strong>dense_keep_prob</strong> – The dropout rate of the dense layers (float)</li>
-<li><strong>lstm_input_keep_prob</strong> – The dropout rate of the inputs to the LSTM cell (float)</li>
-<li><strong>lstm_output_keep_prob</strong> – The dropout rate of the outputs of the LSTM cell (float)</li>
-<li><strong>gaz_encoding_dimension</strong> – The gazetteer encoding dimension (int)</li>
+is the word's index (int)</li>
+<li><strong>token_embedding_dimension</strong> -- The embedding dimension of the word (int)</li>
+<li><strong>token_pretrained_embedding_filepath</strong> -- The pretrained embedding file-path (str)</li>
+<li><strong>dense_keep_prob</strong> -- The dropout rate of the dense layers (float)</li>
+<li><strong>lstm_input_keep_prob</strong> -- The dropout rate of the inputs to the LSTM cell (float)</li>
+<li><strong>lstm_output_keep_prob</strong> -- The dropout rate of the outputs of the LSTM cell (float)</li>
+<li><strong>gaz_encoding_dimension</strong> -- The gazetteer encoding dimension (int)</li>
 </ul>
 </td>
 </tr>
@@ -447,7 +486,8 @@ is the word’s index (int)</li>
 <dl class="method">
 <dt id="mindmeld.models.taggers.lstm.LstmModel.setup_model">
 <code class="descname">setup_model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/lstm.html#LstmModel.setup_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.lstm.LstmModel.setup_model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>&quot;Not implemented.</p>
+</dd></dl>
 
 </dd></dl>
 

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Introduction to Conversational Applications &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Introduction to Conversational Applications &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -143,6 +143,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -160,6 +161,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -256,23 +258,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="introduction-to-conversational-applications">
@@ -288,10 +280,10 @@
 </div>
 <div class="section" id="machine-learning-and-the-challenge-of-building-useful-conversational-applications">
 <h2>Machine Learning and the Challenge of Building Useful Conversational Applications<a class="headerlink" href="#machine-learning-and-the-challenge-of-building-useful-conversational-applications" title="Permalink to this headline">¶</a></h2>
-<p>Conversational applications may seem simple on the surface, but building truly useful conversational experiences is among the hardest AI challenges solvable today. The challenge lies in the inherent complexity of human language. Simple applications which support a very narrow vocabulary of commands are straightforward to build using rule-based approaches, but users nearly always find such applications trivial and tiresome. Applications that succeed in delighting users impose few constraints on a user’s vocabulary; they simply let users speak to the application as if conversing with another human. Applications like this, which understand broad-vocabulary natural language, are notoriously complex due to the inherent combinatorial complexity of language, or what’s called the <a class="reference external" href="https://en.wikipedia.org/wiki/Curse_of_dimensionality">curse of dimensionality</a>. In other words, the number of different ways a human might phrase even a simple question can quickly explode into many thousands of variations. The human brain is remarkable at making sense of many trillions of language variations in a fraction of a second with near-perfect accuracy. This same feat is all but impossible for today’s most advanced AI technology.</p>
-<p>In the past few years, machine learning approaches, namely supervised learning and <a class="reference external" href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a>, have proven effective at understanding natural language in a wide range of broad-vocabulary domains. To date, large-scale supervised learning is the only approach to yield truly useful conversational applications embraced by millions of users. All of today’s most widely used conversational services — Cortana, Siri, Google Assistant, and Alexa — rely on large-scale supervised learning. The two key ingredients of supervised learning systems are high-quality, representative training data, and state-of-the-art algorithms. If the training data reflects the range of user inputs and outputs the application experiences during normal usage, then the algorithms can learn how to recognize the important patterns in the data which dictate how to interpret each request.</p>
+<p>Conversational applications may seem simple on the surface, but building truly useful conversational experiences is among the hardest AI challenges solvable today. The challenge lies in the inherent complexity of human language. Simple applications which support a very narrow vocabulary of commands are straightforward to build using rule-based approaches, but users nearly always find such applications trivial and tiresome. Applications that succeed in delighting users impose few constraints on a user's vocabulary; they simply let users speak to the application as if conversing with another human. Applications like this, which understand broad-vocabulary natural language, are notoriously complex due to the inherent combinatorial complexity of language, or what's called the <a class="reference external" href="https://en.wikipedia.org/wiki/Curse_of_dimensionality">curse of dimensionality</a>. In other words, the number of different ways a human might phrase even a simple question can quickly explode into many thousands of variations. The human brain is remarkable at making sense of many trillions of language variations in a fraction of a second with near-perfect accuracy. This same feat is all but impossible for today's most advanced AI technology.</p>
+<p>In the past few years, machine learning approaches, namely supervised learning and <a class="reference external" href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a>, have proven effective at understanding natural language in a wide range of broad-vocabulary domains. To date, large-scale supervised learning is the only approach to yield truly useful conversational applications embraced by millions of users. All of today's most widely used conversational services — Cortana, Siri, Google Assistant, and Alexa — rely on large-scale supervised learning. The two key ingredients of supervised learning systems are high-quality, representative training data, and state-of-the-art algorithms. If the training data reflects the range of user inputs and outputs the application experiences during normal usage, then the algorithms can learn how to recognize the important patterns in the data which dictate how to interpret each request.</p>
 <p>It is important to remember that for supervised learning, any application is only as smart as its underlying data. No machine learning technology that exists today is capable of demonstrating intelligence not already reflected in its training data. To build a useful conversational application, it must first be possible and practical to collect training data that comprehensively illustrates the desired usage behavior. For applications where representative training data is abundant, advanced multi-layered neural network techniques like deep learning can likely be enlisted to give impressive results. For applications with modest amounts of data, a range of conventional machine learning techniques can likely be employed to deliver acceptable performance.</p>
-<p>For language understanding applications, thousands or millions of training examples are typically required in order to illuminate the large number of language permutations which appear in actual user natural language requests. While AI futurists envision that someday general purpose or ‘strong’ AI may enable broad vocabulary language understanding out-of-the-box without requiring domain-by-domain training, today’s most effective AI requires each application domain to have its own set of representative training data.</p>
+<p>For language understanding applications, thousands or millions of training examples are typically required in order to illuminate the large number of language permutations which appear in actual user natural language requests. While AI futurists envision that someday general purpose or 'strong' AI may enable broad vocabulary language understanding out-of-the-box without requiring domain-by-domain training, today's most effective AI requires each application domain to have its own set of representative training data.</p>
 <p>Faced with the challenges of conversational interface design and the need for sufficient quantity and quality of training data, developers and companies struggle to create reliable and useful conversational applications. In fact, the vast majority of attempts to date have failed. This woeful track record can no doubt be traced to the dearth of tools and best practices companies could use to find the path to success. A new playbook and a new generation of tools is desperately needed to help organizations chart a fruitful course on the new frontier of conversational application design.</p>
 </div>
 </div>

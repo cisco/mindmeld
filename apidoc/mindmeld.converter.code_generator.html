@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.converter.code_generator module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.converter.code_generator module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.converter.code_generator">
@@ -274,7 +266,7 @@
 <dl class="class">
 <dt id="mindmeld.converter.code_generator.CodeGenerator">
 <em class="property">class </em><code class="descclassname">mindmeld.converter.code_generator.</code><code class="descname">CodeGenerator</code><a class="reference internal" href="../_modules/mindmeld/converter/code_generator.html#CodeGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.code_generator.CodeGenerator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This class contains primitive python functions to generate
 python code</p>
 <dl class="method">
@@ -307,7 +299,7 @@ python code</p>
 <dl class="class">
 <dt id="mindmeld.converter.code_generator.MindmeldCodeGenerator">
 <em class="property">class </em><code class="descclassname">mindmeld.converter.code_generator.</code><code class="descname">MindmeldCodeGenerator</code><a class="reference internal" href="../_modules/mindmeld/converter/code_generator.html#MindmeldCodeGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.code_generator.MindmeldCodeGenerator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.converter.code_generator.CodeGenerator" title="mindmeld.converter.code_generator.CodeGenerator"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.converter.code_generator.CodeGenerator</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.converter.code_generator.CodeGenerator" title="mindmeld.converter.code_generator.CodeGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.converter.code_generator.CodeGenerator</span></code></a></p>
 <p>This class generates Mindmeld specific python code blocks</p>
 <dl class="method">
 <dt id="mindmeld.converter.code_generator.MindmeldCodeGenerator.generate_follow_up">

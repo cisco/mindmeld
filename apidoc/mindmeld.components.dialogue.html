@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.dialogue module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.dialogue module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.dialogue">
@@ -275,32 +267,50 @@
 <dl class="exception">
 <dt id="mindmeld.components.dialogue.DialogueStateException">
 <em class="property">exception </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DialogueStateException</code><span class="sig-paren">(</span><em>message=None</em>, <em>target_dialogue_state=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueStateException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.components.dialogue.AutoEntityFilling">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">AutoEntityFilling</code><span class="sig-paren">(</span><em>entrance_handler</em>, <em>form</em>, <em>app</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#AutoEntityFilling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.AutoEntityFilling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
 (AEF) that allows developers to prompt users for completing the missing
 requirements for entity slots.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.AutoEntityFilling.app">
 <code class="descname">app</code><a class="headerlink" href="#mindmeld.components.dialogue.AutoEntityFilling.app" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Application</em> – The application that initializes this flow.</p>
+<dd><p><em>Application</em> -- The application that initializes this flow.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.dialogue.AutoEntityFilling.call_async">
+<code class="descname">call_async</code><span class="sig-paren">(</span><em>request</em>, <em>responder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#AutoEntityFilling.call_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.AutoEntityFilling.call_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>The slot-filling call for asynchronous apps</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> (<em>Request</em>) -- The request object.</li>
+<li><strong>responder</strong> (<em>DialogueResponder</em>) -- The responder object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.components.dialogue.Conversation">
-<em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">Conversation</code><span class="sig-paren">(</span><em>app=None</em>, <em>app_path=None</em>, <em>nlp=None</em>, <em>context=None</em>, <em>default_params=None</em>, <em>force_sync=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#Conversation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.Conversation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">Conversation</code><span class="sig-paren">(</span><em>app=None</em>, <em>app_path=None</em>, <em>nlp=None</em>, <em>context=None</em>, <em>default_params=None</em>, <em>force_sync=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#Conversation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.Conversation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The conversation object is a very basic MindMeld client.</p>
 <p>It can be useful for testing out dialogue flows in python.</p>
 <p class="rubric">Example</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;path/to/my/app&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;path/to/my/app&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
 <span class="go">[&#39;Hello. I can help you find store hours. How can I help?&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Is the store on elm open?&#39;</span><span class="p">)</span>
@@ -310,31 +320,37 @@ requirements for entity slots.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.Conversation.history">
 <code class="descname">history</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.history" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – The history of the conversation. Starts with the most recent message.</p>
+<dd><p><em>list</em> -- The history of the conversation. Starts with the most recent message.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.Conversation.context">
 <code class="descname">context</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.context" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – The context of the conversation, containing user context.</p>
+<dd><p><em>dict</em> -- The context of the conversation, containing user context.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.Conversation.default_params">
 <code class="descname">default_params</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.default_params" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Params</em> – The default params to use with each turn. These             defaults will be overridden by params passed for each turn.</p>
+<dd><p><em>Params</em> -- The default params to use with each turn. These             defaults will be overridden by params passed for each turn.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.Conversation.params">
 <code class="descname">params</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.params" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>FrozenParams</em> – The params returned by the most recent turn.</p>
+<dd><p><em>FrozenParams</em> -- The params returned by the most recent turn.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.Conversation.force_sync">
 <code class="descname">force_sync</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.force_sync" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Force synchronous return for <cite>say()</cite> and <cite>process()</cite>             even when app is in async mode.</p>
+<dd><p><em>bool</em> -- Force synchronous return for <cite>say()</cite> and <cite>process()</cite>             even when app is in async mode.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.components.dialogue.Conversation.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#mindmeld.components.dialogue.Conversation.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool, optional</em> -- If True, returns class probabilities along with class                 prediction.</p>
 </dd></dl>
 
 <dl class="method">
@@ -348,10 +364,10 @@ the response.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text of a message.</li>
-<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The params to use with this message, overriding any defaults
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text of a message.</li>
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The params to use with this message, overriding any defaults
 which may have been set.</li>
-<li><strong>force_sync</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Force synchronous response
+<li><strong>force_sync</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- Force synchronous response
 even when app is in async mode.</li>
 </ul>
 </td>
@@ -383,10 +399,10 @@ returns the extracted messages from the directives.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text of a message.</li>
-<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The params to use with this message,
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text of a message.</li>
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The params to use with this message,
 overriding any defaults which may have been set.</li>
-<li><strong>force_sync</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Force synchronous response
+<li><strong>force_sync</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- Force synchronous response
 even when app is in async mode.</li>
 </ul>
 </td>
@@ -406,7 +422,7 @@ even when app is in async mode.</li>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueFlow">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DialogueFlow</code><span class="sig-paren">(</span><em>name</em>, <em>entrance_handler</em>, <em>app</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueFlow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueFlow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.dialogue.DialogueManager" title="mindmeld.components.dialogue.DialogueManager"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.dialogue.DialogueManager</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.dialogue.DialogueManager" title="mindmeld.components.dialogue.DialogueManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.dialogue.DialogueManager</span></code></a></p>
 <p>A special dialogue manager subclass used to implement dialogue flows.
 Dialogue flows allow developers to implement multiple turn interactions
 where only a subset of dialogue states should be accessible or where
@@ -414,13 +430,13 @@ different dialogue rules should apply.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueFlow.app">
 <code class="descname">app</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueFlow.app" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Application</em> – The application that initializes this flow.</p>
+<dd><p><em>Application</em> -- The application that initializes this flow.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueFlow.exit_flow_states">
 <code class="descname">exit_flow_states</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueFlow.exit_flow_states" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – The list of exit states.</p>
+<dd><p><em>list</em> -- The list of exit states.</p>
 </dd></dl>
 
 <dl class="method">
@@ -455,7 +471,7 @@ different dialogue rules should apply.</p>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueFlow.logger">
-<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueFlow (NOTSET)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueFlow.logger" title="Permalink to this definition">¶</a></dt>
+<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueFlow (WARNING)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueFlow.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class logger.</p>
 </dd></dl>
 
@@ -470,7 +486,7 @@ different dialogue rules should apply.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueManager">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DialogueManager</code><span class="sig-paren">(</span><em>responder_class=None</em>, <em>async_mode=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueManager.add_dialogue_rule">
 <code class="descname">add_dialogue_rule</code><span class="sig-paren">(</span><em>name</em>, <em>handler</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueManager.add_dialogue_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueManager.add_dialogue_rule" title="Permalink to this definition">¶</a></dt>
@@ -480,9 +496,9 @@ different dialogue rules should apply.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the dialogue state.</li>
-<li><strong>handler</strong> (<em>function</em>) – The dialogue state handler function.</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A list of options to be passed to the DialogueStateRule initializer.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the dialogue state.</li>
+<li><strong>handler</strong> (<em>function</em>) -- The dialogue state handler function.</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A list of options to be passed to the DialogueStateRule initializer.</li>
 </ul>
 </td>
 </tr>
@@ -500,7 +516,7 @@ registered first will be called first.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>middleware</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.8)"><em>callable</em></a>) – A dialogue manager middleware
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>middleware</strong> (<em>callable</em>) -- A dialogue manager middleware
 function.</td>
 </tr>
 </tbody>
@@ -516,9 +532,9 @@ function.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>request</strong> (<em>Request</em>) – The request object.</li>
-<li><strong>responder</strong> (<em>DialogueResponder</em>) – The responder object.</li>
-<li><strong>target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The target dialogue state.</li>
+<li><strong>request</strong> (<em>Request</em>) -- The request object.</li>
+<li><strong>responder</strong> (<em>DialogueResponder</em>) -- The responder object.</li>
+<li><strong>target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The target dialogue state.</li>
 </ul>
 </td>
 </tr>
@@ -553,7 +569,7 @@ dialogue state setting and reselect a handler, following a new target dialogue s
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – a dialogue_state name to push system into</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- a dialogue_state name to push system into</td>
 </tr>
 </tbody>
 </table>
@@ -561,7 +577,7 @@ dialogue state setting and reselect a handler, following a new target dialogue s
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueManager.logger">
-<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueManager (NOTSET)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueManager.logger" title="Permalink to this definition">¶</a></dt>
+<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueManager (WARNING)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueManager.logger" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -569,13 +585,13 @@ dialogue state setting and reselect a handler, following a new target dialogue s
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueResponder">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DialogueResponder</code><span class="sig-paren">(</span><em>frame=None</em>, <em>params=None</em>, <em>history=None</em>, <em>slots=None</em>, <em>request=None</em>, <em>dialogue_state=None</em>, <em>directives=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The dialogue responder helps generate directives and fill slots in the
 system-generated natural language responses.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueResponder.DirectiveNames">
 <em class="property">class </em><code class="descname">DirectiveNames</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.DirectiveNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The list of directive names.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueResponder.DirectiveNames.LIST">
@@ -617,7 +633,7 @@ system-generated natural language responses.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueResponder.DirectiveTypes">
 <em class="property">class </em><code class="descname">DirectiveTypes</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.DirectiveTypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The list of directive types.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueResponder.DirectiveTypes.ACTION">
@@ -634,14 +650,14 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.act">
 <code class="descname">act</code><span class="sig-paren">(</span><em>name</em>, <em>payload=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.act" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an arbitrary directive of type ‘action’.</p>
+<dd><p>Adds an arbitrary directive of type 'action'.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the directive.</li>
-<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – The payload for the action.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the directive.</li>
+<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- The payload for the action.</li>
 </ul>
 </td>
 </tr>
@@ -658,9 +674,9 @@ system-generated natural language responses.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the directive.</li>
-<li><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the directive.</li>
-<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – The payload for the view.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the directive.</li>
+<li><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of the directive.</li>
+<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- The payload for the view.</li>
 </ul>
 </td>
 </tr>
@@ -671,14 +687,14 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.display">
 <code class="descname">display</code><span class="sig-paren">(</span><em>name</em>, <em>payload=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.display" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an arbitrary directive of type ‘view’.</p>
+<dd><p>Adds an arbitrary directive of type 'view'.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the directive.</li>
-<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – The payload for the view.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the directive.</li>
+<li><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- The payload for the view.</li>
 </ul>
 </td>
 </tr>
@@ -695,12 +711,12 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.list">
 <code class="descname">list</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘list’ view directive.</p>
+<dd><p>Adds a 'list' view directive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The list of dictionary objects.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- The list of dictionary objects.</td>
 </tr>
 </tbody>
 </table>
@@ -709,7 +725,7 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.listen">
 <code class="descname">listen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.listen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.listen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘listen’ directive.</p>
+<dd><p>Adds a 'listen' directive.</p>
 </dd></dl>
 
 <dl class="method">
@@ -720,7 +736,7 @@ system-generated natural language responses.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text of the reply.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text of the reply.</td>
 </tr>
 </tbody>
 </table>
@@ -729,12 +745,12 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.reply">
 <code class="descname">reply</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.reply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.reply" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘reply’ directive.</p>
+<dd><p>Adds a 'reply' directive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text of the reply.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text of the reply.</td>
 </tr>
 </tbody>
 </table>
@@ -743,7 +759,7 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.reset">
 <code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘reset’ directive.</p>
+<dd><p>Adds a 'reset' directive.</p>
 </dd></dl>
 
 <dl class="method">
@@ -754,7 +770,7 @@ system-generated natural language responses.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directive</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A directive.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directive</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A directive.</td>
 </tr>
 </tbody>
 </table>
@@ -763,12 +779,12 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.sleep">
 <code class="descname">sleep</code><span class="sig-paren">(</span><em>delay=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.sleep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.sleep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘sleep’ directive.</p>
+<dd><p>Adds a 'sleep' directive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>delay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The amount of milliseconds to wait before putting the client to sleep.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>delay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The amount of milliseconds to wait before putting the client to sleep.</td>
 </tr>
 </tbody>
 </table>
@@ -777,12 +793,12 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.speak">
 <code class="descname">speak</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.speak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.speak" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘speak’ directive.</p>
+<dd><p>Adds a 'speak' directive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to speak aloud.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to speak aloud.</td>
 </tr>
 </tbody>
 </table>
@@ -791,12 +807,12 @@ system-generated natural language responses.</p>
 <dl class="method">
 <dt id="mindmeld.components.dialogue.DialogueResponder.suggest">
 <code class="descname">suggest</code><span class="sig-paren">(</span><em>suggestions</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueResponder.suggest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueResponder.suggest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a ‘suggestions’ directive.</p>
+<dd><p>Adds a 'suggestions' directive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>suggestions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of suggestions.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>suggestions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of suggestions.</td>
 </tr>
 </tbody>
 </table>
@@ -825,43 +841,43 @@ system-generated natural language responses.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DialogueStateRule">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DialogueStateRule</code><span class="sig-paren">(</span><em>dialogue_state</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DialogueStateRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A rule that determines a dialogue state. Each rule represents a pattern that must match in
 order to invoke a particular dialogue state.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.dialogue_state">
 <code class="descname">dialogue_state</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.dialogue_state" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the dialogue state.</p>
+<dd><p><em>str</em> -- The name of the dialogue state.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the domain to match against.</p>
+<dd><p><em>str</em> -- The name of the domain to match against.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.entity_types">
 <code class="descname">entity_types</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.entity_types" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>set</em> – The set of entity types to match against.</p>
+<dd><p><em>set</em> -- The set of entity types to match against.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.intent">
 <code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.intent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the intent to match against.</p>
+<dd><p><em>str</em> -- The name of the intent to match against.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.targeted_only">
 <code class="descname">targeted_only</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.targeted_only" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Whether the state is targeted only.</p>
+<dd><p><em>bool</em> -- Whether the state is targeted only.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.default">
 <code class="descname">default</code><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.default" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Whether this is the default state.</p>
+<dd><p><em>bool</em> -- Whether this is the default state.</p>
 </dd></dl>
 
 <dl class="method">
@@ -872,7 +888,7 @@ order to invoke a particular dialogue state.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>Request</em>) – A request object.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>Request</em>) -- A request object.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Whether or not the context matches.</td>
 </tr>
@@ -928,7 +944,7 @@ default rule, domains, intents, entity types, entity mappings.</p>
 
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DialogueStateRule.logger">
-<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueStateRule (NOTSET)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.logger" title="Permalink to this definition">¶</a></dt>
+<code class="descname">logger</code><em class="property"> = &lt;Logger mindmeld.components.dialogue.DialogueStateRule (WARNING)&gt;</em><a class="headerlink" href="#mindmeld.components.dialogue.DialogueStateRule.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class logger.</p>
 </dd></dl>
 
@@ -937,7 +953,7 @@ default rule, domains, intents, entity types, entity mappings.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DirectiveNames">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DirectiveNames</code><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DirectiveNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DirectiveNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A constants object for directive names.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DirectiveNames.LIST">
@@ -986,7 +1002,7 @@ default rule, domains, intents, entity types, entity mappings.</p>
 <dl class="class">
 <dt id="mindmeld.components.dialogue.DirectiveTypes">
 <em class="property">class </em><code class="descclassname">mindmeld.components.dialogue.</code><code class="descname">DirectiveTypes</code><a class="reference internal" href="../_modules/mindmeld/components/dialogue.html#DirectiveTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.dialogue.DirectiveTypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A constants object for directive types.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.dialogue.DirectiveTypes.ACTION">

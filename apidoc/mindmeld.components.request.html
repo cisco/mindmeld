@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.request module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.request module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,76 +252,66 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.request">
 <span id="mindmeld-components-request-module"></span><h1>mindmeld.components.request module<a class="headerlink" href="#module-mindmeld.components.request" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="mindmeld.components.request.FrozenParams">
-<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">FrozenParams</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#FrozenParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.FrozenParams" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.request.Params" title="mindmeld.components.request.Params"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.request.Params</span></code></a></p>
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">FrozenParams</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#FrozenParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.FrozenParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.request.Params" title="mindmeld.components.request.Params"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.request.Params</span></code></a></p>
 <p>An immutable version of the Params object.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.allowed_intents">
 <code class="descname">allowed_intents</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.allowed_intents" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list, str</em> – A list of intents that you can set to force the language
+<dd><p><em>list, str</em> -- A list of intents that you can set to force the language
 processor to choose from.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.target_dialogue_state">
 <code class="descname">target_dialogue_state</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.target_dialogue_state" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the dialogue handler that you want to reach in
+<dd><p><em>str</em> -- The name of the dialogue handler that you want to reach in
 the next turn.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.time_zone">
 <code class="descname">time_zone</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.time_zone" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of an IANA time zone, such as ‘America/Los_Angeles’, or
-‘Asia/Kolkata’.</p>
+<dd><p><em>str</em> -- The name of an IANA time zone, such as 'America/Los_Angeles', or
+'Asia/Kolkata'.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.language">
 <code class="descname">language</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.language" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The language code representing ISO 639-1/2 language codes</p>
+<dd><p><em>str</em> -- The language code representing ISO 639-1/2 language codes</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.locale">
 <code class="descname">locale</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.locale" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The locale representing the ISO 639-1/2 language code and
+<dd><p><em>str, optional</em> -- The locale representing the ISO 639-1/2 language code and
 ISO3166 alpha 2 country code separated by an underscore character.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.timestamp">
 <code class="descname">timestamp</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>long</em> – A unix time stamp for the request accurate to the nearest second.</p>
+<dd><p><em>long</em> -- A unix time stamp for the request accurate to the nearest second.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.FrozenParams.dynamic_resource">
 <code class="descname">dynamic_resource</code><a class="headerlink" href="#mindmeld.components.request.FrozenParams.dynamic_resource" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary containing data used to influence the language
+<dd><p><em>dict</em> -- A dictionary containing data used to influence the language
 classifiers by adding resource data for the given turn.</p>
 </dd></dl>
 
@@ -327,54 +319,54 @@ classifiers by adding resource data for the given turn.</p>
 
 <dl class="class">
 <dt id="mindmeld.components.request.Params">
-<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Params</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=NOTHING</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#Params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Params</code><span class="sig-paren">(</span><em>*</em>, <em>allowed_intents=NOTHING</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=NOTHING</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A class that contains parameters that modify how the user query is parsed.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.allowed_intents">
 <code class="descname">allowed_intents</code><a class="headerlink" href="#mindmeld.components.request.Params.allowed_intents" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list, str</em> – A list of intents that you can set to force the language
+<dd><p><em>list, str</em> -- A list of intents that you can set to force the language
 processor to choose from.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.target_dialogue_state">
 <code class="descname">target_dialogue_state</code><a class="headerlink" href="#mindmeld.components.request.Params.target_dialogue_state" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the dialogue handler that you want to reach in
+<dd><p><em>str</em> -- The name of the dialogue handler that you want to reach in
 the next turn.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.time_zone">
 <code class="descname">time_zone</code><a class="headerlink" href="#mindmeld.components.request.Params.time_zone" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of an IANA time zone, such as ‘America/Los_Angeles’, or
-‘Asia/Kolkata’.</p>
+<dd><p><em>str</em> -- The name of an IANA time zone, such as 'America/Los_Angeles', or
+'Asia/Kolkata'.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.timestamp">
 <code class="descname">timestamp</code><a class="headerlink" href="#mindmeld.components.request.Params.timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>long</em> – A unix time stamp for the request accurate to the nearest second.</p>
+<dd><p><em>long</em> -- A unix time stamp for the request accurate to the nearest second.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.locale">
 <code class="descname">locale</code><a class="headerlink" href="#mindmeld.components.request.Params.locale" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The locale representing the ISO 639-1/2 language code and ISO3166
+<dd><p><em>str, optional</em> -- The locale representing the ISO 639-1/2 language code and ISO3166
 alpha 2 country code separated by an underscore character.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.language">
 <code class="descname">language</code><a class="headerlink" href="#mindmeld.components.request.Params.language" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The language code representing ISO 639-1/2
+<dd><p><em>str, optional</em> -- The language code representing ISO 639-1/2
 language codes.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Params.dynamic_resource">
 <code class="descname">dynamic_resource</code><a class="headerlink" href="#mindmeld.components.request.Params.dynamic_resource" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary containing data used to influence the language
+<dd><p><em>dict</em> -- A dictionary containing data used to influence the language
 classifiers by adding resource data for the given turn.</p>
 </dd></dl>
 
@@ -387,14 +379,14 @@ classifiers by adding resource data for the given turn.</p>
 <dt id="mindmeld.components.request.Params.validate_dm_params">
 <code class="descname">validate_dm_params</code><span class="sig-paren">(</span><em>handler_map</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Params.validate_dm_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Params.validate_dm_params" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
-<dt>Validate that the value of the ‘target_dialogue_state’ parameter is a valid dialogue state</dt>
+<dt>Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state</dt>
 <dd>for the application and returns that value in a dictionary.</dd>
 </dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>handler_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Mapping from dialogue state to the function handler that gets
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>handler_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Mapping from dialogue state to the function handler that gets
 called when in the state.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">single item dictionary with the parameter value if valid and None if not.</td>
@@ -432,7 +424,7 @@ called when in the state.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the parameter to be validated.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Name of the parameter to be validated.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
 <dt>True/False depending on success of the validation, None if the param name does</dt>
@@ -450,40 +442,40 @@ called when in the state.</td>
 
 <dl class="class">
 <dt id="mindmeld.components.request.Request">
-<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Request</code><span class="sig-paren">(</span><em>*</em>, <em>domain=None</em>, <em>intent=None</em>, <em>entities=NOTHING</em>, <em>history=NOTHING</em>, <em>text=None</em>, <em>frame=&lt;immutables.Map({})&gt;</em>, <em>params=FrozenParams(allowed_intents=()</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;)</em>, <em>context=&lt;immutables.Map({})&gt;</em>, <em>confidences=&lt;immutables.Map({})&gt;</em>, <em>nbest_transcripts_text=NOTHING</em>, <em>nbest_transcripts_entities=NOTHING</em>, <em>nbest_aligned_entities=NOTHING</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/mindmeld/components/request.html#Request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">mindmeld.components.request.</code><code class="descname">Request</code><span class="sig-paren">(</span><em>*</em>, <em>domain=None</em>, <em>intent=None</em>, <em>entities=NOTHING</em>, <em>history=NOTHING</em>, <em>text=None</em>, <em>frame=&lt;immutables.Map({})&gt;</em>, <em>params=FrozenParams(allowed_intents=()</em>, <em>target_dialogue_state=None</em>, <em>time_zone=None</em>, <em>timestamp=0</em>, <em>language=None</em>, <em>locale=None</em>, <em>dynamic_resource=&lt;immutables.Map({})&gt;)</em>, <em>context=&lt;immutables.Map({})&gt;</em>, <em>confidences=&lt;immutables.Map({})&gt;</em>, <em>nbest_transcripts_text=NOTHING</em>, <em>nbest_transcripts_entities=NOTHING</em>, <em>nbest_aligned_entities=NOTHING</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The Request is an object passed in through the Dialogue Manager and contains all the
 information provided by the application client for the dialogue handler to act on. Note: the
 Request object is read-only since it represents the client state, which should not be mutated.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.domains">
 <code class="descname">domains</code><a class="headerlink" href="#mindmeld.components.request.Request.domains" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – Domain of the current query.</p>
+<dd><p><em>str</em> -- Domain of the current query.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.intent">
 <code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.request.Request.intent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – Intent of the current query.</p>
+<dd><p><em>str</em> -- Intent of the current query.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.entities">
 <code class="descname">entities</code><a class="headerlink" href="#mindmeld.components.request.Request.entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of entities in the current query.</p>
+<dd><p><em>list</em> -- A list of entities in the current query.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.history">
 <code class="descname">history</code><a class="headerlink" href="#mindmeld.components.request.Request.history" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – List of previous and current responder objects (de-serialized) up to the
+<dd><p><em>list</em> -- List of previous and current responder objects (de-serialized) up to the
 current conversation.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.text">
 <code class="descname">text</code><a class="headerlink" href="#mindmeld.components.request.Request.text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The query text.</p>
+<dd><p><em>str</em> -- The query text.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -495,7 +487,7 @@ current conversation.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.params">
 <code class="descname">params</code><a class="headerlink" href="#mindmeld.components.request.Request.params" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Params</em> – An object that modifies how MindMeld process the current turn.</p>
+<dd><p><em>Params</em> -- An object that modifies how MindMeld process the current turn.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -508,29 +500,34 @@ application from the client in the request.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.confidences">
 <code class="descname">confidences</code><a class="headerlink" href="#mindmeld.components.request.Request.confidences" title="Permalink to this definition">¶</a></dt>
-<dd><p>Immutables Map of keys <code class="docutils literal"><span class="pre">domains</span></code>, <code class="docutils literal"><span class="pre">intents</span></code>, <code class="docutils literal"><span class="pre">entities</span></code> and <code class="docutils literal"><span class="pre">roles</span></code>
+<dd><p>Immutables Map of keys <code class="docutils literal notranslate"><span class="pre">domains</span></code>, <code class="docutils literal notranslate"><span class="pre">intents</span></code>, <code class="docutils literal notranslate"><span class="pre">entities</span></code> and <code class="docutils literal notranslate"><span class="pre">roles</span></code>
 containing confidence probabilities across all labels for each classifier.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.nbest_transcripts_text">
 <code class="descname">nbest_transcripts_text</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_transcripts_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – List of alternate n-best transcripts from an ASR system</p>
+<dd><p><em>tuple</em> -- List of alternate n-best transcripts from an ASR system</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.nbest_transcripts_entities">
 <code class="descname">nbest_transcripts_entities</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_transcripts_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – List of lists of extracted entities for each of the
+<dd><p><em>tuple</em> -- List of lists of extracted entities for each of the
 n-best transcripts.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.request.Request.nbest_aligned_entities">
 <code class="descname">nbest_aligned_entities</code><a class="headerlink" href="#mindmeld.components.request.Request.nbest_aligned_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – List of lists of aligned entities for each of the n-best
+<dd><p><em>tuple</em> -- List of lists of aligned entities for each of the n-best
 transcripts.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.components.request.Request.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/request.html#Request.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.request.Request.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

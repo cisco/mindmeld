@@ -273,6 +273,28 @@ Blueprint Applications
 
    10. Testing and Deployment
 
+ Banking Assistant
+
+   1. The Use Case
+
+   2. Example Dialogue Interactions
+
+   3. Domain-Intent-Entity Hierarchy
+
+   4. Dialogue States
+
+   5. Knowledge Base
+
+   6. Training Data
+
+   7. Training the NLP Classifiers
+
+   8. Parser Configuration
+
+   9. Using the Question Answerer
+
+   10. Testing and Deployment
+
 User Guide
 
  Getting Started
@@ -453,6 +475,8 @@ User Guide
 
    Dealing with unstructured text
 
+   Leveraging semantic embeddings
+
  Working with the Dialogue Manager
 
    Dialogue States
@@ -474,6 +498,20 @@ User Guide
    Asynchronous Dialogue State Handlers and Middleware
 
    Next Steps
+
+ Working with Custom Actions
+
+   Why Custom Actions?
+
+   OpenAPI Specification for client-server interaction
+
+   Configure Custom Actions for your MindMeld application
+
+   A Simple Custom Action Server
+
+   Using Custom Actions with MindMeld applications
+
+   Calling Individual Custom Actions inside a MindMeld application
 
  Internationalization support
 

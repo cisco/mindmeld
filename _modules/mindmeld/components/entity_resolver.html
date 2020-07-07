@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.entity_resolver &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.entity_resolver &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -255,14 +257,13 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">elasticsearch5.exceptions</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
-<span class="kn">from</span> <span class="nn">elasticsearch5.exceptions</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch.exceptions</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch.exceptions</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
 
 <span class="kn">from</span> <span class="nn">..core</span> <span class="k">import</span> <span class="n">Entity</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">EntityResolverConnectionError</span><span class="p">,</span> <span class="n">EntityResolverError</span>
 <span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_ES_SYNONYM_MAPPING</span><span class="p">,</span>
-    <span class="n">DOC_TYPE</span><span class="p">,</span>
     <span class="n">PHONETIC_ES_SYNONYM_MAPPING</span><span class="p">,</span>
     <span class="n">get_app_namespace</span><span class="p">,</span>
     <span class="n">get_classifier_config</span><span class="p">,</span>
@@ -270,12 +271,14 @@
 <span class="kn">from</span> <span class="nn">._elasticsearch_helpers</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">INDEX_TYPE_KB</span><span class="p">,</span>
     <span class="n">INDEX_TYPE_SYNONYM</span><span class="p">,</span>
+    <span class="n">DOC_TYPE</span><span class="p">,</span>
     <span class="n">create_es_client</span><span class="p">,</span>
     <span class="n">delete_index</span><span class="p">,</span>
     <span class="n">does_index_exist</span><span class="p">,</span>
     <span class="n">get_field_names</span><span class="p">,</span>
     <span class="n">get_scoped_index_name</span><span class="p">,</span>
     <span class="n">load_index</span><span class="p">,</span>
+    <span class="n">resolve_es_config_for_version</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -405,6 +408,8 @@
             <span class="k">if</span> <span class="n">use_double_metaphone</span>
             <span class="k">else</span> <span class="n">DEFAULT_ES_SYNONYM_MAPPING</span>
         <span class="p">)</span>
+        <span class="n">es_client</span> <span class="o">=</span> <span class="n">es_client</span> <span class="ow">or</span> <span class="n">create_es_client</span><span class="p">(</span><span class="n">es_host</span><span class="p">)</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="n">resolve_es_config_for_version</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">es_client</span><span class="p">)</span>
         <span class="n">load_index</span><span class="p">(</span>
             <span class="n">app_namespace</span><span class="p">,</span>
             <span class="n">index_name</span><span class="p">,</span>

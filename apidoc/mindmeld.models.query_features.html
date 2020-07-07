@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.query_features module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.query_features module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.query_features">
@@ -281,8 +273,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Max size of n-gram to extract</li>
-<li><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The word to be extract n-grams from</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- Max size of n-gram to extract</li>
+<li><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The word to be extract n-grams from</li>
 </ul>
 </td>
 </tr>
@@ -311,8 +303,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ngram_lengths_to_start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </li>
-<li><strong>thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Cut off value to include word in n-gram vocab</li>
+<li><strong>ngram_lengths_to_start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- </li>
+<li><strong>thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- Cut off value to include word in n-gram vocab</li>
 </ul>
 </td>
 </tr>
@@ -332,8 +324,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>lengths</strong> (<em>list of int</em>) – The ngram length.</li>
-<li><strong>thresholds</strong> (<em>list of int</em>) – frequency cut off value to include ngram in vocab</li>
+<li><strong>lengths</strong> (<em>list of int</em>) -- The ngram length.</li>
+<li><strong>thresholds</strong> (<em>list of int</em>) -- frequency cut off value to include ngram in vocab</li>
 </ul>
 </td>
 </tr>
@@ -358,10 +350,10 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ngram_lengths_to_start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </li>
-<li><strong>window of tokens to be considered relative to the</strong> (<em>The</em>) – </li>
-<li><strong>token while extracting char n-grams</strong> (<em>current</em>) – </li>
-<li><strong>thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Cut off value to include word in n-gram vocab</li>
+<li><strong>ngram_lengths_to_start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- </li>
+<li><strong>window of tokens to be considered relative to the</strong> (<em>The</em>) -- </li>
+<li><strong>token while extracting char n-grams</strong> (<em>current</em>) -- </li>
+<li><strong>thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- Cut off value to include word in n-gram vocab</li>
 </ul>
 </td>
 </tr>
@@ -380,7 +372,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lengths</strong> (<em>list of int</em>) – The ngram length.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lengths</strong> (<em>list of int</em>) -- The ngram length.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(function) An feature extraction function that takes a query and             returns ngrams of the specified lengths at start and end of query.</td>
 </tr>
@@ -396,7 +388,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of frequency bins (besides OOV)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The number of frequency bins (besides OOV)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A feature extraction function that returns the log of the             count of query tokens within each frequency bin.</td>
 </tr>
@@ -414,7 +406,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A feature extraction function that returns the log of the             count of query tokens within each gazetteer’s frequency bins.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A feature extraction function that returns the log of the             count of query tokens within each gazetteer's frequency bins.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(function)</td>
 </tr>
@@ -427,14 +419,14 @@
 <code class="descclassname">mindmeld.models.query_features.</code><code class="descname">extract_in_gaz_feature</code><span class="sig-paren">(</span><em>scaling=1</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/query_features.html#extract_in_gaz_feature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.query_features.extract_in_gaz_feature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a feature extractor that generates a set of features indicating the presence
 of query n-grams in different entity gazetteers. Used by the domain and intent classifiers
-when the ‘in-gaz’ feature is specified in the config.</p>
+when the 'in-gaz' feature is specified in the config.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>scaling</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – A multiplicative scale factor to the <code class="docutils literal"><span class="pre">ratio_pop</span></code> and <code class="docutils literal"><span class="pre">ratio</span></code> features of</li>
-<li><strong>in-gaz feature set.</strong> (<em>the</em>) – </li>
+<li><strong>scaling</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- A multiplicative scale factor to the <code class="docutils literal notranslate"><span class="pre">ratio_pop</span></code> and <code class="docutils literal notranslate"><span class="pre">ratio</span></code> features of</li>
+<li><strong>in-gaz feature set.</strong> (<em>the</em>) -- </li>
 </ul>
 </td>
 </tr>
@@ -483,8 +475,8 @@ when the ‘in-gaz’ feature is specified in the config.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>lengths</strong> (<em>list of int</em>) – The ngram length.</li>
-<li><strong>thresholds</strong> (<em>list of int</em>) – frequency cut off value to include ngram in vocab</li>
+<li><strong>lengths</strong> (<em>list of int</em>) -- The ngram length.</li>
+<li><strong>thresholds</strong> (<em>list of int</em>) -- frequency cut off value to include ngram in vocab</li>
 </ul>
 </td>
 </tr>
@@ -518,7 +510,7 @@ candidates at/near the current token.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – positions relative to current token (=0)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>start_positions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- positions relative to current token (=0)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(function) The feature extractor.</td>
 </tr>
@@ -548,7 +540,7 @@ candidates at/near the current token.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lengths</strong> (<em>list of int</em>) – The ngram length</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lengths</strong> (<em>list of int</em>) -- The ngram length</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(function) An feature extraction function that takes a query and             returns ngrams of word shapes, for n of specified lengths.</td>
 </tr>
@@ -565,8 +557,8 @@ candidates at/near the current token.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of string to n-gramize</li>
-<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The size of the n-gram</li>
+<li><strong>input_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- List of string to n-gramize</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The size of the n-gram</li>
 </ul>
 </td>
 </tr>
@@ -589,9 +581,9 @@ candidates at/near the current token.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>feat_seq</strong> (<em>list of dict</em>) – The original list of feature dicts which gets
+<li><strong>feat_seq</strong> (<em>list of dict</em>) -- The original list of feature dicts which gets
 mutated.</li>
-<li><strong>update_feat_seq</strong> (<em>list of dict</em>) – The list of features to update with.</li>
+<li><strong>update_feat_seq</strong> (<em>list of dict</em>) -- The list of features to update with.</li>
 </ul>
 </td>
 </tr>

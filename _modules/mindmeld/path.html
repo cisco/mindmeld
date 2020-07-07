@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.path &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.path &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -291,6 +293,9 @@
 <span class="n">GEN_INDEXES_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_FOLDER</span><span class="p">,</span> <span class="s2">&quot;indexes&quot;</span><span class="p">)</span>
 <span class="n">GEN_INDEX_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INDEXES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{index}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">RANKING_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GEN_INDEX_FOLDER</span><span class="p">,</span> <span class="s2">&quot;ranking.pkl&quot;</span><span class="p">)</span>
+<span class="n">GEN_EMBEDDER_MODEL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">GEN_INDEXES_FOLDER</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{embedder_type}</span><span class="s2">_</span><span class="si">{model_name}</span><span class="s2">_cache.pkl&quot;</span>
+<span class="p">)</span>
 
 <span class="c1"># Domains sub tree for labeled queries</span>
 <span class="n">DOMAINS_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">APP_PATH</span><span class="p">,</span> <span class="s2">&quot;domains&quot;</span><span class="p">)</span>
@@ -742,6 +747,23 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">RANKING_FILE_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_embedder_cache_file_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_embedder_cache_file_path">[docs]</a><span class="nd">@safe_path</span>
+<span class="k">def</span> <span class="nf">get_embedder_cache_file_path</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">embedder_type</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the path to the model_cache.json file for a given embedder model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app_path (str): The path to the app data.</span>
+<span class="sd">        embedder_type (str): The name of the embedder type.</span>
+<span class="sd">        model_name (str): The name of the specific trained model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str) The path for the json cached of the embedded values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">GEN_EMBEDDER_MODEL_PATH</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">,</span> <span class="n">embedder_type</span><span class="o">=</span><span class="n">embedder_type</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_app_module_path"><a class="viewcode-back" href="../../apidoc/mindmeld.path.html#mindmeld.path.get_app_module_path">[docs]</a><span class="nd">@safe_path</span>

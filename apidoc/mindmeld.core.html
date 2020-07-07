@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.core module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.core module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.core">
@@ -275,10 +267,10 @@
 <dl class="class">
 <dt id="mindmeld.core.Bunch">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">Bunch</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#Bunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.Bunch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
 <p>Dictionary-like object that exposes its keys as attributes.</p>
-<p>Inspired by scikit learn’s Bunches</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<p>Inspired by scikit learn's Bunches</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span>
 <span class="go">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">b</span>
@@ -296,51 +288,51 @@
 <dl class="class">
 <dt id="mindmeld.core.Entity">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">Entity</code><span class="sig-paren">(</span><em>text</em>, <em>entity_type</em>, <em>role=None</em>, <em>value=None</em>, <em>display_text=None</em>, <em>confidence=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.Entity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An Entity is any important piece of text that provides more information about the user
 intent.</p>
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.text">
 <code class="descname">text</code><a class="headerlink" href="#mindmeld.core.Entity.text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The text contents that span the entity</p>
+<dd><p><em>str</em> -- The text contents that span the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.type">
 <code class="descname">type</code><a class="headerlink" href="#mindmeld.core.Entity.type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of the entity</p>
+<dd><p><em>str</em> -- The type of the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.role">
 <code class="descname">role</code><a class="headerlink" href="#mindmeld.core.Entity.role" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The role of the entity</p>
+<dd><p><em>str</em> -- The role of the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.value">
 <code class="descname">value</code><a class="headerlink" href="#mindmeld.core.Entity.value" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The resolved value of the entity</p>
+<dd><p><em>str</em> -- The resolved value of the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.display_text">
 <code class="descname">display_text</code><a class="headerlink" href="#mindmeld.core.Entity.display_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – A human readable text representation of the entity for use in natural
+<dd><p><em>str</em> -- A human readable text representation of the entity for use in natural
 language responses.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.confidence">
 <code class="descname">confidence</code><a class="headerlink" href="#mindmeld.core.Entity.confidence" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>float</em> – A confidence value from 0 to 1 about how confident the entity
+<dd><p><em>float</em> -- A confidence value from 0 to 1 about how confident the entity
 recognizer was for the given class label.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Entity.is_system_entity">
 <code class="descname">is_system_entity</code><a class="reference internal" href="../_modules/mindmeld/core.html#Entity.is_system_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.Entity.is_system_entity" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – True if the entity is a system entity</p>
+<dd><p><em>bool</em> -- True if the entity is a system entity</p>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -351,7 +343,7 @@ recognizer was for the given class label.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – An entity type</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- An entity type</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the entity is a system entity type, else False</td>
 </tr>
@@ -372,43 +364,54 @@ recognizer was for the given class label.</p>
 <dl class="class">
 <dt id="mindmeld.core.FormEntity">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">FormEntity</code><span class="sig-paren">(</span><em>entity=None</em>, <em>role=None</em>, <em>responses=None</em>, <em>retry_response=None</em>, <em>value=None</em>, <em>default_eval=True</em>, <em>hints=None</em>, <em>custom_eval=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#FormEntity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.FormEntity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A form entity is used for defining custom objects for the entity form used in
 AutoEntityFilling (slot-filling).</p>
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.entity">
 <code class="descname">entity</code><a class="headerlink" href="#mindmeld.core.FormEntity.entity" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – Entity name</p>
+<dd><p><em>str</em> -- Entity name</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.role">
 <code class="descname">role</code><a class="headerlink" href="#mindmeld.core.FormEntity.role" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The role of the entity</p>
+<dd><p><em>str, optional</em> -- The role of the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.responses">
 <code class="descname">responses</code><a class="headerlink" href="#mindmeld.core.FormEntity.responses" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list, optional</em> – NLR for prompting the user for missing entities</p>
+<dd><p><em>list/str, optional</em> -- Message(s) for prompting the user for missing entities</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="mindmeld.core.FormEntity.retry_response">
+<code class="descname">retry_response</code><a class="headerlink" href="#mindmeld.core.FormEntity.retry_response" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list/str, optional</em> -- Message(s) for re-prompting users. If not provided,</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">defaults to responses</code></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.value">
 <code class="descname">value</code><a class="headerlink" href="#mindmeld.core.FormEntity.value" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The resolved value of the entity</p>
+<dd><p><em>str, optional</em> -- The resolved value of the entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.default_eval">
 <code class="descname">default_eval</code><a class="headerlink" href="#mindmeld.core.FormEntity.default_eval" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool, optional</em> – Use system validation (default: True)</p>
+<dd><p><em>bool, optional</em> -- Use system validation (default: True)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.hints">
 <code class="descname">hints</code><a class="headerlink" href="#mindmeld.core.FormEntity.hints" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list, optional</em> – Developer defined list of keywords to verify the</p>
+<dd><p><em>list, optional</em> -- Developer defined list of keywords to verify the</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -419,7 +422,7 @@ AutoEntityFilling (slot-filling).</p>
 <dl class="attribute">
 <dt id="mindmeld.core.FormEntity.custom_eval">
 <code class="descname">custom_eval</code><a class="headerlink" href="#mindmeld.core.FormEntity.custom_eval" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>func, optional</em> – custom validation function (should return bool:</p>
+<dd><p><em>func, optional</em> -- custom validation function (should return bool:</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -432,42 +435,42 @@ AutoEntityFilling (slot-filling).</p>
 <dl class="class">
 <dt id="mindmeld.core.NestedEntity">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">NestedEntity</code><span class="sig-paren">(</span><em>texts</em>, <em>spans</em>, <em>token_spans</em>, <em>entity</em>, <em>children=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#NestedEntity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.NestedEntity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>An entity with the context of the query it came from, along with         information like the entity’s parent and children.</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An entity with the context of the query it came from, along with         information like the entity's parent and children.</p>
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.texts">
 <code class="descname">texts</code><a class="headerlink" href="#mindmeld.core.NestedEntity.texts" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – Tuple containing the three forms of text: raw text,             processed text, and normalized text</p>
+<dd><p><em>tuple</em> -- Tuple containing the three forms of text: raw text,             processed text, and normalized text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.spans">
 <code class="descname">spans</code><a class="headerlink" href="#mindmeld.core.NestedEntity.spans" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – Tuple containing the character index spans of the             text for this entity for each text form</p>
+<dd><p><em>tuple</em> -- Tuple containing the character index spans of the             text for this entity for each text form</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.token_spans">
 <code class="descname">token_spans</code><a class="headerlink" href="#mindmeld.core.NestedEntity.token_spans" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – Tuple containing the token index spans of the             text for this entity for each text form</p>
+<dd><p><em>tuple</em> -- Tuple containing the token index spans of the             text for this entity for each text form</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.entity">
 <code class="descname">entity</code><a class="headerlink" href="#mindmeld.core.NestedEntity.entity" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Entity</em> – The entity object</p>
+<dd><p><em>Entity</em> -- The entity object</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.parent">
 <code class="descname">parent</code><a class="headerlink" href="#mindmeld.core.NestedEntity.parent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>NestedEntity</em> – The parent of the nested entity</p>
+<dd><p><em>NestedEntity</em> -- The parent of the nested entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.NestedEntity.children">
 <code class="descname">children</code><a class="headerlink" href="#mindmeld.core.NestedEntity.children" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple of NestedEntity</em> – A tuple of children nested entities</p>
+<dd><p><em>tuple of NestedEntity</em> -- A tuple of children nested entities</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -479,17 +482,17 @@ AutoEntityFilling (slot-filling).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – Description</li>
-<li><strong>span</strong> (<em>Span</em>) – The span of the entity in the query’s raw text</li>
-<li><strong>normalized_span</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em>, </em><em>optional</em>) – The span of the entity in the
-query’s normalized text</li>
-<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The entity type. One of this and entity
+<li><strong>query</strong> (<em>Query</em>) -- Description</li>
+<li><strong>span</strong> (<em>Span</em>) -- The span of the entity in the query's raw text</li>
+<li><strong>normalized_span</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em>, </em><em>optional</em>) -- The span of the entity in the
+query's normalized text</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The entity type. One of this and entity
 must be provided</li>
-<li><strong>role</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The entity role. Ignored if entity is provided.</li>
-<li><strong>entity</strong> (<em>Entity</em><em>, </em><em>optional</em>) – The entity. One of this and entity must
+<li><strong>role</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The entity role. Ignored if entity is provided.</li>
+<li><strong>entity</strong> (<em>Entity</em><em>, </em><em>optional</em>) -- The entity. One of this and entity must
 be provided</li>
-<li><strong>parent_offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The offset of the parent in the query</li>
-<li><strong>children</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em>, </em><em>optional</em>) – Description</li>
+<li><strong>parent_offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The offset of the parent in the query</li>
+<li><strong>children</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em>, </em><em>optional</em>) -- Description</li>
 </ul>
 </td>
 </tr>
@@ -571,61 +574,61 @@ be provided</li>
 <dl class="class">
 <dt id="mindmeld.core.ProcessedQuery">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">ProcessedQuery</code><span class="sig-paren">(</span><em>query</em>, <em>domain=None</em>, <em>intent=None</em>, <em>entities=None</em>, <em>is_gold=False</em>, <em>nbest_transcripts_queries=None</em>, <em>nbest_transcripts_entities=None</em>, <em>nbest_aligned_entities=None</em>, <em>confidence=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#ProcessedQuery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.ProcessedQuery" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A processed query contains a query and the additional metadata that has been labeled or
 predicted.</p>
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.query">
 <code class="descname">query</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.query" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Query</em> – The underlying query object.</p>
+<dd><p><em>Query</em> -- The underlying query object.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The domain of the query</p>
+<dd><p><em>str</em> -- The domain of the query</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.entities">
 <code class="descname">entities</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of entities present in this query</p>
+<dd><p><em>list</em> -- A list of entities present in this query</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.intent">
 <code class="descname">intent</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.intent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The intent of the query</p>
+<dd><p><em>str</em> -- The intent of the query</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.is_gold">
 <code class="descname">is_gold</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.is_gold" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Indicates whether the details in this query were predicted or human labeled</p>
+<dd><p><em>bool</em> -- Indicates whether the details in this query were predicted or human labeled</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.nbest_transcripts_queries">
 <code class="descname">nbest_transcripts_queries</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.nbest_transcripts_queries" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of n best transcript queries</p>
+<dd><p><em>list</em> -- A list of n best transcript queries</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.nbest_transcripts_entities">
 <code class="descname">nbest_transcripts_entities</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.nbest_transcripts_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of lists of entities for each query</p>
+<dd><p><em>list</em> -- A list of lists of entities for each query</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.nbest_aligned_entities">
 <code class="descname">nbest_aligned_entities</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.nbest_aligned_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of lists of aligned entities</p>
+<dd><p><em>list</em> -- A list of lists of aligned entities</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.ProcessedQuery.confidence">
 <code class="descname">confidence</code><a class="headerlink" href="#mindmeld.core.ProcessedQuery.confidence" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary of the class probas for the domain and intent classifier</p>
+<dd><p><em>dict</em> -- A dictionary of the class probas for the domain and intent classifier</p>
 </dd></dl>
 
 <dl class="method">
@@ -639,7 +642,7 @@ predicted.</p>
 <dl class="class">
 <dt id="mindmeld.core.Query">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">Query</code><span class="sig-paren">(</span><em>raw_text</em>, <em>processed_text</em>, <em>normalized_tokens</em>, <em>char_maps</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em>, <em>stemmed_tokens=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#Query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.Query" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The query object is responsible for processing and normalizing raw user text input so that
 classifiers can deal with it. A query stores three forms of text: raw text, processed text, and
 normalized text. The query object is also responsible for translating text ranges across these
@@ -647,51 +650,51 @@ forms.</p>
 <dl class="attribute">
 <dt id="mindmeld.core.Query.raw_text">
 <code class="descname">raw_text</code><a class="headerlink" href="#mindmeld.core.Query.raw_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – the original input text</p>
+<dd><p><em>str</em> -- the original input text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.processed_text">
 <code class="descname">processed_text</code><a class="headerlink" href="#mindmeld.core.Query.processed_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – the text after it has been preprocessed. The pre-processing happens
+<dd><p><em>str</em> -- the text after it has been preprocessed. The pre-processing happens
 at the application level and is generally used for special characters</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.normalized_tokens">
 <code class="descname">normalized_tokens</code><a class="headerlink" href="#mindmeld.core.Query.normalized_tokens" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple of str</em> – a list of normalized tokens</p>
+<dd><p><em>tuple of str</em> -- a list of normalized tokens</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.system_entity_candidates">
 <code class="descname">system_entity_candidates</code><a class="headerlink" href="#mindmeld.core.Query.system_entity_candidates" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>tuple</em> – A list of system entities extracted from the text</p>
+<dd><p><em>tuple</em> -- A list of system entities extracted from the text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.locale">
 <code class="descname">locale</code><a class="headerlink" href="#mindmeld.core.Query.locale" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</p>
+<dd><p><em>str, optional</em> -- The locale representing the ISO 639-1 language code and             ISO3166 alpha 2 country code separated by an underscore character.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.language">
 <code class="descname">language</code><a class="headerlink" href="#mindmeld.core.Query.language" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str, optional</em> – The language code representing ISO 639-1 language codes.</p>
+<dd><p><em>str, optional</em> -- The language code representing ISO 639-1 language codes.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.time_zone">
 <code class="descname">time_zone</code><a class="headerlink" href="#mindmeld.core.Query.time_zone" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The IANA id for the time zone in which the query originated
-such as ‘America/Los_Angeles’</p>
+<dd><p><em>str</em> -- The IANA id for the time zone in which the query originated
+such as 'America/Los_Angeles'</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Query.timestamp">
 <code class="descname">timestamp</code><a class="headerlink" href="#mindmeld.core.Query.timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>long, optional</em> – A unix timestamp used as the reference time
+<dd><p><em>long, optional</em> -- A unix timestamp used as the reference time
 If not specified, the current system time is used. If <cite>time_zone</cite>
 is not also specified, this parameter is ignored</p>
 </dd></dl>
@@ -699,7 +702,7 @@ is not also specified, this parameter is ignored</p>
 <dl class="attribute">
 <dt id="mindmeld.core.Query.stemmed_tokens">
 <code class="descname">stemmed_tokens</code><a class="headerlink" href="#mindmeld.core.Query.stemmed_tokens" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A sequence of stemmed tokens for the query text</p>
+<dd><p><em>list</em> -- A sequence of stemmed tokens for the query text</p>
 </dd></dl>
 
 <dl class="method">
@@ -709,7 +712,7 @@ is not also specified, this parameter is ignored</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sys_types</strong> (<em>set of str</em>) – A set of entity types to select</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sys_types</strong> (<em>set of str</em>) -- A set of entity types to select</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns candidate system entities of the types specified</td>
 </tr>
@@ -727,7 +730,7 @@ is not also specified, this parameter is ignored</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>form</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – A valid text form (TEXT_FORM_RAW, TEXT_FORM_PROCESSED, or
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>form</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- A valid text form (TEXT_FORM_RAW, TEXT_FORM_PROCESSED, or
 TEXT_FORM_NORMALIZED)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The requested text</td>
@@ -747,9 +750,9 @@ TEXT_FORM_NORMALIZED)</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the index being transformed</li>
-<li><strong>form_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the input form. should be one of TEXT_FORM_RAW</li>
-<li><strong>form_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the output form</li>
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- the index being transformed</li>
+<li><strong>form_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- the input form. should be one of TEXT_FORM_RAW</li>
+<li><strong>form_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- the output form</li>
 </ul>
 </td>
 </tr>
@@ -772,10 +775,10 @@ TEXT_FORM_NORMALIZED)</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text_span</strong> (<em>Span</em>) – the text span being transformed</li>
-<li><strong>form_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the input text form. Should be one of TEXT_FORM_RAW, TEXT_FORM_PROCESSED
+<li><strong>text_span</strong> (<em>Span</em>) -- the text span being transformed</li>
+<li><strong>form_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- the input text form. Should be one of TEXT_FORM_RAW, TEXT_FORM_PROCESSED
 or TEXT_FORM_NORMALIZED</li>
-<li><strong>form_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the output text form. Should be one of TEXT_FORM_RAW,
+<li><strong>form_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- the output text form. Should be one of TEXT_FORM_RAW,
 TEXT_FORM_PROCESSED or TEXT_FORM_NORMALIZED</li>
 </ul>
 </td>
@@ -837,7 +840,7 @@ ISO3166 alpha 2 country code separated by an underscore character.</p>
 <dt>
 <code class="descname">time_zone</code></dt>
 <dd><p>The IANA id for the time zone in which the query originated
-such as ‘America/Los_Angeles’.</p>
+such as 'America/Los_Angeles'.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -852,60 +855,60 @@ this parameter is ignored.</p>
 <dl class="class">
 <dt id="mindmeld.core.QueryEntity">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">QueryEntity</code><span class="sig-paren">(</span><em>texts</em>, <em>spans</em>, <em>token_spans</em>, <em>entity</em>, <em>children=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#QueryEntity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.QueryEntity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.core.NestedEntity" title="mindmeld.core.NestedEntity"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.core.NestedEntity</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.core.NestedEntity" title="mindmeld.core.NestedEntity"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.core.NestedEntity</span></code></a></p>
 <p>An entity with the context of the query it came from.</p>
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.text">
 <code class="descname">text</code><a class="headerlink" href="#mindmeld.core.QueryEntity.text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The raw text that was processed into this entity</p>
+<dd><p><em>str</em> -- The raw text that was processed into this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.processed_text">
 <code class="descname">processed_text</code><a class="headerlink" href="#mindmeld.core.QueryEntity.processed_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The processed text that was processed into
+<dd><p><em>str</em> -- The processed text that was processed into
 this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.normalized_text">
 <code class="descname">normalized_text</code><a class="headerlink" href="#mindmeld.core.QueryEntity.normalized_text" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The normalized text that was processed into
+<dd><p><em>str</em> -- The normalized text that was processed into
 this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.span">
 <code class="descname">span</code><a class="headerlink" href="#mindmeld.core.QueryEntity.span" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Span</em> – The character index span of the raw text that was
+<dd><p><em>Span</em> -- The character index span of the raw text that was
 processed into this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.processed_span">
 <code class="descname">processed_span</code><a class="headerlink" href="#mindmeld.core.QueryEntity.processed_span" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Span</em> – The character index span of the raw text that was
+<dd><p><em>Span</em> -- The character index span of the raw text that was
 processed into this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
 <code class="descname">span</code></dt>
-<dd><p><em>Span</em> – The character index span of the raw text that was
+<dd><p><em>Span</em> -- The character index span of the raw text that was
 processed into this entity</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.start">
 <code class="descname">start</code><a class="headerlink" href="#mindmeld.core.QueryEntity.start" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – The character index start of the text range that was processed into this
+<dd><p><em>int</em> -- The character index start of the text range that was processed into this
 entity. This index is based on the normalized text of the query passed in.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.QueryEntity.end">
 <code class="descname">end</code><a class="headerlink" href="#mindmeld.core.QueryEntity.end" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – The character index end of the text range that was processed into this
+<dd><p><em>int</em> -- The character index end of the text range that was processed into this
 entity. This index is based on the normalized text of the query passed in.</p>
 </dd></dl>
 
@@ -914,18 +917,18 @@ entity. This index is based on the normalized text of the query passed in.</p>
 <dl class="class">
 <dt id="mindmeld.core.Span">
 <em class="property">class </em><code class="descclassname">mindmeld.core.</code><code class="descname">Span</code><span class="sig-paren">(</span><em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/core.html#Span"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.core.Span" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Object representing a text span with start and end indices</p>
 <dl class="attribute">
 <dt id="mindmeld.core.Span.start">
 <code class="descname">start</code><a class="headerlink" href="#mindmeld.core.Span.start" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – The index from the original text that represents the start of the span</p>
+<dd><p><em>int</em> -- The index from the original text that represents the start of the span</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.core.Span.end">
 <code class="descname">end</code><a class="headerlink" href="#mindmeld.core.Span.end" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – The index from the original text that represents the end of the span</p>
+<dd><p><em>int</em> -- The index from the original text that represents the end of the span</p>
 </dd></dl>
 
 <dl class="method">
@@ -936,7 +939,7 @@ entity. This index is based on the normalized text of the query passed in.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number to change start and end by</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The number to change start and end by</td>
 </tr>
 </tbody>
 </table>
@@ -950,7 +953,7 @@ entity. This index is based on the normalized text of the query passed in.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj</strong> – The object to slice</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj</strong> -- The object to slice</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The slice of the passed in object for this span</td>
 </tr>
@@ -997,7 +1000,7 @@ with the highest confidence.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entities</strong> (<em>list of QueryEntity</em>) – A list of query entities to resolve</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entities</strong> (<em>list of QueryEntity</em>) -- A list of query entities to resolve</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A filtered list of query entities</td>
 </tr>

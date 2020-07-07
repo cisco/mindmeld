@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Package History &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Package History &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -85,7 +85,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -138,6 +138,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -155,6 +156,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -290,23 +292,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="package-history">
@@ -339,7 +331,7 @@
 <div class="section" id="breaking-changes">
 <h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Replace all instances of the term <code class="docutils literal"><span class="pre">mmworkbench</span></code> to <code class="docutils literal"><span class="pre">mindmeld</span></code>. Older pickled models that refer to the old term will not load, so delete the <code class="docutils literal"><span class="pre">.generated</span></code> folder in application folder, and rebuild all classifiers.</li>
+<li>Replace all instances of the term <code class="docutils literal notranslate"><span class="pre">mmworkbench</span></code> to <code class="docutils literal notranslate"><span class="pre">mindmeld</span></code>. Older pickled models that refer to the old term will not load, so delete the <code class="docutils literal notranslate"><span class="pre">.generated</span></code> folder in application folder, and rebuild all classifiers.</li>
 </ul>
 </div>
 <div class="section" id="bug-fixes-and-other-changes">
@@ -374,17 +366,17 @@
 <div class="section" id="id7">
 <h3>Bug Fixes and Other Changes<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Implement the <code class="docutils literal"><span class="pre">predict_proba()</span></code> method for role classifiers and entity classifiers</li>
+<li>Implement the <code class="docutils literal notranslate"><span class="pre">predict_proba()</span></code> method for role classifiers and entity classifiers</li>
 <li>Add support for viewing feature weights for model introspection</li>
 <li>Improve support for MindMeld applications as python packages</li>
 <li>Add support for query&nbsp;stemming during feature extraction</li>
 <li>Add support for numerical parser features for domain and intent classification</li>
 <li>Add support for word shape features for domain and intent classification</li>
-<li>Add support for dynamic gazetteers, which are online gazetteers that bias the natural language processor’s prediction for the current turn</li>
+<li>Add support for dynamic gazetteers, which are online gazetteers that bias the natural language processor's prediction for the current turn</li>
 <li>Add support for asynchronous dialogue state handlers</li>
 <li>Refactor classifier features names to make them more consistent</li>
-<li>Re-enable automatic blueprint loading using the <code class="docutils literal"><span class="pre">blueprint</span></code> command</li>
-<li>Deprecate the <code class="docutils literal"><span class="pre">session</span></code> object and replace it with the <code class="docutils literal"><span class="pre">context</span></code> object</li>
+<li>Re-enable automatic blueprint loading using the <code class="docutils literal notranslate"><span class="pre">blueprint</span></code> command</li>
+<li>Deprecate the <code class="docutils literal notranslate"><span class="pre">session</span></code> object and replace it with the <code class="docutils literal notranslate"><span class="pre">context</span></code> object</li>
 <li>Add support for parallel processing of entity recognition for n-best&nbsp;ASR transcripts</li>
 <li>MindMeld version compatibility checks are warnings, not exceptions</li>
 </ul>
@@ -421,8 +413,8 @@
 <div class="section" id="bug-fixes">
 <h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The help messages for MindMeld command line tools (<code class="docutils literal"><span class="pre">python</span> <span class="pre">app.py</span></code> and <code class="docutils literal"><span class="pre">mmworkbench</span></code>) should show the correct list of compatible commands</li>
-<li>Various fixes to improve the numerical parser’s robustness and logging</li>
+<li>The help messages for MindMeld command line tools (<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">app.py</span></code> and <code class="docutils literal notranslate"><span class="pre">mmworkbench</span></code>) should show the correct list of compatible commands</li>
+<li>Various fixes to improve the numerical parser's robustness and logging</li>
 </ul>
 </div>
 </div>
@@ -442,7 +434,7 @@
 <div class="section" id="compatibility-notes">
 <h3>Compatibility Notes<a class="headerlink" href="#compatibility-notes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The <code class="docutils literal"><span class="pre">prompt()</span></code> and <code class="docutils literal"><span class="pre">respond()</span></code> methods of the <code class="docutils literal"><span class="pre">DialogueResponder</span></code> object are deprecated in MindMeld 3.2. See <a class="reference internal" href="../userguide/dm.html"><span class="doc">Working with the Dialogue Manager</span></a> to learn how to use new <code class="docutils literal"><span class="pre">DialogueResponder</span></code> methods in your dialogue state handlers.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">prompt()</span></code> and <code class="docutils literal notranslate"><span class="pre">respond()</span></code> methods of the <code class="docutils literal notranslate"><span class="pre">DialogueResponder</span></code> object are deprecated in MindMeld 3.2. See <a class="reference internal" href="../userguide/dm.html"><span class="doc">Working with the Dialogue Manager</span></a> to learn how to use new <code class="docutils literal notranslate"><span class="pre">DialogueResponder</span></code> methods in your dialogue state handlers.</li>
 </ul>
 </div>
 </div>
@@ -453,9 +445,9 @@
 <ul class="simple">
 <li>Add linear-chain conditional random field (CRF) as a model option for the entity recognizer</li>
 <li>Allow the role classifier to be trained with other text models (e.g. SVM, decision tree, etc.) in addition to logistic regression</li>
-<li>Make model configuration format for all classifiers consistent [See “Compatibility Notes” below]</li>
+<li>Make model configuration format for all classifiers consistent [See &quot;Compatibility Notes&quot; below]</li>
 <li>Add new metrics for better error analysis of entity recognition performance</li>
-<li>Add support for modularizing dialogue state handling logic by allowing arbitrary module imports in <code class="docutils literal"><span class="pre">app.py</span></code> (see <strong>Compatibility Notes</strong> below)</li>
+<li>Add support for modularizing dialogue state handling logic by allowing arbitrary module imports in <code class="docutils literal notranslate"><span class="pre">app.py</span></code> (see <strong>Compatibility Notes</strong> below)</li>
 <li>Make blueprints check the current MindMeld package version to validate compatibility</li>
 <li>Only load NLP resources that are needed by active feature extractors (as defined in the model config) to improve runtime performance</li>
 </ul>
@@ -471,7 +463,7 @@
 <h3>Compatibility Notes<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>To make the interfaces for NLP classifiers consistent, the model configuration formats for the entity recognizer and the role classifier have been updated to be in line with the domain and intent classifiers. The model configurations for entity recognizer and role classifier from MindMeld 3.0 <strong>will not</strong> work with MindMeld 3.1. Refer to the user guide for those components to learn how to rewrite your 3.0 configs in the new 3.1 format.</li>
-<li>To support modular organization of dialogue state handling logic by allowing arbitrary package/module imports in the application container (<code class="docutils literal"><span class="pre">app.py</span></code>), MindMeld now needs to load the project folder as a Python package. Every project in MindMeld 3.1 must hence have an empty <code class="docutils literal"><span class="pre">__init__.py</span></code> file at its root level. Projects created for MindMeld 3.0 <strong>will not</strong> work with MindMeld 3.1 unless an <code class="docutils literal"><span class="pre">__init__.py</span></code> file is added. Refer to the user guide for the dialogue manager to learn how to use imports in your application container.</li>
+<li>To support modular organization of dialogue state handling logic by allowing arbitrary package/module imports in the application container (<code class="docutils literal notranslate"><span class="pre">app.py</span></code>), MindMeld now needs to load the project folder as a Python package. Every project in MindMeld 3.1 must hence have an empty <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file at its root level. Projects created for MindMeld 3.0 <strong>will not</strong> work with MindMeld 3.1 unless an <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file is added. Refer to the user guide for the dialogue manager to learn how to use imports in your application container.</li>
 </ul>
 </div>
 </div>

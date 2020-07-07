@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.intent_classifier module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.intent_classifier module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.intent_classifier">
@@ -275,14 +267,14 @@
 <dl class="class">
 <dt id="mindmeld.components.intent_classifier.IntentClassifier">
 <em class="property">class </em><code class="descclassname">mindmeld.components.intent_classifier.</code><code class="descname">IntentClassifier</code><span class="sig-paren">(</span><em>resource_loader</em>, <em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/intent_classifier.html#IntentClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.intent_classifier.IntentClassifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.components.classifier.html#mindmeld.components.classifier.Classifier" title="mindmeld.components.classifier.Classifier"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.classifier.Classifier</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.components.classifier.html#mindmeld.components.classifier.Classifier" title="mindmeld.components.classifier.Classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.classifier.Classifier</span></code></a></p>
 <p>An intent classifier is used to determine the target intent for a given query. It is trained
 using all of the labeled queries across all intents for a domain in an application. The
 labels for the training data are the intent names associated with each query.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.intent_classifier.IntentClassifier.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.intent_classifier.IntentClassifier.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The domain that this intent classifier belongs to.</p>
+<dd><p><em>str</em> -- The domain that this intent classifier belongs to.</p>
 </dd></dl>
 
 <dl class="method">
@@ -293,7 +285,7 @@ labels for the training data are the intent names associated with each query.</p
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the model should be stored.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The location on disk where the model should be stored.</td>
 </tr>
 </tbody>
 </table>
@@ -308,16 +300,16 @@ labels for the training data are the intent names associated with each query.</p
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of machine learning model to use. If omitted, the default
+<li><strong>model_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of machine learning model to use. If omitted, the default
 model type will be used.</li>
-<li><strong>features</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Features to extract from each example instance to form the feature
+<li><strong>features</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Features to extract from each example instance to form the feature
 vector used for model training. If omitted, the default feature set for the model
 type will be used.</li>
-<li><strong>params_grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The grid of hyper-parameters to search, for finding the optimal
+<li><strong>params_grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The grid of hyper-parameters to search, for finding the optimal
 hyper-parameter settings for the model. If omitted, the default hyper-parameter
 search grid will be used.</li>
-<li><strong>queries</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>ProcessedQuery</em><em>]</em>) – The labeled queries to use as training data.</li>
-<li><strong>cv</strong> (<em>optional</em>) – Cross-validation settings.</li>
+<li><strong>queries</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>ProcessedQuery</em><em>]</em>) -- The labeled queries to use as training data.</li>
+<li><strong>cv</strong> (<em>optional</em>) -- Cross-validation settings.</li>
 </ul>
 </td>
 </tr>
@@ -334,9 +326,9 @@ search grid will be used.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to be predicted.</li>
-<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The expected intent label for this query.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query to be predicted.</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The expected intent label for this query.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
 </ul>
 </td>
 </tr>
@@ -358,7 +350,7 @@ search grid will be used.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the model is stored.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The location on disk where the model is stored.</td>
 </tr>
 </tbody>
 </table>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.model module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.model module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.model">
@@ -275,7 +267,7 @@
 <dl class="class">
 <dt id="mindmeld.models.model.EntityLabelEncoder">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">EntityLabelEncoder</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityLabelEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityLabelEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.LabelEncoder" title="mindmeld.models.model.LabelEncoder"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.LabelEncoder</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.LabelEncoder" title="mindmeld.models.model.LabelEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.LabelEncoder</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.models.model.EntityLabelEncoder.decode">
 <code class="descname">decode</code><span class="sig-paren">(</span><em>tags_by_example</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityLabelEncoder.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityLabelEncoder.decode" title="Permalink to this definition">¶</a></dt>
@@ -285,8 +277,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tags_by_example</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of tags per query</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dict containing atleast the “examples” key, which is a
+<li><strong>tags_by_example</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of tags per query</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A dict containing at least the &quot;examples&quot; key, which is a
 list of queries to process</li>
 </ul>
 </td>
@@ -304,21 +296,21 @@ list of queries to process</li>
 <dl class="method">
 <dt id="mindmeld.models.model.EntityLabelEncoder.encode">
 <code class="descname">encode</code><span class="sig-paren">(</span><em>labels</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityLabelEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityLabelEncoder.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>“Gets a list of joint app and system IOB tags from each query’s entities.</p>
+<dd><p>&quot;Gets a list of joint app and system IOB tags from each query's entities.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of labels associated with each query</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dict containing atleast the “examples” key, which is a
+<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of labels associated with each query</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A dict containing atleast the &quot;examples&quot; key, which is a
 list of queries to process</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
 <dt>A list of list of joint app and system IOB tags from each</dt>
-<dd><p class="first last">query’s entities</p>
+<dd><p class="first last">query's entities</p>
 </dd>
 </dl>
 </p>
@@ -336,24 +328,26 @@ list of queries to process</li>
 <dl class="class">
 <dt id="mindmeld.models.model.EntityModelEvaluation">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">EntityModelEvaluation</code><span class="sig-paren">(</span><em>config</em>, <em>results</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityModelEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityModelEvaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.SequenceModelEvaluation" title="mindmeld.models.model.SequenceModelEvaluation"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.SequenceModelEvaluation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.SequenceModelEvaluation" title="mindmeld.models.model.SequenceModelEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.SequenceModelEvaluation</span></code></a></p>
 <p>Generates some statistics specific to entity recognition</p>
 <dl class="method">
 <dt id="mindmeld.models.model.EntityModelEvaluation.get_stats">
 <code class="descname">get_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityModelEvaluation.get_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityModelEvaluation.get_stats" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Prints model evaluation stats in a table to stdout</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.model.EntityModelEvaluation.print_stats">
 <code class="descname">print_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#EntityModelEvaluation.print_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EntityModelEvaluation.print_stats" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Prints model evaluation stats to stdout</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.models.model.EvaluatedExample">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">EvaluatedExample</code><a class="reference internal" href="../_modules/mindmeld/models/model.html#EvaluatedExample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.EvaluatedExample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.EvaluatedExample" title="mindmeld.models.model.EvaluatedExample"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.EvaluatedExample</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.EvaluatedExample" title="mindmeld.models.model.EvaluatedExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.EvaluatedExample</span></code></a></p>
 <p>Represents the evaluation of a single example</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.EvaluatedExample.example">
@@ -376,13 +370,13 @@ list of queries to process</li>
 <dl class="attribute">
 <dt id="mindmeld.models.model.EvaluatedExample.proba">
 <code class="descname">proba</code><a class="headerlink" href="#mindmeld.models.model.EvaluatedExample.proba" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Maps labels to their predicted probabilities</p>
+<dd><p><em>dict</em> -- Maps labels to their predicted probabilities</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.EvaluatedExample.label_type">
 <code class="descname">label_type</code><a class="headerlink" href="#mindmeld.models.model.EvaluatedExample.label_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE</p>
+<dd><p><em>str</em> -- One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -395,7 +389,7 @@ list of queries to process</li>
 <dl class="class">
 <dt id="mindmeld.models.model.LabelEncoder">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">LabelEncoder</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#LabelEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.LabelEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The label encoder is responsible for converting between rich label
 objects such as a ProcessedQuery and basic formats a model can interpret.</p>
 <p>A MindMeld model uses its label encoder at fit time to encode labels into a
@@ -409,7 +403,7 @@ objects</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of classes</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of classes</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The decoded labels</td>
 </tr>
@@ -427,7 +421,7 @@ objects</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of labels to encode</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of labels to encode</td>
 </tr>
 </tbody>
 </table>
@@ -438,12 +432,12 @@ objects</p>
 <dl class="class">
 <dt id="mindmeld.models.model.Model">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An abstract class upon which all models are based.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.Model.config">
 <code class="descname">config</code><a class="headerlink" href="#mindmeld.models.model.Model.config" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>ModelConfig</em> – The configuration for the model</p>
+<dd><p><em>ModelConfig</em> -- The configuration for the model</p>
 </dd></dl>
 
 <dl class="method">
@@ -455,8 +449,8 @@ objects</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of queries to predict</li>
-<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of labels corresponding to each query</li>
+<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of queries to predict</li>
+<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of labels corresponding to each query</li>
 </ul>
 </td>
 </tr>
@@ -494,9 +488,9 @@ objects</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>resource_loader</strong> (<em>ResourceLoader</em>) – application resource loader object</li>
-<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Optional. A list of examples.</li>
-<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Optional. A parallel list to examples. The gold labels                            for each example.</li>
+<li><strong>resource_loader</strong> (<em>ResourceLoader</em>) -- application resource loader object</li>
+<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- Optional. A list of examples.</li>
+<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- Optional. A parallel list to examples. The gold labels                            for each example.</li>
 </ul>
 </td>
 </tr>
@@ -516,8 +510,8 @@ objects</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of queries to predict</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dictionary containing dynamic resource keys like
+<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of queries to predict</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A dictionary containing dynamic resource keys like
 dynamic gazetteers that is used to bias the NLP classifier</li>
 </ul>
 </td>
@@ -541,7 +535,7 @@ associated probabilities using the trained classification model</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries to train on</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries to train on</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of predicted labels                 with confidence scores</td>
 </tr>
@@ -559,7 +553,7 @@ associated probabilities using the trained classification model</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> – dictionary of resources to register</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> -- dictionary of resources to register</td>
 </tr>
 </tbody>
 </table>
@@ -582,9 +576,9 @@ associated probabilities using the trained classification model</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> – A list of example queries</li>
-<li><strong>labels</strong> – A list of labels associated with the queries</li>
-<li><strong>selection_settings</strong> – A dictionary of parameter lists to select from</li>
+<li><strong>examples</strong> -- A list of example queries</li>
+<li><strong>labels</strong> -- A list of labels associated with the queries</li>
+<li><strong>selection_settings</strong> -- A dictionary of parameter lists to select from</li>
 </ul>
 </td>
 </tr>
@@ -613,59 +607,59 @@ associated probabilities using the trained classification model</p>
 <dl class="class">
 <dt id="mindmeld.models.model.ModelConfig">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">ModelConfig</code><span class="sig-paren">(</span><em>model_type=None</em>, <em>example_type=None</em>, <em>label_type=None</em>, <em>features=None</em>, <em>model_settings=None</em>, <em>params=None</em>, <em>param_selection=None</em>, <em>train_label_set=None</em>, <em>test_label_set=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#ModelConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.ModelConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A value object representing a model configuration.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.model_type">
 <code class="descname">model_type</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.model_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the model type. Will be used to find the
+<dd><p><em>str</em> -- The name of the model type. Will be used to find the
 model class to instantiate</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.example_type">
 <code class="descname">example_type</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.example_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of the examples which will be passed into
+<dd><p><em>str</em> -- The type of the examples which will be passed into
 <cite>fit()</cite> and <cite>predict()</cite>. Used to select feature extractors</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.label_type">
 <code class="descname">label_type</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.label_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of the labels which will be passed into
+<dd><p><em>str</em> -- The type of the labels which will be passed into
 <cite>fit()</cite> and returned by <cite>predict()</cite>. Used to select the label encoder</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.model_settings">
 <code class="descname">model_settings</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.model_settings" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Settings specific to the model type specified</p>
+<dd><p><em>dict</em> -- Settings specific to the model type specified</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.params">
 <code class="descname">params</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.params" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Params to pass to the underlying classifier</p>
+<dd><p><em>dict</em> -- Params to pass to the underlying classifier</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.param_selection">
 <code class="descname">param_selection</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.param_selection" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Configuration for param selection (using cross
+<dd><p><em>dict</em> -- Configuration for param selection (using cross
 validation)
-{‘type’: ‘shuffle’,
-‘n’: 3,
-‘k’: 10,
-‘n_jobs’: 2,
-‘scoring’: ‘’,
-‘grid’: {}
+{'type': 'shuffle',
+'n': 3,
+'k': 10,
+'n_jobs': 2,
+'scoring': '',
+'grid': {}
 }</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.features">
 <code class="descname">features</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.features" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – The keys are the names of feature extractors and the
+<dd><p><em>dict</em> -- The keys are the names of feature extractors and the
 values are either a kwargs dict which will be passed into the
 feature extractor function, or a callable which will be used as to
 extract features</p>
@@ -674,14 +668,14 @@ extract features</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.train_label_set">
 <code class="descname">train_label_set</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.train_label_set" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>regex pattern</em> – The regex pattern for finding training
+<dd><p><em>regex pattern</em> -- The regex pattern for finding training
 file names.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelConfig.test_label_set">
 <code class="descname">test_label_set</code><a class="headerlink" href="#mindmeld.models.model.ModelConfig.test_label_set" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>regex pattern</em> – The regex pattern for finding testing
+<dd><p><em>regex pattern</em> -- The regex pattern for finding testing
 file names.</p>
 </dd></dl>
 
@@ -693,7 +687,7 @@ file names.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rname</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.8)"><em>string</em></a>) – Name of the resource</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rname</strong> (<em>string</em>) -- Name of the resource</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple containing:<blockquote>
 <div><ul class="simple">
@@ -734,7 +728,7 @@ loading the latest settings from the app config to the current config</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_config</strong> (<em>ModelConfig</em>) – The ModelConfig representing the app’s latest config</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_config</strong> (<em>ModelConfig</em>) -- The ModelConfig representing the app's latest config</td>
 </tr>
 </tbody>
 </table>
@@ -822,19 +816,19 @@ loading the latest settings from the app config to the current config</p>
 <dl class="class">
 <dt id="mindmeld.models.model.ModelEvaluation">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">ModelEvaluation</code><span class="sig-paren">(</span><em>config</em>, <em>results</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#ModelEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.ModelEvaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
 <p>Represents the evaluation of a model at a specific configuration
 using a collection of examples and labels.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelEvaluation.config">
 <code class="descname">config</code><a class="headerlink" href="#mindmeld.models.model.ModelEvaluation.config" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>ModelConfig</em> – The model config used during evaluation.</p>
+<dd><p><em>ModelConfig</em> -- The model config used during evaluation.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.ModelEvaluation.results">
 <code class="descname">results</code><a class="headerlink" href="#mindmeld.models.model.ModelEvaluation.results" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list of EvaluatedExample</em> – A list of the evaluated examples.</p>
+<dd><p><em>list of EvaluatedExample</em> -- A list of the evaluated examples.</p>
 </dd></dl>
 
 <dl class="method">
@@ -947,13 +941,13 @@ evaluation metrics or to generate graphs of their choice.</p>
 <dl class="class">
 <dt id="mindmeld.models.model.RawResults">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">RawResults</code><span class="sig-paren">(</span><em>predicted</em>, <em>expected</em>, <em>text_labels</em>, <em>predicted_flat=None</em>, <em>expected_flat=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#RawResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.RawResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Represents the raw results of a set of evaluated examples. Useful for generating
 stats and graphs.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.RawResults.predicted">
 <code class="descname">predicted</code><a class="headerlink" href="#mindmeld.models.model.RawResults.predicted" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of predictions. For sequences this is a list of lists, and for
+<dd><p><em>list</em> -- A list of predictions. For sequences this is a list of lists, and for
 standard classifieris this is a 1d array. All classes are in their numeric
 representations for ease of use with evaluation libraries and graphing.</p>
 </dd></dl>
@@ -961,27 +955,27 @@ representations for ease of use with evaluation libraries and graphing.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.model.RawResults.expected">
 <code class="descname">expected</code><a class="headerlink" href="#mindmeld.models.model.RawResults.expected" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – Same as predicted but contains the true or gold values.</p>
+<dd><p><em>list</em> -- Same as predicted but contains the true or gold values.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.RawResults.text_labels">
 <code class="descname">text_labels</code><a class="headerlink" href="#mindmeld.models.model.RawResults.text_labels" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of all the text label values, the index of the text label in
+<dd><p><em>list</em> -- A list of all the text label values, the index of the text label in
 this array is the numeric label</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.RawResults.predicted_flat">
 <code class="descname">predicted_flat</code><a class="headerlink" href="#mindmeld.models.model.RawResults.predicted_flat" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – (Optional): For sequence models this is a flattened list of all
+<dd><p><em>list</em> -- (Optional): For sequence models this is a flattened list of all
 predicted tags (1d array)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.model.RawResults.expected_flat">
 <code class="descname">expected_flat</code><a class="headerlink" href="#mindmeld.models.model.RawResults.expected_flat" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – (Optional): For sequence models this is a flattened list of all gold
+<dd><p><em>list</em> -- (Optional): For sequence models this is a flattened list of all gold
 tags</p>
 </dd></dl>
 
@@ -990,7 +984,7 @@ tags</p>
 <dl class="class">
 <dt id="mindmeld.models.model.SequenceModelEvaluation">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">SequenceModelEvaluation</code><span class="sig-paren">(</span><em>config</em>, <em>results</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#SequenceModelEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.SequenceModelEvaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.models.model.SequenceModelEvaluation.get_stats">
 <code class="descname">get_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#SequenceModelEvaluation.get_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.SequenceModelEvaluation.get_stats" title="Permalink to this definition">¶</a></dt>
@@ -1014,7 +1008,7 @@ tags</p>
 <dl class="class">
 <dt id="mindmeld.models.model.StandardModelEvaluation">
 <em class="property">class </em><code class="descclassname">mindmeld.models.model.</code><code class="descname">StandardModelEvaluation</code><span class="sig-paren">(</span><em>config</em>, <em>results</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#StandardModelEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.StandardModelEvaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.models.model.ModelEvaluation" title="mindmeld.models.model.ModelEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.ModelEvaluation</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.models.model.StandardModelEvaluation.get_stats">
 <code class="descname">get_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#StandardModelEvaluation.get_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.model.StandardModelEvaluation.get_stats" title="Permalink to this definition">¶</a></dt>

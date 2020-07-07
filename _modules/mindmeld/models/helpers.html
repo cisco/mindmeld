@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.helpers &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.helpers &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -258,6 +260,7 @@
 <span class="n">FEATURE_MAP</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">MODEL_MAP</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">LABEL_MAP</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">EMBEDDER_MAP</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="c1"># Example types</span>
 <span class="n">QUERY_EXAMPLE_TYPE</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span>
@@ -335,6 +338,26 @@
     <span class="k">return</span> <span class="n">LABEL_MAP</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">](</span><span class="n">config</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="create_embedder_model"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.create_embedder_model">[docs]</a><span class="k">def</span> <span class="nf">create_embedder_model</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates and loads the embedder model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">embedder_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_settings&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">embedding_fields</span> <span class="o">=</span> <span class="n">embedder_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;embedding_fields&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedding_fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># No embedding fields specified in the app config, continuing without embedder model.</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">embedder_type</span> <span class="o">=</span> <span class="n">embedder_config</span><span class="p">[</span><span class="s2">&quot;embedder_type&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid model configuration: No provided embedder type.&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EMBEDDER_MAP</span><span class="p">[</span><span class="n">embedder_type</span><span class="p">](</span><span class="n">app_path</span><span class="p">,</span> <span class="o">**</span><span class="n">embedder_config</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid model configuration: Unknown embedder type </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">embedder_type</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="register_model"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_model">[docs]</a><span class="k">def</span> <span class="nf">register_model</span><span class="p">(</span><span class="n">model_type</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Registers a model for use with `create_model()`</span>
 
@@ -342,9 +365,6 @@
 <span class="sd">        model_type (str): The model type as specified in model configs</span>
 <span class="sd">        model_class (class): The model to register</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="n">MODEL_MAP</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model </span><span class="si">{!r}</span><span class="s2"> is already registered.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_type</span><span class="p">))</span>
-
     <span class="n">MODEL_MAP</span><span class="p">[</span><span class="n">model_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span></div>
 
 
@@ -416,6 +436,14 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">LABEL_MAP</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_encoder</span></div>
+
+
+<div class="viewcode-block" id="register_embedder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.register_embedder">[docs]</a><span class="k">def</span> <span class="nf">register_embedder</span><span class="p">(</span><span class="n">embedder_type</span><span class="p">,</span> <span class="n">embedder</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">embedder_type</span> <span class="ow">in</span> <span class="n">EMBEDDER_MAP</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Embedder of type </span><span class="si">{!r}</span><span class="s2"> is already registered.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">embedder_type</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">EMBEDDER_MAP</span><span class="p">[</span><span class="n">embedder_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">embedder</span></div>
 
 
 <div class="viewcode-block" id="mask_numerics"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.helpers.html#mindmeld.models.mask_numerics">[docs]</a><span class="k">def</span> <span class="nf">mask_numerics</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>

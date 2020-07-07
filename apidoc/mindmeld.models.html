@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models package &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models package &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models">
@@ -274,59 +266,59 @@
 <dl class="class">
 <dt id="mindmeld.models.ModelConfig">
 <em class="property">class </em><code class="descclassname">mindmeld.models.</code><code class="descname">ModelConfig</code><span class="sig-paren">(</span><em>model_type=None</em>, <em>example_type=None</em>, <em>label_type=None</em>, <em>features=None</em>, <em>model_settings=None</em>, <em>params=None</em>, <em>param_selection=None</em>, <em>train_label_set=None</em>, <em>test_label_set=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/model.html#ModelConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.ModelConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A value object representing a model configuration.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.model_type">
 <code class="descname">model_type</code><a class="headerlink" href="#mindmeld.models.ModelConfig.model_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the model type. Will be used to find the
+<dd><p><em>str</em> -- The name of the model type. Will be used to find the
 model class to instantiate</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.example_type">
 <code class="descname">example_type</code><a class="headerlink" href="#mindmeld.models.ModelConfig.example_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of the examples which will be passed into
+<dd><p><em>str</em> -- The type of the examples which will be passed into
 <cite>fit()</cite> and <cite>predict()</cite>. Used to select feature extractors</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.label_type">
 <code class="descname">label_type</code><a class="headerlink" href="#mindmeld.models.ModelConfig.label_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of the labels which will be passed into
+<dd><p><em>str</em> -- The type of the labels which will be passed into
 <cite>fit()</cite> and returned by <cite>predict()</cite>. Used to select the label encoder</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.model_settings">
 <code class="descname">model_settings</code><a class="headerlink" href="#mindmeld.models.ModelConfig.model_settings" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Settings specific to the model type specified</p>
+<dd><p><em>dict</em> -- Settings specific to the model type specified</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.params">
 <code class="descname">params</code><a class="headerlink" href="#mindmeld.models.ModelConfig.params" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Params to pass to the underlying classifier</p>
+<dd><p><em>dict</em> -- Params to pass to the underlying classifier</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.param_selection">
 <code class="descname">param_selection</code><a class="headerlink" href="#mindmeld.models.ModelConfig.param_selection" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Configuration for param selection (using cross
+<dd><p><em>dict</em> -- Configuration for param selection (using cross
 validation)
-{‘type’: ‘shuffle’,
-‘n’: 3,
-‘k’: 10,
-‘n_jobs’: 2,
-‘scoring’: ‘’,
-‘grid’: {}
+{'type': 'shuffle',
+'n': 3,
+'k': 10,
+'n_jobs': 2,
+'scoring': '',
+'grid': {}
 }</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.features">
 <code class="descname">features</code><a class="headerlink" href="#mindmeld.models.ModelConfig.features" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – The keys are the names of feature extractors and the
+<dd><p><em>dict</em> -- The keys are the names of feature extractors and the
 values are either a kwargs dict which will be passed into the
 feature extractor function, or a callable which will be used as to
 extract features</p>
@@ -335,14 +327,14 @@ extract features</p>
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.train_label_set">
 <code class="descname">train_label_set</code><a class="headerlink" href="#mindmeld.models.ModelConfig.train_label_set" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>regex pattern</em> – The regex pattern for finding training
+<dd><p><em>regex pattern</em> -- The regex pattern for finding training
 file names.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.ModelConfig.test_label_set">
 <code class="descname">test_label_set</code><a class="headerlink" href="#mindmeld.models.ModelConfig.test_label_set" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>regex pattern</em> – The regex pattern for finding testing
+<dd><p><em>regex pattern</em> -- The regex pattern for finding testing
 file names.</p>
 </dd></dl>
 
@@ -354,7 +346,7 @@ file names.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rname</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.8)"><em>string</em></a>) – Name of the resource</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rname</strong> (<em>string</em>) -- Name of the resource</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple containing:<blockquote>
 <div><ul class="simple">
@@ -395,7 +387,7 @@ loading the latest settings from the app config to the current config</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_config</strong> (<em>ModelConfig</em>) – The ModelConfig representing the app’s latest config</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_config</strong> (<em>ModelConfig</em>) -- The ModelConfig representing the app's latest config</td>
 </tr>
 </tbody>
 </table>
@@ -480,6 +472,74 @@ loading the latest settings from the app config to the current config</p>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="mindmeld.models.Embedder">
+<em class="property">class </em><code class="descclassname">mindmeld.models.</code><code class="descname">Embedder</code><span class="sig-paren">(</span><em>app_path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Base class for embedder model</p>
+<dl class="method">
+<dt id="mindmeld.models.Embedder.clear_cache">
+<code class="descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder.clear_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the cache file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.Embedder.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps the cache to disk.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.Embedder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>text_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of text strings for which to generate the embeddings.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of numpy arrays of the embeddings.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.Embedder.get_encodings">
+<code class="descname">get_encodings</code><span class="sig-paren">(</span><em>text_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder.get_encodings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder.get_encodings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches the encoded values from the cache, or generates them.
+:param text_list: A list of text strings for which to get the embeddings.
+:type text_list: list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of numpy arrays with the embeddings.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mindmeld.models.Embedder.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/embedder_models.html#Embedder.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.Embedder.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the embedder model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The model object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="mindmeld.models.create_model">
 <code class="descclassname">mindmeld.models.</code><code class="descname">create_model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.create_model" title="Permalink to this definition">¶</a></dt>
@@ -488,17 +548,28 @@ loading the latest settings from the app config to the current config</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) – A model configuration</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) -- A model configuration</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a configured model</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Model</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> – When model configuration is invalid</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> -- When model configuration is invalid</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.create_embedder_model">
+<code class="descclassname">mindmeld.models.</code><code class="descname">create_embedder_model</code><span class="sig-paren">(</span><em>app_path</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#create_embedder_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.create_embedder_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and loads the embedder model.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mindmeld.models.register_embedder">
+<code class="descclassname">mindmeld.models.</code><code class="descname">register_embedder</code><span class="sig-paren">(</span><em>embedder_type</em>, <em>embedder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#register_embedder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.register_embedder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
@@ -522,6 +593,7 @@ loading the latest settings from the app config to the current config</p>
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="mindmeld.models.embedder_models.html">mindmeld.models.embedder_models module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mindmeld.models.entity_features.html">mindmeld.models.entity_features module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mindmeld.models.helpers.html">mindmeld.models.helpers module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mindmeld.models.model.html">mindmeld.models.model module</a></li>

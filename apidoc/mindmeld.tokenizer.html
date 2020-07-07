@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.tokenizer module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.tokenizer module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.tokenizer">
@@ -275,7 +267,7 @@
 <dl class="class">
 <dt id="mindmeld.tokenizer.Tokenizer">
 <em class="property">class </em><code class="descclassname">mindmeld.tokenizer.</code><code class="descname">Tokenizer</code><span class="sig-paren">(</span><em>exclude_from_norm=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/tokenizer.html#Tokenizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.tokenizer.Tokenizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
 given piece of text.</p>
 <dl class="staticmethod">
@@ -294,7 +286,7 @@ given piece of text.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>char</strong> – ASCII folding token</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>char</strong> -- ASCII folding token</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a ASCII character</td>
 </tr>
@@ -312,7 +304,7 @@ given piece of text.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> – ASCII folding token string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> -- ASCII folding token string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a ASCII character</td>
 </tr>
@@ -335,8 +327,8 @@ proper alignment.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>raw_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Raw query text.</li>
-<li><strong>normalized_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Normalized query text.</li>
+<li><strong>raw_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Raw query text.</li>
+<li><strong>normalized_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Normalized query text.</li>
 </ul>
 </td>
 </tr>
@@ -365,8 +357,8 @@ proper alignment.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to perform matching on</li>
-<li><strong>compiled</strong> – A compiled regex object that can be used for matching</li>
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to perform matching on</li>
+<li><strong>compiled</strong> -- A compiled regex object that can be used for matching</li>
 </ul>
 </td>
 </tr>
@@ -389,8 +381,8 @@ proper alignment.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to normalize</li>
-<li><strong>keep_special_chars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, the tokenizer excludes a list of special
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to normalize</li>
+<li><strong>keep_special_chars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- If True, the tokenizer excludes a list of special
 characters used in annotations</li>
 </ul>
 </td>
@@ -418,7 +410,7 @@ the following characters is a number
 the following character is a letter
 5. remove special characters except ampersand when both preceding and following characters
 are letters
-6. remove special character except ampersand when the following character is ‘|’
+6. remove special character except ampersand when the following character is '|'
 7. remove diacritics and replace it with equivalent ascii character when possible</p>
 <p>Note that the tokenizer also excludes a list of special characters used in annotations when
 the flag keep_special_chars is set to True</p>
@@ -427,8 +419,8 @@ the flag keep_special_chars is set to True</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to normalize</li>
-<li><strong>keep_special_chars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, the tokenizer excludes a list of special
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to normalize</li>
+<li><strong>keep_special_chars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- If True, the tokenizer excludes a list of special
 characters used in annotations</li>
 </ul>
 </td>
@@ -451,7 +443,7 @@ characters used in annotations</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to normalize</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to normalize</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of normalized tokens</td>
 </tr>

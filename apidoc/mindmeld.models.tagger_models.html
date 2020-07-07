@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.tagger_models module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.tagger_models module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.tagger_models">
@@ -275,7 +267,7 @@
 <dl class="class">
 <dt id="mindmeld.models.tagger_models.TaggerModel">
 <em class="property">class </em><code class="descclassname">mindmeld.models.tagger_models.</code><code class="descname">TaggerModel</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/tagger_models.html#TaggerModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.models.model.html#mindmeld.models.model.Model" title="mindmeld.models.model.Model"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.Model</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.models.model.html#mindmeld.models.model.Model" title="mindmeld.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.Model</span></code></a></p>
 <p>A machine learning classifier for tags.</p>
 <p>This class manages feature extraction, training, cross-validation, and
 prediction. The design goal is that after providing initial settings like
@@ -287,21 +279,21 @@ manipulation is needed from the client.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.tagger_models.TaggerModel.classifier_type">
 <code class="descname">classifier_type</code><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.classifier_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the classifier type. Currently
-recognized values are “memm”,”crf”, and “lstm”</p>
+<dd><p><em>str</em> -- The name of the classifier type. Currently
+recognized values are &quot;memm&quot;,&quot;crf&quot;, and &quot;lstm&quot;</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.tagger_models.TaggerModel.hyperparams">
 <code class="descname">hyperparams</code><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.hyperparams" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A kwargs dict of parameters that will be used to
+<dd><p><em>dict</em> -- A kwargs dict of parameters that will be used to
 initialize the classifier object.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.tagger_models.TaggerModel.grid_search_hyperparams">
 <code class="descname">grid_search_hyperparams</code><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.grid_search_hyperparams" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Like ‘hyperparams’, but the values are
+<dd><p><em>dict</em> -- Like 'hyperparams', but the values are
 lists of parameters. The training process will grid search over the
 Cartesian product of these parameter lists and select the best via
 cross-validation.</p>
@@ -310,7 +302,7 @@ cross-validation.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.tagger_models.TaggerModel.feat_specs">
 <code class="descname">feat_specs</code><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.feat_specs" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A mapping from feature extractor names, as given in
+<dd><p><em>dict</em> -- A mapping from feature extractor names, as given in
 FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the
 associated feature extractor function.</p>
 </dd></dl>
@@ -318,25 +310,25 @@ associated feature extractor function.</p>
 <dl class="attribute">
 <dt id="mindmeld.models.tagger_models.TaggerModel.cross_validation_settings">
 <code class="descname">cross_validation_settings</code><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.cross_validation_settings" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dict that contains “type”, which
+<dd><p><em>dict</em> -- A dict that contains &quot;type&quot;, which
 specifies the name of the cross-validation strategy, such as
-“k-folds” or “shuffle”. The remaining keys are parameters
-specific to the cross-validation type, such as “k” when the type is
-“k-folds”.</p>
+&quot;k-folds&quot; or &quot;shuffle&quot;. The remaining keys are parameters
+specific to the cross-validation type, such as &quot;k&quot; when the type is
+&quot;k-folds&quot;.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.tagger_models.TaggerModel.dump">
 <code class="descname">dump</code><span class="sig-paren">(</span><em>path</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/tagger_models.html#TaggerModel.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.dump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dumps the model using joblib for the config and call’s the underlying model
+<dd><p>Dumps the model using joblib for the config and call's the underlying model
 to dump its state.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to dump the model to</li>
-<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The config containing the model configuration</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The path to dump the model to</li>
+<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The config containing the model configuration</li>
 </ul>
 </td>
 </tr>
@@ -353,8 +345,8 @@ to dump its state.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> – A list of examples to predict</li>
-<li><strong>labels</strong> – A list of expected labels</li>
+<li><strong>examples</strong> -- A list of examples to predict</li>
+<li><strong>labels</strong> -- A list of expected labels</li>
 </ul>
 </td>
 </tr>
@@ -377,9 +369,9 @@ to dump its state.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – A list of queries to train on.</li>
-<li><strong>labels</strong> (<em>list of tuples of mindmeld.core.QueryEntity</em>) – A list of expected labels.</li>
-<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Parameters of the classifier.</li>
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- A list of queries to train on.</li>
+<li><strong>labels</strong> (<em>list of tuples of mindmeld.core.QueryEntity</em>) -- A list of expected labels.</li>
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Parameters of the classifier.</li>
 </ul>
 </td>
 </tr>
@@ -402,8 +394,8 @@ like tensorflow models</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The path to dump the model to</li>
-<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The config containing the model configuration</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The path to dump the model to</li>
+<li><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The config containing the model configuration</li>
 </ul>
 </td>
 </tr>
@@ -419,8 +411,8 @@ like tensorflow models</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries to train on</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference</li>
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries to train on</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference</li>
 </ul>
 </td>
 </tr>
@@ -442,8 +434,8 @@ like tensorflow models</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries to train on</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference</li>
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries to train on</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference</li>
 </ul>
 </td>
 </tr>
@@ -460,7 +452,30 @@ like tensorflow models</p>
 <dl class="method">
 <dt id="mindmeld.models.tagger_models.TaggerModel.select_params">
 <code class="descname">select_params</code><span class="sig-paren">(</span><em>examples</em>, <em>labels</em>, <em>selection_settings=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/tagger_models.html#TaggerModel.select_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.tagger_models.TaggerModel.select_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="docutils">
+<dt>Selects the best set of hyper-parameters for a given set of examples and true labels</dt>
+<dd>through cross-validation</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> -- A list of example queries</li>
+<li><strong>labels</strong> -- A list of labels associated with the queries</li>
+<li><strong>selection_settings</strong> -- A dictionary of parameter lists to select from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dictionary of optimized parameters to use</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.tagger_models.TaggerModel.view_extracted_features">
@@ -471,8 +486,8 @@ like tensorflow models</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.Query" title="mindmeld.core.Query"><em>mindmeld.core.Query</em></a>) – The query to extract features from</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The dynamic resource used along with the query</li>
+<li><strong>query</strong> (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.Query" title="mindmeld.core.Query"><em>mindmeld.core.Query</em></a>) -- The query to extract features from</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The dynamic resource used along with the query</li>
 </ul>
 </td>
 </tr>

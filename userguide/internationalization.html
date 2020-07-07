@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Internationalization support &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Internationalization support &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Dealing with Voice Inputs" href="voice.html" />
-    <link rel="prev" title="Working with the Dialogue Manager" href="dm.html" /> 
+    <link rel="prev" title="Working with Custom Actions" href="custom_action.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Internationalization support</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-language-configuration">Setting up language configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#language-stemming">Language stemming</a></li>
@@ -258,23 +260,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="internationalization-support">
@@ -288,15 +280,15 @@ The limitations of these two components are discussed below.</p>
 <p>Mindmeld supports <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639-1 and ISO 639-2 language codes</a> and
 <a class="reference external" href="https://www.iso.org/obp/ui/#search/code/">ISO 3166-2 locale codes</a>. Locale codes are represented as ISO 639-1 language code
 and ISO3166 alpha 2 country code separated by an underscore character, for example, <cite>en_US</cite>.</p>
-<p>To use a particular language or locale in Mindmeld, the <code class="docutils literal"><span class="pre">config.py</span></code> file needs to configured as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">LANGUAGE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>To use a particular language or locale in Mindmeld, the <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file needs to configured as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LANGUAGE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">,</span>
     <span class="s1">&#39;locale&#39;</span><span class="p">:</span> <span class="s1">&#39;en_CA&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>If the language and locale codes are not configured in <code class="docutils literal"><span class="pre">config.py</span></code>, Mindmeld uses this default:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">LANGUAGE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>If the language and locale codes are not configured in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, Mindmeld uses this default:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LANGUAGE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">,</span>
     <span class="s1">&#39;locale&#39;</span><span class="p">:</span> <span class="s1">&#39;en_US&#39;</span>
 <span class="p">}</span>
@@ -325,10 +317,10 @@ RU, SV, SW, TA, TH, TR, UK, VI, ZH].</p>
 <span id="specify-language"></span><h2>Locale-based resolution<a class="headerlink" href="#locale-based-resolution" title="Permalink to this headline">¶</a></h2>
 <p>For languages supported by system entity resolution, one can change the resolution of system entities like <cite>sys_time</cite> entities by varying the
 locale in the <cite>process</cite> function call. In the example below, the time entity is resolved differently based on if the locale is <cite>en_CA</cite> or <cite>en_US</cite>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Is the Main Street location open for Thanksgiving&#39;</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s1">&#39;en_CA&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Is the Main Street location open for Thanksgiving&#39;</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s1">&#39;en_CA&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;store_info&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;store_info&#39;,</span>
 <span class="go">  &#39;intent&#39;: &#39;find_nearest_store&#39;,</span>
 <span class="go">  &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                  &#39;span&#39;: {&#39;end&#39;: 49, &#39;start&#39;: 37},</span>
@@ -340,10 +332,10 @@ locale in the <cite>process</cite> function call. In the example below, the time
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Is the Main Street location open for Thanksgiving&#39;</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s1">&#39;en_US&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Is the Main Street location open for Thanksgiving&#39;</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s1">&#39;en_US&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;store_info&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;store_info&#39;,</span>
 <span class="go">  &#39;intent&#39;: &#39;find_nearest_store&#39;,</span>
 <span class="go">  &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                  &#39;span&#39;: {&#39;end&#39;: 49, &#39;start&#39;: 37},</span>
@@ -369,7 +361,7 @@ locale in the <cite>process</cite> function call. In the example below, the time
         <a href="voice.html" class="btn btn-neutral float-right" title="Dealing with Voice Inputs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="dm.html" class="btn btn-neutral float-left" title="Working with the Dialogue Manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="custom_action.html" class="btn btn-neutral float-left" title="Working with Custom Actions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

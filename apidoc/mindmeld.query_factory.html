@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.query_factory module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.query_factory module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.query_factory">
@@ -275,43 +267,43 @@
 <dl class="class">
 <dt id="mindmeld.query_factory.QueryFactory">
 <em class="property">class </em><code class="descclassname">mindmeld.query_factory.</code><code class="descname">QueryFactory</code><span class="sig-paren">(</span><em>tokenizer</em>, <em>preprocessor=None</em>, <em>stemmer=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>system_entity_recognizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/query_factory.html#QueryFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.query_factory.QueryFactory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An object which encapsulates the components required to create a Query object.</p>
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.preprocessor">
 <code class="descname">preprocessor</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.preprocessor" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Preprocessor</em> – the object responsible for processing raw text</p>
+<dd><p><em>Preprocessor</em> -- the object responsible for processing raw text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.tokenizer">
 <code class="descname">tokenizer</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.tokenizer" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Tokenizer</em> – the object responsible for normalizing and tokenizing processed
+<dd><p><em>Tokenizer</em> -- the object responsible for normalizing and tokenizing processed
 text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.stemmer">
 <code class="descname">stemmer</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.stemmer" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Stemmer</em> – the object responsible for stemming the text</p>
+<dd><p><em>Stemmer</em> -- the object responsible for stemming the text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.language">
 <code class="descname">language</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.language" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – the language of the text</p>
+<dd><p><em>str</em> -- the language of the text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.locale">
 <code class="descname">locale</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.locale" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – the locale of the text</p>
+<dd><p><em>str</em> -- the locale of the text</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.query_factory.QueryFactory.system_entity_recognizer">
 <code class="descname">system_entity_recognizer</code><a class="headerlink" href="#mindmeld.query_factory.QueryFactory.system_entity_recognizer" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>SystemEntityRecognizer</em> – default to NoOpSystemEntityRecognizer</p>
+<dd><p><em>SystemEntityRecognizer</em> -- default to NoOpSystemEntityRecognizer</p>
 </dd></dl>
 
 <dl class="method">
@@ -323,12 +315,12 @@ text</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Text to create a query object for</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id to create the query relative to.</li>
-<li><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – A reference unix timestamp to create the query relative to,
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Text to create a query object for</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- An IANA time zone id to create the query relative to.</li>
+<li><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) -- A reference unix timestamp to create the query relative to,
 in seconds.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code</li>
 </ul>
 </td>
 </tr>
@@ -351,15 +343,15 @@ in seconds.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The path to the directory containing the
-app’s data. If None is passed, a default query factory will be
+<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The path to the directory containing the
+app's data. If None is passed, a default query factory will be
 returned.</li>
-<li><strong>tokenizer</strong> (<em>Tokenizer</em><em>, </em><em>optional</em>) – The app’s tokenizer. One will be
+<li><strong>tokenizer</strong> (<em>Tokenizer</em><em>, </em><em>optional</em>) -- The app's tokenizer. One will be
 created if none is provided</li>
-<li><strong>preprocessor</strong> (<em>Processor</em><em>, </em><em>optional</em>) – The app’s preprocessor.</li>
-<li><strong>stemmer</strong> (<em>Stemmer</em><em>, </em><em>optional</em>) – The stemmer to use for stemming</li>
-<li><strong>system_entity_recognizer</strong> (<em>SystemEntityRecognizer</em>) – If not passed, we use either the one
-from the application’s configuration or NoOpSystemEntityRecognizer.</li>
+<li><strong>preprocessor</strong> (<em>Processor</em><em>, </em><em>optional</em>) -- The app's preprocessor.</li>
+<li><strong>stemmer</strong> (<em>Stemmer</em><em>, </em><em>optional</em>) -- The stemmer to use for stemming</li>
+<li><strong>system_entity_recognizer</strong> (<em>SystemEntityRecognizer</em>) -- If not passed, we use either the one
+from the application's configuration or NoOpSystemEntityRecognizer.</li>
 </ul>
 </td>
 </tr>
@@ -381,7 +373,7 @@ from the application’s configuration or NoOpSystemEntityRecognizer.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Text to process</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Text to process</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Normalized text</td>
 </tr>

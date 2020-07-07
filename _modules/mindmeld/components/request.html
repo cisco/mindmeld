@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.request &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.request &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -569,7 +571,17 @@
     <span class="n">confidences</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">(),</span> <span class="n">converter</span><span class="o">=</span><span class="n">immutables</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
     <span class="n">nbest_transcripts_text</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
     <span class="n">nbest_transcripts_entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
-    <span class="n">nbest_aligned_entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span></div>
+    <span class="n">nbest_aligned_entities</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">(</span><span class="nb">tuple</span><span class="p">),</span> <span class="n">converter</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Request.to_dict"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.request.html#mindmeld.components.Request.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="s2">&quot;intent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">),</span>
+            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+            <span class="s2">&quot;frame&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">),</span>
+        <span class="p">}</span></div></div>
 </pre></div>
 
            </div>

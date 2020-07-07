@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>MindMeld Blueprints &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>MindMeld Blueprints &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -148,6 +148,7 @@
 <li class="toctree-l1"><a class="reference internal" href="video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -165,6 +166,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -261,23 +263,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="mindmeld-blueprints">
@@ -318,6 +310,25 @@
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><div class="first last line-block">
+<div class="line"><a class="reference internal" href="banking.html"><span class="doc">Banking Assistant</span></a></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Users interact with a banking agent</div>
+<div class="line">to fulfill actions like transferring</div>
+<div class="line">money and paying bills</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">banking_assistant</span></code></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
 <div class="line"><a class="reference internal" href="food_ordering.html"><span class="doc">Food Ordering</span></a></div>
 <div class="line"><br /></div>
 </div>
@@ -328,12 +339,12 @@
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">food_ordering</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">food_ordering</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 </tr>
-<tr class="row-odd"><td><div class="first last line-block">
+<tr class="row-even"><td><div class="first last line-block">
 <div class="line"><a class="reference internal" href="home_assistant.html"><span class="doc">Home Assistant</span></a></div>
 <div class="line"><br /></div>
 </div>
@@ -344,12 +355,12 @@
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">home_assistant</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">home_assistant</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 </tr>
-<tr class="row-even"><td><div class="first last line-block">
+<tr class="row-odd"><td><div class="first last line-block">
 <div class="line"><a class="reference internal" href="video_discovery.html"><span class="doc">Video Discovery</span></a></div>
 <div class="line"><br /></div>
 </div>
@@ -360,12 +371,12 @@
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">video_discovery</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">video_discovery</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 </tr>
-<tr class="row-odd"><td><div class="first last line-block">
+<tr class="row-even"><td><div class="first last line-block">
 <div class="line"><a class="reference internal" href="../quickstart/00_overview.html"><span class="doc">Kwik-E-Mart</span></a></div>
 <div class="line"><br /></div>
 </div>
@@ -376,7 +387,7 @@
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">kwik_e_mart</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">kwik_e_mart</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
@@ -385,7 +396,7 @@
 </table>
 <p>You can use the Quick Start below to get any blueprint up and running.</p>
 <p>Each of the sections beyond the Quick Start covers one blueprint in depth, with exercises that explain what you need to know to convert the blueprint into a production-quality app.</p>
-<p>You’ll be guided through the following steps:</p>
+<p>You'll be guided through the following steps:</p>
 <blockquote>
 <div><ul class="simple">
 <li>define the app scope clearly in terms of domains, intents, entities and roles</li>
@@ -402,7 +413,7 @@
 <h2>Before you Continue<a class="headerlink" href="#before-you-continue" title="Permalink to this headline">¶</a></h2>
 <p>All blueprints require you to install MindMeld and its required dependencies before you begin.</p>
 <p>See the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">Getting Started</span></a> page for instructions on acquiring and installing the MindMeld toolkit on your system.</p>
-<p>The Home Assistant blueprint requires you to register for an <a class="reference external" href="https://openweathermap.org/appid">Open Weather Map</a> API key, and then set an environment variable with the command <code class="docutils literal"><span class="pre">export</span> <span class="pre">OPEN_WEATHER_KEY=[YOUR-KEY]</span></code>. If you skip this step, the app can run but cannot retrieve weather forecasts.</p>
+<p>The Home Assistant blueprint requires you to register for an <a class="reference external" href="https://openweathermap.org/appid">Open Weather Map</a> API key, and then set an environment variable with the command <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">OPEN_WEATHER_KEY=[YOUR-KEY]</span></code>. If you skip this step, the app can run but cannot retrieve weather forecasts.</p>
 </div>
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
@@ -412,10 +423,10 @@
 <p>Open a Python shell and type the following commands to download and set up the blueprint application of your choice.</p>
 <blockquote>
 <div><ul class="simple">
-<li>Use the appropriate Python blueprint name as the value of the <code class="docutils literal"><span class="pre">bp_name</span></code> variable (either <code class="docutils literal"><span class="pre">food_ordering</span></code>, <code class="docutils literal"><span class="pre">home_assistant</span></code>, <code class="docutils literal"><span class="pre">video_assistant</span></code>, or <code class="docutils literal"><span class="pre">kwik_e_mart</span></code>). In the example, we specify the Food Ordering blueprint.</li>
+<li>Use the appropriate Python blueprint name as the value of the <code class="docutils literal notranslate"><span class="pre">bp_name</span></code> variable (either <code class="docutils literal notranslate"><span class="pre">food_ordering</span></code>, <code class="docutils literal notranslate"><span class="pre">home_assistant</span></code>, <code class="docutils literal notranslate"><span class="pre">video_assistant</span></code>, or <code class="docutils literal notranslate"><span class="pre">kwik_e_mart</span></code>). In the example, we specify the Food Ordering blueprint.</li>
 </ul>
 </div></blockquote>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">bp_name</span> <span class="o">=</span> <span class="s1">&#39;food_ordering&#39;</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
@@ -425,7 +436,7 @@
 <div class="section" id="build">
 <h3>2. Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
 <p>Build the Natural Language Processing models that power the app.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
@@ -435,28 +446,28 @@
 <h3>3. Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h3>
 <p>Interact with the app in the Python shell using the commands below. Try the queries shown in the examples, then try some queries of your own invention.</p>
 <p><em>Food Ordering example</em></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">bp_name</span><span class="p">)</span>
 <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hello!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&quot;Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma&#39;s Deli &amp; Cafe, The Salad Place&quot;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&quot;Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma&#39;s Deli &amp; Cafe, The Salad Place&quot;]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Get me a pepperoni pizza from firetrail pizza&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Get me a pepperoni pizza from firetrail pizza&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Sure, I have 1 order of Pepperoni Pizza from Firetrail Pizza for a total price of $11.00. Would you like to place the order?&#39;, &#39;Listening...&#39;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Sure, I have 1 order of Pepperoni Pizza from Firetrail Pizza for a total price of $11.00. Would you like to place the order?&#39;, &#39;Listening...&#39;]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Bye&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Bye&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Goodbye!&#39;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Goodbye!&#39;]</span>
 </pre></div>
 </div>
 <p><em>Home Assistant example</em></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">bp_name</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi&#39;</span><span class="p">)</span>
 <span class="go">[&#39;Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.&#39;]</span>
@@ -467,7 +478,7 @@
 </pre></div>
 </div>
 <p><em>Video Discovery example</em></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi&#39;</span><span class="p">)</span>
 <span class="go">[&#39;Hello.&#39;, &#39;I can help you find movies and TV shows. What do you feel like watching today?&#39;, &quot;Unsupported response: {&#39;videos&#39;: [{&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Wonder Woman&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Beauty and the Beast&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Transformers: The Last Knight&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Logan&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;The Mummy&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Kong: Skull Island&#39;, &#39;release_year&#39;: 2017}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Doctor Who&#39;, &#39;release_year&#39;: 2005}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;Game of Thrones&#39;, &#39;release_year&#39;: 2011}, {&#39;type&#39;: &#39;tv-show&#39;, &#39;title&#39;: &#39;The Walking Dead&#39;, &#39;release_year&#39;: 2010}, {&#39;type&#39;: &#39;movie&#39;, &#39;title&#39;: &#39;Pirates of the Caribbean: Dead Men Tell No Tales&#39;, &#39;release_year&#39;: 2017}]}&quot;, &quot;Suggestions: &#39;Most popular&#39;, &#39;Most recent&#39;, &#39;Movies&#39;, &#39;TV Shows&#39;, &#39;Action&#39;, &#39;Dramas&#39;, &#39;Sci-Fi&#39;&quot;]</span>

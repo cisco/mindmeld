@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.taggers.crf module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.taggers.crf module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.taggers.crf">
@@ -275,7 +267,7 @@
 <dl class="class">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields">
 <em class="property">class </em><code class="descclassname">mindmeld.models.taggers.crf.</code><code class="descname">ConditionalRandomFields</code><span class="sig-paren">(</span><em>**parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger" title="mindmeld.models.taggers.taggers.Tagger"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.taggers.taggers.Tagger</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.models.taggers.taggers.html#mindmeld.models.taggers.taggers.Tagger" title="mindmeld.models.taggers.taggers.Tagger"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.taggers.taggers.Tagger</span></code></a></p>
 <p>A Conditional Random Fields model.</p>
 <dl class="staticmethod">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.extract_example_features">
@@ -286,9 +278,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>example</strong> (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.Query" title="mindmeld.core.Query"><em>mindmeld.core.Query</em></a>) – A query.</li>
-<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature                                   extraction.</li>
-<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction.</li>
+<li><strong>example</strong> (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.Query" title="mindmeld.core.Query"><em>mindmeld.core.Query</em></a>) -- A query.</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) -- The ModelConfig which may contain information used for feature                                   extraction.</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Resources which may be used for this model's feature extraction.</li>
 </ul>
 </td>
 </tr>
@@ -311,10 +303,10 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries</li>
-<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) -- The ModelConfig which may contain information used for feature
 extraction</li>
-<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Resources which may be used for this model's feature extraction</li>
 </ul>
 </td>
 </tr>
@@ -331,22 +323,80 @@ extraction</li>
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.fit">
 <code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.fit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Trains the model. X and y are the format of what is returned by extract_features. There is no
+restriction on their type or content. X should be the fully processed data with extracted
+features that are ready to be used to train the model. y should be a list of classes as
+encoded by the label_encoder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- Generally a list of feature vectors, one for each training example</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of classification labels (encoded by the label_encoder, NOT MindMeld
+entity objects)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.get_params">
 <code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.get_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets a dictionary of all of the current model parameters and their values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>deep</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- Not used, needed for sklearn compatibility</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of the model parameter names as keys and their set values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.load">
 <em class="property">static </em><code class="descname">load</code><span class="sig-paren">(</span><em>model_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.load" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Load the model state to memory. This is a no-op since we do not
+have to do anything special to load default serializable models
+for SKLearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The path to dump the model to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Predicts the labels from a feature matrix X. Again X is the format of what is returned by
+extract_features.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of feature vectors, one for each example</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of predicted labels (in an encoded format)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(list of classification labels)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.predict_proba">
@@ -356,10 +406,10 @@ extraction</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) – a list of queries to predict on</li>
-<li><strong>config</strong> (<em>ModelConfig</em>) – The ModelConfig which may contain information used for feature
+<li><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries to predict on</li>
+<li><strong>config</strong> (<em>ModelConfig</em>) -- The ModelConfig which may contain information used for feature
 extraction</li>
-<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Resources which may be used for this model’s feature extraction</li>
+<li><strong>resources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- Resources which may be used for this model's feature extraction</li>
 </ul>
 </td>
 </tr>
@@ -376,19 +426,33 @@ extraction</li>
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.set_params">
 <code class="descname">set_params</code><span class="sig-paren">(</span><em>**parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.set_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.set_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sets the model parameters. Defaults should be set for all parameters such that a model
+is initialized with reasonable default parameters if none are explicitly passed in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**parameters</strong> -- Arbitrary keyword arguments. The keys are model parameter names and the
+values are what they should be set to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.ConditionalRandomFields.setup_model">
 <code class="descname">setup_model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#ConditionalRandomFields.setup_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.ConditionalRandomFields.setup_model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>&quot;Not implemented.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.models.taggers.crf.FeatureBinner">
 <em class="property">class </em><code class="descclassname">mindmeld.models.taggers.crf.</code><code class="descname">FeatureBinner</code><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#FeatureBinner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.FeatureBinner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class to convert features with numerical values to categorical values.</p>
 <dl class="method">
 <dt id="mindmeld.models.taggers.crf.FeatureBinner.fit">
@@ -398,7 +462,7 @@ extraction</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) – training data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) -- training data</td>
 </tr>
 </tbody>
 </table>
@@ -412,7 +476,7 @@ extraction</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) – training data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) -- training data</td>
 </tr>
 </tbody>
 </table>
@@ -426,7 +490,7 @@ extraction</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) – training data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X_train</strong> (<em>list of list of dict</em>) -- training data</td>
 </tr>
 </tbody>
 </table>
@@ -437,7 +501,7 @@ extraction</li>
 <dl class="class">
 <dt id="mindmeld.models.taggers.crf.FeatureMapper">
 <em class="property">class </em><code class="descclassname">mindmeld.models.taggers.crf.</code><code class="descname">FeatureMapper</code><span class="sig-paren">(</span><em>num_std=2</em>, <em>size_std=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/taggers/crf.html#FeatureMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.taggers.crf.FeatureMapper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mapper for one feature to map numerical values to corresponding bins which are generated
 by the mean and standard deviation of this feature.</p>
 <p>The size and number of bins are decided by num_std and size_std. For example, say
@@ -446,20 +510,20 @@ num_std = 2 and size_std = 0.5, then the bins would look like:</p>
 <li>bucket 0: (-INF, mean - std * 2)</li>
 <li>bucket 1: [mean - std * 2, mean - std * 1.5)</li>
 <li>bucket 2: [mean - std * 1.5, mean - std * 1)</li>
-<li>…</li>
+<li>...</li>
 <li>bucket 8: [mean + std * 1.5, mean + std * 2)</li>
 <li>bucket 9: [mean + std * 2, INF)</li>
 </ul>
 <dl class="attribute">
 <dt id="mindmeld.models.taggers.crf.FeatureMapper._num_std">
 <code class="descname">_num_std</code><a class="headerlink" href="#mindmeld.models.taggers.crf.FeatureMapper._num_std" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – number of standard deviations to generate the bins</p>
+<dd><p><em>int</em> -- number of standard deviations to generate the bins</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.models.taggers.crf.FeatureMapper._size_std">
 <code class="descname">_size_std</code><a class="headerlink" href="#mindmeld.models.taggers.crf.FeatureMapper._size_std" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>float</em> – size of each bin in standard deviation</p>
+<dd><p><em>float</em> -- size of each bin in standard deviation</p>
 </dd></dl>
 
 <dl class="method">
@@ -470,7 +534,7 @@ num_std = 2 and size_std = 0.5, then the bins would look like:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>numeric</em>) – A numeric value</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>numeric</em>) -- A numeric value</td>
 </tr>
 </tbody>
 </table>
@@ -490,7 +554,7 @@ num_std = 2 and size_std = 0.5, then the bins would look like:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – numerical value of this feature</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) -- numerical value of this feature</td>
 </tr>
 </tbody>
 </table>

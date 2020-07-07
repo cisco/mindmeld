@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.system_entity_recognizer module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.system_entity_recognizer module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.system_entity_recognizer">
@@ -274,13 +266,13 @@
 <dl class="exception">
 <dt id="mindmeld.system_entity_recognizer.SystemEntityError">
 <em class="property">exception </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">SystemEntityError</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.system_entity_recognizer.DucklingDimension">
 <em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">DucklingDimension</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingDimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
 <p>An enumeration.</p>
 <dl class="attribute">
 <dt id="mindmeld.system_entity_recognizer.DucklingDimension.AMOUNT_OF_MONEY">
@@ -347,7 +339,7 @@
 <dl class="class">
 <dt id="mindmeld.system_entity_recognizer.DucklingRecognizer">
 <em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">DucklingRecognizer</code><span class="sig-paren">(</span><em>url='http://localhost:7151/parse'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates">
 <code class="descname">get_candidates</code><span class="sig-paren">(</span><em>query</em>, <em>entity_types=None</em>, <em>locale=None</em>, <em>language=None</em>, <em>time_zone=None</em>, <em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#DucklingRecognizer.get_candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.DucklingRecognizer.get_candidates" title="Permalink to this definition">¶</a></dt>
@@ -357,13 +349,13 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.
+<li><strong>query</strong> (<em>Query</em>) -- The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- An IANA time zone id such as 'America/Los_Angeles'.
 If not specified, the system time zone is used.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix timestamp used as the reference time.
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix timestamp used as the reference time.
 If not specified, the current system time is used. If <cite>time_zone</cite>
 is not also specified, this parameter is ignored.</li>
 </ul>
@@ -388,10 +380,10 @@ is not also specified, this parameter is ignored.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Language code</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Locale code</li>
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Language code</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Locale code</li>
 </ul>
 </td>
 </tr>
@@ -416,7 +408,7 @@ We get an instance for the Duckling URL. If there is no URL being passed,</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> – Duckling URL.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> -- Duckling URL.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DucklingRecognizer instance</td>
 </tr>
@@ -435,7 +427,7 @@ Return a tuple consisting the JSON response and a response code.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dict, int)</td>
 </tr>
@@ -452,14 +444,14 @@ Return a tuple consisting the JSON response and a response code.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A raw sentence.</li>
-<li><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of str</em>) – The list of types (e.g. volume,                 temperature) to restrict the output to. If None, include all types.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language of the sentence specified using a 639-1/2 code.
+<li><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- A raw sentence.</li>
+<li><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of str</em>) -- The list of types (e.g. volume,                 temperature) to restrict the output to. If None, include all types.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language of the sentence specified using a 639-1/2 code.
 If both locale and language are provided, the locale is used. If neither are
 provided, the EN language code is used.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – An IANA time zone id such as ‘America/Los_Angeles’.                 If not specified, the system time zone is used.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix millisecond timestamp used as the reference time.                 If not specified, the current system time is used. If <cite>time_zone</cite></li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- An IANA time zone id such as 'America/Los_Angeles'.                 If not specified, the system time zone is used.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix millisecond timestamp used as the reference time.                 If not specified, the current system time is used. If <cite>time_zone</cite></li>
 </ul>
 </td>
 </tr>
@@ -490,9 +482,9 @@ provided, the EN language code is used.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query containing the entity</li>
-<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the entity</li>
-<li><strong>span</strong> (<em>Span</em>) – The character span of the entity in the query</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) -- The character span of the entity in the query</li>
 </ul>
 </td>
 </tr>
@@ -502,7 +494,7 @@ provided, the EN language code is used.</li>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">SystemEntityResolutionError</span></code></p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemEntityResolutionError</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -514,41 +506,135 @@ provided, the EN language code is used.</li>
 <dl class="class">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer">
 <em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">NoOpSystemEntityRecognizer</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="mindmeld.system_entity_recognizer.SystemEntityRecognizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.system_entity_recognizer.SystemEntityRecognizer</span></code></a></p>
 <p>This is a no-ops recognizer which returns empty list and 200.</p>
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates">
 <code class="descname">get_candidates</code><span class="sig-paren">(</span><em>query</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Identifies candidate system entities in the given query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) -- The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of QueryEntity</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates_for_text">
 <code class="descname">get_candidates_for_text</code><span class="sig-paren">(</span><em>text</em>, <em>entity_types=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_candidates_for_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_candidates_for_text" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Identifies candidate system entities in the given text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The system entities found in the text</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_instance">
 <em class="property">static </em><code class="descname">get_instance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.get_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.get_instance" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Static access method. If there is no instance instantiated, we instantiate
+NoOpSystemEntityRecognizer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A SystemEntityRecognizer instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(SystemEntityRecognizer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.parse">
 <code class="descname">parse</code><span class="sig-paren">(</span><em>sentence</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.parse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Calls System Entity Recognizer service API to extract numerical entities from a sentence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- A raw sentence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A tuple containing:</dt>
+<dd><ul class="first last simple">
+<li>response (list, dict): Response from the System Entity Recognizer service that                 consists of a list of dicts, each corresponding to a single prediction or just a                 dict, corresponding to a single prediction.</li>
+<li>response_code (int): http status code.</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.resolve_system_entity">
 <code class="descname">resolve_system_entity</code><span class="sig-paren">(</span><em>query</em>, <em>entity_type</em>, <em>span</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#NoOpSystemEntityRecognizer.resolve_system_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.NoOpSystemEntityRecognizer.resolve_system_entity" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Resolves a system entity in the provided query at the specified span.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>Query</em>) -- The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) -- The character span of the entity in the query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The resolved entity</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemEntityResolutionError</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer">
 <em class="property">class </em><code class="descclassname">mindmeld.system_entity_recognizer.</code><code class="descname">SystemEntityRecognizer</code><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>SystemEntityRecognizer is the external parsing service used to extract
-system entities. It is intended to be used as a singleton, so it’s
+system entities. It is intended to be used as a singleton, so it's
 initialized only once during NLP object construction.</p>
 <dl class="method">
 <dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.get_candidates">
@@ -559,8 +645,8 @@ initialized only once during NLP object construction.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
 </ul>
 </td>
 </tr>
@@ -583,8 +669,8 @@ initialized only once during NLP object construction.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text to examine</li>
-<li><strong>entity_types</strong> (<em>list of str</em>) – The entity types to consider</li>
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text to examine</li>
+<li><strong>entity_types</strong> (<em>list of str</em>) -- The entity types to consider</li>
 </ul>
 </td>
 </tr>
@@ -620,14 +706,14 @@ NoOpSystemEntityRecognizer.</p>
 <em class="property">static </em><code class="descname">load_from_app_path</code><span class="sig-paren">(</span><em>app_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.load_from_app_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.load_from_app_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>If the application configuration is empty, we do not use Duckling.</p>
 <dl class="docutils">
-<dt>Otherwise, we return the Duckling recognizer with the URL defined in the application’s</dt>
+<dt>Otherwise, we return the Duckling recognizer with the URL defined in the application's</dt>
 <dd>config, default to the DEFAULT_DUCKLING_URL.</dd>
 </dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Application path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- Application path</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(SystemEntityRecognizer)</td>
 </tr>
@@ -643,7 +729,7 @@ NoOpSystemEntityRecognizer.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A raw sentence.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sentence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- A raw sentence.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
 <dt>A tuple containing:</dt>
@@ -670,9 +756,9 @@ NoOpSystemEntityRecognizer.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query containing the entity</li>
-<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of the entity</li>
-<li><strong>span</strong> (<em>Span</em>) – The character span of the entity in the query</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query containing the entity</li>
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of the entity</li>
+<li><strong>span</strong> (<em>Span</em>) -- The character span of the entity in the query</li>
 </ul>
 </td>
 </tr>
@@ -682,7 +768,7 @@ NoOpSystemEntityRecognizer.</p>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Entity</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">SystemEntityResolutionError</span></code></p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemEntityResolutionError</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -693,14 +779,14 @@ NoOpSystemEntityRecognizer.</p>
 <dt id="mindmeld.system_entity_recognizer.SystemEntityRecognizer.set_system_entity_recognizer">
 <em class="property">static </em><code class="descname">set_system_entity_recognizer</code><span class="sig-paren">(</span><em>system_entity_recognizer=None</em>, <em>app_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/system_entity_recognizer.html#SystemEntityRecognizer.set_system_entity_recognizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.system_entity_recognizer.SystemEntityRecognizer.set_system_entity_recognizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>We set the global System Entity Recognizer to be the one configured from the
-application’s path.</p>
+application's path.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>system_entity_recognizer</strong> – A system entity recognizer</li>
-<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The application path</li>
+<li><strong>system_entity_recognizer</strong> -- A system entity recognizer</li>
+<li><strong>app_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The application path</li>
 </ul>
 </td>
 </tr>
@@ -720,7 +806,7 @@ application’s path.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(list)</td>
 </tr>
@@ -736,7 +822,7 @@ application’s path.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The duckling item</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The duckling item</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The entity described by the duckling item</td>
 </tr>
@@ -755,9 +841,9 @@ application’s path.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to construct the QueryEntity from</li>
-<li><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The duckling item</li>
-<li><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – The offset into the query that the item’s
+<li><strong>query</strong> (<em>Query</em>) -- The query to construct the QueryEntity from</li>
+<li><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The duckling item</li>
+<li><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) -- The offset into the query that the item's
 indexing begins</li>
 </ul>
 </td>

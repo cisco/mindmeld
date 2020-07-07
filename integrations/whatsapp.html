@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>WhatsApp Integration &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>WhatsApp Integration &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webex_teams.html">Webex Teams Integration</a></li>
@@ -261,23 +263,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="whatsapp-integration">
@@ -286,11 +278,11 @@
 In this tutorial, you will create a WhatsApp bot based on the <a class="reference internal" href="../blueprints/hr_assistant.html"><span class="doc">Human Resource</span></a> blueprint. The HR assistant app is an example of a deep-domain conversational agent that uses a knowledge base of human resources and policies to understand complex user queries that reference employees within a company.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Please make sure to install the Twilio dependency by running in the shell: <code class="code docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bot]</span></code>. You also need to register <a class="reference external" href="https://www.twilio.com/console/sms/whatsapp/sandbox">a sandbox account with Twilio</a>.</p>
+<p class="last">Please make sure to install the Twilio dependency by running in the shell: <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bot]</span></code>. You also need to register <a class="reference external" href="https://www.twilio.com/console/sms/whatsapp/sandbox">a sandbox account with Twilio</a>.</p>
 </div>
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
-<p>In this quick start guide, you will use a Twilio sandbox and <cite>ngrok</cite> to integrate the human resource application to WhatsApp. By setting up a publicly accessible server, one can register the server’s IP address to the Twilio developer sandbox, thereby allowing WhatsApp to send messages to the human resource application through a phone number registered with the sandbox. This guide should take between five and fifteen minutes to complete.</p>
+<p>In this quick start guide, you will use a Twilio sandbox and <cite>ngrok</cite> to integrate the human resource application to WhatsApp. By setting up a publicly accessible server, one can register the server's IP address to the Twilio developer sandbox, thereby allowing WhatsApp to send messages to the human resource application through a phone number registered with the sandbox. This guide should take between five and fifteen minutes to complete.</p>
 <div class="section" id="register-a-sandbox">
 <h3>1. Register a sandbox<a class="headerlink" href="#register-a-sandbox" title="Permalink to this headline">¶</a></h3>
 <p>Login or create a <a class="reference external" href="https://www.twilio.com">new Twilio account</a>.</p>
@@ -299,15 +291,15 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
 <div class="section" id="building-the-bot">
 <h3>2. Building the bot<a class="headerlink" href="#building-the-bot" title="Permalink to this headline">¶</a></h3>
 <p>First, you need to install the specific dependencies for bot integration.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">pip install mindmeld[bot]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install mindmeld[bot]</span>
 </pre></div>
 </div>
 <p>After that you can instantiate a WhatsappBotServer instance. A sample implementation is provided in the HR blueprint.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">mindmeld blueprint hr_assistant</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mindmeld blueprint hr_assistant</span>
 </pre></div>
 </div>
 <p>After downloading the HR blueprint, you can inspect the implementation in <cite>whatsapp_bot_server.py</cite>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span>
 <span class="kn">from</span> <span class="nn">twilio.twiml.messaging_response</span> <span class="kn">import</span> <span class="n">MessagingResponse</span>
@@ -365,7 +357,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
 <div class="section" id="start-the-hr-assistant-app-server">
 <h3>3. Start the HR assistant app server<a class="headerlink" href="#start-the-hr-assistant-app-server" title="Permalink to this headline">¶</a></h3>
 <p>Set the following environment variables and start the Flask server.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -m hr_assistant build</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m hr_assistant build</span>
 <span class="go">cd hr_assistant</span>
 <span class="go">python whatsapp_bot_server.py</span>
 </pre></div>
@@ -374,7 +366,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
 <div class="section" id="test-the-integration">
 <h3>4. Test the integration<a class="headerlink" href="#test-the-integration" title="Permalink to this headline">¶</a></h3>
 <p>Start the ngrok channel. You can download the ngrok application from the Internet and then unzip it in a safe location.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">./ngrok http 8080</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">./ngrok http 8080</span>
 
 <span class="go">Session Status                online</span>
 <span class="go">Session Expires               7 hours, 59 minutes</span>
@@ -389,7 +381,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
 <span class="go">                              0       0       0.00    0.00    0.00    0.00</span>
 </pre></div>
 </div>
-<p>After running the ngrok application, copy the ngrok URL and paste into the Twilio sandbox’s configuration.</p>
+<p>After running the ngrok application, copy the ngrok URL and paste into the Twilio sandbox's configuration.</p>
 <a class="reference internal image-reference" href="../_images/whatsapp_sandbox.png"><img alt="../_images/whatsapp_sandbox.png" class="align-center" src="../_images/whatsapp_sandbox.png" style="width: 700px;" /></a>
 <p>Now you can converse with HR assistant on WhatsApp!</p>
 <a class="reference internal image-reference" href="../_images/whatsapp_chat.png"><img alt="../_images/whatsapp_chat.png" class="align-center" src="../_images/whatsapp_chat.png" style="width: 700px;" /></a>

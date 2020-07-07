@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.role_classifier module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.role_classifier module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.role_classifier">
@@ -275,32 +267,32 @@
 <dl class="class">
 <dt id="mindmeld.components.role_classifier.RoleClassifier">
 <em class="property">class </em><code class="descclassname">mindmeld.components.role_classifier.</code><code class="descname">RoleClassifier</code><span class="sig-paren">(</span><em>resource_loader</em>, <em>domain</em>, <em>intent</em>, <em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/role_classifier.html#RoleClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.role_classifier.RoleClassifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.components.classifier.html#mindmeld.components.classifier.Classifier" title="mindmeld.components.classifier.Classifier"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.classifier.Classifier</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.components.classifier.html#mindmeld.components.classifier.Classifier" title="mindmeld.components.classifier.Classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.classifier.Classifier</span></code></a></p>
 <p>A role classifier is used to determine the target role for entities in a given query. It is
 trained using all the labeled queries for a particular intent. The labels are the role names
 associated with each entity within each query.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.role_classifier.RoleClassifier.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.role_classifier.RoleClassifier.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The domain that this role classifier belongs to</p>
+<dd><p><em>str</em> -- The domain that this role classifier belongs to</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.role_classifier.RoleClassifier.intent">
 <code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.role_classifier.RoleClassifier.intent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The intent that this role classifier belongs to</p>
+<dd><p><em>str</em> -- The intent that this role classifier belongs to</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.role_classifier.RoleClassifier.entity_type">
 <code class="descname">entity_type</code><a class="headerlink" href="#mindmeld.components.role_classifier.RoleClassifier.entity_type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The entity type that this role classifier is for</p>
+<dd><p><em>str</em> -- The entity type that this role classifier is for</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.role_classifier.RoleClassifier.roles">
 <code class="descname">roles</code><a class="headerlink" href="#mindmeld.components.role_classifier.RoleClassifier.roles" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>set</em> – A set containing the roles which can be classified</p>
+<dd><p><em>set</em> -- A set containing the roles which can be classified</p>
 </dd></dl>
 
 <dl class="method">
@@ -312,8 +304,8 @@ associated with each entity within each query.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The model path.</li>
-<li><strong>incremental_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>Optional</em>) – The timestamped folder where the cached                 models are stored.</li>
+<li><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The model path.</li>
+<li><strong>incremental_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>Optional</em>) -- The timestamped folder where the cached                 models are stored.</li>
 </ul>
 </td>
 </tr>
@@ -330,10 +322,10 @@ associated with each entity within each query.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>queries</strong> (<em>list of ProcessedQuery</em>) – The labeled queries to use as training data</li>
-<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A label set to load. If not specified, the default
+<li><strong>queries</strong> (<em>list of ProcessedQuery</em>) -- The labeled queries to use as training data</li>
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) -- A label set to load. If not specified, the default
 training set will be loaded.</li>
-<li><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The timestamp folder to cache models in</li>
+<li><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The timestamp folder to cache models in</li>
 </ul>
 </td>
 </tr>
@@ -354,7 +346,7 @@ training set will be loaded.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the model is stored</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The location on disk where the model is stored</td>
 </tr>
 </tbody>
 </table>
@@ -369,9 +361,9 @@ training set will be loaded.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The input query</li>
-<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The entities in the query</li>
-<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the entity whose role should be classified</li>
+<li><strong>query</strong> (<em>Query</em>) -- The input query</li>
+<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- The entities in the query</li>
+<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The index of the entity whose role should be classified</li>
 </ul>
 </td>
 </tr>
@@ -395,9 +387,9 @@ associated probabilities using the trained role classification model.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The input query</li>
-<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The entities in the query</li>
-<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the entity whose role should be classified</li>
+<li><strong>query</strong> (<em>Query</em>) -- The input query</li>
+<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- The entities in the query</li>
+<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The index of the entity whose role should be classified</li>
 </ul>
 </td>
 </tr>
@@ -420,9 +412,9 @@ associated probabilities using the trained role classification model.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The input query</li>
-<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The entities in the query</li>
-<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the entity whose role should be classified</li>
+<li><strong>query</strong> (<em>Query</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The input query</li>
+<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- The entities in the query</li>
+<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The index of the entity whose role should be classified</li>
 </ul>
 </td>
 </tr>

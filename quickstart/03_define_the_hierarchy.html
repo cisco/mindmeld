@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 3: Define the Domain, Intent, Entity, and Role Hierarchy &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Step 3: Define the Domain, Intent, Entity, and Role Hierarchy &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -143,6 +143,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -160,6 +161,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -256,23 +258,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="step-3-define-the-domain-intent-entity-and-role-hierarchy">
@@ -280,33 +272,33 @@
 <p>To model and understand natural language, every conversational application relies on a hierarchy of machine learning classifiers. This family of machine learning models, broadly defined as the Natural Language Processing (NLP) component of an application, sits at the core of all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has emerged in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.</p>
 <a class="reference internal image-reference" href="../_images/hierarchy.png"><img alt="../_images/hierarchy.png" class="align-center" src="../_images/hierarchy.png" style="width: 700px;" /></a>
 <p>The topmost layer in the model hierarchy is the <em>domain classifier</em>. The domain classifier performs the first-pass categorization, assigning each incoming query into one of a set of pre-defined buckets or <em>domains</em>.</p>
-<p>For any given domain, there may be one or more intents, like “order drink” or “cancel order,” which reflect what the user is trying to accomplish. You define the intents for your application by abstracting them from the dialogue states you scripted in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a>. The <em>intent classifiers</em> predict which of the intents is expressed in a given request.</p>
+<p>For any given domain, there may be one or more intents, like &quot;order drink&quot; or &quot;cancel order,&quot; which reflect what the user is trying to accomplish. You define the intents for your application by abstracting them from the dialogue states you scripted in <a class="reference internal" href="02_script_interactions.html"><span class="doc">Step 2</span></a>. The <em>intent classifiers</em> predict which of the intents is expressed in a given request.</p>
 <p>Next, the <em>entity recognizers</em> discern the words and phrases that must be identified to understand and fulfill the request. These identified words and phrases are called <em>entities</em>, and each intent may have zero or more types of entities which must be recognized.</p>
-<p>A fourth and final classification step, called role classification, is required when entities of the same type need to be interpreted differently to understand the request. For example, “9 AM” and “5 PM” could both be classified as <cite>time</cite> entities, but one might need to be interpreted as playing the role of an <cite>opening time</cite> and the other as playing the role of a <cite>closing time</cite>. The <em>role classifiers</em> label such entities with the appropriate roles.</p>
+<p>A fourth and final classification step, called role classification, is required when entities of the same type need to be interpreted differently to understand the request. For example, &quot;9 AM&quot; and &quot;5 PM&quot; could both be classified as <cite>time</cite> entities, but one might need to be interpreted as playing the role of an <cite>opening time</cite> and the other as playing the role of a <cite>closing time</cite>. The <em>role classifiers</em> label such entities with the appropriate roles.</p>
 <p><a class="reference internal" href="07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a> and the <a class="reference internal" href="../userguide/nlp.html"><span class="doc">User Guide</span></a> provide more details on the NLP classifier hierarchy utilized by MindMeld.</p>
 <div class="section" id="the-example-nlp-model-hierarchy">
 <span id="model-hierarchy"></span><h2>The Example NLP Model Hierarchy<a class="headerlink" href="#the-example-nlp-model-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>We could design the NLP model hierarchy for our simple Kwik-E-Mart conversational application to resemble the illustration below.</p>
 <a class="reference internal image-reference" href="../_images/hierarchy2.png"><img alt="../_images/hierarchy2.png" class="align-center" src="../_images/hierarchy2.png" style="width: 700px;" /></a>
-<p>The single domain in this rudimentary application, <code class="docutils literal"><span class="pre">store_info</span></code>, encompasses all of the functionality required to find information about Kwik-E-Mart retail stores. The <code class="docutils literal"><span class="pre">store_info</span></code> domain supports five initial intents:</p>
+<p>The single domain in this rudimentary application, <code class="docutils literal notranslate"><span class="pre">store_info</span></code>, encompasses all of the functionality required to find information about Kwik-E-Mart retail stores. The <code class="docutils literal notranslate"><span class="pre">store_info</span></code> domain supports five initial intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">greet</span></code> — Begins an interaction and welcomes the user</li>
-<li><code class="docutils literal"><span class="pre">get_store_hours</span></code> — Returns the opening and closing times for the specified store</li>
-<li><code class="docutils literal"><span class="pre">find_nearest_store</span></code> — Returns the closest store to the user</li>
-<li><code class="docutils literal"><span class="pre">exit</span></code> — Ends the current interaction</li>
-<li><code class="docutils literal"><span class="pre">help</span></code> — Provides help information in case the user gets stuck</li>
+<li><code class="docutils literal notranslate"><span class="pre">greet</span></code> — Begins an interaction and welcomes the user</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_store_hours</span></code> — Returns the opening and closing times for the specified store</li>
+<li><code class="docutils literal notranslate"><span class="pre">find_nearest_store</span></code> — Returns the closest store to the user</li>
+<li><code class="docutils literal notranslate"><span class="pre">exit</span></code> — Ends the current interaction</li>
+<li><code class="docutils literal notranslate"><span class="pre">help</span></code> — Provides help information in case the user gets stuck</li>
 </ul>
 </div></blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">By convention, intent names are verbs that describe what the user is trying accomplish.</p>
 </div>
-<p>In this basic example, only the <code class="docutils literal"><span class="pre">get_store_hours</span></code> intent requires entity recognition. This intent supports two entity types:</p>
+<p>In this basic example, only the <code class="docutils literal notranslate"><span class="pre">get_store_hours</span></code> intent requires entity recognition. This intent supports two entity types:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">store_name</span></code> — The name of a specific retail store location</li>
-<li><code class="docutils literal"><span class="pre">date</span></code> — The calendar date or day of the week</li>
+<li><code class="docutils literal notranslate"><span class="pre">store_name</span></code> — The name of a specific retail store location</li>
+<li><code class="docutils literal notranslate"><span class="pre">date</span></code> — The calendar date or day of the week</li>
 </ul>
 </div></blockquote>
 <p>Neither of these entity types require role classification.</p>
@@ -322,8 +314,8 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Please <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">install MindMeld</span></a> before proceeding with the instructions below.</p>
 </div>
-<p>Every MindMeld application begins with a <em>root folder</em> to contain all of the application’s training data files, configuration files and custom code. For our example, let’s define a root folder called <code class="docutils literal"><span class="pre">my_app</span></code>.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">MM_APP_ROOT</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/my_app&quot;</span>
+<p>Every MindMeld application begins with a <em>root folder</em> to contain all of the application's training data files, configuration files and custom code. For our example, let's define a root folder called <code class="docutils literal notranslate"><span class="pre">my_app</span></code>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">MM_APP_ROOT</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/my_app&quot;</span>
 mkdir -p <span class="nv">$MM_APP_ROOT</span>
 <span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
 </pre></div>
@@ -331,12 +323,12 @@ mkdir -p <span class="nv">$MM_APP_ROOT</span>
 <p>The folder structure inside the root folder defines the domain and intent hierarchy for your application. Create it according to the following procedure:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Within the root folder, create a folder named <code class="docutils literal"><span class="pre">domains</span></code></li>
-<li>Use your domains as names for a set of folders that you create within the <code class="docutils literal"><span class="pre">domains</span></code> folder</li>
+<li>Within the root folder, create a folder named <code class="docutils literal notranslate"><span class="pre">domains</span></code></li>
+<li>Use your domains as names for a set of folders that you create within the <code class="docutils literal notranslate"><span class="pre">domains</span></code> folder</li>
 <li>Create a set of folders within each folder you created in Step 2, giving each new folder the name of one intent from its parent domain</li>
 </ol>
 </div></blockquote>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>mkdir domains
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir domains
 <span class="nb">cd</span> domains
 mkdir store_info
 <span class="nb">cd</span> store_info
@@ -347,29 +339,29 @@ mkdir get_store_hours
 <p>This folder structure organizes the training data for the machine learning models in your application. Now, create a folder structure to organize the data files used by the entity recognizer, role classifier, and entity resolver models.</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Within the root folder, create a folder named <code class="docutils literal"><span class="pre">entities</span></code></li>
-<li>Use your entities as names for a set of folders that you create within the <code class="docutils literal"><span class="pre">entities</span></code> folder</li>
+<li>Within the root folder, create a folder named <code class="docutils literal notranslate"><span class="pre">entities</span></code></li>
+<li>Use your entities as names for a set of folders that you create within the <code class="docutils literal notranslate"><span class="pre">entities</span></code> folder</li>
 </ol>
 </div></blockquote>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
 mkdir entities
 <span class="nb">cd</span> entities
 mkdir store_name
 </pre></div>
 </div>
-<p>MindMeld provides a faster way to create your application structure for common use cases. These are called application <em>blueprints</em>. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> method, as shown below.</p>
+<p>MindMeld provides a faster way to create your application structure for common use cases. These are called application <em>blueprints</em>. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the <code class="xref py py-func docutils literal notranslate"><span class="pre">blueprint()</span></code> method, as shown below.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">If you manually created a <code class="docutils literal"><span class="pre">my_app</span></code> folder following the instructions above, be sure to delete it before invoking the <code class="docutils literal"><span class="pre">blueprint</span></code> method.</p>
+<p class="last">If you manually created a <code class="docutils literal notranslate"><span class="pre">my_app</span></code> folder following the instructions above, be sure to delete it before invoking the <code class="docutils literal notranslate"><span class="pre">blueprint</span></code> method.</p>
 </div>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$HOME</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$HOME</span>
 python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;kwik_e_mart&#39;, &#39;my_app&#39;);&quot;</span>
 </pre></div>
 </div>
-<p>Running the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> method for our simple example application produces the root directory structure illustrated below.</p>
+<p>Running the <code class="xref py py-func docutils literal notranslate"><span class="pre">blueprint()</span></code> method for our simple example application produces the root directory structure illustrated below.</p>
 <a class="reference internal image-reference" href="../_images/directory.png"><img alt="../_images/directory.png" class="align-center" src="../_images/directory.png" style="width: 350px;" /></a>
 <p>See the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">User Guide</span></a> for more about blueprints, and root folder organization and structure.</p>
-<p>Notice that there is no folder for the <code class="docutils literal"><span class="pre">date</span></code> entity. None is needed, because we can use the MindMeld <em>system entity</em> for time expressions, <code class="docutils literal"><span class="pre">sys_time</span></code>, to capture the date information. A system entity is one that it is already built into the MindMeld platform. MindMeld provides several different system entity types for common, domain-independent entities; see the MindMeld <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">User Guide</span></a> for details.</p>
+<p>Notice that there is no folder for the <code class="docutils literal notranslate"><span class="pre">date</span></code> entity. None is needed, because we can use the MindMeld <em>system entity</em> for time expressions, <code class="docutils literal notranslate"><span class="pre">sys_time</span></code>, to capture the date information. A system entity is one that it is already built into the MindMeld platform. MindMeld provides several different system entity types for common, domain-independent entities; see the MindMeld <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">User Guide</span></a> for details.</p>
 <p>Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.</p>
 <a class="reference internal image-reference" href="../_images/quickstart_parse_output.png"><img alt="../_images/quickstart_parse_output.png" class="align-center" src="../_images/quickstart_parse_output.png" style="width: 600px;" /></a>
 <p>Next, we explore how to introduce training data to the defined folders in order to build machine learning models that parse and understand user requests as shown above.</p>

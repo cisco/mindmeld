@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.converter.rasa &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.converter.rasa &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -353,6 +355,19 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">intent_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">intent_example</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_get_action_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">file_ending</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;yml&quot;</span><span class="p">]:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rasa_project_directory</span> <span class="o">+</span> <span class="s2">&quot;/endpoints.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action_endpoint&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can not open endpoints.yml file at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Could not find endpoints.yml file in project directory&quot;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_read_domain_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">file_ending</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;yml&quot;</span><span class="p">]:</span>
             <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rasa_project_directory</span> <span class="o">+</span> <span class="s2">&quot;/domain.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span>
@@ -391,13 +406,14 @@
 
     <span class="k">def</span> <span class="nf">_read_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">domain_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_domain_file</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;templates&quot;</span> <span class="ow">in</span> <span class="n">domain_file</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">domain_file</span><span class="p">[</span><span class="s2">&quot;templates&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">templates</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;templates&quot;</span><span class="p">,</span> <span class="s2">&quot;responses&quot;</span><span class="p">]:</span>
+            <span class="n">templates</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">domain_file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="k">return</span> <span class="n">templates</span>
 
 <div class="viewcode-block" id="RasaConverter.create_entity_files"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.rasa.html#mindmeld.converter.RasaConverter.create_entity_files">[docs]</a>    <span class="k">def</span> <span class="nf">create_entity_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mm_entry</span><span class="p">):</span>
         <span class="n">entity_value</span><span class="p">,</span> <span class="n">entity</span> <span class="o">=</span> <span class="n">mm_entry</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
         <span class="n">gazetteer_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span><span class="p">,</span> <span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="s2">&quot;gazetteer.txt&quot;</span>
         <span class="p">)</span>
@@ -436,7 +452,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_is_action</span><span class="p">(</span><span class="n">stories_line</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">stories_line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot; - &quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;- &quot;</span> <span class="ow">in</span> <span class="n">stories_line</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_does_intent_have_entity</span><span class="p">(</span><span class="n">stories_line</span><span class="p">):</span>
@@ -587,14 +603,18 @@
 
     <span class="k">def</span> <span class="nf">_write_init_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;from mindmeld import Application</span>
+<span class="s2">from mindmeld.components.custom_action import CustomAction</span>
 <span class="s2">from . import custom_features  # noqa: F401</span>
 
 <span class="s2">app = Application(__name__)</span>
 
 <span class="s2">__all__ = [&#39;app&#39;]</span>
-
-
 <span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_endpoint</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">url</span><span class="p">:</span>
+            <span class="n">action_config</span> <span class="o">=</span> <span class="s2">&quot;action_config = {{&#39;url&#39;: &#39;</span><span class="si">{url}</span><span class="s2">&#39;}}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">string</span> <span class="o">+=</span> <span class="n">action_config</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span> <span class="o">+</span> <span class="s2">&quot;/__init__.py&quot;</span><span class="p">,</span> <span class="s2">&quot;w+&quot;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">f</span>
@@ -634,21 +654,29 @@
         <span class="c1"># check if prompts contain any entities</span>
         <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span><span class="p">:</span>
             <span class="n">entities</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{.*\}&quot;</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
-            <span class="n">entities_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">newprompt</span> <span class="o">=</span> <span class="n">prompt</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-                <span class="n">newprompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
-                <span class="n">entities_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
-            <span class="n">entities_args</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">entities_list</span><span class="p">))</span>
-            <span class="n">prompts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">newprompt</span> <span class="o">+</span> <span class="s1">&#39;&quot;.format(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entities_args</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities_list</span><span class="p">:</span>
-                <span class="n">newentity</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                <span class="n">entities_string</span> <span class="o">=</span> <span class="s2">&quot;    </span><span class="si">{}</span><span class="s2">_s = [e[&#39;text&#39;] for e in &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">newentity</span>
-                <span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;request.entities if e[&#39;type&#39;] == &#39;</span><span class="si">{}</span><span class="s2">&#39;]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newentity</span><span class="p">)</span>
-                <span class="n">entity_string</span> <span class="o">=</span> <span class="s2">&quot;    </span><span class="si">{0}</span><span class="s2"> = </span><span class="si">{0}</span><span class="s2">_s[0]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newentity</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">entities_string</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">entity_string</span><span class="p">)</span>
+
+            <span class="c1"># If we have entities, we do string format with entities; otherwise</span>
+            <span class="c1"># just simple string prompts</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">entities_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">newprompt</span> <span class="o">=</span> <span class="n">prompt</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">newprompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+                    <span class="n">entities_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                <span class="n">entities_args</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">entities_list</span><span class="p">))</span>
+                <span class="n">prompts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">newprompt</span> <span class="o">+</span> <span class="s1">&#39;&quot;.format(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entities_args</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities_list</span><span class="p">:</span>
+                    <span class="n">newentity</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">entities_string</span> <span class="o">=</span> <span class="s2">&quot;    </span><span class="si">{}</span><span class="s2">_s = [e[&#39;text&#39;] for e in &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">newentity</span>
+                    <span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;request.entities if e[&#39;type&#39;] == &#39;</span><span class="si">{}</span><span class="s2">&#39;]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newentity</span><span class="p">)</span>
+                    <span class="n">entity_string</span> <span class="o">=</span> <span class="s2">&quot;    </span><span class="si">{0}</span><span class="s2"> = </span><span class="si">{0}</span><span class="s2">_s[0]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newentity</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">entities_string</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">entity_string</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prompts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">prompt</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
         <span class="n">prompts_string</span> <span class="o">=</span> <span class="s2">&quot;    prompts = [</span><span class="si">{}</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prompts_list</span><span class="p">))</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prompts_string</span><span class="p">)</span>
 
@@ -673,6 +701,21 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindmeld_project_directory</span> <span class="o">+</span> <span class="s2">&quot;/__init__.py&quot;</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;    # This is a custom action from rasa</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;    action = CustomAction(name=&#39;</span><span class="si">{action}</span><span class="s2">&#39;, config=action_config)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">action</span><span class="o">=</span><span class="n">action</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;    action.invoke(request, responder)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">lines</span>
+
     <span class="k">def</span> <span class="nf">_write_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">templates</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_write_function_declaration</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -683,9 +726,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_write_function_body_prompt</span><span class="p">(</span><span class="n">prompts_list</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_write_responder_lines</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    # This is a custom action from rasa</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># If no templates, write a blank function</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    # No templates were provided for action</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -697,7 +739,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_attach_handle_to_function</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">file_lines</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file_lines</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;def </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="p">),</span> <span class="n">line</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;def </span><span class="si">{}</span><span class="s2">(request, responder):&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                 <span class="n">insert_line</span> <span class="o">=</span> <span class="n">i</span>
                 <span class="k">while</span> <span class="n">file_lines</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">file_lines</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">handle</span><span class="p">:</span>
@@ -721,10 +763,24 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Action handler not found for </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">current_action</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">file_lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-            <span class="n">current_line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;    additional_actions = </span><span class="si">{actions}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">),</span>
-        <span class="p">)</span>
+        <span class="n">additional_actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># for the rest of the actions, add any custom action here</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">custom_action</span> <span class="o">=</span> <span class="n">RasaConverter</span><span class="o">.</span><span class="n">_get_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">RasaConverter</span><span class="o">.</span><span class="n">_is_custom_action</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+                <span class="n">file_lines</span><span class="p">[</span><span class="n">current_line</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">current_line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_action</span>
+                <span class="n">current_line</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_action</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">additional_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">additional_actions</span><span class="p">:</span>
+            <span class="c1"># we note non-custom actions as a string list</span>
+            <span class="n">file_lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">current_line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;    additional_actions = </span><span class="si">{actions}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">actions</span><span class="o">=</span><span class="n">additional_actions</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="RasaConverter.create_mindmeld_init"><a class="viewcode-back" href="../../../apidoc/mindmeld.converter.rasa.html#mindmeld.converter.RasaConverter.create_mindmeld_init">[docs]</a>    <span class="k">def</span> <span class="nf">create_mindmeld_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_init_header</span><span class="p">()</span>
@@ -741,9 +797,9 @@
             <span class="c1"># Loop through steps for each story</span>
             <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="c1"># Get intent, any entities, and actions</span>
-                <span class="n">intent</span> <span class="o">=</span> <span class="n">step</span><span class="p">[</span><span class="s2">&quot;intent&quot;</span><span class="p">]</span>
+                <span class="n">intent</span> <span class="o">=</span> <span class="n">step</span><span class="p">[</span><span class="s2">&quot;intent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="n">entities</span> <span class="o">=</span> <span class="n">step</span><span class="p">[</span><span class="s2">&quot;entities&quot;</span><span class="p">]</span>
-                <span class="n">actions</span> <span class="o">=</span> <span class="n">step</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>
+                <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">step</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]]</span>
                 <span class="c1"># attach handle to correct function</span>
                 <span class="n">app_handle_string</span> <span class="o">=</span> <span class="n">RasaConverter</span><span class="o">.</span><span class="n">_get_app_handle</span><span class="p">(</span><span class="n">intent</span><span class="p">,</span> <span class="n">entities</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_attach_handle_to_function</span><span class="p">(</span>
@@ -778,8 +834,6 @@
 <span class="sd">            training data may contain entities</span>
 
 <span class="sd">        limitations:</span>
-<span class="sd">        - Rasa has the ability to have custom actions, which is not supported by</span>
-<span class="sd">        the converter.</span>
 <span class="sd">        - Rasa has the ability to handle multiple intents per query, while Mindmeld</span>
 <span class="sd">        does not.</span>
 <span class="sd">        - Rasa training data may be json format, which is not currently supported.</span>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>About This Playbook &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>About This Playbook &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -85,7 +85,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -138,6 +138,7 @@
 <li class="toctree-l1"><a class="reference internal" href="blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -155,6 +156,7 @@
 <li class="toctree-l1"><a class="reference internal" href="userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -251,23 +253,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="about-this-playbook">
@@ -423,6 +415,19 @@
 <li class="toctree-l2"><a class="reference internal" href="blueprints/hr_assistant.html#testing-and-deployment">10. Testing and Deployment</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="blueprints/banking.html">Banking Assistant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#the-use-case">1. The Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#example-dialogue-interactions">2. Example Dialogue Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#domain-intent-entity-hierarchy">3. Domain-Intent-Entity Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#dialogue-states">4. Dialogue States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#knowledge-base">5. Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#training-data">6. Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#training-the-nlp-classifiers">7. Training the NLP Classifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#parser-configuration">8. Parser Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#using-the-question-answerer">9. Using the Question Answerer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blueprints/banking.html#testing-and-deployment">10. Testing and Deployment</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="toctree-wrapper compound" id="userguide">
@@ -538,9 +543,10 @@
 <li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#prepare-your-data-for-the-knowledge-base">Prepare your Data for the Knowledge Base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#verify-that-the-data-is-clean">Verify that the Data is Clean</a></li>
 <li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#import-the-data-into-the-knowledge-base">Import the Data into the Knowledge Base</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-simple-searches-with-the-get-api">Perform Simple Searches with the <code class="docutils literal"><span class="pre">get()</span></code> API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-advanced-searches-with-the-build-search-api">Perform Advanced Searches with the <code class="docutils literal"><span class="pre">build_search()</span></code> API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-simple-searches-with-the-get-api">Perform Simple Searches with the <code class="docutils literal notranslate"><span class="pre">get()</span></code> API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#perform-advanced-searches-with-the-build-search-api">Perform Advanced Searches with the <code class="docutils literal notranslate"><span class="pre">build_search()</span></code> API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#dealing-with-unstructured-text">Dealing with unstructured text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/kb.html#leveraging-semantic-embeddings">Leveraging semantic embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/dm.html">Working with the Dialogue Manager</a><ul>
@@ -554,6 +560,15 @@
 <li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#dialogue-middleware">Dialogue Middleware</a></li>
 <li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#asynchronous-dialogue-state-handlers-and-middleware">Asynchronous Dialogue State Handlers and Middleware</a></li>
 <li class="toctree-l2"><a class="reference internal" href="userguide/dm.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/custom_action.html">Working with Custom Actions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#why-custom-actions">Why Custom Actions?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#openapi-specification-for-client-server-interaction">OpenAPI Specification for client-server interaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#configure-custom-actions-for-your-mindmeld-application">Configure Custom Actions for your MindMeld application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#a-simple-custom-action-server">A Simple Custom Action Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#using-custom-actions-with-mindmeld-applications">Using Custom Actions with MindMeld applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/custom_action.html#calling-individual-custom-actions-inside-a-mindmeld-application">Calling Individual Custom Actions inside a MindMeld application</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="userguide/internationalization.html">Internationalization support</a><ul>

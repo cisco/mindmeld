@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Different Approaches for Building Conversational Applications &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Different Approaches for Building Conversational Applications &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -146,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -163,6 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -259,23 +261,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="different-approaches-for-building-conversational-applications">
@@ -289,14 +281,14 @@
 </div>
 <div class="section" id="cloud-based-nlp-services">
 <h2>Cloud-Based NLP Services<a class="headerlink" href="#cloud-based-nlp-services" title="Permalink to this headline">¶</a></h2>
-<p>In the past few years, a variety of cloud-based Natural Language Processing (NLP) services have emerged that aspire to reduce the complexity associated with building basic language understanding capabilities. These services are intended to enable developers without machine learning or NLP expertise to create useful NLP capabilities. All of these services provide browser-based consoles which assist developers in uploading and annotating training examples. They also streamline the task of launching a cloud-based web service to handle and parse natural language requests. These services are generally provided by large consumer internet companies to entice developers to upload their training data and thereby help the service provider improve their own conversational AI offerings in the process. Among the NLP services currently available are <a class="reference external" href="https://aws.amazon.com/lex/">Amazon Lex</a>, <a class="reference external" href="https://dialogflow.com/">Google’s Dialogflow</a>, <a class="reference external" href="https://wit.ai/">Facebook’s wit.ai</a>, <a class="reference external" href="https://www.luis.ai/">Microsoft LUIS</a>,  and <a class="reference external" href="https://www.ibm.com/cloud/watson-assistant/">IBM Watson Assistant</a>.</p>
-<p>Cloud-based NLP services offer a relatively straightforward path for developers to build conversational applications without requiring machine learning knowledge. As a result, they can be the fastest path for assembling a demo or prototype. Many of these services offer pre-trained models for popular consumer tasks like checking the weather, setting an alarm or timer, updating a to-do list, or sending a text message. This makes them well-suited for applications which simply need to replicate common consumer domains without customization. Since the pre-trained models generally offered by these services duplicate the freely available functionality in today’s widely used consumer virtual assistants, companies aiming to leverage these pre-trained models to monetize their own business are likely to face an uphill battle.</p>
+<p>In the past few years, a variety of cloud-based Natural Language Processing (NLP) services have emerged that aspire to reduce the complexity associated with building basic language understanding capabilities. These services are intended to enable developers without machine learning or NLP expertise to create useful NLP capabilities. All of these services provide browser-based consoles which assist developers in uploading and annotating training examples. They also streamline the task of launching a cloud-based web service to handle and parse natural language requests. These services are generally provided by large consumer internet companies to entice developers to upload their training data and thereby help the service provider improve their own conversational AI offerings in the process. Among the NLP services currently available are <a class="reference external" href="https://aws.amazon.com/lex/">Amazon Lex</a>, <a class="reference external" href="https://dialogflow.com/">Google's Dialogflow</a>, <a class="reference external" href="https://wit.ai/">Facebook's wit.ai</a>, <a class="reference external" href="https://www.luis.ai/">Microsoft LUIS</a>,  and <a class="reference external" href="https://www.ibm.com/cloud/watson-assistant/">IBM Watson Assistant</a>.</p>
+<p>Cloud-based NLP services offer a relatively straightforward path for developers to build conversational applications without requiring machine learning knowledge. As a result, they can be the fastest path for assembling a demo or prototype. Many of these services offer pre-trained models for popular consumer tasks like checking the weather, setting an alarm or timer, updating a to-do list, or sending a text message. This makes them well-suited for applications which simply need to replicate common consumer domains without customization. Since the pre-trained models generally offered by these services duplicate the freely available functionality in today's widely used consumer virtual assistants, companies aiming to leverage these pre-trained models to monetize their own business are likely to face an uphill battle.</p>
 <p>For companies that need to build an application which goes beyond a simple demo and requires models other than generic, pre-trained consumer domains, cloud-based NLP services are typically not the best approach. Building language understanding models tailored to a particular application or domain requires training the models on thousands or millions of representative training examples. Cloud-based NLP services, since they are targeted at developers who are unlikely to have large amounts of training data, are generally intended for smaller data sets and simpler custom models. In addition, most cloud-based NLP services only support basic NLP tasks such as intent classification and entity recognition. Implementing the other required processing steps in a typical conversational workflow, such as entity resolution, language parsing, question answering, and knowledge base creation, is left up to the developer. Perhaps most importantly, for companies unable or unwilling to forego legal ownership of user data when it is uploaded to the service provider cloud, these NLP services are generally not a viable option.</p>
 </div>
 <div class="section" id="machine-learning-toolkits">
 <h2>Machine Learning Toolkits<a class="headerlink" href="#machine-learning-toolkits" title="Permalink to this headline">¶</a></h2>
-<p>Machine learning researchers working on NLP and conversational applications typically rely on versatile and advanced machine learning toolkits. These toolkits provide low-level access to state-of-the-art algorithms, including deep learning models like <a class="reference external" href="https://en.wikipedia.org/wiki/Long_short-term_memory">LSTMs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Recurrent_neural_network">RNNs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Convolutional_neural_network">CNNs</a>, and more. Popular machine learning toolkits include <a class="reference external" href="https://www.tensorflow.org/">Google’s TensorFlow</a> and <a class="reference external" href="https://www.microsoft.com/en-us/research/product/cognitive-toolkit/">Microsoft Cognitive Toolkit</a>.</p>
-<p>For machine learning researchers, toolkits like these are indispensable, and serve as the foundation for much cutting-edge AI research performed today. For companies looking to deploy production conversational services, though, the toolkits often provide little help.  First, although they provide access to the most advanced machine learning algorithms, they provide little or no representative training data likely to be useful for a given production application. This leaves developers to do all the heavy lifting associated with creating and managing training data themselves. Secondly, while the algorithm access they provide is low-level and deep, they offer none of the higher level abstractions which can greatly streamline the task of constructing a conversational interface. As a result, even the most skilled machine learning engineers rarely succeed in building production-quality conversational applications using today’s machine learning toolkits.</p>
+<p>Machine learning researchers working on NLP and conversational applications typically rely on versatile and advanced machine learning toolkits. These toolkits provide low-level access to state-of-the-art algorithms, including deep learning models like <a class="reference external" href="https://en.wikipedia.org/wiki/Long_short-term_memory">LSTMs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Recurrent_neural_network">RNNs</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Convolutional_neural_network">CNNs</a>, and more. Popular machine learning toolkits include <a class="reference external" href="https://www.tensorflow.org/">Google's TensorFlow</a> and <a class="reference external" href="https://www.microsoft.com/en-us/research/product/cognitive-toolkit/">Microsoft Cognitive Toolkit</a>.</p>
+<p>For machine learning researchers, toolkits like these are indispensable, and serve as the foundation for much cutting-edge AI research performed today. For companies looking to deploy production conversational services, though, the toolkits often provide little help.  First, although they provide access to the most advanced machine learning algorithms, they provide little or no representative training data likely to be useful for a given production application. This leaves developers to do all the heavy lifting associated with creating and managing training data themselves. Secondly, while the algorithm access they provide is low-level and deep, they offer none of the higher level abstractions which can greatly streamline the task of constructing a conversational interface. As a result, even the most skilled machine learning engineers rarely succeed in building production-quality conversational applications using today's machine learning toolkits.</p>
 </div>
 <div class="section" id="conversational-ai-platforms">
 <h2>Conversational AI Platforms<a class="headerlink" href="#conversational-ai-platforms" title="Permalink to this headline">¶</a></h2>
@@ -308,7 +300,7 @@
 <p>With so many different approaches for building conversational applications, it can be difficult for companies to know which strategy is best. An optimal strategy surpasses the threshold of performance that ensures a positive user experience. Determining this baseline level of acceptability can be an especially confusing or daunting undertaking for conversational applications.</p>
 <p>Conversational interfaces represent a new user interface paradigm that is unfamiliar and non-intuitive for many developers whose experience is in web or native applications. Conversational interfaces can be utterly unforgiving compared to traditional graphical user interfaces (GUIs). In a traditional GUI, the visual elements provide a mechanism to guide the user down an interaction path that leads to a positive experience. For conversational interfaces, no such visual guide exists. Instead, the user is typically presented with a microphone button or a text prompt and expected to figure out how to verbalize desired requests from scratch. Faced with such an open-ended prompt and little context, many users find themselves at a loss for words. Even worse, they tend to pose questions that the system is not designed to handle, leading to a fruitless and frustrating outcome.</p>
 <p>Developers building conversational interfaces for the first time often attempt to follow the same practices they know from building traditional GUIs. That means building a minimum viable product (MVP) to capture a small subset of the envisioned functionality, and then submitting the MVP for user testing. For conversational interfaces, this approach almost inevitably fails. A minimal implementation of a conversational interface is typically built using a small subset of the training data that will eventually be needed in a production application. For example, consider an MVP built using ten percent of the training data eventually required. This application could only understand around ten percent of the typical language variations verbalized by users when they invoke your app. As a result, when you submit your app for user testing, nine out of ten users will fail on their first request. This abysmal performance might quickly toll the death knell for your project.</p>
-<p>As it turns out, quick-and-dirty prototypes and limited-scale user testing are not particularly useful in assessing the utility of conversational applications. The only way to measure performance accurately is to enlist large-scale analytics to deterministically measure performance across the long tail of possible user interactions. This measurment methodology is what popular commercial virtual assistants like Siri, Cortana, Google Assistant, and Alexa rely on to ensure that their services meet a mimimum threshold of acceptability before they launch any new features publicly. The methodology requires, first, having a large enough set of ‘ground truth’ data to reflect the lion’s share of all possible user interaction patterns. Secondly, it requires automated testing, using the ‘ground truth’ data, to ensure that a high enough percentage of user queries return an acceptable response.</p>
+<p>As it turns out, quick-and-dirty prototypes and limited-scale user testing are not particularly useful in assessing the utility of conversational applications. The only way to measure performance accurately is to enlist large-scale analytics to deterministically measure performance across the long tail of possible user interactions. This measurment methodology is what popular commercial virtual assistants like Siri, Cortana, Google Assistant, and Alexa rely on to ensure that their services meet a mimimum threshold of acceptability before they launch any new features publicly. The methodology requires, first, having a large enough set of 'ground truth' data to reflect the lion's share of all possible user interaction patterns. Secondly, it requires automated testing, using the 'ground truth' data, to ensure that a high enough percentage of user queries return an acceptable response.</p>
 <p>Users are unforgiving when evaluating a conversational interface. They expect to verbalize requests just as if speaking with another person. They then expect the system to respond with human-like accuracy. This typically means that conversational applications must be near-perfect. In practice, when a conversational interface cannot achieve accuracy of at least 95%, users are likely conclude that the app is dimwitted and never use it again.</p>
 <p>Observe the following guidelines to ensure that your conversational interface accounts for the unique characteristics of conversational applications and meets a minimum threshold of acceptability before going live.</p>
 <table border="1" class="docutils">
@@ -321,7 +313,7 @@
 <td>Select a use case that mimics a familiar, real-world interaction so that users intuitively know the types of questions to ask. Selecting an unrealistic or incorrect use case will render even the smartest app dead on arrival.</td>
 </tr>
 <tr class="row-even"><td>2</td>
-<td>Generate a large enough set of ‘ground truth’ training data to ensure that the vast majority of user interactions can be captured and measured. Dipping your toe in the water does not work. Real-world accuracy can only be evaluated after you take the plunge.</td>
+<td>Generate a large enough set of 'ground truth' training data to ensure that the vast majority of user interactions can be captured and measured. Dipping your toe in the water does not work. Real-world accuracy can only be evaluated after you take the plunge.</td>
 </tr>
 <tr class="row-odd"><td>3</td>
 <td>Employ large-scale analytics to ensure that your application achieves at least 95% accuracy across the long tail of possible user interactions. Spot checking and small-scale user testing cannot expose long-tail corner cases which might fatally undermine overall accuracy.</td>

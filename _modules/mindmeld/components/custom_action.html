@@ -1,0 +1,492 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.components.custom_action &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.3.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.components.custom_action</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.components.custom_action</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">ssl</span>
+<span class="kn">import</span> <span class="nn">aiohttp</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">.dialogue</span> <span class="k">import</span> <span class="n">DialogueResponder</span>
+<span class="kn">from</span> <span class="nn">.request</span> <span class="k">import</span> <span class="n">Params</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">RESPONSE_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="s2">&quot;directives&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="s2">&quot;slots&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="CustomActionException"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomActionException">[docs]</a><span class="k">class</span> <span class="nc">CustomActionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CustomAction"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction">[docs]</a><span class="k">class</span> <span class="nc">CustomAction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class allows the client to send Request and Responder to another server and return the</span>
+<span class="sd">      the directives and frame in the response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CustomActionException</span><span class="p">(</span><span class="s1">&#39;Invalid `name` argument.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cert&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;public_key&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_private_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;private_key&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merge</span> <span class="o">=</span> <span class="n">merge</span>
+
+<div class="viewcode-block" id="CustomAction.get_json_payload"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction.get_json_payload">[docs]</a>    <span class="k">def</span> <span class="nf">get_json_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="n">request_json</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">responder_json</span> <span class="o">=</span> <span class="n">DialogueResponder</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="n">request_json</span><span class="p">,</span>
+            <span class="s2">&quot;responder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">responder_json</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">RESPONSE_FIELDS</span><span class="p">},</span>
+            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="CustomAction.invoke"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction.invoke">[docs]</a>    <span class="k">def</span> <span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Invoke the custom action with Request and Responder and return True if the action is</span>
+<span class="sd">        executed successfully, False otherwise. Upon successful execution, we update the Frame</span>
+<span class="sd">        and Directives of the Responder object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request)</span>
+<span class="sd">            responder (DialogueResponder)</span>
+<span class="sd">            async_mode (bool)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (bool)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CustomActionException</span><span class="p">(</span>
+                <span class="s2">&quot;No URL is given for custom action </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">json_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_json_payload</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">async_mode</span><span class="p">:</span>
+                <span class="c1"># returning the coroutine to be awaited elsewhere</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_async</span><span class="p">(</span><span class="n">json_data</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="n">json_data</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Connection error trying to reach custom action server </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="CustomAction.invoke_async"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction.invoke_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">invoke_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Asynchronously invoke the custom action with Request and Responder and return True if</span>
+<span class="sd">        the action is executed successfully, False otherwise. Upon successful execution, we update</span>
+<span class="sd">        the Frame and Directives of the Responder object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request)</span>
+<span class="sd">            responder (DialogueResponder)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (bool)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="n">status_code</span><span class="p">,</span> <span class="n">result_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_post_response</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="n">result_json</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_process_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="n">status_code</span><span class="p">,</span> <span class="n">result_json</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_post_response</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="n">result_json</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_post_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">result_json</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">RESPONSE_FIELDS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result_json</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;`</span><span class="si">%s</span><span class="s2">` not in the response of custom action </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="n">field</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">:</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">directives</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directives&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;slots&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">Params</span><span class="p">(</span><span class="o">**</span><span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">allowed_intents</span><span class="p">)</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">dynamic_resource</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">dynamic_resource</span><span class="p">)</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">time_zone</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">time_zone</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">language</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">locale</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">locale</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">target_dialogue_state</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">timestamp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">directives</span> <span class="o">=</span> <span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directives&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">slots</span> <span class="o">=</span> <span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;slots&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">Params</span><span class="p">(</span><span class="o">**</span><span class="n">result_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Error </span><span class="si">%s</span><span class="s2"> trying to reach custom action server </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="n">status_code</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CustomAction.post"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_key</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span> <span class="n">cert</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_key</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span> <span class="n">cert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">200</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="CustomAction.post_async"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomAction.post_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">):</span>
+        <span class="n">ssl_context</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cert</span><span class="p">:</span>
+            <span class="n">ssl_context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">(</span><span class="n">cafile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cert</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_key</span><span class="p">:</span>
+            <span class="n">ssl_context</span><span class="o">.</span><span class="n">load_cert_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_public_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_key</span><span class="p">)</span>
+
+        <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span> <span class="n">ssl</span><span class="o">=</span><span class="n">ssl_context</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mi">200</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="p">{}</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span></div>
+
+
+<div class="viewcode-block" id="CustomActionSequence"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomActionSequence">[docs]</a><span class="k">class</span> <span class="nc">CustomActionSequence</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class implements a sequence of custom actions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">CustomAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="n">merge</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CustomActionSequence.invoke"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomActionSequence.invoke">[docs]</a>    <span class="k">def</span> <span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Failed to invoke action </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="CustomActionSequence.invoke_async"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.CustomActionSequence.invoke_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">invoke_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">action</span><span class="o">.</span><span class="n">invoke_async</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Failed to invoke action </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;action_seq=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="invoke_custom_action"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.invoke_custom_action">[docs]</a><span class="k">def</span> <span class="nf">invoke_custom_action</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">responder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="n">merge</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="invoke_custom_action_async"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.custom_action.html#mindmeld.components.invoke_custom_action_async">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">invoke_custom_action_async</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">responder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="n">merge</span><span class="p">)</span><span class="o">.</span><span class="n">invoke_async</span><span class="p">(</span>
+        <span class="n">request</span><span class="p">,</span> <span class="n">responder</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

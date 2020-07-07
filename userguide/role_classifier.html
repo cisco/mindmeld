@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Role Classifier &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Working with the Role Classifier &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -156,7 +157,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#classifier-configuration">Classifier configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#training-with-custom-configurations">Training with custom configurations</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#application-configuration-file">1. Application configuration file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#arguments-to-the-fit-method">2. Arguments to the <code class="docutils literal"><span class="pre">fit()</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arguments-to-the-fit-method">2. Arguments to the <code class="docutils literal notranslate"><span class="pre">fit()</span></code> method</a></li>
 </ul>
 </li>
 </ul>
@@ -172,6 +173,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -268,23 +270,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="working-with-the-role-classifier">
@@ -311,20 +303,20 @@
 <li>Then, conduct experimentation in the Python shell.</li>
 </ul>
 </div></blockquote>
-<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> (NLP) class from the MindMeld <code class="xref py py-mod docutils literal"><span class="pre">nlp</span></code> module and <a class="reference internal" href="nlp.html#instantiate-nlp"><span class="std std-ref">instantiate an object</span></a> with the path to your MindMeld project.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> (NLP) class from the MindMeld <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp</span></code> module and <a class="reference internal" href="nlp.html#instantiate-nlp"><span class="std std-ref">instantiate an object</span></a> with the path to your MindMeld project.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
 </pre></div>
 </div>
 <p>Verify that the NLP has correctly identified all the domains and intents for your app.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;smart_home&#39;: &lt;DomainProcessor &#39;smart_home&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;times_and_dates&#39;: &lt;DomainProcessor &#39;times_and_dates&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;unknown&#39;: &lt;DomainProcessor &#39;unknown&#39; ready: False, dirty: False&gt;,</span>
@@ -333,10 +325,10 @@
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;change_alarm&#39;: &lt;IntentProcessor &#39;change_alarm&#39; ready: True, dirty: True&gt;,</span>
 <span class="go"> &#39;check_alarm&#39;: &lt;IntentProcessor &#39;check_alarm&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;remove_alarm&#39;: &lt;IntentProcessor &#39;remove_alarm&#39; ready: False, dirty: False&gt;,</span>
@@ -348,10 +340,10 @@
 <span class="go">...</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;check_weather&#39;: &lt;IntentProcessor &#39;check_weather&#39; ready: False, dirty: False&gt;</span>
 <span class="go">}</span>
 </pre></div>
@@ -360,30 +352,30 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Until the labeled training queries have been loaded, MindMeld is not aware of the different entity types for your app.</p>
 </div>
-<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method to load the training queries for an intent of your choice. This can take several minutes for intents with a large number of training queries. Once the build is complete, inspect the entity types.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<p>Use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method to load the training queries for an intent of your choice. This can take several minutes for intents with a large number of training queries. Once the build is complete, inspect the entity types.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;sys_time&#39;: &lt;EntityProcessor &#39;sys_time&#39; ready: True, dirty: True&gt;,</span>
 <span class="go"> &#39;sys_interval&#39;: &lt;EntityProcessor &#39;sys_interval&#39; ready: True, dirty: True&gt;</span>
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>Access the <code class="xref py py-class docutils literal"><span class="pre">RoleClassifier</span></code> for an entity type of your choice, using the <code class="xref py py-attr docutils literal"><span class="pre">role_classifier</span></code> attribute of the desired entity.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="s1">&#39;sys_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">role_classifier</span>
+<p>Access the <code class="xref py py-class docutils literal notranslate"><span class="pre">RoleClassifier</span></code> for an entity type of your choice, using the <code class="xref py py-attr docutils literal notranslate"><span class="pre">role_classifier</span></code> attribute of the desired entity.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="s1">&#39;sys_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">role_classifier</span>
 <span class="n">rc</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;RoleClassifier ready: True, dirty: True&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;RoleClassifier ready: True, dirty: True&gt;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="train-a-role-classifier">
 <span id="train-role-model"></span><h2>Train a role classifier<a class="headerlink" href="#train-a-role-classifier" title="Permalink to this headline">¶</a></h2>
-<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.fit()</span></code> method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.</p>
-<div class="highlight-python" id="baseline-role-fit"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<p>Use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.fit()</span></code> method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal notranslate"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.</p>
+<div class="highlight-python notranslate" id="baseline-role-fit"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
@@ -392,19 +384,19 @@
 <span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 <span class="go">No role model configuration set. Using default.</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method loads all necessary training queries and trains a role classification model. When called with no arguments (as in the example above), the method uses the settings from <code class="docutils literal"><span class="pre">config.py</span></code>, the <a class="reference internal" href="nlp.html#build-nlp-with-config"><span class="std std-ref">app’s configuration file</span></a>. If <code class="docutils literal"><span class="pre">config.py</span></code> is not defined, the method uses the MindMeld preset <a class="reference internal" href="nlp.html#config"><span class="std std-ref">classifier configuration</span></a>.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method loads all necessary training queries and trains a role classification model. When called with no arguments (as in the example above), the method uses the settings from <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the <a class="reference internal" href="nlp.html#build-nlp-with-config"><span class="std std-ref">app's configuration file</span></a>. If <code class="docutils literal notranslate"><span class="pre">config.py</span></code> is not defined, the method uses the MindMeld preset <a class="reference internal" href="nlp.html#config"><span class="std std-ref">classifier configuration</span></a>.</p>
 <p>Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.</p>
 <div class="section" id="classifier-configuration">
 <h3>Classifier configuration<a class="headerlink" href="#classifier-configuration" title="Permalink to this headline">¶</a></h3>
-<p>Use the <code class="xref py py-attr docutils literal"><span class="pre">config</span></code> attribute of a trained classifier to view the <a class="reference internal" href="nlp.html#config"><span class="std std-ref">configuration</span></a> that the classifier is using. Here’s an  example where we view the configuration of a role classifier trained using default settings:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<p>Use the <code class="xref py py-attr docutils literal notranslate"><span class="pre">config</span></code> attribute of a trained classifier to view the <a class="reference internal" href="nlp.html#config"><span class="std std-ref">configuration</span></a> that the classifier is using. Here's an  example where we view the configuration of a role classifier trained using default settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &#39;features&#39;: {</span>
 <span class="go">    &#39;bag-of-words-after&#39;: {</span>
 <span class="go">      &#39;ngram_lengths_to_start_positions&#39;: {1: [0, 1], 2: [0, 1]}</span>
@@ -422,24 +414,24 @@
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>Let’s take a look at the allowed values for each setting in a role classifier configuration.</p>
+<p>Let's take a look at the allowed values for each setting in a role classifier configuration.</p>
 <blockquote>
 <div></div></blockquote>
 <ol class="arabic simple" id="model-settings">
 <li><strong>Model Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'model_type'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'model_type'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">Always <code class="docutils literal"><span class="pre">'text'</span></code>, since role classification is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model.</p>
+<p class="last">Always <code class="docutils literal notranslate"><span class="pre">'text'</span></code>, since role classification is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'model_settings'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'model_settings'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p>Always a dictionary with the single key <code class="docutils literal"><span class="pre">'classifier_type'</span></code>, whose value specifies the machine learning model to use. Allowed values are shown in the table below.</p>
+<p>Always a dictionary with the single key <code class="docutils literal notranslate"><span class="pre">'classifier_type'</span></code>, whose value specifies the machine learning model to use. Allowed values are shown in the table below.</p>
 <table border="1" class="last docutils" id="sklearn-role-models">
 <colgroup>
 <col width="8%" />
@@ -453,19 +445,19 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'logreg'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'logreg'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">Logistic regression</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">sklearn.linear_model.LogisticRegression</a></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'svm'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'svm'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/svm.html#svm-classification">Support vector machine</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC">sklearn.svm.SVC</a></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'dtree'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'dtree'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/tree.html#tree">Decision tree</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier">sklearn.tree.DecisionTreeClassifier</a></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'rforest'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'rforest'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/ensemble.html#forest">Random forest</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier">sklearn.ensemble.RandomForestClassifier</a></td>
 </tr>
@@ -477,7 +469,7 @@
 <li><strong>Feature Extraction Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'features'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'features'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
@@ -493,72 +485,72 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'bag-of-words-after'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'bag-of-words-after'</span></code></td>
 <td><p class="first">Generates n-grams of specified lengths from the query text following the current entity.</p>
 <p>Settings:</p>
 <p>A dictionary with n-gram lengths as keys and a list of different starting positions as values.
 Each starting position is a token index, relative to the the start of the current entity span.</p>
 <p>Examples:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'ngram_lengths_to_start_positions':</span> <span class="pre">{1:</span> <span class="pre">[0],</span> <span class="pre">2:</span> <span class="pre">[0]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'ngram_lengths_to_start_positions':</span> <span class="pre">{1:</span> <span class="pre">[0],</span> <span class="pre">2:</span> <span class="pre">[0]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts all words (unigrams) and bigrams starting with the first word of the current entity span</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'ngram_lengths_to_start_positions':</span> <span class="pre">{1:</span> <span class="pre">[0,</span> <span class="pre">1],</span> <span class="pre">2:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'ngram_lengths_to_start_positions':</span> <span class="pre">{1:</span> <span class="pre">[0,</span> <span class="pre">1],</span> <span class="pre">2:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>additionally includes unigrams and bigrams starting from the word after the current entity’s first token</li>
+<li>additionally includes unigrams and bigrams starting from the word after the current entity's first token</li>
 </ul>
 </dd>
 </dl>
-<p>Given the query “Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}”
-and a classifier extracting features for the “6 AM” <code class="docutils literal"><span class="pre">sys_time</span></code> entity:</p>
+<p>Given the query &quot;Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}&quot;
+and a classifier extracting features for the &quot;6 AM&quot; <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> entity:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{1:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{1:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “6” and “AM”</li>
+<li>extracts &quot;6&quot; and &quot;AM&quot;</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{2:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{2:</span> <span class="pre">[0,</span> <span class="pre">1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “6 AM” and “AM alarm”</li>
+<li>extracts &quot;6 AM&quot; and &quot;AM alarm&quot;</li>
 </ul>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'bag-of-words-before'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'bag-of-words-before'</span></code></td>
 <td><p class="first">Generates n-grams of specified lengths from the query text preceding the current entity.</p>
 <p>Settings:</p>
 <p>A dictionary with n-gram lengths as keys and a list of different starting positions as values, similar
-to the <code class="docutils literal"><span class="pre">'bag-of-words-after'</span></code> feature group.</p>
+to the <code class="docutils literal notranslate"><span class="pre">'bag-of-words-after'</span></code> feature group.</p>
 <p>Examples:</p>
-<p>Given the query “Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}”
-and a classifier extracting features for the “6 AM” <code class="docutils literal"><span class="pre">sys_time</span></code> entity:</p>
+<p>Given the query &quot;Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}&quot;
+and a classifier extracting features for the &quot;6 AM&quot; <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> entity:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{1:</span> <span class="pre">[-2,</span> <span class="pre">-1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{1:</span> <span class="pre">[-2,</span> <span class="pre">-1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “change” and “my”</li>
+<li>extracts &quot;change&quot; and &quot;my&quot;</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{2:</span> <span class="pre">[-2,</span> <span class="pre">-1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{2:</span> <span class="pre">[-2,</span> <span class="pre">-1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “change my” and “my 6”</li>
+<li>extracts &quot;change my&quot; and &quot;my 6&quot;</li>
 </ul>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'in-gaz'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'in-gaz'</span></code></td>
 <td>Generates a set of features indicating the presence of query n-grams in different entity gazetteers,
 along with popularity information as defined in the gazetteer.</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'numeric'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'numeric'</span></code></td>
 <td>Generates a set of features indicating the presence of numeric entities in the query extracted by the
 numerical parser. These numeric entities include only time and interval entities and are labelled as
-<code class="docutils literal"><span class="pre">sys_time</span></code> and <code class="docutils literal"><span class="pre">sys_interval</span></code>.</td>
+<code class="docutils literal notranslate"><span class="pre">sys_time</span></code> and <code class="docutils literal notranslate"><span class="pre">sys_interval</span></code>.</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'other-entities'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'other-entities'</span></code></td>
 <td>Encodes information about the other entities present in the query than the current one.</td>
 </tr>
 </tbody>
@@ -569,23 +561,23 @@ numerical parser. These numeric entities include only time and interval entities
 <li><strong>Hyperparameter Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A dictionary of values to be used for model hyperparameters during training. Examples include the <code class="docutils literal"><span class="pre">'kernel'</span></code> parameter for SVM, <code class="docutils literal"><span class="pre">'penalty'</span></code> for logistic regression, <code class="docutils literal"><span class="pre">'max_depth'</span></code> for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the <a class="reference internal" href="#sklearn-role-models"><span class="std std-ref">reference links</span></a> above for parameter lists.</p>
+<p class="last">A dictionary of values to be used for model hyperparameters during training. Examples include the <code class="docutils literal notranslate"><span class="pre">'kernel'</span></code> parameter for SVM, <code class="docutils literal notranslate"><span class="pre">'penalty'</span></code> for logistic regression, <code class="docutils literal notranslate"><span class="pre">'max_depth'</span></code> for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the <a class="reference internal" href="#sklearn-role-models"><span class="std std-ref">reference links</span></a> above for parameter lists.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'param_selection'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'param_selection'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p>Is a dictionary containing the settings for <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search">hyperparameter selection</a>. This is used as an alternative to the <code class="docutils literal"><span class="pre">'params'</span></code> dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.</p>
+<p>Is a dictionary containing the settings for <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search">hyperparameter selection</a>. This is used as an alternative to the <code class="docutils literal notranslate"><span class="pre">'params'</span></code> dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.</p>
 <p>MindMeld needs two pieces of information from the developer to do parameter estimation:</p>
 <ol class="arabic simple">
-<li>The parameter space to search, captured by the value for the <code class="docutils literal"><span class="pre">'grid'</span></code> key</li>
-<li>The strategy for splitting the labeled data into training and validation sets, specified by the <code class="docutils literal"><span class="pre">'type'</span></code> key</li>
+<li>The parameter space to search, captured by the value for the <code class="docutils literal notranslate"><span class="pre">'grid'</span></code> key</li>
+<li>The strategy for splitting the labeled data into training and validation sets, specified by the <code class="docutils literal notranslate"><span class="pre">'type'</span></code> key</li>
 </ol>
-<p>Depending on the splitting scheme selected, the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> dictionary can contain other keys that define additional settings. The table below enumerates all the keys allowed in the dictionary.</p>
+<p>Depending on the splitting scheme selected, the <code class="xref py py-data docutils literal notranslate"><span class="pre">param_selection</span></code> dictionary can contain other keys that define additional settings. The table below enumerates all the keys allowed in the dictionary.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="16%" />
@@ -597,10 +589,10 @@ numerical parser. These numeric entities include only time and interval entities
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'grid'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'grid'</span></code></td>
 <td><p class="first">A dictionary mapping each hyperparameter to a list of potential values to be searched. Here is an example grid
 for a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">logistic regression</a> model:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">],</span>
   <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">],</span>
    <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
@@ -610,52 +602,52 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <p class="last">See the <a class="reference internal" href="#sklearn-role-models"><span class="std std-ref">reference links</span></a> above for details on the hyperparameters available for each model.</p>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'type'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'type'</span></code></td>
 <td><p class="first">The <a class="reference external" href="http://scikit-learn.org/stable/modules/cross_validation">cross-validation</a> methodology to use. One of:</p>
 <ul class="last simple">
-<li><code class="docutils literal"><span class="pre">'k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold">K-folds</a></li>
-<li><code class="docutils literal"><span class="pre">'shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ShuffleSplit">Randomized folds</a></li>
-<li><code class="docutils literal"><span class="pre">'group-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold">K-folds with non-overlapping groups</a></li>
-<li><code class="docutils literal"><span class="pre">'group-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupShuffleSplit">Group-aware randomized folds</a></li>
-<li><code class="docutils literal"><span class="pre">'stratified-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold">Stratified k-folds</a></li>
-<li><code class="docutils literal"><span class="pre">'stratified-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit">Stratified randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold">K-folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ShuffleSplit">Randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'group-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold">K-folds with non-overlapping groups</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'group-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupShuffleSplit">Group-aware randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'stratified-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold">Stratified k-folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'stratified-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit">Stratified randomized folds</a></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'k'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'k'</span></code></td>
 <td>Number of folds (splits)</td>
 </tr>
 </tbody>
 </table>
-<p class="last">To identify the parameters that give the highest accuracy, the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method does an <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search">exhaustive grid search</a> over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> can use these optimal parameters and skip the parameter selection process</p>
+<p class="last">To identify the parameters that give the highest accuracy, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method does an <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search">exhaustive grid search</a> over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> can use these optimal parameters and skip the parameter selection process</p>
 </dd>
 </dl>
 <ol class="arabic simple" start="4">
 <li><strong>Custom Train/Test Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'train_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'train_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A string representing a regex pattern that selects all training files for role model training with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'train.*\.txt'</span></code>.</p>
+<p class="last">A string representing a regex pattern that selects all training files for role model training with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal notranslate"><span class="pre">'train.*\.txt'</span></code>.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'test_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'test_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A string representing a regex pattern that selects all evaluation files for role model testing with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'test.*\.txt'</span></code>.</p>
+<p class="last">A string representing a regex pattern that selects all evaluation files for role model testing with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal notranslate"><span class="pre">'test.*\.txt'</span></code>.</p>
 </dd>
 </dl>
 </div>
 <div class="section" id="training-with-custom-configurations">
 <span id="build-role-with-config"></span><h3>Training with custom configurations<a class="headerlink" href="#training-with-custom-configurations" title="Permalink to this headline">¶</a></h3>
-<p>To override MindMeld’s default role classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method with appropriate arguments.</p>
+<p>To override MindMeld's default role classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method with appropriate arguments.</p>
 <div class="section" id="application-configuration-file">
 <h4>1. Application configuration file<a class="headerlink" href="#application-configuration-file" title="Permalink to this headline">¶</a></h4>
-<p>When you define custom classifier&nbsp;settings in <code class="docutils literal"><span class="pre">config.py</span></code>, the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.fit()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> methods use those settings instead of MindMeld’s defaults. To do this, define a dictionary of your custom settings, named <code class="xref py py-data docutils literal"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>.</p>
-<p>Here’s an example of a <code class="docutils literal"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the preset configuration for the role classifier.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ROLE_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>When you define custom classifier&nbsp;settings in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.fit()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> methods use those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named <code class="xref py py-data docutils literal notranslate"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>.</p>
+<p>Here's an example of a <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the preset configuration for the role classifier.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ROLE_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span><span class="p">}</span>
     <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span>
@@ -680,8 +672,8 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Settings defined in <code class="xref py py-data docutils literal"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code> apply to role classifiers across all entity types in your application. For finer-grained control, you can implement the <code class="xref py py-meth docutils literal"><span class="pre">get_role_classifier_config()</span></code> function in <code class="docutils literal"><span class="pre">config.py</span></code> to specify suitable configurations for each entity. This gives you the flexibility to have customized configurations for different role classifiers based on the domain, intent, and entity type.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">copy</span>
+<p>Settings defined in <code class="xref py py-data docutils literal notranslate"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code> apply to role classifiers across all entity types in your application. For finer-grained control, you can implement the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_role_classifier_config()</span></code> function in <code class="docutils literal notranslate"><span class="pre">config.py</span></code> to specify suitable configurations for each entity. This gives you the flexibility to have customized configurations for different role classifiers based on the domain, intent, and entity type.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="k">def</span> <span class="nf">get_role_classifier_config</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">intent</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
     <span class="n">SPECIAL_CONFIG</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ROLE_CLASSIFIER_CONFIG</span><span class="p">)</span>
@@ -690,27 +682,27 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
     <span class="k">return</span> <span class="n">SPECIAL_CONFIG</span>
 </pre></div>
 </div>
-<p>Using <code class="docutils literal"><span class="pre">config.py</span></code> is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.</p>
-<p>Since this method requires updating a file each time you modify a setting, it’s less suitable for rapid prototyping than the method described next.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">config.py</span></code> is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.</p>
+<p>Since this method requires updating a file each time you modify a setting, it's less suitable for rapid prototyping than the method described next.</p>
 </div>
 <div class="section" id="arguments-to-the-fit-method">
-<h4>2. Arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method<a class="headerlink" href="#arguments-to-the-fit-method" title="Permalink to this headline">¶</a></h4>
-<p>For experimenting with the role classifier, the recommended method is to use arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. The main areas for exploration are feature extraction and hyperparameter tuning.</p>
+<h4>2. Arguments to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method<a class="headerlink" href="#arguments-to-the-fit-method" title="Permalink to this headline">¶</a></h4>
+<p>For experimenting with the role classifier, the recommended method is to use arguments to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. The main areas for exploration are feature extraction and hyperparameter tuning.</p>
 <p><strong>Feature extraction</strong></p>
-<p>View the default feature set, as seen in the baseline classifier that we trained <a class="reference internal" href="#baseline-role-fit"><span class="std std-ref">earlier</span></a>. Notice that the ‘ngram_lengths_to_start_positions’ settings tell the classifier to extract n-grams within a context window of two tokens or less around the token of interest — that is, to only look at words in the immediate vicinity.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<p>View the default feature set, as seen in the baseline classifier that we trained <a class="reference internal" href="#baseline-role-fit"><span class="std std-ref">earlier</span></a>. Notice that the 'ngram_lengths_to_start_positions' settings tell the classifier to extract n-grams within a context window of two tokens or less around the token of interest — that is, to only look at words in the immediate vicinity.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_features</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
 <span class="n">my_features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &#39;bag-of-words-after&#39;: {&#39;ngram_lengths_to_start_positions&#39;: {1: [0, 1], 2: [0, 1]}},</span>
 <span class="go">  &#39;bag-of-words-before&#39;: {&#39;ngram_lengths_to_start_positions&#39;: {1: [-2, -1], 2: [-2, -1]}},</span>
 <span class="go">  &#39;other-entities&#39;: {}</span>
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We’ll see whether that provides better information than the smaller default window. Do this by changing the ‘ngram_lengths_to_start_positions’ settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;bag-of-words-after&#39;</span><span class="p">][</span><span class="s1">&#39;ngram_lengths_to_start_positions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<p>Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window. Do this by changing the 'ngram_lengths_to_start_positions' settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;bag-of-words-after&#39;</span><span class="p">][</span><span class="s1">&#39;ngram_lengths_to_start_positions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
     <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 <span class="p">}</span>
@@ -721,7 +713,7 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="n">my_features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &#39;bag-of-words-after&#39;: {&#39;ngram_lengths_to_start_positions&#39;: {1: [0, 1, 2, 3], 2: [0, 1, 2]}},</span>
 <span class="go">  &#39;bag-of-words-before&#39;: {&#39;ngram_lengths_to_start_positions&#39;: {1: [-3, -2, -1], 2: [-3, -2, -1]}},</span>
 <span class="go">  &#39;other-entities&#39;: {}</span>
@@ -735,25 +727,25 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <li>Bigrams: { w<sub>-3</sub>w<sub>-2</sub>, w<sub>-2</sub>w<sub>-1</sub>, w<sub>-1</sub>w<sub>0</sub>,  w<sub>0</sub>w<sub>1</sub>, w<sub>1</sub>w<sub>2</sub>, w<sub>2</sub>w<sub>3</sub> }</li>
 </ul>
 </div></blockquote>
-<p>Retrain the classifier with the updated feature set by passing in the <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary as an argument to the <code class="xref py py-data docutils literal"><span class="pre">features</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. This applies our new feature extraction settings, while retaining the MindMeld defaults for model and classifier types (logreg) and hyperparameter selection.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">my_features</span><span class="p">)</span>
+<p>Retrain the classifier with the updated feature set by passing in the <code class="xref py py-data docutils literal notranslate"><span class="pre">my_features</span></code> dictionary as an argument to the <code class="xref py py-data docutils literal notranslate"><span class="pre">features</span></code> parameter of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. This applies our new feature extraction settings, while retaining the MindMeld defaults for model and classifier types (logreg) and hyperparameter selection.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">my_features</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 <span class="go">No app configuration file found. Using default role model configuration</span>
 </pre></div>
 </div>
 <p><strong>Hyperparameter tuning</strong></p>
-<p>View the model’s hyperparameters, keeping in mind the <a class="reference internal" href="#model-settings"><span class="std std-ref">hyperparameters</span></a> for logistic regression, the default model for role classification in MindMeld. These include inverse of regularization strength as ‘C’, and the norm used in penalization as ‘penalty’.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_params</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span>
+<p>View the model's hyperparameters, keeping in mind the <a class="reference internal" href="#model-settings"><span class="std std-ref">hyperparameters</span></a> for logistic regression, the default model for role classification in MindMeld. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_params</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">params</span>
 <span class="n">my_params</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;C&#39;: 100, &#39;penalty&#39;: &#39;l1&#39;}</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;C&#39;: 100, &#39;penalty&#39;: &#39;l1&#39;}</span>
 </pre></div>
 </div>
-<p>Instead of relying on the default preset values for <code class="docutils literal"><span class="pre">'C'</span></code> and <code class="docutils literal"><span class="pre">'penalty'</span></code>, let’s specify a parameter search grid to let MindMeld select ideal values for the dataset. We’ll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal <code class="docutils literal"><span class="pre">'C'</span></code> and <code class="docutils literal"><span class="pre">'penalty'</span></code> parameters using 10-fold cross-validation:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
+<p>Instead of relying on the default preset values for <code class="docutils literal notranslate"><span class="pre">'C'</span></code> and <code class="docutils literal notranslate"><span class="pre">'penalty'</span></code>, let's specify a parameter search grid to let MindMeld select ideal values for the dataset. We'll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal <code class="docutils literal notranslate"><span class="pre">'C'</span></code> and <code class="docutils literal notranslate"><span class="pre">'penalty'</span></code> parameters using 10-fold cross-validation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span>
   <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">]</span>
 <span class="p">}</span>
@@ -764,23 +756,23 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Pass the updated settings to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> as an argument to the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> parameter. The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose 10-fold cross-validation accuracy is highest.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+<p>Pass the updated settings to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> as an argument to the <code class="xref py py-data docutils literal notranslate"><span class="pre">param_selection</span></code> parameter. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose 10-fold cross-validation accuracy is highest.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 <span class="go">No app configuration file found. Using default role model configuration</span>
 <span class="go">Selecting hyperparameters using k-fold cross validation with 10 splits</span>
 <span class="go">Best accuracy: 96.59%, params: {&#39;C&#39;: 1, &#39;penalty&#39;: &#39;l2&#39;}</span>
 </pre></div>
 </div>
-<p>Now we’ll try a different cross-validation strategy: five randomized folds. Modify the values of the <code class="docutils literal"><span class="pre">'k'</span></code> and <code class="docutils literal"><span class="pre">'type'</span></code> keys in <code class="xref py py-data docutils literal"><span class="pre">my_param_settings</span></code>, and call <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> to see whether accuracy improves:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<p>Now we'll try a different cross-validation strategy: five randomized folds. Modify the values of the <code class="docutils literal notranslate"><span class="pre">'k'</span></code> and <code class="docutils literal notranslate"><span class="pre">'type'</span></code> keys in <code class="xref py py-data docutils literal notranslate"><span class="pre">my_param_settings</span></code>, and call <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> to see whether accuracy improves:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;shuffle&#39;</span>
 <span class="n">my_param_settings</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;grid&#39;: {</span>
 <span class="go">           &#39;C&#39;: [1, 10, 100, 1000],</span>
 <span class="go">           &#39;penalty&#39;: [&#39;l1&#39;, &#39;l2&#39;]</span>
@@ -790,10 +782,10 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 <span class="go">No app configuration file found. Using default role model configuration</span>
 <span class="go">Selecting hyperparameters using shuffle cross validation with 5 splits</span>
 <span class="go">Best accuracy: 97.78%, params: {&#39;C&#39;: 1, &#39;penalty&#39;: &#39;l2&#39;}</span>
@@ -806,78 +798,78 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <div class="section" id="run-the-role-classifier">
 <span id="predict-roles"></span><h2>Run the role classifier<a class="headerlink" href="#run-the-role-classifier" title="Permalink to this headline">¶</a></h2>
 <p>Before you run the trained role classifier on a test query, you must first detect all the entities in the query using a <a class="reference internal" href="entity_recognizer.html#train-entity-model"><span class="std std-ref">trained entity recognizer</span></a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;Change my 6 AM alarm to 7 AM&#39;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;Change my 6 AM alarm to 7 AM&#39;</span>
 <span class="n">er</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;change_alarm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entity_recognizer</span>
 <span class="n">entities</span> <span class="o">=</span> <span class="n">er</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 <span class="n">entities</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">(&lt;QueryEntity &#39;6 AM&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(&lt;QueryEntity &#39;6 AM&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;,</span>
 <span class="go"> &lt;QueryEntity &#39;7 AM&#39; (&#39;sys_time&#39;) char: [24-27], tok: [6-7]&gt;)</span>
 </pre></div>
 </div>
-<p>Now you can choose an entity from among those detected, and call the role classifier’s <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.predict()</span></code> method to classify it. Although it classifies a single entity, the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.predict()</span></code> method uses the full query text, and information about all its entities, for <a class="reference internal" href="#role-features"><span class="std std-ref">feature extraction</span></a>.</p>
-<p>Run the trained role classifier on the two entities from the example above, one by one. The <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> method returns the label for the role whose predicted probability is highest.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<p>Now you can choose an entity from among those detected, and call the role classifier's <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.predict()</span></code> method to classify it. Although it classifies a single entity, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.predict()</span></code> method uses the full query text, and information about all its entities, for <a class="reference internal" href="#role-features"><span class="std std-ref">feature extraction</span></a>.</p>
+<p>Run the trained role classifier on the two entities from the example above, one by one. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code> method returns the label for the role whose predicted probability is highest.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;old_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;old_time&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;new_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;new_time&#39;</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">At runtime, the natural language processor’s <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method calls <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.predict()</span></code> to roles for all detected entities in the incoming query.</p>
+<p class="last">At runtime, the natural language processor's <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.predict()</span></code> to roles for all detected entities in the incoming query.</p>
 </div>
-<p>We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible role labels, use the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.predict_proba()</span></code> method. This is useful both for experimenting with classifier settings and for debugging classifier performance.</p>
+<p>We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible role labels, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.predict_proba()</span></code> method. This is useful both for experimenting with classifier settings and for debugging classifier performance.</p>
 <p>The result is a list of tuples whose first element is the role label and whose second element is the associated classification probability. These are ranked by roles, from most likely to least likely.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[(&#39;old_time&#39;, 0.9998281252873086), (&#39;new_time&#39;, 0.00017187471269142218)]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[(&#39;old_time&#39;, 0.9998281252873086), (&#39;new_time&#39;, 0.00017187471269142218)]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[(&#39;new_time&#39;, 0.9999960507734881), (&#39;old_time&#39;, 3.949226511944386e-06)]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[(&#39;new_time&#39;, 0.9999960507734881), (&#39;old_time&#39;, 3.949226511944386e-06)]</span>
 </pre></div>
 </div>
 <p>An ideal classifier would assign a high probability to the expected (correct) class label for a test query, while assigning very low probabilities to incorrect labels.</p>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> methods operate on one entity at a time. Next, we’ll see how to test a trained model on a batch of labeled test queries.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_proba()</span></code> methods operate on one entity at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.</p>
 </div>
 <div class="section" id="evaluate-classifier-performance">
 <h2>Evaluate classifier performance<a class="headerlink" href="#evaluate-classifier-performance" title="Permalink to this headline">¶</a></h2>
-<p>To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the <a class="reference internal" href="nlp.html#evaluate-nlp"><span class="std std-ref">Natural Language Processor</span></a> chapter. Once you have the test data files in the right place in your MindMeld project, you can measure your model’s performance using the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.evaluate()</span></code> method.</p>
+<p>To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the <a class="reference internal" href="nlp.html#evaluate-nlp"><span class="std std-ref">Natural Language Processor</span></a> chapter. Once you have the test data files in the right place in your MindMeld project, you can measure your model's performance using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.evaluate()</span></code> method.</p>
 <p>Before you can evaluate the accuracy of your trained role classifier, you must first create labeled test data and place it in your MindMeld project as described in the <a class="reference internal" href="nlp.html#evaluate-nlp"><span class="std std-ref">Natural Language Processor</span></a> chapter.</p>
-<p>Then, when you are ready, use the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.evaluate()</span></code> method, which</p>
+<p>Then, when you are ready, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.evaluate()</span></code> method, which</p>
 <blockquote>
 <div><ul class="simple">
 <li>strips away all ground truth annotations from the test queries,</li>
 <li>passes the resulting unlabeled queries to the trained role classifier for prediction, and</li>
-<li>compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.</li>
+<li>compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.</li>
 </ul>
 </div></blockquote>
 <p>In the example below, the model gets 20 out of 21 test queries correct, resulting in an accuracy of about 95%.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading queries from file times_and_dates/change_alarm/test.txt</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading queries from file times_and_dates/change_alarm/test.txt</span>
 <span class="go">&lt;StandardModelEvaluation score: 95.24%, 20 of 21 examples correct&gt;</span>
 </pre></div>
 </div>
-<p>The aggregate accuracy score we see above is only the beginning, because the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.</p>
-<p>Print all the model performance statistics reported by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<p>The aggregate accuracy score we see above is only the beginning, because the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.</p>
+<p>Print all the model performance statistics reported by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 <span class="nb">eval</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Overall statistics:</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Overall statistics:</span>
 
 <span class="go">    accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro</span>
 <span class="go">       0.952       0.952          20          20           1           1       0.952       0.952</span>
@@ -899,8 +891,8 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="go">        new_time              1              9</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">eval.get_stats()</span></code> method returns all the above statistics in a structured dictionary without printing them to the console.</p>
-<p>Let’s decipher the statists output by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval.get_stats()</span></code> method returns all the above statistics in a structured dictionary without printing them to the console.</p>
+<p>Let's decipher the statists output by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method.</p>
 <dl class="docutils">
 <dt><strong>Overall Statistics</strong></dt>
 <dd><div class="first line-block">
@@ -942,7 +934,7 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <p>When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.</p>
 <ul class="last simple">
 <li><strong>Classes are balanced</strong> — When the number of annotations for each role are comparable and each role is equally important, focusing on the accuracy metric is usually good enough.</li>
-<li><strong>Classes are imbalanced</strong> — In this case, it’s important to take the f1 scores into account.</li>
+<li><strong>Classes are imbalanced</strong> — In this case, it's important to take the f1 scores into account.</li>
 <li><strong>All f1 and accuracy scores are low</strong> — When role classification is performing poorly across all roles, either of the following may be the problem: 1) You do not have enough training data for the model to learn, or 2) you need to tune your model hyperparameters.</li>
 <li><strong>f1 weighted is higher than f1 macro</strong> — This means that roles with fewer evaluation examples are performing poorly. Try adding more data to these roles.</li>
 <li><strong>f1 macro is higher than f1 weighted</strong> — This means that roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.</li>
@@ -995,15 +987,15 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A <a class="reference external" href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a <code class="docutils literal"><span class="pre">new_time</span></code> entity as <code class="docutils literal"><span class="pre">old_time</span></code>.</p>
+<p class="last">A <a class="reference external" href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a <code class="docutils literal notranslate"><span class="pre">new_time</span></code> entity as <code class="docutils literal notranslate"><span class="pre">old_time</span></code>.</p>
 </dd>
 </dl>
-<p>Now we have a wealth of information about the performance of our classifier. Let’s go further and inspect the classifier’s predictions at the level of individual queries, to better understand error patterns.</p>
-<p>View the classifier predictions for the entire test set using the <code class="xref py py-attr docutils literal"><span class="pre">results</span></code> attribute of the returned <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-obj docutils literal"><span class="pre">eval</span></code></a> object. Each result is an instance of the <code class="xref py py-class docutils literal"><span class="pre">EvaluatedExample</span></code> class, which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="o">.</span><span class="n">results</span>
+<p>Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.</p>
+<p>View the classifier predictions for the entire test set using the <code class="xref py py-attr docutils literal notranslate"><span class="pre">results</span></code> attribute of the returned <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a> object. Each result is an instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">EvaluatedExample</span></code> class, which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go">  EvaluatedExample(example=(&lt;Query &#39;change my 6 am alarm&#39;&gt;, (&lt;QueryEntity &#39;6 am&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;,), 0), expected=&#39;old_time&#39;, predicted=&#39;old_time&#39;, probas={&#39;sys_time&#39;: 0.10062246873286373, &#39;old_time&#39;: 0.89937753126713627}, label_type=&#39;class&#39;),</span>
 <span class="go">  EvaluatedExample(example=(&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, (&lt;QueryEntity &#39;6 am&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;, &lt;QueryEntity &#39;7 am&#39; (&#39;sys_time&#39;) char: [24-27], tok: [6-7]&gt;), 0), expected=&#39;old_time&#39;, predicted=&#39;old_time&#39;, probas={&#39;sys_time&#39;: 0.028607105880949835, &#39;old_time&#39;: 0.97139289411905017}, label_type=&#39;class&#39;),</span>
 <span class="go"> ...</span>
@@ -1011,30 +1003,30 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 </pre></div>
 </div>
 <p>Next, we look selectively at just the correct or incorrect predictions.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">correct_results</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">correct_results</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go">  EvaluatedExample(example=(&lt;Query &#39;change my 6 am alarm&#39;&gt;, (&lt;QueryEntity &#39;6 am&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;,), 0), expected=&#39;old_time&#39;, predicted=&#39;old_time&#39;, probas={&#39;new_time&#39;: 0.10062246873286373, &#39;old_time&#39;: 0.89937753126713627}, label_type=&#39;class&#39;),</span>
 <span class="go">  EvaluatedExample(example=(&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, (&lt;QueryEntity &#39;6 am&#39; (&#39;sys_time&#39;) char: [10-13], tok: [2-3]&gt;, &lt;QueryEntity &#39;7 am&#39; (&#39;sys_time&#39;) char: [24-27], tok: [6-7]&gt;), 0), expected=&#39;old_time&#39;, predicted=&#39;old_time&#39;, probas={&#39;new_time&#39;: 0.028607105880949835, &#39;old_time&#39;: 0.97139289411905017}, label_type=&#39;class&#39;),</span>
 <span class="go"> ...</span>
 <span class="go">]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go">  EvaluatedExample(example=(&lt;Query &#39;replace the 8 am alarm with a 10 am alarm&#39;&gt;, (&lt;QueryEntity &#39;8 am&#39; (&#39;sys_time&#39;) char: [12-15], tok: [2-3]&gt;, &lt;QueryEntity &#39;10 am&#39; (&#39;sys_time&#39;) char: [30-34], tok: [7-8]&gt;), 1), expected=&#39;new_time&#39;, predicted=&#39;old_time&#39;, probas={&#39;new_time&#39;: 0.48770513415754235, &#39;old_time&#39;: 0.51229486584245765}, label_type=&#39;class&#39;)</span>
 <span class="go">]</span>
 </pre></div>
 </div>
 <p>Slicing and dicing these results for error analysis is easily done with <a class="reference external" href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehensions</a>.</p>
-<p>Our example dataset is fairly small, and we get just one case of misclassification. But for a real-world app with a large test set, we’d need to be able inspect incorrect predictions for a particular role. Try this using the <code class="docutils literal"><span class="pre">new_time</span></code> role from our example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;new_time&#39;</span><span class="p">]</span>
+<p>Our example dataset is fairly small, and we get just one case of misclassification. But for a real-world app with a large test set, we'd need to be able inspect incorrect predictions for a particular role. Try this using the <code class="docutils literal notranslate"><span class="pre">new_time</span></code> role from our example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;new_time&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go">  (</span>
 <span class="go">    (</span>
 <span class="go">      &lt;Query &#39;replace the 8 am alarm with a 10 am alarm&#39;&gt;,</span>
@@ -1049,11 +1041,11 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="go">]</span>
 </pre></div>
 </div>
-<p>Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier’s confidence for the true label was relatively low. We’ll demonstrate this with the <code class="docutils literal"><span class="pre">new_time</span></code> role and a confidence of &lt;60%.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;new_time&#39;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">[</span><span class="s1">&#39;new_time&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">6</span><span class="p">]</span>
+<p>Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the <code class="docutils literal notranslate"><span class="pre">new_time</span></code> role and a confidence of &lt;60%.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;new_time&#39;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">[</span><span class="s1">&#39;new_time&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">6</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go">  (</span>
 <span class="go">    (</span>
 <span class="go">      &lt;Query &#39;replace the 8 am alarm with a 10 am alarm&#39;&gt;,</span>
@@ -1079,18 +1071,18 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 <span class="go">]</span>
 </pre></div>
 </div>
-<p>For both of these results, the classifier’s prediction probability for the <code class="docutils literal"><span class="pre">'new_time'</span></code> role was fairly low. The classifier got one of them wrong, and barely got the other one right with a confidence of about 59%.</p>
-<p>Try looking at the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">training data</span></a>. You should discover that the <code class="docutils literal"><span class="pre">new_time</span></code> role does indeed lack labeled training queries like the ones above.</p>
-<p>One potential solution is to add more training queries for the <code class="docutils literal"><span class="pre">new_time</span></code> role, so the classification model can generalize better.</p>
-<p>Error analysis on the results of the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described <a class="reference internal" href="#build-role-with-config"><span class="std std-ref">earlier</span></a> in this chapter.</p>
+<p>For both of these results, the classifier's prediction probability for the <code class="docutils literal notranslate"><span class="pre">'new_time'</span></code> role was fairly low. The classifier got one of them wrong, and barely got the other one right with a confidence of about 59%.</p>
+<p>Try looking at the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">training data</span></a>. You should discover that the <code class="docutils literal notranslate"><span class="pre">new_time</span></code> role does indeed lack labeled training queries like the ones above.</p>
+<p>One potential solution is to add more training queries for the <code class="docutils literal notranslate"><span class="pre">new_time</span></code> role, so the classification model can generalize better.</p>
+<p>Error analysis on the results of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described <a class="reference internal" href="#build-role-with-config"><span class="std std-ref">earlier</span></a> in this chapter.</p>
 </div>
 <div class="section" id="view-features-extracted-for-classification">
 <h2>View features extracted for classification<a class="headerlink" href="#view-features-extracted-for-classification" title="Permalink to this headline">¶</a></h2>
-<p>While training a new model or investigating a misclassification by the classifier, it is sometimes useful to view the extracted features to make sure they are as expected. For example, there may be non-ASCII characters in the query that are treated differently by the feature extractors. Or the value assigned to a particular feature may be computed differently than you expected. Not extracting the right features could lead to misclassifications. In the example below, we view the features extracted for the query ‘set alarm for 7 am’ using <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.view_extracted_features()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">view_extracted_features</span><span class="p">(</span><span class="s2">&quot;set alarm for 7 am&quot;</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<p>While training a new model or investigating a misclassification by the classifier, it is sometimes useful to view the extracted features to make sure they are as expected. For example, there may be non-ASCII characters in the query that are treated differently by the feature extractors. Or the value assigned to a particular feature may be computed differently than you expected. Not extracting the right features could lead to misclassifications. In the example below, we view the features extracted for the query 'set alarm for 7 am' using <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.view_extracted_features()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">view_extracted_features</span><span class="p">(</span><span class="s2">&quot;set alarm for 7 am&quot;</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;bag_of_words|ngram_before|length:1|pos:-2&#39;: &#39;alarm&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;bag_of_words|ngram_before|length:1|pos:-2&#39;: &#39;alarm&#39;,</span>
 <span class="go"> &#39;bag_of_words|ngram_before|length:1|pos:-1&#39;: &#39;for&#39;,</span>
 <span class="go"> &#39;bag_of_words|ngram_before|length:2|pos:-2&#39;: &#39;alarm for&#39;,</span>
 <span class="go"> &#39;bag_of_words|ngram_before|length:2|pos:-1&#39;: &#39;for 7&#39;,</span>
@@ -1104,18 +1096,18 @@ for a <a class="reference external" href="http://scikit-learn.org/stable/modules
 </div>
 <div class="section" id="save-model-for-future-use">
 <h2>Save model for future use<a class="headerlink" href="#save-model-for-future-use" title="Permalink to this headline">¶</a></h2>
-<p>Save the trained role classifier for later use by calling the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.dump()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">dump()</span></code> method serializes the trained model as a <a class="reference external" href="https://docs.python.org/3/library/pickle.html">pickle file</a> and saves it to the specified location on disk.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/role_classifier.maxent.20170701.pkl&#39;</span><span class="p">)</span>
+<p>Save the trained role classifier for later use by calling the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.dump()</span></code> method. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code> method serializes the trained model as a <a class="reference external" href="https://docs.python.org/3/library/pickle.html">pickle file</a> and saves it to the specified location on disk.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/role_classifier.maxent.20170701.pkl&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Saving role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Saving role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 </pre></div>
 </div>
-<p>You can load the saved model anytime using the <code class="xref py py-meth docutils literal"><span class="pre">RoleClassifier.load()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/role_classifier.maxent.20170701.pkl&#39;</span><span class="p">)</span>
+<p>You can load the saved model anytime using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RoleClassifier.load()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/role_classifier.maxent.20170701.pkl&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading role classifier: domain=&#39;times_and_dates&#39;, intent=&#39;change_alarm&#39;, entity_type=&#39;sys_time&#39;</span>
 </pre></div>
 </div>
 </div>

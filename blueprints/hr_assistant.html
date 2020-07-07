@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>HR Assistant &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>HR Assistant &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -61,7 +61,7 @@
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Getting Started" href="../userguide/getting_started.html" />
+    <link rel="next" title="Banking Assistant" href="banking.html" />
     <link rel="prev" title="Home Assistant" href="home_assistant.html" /> 
 </head>
 
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -157,6 +157,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#testing-and-deployment">10. Testing and Deployment</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -174,6 +175,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -270,28 +272,18 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="hr-assistant">
 <span id="id1"></span><h1>HR Assistant<a class="headerlink" href="#hr-assistant" title="Permalink to this headline">¶</a></h1>
-<p>In this step-by-step walkthrough, you’ll build a conversational application for a Human Resources assistant that can answer questions about employees and general policies at a company.</p>
+<p>In this step-by-step walkthrough, you'll build a conversational application for a Human Resources assistant that can answer questions about employees and general policies at a company.</p>
 <p>Working through this blueprint will teach you how to</p>
 <blockquote>
 <div><ul class="simple">
@@ -320,80 +312,80 @@ In addition, they can also use the assistant to answer frequently asked question
 <span id="hr-assistant-model-hierarchy"></span><h2>3. Domain-Intent-Entity Hierarchy<a class="headerlink" href="#domain-intent-entity-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>Here is the NLP model hierarchy for our HR assistant application.</p>
 <img alt="../_images/hierarchy_hr_assistant.png" src="../_images/hierarchy_hr_assistant.png" />
-<p>The HR assistant blueprint is organized into six domains: <code class="docutils literal"><span class="pre">General</span></code>, <code class="docutils literal"><span class="pre">Salary</span></code>, <code class="docutils literal"><span class="pre">Dates</span></code>, <code class="docutils literal"><span class="pre">Hierarchy</span></code>, <code class="docutils literal"><span class="pre">Unsupported</span></code>, and <code class="docutils literal"><span class="pre">Greeting</span></code>. The domains of the HR assistant blueprint correspond to the categories of questions that could be asked.</p>
+<p>The HR assistant blueprint is organized into six domains: <code class="docutils literal notranslate"><span class="pre">General</span></code>, <code class="docutils literal notranslate"><span class="pre">Salary</span></code>, <code class="docutils literal notranslate"><span class="pre">Dates</span></code>, <code class="docutils literal notranslate"><span class="pre">Hierarchy</span></code>, <code class="docutils literal notranslate"><span class="pre">Unsupported</span></code>, and <code class="docutils literal notranslate"><span class="pre">Greeting</span></code>. The domains of the HR assistant blueprint correspond to the categories of questions that could be asked.</p>
 <p>The full list of intents for all domains is illustrated below.</p>
-<p>The <code class="docutils literal"><span class="pre">General</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">General</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">get_info</span></code> — User wants specific information about an employee (e.g. state, department, position, etc)</li>
-<li><code class="docutils literal"><span class="pre">get_aggregate</span></code> — User wants an average, total, or percentage of employees that meet certain criteria</li>
-<li><code class="docutils literal"><span class="pre">get_employees</span></code> — User wants a list of employees who meet certain criteria</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_info</span></code> — User wants specific information about an employee (e.g. state, department, position, etc)</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_aggregate</span></code> — User wants an average, total, or percentage of employees that meet certain criteria</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_employees</span></code> — User wants a list of employees who meet certain criteria</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">Salary</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Salary</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">get_salary</span></code> — User wants the salary of a specific employee</li>
-<li><code class="docutils literal"><span class="pre">get_salary_aggregate</span></code> — User wants an average, total, or percentage specifically related to salary</li>
-<li><code class="docutils literal"><span class="pre">get_salary_employees</span></code> — User wants a list of employees who meet certain criteria that include salary</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_salary</span></code> — User wants the salary of a specific employee</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_salary_aggregate</span></code> — User wants an average, total, or percentage specifically related to salary</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_salary_employees</span></code> — User wants a list of employees who meet certain criteria that include salary</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">Date</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Date</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">get_date</span></code> — User wants the birth date, hiring date, or firing date of an employee</li>
-<li><code class="docutils literal"><span class="pre">get_date_range_aggregate</span></code> — User wants an average, total, or percentage filtered on a date range</li>
-<li><code class="docutils literal"><span class="pre">get_date_range_employees</span></code> — User wants a list of employees who meet certain criteria filtered on a date range</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_date</span></code> — User wants the birth date, hiring date, or firing date of an employee</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_date_range_aggregate</span></code> — User wants an average, total, or percentage filtered on a date range</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_date_range_employees</span></code> — User wants a list of employees who meet certain criteria filtered on a date range</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">Hierarchy</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Hierarchy</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">get_hierarchy</span></code> — User wants to know who an employee works for or who works for an employee</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_hierarchy</span></code> — User wants to know who an employee works for or who works for an employee</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">Unsupported</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Unsupported</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">unsupported</span></code> — User has provided a query outside the scope of the HR assistant</li>
+<li><code class="docutils literal notranslate"><span class="pre">unsupported</span></code> — User has provided a query outside the scope of the HR assistant</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">Greeting</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Greeting</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">greet</span></code> — Greet the user and inform them of the assistant’s functionality</li>
-<li><code class="docutils literal"><span class="pre">exit</span></code> — Say bye to the user</li>
+<li><code class="docutils literal notranslate"><span class="pre">greet</span></code> — Greet the user and inform them of the assistant's functionality</li>
+<li><code class="docutils literal notranslate"><span class="pre">exit</span></code> — Say bye to the user</li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">FAQ</span></code> domain supports the following intents:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">FAQ</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">all_topics</span></code> - User asks a specific policy question</li>
-<li><code class="docutils literal"><span class="pre">generic</span></code> - User indicates they want to ask a policy question</li>
+<li><code class="docutils literal notranslate"><span class="pre">all_topics</span></code> - User asks a specific policy question</li>
+<li><code class="docutils literal notranslate"><span class="pre">generic</span></code> - User indicates they want to ask a policy question</li>
 </ul>
 </div></blockquote>
-<p>There are two types of entities in MindMeld: <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">System Entities</span></a> and <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">Custom Entities</span></a>. System entities are pre-defined in MindMeld. Examples include <code class="docutils literal"><span class="pre">sys_temperature</span></code>, <code class="docutils literal"><span class="pre">sys_time</span></code>, and <code class="docutils literal"><span class="pre">sys_interval</span></code>. Custom entities are defined by the developers of each application. Within each entity folder, the file <code class="docutils literal"><span class="pre">gazetteer.txt</span></code> contains the full list of values for each custom entity.</p>
+<p>There are two types of entities in MindMeld: <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">System Entities</span></a> and <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">Custom Entities</span></a>. System entities are pre-defined in MindMeld. Examples include <code class="docutils literal notranslate"><span class="pre">sys_temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">sys_time</span></code>, and <code class="docutils literal notranslate"><span class="pre">sys_interval</span></code>. Custom entities are defined by the developers of each application. Within each entity folder, the file <code class="docutils literal notranslate"><span class="pre">gazetteer.txt</span></code> contains the full list of values for each custom entity.</p>
 <p>HR assistant defines and uses the following custom entities for each of its domains, which are grouped by their purpose below:</p>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="first docutils">
 <dt>User Information</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">state</span></code>: detects the state referred to, for example: “is {mia|name} from {CA|state}?”</li>
-<li><code class="docutils literal"><span class="pre">age</span></code>: detects whether the user is asking about the age of an employee. For example: “tell me the {age of|age} {mia|name}”</li>
-<li><code class="docutils literal"><span class="pre">sex</span></code>: detects the gender of an employee. For example: “is {Ivan|name} {male|sex}?”</li>
-<li><code class="docutils literal"><span class="pre">maritaldesc</span></code>: detects the marital status of an employee. For example: “is {Ivan|name} a {married|maritaldesc} man?”</li>
-<li><code class="docutils literal"><span class="pre">citizendesc</span></code>: detects the citizenship status of an employee. For example: “is {Nan|name} a {us citizen|citizendesc}?”</li>
-<li><code class="docutils literal"><span class="pre">racedesc</span></code>: detects the race of an employee. For example: “is {Mia|name} {multiracial|racedesc}?”</li>
-<li><code class="docutils literal"><span class="pre">reason_for_termination</span></code>: detects a reason for termination for an employee. For example: “Did {Mia|name} leave because of {medical issues|reason_for_termination}?”</li>
-<li><code class="docutils literal"><span class="pre">department</span></code>: detects the department of an employee. For example: “is {Nan|name} working in {sales|department}?”</li>
-<li><code class="docutils literal"><span class="pre">position</span></code>: detects the position of an employee. For example: “Is {Ivan|name} a {software engineer|position}?”</li>
-<li><code class="docutils literal"><span class="pre">manager</span></code>: detects whether the user is asking for hierarchy information. For example: “Who is the {supervisor|manager} for {Mia|name}?”</li>
-<li><code class="docutils literal"><span class="pre">employee_source</span></code>: detects how an employee heard about the company. For example: “Did {mia|name} find out about us from an {information session|racedesc}?”</li>
-<li><code class="docutils literal"><span class="pre">performance_score</span></code>: detects the performance score of an employee. For example: “Is {ivan|name} currently {performing poorly|reason_for_termination} at the company?”</li>
-<li><code class="docutils literal"><span class="pre">money</span></code>: detects whether the user is referring to salary information. For example: “What is {ivan|name} {earning|money}”</li>
-<li><code class="docutils literal"><span class="pre">dob</span></code>: detects whether the user is referring to date of birth. For example: “When was {Nan|name} {born|dob}?”</li>
-<li><code class="docutils literal"><span class="pre">employment_action</span></code>: detects whether the user is referring to hiring or firing an employee. For example: “What was {ivan|name}’s {date of termination|employment_action}”</li>
+<li><code class="docutils literal notranslate"><span class="pre">state</span></code>: detects the state referred to, for example: &quot;is {mia|name} from {CA|state}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">age</span></code>: detects whether the user is asking about the age of an employee. For example: &quot;tell me the {age of|age} {mia|name}&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">sex</span></code>: detects the gender of an employee. For example: &quot;is {Ivan|name} {male|sex}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">maritaldesc</span></code>: detects the marital status of an employee. For example: &quot;is {Ivan|name} a {married|maritaldesc} man?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">citizendesc</span></code>: detects the citizenship status of an employee. For example: &quot;is {Nan|name} a {us citizen|citizendesc}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">racedesc</span></code>: detects the race of an employee. For example: &quot;is {Mia|name} {multiracial|racedesc}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">reason_for_termination</span></code>: detects a reason for termination for an employee. For example: &quot;Did {Mia|name} leave because of {medical issues|reason_for_termination}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">department</span></code>: detects the department of an employee. For example: &quot;is {Nan|name} working in {sales|department}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">position</span></code>: detects the position of an employee. For example: &quot;Is {Ivan|name} a {software engineer|position}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">manager</span></code>: detects whether the user is asking for hierarchy information. For example: &quot;Who is the {supervisor|manager} for {Mia|name}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">employee_source</span></code>: detects how an employee heard about the company. For example: &quot;Did {mia|name} find out about us from an {information session|racedesc}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">performance_score</span></code>: detects the performance score of an employee. For example: &quot;Is {ivan|name} currently {performing poorly|reason_for_termination} at the company?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">money</span></code>: detects whether the user is referring to salary information. For example: &quot;What is {ivan|name} {earning|money}&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">dob</span></code>: detects whether the user is referring to date of birth. For example: &quot;When was {Nan|name} {born|dob}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">employment_action</span></code>: detects whether the user is referring to hiring or firing an employee. For example: &quot;What was {ivan|name}'s {date of termination|employment_action}&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -401,10 +393,10 @@ In addition, they can also use the assistant to answer frequently asked question
 <li><dl class="first docutils">
 <dt>Compare/Functions</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">comparator</span></code>: detects comparison keywords (more than, less than, equal to, between). For example: “is {mia|name} {earning|money} {more than} {ivan|name}?”</li>
-<li><code class="docutils literal"><span class="pre">extreme</span></code>: detects extreme keywords (highest, oldest, lowest, youngest). For example: “who is the {oldest|extreme} employee?”</li>
-<li><code class="docutils literal"><span class="pre">date_compare</span></code>: detects date comparision key words (prior to, after). For example: “Was {Ivan|name} {born|dob} {prior to|date_compare} {1990|sys_time}?”</li>
-<li><code class="docutils literal"><span class="pre">function</span></code>: detects a function type (percent, sum, average, count). For example: “What {percent|function} of employees are {women|sex}?”</li>
+<li><code class="docutils literal notranslate"><span class="pre">comparator</span></code>: detects comparison keywords (more than, less than, equal to, between). For example: &quot;is {mia|name} {earning|money} {more than} {ivan|name}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">extreme</span></code>: detects extreme keywords (highest, oldest, lowest, youngest). For example: &quot;who is the {oldest|extreme} employee?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">date_compare</span></code>: detects date comparision key words (prior to, after). For example: &quot;Was {Ivan|name} {born|dob} {prior to|date_compare} {1990|sys_time}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">function</span></code>: detects a function type (percent, sum, average, count). For example: &quot;What {percent|function} of employees are {women|sex}?&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -412,30 +404,30 @@ In addition, they can also use the assistant to answer frequently asked question
 <li><dl class="first docutils">
 <dt>Custom Time Entities</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">time_interval</span></code>: detects a decade (1980’s, 80s, eighties). For example: “{how many|function} employees were {born|dob} in the {eighties|time_interval}?”</li>
-<li><code class="docutils literal"><span class="pre">time_recur</span></code>: detects a recurring time interval (yearly, monthly, weekly). For example: “what does {ivan|name} {make|money} {monthly|time_recur}?”</li>
+<li><code class="docutils literal notranslate"><span class="pre">time_interval</span></code>: detects a decade (1980's, 80s, eighties). For example: &quot;{how many|function} employees were {born|dob} in the {eighties|time_interval}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">time_recur</span></code>: detects a recurring time interval (yearly, monthly, weekly). For example: &quot;what does {ivan|name} {make|money} {monthly|time_recur}?&quot;</li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 </div></blockquote>
-<p>HR assistant uses three system entities: <code class="docutils literal"><span class="pre">sys_time</span></code> (time), <code class="docutils literal"><span class="pre">sys_amount-of-money</span></code> (money), <code class="docutils literal"><span class="pre">sys_number</span></code> (number). Some examples for annotation with system entities: “{How many|function} employees were {born|dob} in {2009|sys_time}?” and “what {fraction|function} of employees {make|money} {less than|comparator} {69 grand|sys_amount-of-money}?”.</p>
+<p>HR assistant uses three system entities: <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> (time), <code class="docutils literal notranslate"><span class="pre">sys_amount-of-money</span></code> (money), <code class="docutils literal notranslate"><span class="pre">sys_number</span></code> (number). Some examples for annotation with system entities: &quot;{How many|function} employees were {born|dob} in {2009|sys_time}?&quot; and &quot;what {fraction|function} of employees {make|money} {less than|comparator} {69 grand|sys_amount-of-money}?&quot;.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
 <p class="last">To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)</p>
 </div>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;hr_assistant&#39;);&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;hr_assistant&#39;);&quot;</span>
 </pre></div>
 </div>
-<p>This should create a MindMeld project folder called <code class="docutils literal"><span class="pre">hr_assistant</span></code> in your current directory with the following structure:</p>
+<p>This should create a MindMeld project folder called <code class="docutils literal notranslate"><span class="pre">hr_assistant</span></code> in your current directory with the following structure:</p>
 <a class="reference internal image-reference" href="../_images/hr_assistant_directory.png"><img alt="../_images/hr_assistant_directory.png" class="align-center" src="../_images/hr_assistant_directory.png" style="width: 250px;" /></a>
 </div>
 <div class="section" id="dialogue-states">
 <h2>4. Dialogue States<a class="headerlink" href="#dialogue-states" title="Permalink to this headline">¶</a></h2>
 <p>Dialogue state logic can be arbitrarily complex. Simple dialogue state handlers just return a canned text response, while sophisticated ones can call third party APIs, calculate state transitions, and return complex responses.</p>
-<p>Let’s begin by looking at some of the dialogue states for the intents in the <code class="docutils literal"><span class="pre">general</span></code> domain:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;age&#39;</span><span class="p">)</span>
+<p>Let's begin by looking at some of the dialogue states for the intents in the <code class="docutils literal notranslate"><span class="pre">general</span></code> domain:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;age&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_info_age</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -456,9 +448,9 @@ In addition, they can also use the assistant to answer frequently asked question
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>Observe that the same intent has multiple dialogue states that specify a <code class="docutils literal"><span class="pre">has_entity</span></code> field, except for the last case which serves as the default case. In other words, Mindmeld will feed the request to the dialogue state handler if there is a match between an entity found in the user query and the entity that the dialogue state handler accepts. If none of the entities are found, Mindmeld will default to the last case that does not specify an entity. This is where the system can follow up with the user and ask for any information needed to complete the query.</p>
-<p>We can see this paradigm followed in the domain <code class="docutils literal"><span class="pre">salary</span></code> as well:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;time_recur&#39;</span><span class="p">)</span>
+<p>Observe that the same intent has multiple dialogue states that specify a <code class="docutils literal notranslate"><span class="pre">has_entity</span></code> field, except for the last case which serves as the default case. In other words, Mindmeld will feed the request to the dialogue state handler if there is a match between an entity found in the user query and the entity that the dialogue state handler accepts. If none of the entities are found, Mindmeld will default to the last case that does not specify an entity. This is where the system can follow up with the user and ask for any information needed to complete the query.</p>
+<p>We can see this paradigm followed in the domain <code class="docutils literal notranslate"><span class="pre">salary</span></code> as well:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;time_recur&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_salary_for_interval</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -474,17 +466,17 @@ In addition, they can also use the assistant to answer frequently asked question
 <p class="last">Analyze the way the HR assistant blueprint uses this pattern <strong>multiple dialogue states for multiple intents</strong>. Why this pattern used instead of another?</p>
 </div>
 <p>Sometimes a dialogue state handler needs to be aware of the context from a previous state. This happens in the <strong>follow-up request pattern</strong>. Consider this conversational interaction:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>User: Can you tell me about daniel?
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>User: Can you tell me about daniel?
 App: What would you like to know about Daniel Davis?    <span class="c1"># get_info_default</span>
 User: is he married
 App: Daniel Davis is Single                             <span class="c1"># get_info_maritaldesc</span>
 </pre></div>
 </div>
-<p>Observe that the first request leaves out some required information — the type of user information to query. Therefore, in the response, the application must ask the user for the missing information. Most importantly, the app needs to “remember” context from the first request (in this case the person that the user is referring to) to understand the user’s second request, in which the user specifies the information that was missing.</p>
+<p>Observe that the first request leaves out some required information — the type of user information to query. Therefore, in the response, the application must ask the user for the missing information. Most importantly, the app needs to &quot;remember&quot; context from the first request (in this case the person that the user is referring to) to understand the user's second request, in which the user specifies the information that was missing.</p>
 <p>Here is how the HR assistant blueprint implements this pattern:</p>
 <ol class="arabic simple">
-<li>Define the <code class="docutils literal"><span class="pre">get_info</span></code> intent</li>
-<li>Define the <code class="docutils literal"><span class="pre">get_info</span></code> state (default that does not include a <code class="docutils literal"><span class="pre">has_entity</span></code>)</li>
+<li>Define the <code class="docutils literal notranslate"><span class="pre">get_info</span></code> intent</li>
+<li>Define the <code class="docutils literal notranslate"><span class="pre">get_info</span></code> state (default that does not include a <code class="docutils literal notranslate"><span class="pre">has_entity</span></code>)</li>
 </ol>
 <p>Here are the intents and states in the HR assistant blueprint, as defined in the application dialogue handler modules in the blueprint folder.</p>
 <table border="1" class="docutils">
@@ -500,108 +492,108 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_age</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_age</span></code></td>
 <td>Get the age of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_state</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_state</span></code></td>
 <td>Get the state of an employee</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_maritaldesc</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_maritaldesc</span></code></td>
 <td>Get the marital status of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_citizendesc</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_citizendesc</span></code></td>
 <td>Get the citizenship status of an employee</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_racedesc</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_racedesc</span></code></td>
 <td>Get the race of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_performance_score</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_performance_score</span></code></td>
 <td>Get the performance score of an employee</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_rft</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_rft</span></code></td>
 <td>Get the reason for termination of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_employee_source</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_employee_source</span></code></td>
 <td>Get how an employee heard of the company</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_position</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_position</span></code></td>
 <td>Get the position of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_employment_status</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_employment_status</span></code></td>
 <td>Get the employment status of an employee</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_dept</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_dept</span></code></td>
 <td>Get the department that an employee is in</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_info</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_info_default</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_info</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_info_default</span></code></td>
 <td>Clarify the type of info requested of an employee</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_aggregate</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_aggregate</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_aggregate</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_aggregate</span></code></td>
 <td>Get aggregate information requested</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_employees</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_employees</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_employees</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_employees</span></code></td>
 <td>Get employees that meet a certain criteria</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_salary</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_salary</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_salary</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_salary</span></code></td>
 <td>Get the salary of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_salary_aggregate</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_salary_aggregate</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_salary_aggregate</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_salary_aggregate</span></code></td>
 <td>Get aggregate salary related information</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_salary_employees</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_salary_employees</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_salary_employees</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_salary_employees</span></code></td>
 <td>Get employees that meet a salary criteria</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_date</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_date</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_date</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_date</span></code></td>
 <td>Get employees within a date range</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_date_range_aggregate</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_date_range_aggregate</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_date_range_aggregate</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_date_range_aggregate</span></code></td>
 <td>Aggregate info of employees within a date range</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">get_date_range_employees</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_date_range_employees</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">get_date_range_employees</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_date_range_employees</span></code></td>
 <td>Get employees within a date range</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">get_hierarchy</span></code></td>
-<td><code class="docutils literal"><span class="pre">get_hierarchy</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">get_hierarchy</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">get_hierarchy</span></code></td>
 <td>Get manager information of an employee</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">unsupported</span></code></td>
-<td><code class="docutils literal"><span class="pre">unsupported</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">unsupported</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">unsupported</span></code></td>
 <td>Handle unsupported query by prompting user</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">greet</span></code></td>
-<td><code class="docutils literal"><span class="pre">greet</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">greet</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">greet</span></code></td>
 <td>Greet the user and describe functionality</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">exit</span></code></td>
-<td><code class="docutils literal"><span class="pre">exit</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">exit</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">exit</span></code></td>
 <td>Say bye to the user</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">generic</span></code></td>
-<td><code class="docutils literal"><span class="pre">generic</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">generic</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">generic</span></code></td>
 <td>Prompt the user for a specific policy question</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">all_topics</span></code></td>
-<td><code class="docutils literal"><span class="pre">all_topics</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">all_topics</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">all_topics</span></code></td>
 <td>Reply with the answer to the asked policy question</td>
 </tr>
 </tbody>
@@ -612,12 +604,12 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <p>The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from <a class="reference external" href="https://www.kaggle.com/rhuebner/human-resources-data-set">Kaggle</a> and frequently asked human resources questions from <cite>UC Berkeley &lt;https://hr.berkeley.edu/faq-page&gt;</cite>. The knowledge base comprises of two indices in <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">user_data</span></code> — information about employees</li>
-<li><code class="docutils literal"><span class="pre">faq_data</span></code> - frequently asked question answer pairs</li>
+<li><code class="docutils literal notranslate"><span class="pre">user_data</span></code> — information about employees</li>
+<li><code class="docutils literal notranslate"><span class="pre">faq_data</span></code> - frequently asked question answer pairs</li>
 </ul>
 </div></blockquote>
-<p>For example, here’s the knowledge base entry in the <code class="docutils literal"><span class="pre">user_data</span></code> index for the employee “Mia Brown”:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+<p>For example, here's the knowledge base entry in the <code class="docutils literal notranslate"><span class="pre">user_data</span></code> index for the employee &quot;Mia Brown&quot;:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;emp_name&quot;</span><span class="o">:</span> <span class="s2">&quot;Brown, Mia&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">1103024456</span><span class="p">,</span>
     <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="s2">&quot;MA&quot;</span><span class="p">,</span>
@@ -642,21 +634,21 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Here’s another example with a knowledge base entry in the <code class="docutils literal"><span class="pre">faq_data</span></code> index:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+<p>Here's another example with a knowledge base entry in the <code class="docutils literal notranslate"><span class="pre">faq_data</span></code> index:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="s2">&quot;hrfaq24&quot;</span><span class="p">,</span>
     <span class="s2">&quot;question&quot;</span><span class="o">:</span> <span class="s2">&quot;What is the performance cycle?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;answer&quot;</span><span class="o">:</span> <span class="s2">&quot;The intent of the performance cycle is to identify the key parts of each employee&#39;s job, identify what it looks like when that is done well (meets your expectations as a manager), and how both you as manager and your employee will know when that is achieved (measurements).Phase 1 - Planning:  Creating goals and expectations between the employee and manager for the current year. Phase 2 - Check-Ins:  Giving ongoing feedback throughout the year; identifying acomplishments, areas for improvement and adjusting the goals/expectations as necessary. Phase 3 - Review:  Reviewing the year at the end of the performance period.&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Assuming that you have Elasticsearch installed, running the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> command described above should build the knowledge base for the HR assistant app by creating the index and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to query the indexes.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<p>Assuming that you have Elasticsearch installed, running the <code class="xref py py-func docutils literal notranslate"><span class="pre">blueprint()</span></code> command described above should build the knowledge base for the HR assistant app by creating the index and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to query the indexes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;user_data&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &#39;rft&#39;: &#39;N/A - still employed&#39;,</span>
 <span class="go">   &#39;performance_score&#39;: &#39;N/A- too early to review&#39;,</span>
 <span class="go">   &#39;citizendesc&#39;: &#39;US Citizen&#39;,</span>
@@ -714,8 +706,8 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line">“What kinds of questions would you ask a smart HR assistant</div>
-<div class="line">that has access to an HR database?”</div>
+<div class="line">&quot;What kinds of questions would you ask a smart HR assistant</div>
+<div class="line">that has access to an HR database?&quot;</div>
 </div>
 </td>
 </tr>
@@ -730,13 +722,13 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">get_info</span></code> intent (<code class="docutils literal"><span class="pre">general</span></code> domain):</div>
-<div class="line">“How would you ask for an employee’s information such as state,</div>
-<div class="line">position, department, etc?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">get_info</span></code> intent (<code class="docutils literal notranslate"><span class="pre">general</span></code> domain):</div>
+<div class="line">&quot;How would you ask for an employee's information such as state,</div>
+<div class="line">position, department, etc?&quot;</div>
 <div class="line"><br /></div>
-<div class="line"><code class="docutils literal"><span class="pre">get_salary</span></code> intent (<code class="docutils literal"><span class="pre">salary</span></code> domain):</div>
-<div class="line">“How would you ask for the salary</div>
-<div class="line">of an employee?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">get_salary</span></code> intent (<code class="docutils literal notranslate"><span class="pre">salary</span></code> domain):</div>
+<div class="line">&quot;How would you ask for the salary</div>
+<div class="line">of an employee?&quot;</div>
 </div>
 </td>
 </tr>
@@ -746,8 +738,8 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">get_info</span></code>: “Annotate all occurrences of</div>
-<div class="line"><code class="docutils literal"><span class="pre">name</span></code> and other user info entities in the given query”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">get_info</span></code>: &quot;Annotate all occurrences of</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">name</span></code> and other user info entities in the given query&quot;</div>
 </div>
 </td>
 </tr>
@@ -769,9 +761,9 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">state</span></code> entity: “Enumerate a list of state names”</div>
-<div class="line"><code class="docutils literal"><span class="pre">department</span></code> entity: “What are some names of</div>
-<div class="line">departments at the company?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">state</span></code> entity: &quot;Enumerate a list of state names&quot;</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">department</span></code> entity: &quot;What are some names of</div>
+<div class="line">departments at the company?&quot;</div>
 </div>
 </td>
 </tr>
@@ -780,28 +772,28 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <p>In summary, the process is this:</p>
 <ol class="arabic simple">
 <li>Start with an exploratory data generation process, collecting varied examples of how the end user would interact with the app.</li>
-<li>Cluster the data into different domains based on category. For example, the HR Assistant application has to answer questions regarding general information, salary, date filters, and hierarchy so we divide these areas into the following domains: <code class="docutils literal"><span class="pre">general</span></code>, <code class="docutils literal"><span class="pre">salary</span></code>, <code class="docutils literal"><span class="pre">date</span></code>, <code class="docutils literal"><span class="pre">hierarchy</span></code>, <code class="docutils literal"><span class="pre">unsupported</span></code> and <code class="docutils literal"><span class="pre">greeting</span></code>.</li>
+<li>Cluster the data into different domains based on category. For example, the HR Assistant application has to answer questions regarding general information, salary, date filters, and hierarchy so we divide these areas into the following domains: <code class="docutils literal notranslate"><span class="pre">general</span></code>, <code class="docutils literal notranslate"><span class="pre">salary</span></code>, <code class="docutils literal notranslate"><span class="pre">date</span></code>, <code class="docutils literal notranslate"><span class="pre">hierarchy</span></code>, <code class="docutils literal notranslate"><span class="pre">unsupported</span></code> and <code class="docutils literal notranslate"><span class="pre">greeting</span></code>.</li>
 <li>Once we establish a clear domain-intent-entity-role hierarchy, generate labeled data for each component in the hierarchy.</li>
 </ol>
-<p>The <code class="docutils literal"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal"><span class="pre">entities</span></code> directory contains the data for entity resolution. Directories are at root level in the blueprint folder.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal notranslate"><span class="pre">entities</span></code> directory contains the data for entity resolution. Directories are at root level in the blueprint folder.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
 <ul class="last simple">
 <li>Read <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about <a class="reference internal" href="../userguide/nlp.html"><span class="doc">NLP model evaluation and error analysis</span></a> in the user guide.</li>
-<li>To train NLP models for your own HR assistant application, you can start by reusing the blueprint data for generic intents like <code class="docutils literal"><span class="pre">get_info</span></code> and <code class="docutils literal"><span class="pre">get_salary</span></code>. If you have more information in your HR database then you can create new intents and domains to include the new functionality.</li>
+<li>To train NLP models for your own HR assistant application, you can start by reusing the blueprint data for generic intents like <code class="docutils literal notranslate"><span class="pre">get_info</span></code> and <code class="docutils literal notranslate"><span class="pre">get_salary</span></code>. If you have more information in your HR database then you can create new intents and domains to include the new functionality.</li>
 </ul>
 </div>
 </div>
 <div class="section" id="training-the-nlp-classifiers">
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
-<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld’s default machine learning settings.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;./hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Loading raw queries from file hr_assistant/domains/date/get_date/train.txt</span>
 <span class="go">Loading raw queries from file hr_assistant/domains/date/get_date_range_aggregate/train.txt</span>
 <span class="go">Loading raw queries from file hr_assistant/domains/date/get_date_range_employees/train.txt</span>
@@ -824,11 +816,11 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <p class="first admonition-title">Tip</p>
 <p class="last">During active development, it helps to increase the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">MindMeld logging level</span></a> to better understand what is happening behind the scenes. All code snippets here assume that logging level is set to verbose.</p>
 </div>
-<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;is Mia brown in the sales department?&quot;</span><span class="p">)</span>
+<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;is Mia brown in the sales department?&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;is Mia brown in the sales department?&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;is Mia brown in the sales department?&#39;,</span>
 <span class="go"> &#39;domain&#39;: &#39;general&#39;,</span>
 <span class="go"> &#39;intent&#39;: &#39;get_info&#39;,</span>
 <span class="go"> &#39;entities&#39;: [{&#39;text&#39;: &#39;Mia brown&#39;,</span>
@@ -858,17 +850,17 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom hr assistant data, you may find that the default settings may not be optimal and you can get better accuracy by individually optimizing each of the NLP components.</p>
 <p>Because the HR assistant app has five domains and over twenty intents, the classifiers need a fair amount of fine-tuning.</p>
 <p>Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the intent classifier.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
 <span class="go"> &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
@@ -877,22 +869,22 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier’s <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. Intent classifer and role classifier examples follow.</p>
+<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. Intent classifer and role classifier examples follow.</p>
 </div>
 <div class="section" id="experiment-with-the-intent-classifiers">
 <h3>Experiment with the intent classifiers<a class="headerlink" href="#experiment-with-the-intent-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>We can change the feature extraction settings to use bag of trigrams in addition to the default bag of words:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;salary&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;salary&#39;</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 5 splits</span>
 <span class="go">Best accuracy: 97.20%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 0.9612578616352201, 1: 1.0065860215053766, 2: 1.0362745098039214}, &#39;fit_intercept&#39;: True}</span>
 </pre></div>
 </div>
 <p>We can also change the model for the intent classifier to Support Vector Machine (SVM) classifier, which works well for some datasets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
    <span class="s1">&#39;kernel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">]</span>
 <span class="p">}</span>
@@ -907,7 +899,7 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 <span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;svm&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">param_selection_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;salary&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;salary&#39;</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
 <span class="go">Best accuracy: 98.00%, params: {&#39;C&#39;: 0.5, &#39;kernel&#39;: &#39;linear&#39;}</span>
 </pre></div>
@@ -920,8 +912,8 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 <div class="section" id="inspect-the-configuration">
 <h3>Inspect the configuration<a class="headerlink" href="#inspect-the-configuration" title="Permalink to this headline">¶</a></h3>
-<p>The application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named <code class="docutils literal"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code> and <code class="docutils literal"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code>, respectively; other dictionaries include <code class="docutils literal"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code> and <code class="docutils literal"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>. If no custom model configuration is added to <code class="docutils literal"><span class="pre">config.py</span></code> file, MindMeld uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">INTENT_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>The application configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named <code class="docutils literal notranslate"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code> and <code class="docutils literal notranslate"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code>, respectively; other dictionaries include <code class="docutils literal notranslate"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code> and <code class="docutils literal notranslate"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>. If no custom model configuration is added to <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file, MindMeld uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INTENT_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span>
@@ -956,20 +948,20 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 <div class="section" id="parser-configuration">
 <h2>8. Parser Configuration<a class="headerlink" href="#parser-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The relationships between entities in the HR assistant queries are simple ones. For example, in the annotated query <code class="docutils literal"><span class="pre">is</span> <span class="pre">{mia|name}</span> <span class="pre">{married|maritaldesc}?</span></code>, the <code class="docutils literal"><span class="pre">maritaldesc</span></code> entity is self-sufficient, in that it is not described by any other entity.</p>
+<p>The relationships between entities in the HR assistant queries are simple ones. For example, in the annotated query <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">{mia|name}</span> <span class="pre">{married|maritaldesc}?</span></code>, the <code class="docutils literal notranslate"><span class="pre">maritaldesc</span></code> entity is self-sufficient, in that it is not described by any other entity.</p>
 <p>If you extended the app to support queries with more complex entity relationships, it would be necessary to specify <em>entity groups</em> and configure the parser accordingly. For more about entity groups and parser configurations, see the <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> chapter of the User Guide.</p>
 <p>Since we do not have entity groups in the HR assistant app, we do not need a parser configuration.</p>
 </div>
 <div class="section" id="using-the-question-answerer">
 <h2>9. Using the Question Answerer<a class="headerlink" href="#using-the-question-answerer" title="Permalink to this headline">¶</a></h2>
 <p>The <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. In the case of an HR assistant that intelligently retrieves information from a knowledge base of employee information or policy questions, a question answerer is essential. Other than the unsupported intent, all of the intents in the HR Assistant make use of the Question Answerer.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">users</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;user_data&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="p">[</span><span class="n">user</span><span class="p">[</span><span class="s1">&#39;emp_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> &quot;Singh, Nan&quot;,</span>
 <span class="go"> &quot;Simard, Kramer&quot;,</span>
 <span class="go"> &quot;Clayton, Rick&quot;</span>
@@ -978,7 +970,7 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 <p>MindMeld would supports filtering the results (For example, we can search for employees that are male, in the sales department, etc.) See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.</p>
 <p>In the case that we are trying to filter on multiple non-numeric entities, we can do so by passing in a dictionary that contains a key and value pair. An example of this is shown in the helper function for the HR Assistant below.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_resolve_categorical_entities</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_resolve_categorical_entities</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  This function retrieves all categorical entities as listed below and filters the knowledge base</span>
 <span class="sd">  using these entities as filters. The final search object containing the shortlisted employee data</span>
@@ -1008,28 +1000,28 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
   <span class="k">return</span> <span class="n">qa</span><span class="p">,</span> <span class="n">size</span>
 </pre></div>
 </div>
-<p>For the <code class="docutils literal"><span class="pre">faq</span></code> domain, given the user query, the Question Answerer has to retrieve information from a knowledge base that consists of long-form text in the form of question-answer pairs. See <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> to learn more about how MindMeld retrieves and ranks unstructured data.
+<p>For the <code class="docutils literal notranslate"><span class="pre">faq</span></code> domain, given the user query, the Question Answerer has to retrieve information from a knowledge base that consists of long-form text in the form of question-answer pairs. See <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> to learn more about how MindMeld retrieves and ranks unstructured data.
 In the HR blueprint, we use both question and answer field to rank the KB entries. Depending on the domain and coverage of data, you may want to experiment with ranking on multiple fields.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="s1">&#39;how are overtime hours determined?&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;question&#39;: &#39;How is my overtime compensation calculated?&#39;,</span>
 <span class="go"> &#39;answer&#39;: &#39;Overtime is paid at the rate of one and one-half times an employee’s regular rate of pay for all hours worked in excess of forty (40) hours in a standard work week. “Hours worked” refers to the amount of time actually worked in a standard work week. Paid time off for sick leave, vacation, or holidays is not included in hours worked for the determination of overtime. Overtime hours and compensation is based on calculation using the above rate.&#39;,</span>
 <span class="go"> &#39;id&#39;: &#39;hrfaq9&#39;</span>
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;is there an online course on how to set goals?&#39;</span>
 <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="n">query</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;faq_data&#39;</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">answer</span><span class="o">=</span><span class="n">query</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;question&#39;: &#39;How do I set goals?&#39;,</span>
 <span class="go"> &#39;answer&#39;: &#39;Meet with your employee. Identify and agree on major pieces of the job. Use that list to determine performance for the year. Start the next period by identifying the major pieces of the job, what success looks like, and how that might be measured.&#39;,</span>
 <span class="go"> &#39;id&#39;: &#39;hrfaq29&#39;</span>
@@ -1051,16 +1043,16 @@ In the HR blueprint, we use both question and answer field to rank the KB entrie
 </div>
 <div class="section" id="testing-and-deployment">
 <h2>10. Testing and Deployment<a class="headerlink" href="#testing-and-deployment" title="Permalink to this headline">¶</a></h2>
-<p>Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, perform an end-to-end test of the app using the <code class="xref py py-class docutils literal"><span class="pre">Conversation</span></code> class.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<p>Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, perform an end-to-end test of the app using the <code class="xref py py-class docutils literal notranslate"><span class="pre">Conversation</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;./hr_assistant&#39;</span><span class="p">)</span>
 <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;What is Elisa&#39;s marital status&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Elisa Bramante is Single&#39;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Elisa Bramante is Single&#39;]</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">say()</span></code> method:</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">say()</span></code> method:</p>
 <blockquote>
 <div><ul class="simple">
 <li>packages the input text in a user request object</li>
@@ -1070,7 +1062,7 @@ In the HR blueprint, we use both question and answer field to rank the KB entrie
 </div></blockquote>
 <p>In the above example, we requested information about a particular employee and the app responded, as expected, by identifying the employee referenced by just the first name and the type of information requested about the employee.</p>
 <p>Try a multi-turn dialogue:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;hr_assistant&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Tell me about Mia Brown&#39;</span><span class="p">)</span>
 <span class="go">[&#39;What information would you like to know about Mia Brown?&#39;, &#39;Listening...&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Who is her manager?&quot;</span><span class="p">)</span>
@@ -1078,7 +1070,7 @@ In the HR blueprint, we use both question and answer field to rank the KB entrie
 </pre></div>
 </div>
 <p>If the user goes off track, or presents a query that is out of the scope of the assistant, the app is able to recognize this and prompt the user back to what is supported. Below is an example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Can you give me a million dollars please?&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Can you give me a million dollars please?&quot;</span><span class="p">)</span>
 <span class="go">[&quot;Hmmm, I don&#39;t quite understand, you can ask me something like &#39;What is the average salary for women?&#39;&quot;,</span>
 <span class="go">&#39;Listening...&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;What is nan singh&#39;s hourly salary?&quot;</span><span class="p">)</span>
@@ -1086,10 +1078,10 @@ In the HR blueprint, we use both question and answer field to rank the KB entrie
 </pre></div>
 </div>
 <p>Alternatively, enter conversation mode directly from the command-line.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -m hr_assistant converse</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m hr_assistant converse</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">You: Percent of employees earning less than 20 an hour?</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">You: Percent of employees earning less than 20 an hour?</span>
 <span class="go">App: Of the total employees, the percentage that meet your criteria is 29.0</span>
 </pre></div>
 </div>
@@ -1112,7 +1104,7 @@ In the HR blueprint, we use both question and answer field to rank the KB entrie
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../userguide/getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="banking.html" class="btn btn-neutral float-right" title="Banking Assistant" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="home_assistant.html" class="btn btn-neutral float-left" title="Home Assistant" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

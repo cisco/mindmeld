@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.app_manager module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.app_manager module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.app_manager">
@@ -275,42 +267,42 @@
 <dl class="class">
 <dt id="mindmeld.app_manager.ApplicationManager">
 <em class="property">class </em><code class="descclassname">mindmeld.app_manager.</code><code class="descname">ApplicationManager</code><span class="sig-paren">(</span><em>app_path</em>, <em>nlp=None</em>, <em>question_answerer=None</em>, <em>es_host=None</em>, <em>request_class=None</em>, <em>responder_class=None</em>, <em>preprocessor=None</em>, <em>async_mode=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/app_manager.html#ApplicationManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The Application Manager is the core orchestrator of the MindMeld platform. It receives     a client request, and processes that request by passing it through all the necessary     components of MindMeld. Once processing is complete, the application manager returns     the final response back to the client.</p>
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.async_mode">
 <code class="descname">async_mode</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.async_mode" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Whether the application is asynchronous or synchronous.</p>
+<dd><p><em>bool</em> -- Whether the application is asynchronous or synchronous.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.nlp">
 <code class="descname">nlp</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.nlp" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>NaturalLanguageProcessor</em> – The natural language processor.</p>
+<dd><p><em>NaturalLanguageProcessor</em> -- The natural language processor.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.question_answerer">
 <code class="descname">question_answerer</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.question_answerer" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>QuestionAnswerer</em> – The question answerer.</p>
+<dd><p><em>QuestionAnswerer</em> -- The question answerer.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.request_class">
 <code class="descname">request_class</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.request_class" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Request</em> – Any class that inherits                 from Request</p>
+<dd><p><em>Request</em> -- Any class that inherits                 from Request</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.responder_class">
 <code class="descname">responder_class</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.responder_class" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>DialogueResponder</em> – Any class                 that inherits from the DialogueResponder</p>
+<dd><p><em>DialogueResponder</em> -- Any class                 that inherits from the DialogueResponder</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.app_manager.ApplicationManager.dialogue_manager">
 <code class="descname">dialogue_manager</code><a class="headerlink" href="#mindmeld.app_manager.ApplicationManager.dialogue_manager" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>DialogueManager</em> – The application’s dialogue manager.</p>
+<dd><p><em>DialogueManager</em> -- The application's dialogue manager.</p>
 </dd></dl>
 
 <dl class="method">
@@ -322,9 +314,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the dialogue state</li>
-<li><strong>handler</strong> (<em>function</em>) – The dialogue state handler function</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A list of options which specify the dialogue rule</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the dialogue state</li>
+<li><strong>handler</strong> (<em>function</em>) -- The dialogue state handler function</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A list of options which specify the dialogue rule</li>
 </ul>
 </td>
 </tr>
@@ -340,7 +332,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>middleware</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.8)"><em>callable</em></a>) – A dialogue manager middleware function</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>middleware</strong> (<em>callable</em>) -- A dialogue manager middleware function</td>
 </tr>
 </tbody>
 </table>
@@ -360,16 +352,16 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The text of the message sent by the user</li>
-<li><strong>params</strong> (<em>Params/dict</em><em>, </em><em>optional</em>) – Contains parameters which modify how text is parsed</li>
-<li><strong>params.allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A list of allowed intents                 for model consideration</li>
-<li><strong>params.target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The target dialogue state</li>
-<li><strong>params.time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>params.timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
-<li><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary specifying the frame of the conversation</li>
-<li><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of app-specific data</li>
-<li><strong>history</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A list of previous and current responder objects                                       through interactions with MindMeld</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Flag to return confidence scores for domains and intents</li>
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The text of the message sent by the user</li>
+<li><strong>params</strong> (<em>Params/dict</em><em>, </em><em>optional</em>) -- Contains parameters which modify how text is parsed</li>
+<li><strong>params.allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) -- A list of allowed intents                 for model consideration</li>
+<li><strong>params.target_dialogue_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The target dialogue state</li>
+<li><strong>params.time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as                 'America/Los_Angeles', or 'Asia/Kolkata'                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>params.timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
+<li><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary specifying the frame of the conversation</li>
+<li><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of app-specific data</li>
+<li><strong>history</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) -- A list of previous and current responder objects                                       through interactions with MindMeld</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- Flag to return confidence scores for domains and intents</li>
 </ul>
 </td>
 </tr>
@@ -407,7 +399,7 @@ Otherwise we raise a TypeError.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>Params</em>) – The input params to convert</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>Params</em>) -- The input params to convert</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The converted params object</td>
 </tr>

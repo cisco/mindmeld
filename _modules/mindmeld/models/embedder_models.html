@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>mindmeld.models.embedder_models &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'4.3.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mindmeld.models.embedder_models</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mindmeld.models.embedder_models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the embedder model class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="k">import</span> <span class="n">register_embedder</span>
+<span class="kn">from</span> <span class="nn">.taggers.embeddings</span> <span class="k">import</span> <span class="n">WordSequenceEmbedding</span>
+<span class="kn">from</span> <span class="nn">..tokenizer</span> <span class="k">import</span> <span class="n">Tokenizer</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="k">import</span> <span class="n">SentenceTransformer</span>
+
+    <span class="n">register_bert</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Must install the extra [bert] to use the built in embbedder.&quot;</span><span class="p">)</span>
+    <span class="n">register_bert</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="Embedder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder">[docs]</a><span class="k">class</span> <span class="nc">Embedder</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for embedder model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an embedder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_name&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">get_embedder_cache_file_path</span><span class="p">(</span>
+            <span class="n">app_path</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;embedder_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span>
+        <span class="p">)</span>
+
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Embedder.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder.load">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads the embedder model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The model object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Embedder.encode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder.encode">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            text_list (list): A list of text strings for which to generate the embeddings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A list of numpy arrays of the embeddings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Embedder.clear_cache"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Deletes the cache file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Embedder.get_encodings"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder.get_encodings">[docs]</a>    <span class="k">def</span> <span class="nf">get_encodings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetches the encoded values from the cache, or generates them.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            text_list (list): A list of text strings for which to get the embeddings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): A list of numpy arrays with the embeddings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">text_list</span><span class="p">]</span>
+        <span class="n">cache_miss_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span> <span class="k">if</span> <span class="n">vec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">text_to_encode</span> <span class="o">=</span> <span class="p">[</span><span class="n">text_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cache_miss_indices</span><span class="p">]</span>
+        <span class="n">model_encoded_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text_to_encode</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cache_miss_indices</span><span class="p">):</span>
+            <span class="n">encoded</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_encoded_text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">text_to_encode</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">model_encoded_text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">encoded</span></div>
+
+<div class="viewcode-block" id="Embedder.dump"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.Embedder.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dumps the cache to disk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BertEmbedder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.BertEmbedder">[docs]</a><span class="k">class</span> <span class="nc">BertEmbedder</span><span class="p">(</span><span class="n">Embedder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encoder class for bert models as described here: https://github.com/UKPLab/sentence-transformers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_BERT</span> <span class="o">=</span> <span class="s2">&quot;bert-base-nli-mean-tokens&quot;</span>
+
+<div class="viewcode-block" id="BertEmbedder.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.BertEmbedder.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="n">bert_model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_BERT</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No bert model specifications passed, using default.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bert_model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span>
+        <span class="k">return</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="n">bert_model_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BertEmbedder.encode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.BertEmbedder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GloveEmbedder"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.GloveEmbedder">[docs]</a><span class="k">class</span> <span class="nc">GloveEmbedder</span><span class="p">(</span><span class="n">Embedder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encoder class for GloVe embeddings as described here: https://nlp.stanford.edu/projects/glove/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_EMBEDDING_DIM</span> <span class="o">=</span> <span class="mi">300</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">glove_tokenizer</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GloveEmbedder.tokenize"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.GloveEmbedder.tokenize">[docs]</a>    <span class="k">def</span> <span class="nf">tokenize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">glove_tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">keep_special_chars</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">token_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">token_list</span></div>
+
+<div class="viewcode-block" id="GloveEmbedder.load"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.GloveEmbedder.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">token_embedding_dimension</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;token_embedding_dimension&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_EMBEDDING_DIM</span>
+        <span class="p">)</span>
+        <span class="n">token_pretrained_embedding_filepath</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;token_pretrained_embedding_filepath&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">WordSequenceEmbedding</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">token_embedding_dimension</span><span class="p">,</span>
+            <span class="n">token_pretrained_embedding_filepath</span><span class="p">,</span>
+            <span class="n">use_padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GloveEmbedder.encode"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.GloveEmbedder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+        <span class="n">token_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">text_list</span><span class="p">]</span>
+        <span class="n">vector_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encode_sequence_of_tokens</span><span class="p">(</span><span class="n">tl</span><span class="p">)</span> <span class="k">for</span> <span class="n">tl</span> <span class="ow">in</span> <span class="n">token_list</span><span class="p">]</span>
+        <span class="n">encoded_vecs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vl</span> <span class="ow">in</span> <span class="n">vector_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">encoded_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">encoded_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">encoded_vecs</span></div>
+
+<div class="viewcode-block" id="GloveEmbedder.dump"><a class="viewcode-back" href="../../../apidoc/mindmeld.models.embedder_models.html#mindmeld.models.GloveEmbedder.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dumps the cache to disk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_embeddings</span><span class="p">()</span></div></div>
+
+
+<span class="k">if</span> <span class="n">register_bert</span><span class="p">:</span>
+    <span class="n">register_embedder</span><span class="p">(</span><span class="s2">&quot;bert&quot;</span><span class="p">,</span> <span class="n">BertEmbedder</span><span class="p">)</span>
+
+<span class="n">register_embedder</span><span class="p">(</span><span class="s2">&quot;glove&quot;</span><span class="p">,</span> <span class="n">GloveEmbedder</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

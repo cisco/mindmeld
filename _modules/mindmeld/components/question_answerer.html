@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.question_answerer &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.question_answerer &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -253,28 +255,43 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
-<span class="kn">from</span> <span class="nn">elasticsearch5</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
-<span class="kn">from</span> <span class="nn">elasticsearch5</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="k">import</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">EsConnectionError</span>
+<span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="k">import</span> <span class="n">ElasticsearchException</span><span class="p">,</span> <span class="n">TransportError</span>
 
-<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="n">KnowledgeBaseConnectionError</span><span class="p">,</span> <span class="n">KnowledgeBaseError</span>
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">KnowledgeBaseConnectionError</span><span class="p">,</span>
+    <span class="n">KnowledgeBaseError</span><span class="p">,</span>
+    <span class="n">ElasticsearchVersionError</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..resource_loader</span> <span class="k">import</span> <span class="n">ResourceLoader</span>
 <span class="kn">from</span> <span class="nn">._config</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span>
     <span class="n">DEFAULT_RANKING_CONFIG</span><span class="p">,</span>
-    <span class="n">DOC_TYPE</span><span class="p">,</span>
     <span class="n">get_app_namespace</span><span class="p">,</span>
+    <span class="n">get_classifier_config</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._elasticsearch_helpers</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DOC_TYPE</span><span class="p">,</span>
     <span class="n">create_es_client</span><span class="p">,</span>
     <span class="n">delete_index</span><span class="p">,</span>
     <span class="n">does_index_exist</span><span class="p">,</span>
     <span class="n">get_scoped_index_name</span><span class="p">,</span>
     <span class="n">load_index</span><span class="p">,</span>
+    <span class="n">create_index_mapping</span><span class="p">,</span>
+    <span class="n">is_es_version_7</span><span class="p">,</span>
+    <span class="n">resolve_es_config_for_version</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="k">import</span> <span class="n">create_embedder_model</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">DEFAULT_QUERY_TYPE</span> <span class="o">=</span> <span class="s2">&quot;keyword&quot;</span>
+<span class="n">ALL_QUERY_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;embedder&quot;</span><span class="p">,</span> <span class="s2">&quot;embedder_keyword&quot;</span><span class="p">,</span> <span class="s2">&quot;embedder_text&quot;</span><span class="p">]</span>
+<span class="n">EMBEDDING_FIELD_STRING</span> <span class="o">=</span> <span class="s2">&quot;_embedding&quot;</span>
 
 
 <div class="viewcode-block" id="QuestionAnswerer"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer">[docs]</a><span class="k">class</span> <span class="nc">QuestionAnswerer</span><span class="p">:</span>
@@ -282,7 +299,7 @@
 <span class="sd">    necessary functionality for interacting with the application&#39;s knowledge base.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">resource_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initializes a question answerer</span>
 
 <span class="sd">        Args:</span>
@@ -297,6 +314,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_app_namespace</span> <span class="o">=</span> <span class="n">get_app_namespace</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span> <span class="o">=</span> <span class="n">get_classifier_config</span><span class="p">(</span>
+                <span class="s2">&quot;question_answering&quot;</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_embedder_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;embedder&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_embedder_model</span> <span class="o">=</span> <span class="n">create_embedder_model</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_es_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -305,7 +332,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span> <span class="o">=</span> <span class="n">create_es_client</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_host</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__es_client</span>
 
-<div class="viewcode-block" id="QuestionAnswerer.get"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_query_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_type&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ALL_QUERY_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qa_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_type&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DEFAULT_QUERY_TYPE</span>
+
+<div class="viewcode-block" id="QuestionAnswerer.get"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Gets a collection of documents from the knowledge base matching the provided</span>
 <span class="sd">        search criteria. This API provides a simple interface for developers to specify a list of</span>
 <span class="sd">        knowledge base field and query string pairs to find best matches in a similar way as in</span>
@@ -326,7 +360,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            index (str): The name of an index.</span>
 <span class="sd">            size (int): The maximum number of records, default to 10.</span>
-<span class="sd">            query_type (str): Whether the search is over structured or unstructured text.</span>
+<span class="sd">            query_type (str): Whether the search is over structured, unstructured and whether to use</span>
+<span class="sd">                              text signals for ranking, embedder signals, or both.</span>
 <span class="sd">            id (str): The id of a particular document to retrieve.</span>
 <span class="sd">            _sort (str): Specify the knowledge base field for custom sort.</span>
 <span class="sd">            _sort_type (str): Specify custom sort type. Valid values are &#39;asc&#39;, &#39;desc&#39; and</span>
@@ -336,8 +371,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list: A list of matching documents.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">doc_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+
+        <span class="n">query_type</span> <span class="o">=</span> <span class="n">query_type</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_type</span>
 
         <span class="c1"># If an id was passed in, simply retrieve the specified document</span>
         <span class="k">if</span> <span class="n">doc_id</span><span class="p">:</span>
@@ -362,6 +398,12 @@
                 <span class="n">sort_clause</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;_sort_location&quot;</span><span class="p">:</span>
                 <span class="n">sort_clause</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="s2">&quot;embedder&quot;</span> <span class="ow">in</span> <span class="n">query_type</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedder_model</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">query_type</span> <span class="ow">or</span> <span class="s2">&quot;keyword&quot;</span> <span class="ow">in</span> <span class="n">query_type</span><span class="p">:</span>
+                    <span class="n">query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+                <span class="n">embedded_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedder_model</span><span class="o">.</span><span class="n">get_encodings</span><span class="p">([</span><span class="n">value</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">embedded_key</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="n">EMBEDDING_FIELD_STRING</span>
+                <span class="n">query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">embedded_key</span><span class="p">:</span> <span class="n">embedded_value</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Added query clause: field= </span><span class="si">%s</span><span class="s2"> value= </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -428,7 +470,10 @@
                 <span class="c1"># TODO: move the ES API call logic to ES helper</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
-                <span class="n">all_field_info</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">&quot;mappings&quot;</span><span class="p">][</span><span class="s2">&quot;document&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">is_es_version_7</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_es_client</span><span class="p">):</span>
+                    <span class="n">all_field_info</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">&quot;mappings&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_field_info</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">&quot;mappings&quot;</span><span class="p">][</span><span class="n">DOC_TYPE</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">all_field_info</span><span class="p">:</span>
                     <span class="n">field_type</span> <span class="o">=</span> <span class="n">all_field_info</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_es_field_info</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">FieldInfo</span><span class="p">(</span>
@@ -463,6 +508,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
+<div class="viewcode-block" id="QuestionAnswerer.save_embedder_model"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.save_embedder_model">[docs]</a>    <span class="k">def</span> <span class="nf">save_embedder_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_embedder_model</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="QuestionAnswerer.load_kb"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.QuestionAnswerer.load_kb">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_kb</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -473,6 +521,8 @@
         <span class="n">es_client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">connect_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">clean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">app_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Loads documents from disk into the specified index in the knowledge</span>
 <span class="sd">        base. If an index with the specified name doesn&#39;t exist, a new index</span>
@@ -492,23 +542,67 @@
 <span class="sd">                connection to the Elasticsearch host.</span>
 <span class="sd">            clean (bool): Set to true if you want to delete an existing index</span>
 <span class="sd">                and reindex it</span>
+<span class="sd">            app_path (str): The path to the directory containing the app&#39;s data</span>
+<span class="sd">            config (dict): The QA config if passed directly rather than loaded from the app config</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">embedder_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">embedding_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">app_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;You must provide either the application path to upload embeddings as specified&quot;</span>
+                <span class="s2">&quot; in the app config or directly provide the QA config.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">qa_config</span> <span class="o">=</span> <span class="n">config</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">qa_config</span> <span class="o">=</span> <span class="n">get_classifier_config</span><span class="p">(</span>
+                    <span class="s2">&quot;question_answering&quot;</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span>
+                <span class="p">)</span>
+            <span class="n">embedder_model</span> <span class="o">=</span> <span class="n">create_embedder_model</span><span class="p">(</span><span class="n">app_path</span><span class="p">,</span> <span class="n">qa_config</span><span class="p">)</span>
+            <span class="n">embedding_fields</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">qa_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_settings&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;embedding_fields&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index_name</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">_doc_count</span><span class="p">(</span><span class="n">data_file</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_doc_data</span><span class="p">(</span><span class="n">data_file</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">data_fp</span><span class="p">:</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
                 <span class="n">data_fp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>
                     <span class="n">docs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data_fp</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data_fp</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data_fp</span><span class="p">:</span>
                         <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">return</span> <span class="n">count</span>
+                <span class="k">return</span> <span class="n">count</span>
 
-        <span class="k">def</span> <span class="nf">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">embedder_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">match_regex</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">pattern_list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">pattern_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">embedder_model</span><span class="p">:</span>
+                    <span class="n">embed_fields</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">match_regex</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">embed_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">embed_fields</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">embed_vals</span> <span class="o">=</span> <span class="n">embedder_model</span><span class="o">.</span><span class="n">get_encodings</span><span class="p">(</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">embed_fields</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">embedded_doc</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">key</span> <span class="o">+</span> <span class="n">EMBEDDING_FIELD_STRING</span><span class="p">:</span> <span class="n">emb</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">emb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">embed_keys</span><span class="p">,</span> <span class="n">embed_vals</span><span class="p">)</span>
+                    <span class="p">}</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">embedded_doc</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">doc</span>
                 <span class="n">base</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">base</span>
@@ -520,15 +614,21 @@
                     <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading data from a json file.&quot;</span><span class="p">)</span>
                     <span class="n">docs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data_fp</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
-                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading data from a jsonl file.&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data_fp</span><span class="p">:</span>
                         <span class="n">doc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                        <span class="k">yield</span> <span class="n">transform</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">)</span>
 
-        <span class="n">docs</span> <span class="o">=</span> <span class="n">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
-        <span class="n">docs_count</span> <span class="o">=</span> <span class="n">_doc_count</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+        <span class="n">docs_count</span> <span class="o">=</span> <span class="n">_doc_data</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">embedder_model</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedding_fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No embedding fields specified in the app config, &quot;</span>
+                <span class="s2">&quot;continuing without generating embeddings...&quot;</span>
+            <span class="p">)</span>
+            <span class="n">embedder_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">docs</span> <span class="o">=</span> <span class="n">_doc_generator</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">clean</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -540,17 +640,54 @@
                     <span class="n">app_namespace</span><span class="p">,</span>
                 <span class="p">)</span>
 
+        <span class="k">def</span> <span class="nf">_generate_mapping_data</span><span class="p">(</span><span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">):</span>
+            <span class="c1"># generates a dictionary with any metadata needed to create the mapping&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">embedder_model</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{}</span>
+            <span class="n">MAX_ES_VECTOR_LEN</span> <span class="o">=</span> <span class="mi">2048</span>
+            <span class="n">embedding_properties</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">mapping_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;embedding_properties&quot;</span><span class="p">:</span> <span class="n">embedding_properties</span><span class="p">}</span>
+
+            <span class="n">dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedder_model</span><span class="o">.</span><span class="n">get_encodings</span><span class="p">([</span><span class="s2">&quot;encoding&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dims</span> <span class="o">&gt;</span> <span class="n">MAX_ES_VECTOR_LEN</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Vectors in ElasticSearch must be less than size: </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">MAX_ES_VECTOR_LEN</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">embedding_fields</span><span class="p">:</span>
+                <span class="n">embedding_properties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span> <span class="o">+</span> <span class="n">EMBEDDING_FIELD_STRING</span><span class="p">,</span> <span class="s2">&quot;dims&quot;</span><span class="p">:</span> <span class="n">dims</span><span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">mapping_data</span>
+
+        <span class="n">es_client</span> <span class="o">=</span> <span class="n">es_client</span> <span class="ow">or</span> <span class="n">create_es_client</span><span class="p">(</span><span class="n">es_host</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_es_version_7</span><span class="p">(</span><span class="n">es_client</span><span class="p">):</span>
+            <span class="n">mapping_data</span> <span class="o">=</span> <span class="n">_generate_mapping_data</span><span class="p">(</span><span class="n">embedder_model</span><span class="p">,</span> <span class="n">embedding_fields</span><span class="p">)</span>
+            <span class="n">qa_mapping</span> <span class="o">=</span> <span class="n">create_index_mapping</span><span class="p">(</span><span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span> <span class="n">mapping_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">embedder_model</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;You must upgrade to ElasticSearch 7 to use the embedding features.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ElasticsearchVersionError</span>
+            <span class="n">qa_mapping</span> <span class="o">=</span> <span class="n">resolve_es_config_for_version</span><span class="p">(</span><span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span> <span class="n">es_client</span><span class="p">)</span>
+
         <span class="n">load_index</span><span class="p">(</span>
             <span class="n">app_namespace</span><span class="p">,</span>
             <span class="n">index_name</span><span class="p">,</span>
             <span class="n">docs</span><span class="p">,</span>
             <span class="n">docs_count</span><span class="p">,</span>
-            <span class="n">DEFAULT_ES_QA_MAPPING</span><span class="p">,</span>
+            <span class="n">qa_mapping</span><span class="p">,</span>
             <span class="n">DOC_TYPE</span><span class="p">,</span>
             <span class="n">es_host</span><span class="p">,</span>
             <span class="n">es_client</span><span class="p">,</span>
             <span class="n">connect_timeout</span><span class="o">=</span><span class="n">connect_timeout</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span>
+
+        <span class="c1"># Saves the embedder model cache to disk</span>
+        <span class="k">if</span> <span class="n">embedder_model</span><span class="p">:</span>
+            <span class="n">embedder_model</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="FieldInfo"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo">[docs]</a><span class="k">class</span> <span class="nc">FieldInfo</span><span class="p">:</span>
@@ -569,6 +706,7 @@
     <span class="n">TEXT_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;keyword&quot;</span><span class="p">}</span>
     <span class="n">DATE_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;date&quot;</span><span class="p">}</span>
     <span class="n">GEO_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;geo_point&quot;</span><span class="p">}</span>
+    <span class="n">VECTOR_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dense_vector&quot;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">field_type</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -600,9 +738,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GEO_TYPES</span></div>
 
 <div class="viewcode-block" id="FieldInfo.is_text_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_text_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_text_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a text, otherwise returns False&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a text field, otherwise returns False&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEXT_TYPES</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEXT_TYPES</span></div>
+
+<div class="viewcode-block" id="FieldInfo.is_vector_field"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.FieldInfo.is_vector_field">[docs]</a>    <span class="k">def</span> <span class="nf">is_vector_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the knowledge base field is a vector field, otherwise returns False&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">VECTOR_TYPES</span></div></div>
 
 
 <div class="viewcode-block" id="Search"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search">[docs]</a><span class="k">class</span> <span class="nc">Search</span><span class="p">:</span>
@@ -646,7 +789,7 @@
 
         <span class="k">return</span> <span class="n">s</span>
 
-    <span class="k">def</span> <span class="nf">_build_query_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_build_query_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
         <span class="n">field_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kb_field_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">field_info</span><span class="p">:</span>
@@ -663,7 +806,7 @@
         <span class="n">clause</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="n">clause</span><span class="o">.</span><span class="n">get_type</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_build_filter_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_build_filter_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># set the filter type to be &#39;range&#39; if any range operator is specified.</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gt&quot;</span><span class="p">)</span>
@@ -716,7 +859,7 @@
         <span class="n">clause</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="n">clause</span><span class="o">.</span><span class="n">get_type</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_build_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clause_type</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_build_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clause_type</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Helper method to build query, filter and sort clauses.</span>
 
 <span class="sd">        Args:</span>
@@ -731,7 +874,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown clause type.&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Search.query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Search.query"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Specify the query text to match on a knowledge base text field. The query text is</span>
 <span class="sd">        normalized and processed (based on query_type) to find matches in knowledge base using</span>
 <span class="sd">        several text relevance scoring factors including exact matches, phrase matches and partial</span>
@@ -747,7 +890,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            a keyword argument to specify the query text and the knowledge base document field along</span>
-<span class="sd">            with the query type (keyword/text).</span>
+<span class="sd">            with the query type (keyword/text/embedder/embedder_keyword/embedder_text).</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Search: a new Search object with added search criteria.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -756,7 +899,7 @@
 
         <span class="k">return</span> <span class="n">new_search</span></div>
 
-<div class="viewcode-block" id="Search.filter"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Search.filter"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Specify filter condition to be applied to specified knowledge base field. In MindMeld</span>
 <span class="sd">        two types of filters are supported: text filter and range filters.</span>
 
@@ -876,7 +1019,8 @@
                 <span class="n">es_boost_functions</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clauses</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]:</span>
                     <span class="n">query_clause</span><span class="p">,</span> <span class="n">boost_functions</span> <span class="o">=</span> <span class="n">clause</span><span class="o">.</span><span class="n">build_query</span><span class="p">()</span>
-                    <span class="n">es_query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_clause</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">query_clause</span><span class="p">:</span>
+                        <span class="n">es_query_clauses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">query_clause</span><span class="p">)</span>
                     <span class="n">es_boost_functions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">boost_functions</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ranking_config</span><span class="p">[</span><span class="s2">&quot;query_clauses_operator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>
@@ -910,6 +1054,7 @@
             <span class="n">es_query</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;function_score&quot;</span><span class="p">][</span><span class="s2">&quot;functions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sort_function</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ES query syntax: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">es_query</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">es_query</span>
 
 <div class="viewcode-block" id="Search.execute"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -924,6 +1069,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># TODO: move the ES API call logic to ES helper</span>
             <span class="n">es_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_es_query</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
             <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">es_query</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;hits&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">]]</span>
             <span class="k">return</span> <span class="n">results</span>
@@ -971,7 +1117,12 @@
         <span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span> <span class="o">=</span> <span class="mi">100</span>
 
         <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="n">synonym_field</span><span class="o">=</span><span class="kc">None</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">field</span><span class="p">,</span>
+            <span class="n">field_info</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+            <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span>
+            <span class="n">synonym_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Initialize a knowledge base query clause.&quot;&quot;&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
@@ -993,7 +1144,26 @@
             <span class="c1"># 4. matches on synonym if available (exact, word N-gram and character N-gram):</span>
             <span class="c1"># for a knowledge base text field the synonym are indexed in a separate field</span>
             <span class="c1"># &quot;&lt;field name&gt;$whitelist&quot; if available.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+            <span class="n">functions</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;embedder&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_vector_field</span><span class="p">():</span>
+                <span class="n">clause</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">functions</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;script_score&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;script&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;cosineSimilarity(params.field_embedding,&quot;</span>
+                                <span class="s2">&quot; doc[params.matching_field]) + 1.0&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="s2">&quot;field_embedding&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                                    <span class="s2">&quot;matching_field&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">,</span>
+                                <span class="p">},</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="k">elif</span> <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span><span class="p">:</span>
                 <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -1007,7 +1177,7 @@
                         <span class="p">]</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;keyword&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="s2">&quot;keyword&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_type</span><span class="p">:</span>
                 <span class="n">clause</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -1029,15 +1199,16 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown query type.&quot;</span><span class="p">)</span>
 
-            <span class="c1"># Boost function for boosting conditions, e.g. exact match boosting</span>
-            <span class="n">boost_functions</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;.normalized_keyword&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
-                    <span class="p">},</span>
-                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_text_field</span><span class="p">():</span>
+                <span class="c1"># Boost function for boosting conditions, e.g. exact match boosting</span>
+                <span class="n">functions</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;.normalized_keyword&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
 
             <span class="c1"># generate ES syntax for matching on synonym whitelist if available.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_field</span><span class="p">:</span>
@@ -1079,7 +1250,7 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
 
-                <span class="n">boost_functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1096,11 +1267,14 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">clause</span><span class="p">,</span> <span class="n">boost_functions</span></div>
+            <span class="k">return</span> <span class="n">clause</span><span class="p">,</span> <span class="n">functions</span></div>
 
 <div class="viewcode-block" id="Search.QueryClause.validate"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.QueryClause.validate">[docs]</a>        <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_text_field</span><span class="p">():</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Query can only be defined on text field.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_text_field</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">is_vector_field</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Query can only be defined on text and vector fields.&quot;</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="Search.FilterClause"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.question_answerer.html#mindmeld.Search.FilterClause">[docs]</a>    <span class="k">class</span> <span class="nc">FilterClause</span><span class="p">(</span><span class="n">Clause</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This class models a knowledge base filter clause.&quot;&quot;&quot;</span>
@@ -1110,7 +1284,7 @@
             <span class="n">field</span><span class="p">,</span>
             <span class="n">field_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">query_type</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span>
+            <span class="n">query_type</span><span class="o">=</span><span class="n">DEFAULT_QUERY_TYPE</span><span class="p">,</span>
             <span class="n">range_gt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">range_gte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">range_lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

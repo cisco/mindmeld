@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.dialogue &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.dialogue &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -660,7 +662,8 @@
         <span class="n">res</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
         <span class="c1"># Add dialogue flow&#39;s sub-dialogue_state if provided</span>
-        <span class="k">if</span> <span class="n">res</span> <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+            <span class="c1"># TODO: check if this flow is executed, currently not covered in tests</span>
             <span class="n">dialogue_state</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dialogue_state</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">]])</span>
         <span class="n">responder</span><span class="o">.</span><span class="n">dialogue_state</span> <span class="o">=</span> <span class="n">dialogue_state</span>
         <span class="k">return</span> <span class="n">responder</span>
@@ -718,7 +721,12 @@
         <span class="n">result_handler</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
         <span class="c1"># Add dialogue flow&#39;s sub-dialogue_state if provided</span>
-        <span class="k">if</span> <span class="n">result_handler</span> <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">result_handler</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">result_handler</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result_handler</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;dialogue_state&quot;</span> <span class="ow">in</span> <span class="n">result_handler</span>
+        <span class="p">):</span>
+            <span class="c1"># TODO: check if this flow is executed, currently not covered in tests</span>
             <span class="n">dialogue_state</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">dialogue_state</span><span class="p">,</span> <span class="n">result_handler</span><span class="p">[</span><span class="s2">&quot;dialogue_state&quot;</span><span class="p">]</span>
             <span class="p">)</span>
@@ -1032,21 +1040,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">text</span>
         <span class="n">entity_type</span> <span class="o">=</span> <span class="n">slot</span><span class="o">.</span><span class="n">entity</span>
-        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_query_features</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-
-        <span class="c1"># payload format for entity feature extractors:</span>
-        <span class="c1">#     tuple(query (Query Object), list of entities, entity index)</span>
-
-        <span class="c1"># For slot filling, the user query will consist of the prompted entity.</span>
-        <span class="c1"># Hence `entity = [query]` and `entity_index = 0`.</span>
-        <span class="n">formatted_payload</span> <span class="o">=</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">query</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="n">extracted_feature</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_resolved_value</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">default_eval</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">DEFAULT_SYS_ENTITIES</span><span class="p">:</span>
                 <span class="c1"># system entity validation - checks for presence of required system entity</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">entity_text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+                    <span class="n">entity_text</span> <span class="o">=</span> <span class="n">text</span>
+
+                <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_query_features</span><span class="p">(</span><span class="n">entity_text</span><span class="p">)</span>
+
                 <span class="n">resources</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">extracted_feature</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="n">query_features</span><span class="o">.</span><span class="n">extract_sys_candidates</span><span class="p">([</span><span class="n">entity_type</span><span class="p">])(</span>
@@ -1056,22 +1065,33 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># gazetteer validation</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_query_features</span><span class="p">(</span>
+                        <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cname&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_query_features</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
                 <span class="n">gaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">resource_loader</span><span class="o">.</span><span class="n">get_gazetteer</span><span class="p">(</span>
                     <span class="n">entity_type</span>
                 <span class="p">)</span>
 
+                <span class="c1"># payload format for entity feature extractors:</span>
+                <span class="c1"># tuple(query (Query Object), list of entities, entity index)</span>
+                <span class="n">_payload</span> <span class="o">=</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">query</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">gazetteer</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gazetteers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">entity_type</span><span class="p">:</span> <span class="n">gaz</span><span class="p">}}</span>
                     <span class="n">extracted_feature</span> <span class="o">=</span> <span class="n">entity_features</span><span class="o">.</span><span class="n">extract_in_gaz_features</span><span class="p">()(</span>
-                        <span class="n">formatted_payload</span><span class="p">,</span> <span class="n">gazetteer</span>
+                        <span class="n">_payload</span><span class="p">,</span> <span class="n">gazetteer</span>
                     <span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">extracted_feature</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_resolved_value</span>
 
             <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
-                    <span class="n">_resolved_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+                <span class="n">_resolved_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">hints</span><span class="p">:</span>
             <span class="c1"># hints / user-list validation</span>
@@ -1084,10 +1104,7 @@
             <span class="c1"># Custom validation using function provided by developer. Should return True/False</span>
             <span class="c1"># for validation status. If true, then continue, else fail overall validation.</span>
 
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">slot</span><span class="o">.</span><span class="n">custom_eval</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_resolved_value</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">extracted_feature</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_validated_entity&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
@@ -1112,10 +1129,14 @@
                         <span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">entity</span>
                         <span class="k">break</span>
 
-    <span class="k">def</span> <span class="nf">_end_slot_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_end_slot_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">async_mode</span><span class="p">):</span>
         <span class="c1"># Returns filled entity objects as request.entities</span>
         <span class="c1"># We pass in the previous turn&#39;s responder&#39;s params to the current request</span>
+
         <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">request_class</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="n">domain</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
             <span class="n">entities</span><span class="o">=</span><span class="p">[</span><span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_form</span><span class="p">],</span>
             <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">context</span> <span class="ow">or</span> <span class="p">{},</span>
             <span class="n">history</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">history</span> <span class="ow">or</span> <span class="p">[],</span>
@@ -1124,14 +1145,23 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_exit_flow</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">async_mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_slot_fill_async</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_slot_fill_sync</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_end_slot_fill_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_end_slot_fill_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entrance_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_prompt_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">nlr</span><span class="p">):</span>
         <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">nlr</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_retry_logic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">nlr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_retry_logic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">nlr</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_retries</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">nlr</span><span class="p">)</span>
@@ -1139,10 +1169,25 @@
             <span class="c1"># max attempts exceeded, reset counter, exit auto_fill.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_retry_attempts</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_exit_flow</span><span class="p">(</span><span class="n">responder</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">reprocess</span><span class="p">()</span>
+
+            <span class="c1"># reprocess query to obtain intended nlp config, ignoring previous config.</span>
+            <span class="n">processed_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">query_text</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+            <span class="c1"># create new request object from the current responder object.</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">request_class</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">context</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">history</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">history</span> <span class="ow">or</span> <span class="p">[],</span>
+                <span class="n">frame</span><span class="o">=</span><span class="n">responder</span><span class="o">.</span><span class="n">frame</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">params</span><span class="o">=</span><span class="n">FrozenParams</span><span class="p">(</span><span class="o">**</span><span class="n">responder</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()),</span>
+                <span class="o">**</span><span class="n">processed_query</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># call intended handler from reprocessed query.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">app_manager</span><span class="o">.</span><span class="n">dialogue_manager</span><span class="o">.</span><span class="n">apply_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The iterative call to fill missing slots in the entity form till all slots have been</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The iterative call to fill missing slots in the entity form till all slots have been</span>
 <span class="sd">        filled up or the flow has been exited.</span>
 
 <span class="sd">        Args:</span>
@@ -1179,7 +1224,7 @@
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_valid</span><span class="p">:</span>
                     <span class="c1"># retry logic</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_retry_logic</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="n">slot</span><span class="o">.</span><span class="n">retry_response</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_retry_logic</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">slot</span><span class="o">.</span><span class="n">retry_response</span><span class="p">)</span>
                     <span class="k">return</span>
 
                 <span class="n">slot</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Entity</span><span class="p">(</span>
@@ -1193,7 +1238,16 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_turn</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Finish slot-filling and return to handler</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_slot_fill</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_slot_fill</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">async_mode</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AutoEntityFilling.call_async"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.AutoEntityFilling.call_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">call_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The slot-filling call for asynchronous apps</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): The request object.</span>
+<span class="sd">            responder (DialogueResponder): The responder object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="DialogueResponder"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.DialogueResponder">[docs]</a><span class="k">class</span> <span class="nc">DialogueResponder</span><span class="p">:</span>
@@ -1401,6 +1455,8 @@
 <span class="sd">        params (FrozenParams): The params returned by the most recent turn.</span>
 <span class="sd">        force_sync (bool): Force synchronous return for `say()` and `process()` \</span>
 <span class="sd">            even when app is in async mode.</span>
+<span class="sd">        verbose (bool, optional): If True, returns class probabilities along with class \</span>
+<span class="sd">                prediction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_logger</span> <span class="o">=</span> <span class="n">mod_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;Conversation&quot;</span><span class="p">)</span>
@@ -1413,6 +1469,7 @@
         <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">default_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">force_sync</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
@@ -1427,6 +1484,8 @@
 <span class="sd">                defaults will be overridden by params passed for each turn.</span>
 <span class="sd">            force_sync (bool, optional): Force synchronous return for `say()` and `process()`</span>
 <span class="sd">                even when app is in async mode.</span>
+<span class="sd">            verbose (bool, optional): If True, returns class probabilities along with class \</span>
+<span class="sd">                prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">get_app</span><span class="p">(</span><span class="n">app_path</span><span class="p">)</span>
         <span class="n">app</span><span class="o">.</span><span class="n">lazy_init</span><span class="p">(</span><span class="n">nlp</span><span class="p">)</span>
@@ -1439,6 +1498,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span> <span class="o">=</span> <span class="n">default_params</span> <span class="ow">or</span> <span class="n">Params</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_sync</span> <span class="o">=</span> <span class="n">force_sync</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">FrozenParams</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>	
 
 <div class="viewcode-block" id="Conversation.say"><a class="viewcode-back" href="../../../apidoc/mindmeld.components.dialogue.html#mindmeld.Conversation.say">[docs]</a>    <span class="k">def</span> <span class="nf">say</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Send a message in the conversation. The message will be</span>
@@ -1529,6 +1589,7 @@
             <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
             <span class="n">frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span>
             <span class="n">history</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">frame</span>
@@ -1570,6 +1631,7 @@
             <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
             <span class="n">frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span>
             <span class="n">history</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">frame</span>

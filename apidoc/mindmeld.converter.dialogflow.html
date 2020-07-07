@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.converter.dialogflow module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.converter.dialogflow module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.converter.dialogflow">
@@ -276,7 +268,7 @@ into Mindmeld projects</p>
 <dl class="class">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter">
 <em class="property">class </em><code class="descclassname">mindmeld.converter.dialogflow.</code><code class="descname">DialogflowConverter</code><span class="sig-paren">(</span><em>dialogflow_project_directory</em>, <em>mindmeld_project_directory</em>, <em>custom_config_file_path=None</em>, <em>language='en'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.converter.converter.html#mindmeld.converter.converter.Converter" title="mindmeld.converter.converter.Converter"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.converter.converter.Converter</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.converter.converter.html#mindmeld.converter.converter.Converter" title="mindmeld.converter.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.converter.converter.Converter</span></code></a></p>
 <p>The class is a sub class of the abstract Converter class. This class
 contains the methods required to convert a Dialogflow project into a MindMeld project</p>
 <dl class="method">
@@ -303,8 +295,8 @@ Returns name cleaned if the cleaned name is not found in lst.</p>
 <dd>Dialogflow supports multiple languages and locales. They store their training
 data for different languages in different files. So, the name of each training
 file ends with a meta tag, two letters long for language, and an additional
-two letters for dialect (if applicable). For example, a file ending in “_en-au”
-indicates it’s in English (Australia). Below we use “la” to represent this
+two letters for dialect (if applicable). For example, a file ending in &quot;_en-au&quot;
+indicates it's in English (Australia). Below we use &quot;la&quot; to represent this
 meta tag.</dd>
 <dt>entities folder contains:</dt>
 <dd>entityName.json - Meta data about entityName for all languages.
@@ -346,17 +338,20 @@ bots that support multiple languages.</p>
 <dl class="method">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_directory">
 <code class="descname">create_mindmeld_directory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_directory" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates key MindMeld folders for project.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_init">
 <code class="descname">create_mindmeld_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_init" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates MindMeld __init__.py file.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_training_data">
 <code class="descname">create_mindmeld_training_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/converter/dialogflow.html#DialogflowConverter.create_mindmeld_training_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.create_mindmeld_training_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Converts traning data from other software into MindMeld training data.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter.generate_handlers">
@@ -365,7 +360,7 @@ bots that support multiple languages.</p>
 
 <dl class="attribute">
 <dt id="mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map">
-<code class="descname">sys_entity_map</code><em class="property"> = {'&#64;sys.date-time': 'sys_interval', '&#64;sys.date': 'sys_time', '&#64;sys.date-period': 'sys_interval', '&#64;sys.time': 'sys_time', '&#64;sys.time-period': 'sys_duration', '&#64;sys.duration': 'sys_duration', '&#64;sys.number': 'sys_number', '&#64;sys.cardinal': 'sys_number', '&#64;sys.ordinal': 'sys_ordinal', '&#64;sys.unit-currency': 'sys_amount-of-money', '&#64;sys.unit-volume': 'sys_volume', '&#64;sys.email': 'sys_email', '&#64;sys.phone-number': 'sys_phone-number', '&#64;sys.url': 'sys_url', '&#64;sys.temperature': 'sys_temperature'}</em><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sys_entity_map</code><em class="property"> = {'&#64;sys.cardinal': 'sys_number', '&#64;sys.date': 'sys_time', '&#64;sys.date-period': 'sys_interval', '&#64;sys.date-time': 'sys_interval', '&#64;sys.duration': 'sys_duration', '&#64;sys.email': 'sys_email', '&#64;sys.number': 'sys_number', '&#64;sys.ordinal': 'sys_ordinal', '&#64;sys.phone-number': 'sys_phone-number', '&#64;sys.temperature': 'sys_temperature', '&#64;sys.time': 'sys_time', '&#64;sys.time-period': 'sys_duration', '&#64;sys.unit-currency': 'sys_amount-of-money', '&#64;sys.unit-volume': 'sys_volume', '&#64;sys.url': 'sys_url'}</em><a class="headerlink" href="#mindmeld.converter.dialogflow.DialogflowConverter.sys_entity_map" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

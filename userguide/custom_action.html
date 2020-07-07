@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138982267-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-138982267-1');
+  </script>
+
+  <title>Working with Custom Actions &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  
+
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'4.3.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/custom.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Internationalization support" href="internationalization.html" />
+    <link rel="prev" title="Working with the Dialogue Manager" href="dm.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> The Conversational AI Playbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction_to_conversational_applications.html">Introduction to Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/approaches_for_building_conversational_applications.html">Different Approaches for Building Conversational Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/anatomy_of_a_conversational_ai_interaction.html">Anatomy of a Conversational AI Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introducing_mindmeld.html">Introducing MindMeld</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/key_concepts.html">Key Concepts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Step-by-Step Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/00_overview.html">Building a Conversational Interface in 10 Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/01_select_the_right_use_case.html">Step 1: Select the Right Use Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/02_script_interactions.html">Step 2: Script Your Ideal Dialogue Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/03_define_the_hierarchy.html">Step 3: Define the Domain, Intent, Entity, and Role Hierarchy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/04_define_the_dialogue_handlers.html">Step 4: Define the Dialogue State Handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/05_create_the_knowledge_base.html">Step 5: Create the Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/06_generate_representative_training_data.html">Step 6: Generate Representative Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html">Step 7: Train the Natural Language Processing Classifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/08_configure_the_language_parser.html">Step 8: Configure the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/09_optimize_question_answering_performance.html">Step 9: Optimize Question Answering Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/10_deploy_to_production.html">Step 10: Deploy Trained Models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Blueprint Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/overview.html">MindMeld Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/food_ordering.html">Food Ordering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessor.html">Working with the Preprocessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlp.html">Working with the Natural Language Processor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classifier.html">Working with the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classifier.html">Working with the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognizer.html">Working with the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">Using LSTM for Entity Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classifier.html">Working with the Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolver.html">Working with the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Working with the Language Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with Custom Actions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-custom-actions">Why Custom Actions?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openapi-specification-for-client-server-interaction">OpenAPI Specification for client-server interaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-custom-actions-for-your-mindmeld-application">Configure Custom Actions for your MindMeld application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-simple-custom-action-server">A Simple Custom Action Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-custom-actions-with-mindmeld-applications">Using Custom Actions with MindMeld applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-individual-custom-actions-inside-a-mindmeld-application">Calling Individual Custom Actions inside a MindMeld application</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integrations/whatsapp.html">WhatsApp Integration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../internal/api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MindMeld UI</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mindmeld_ui/mindmeld_ui.html">MindMeld UI</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Versions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../versions/changes.html">Recent Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions/history.html">Package History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">The Conversational AI Playbook</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with Custom Actions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/userguide/custom_action.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="working-with-custom-actions">
+<h1>Working with Custom Actions<a class="headerlink" href="#working-with-custom-actions" title="Permalink to this headline">¶</a></h1>
+<p>MindMeld 4.3 introduces Custom Actions which allow MindMeld developers to further separate their business
+logic from the conversational application. This paradigm shift helps to reduce the barriers to build and
+deploy conversational applications.</p>
+<div class="section" id="why-custom-actions">
+<h2>Why Custom Actions?<a class="headerlink" href="#why-custom-actions" title="Permalink to this headline">¶</a></h2>
+<p>Suppose that a team is working to build a MindMeld application and integrate it the rest of their microservices.
+Since the microservices are written in Java, the developers want to reuse as much logic as
+possible. Since the MindMeld application is in Python, they would have to re-implement their Java code to Python code.</p>
+<p>With Custom Actions, the developers can now shift the responsibility of fulfilling business logic to services that
+are outside of MindMeld applications, and these services can be implemented in any language. The developers can specify
+the exact conditions (for example, matching a certain domain or intent) to execute the custom actions and the MindMeld
+application will interact with the custom action servers through http(s) requests.</p>
+</div>
+<div class="section" id="openapi-specification-for-client-server-interaction">
+<h2>OpenAPI Specification for client-server interaction<a class="headerlink" href="#openapi-specification-for-client-server-interaction" title="Permalink to this headline">¶</a></h2>
+<p>Our client – server protocol is documented <a class="reference external" href="https://github.com/cisco/mindmeld/blob/master/mindmeld/openapi/custom_action.yaml">here</a>.
+For easy viewing you can check out Swagger UI, which can also help to render OpenAPI protocol into client and server
+stubs in a variety of languages.</p>
+<p>Each request to the Custom Action Server includes two fields: <code class="docutils literal notranslate"><span class="pre">request</span></code> and <code class="docutils literal notranslate"><span class="pre">responder</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">request</span></code> field encapsulates information from the <a class="reference external" href="https://www.mindmeld.com/docs/apidoc/mindmeld.components.request.html#mindmeld.components.request.Request">Request</a>
+object (text, NLP information, etc.) and the <code class="docutils literal notranslate"><span class="pre">responder</span></code> field the <a class="reference external" href="https://www.mindmeld.com/docs/apidoc/mindmeld.components.dialogue.html#mindmeld.components.dialogue.DialogueResponder">Responder</a> object (directives, frame, slots, params).</p>
+<p>In a normal MindMeld application, each object is passed into the application handler for processing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;some_intent&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">handle_intent</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="c1"># normal MindMeld application logic goes here</span>
+</pre></div>
+</div>
+<p>In an analogous process to <code class="docutils literal notranslate"><span class="pre">&#64;app.handle</span></code>, when we invoke the custom action, we are serializing the <code class="docutils literal notranslate"><span class="pre">request</span></code> and <code class="docutils literal notranslate"><span class="pre">responder</span></code> and
+passing them into the body of the http request to the server. In the response, we simply expect it to contain all
+the fields of the <code class="docutils literal notranslate"><span class="pre">Responder</span></code> object which will be deserialized and processed before returning to the end client.</p>
+</div>
+<div class="section" id="configure-custom-actions-for-your-mindmeld-application">
+<h2>Configure Custom Actions for your MindMeld application<a class="headerlink" href="#configure-custom-actions-for-your-mindmeld-application" title="Permalink to this headline">¶</a></h2>
+<p>You can specify custom action configuration in <code class="docutils literal notranslate"><span class="pre">config.py</span></code> with the <code class="docutils literal notranslate"><span class="pre">url</span></code> field:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CUSTOM_ACTION_CONFIG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://0.0.0.0:8080/&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Currently MindMeld also supports SSL encryption by specifying the following fields in
+the <code class="docutils literal notranslate"><span class="pre">CUSTOM_ACTION_CONFIG</span></code>: <code class="docutils literal notranslate"><span class="pre">cert</span></code>, <code class="docutils literal notranslate"><span class="pre">public_key</span></code> and <code class="docutils literal notranslate"><span class="pre">private_key</span></code>. Each field
+is the path to the local location of the certificate, public and private key.</p>
+</div>
+<div class="section" id="a-simple-custom-action-server">
+<h2>A Simple Custom Action Server<a class="headerlink" href="#a-simple-custom-action-server" title="Permalink to this headline">¶</a></h2>
+<p>To understand the behavior of Custom Actions, let's take a look at example of a Custom
+Action Server. Suppose that we have implemented the following server and it is running
+locally at address <a class="reference external" href="http://0.0.0.0:8080/">http://0.0.0.0:8080/</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">connexion</span>
+
+<span class="kn">from</span> <span class="nn">..models.data</span> <span class="kn">import</span> <span class="n">Data</span>  <span class="c1"># noqa: E501</span>
+<span class="kn">from</span> <span class="nn">..models.responder</span> <span class="kn">import</span> <span class="n">Responder</span>  <span class="c1"># noqa: E501</span>
+<span class="kn">from</span> <span class="nn">..models.directive</span> <span class="kn">import</span> <span class="n">Directive</span>
+
+
+<span class="k">def</span> <span class="nf">invoke_action</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>  <span class="c1"># noqa: E501</span>
+    <span class="sd">&quot;&quot;&quot;Invoke an action</span>
+
+<span class="sd">     # noqa: E501</span>
+
+<span class="sd">    :param data: MindMeld Data</span>
+<span class="sd">    :type data: dict | bytes</span>
+
+<span class="sd">    :rtype: Responder</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">connexion</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_json</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">connexion</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">())</span>  <span class="c1"># noqa: E501</span>
+
+    <span class="n">action</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">action</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Invoking {action} on custom server.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+
+    <span class="n">reply</span> <span class="o">=</span> <span class="n">Directive</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;reply&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">msg</span><span class="p">},</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;view&#39;</span><span class="p">)</span>
+    <span class="n">responder</span> <span class="o">=</span> <span class="n">Responder</span><span class="p">(</span><span class="n">directives</span><span class="o">=</span><span class="p">[</span><span class="n">reply</span><span class="p">],</span> <span class="n">frame</span><span class="o">=</span><span class="p">{}),</span>
+    <span class="k">return</span> <span class="n">responder</span>
+</pre></div>
+</div>
+<p>The template for the above example is auto-generated by Swagger from our OpenAPI protocol.
+In this example, the server simply returns a reply directive for each action request.</p>
+</div>
+<div class="section" id="using-custom-actions-with-mindmeld-applications">
+<h2>Using Custom Actions with MindMeld applications<a class="headerlink" href="#using-custom-actions-with-mindmeld-applications" title="Permalink to this headline">¶</a></h2>
+<p>Add a call to a custom action as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">custom_action</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;deny&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above example, we are specifying that when <cite>deny</cite> intent is reached, the application
+should make a call for <code class="docutils literal notranslate"><span class="pre">action_restart</span></code> to the URL specified in <code class="docutils literal notranslate"><span class="pre">CUSTOM_ACTION_CONFIG</span></code>.</p>
+<p>In our response, we should see one reply directive with the message: <code class="docutils literal notranslate"><span class="pre">Invoking</span> <span class="pre">action_restart</span> <span class="pre">on</span> <span class="pre">custom</span> <span class="pre">server</span></code>.</p>
+<p>If your application is asynchronous, you can specify the custom action to be executed
+asynchronously with the <code class="docutils literal notranslate"><span class="pre">async_mode</span></code> flag.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">custom_action</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;deny&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If there are more than one custom action server, you can also choose to
+specify the server by passing the custom action config directly into the application.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://0.0.0.0:8081/&quot;</span><span class="p">}</span>
+<span class="n">app</span><span class="o">.</span><span class="n">custom_action</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;deny&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to execute a sequence of custom actions, you can pass the list of actions into
+the <code class="docutils literal notranslate"><span class="pre">actions</span></code> field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">custom_action</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;ask_help&#39;</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;action_help&#39;</span><span class="p">,</span> <span class="s1">&#39;action_restart&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In our response, we should see two replies: <code class="docutils literal notranslate"><span class="pre">Invoking</span> <span class="pre">action_help</span> <span class="pre">on</span> <span class="pre">custom</span> <span class="pre">server</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Invoking</span> <span class="pre">action_restart</span> <span class="pre">on</span> <span class="pre">custom</span> <span class="pre">server</span></code>.</p>
+<p>The default behavior for executing a sequence of custom actions is to merge all of their fields in the final
+<code class="docutils literal notranslate"><span class="pre">responder</span></code>. If we set the <code class="docutils literal notranslate"><span class="pre">merge</span></code> flag to be <code class="docutils literal notranslate"><span class="pre">False</span></code>, we will only keep the result of the last action.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">custom_action</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;ask_help&#39;</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;action_help&#39;</span><span class="p">,</span> <span class="s1">&#39;action_restart&#39;</span><span class="p">],</span> <span class="n">merge</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, in the final response, we will see only one reply: &quot;Invoking action_restart on custom server&quot;.</p>
+</div>
+<div class="section" id="calling-individual-custom-actions-inside-a-mindmeld-application">
+<h2>Calling Individual Custom Actions inside a MindMeld application<a class="headerlink" href="#calling-individual-custom-actions-inside-a-mindmeld-application" title="Permalink to this headline">¶</a></h2>
+<p>You can invoke individual custom actions by calling the <code class="docutils literal notranslate"><span class="pre">CustomAction</span></code> object directly.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;restart&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">action_check_out</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mindmeld.component</span> <span class="kn">import</span> <span class="n">CustomAction</span>
+    <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The advantage of invoking a custom action manually is that you can further refine and process
+the results from the custom actions. Here the resulting fields are merged into the <code class="docutils literal notranslate"><span class="pre">responder</span></code>
+object.</p>
+<p>Similarly to the <code class="docutils literal notranslate"><span class="pre">custom_action</span></code> handler, we can pass the <code class="docutils literal notranslate"><span class="pre">merge</span></code> flag into the <code class="docutils literal notranslate"><span class="pre">CustomAction</span></code>
+object to set its behavior for handling the fields of the returned <code class="docutils literal notranslate"><span class="pre">Responder</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;restart&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">action_check_out</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also invoke the CustomAction asynchronously as well:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;restart&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">action_check_out</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">await</span> <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can pipe multiple custom actions easily in a sequence and mix this sequence with any operation
+by the <code class="docutils literal notranslate"><span class="pre">responder</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;ask_help&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">handle_ask_help</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;I can help you&#39;</span><span class="p">)</span>
+    <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;action_help&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="n">CustomAction</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the example above, first we choose to add a reply first, and then invoke two custom actions in sequence.</p>
+<p>In the final result, we should see three replies: <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">can</span> <span class="pre">help</span> <span class="pre">you</span></code>, <code class="docutils literal notranslate"><span class="pre">Invoking</span> <span class="pre">action_help</span> <span class="pre">on</span> <span class="pre">custom</span> <span class="pre">server</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Invoking</span> <span class="pre">action_restart</span> <span class="pre">on</span> <span class="pre">custom</span> <span class="pre">server</span></code>.</p>
+<p>Instead of calling individual <code class="docutils literal notranslate"><span class="pre">CustomAction</span></code> in sequence, you can also use the <code class="docutils literal notranslate"><span class="pre">CustomActionSequence</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;ask_help&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">handle_ask_help</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mindmeld.component</span> <span class="kn">import</span> <span class="n">CustomActionSequence</span>
+
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;I can help you&#39;</span><span class="p">)</span>
+    <span class="n">CustomActionSequence</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;action_help&#39;</span><span class="p">,</span> <span class="s1">&#39;action_restart&#39;</span><span class="p">],</span> <span class="n">config</span><span class="o">=</span><span class="n">action_config</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For your convenience, we also provide helper functions (<code class="docutils literal notranslate"><span class="pre">invoke_custom_action</span></code>, <code class="docutils literal notranslate"><span class="pre">invoke_action_async</span></code>) which wrap
+around the <code class="docutils literal notranslate"><span class="pre">CustomAction</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;restart&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">action_check_out</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mindmeld.component</span> <span class="kn">import</span> <span class="n">invoke_custom_action</span>
+    <span class="n">invoke_custom_action</span><span class="p">(</span><span class="s1">&#39;action_restart&#39;</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="internationalization.html" class="btn btn-neutral float-right" title="Internationalization support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dm.html" class="btn btn-neutral float-left" title="Working with the Dialogue Manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Cisco Systems
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

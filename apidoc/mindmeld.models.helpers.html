@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.helpers module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.helpers module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,28 +252,24 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.helpers">
 <span id="mindmeld-models-helpers-module"></span><h1>mindmeld.models.helpers module<a class="headerlink" href="#module-mindmeld.models.helpers" title="Permalink to this headline">¶</a></h1>
 <p>This module contains some helper functions for the models package</p>
+<dl class="function">
+<dt id="mindmeld.models.helpers.create_embedder_model">
+<code class="descclassname">mindmeld.models.helpers.</code><code class="descname">create_embedder_model</code><span class="sig-paren">(</span><em>app_path</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#create_embedder_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.create_embedder_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and loads the embedder model.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="mindmeld.models.helpers.create_model">
 <code class="descclassname">mindmeld.models.helpers.</code><code class="descname">create_model</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.create_model" title="Permalink to this definition">¶</a></dt>
@@ -280,13 +278,13 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) – A model configuration</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) -- A model configuration</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a configured model</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Model</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> – When model configuration is invalid</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> -- When model configuration is invalid</td>
 </tr>
 </tbody>
 </table>
@@ -303,8 +301,8 @@ and type of all the entities match.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>expected</strong> (<em>list of core.Entity</em>) – A list of the expected entities for some query</li>
-<li><strong>predicted</strong> (<em>list of core.Entity</em>) – A list of the predicted entities for some query</li>
+<li><strong>expected</strong> (<em>list of core.Entity</em>) -- A list of the expected entities for some query</li>
+<li><strong>predicted</strong> (<em>list of core.Entity</em>) -- A list of the predicted entities for some query</li>
 </ul>
 </td>
 </tr>
@@ -321,8 +319,8 @@ and type of all the entities match.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>example_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The type of example</li>
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the feature extractor</li>
+<li><strong>example_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The type of example</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the feature extractor</li>
 </ul>
 </td>
 </tr>
@@ -344,7 +342,7 @@ and type of all the entities match.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) – A model configuration</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>ModelConfig</em>) -- A model configuration</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The appropriate LabelEncoder object for the given config</td>
 </tr>
@@ -364,9 +362,9 @@ and type of all the entities match.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tokens</strong> (<em>list of str</em>) – Word tokens.</li>
-<li><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the desired ngram’s start position.</li>
-<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The length of the n-gram, e.g. 1 for unigram, etc.</li>
+<li><strong>tokens</strong> (<em>list of str</em>) -- Word tokens.</li>
+<li><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The index of the desired ngram's start position.</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The length of the n-gram, e.g. 1 for unigram, etc.</li>
 </ul>
 </td>
 </tr>
@@ -380,14 +378,14 @@ and type of all the entities match.</p>
 <dl class="function">
 <dt id="mindmeld.models.helpers.get_seq_accuracy_scorer">
 <code class="descclassname">mindmeld.models.helpers.</code><code class="descname">get_seq_accuracy_scorer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#get_seq_accuracy_scorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.get_seq_accuracy_scorer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a scorer that can be used by sklearn’s GridSearchCV based on the
+<dd><p>Returns a scorer that can be used by sklearn's GridSearchCV based on the
 sequence_accuracy_scoring method below.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="mindmeld.models.helpers.get_seq_tag_accuracy_scorer">
 <code class="descclassname">mindmeld.models.helpers.</code><code class="descname">get_seq_tag_accuracy_scorer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#get_seq_tag_accuracy_scorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.get_seq_tag_accuracy_scorer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a scorer that can be used by sklearn’s GridSearchCV based on the
+<dd><p>Returns a scorer that can be used by sklearn's GridSearchCV based on the
 sequence_tag_accuracy_scoring method below.</p>
 </dd></dl>
 
@@ -400,9 +398,9 @@ sequence_tag_accuracy_scoring method below.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The original resource</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – The dynamic resource that needs to be ingested</li>
-<li><strong>tokenizer</strong> (<em>Tokenizer</em>) – This used to normalize the entities in the dynamic resource</li>
+<li><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The original resource</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- The dynamic resource that needs to be ingested</li>
+<li><strong>tokenizer</strong> (<em>Tokenizer</em>) -- This used to normalize the entities in the dynamic resource</li>
 </ul>
 </td>
 </tr>
@@ -424,7 +422,7 @@ sequence_tag_accuracy_scoring method below.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- A string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A masked string for digit characters</td>
 </tr>
@@ -444,9 +442,9 @@ resource passed in for only the gazetteer values</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The original resource built from the app</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The dynamic resource passed in</li>
-<li><strong>tokenizer</strong> (<em>Tokenizer</em>) – This component is used to normalize entities in dyn gaz</li>
+<li><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The original resource built from the app</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The dynamic resource passed in</li>
+<li><strong>tokenizer</strong> (<em>Tokenizer</em>) -- This component is used to normalize entities in dyn gaz</li>
 </ul>
 </td>
 </tr>
@@ -461,6 +459,11 @@ resource passed in for only the gazetteer values</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="mindmeld.models.helpers.register_embedder">
+<code class="descclassname">mindmeld.models.helpers.</code><code class="descname">register_embedder</code><span class="sig-paren">(</span><em>embedder_type</em>, <em>embedder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#register_embedder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.register_embedder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="mindmeld.models.helpers.register_entity_feature">
 <code class="descclassname">mindmeld.models.helpers.</code><code class="descname">register_entity_feature</code><span class="sig-paren">(</span><em>feature_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/helpers.html#register_entity_feature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.helpers.register_entity_feature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers entity feature</p>
@@ -468,7 +471,7 @@ resource passed in for only the gazetteer values</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the entity feature</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the entity feature</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the feature extractor</td>
 </tr>
@@ -487,8 +490,8 @@ resource passed in for only the gazetteer values</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>feature_type</strong> – ‘query’ or ‘entity’</li>
-<li><strong>feature_name</strong> – The name of the feature, used in config.py</li>
+<li><strong>feature_type</strong> -- 'query' or 'entity'</li>
+<li><strong>feature_name</strong> -- The name of the feature, used in config.py</li>
 </ul>
 </td>
 </tr>
@@ -512,12 +515,12 @@ resource passed in for only the gazetteer values</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>label_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The label type of the label encoder</li>
-<li><strong>label_encoder</strong> (<em>LabelEncoder</em>) – The label encoder class to register</li>
+<li><strong>label_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The label type of the label encoder</li>
+<li><strong>label_encoder</strong> (<em>LabelEncoder</em>) -- The label encoder class to register</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> – If the label type is already registered</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> -- If the label type is already registered</p>
 </td>
 </tr>
 </tbody>
@@ -533,8 +536,8 @@ resource passed in for only the gazetteer values</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The model type as specified in model configs</li>
-<li><strong>model_class</strong> (<em>class</em>) – The model to register</li>
+<li><strong>model_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The model type as specified in model configs</li>
+<li><strong>model_class</strong> (<em>class</em>) -- The model to register</li>
 </ul>
 </td>
 </tr>
@@ -550,7 +553,7 @@ resource passed in for only the gazetteer values</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the query feature</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the query feature</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the feature extractor</td>
 </tr>
@@ -568,7 +571,7 @@ resource passed in for only the gazetteer values</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the key of a classifier resource which must be initialized before
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- the key of a classifier resource which must be initialized before
 the given feature extractor is used</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the feature extractor</td>
@@ -591,8 +594,8 @@ the given feature extractor is used</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>y_true</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of true expected labels</li>
-<li><strong>y_pred</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of predicted labels</li>
+<li><strong>y_true</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A sequence of true expected labels</li>
+<li><strong>y_pred</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A sequence of predicted labels</li>
 </ul>
 </td>
 </tr>
@@ -618,8 +621,8 @@ the given feature extractor is used</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>y_true</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of true expected labels</li>
-<li><strong>y_pred</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A sequence of predicted labels</li>
+<li><strong>y_true</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A sequence of true expected labels</li>
+<li><strong>y_pred</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A sequence of predicted labels</li>
 </ul>
 </td>
 </tr>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Webex Teams Integration &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Webex Teams Integration &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Webex Teams Integration</a><ul>
@@ -262,23 +264,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="webex-teams-integration">
@@ -287,31 +279,31 @@
 In this tutorial, we will create a Webex Teams bot based on the <a class="reference internal" href="../blueprints/food_ordering.html"><span class="doc">Food Ordering</span></a> blueprint. The food ordering app is an example of a deep-domain conversational agent that uses a knowledge base of restaurants and menu items to understand complex user queries that reference dishes from different restaurant menus.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Please make sure to install the Webex Teams dependency by running in the shell: <code class="code docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bot]</span></code>.</p>
+<p class="last">Please make sure to install the Webex Teams dependency by running in the shell: <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bot]</span></code>.</p>
 </div>
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
-<p>In this quick start guide, we will use a webhook and <cite>ngrok</cite> to integrate the food ordering application to Webex Teams. By setting up a publicly accessible server, one can register the server’s IP address to the webhook, thereby allowing Webex Teams to send messages to the food ordering application. This guide should take between five and fifteen minutes to complete.</p>
+<p>In this quick start guide, we will use a webhook and <cite>ngrok</cite> to integrate the food ordering application to Webex Teams. By setting up a publicly accessible server, one can register the server's IP address to the webhook, thereby allowing Webex Teams to send messages to the food ordering application. This guide should take between five and fifteen minutes to complete.</p>
 <div class="section" id="register-webex-bot">
 <h3>1. Register Webex Bot<a class="headerlink" href="#register-webex-bot" title="Permalink to this headline">¶</a></h3>
-<p>Create a <a class="reference external" href="https://developer.webex.com/my-apps/new/bot">new Webex Bot integration</a> and store the Bot’s Access Token safely.</p>
+<p>Create a <a class="reference external" href="https://developer.webex.com/my-apps/new/bot">new Webex Bot integration</a> and store the Bot's Access Token safely.</p>
 <a class="reference internal image-reference" href="../_images/create_bot.png"><img alt="../_images/create_bot.png" class="align-center" src="../_images/create_bot.png" style="width: 700px;" /></a>
 <p>Next, make sure you make the local server endpoint for port 8080 publicly accessible. This could be done through a system like Nginx.</p>
 </div>
 <div class="section" id="register-webex-webhook">
 <h3>2. Register Webex Webhook<a class="headerlink" href="#register-webex-webhook" title="Permalink to this headline">¶</a></h3>
-<p>Register a <a class="reference external" href="https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook">new webhook</a>. Set the <code class="docutils literal"><span class="pre">targetUrl</span></code> as ngrok’s public URL, set <code class="docutils literal"><span class="pre">resource</span></code> to <code class="docutils literal"><span class="pre">messages</span></code>, and set <code class="docutils literal"><span class="pre">event</span></code> to <code class="docutils literal"><span class="pre">created</span></code>. Once you click <cite>Run</cite>, store the <code class="docutils literal"><span class="pre">id</span></code> field in the response. This will be your webhook ID.</p>
+<p>Register a <a class="reference external" href="https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook">new webhook</a>. Set the <code class="docutils literal notranslate"><span class="pre">targetUrl</span></code> as ngrok's public URL, set <code class="docutils literal notranslate"><span class="pre">resource</span></code> to <code class="docutils literal notranslate"><span class="pre">messages</span></code>, and set <code class="docutils literal notranslate"><span class="pre">event</span></code> to <code class="docutils literal notranslate"><span class="pre">created</span></code>. Once you click <cite>Run</cite>, store the <code class="docutils literal notranslate"><span class="pre">id</span></code> field in the response. This will be your webhook ID.</p>
 <a class="reference internal image-reference" href="../_images/webhook.png"><img alt="../_images/webhook.png" class="align-center" src="../_images/webhook.png" style="width: 700px;" /></a>
 </div>
 <div class="section" id="building-the-bot">
 <h3>3. Building the bot<a class="headerlink" href="#building-the-bot" title="Permalink to this headline">¶</a></h3>
 <p>You can import <cite>WebexBotServer</cite> to build a Webex bot application server with MindMeld.</p>
 <p>First, you need to install the specific dependencies for bot integration.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">pip install mindmeld[bot]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install mindmeld[bot]</span>
 </pre></div>
 </div>
 <p>After that you can instantiate an WebexBotServer instance and pass your application logic and the Webhook ID and the Access Token into the server.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="kn">from</span> <span class="nn">mindmeld.bot</span> <span class="kn">import</span> <span class="n">WebexBotServer</span>
 <span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span>
 
@@ -336,7 +328,7 @@ In this tutorial, we will create a Webex Teams bot based on the <a class="refere
 </pre></div>
 </div>
 <p>You can download the food ordering blueprint or HR blueprint for an example implementation.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">bp_name</span> <span class="o">=</span> <span class="s1">&#39;food_ordering&#39;</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp_name</span><span class="p">)</span>
@@ -346,7 +338,7 @@ In this tutorial, we will create a Webex Teams bot based on the <a class="refere
 <div class="section" id="start-the-food-ordering-server">
 <h3>4. Start the food ordering server<a class="headerlink" href="#start-the-food-ordering-server" title="Permalink to this headline">¶</a></h3>
 <p>Set the following environment variables and start the flask server.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">cd food_ordering</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd food_ordering</span>
 <span class="go">export WEBHOOK_ID=&lt;insert webhook id&gt;</span>
 <span class="go">export BOT_ACCESS_TOKEN=&lt;insert bot access token&gt;</span>
 <span class="go">python webex_bot_server.py</span>

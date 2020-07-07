@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>MindMeld UI &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>MindMeld UI &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -261,23 +263,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="mindmeld-ui">
@@ -289,30 +281,30 @@
 <p>You can run this app by following the next steps while inside the <cite>mindmeld-ui</cite> folder of the <cite>mindmeld</cite> repository.</p>
 <div class="section" id="install-the-dependencies">
 <h3>1. Install the dependencies<a class="headerlink" href="#install-the-dependencies" title="Permalink to this headline">¶</a></h3>
-<p>In order to run the app, you need to install it’s dependencies. You can simply run:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">npm install</span>
+<p>In order to run the app, you need to install it's dependencies. You can simply run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">npm install</span>
 </pre></div>
 </div>
 <p>You can also use yarn:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">yarn install</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">yarn install</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="run-the-web-app">
 <h3>2. Run the web app<a class="headerlink" href="#run-the-web-app" title="Permalink to this headline">¶</a></h3>
 <p>To run the web app simply do:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">npm start</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">npm start</span>
 </pre></div>
 </div>
 <p>You can also use yarn:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">yarn start</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">yarn start</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="setup-configurations-optional">
 <h3>3. Setup configurations (Optional)<a class="headerlink" href="#setup-configurations-optional" title="Permalink to this headline">¶</a></h3>
 <p>At the <cite>mindmeld-ui</cite> directory, you can add a <cite>.env</cite> file that includes your configurations. This file should look like this:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">REACT_APP_GOOGLE_KEY = &lt;YOUR_GOOGLE_KEY&gt; # Set this if you want to use Google Cloud&#39;s Speech API (as opposed to Chromes native ASR).</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">REACT_APP_GOOGLE_KEY = &lt;YOUR_GOOGLE_KEY&gt; # Set this if you want to use Google Cloud&#39;s Speech API (as opposed to Chromes native ASR).</span>
 <span class="go">REACT_APP_MAX_ALTERNATIVES = &lt;MAX_ALTERNATIVES&gt; # Set this if you want to control how many responses you get from the ASR.</span>
 <span class="go">REACT_APP_MINDMELD_URL = &lt;MINDMELD_URL&gt; # Set this if you need to point the UI to point the UI to a URL different than the default &#39;http://127.0.0.1:7150/parse&#39;</span>
 </pre></div>
@@ -321,7 +313,7 @@
 <div class="section" id="navigate-the-app">
 <h3>4. Navigate the app<a class="headerlink" href="#navigate-the-app" title="Permalink to this headline">¶</a></h3>
 <p>First, you will need to run the Mindmeld app. If you are developing locally, you can do:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -m [app-name] run</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m [app-name] run</span>
 </pre></div>
 </div>
 <img alt="MindMeld UI" src="../_images/mindmeld_ui.png" />

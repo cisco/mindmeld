@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.nlp module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.nlp module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.nlp">
@@ -275,19 +267,19 @@
 <dl class="class">
 <dt id="mindmeld.components.nlp.DomainProcessor">
 <em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">DomainProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#DomainProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
 <p>The domain processor houses the hierarchy of domain-specific natural language processing
 models required for understanding the user input for a particular domain.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.DomainProcessor.name">
 <code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.name" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of the domain.</p>
+<dd><p><em>str</em> -- The name of the domain.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.DomainProcessor.intent_classifier">
 <code class="descname">intent_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.DomainProcessor.intent_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>IntentClassifier</em> – The intent classifier for this domain.</p>
+<dd><p><em>IntentClassifier</em> -- The intent classifier for this domain.</p>
 </dd></dl>
 
 <dl class="method">
@@ -299,9 +291,9 @@ models required for understanding the user input for a particular domain.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query to be predicted.</li>
-<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The expected intent label for this query.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query to be predicted.</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The expected intent label for this query.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
 </ul>
 </td>
 </tr>
@@ -324,14 +316,14 @@ models required for understanding the user input for a particular domain.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, or </em><em>list/tuple</em>) – The raw user text input, or a list of the n-best                 query transcripts from ASR.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example:                     {                         close_door: {}                     }                 where close_door is the intent. The intent belongs to the smart_home domain.                 If allowed_nlp_classes is None, we use the normal model predict functionality.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, or </em><em>list/tuple</em>) -- The raw user text input, or a list of the n-best                 query transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example:                     {                         close_door: {}                     }                 where close_door is the intent. The intent belongs to the smart_home domain.                 If allowed_nlp_classes is None, we use the normal model predict functionality.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as                 'America/Los_Angeles', or 'Asia/Kolkata'                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -354,11 +346,11 @@ models required for understanding the user input for a particular domain.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'close_door':</span> <span class="pre">{}}</span></code>
+<li><strong>query</strong> (<em>Query</em><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the intent section of the                 NLP hierarchy that is selected for NLP analysis. An example: <code class="docutils literal notranslate"><span class="pre">{'close_door':</span> <span class="pre">{}}</span></code>
 where close_door is the intent. The intent belongs to the smart_home domain.                 If allowed_nlp_classes is None, we use the normal model predict functionality.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -383,37 +375,37 @@ where close_door is the intent. The intent belongs to the smart_home domain.    
 <dl class="class">
 <dt id="mindmeld.components.nlp.EntityProcessor">
 <em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">EntityProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>intent</em>, <em>entity_type</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#EntityProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
 <p>The entity processor houses the hierarchy of entity-specific natural language processing
 models required for analyzing a specific entity type in the user input.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.EntityProcessor.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The domain this entity belongs to.</p>
+<dd><p><em>str</em> -- The domain this entity belongs to.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.EntityProcessor.intent">
 <code class="descname">intent</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.intent" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The intent this entity belongs to.</p>
+<dd><p><em>str</em> -- The intent this entity belongs to.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.EntityProcessor.type">
 <code class="descname">type</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.type" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of this entity.</p>
+<dd><p><em>str</em> -- The type of this entity.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.EntityProcessor.name">
 <code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.name" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The type of this entity.</p>
+<dd><p><em>str</em> -- The type of this entity.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.EntityProcessor.role_classifier">
 <code class="descname">role_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.EntityProcessor.role_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>RoleClassifier</em> – The role classifier for this entity type.</p>
+<dd><p><em>RoleClassifier</em> -- The role classifier for this entity type.</p>
 </dd></dl>
 
 <dl class="method">
@@ -425,10 +417,10 @@ models required for analyzing a specific entity type in the user input.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em>) – The query the entity originated from.</li>
-<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – All entities recognized in the query.</li>
-<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The index of the entity to process.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If set to True, returns confidence scores of classes.</li>
+<li><strong>query</strong> (<em>Query</em>) -- The query the entity originated from.</li>
+<li><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- All entities recognized in the query.</li>
+<li><strong>entity_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The index of the entity to process.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- If set to True, returns confidence scores of classes.</li>
 </ul>
 </td>
 </tr>
@@ -466,8 +458,8 @@ resolution on just the text of the entity.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity</strong> (<em>QueryEntity</em>) – The entity to process.</li>
-<li><strong>aligned_entity_spans</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>QueryEntity</em><em>]</em>) – The list of aligned n-best entity spans
+<li><strong>entity</strong> (<em>QueryEntity</em>) -- The entity to process.</li>
+<li><strong>aligned_entity_spans</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>QueryEntity</em><em>]</em>) -- The list of aligned n-best entity spans
 to improve resolution.</li>
 </ul>
 </td>
@@ -487,25 +479,25 @@ to improve resolution.</li>
 <dl class="class">
 <dt id="mindmeld.components.nlp.IntentProcessor">
 <em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">IntentProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>domain</em>, <em>intent</em>, <em>resource_loader=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#IntentProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
 <p>The intent processor houses the hierarchy of intent-specific natural language processing
 models required for understanding the user input for a particular intent.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.IntentProcessor.domain">
 <code class="descname">domain</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.domain" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The domain this intent belongs to.</p>
+<dd><p><em>str</em> -- The domain this intent belongs to.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.IntentProcessor.name">
 <code class="descname">name</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.name" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – The name of this intent.</p>
+<dd><p><em>str</em> -- The name of this intent.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.IntentProcessor.entity_recognizer">
 <code class="descname">entity_recognizer</code><a class="headerlink" href="#mindmeld.components.nlp.IntentProcessor.entity_recognizer" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>EntityRecognizer</em> – The entity recognizer for this intent.</p>
+<dd><p><em>EntityRecognizer</em> -- The entity recognizer for this intent.</p>
 </dd></dl>
 
 <dl class="method">
@@ -518,16 +510,16 @@ trained for this intent.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The raw user text input, or a list of the n-best query
 transcripts from ASR.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
-‘America/Los_Angeles’, or ‘Asia/Kolkata’
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as
+'America/Los_Angeles', or 'Asia/Kolkata'
 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class as well as predict probabilities.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class as well as predict probabilities.</li>
 </ul>
 </td>
 </tr>
@@ -550,9 +542,9 @@ See the [tz database](<a class="reference external" href="https://www.iana.org/t
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal"><span class="pre">True</span></code>, returns class as well as predict probabilities.</li>
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, returns class as well as predict probabilities.</li>
 </ul>
 </td>
 </tr>
@@ -583,26 +575,26 @@ See the [tz database](<a class="reference external" href="https://www.iana.org/t
 <dl class="class">
 <dt id="mindmeld.components.nlp.NaturalLanguageProcessor">
 <em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">NaturalLanguageProcessor</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader=None</em>, <em>config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.components.nlp.Processor" title="mindmeld.components.nlp.Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.components.nlp.Processor</span></code></a></p>
 <p>The natural language processor is the MindMeld component responsible for understanding
 the user input using a hierarchy of natural language processing models.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.NaturalLanguageProcessor.domain_classifier">
 <code class="descname">domain_classifier</code><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.domain_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>DomainClassifier</em> – The domain classifier for this application.</p>
+<dd><p><em>DomainClassifier</em> -- The domain classifier for this application.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.components.nlp.NaturalLanguageProcessor.extract_allowed_intents">
 <code class="descname">extract_allowed_intents</code><span class="sig-paren">(</span><em>allowed_intents</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#NaturalLanguageProcessor.extract_allowed_intents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.NaturalLanguageProcessor.extract_allowed_intents" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function validates a user inputted list of allowed_intents against the NLP
-hierarchy and construct a hierarchy dictionary as follows: <code class="docutils literal"><span class="pre">{domain:</span> <span class="pre">{intent:</span> <span class="pre">{}}</span></code> if
+hierarchy and construct a hierarchy dictionary as follows: <code class="docutils literal notranslate"><span class="pre">{domain:</span> <span class="pre">{intent:</span> <span class="pre">{}}</span></code> if
 the validation of allowed_intents has passed.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of allowable intents in the format “domain.intent”.                 If all intents need to be included, the syntax is “domain.*”.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of allowable intents in the format &quot;domain.intent&quot;.                 If all intents need to be included, the syntax is &quot;domain.*&quot;.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of NLP hierarchy.</td>
 </tr>
@@ -621,10 +613,10 @@ the validation of allowed_intents has passed.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>markup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The marked up query string.</li>
-<li><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The gold value for domain classification.</li>
-<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The gold value for intent classification.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
+<li><strong>markup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The marked up query string.</li>
+<li><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The gold value for domain classification.</li>
+<li><strong>intent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The gold value for intent classification.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
 </ul>
 </td>
 </tr>
@@ -647,17 +639,17 @@ the validation of allowed_intents has passed.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
-<li><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – A list of allowed intents to use for                 the NLP processing.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal notranslate"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>allowed_intents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) -- A list of allowed intents to use for                 the NLP processing.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and
 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code. This parameter is
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code. This parameter is
 ignored deprecated this is an application level parameter.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as                 'America/Los_Angeles', or 'Asia/Kolkata'                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -680,10 +672,10 @@ ignored deprecated this is an application level parameter.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent. If                 <code class="docutils literal"><span class="pre">allowed_nlp_classes</span></code> is <code class="docutils literal"><span class="pre">None</span></code>, we just use the normal model predict                 functionality.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal notranslate"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent. If                 <code class="docutils literal notranslate"><span class="pre">allowed_nlp_classes</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, we just use the normal model predict                 functionality.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -708,26 +700,26 @@ ignored deprecated this is an application level parameter.</li>
 <dl class="class">
 <dt id="mindmeld.components.nlp.Processor">
 <em class="property">class </em><code class="descclassname">mindmeld.components.nlp.</code><code class="descname">Processor</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader=None</em>, <em>config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/nlp.html#Processor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.nlp.Processor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>A generic base class for processing queries through the MindMeld NLP
 components.</p>
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.Processor.resource_loader">
 <code class="descname">resource_loader</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.resource_loader" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>ResourceLoader</em> – An object which can load resources for the processor.</p>
+<dd><p><em>ResourceLoader</em> -- An object which can load resources for the processor.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.Processor.dirty">
 <code class="descname">dirty</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.dirty" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Indicates whether the processor has unsaved changes to
+<dd><p><em>bool</em> -- Indicates whether the processor has unsaved changes to
 its models.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.components.nlp.Processor.ready">
 <code class="descname">ready</code><a class="headerlink" href="#mindmeld.components.nlp.Processor.ready" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> – Indicates whether the processor is ready to process
+<dd><p><em>bool</em> -- Indicates whether the processor is ready to process
 messages.</p>
 </dd></dl>
 
@@ -740,9 +732,9 @@ messages.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>incremental</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – When <code class="docutils literal"><span class="pre">True</span></code>, only build models whose training data or
-configuration has changed since the last build. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
-<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.8)"><em>string</em></a><em>, </em><em>optional</em>) – The label set from which to train all classifiers.</li>
+<li><strong>incremental</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- When <code class="docutils literal notranslate"><span class="pre">True</span></code>, only build models whose training data or
+configuration has changed since the last build. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</li>
+<li><strong>label_set</strong> (<em>string</em><em>, </em><em>optional</em>) -- The label set from which to train all classifiers.</li>
 </ul>
 </td>
 </tr>
@@ -759,13 +751,13 @@ configuration has changed since the last build. Defaults to <code class="docutil
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – Text or list of texts to create a query object for.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as
-‘America/Los_Angeles’, or ‘Asia/Kolkata’
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) -- Text or list of texts to create a query object for.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as
+'America/Los_Angeles', or 'Asia/Kolkata'
 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
 </ul>
 </td>
 </tr>
@@ -796,9 +788,9 @@ children.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>print_stats</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, prints the full stats table. Otherwise prints just
+<li><strong>print_stats</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- If true, prints the full stats table. Otherwise prints just
 the accuracy</li>
-<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The label set from which to evaluate
+<li><strong>label_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The label set from which to evaluate
 all classifiers.</li>
 </ul>
 </td>
@@ -816,7 +808,7 @@ from disk.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The incremental timestamp value.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>incremental_timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The incremental timestamp value.</td>
 </tr>
 </tbody>
 </table>
@@ -831,15 +823,15 @@ from disk.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
-<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
-<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – Language as specified using a 639-1/2 code. This parameter is
+<li><strong>query_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The raw user text input, or a list of the n-best query                 transcripts from ASR.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal notranslate"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The locale representing the ISO 639-1 language code and                 ISO3166 alpha 2 country code separated by an underscore character.</li>
+<li><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- Language as specified using a 639-1/2 code. This parameter is
 deprecated deprecated this is an application level parameter.</li>
-<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) – The name of an IANA time zone, such as                 ‘America/Los_Angeles’, or ‘Asia/Kolkata’                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
-<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) – A unix time stamp for the request (in seconds).</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference.</li>
-<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>time_zone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em>) -- The name of an IANA time zone, such as                 'America/Los_Angeles', or 'Asia/Kolkata'                 See the [tz database](<a class="reference external" href="https://www.iana.org/time-zones">https://www.iana.org/time-zones</a>) for more information.</li>
+<li><strong>timestamp</strong> (<em>long</em><em>, </em><em>optional</em>) -- A unix time stamp for the request (in seconds).</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference.</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) -- If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -862,9 +854,9 @@ deprecated deprecated this is an application level parameter.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – The user input query, or a list of the n-best transcripts                 query objects.</li>
-<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference             verbose (bool, optional): If True, returns class probabilities along with class                 prediction.</li>
+<li><strong>query</strong> (<em>Query</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- The user input query, or a list of the n-best transcripts                 query objects.</li>
+<li><strong>allowed_nlp_classes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dictionary of the NLP hierarchy that is                 selected for NLP analysis. An example: <code class="docutils literal notranslate"><span class="pre">{'smart_home':</span> <span class="pre">{'close_door':</span> <span class="pre">{}}}</span></code>                 where smart_home is the domain and close_door is the intent.</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference             verbose (bool, optional): If True, returns class probabilities along with class                 prediction.</li>
 </ul>
 </td>
 </tr>
@@ -907,7 +899,7 @@ from within a long running child process.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>instance_id</strong> (<em>number</em>) – id(inst) of the Processor instance that needs called</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>instance_id</strong> (<em>number</em>) -- id(inst) of the Processor instance that needs called</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The result of the called function</td>
 </tr>

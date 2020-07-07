@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with User-Defined Features &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Working with User-Defined Features &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -161,6 +162,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -257,49 +259,39 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="working-with-user-defined-features">
 <h1>Working with User-Defined Features<a class="headerlink" href="#working-with-user-defined-features" title="Permalink to this headline">¶</a></h1>
 <p>In addition to the features available for each NLP classifier in MindMeld,
 you can also define your own custom feature extractors that are relevant to your application.
-User-defined features must follow the same format as MindMeld’s in-built features.
+User-defined features must follow the same format as MindMeld's in-built features.
 In this section, we will examine the components of a feature extractor function and
 explain how to write your own custom features.</p>
 <div class="section" id="custom-features-file">
 <h2>Custom Features File<a class="headerlink" href="#custom-features-file" title="Permalink to this headline">¶</a></h2>
-<p>Start by creating a new Python file, say <code class="docutils literal"><span class="pre">custom_features.py</span></code>, that will contain the definitions
-of all your custom feature extractors. If your MindMeld project was created using the “template”
+<p>Start by creating a new Python file, say <code class="docutils literal notranslate"><span class="pre">custom_features.py</span></code>, that will contain the definitions
+of all your custom feature extractors. If your MindMeld project was created using the &quot;template&quot;
 blueprint or adapted from an existing blueprint application, you should already have this file at
 the root level of your project directory. If you created your
 MindMeld project from scratch, you can refer to any of the blueprints for an example of the
 custom features file.</p>
 <p>In order to use your custom features, the custom features file must be imported in the
-<code class="docutils literal"><span class="pre">__init__.py</span></code> file. For example, in the Home Assistant blueprint app you can import
-a custom features file named <code class="docutils literal"><span class="pre">custom_features.py</span></code> by adding the following line to the
-<code class="docutils literal"><span class="pre">__init__.py</span></code> file.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">home_assistant.custom_features</span>
+<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file. For example, in the Home Assistant blueprint app you can import
+a custom features file named <code class="docutils literal notranslate"><span class="pre">custom_features.py</span></code> by adding the following line to the
+<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">home_assistant.custom_features</span>
 </pre></div>
 </div>
 <p>You can then reference your newly defined features in the classifier
-configurations you specify in the application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>.</p>
+configurations you specify in the application configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>.</p>
 <p>The Natural Language Processor uses two kinds of features. <strong>Query features</strong> can be used in
 domain, intent, and entity model configs, and are extracted by feature extractors that operate on
 the entire input query. <strong>Entity Features</strong>, on the other hand, can only be used in the role
@@ -308,20 +300,20 @@ entity. An example for each kind of feature extractor is provided in the followi
 <p>To summarize, in order to implement and use your own custom features, you must do the following:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Define your feature extractors in a <code class="docutils literal"><span class="pre">.py</span></code> file (referred to as the <em>custom features file</em>)</li>
-<li>Import the custom features file in <code class="docutils literal"><span class="pre">__init__.py</span></code>.</li>
-<li>Add your newly defined feature names to the <code class="docutils literal"><span class="pre">'features'</span></code> dictionary within a classifier
+<li>Define your feature extractors in a <code class="docutils literal notranslate"><span class="pre">.py</span></code> file (referred to as the <em>custom features file</em>)</li>
+<li>Import the custom features file in <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>.</li>
+<li>Add your newly defined feature names to the <code class="docutils literal notranslate"><span class="pre">'features'</span></code> dictionary within a classifier
 configuration.</li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="example-of-a-query-feature-extractor">
 <h2>Example of a Query Feature Extractor<a class="headerlink" href="#example-of-a-query-feature-extractor" title="Permalink to this headline">¶</a></h2>
-<p>Each feature extractor is defined as a Python function that returns an inner <code class="docutils literal"><span class="pre">_extractor</span></code>
-function. This <code class="docutils literal"><span class="pre">_extractor</span></code> function performs the actual feature extraction. The following code
+<p>Each feature extractor is defined as a Python function that returns an inner <code class="docutils literal notranslate"><span class="pre">_extractor</span></code>
+function. This <code class="docutils literal notranslate"><span class="pre">_extractor</span></code> function performs the actual feature extraction. The following code
 block shows an example of a query feature extractor that computes the average token length of
 an input query.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">extract_average_token_length</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Example query feature that gets the average length of normalized tokens in the query</span>
@@ -338,19 +330,19 @@ an input query.</p>
     <span class="k">return</span> <span class="n">_extractor</span>
 </pre></div>
 </div>
-<p>Let’s take a closer look at the salient parts of a feature extractor.</p>
+<p>Let's take a closer look at the salient parts of a feature extractor.</p>
 <ol class="arabic simple">
-<li>The <code class="docutils literal"><span class="pre">&#64;register_query_feature</span></code> decorator at the top registers the feature with MindMeld.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">&#64;register_query_feature</span></code> decorator at the top registers the feature with MindMeld.</li>
 </ol>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_query_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;average-token-length&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">feature_name</span></code> parameter specifies the name by which the extractor will be referenced in the
-app’s configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>. The feature name must be added as a key within the
-‘features’ dictionary of the classifier config, as shown below. If the feature extractor function
+<p>The <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> parameter specifies the name by which the extractor will be referenced in the
+app's configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>. The feature name must be added as a key within the
+'features' dictionary of the classifier config, as shown below. If the feature extractor function
 has parameters, the corresponding value in the key-value pair must specify these parameters. If
 there are no parameters, as in this case, an empty dictionary is sufficient.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span> <span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
      <span class="o">...</span>
      <span class="o">...</span>
      <span class="o">...</span>
@@ -369,24 +361,24 @@ there are no parameters, as in this case, an empty dictionary is sufficient.</p>
  <span class="p">}</span>
 </pre></div>
 </div>
-<p>2. The arguments passed to the feature extractor can be accessed by the inner <code class="docutils literal"><span class="pre">_extractor</span></code>
+<p>2. The arguments passed to the feature extractor can be accessed by the inner <code class="docutils literal notranslate"><span class="pre">_extractor</span></code>
 function.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">extract_average_token_length</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">extract_average_token_length</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
 </pre></div>
 </div>
-<p>The values of the parameters must be specified in the ‘features’ dictionary of the classifier
+<p>The values of the parameters must be specified in the 'features' dictionary of the classifier
 config as values corresponding to the appropriate feature keys.</p>
-<p>3. The feature extractor returns an <code class="docutils literal"><span class="pre">_extractor</span></code> function which encapsulates the actual feature
+<p>3. The feature extractor returns an <code class="docutils literal notranslate"><span class="pre">_extractor</span></code> function which encapsulates the actual feature
 extraction logic.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
 </pre></div>
 </div>
-<p>Query feature extractors have access to the <code class="docutils literal"><span class="pre">query</span></code> object, which contains the query text,
+<p>Query feature extractors have access to the <code class="docutils literal notranslate"><span class="pre">query</span></code> object, which contains the query text,
 normalized query tokens, and system entity candidates.</p>
 <ol class="arabic simple" start="4">
-<li>The <code class="docutils literal"><span class="pre">_extractor</span></code> function must return a dictionary mapping feature names to their corresponding values.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">_extractor</span></code> function must return a dictionary mapping feature names to their corresponding values.</li>
 </ol>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="p">{</span><span class="s1">&#39;average_token_length&#39;</span><span class="p">:</span> <span class="n">average_token_length</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="p">{</span><span class="s1">&#39;average_token_length&#39;</span><span class="p">:</span> <span class="n">average_token_length</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -399,21 +391,21 @@ config specifications will raise an error.</p>
 <p>There are two other differences.</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Entity features are registered using a different decorator, <code class="docutils literal"><span class="pre">&#64;register_entity_feature</span></code>.</li>
-<li>The inner <code class="docutils literal"><span class="pre">_extractor</span></code> function of an entity feature extractor receives an <code class="docutils literal"><span class="pre">example</span></code>
+<li>Entity features are registered using a different decorator, <code class="docutils literal notranslate"><span class="pre">&#64;register_entity_feature</span></code>.</li>
+<li>The inner <code class="docutils literal notranslate"><span class="pre">_extractor</span></code> function of an entity feature extractor receives an <code class="docutils literal notranslate"><span class="pre">example</span></code>
 object that contains information about the query and the extracted entities.</li>
 </ol>
 </div></blockquote>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_extractor</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
     <span class="n">query</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">entity_index</span> <span class="o">=</span> <span class="n">example</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">query</span></code> object is the same as above, <code class="docutils literal"><span class="pre">entities</span></code> is a list of all the entities detected in
-the query, and the <code class="docutils literal"><span class="pre">entity_index</span></code> specifies which of the <code class="docutils literal"><span class="pre">entities</span></code> the extractor function is
+<p>The <code class="docutils literal notranslate"><span class="pre">query</span></code> object is the same as above, <code class="docutils literal notranslate"><span class="pre">entities</span></code> is a list of all the entities detected in
+the query, and the <code class="docutils literal notranslate"><span class="pre">entity_index</span></code> specifies which of the <code class="docutils literal notranslate"><span class="pre">entities</span></code> the extractor function is
 currently operating on.</p>
-<p>Here’s an example of an entity feature extractor that computes the starting character index for a
+<p>Here's an example of an entity feature extractor that computes the starting character index for a
 given entity.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@register_entity_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;entity-span-start&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_entity_feature</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="s1">&#39;entity-span-start&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">extract_entity_span_start</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Example entity feature that gets the start span for the given entity</span>

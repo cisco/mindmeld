@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Using LSTM for Entity Recognition &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Using LSTM for Entity Recognition &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -160,6 +161,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -256,23 +258,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="using-lstm-for-entity-recognition">
@@ -280,14 +272,14 @@
 <p>Entity recognition is the one task within the NLP pipeline where deep learning models are among the available classification models. In particular, MindMeld provides a <a class="reference external" href="https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks">Bi-Directional Long Short-Term Memory (LSTM) Network</a>, which has been shown to perform well on sequence labeling tasks such as entity recognition. The model is implemented in <a class="reference external" href="https://www.tensorflow.org/get_started/">TensorFlow</a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Please make sure to install the Tensorflow requirement by running in the shell: <code class="code docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[tensorflow]</span></code>.</p>
+<p class="last">Please make sure to install the Tensorflow requirement by running in the shell: <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[tensorflow]</span></code>.</p>
 </div>
 <div class="section" id="lstm-network-overview">
 <h2>LSTM network overview<a class="headerlink" href="#lstm-network-overview" title="Permalink to this headline">¶</a></h2>
 <p>The MindMeld Bi-Directional LSTM network</p>
 <blockquote>
 <div><ul class="simple">
-<li>encodes words as pre-trained word embeddings using Stanford’s <a class="reference external" href="https://nlp.stanford.edu/projects/glove/">GloVe representation</a></li>
+<li>encodes words as pre-trained word embeddings using Stanford's <a class="reference external" href="https://nlp.stanford.edu/projects/glove/">GloVe representation</a></li>
 <li>encodes characters using a convolutional network trained on the training data</li>
 <li>concatenates the word and character embeddings together and feeds them into the bi-directional LSTM</li>
 <li>couples the forget and input gates of the LSTM using a peephole connection, to improve overall accuracies on downstream NLP tasks</li>
@@ -314,9 +306,9 @@
 </div>
 <div class="section" id="lstm-parameter-settings">
 <h2>LSTM parameter settings<a class="headerlink" href="#lstm-parameter-settings" title="Permalink to this headline">¶</a></h2>
-<p>Parameter tuning for an LSTM is more complex than for traditional machine learning models. A good starting point for understanding this subject is Andrej Karpathy’s <a class="reference external" href="https://cs231n.github.io/neural-networks-3/#baby">course notes</a> from the Convolutional Neural Networks for Visual Recognition course at Stanford University.</p>
+<p>Parameter tuning for an LSTM is more complex than for traditional machine learning models. A good starting point for understanding this subject is Andrej Karpathy's <a class="reference external" href="https://cs231n.github.io/neural-networks-3/#baby">course notes</a> from the Convolutional Neural Networks for Visual Recognition course at Stanford University.</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
@@ -334,14 +326,14 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">padding_length</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">padding_length</span></code></td>
 <td><p class="first">The sequence model treats this as the maximum number of words in a query.
-If a query has more words than <code class="docutils literal"><span class="pre">padding_length</span></code>, the surplus words are discarded.</p>
+If a query has more words than <code class="docutils literal notranslate"><span class="pre">padding_length</span></code>, the surplus words are discarded.</p>
 <p>Typically set to the maximum word length of query expected both at train and predict time.</p>
-<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'padding_length':</span> <span class="pre">20}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'padding_length':</span> <span class="pre">20}</span></code></dt>
 <dd><ul class="first last simple">
 <li>a query can have a maximum of twenty words</li>
 </ul>
@@ -349,12 +341,12 @@ If a query has more words than <code class="docutils literal"><span class="pre">
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">batch_size</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">batch_size</span></code></td>
 <td><p class="first">Size of each batch of training data to feed into the network (which uses mini-batch learning).</p>
-<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'batch_size':</span> <span class="pre">20}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'batch_size':</span> <span class="pre">20}</span></code></dt>
 <dd><ul class="first last simple">
 <li>feed twenty training queries to the network for each learning step</li>
 </ul>
@@ -362,12 +354,12 @@ If a query has more words than <code class="docutils literal"><span class="pre">
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">display_epoch</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">display_epoch</span></code></td>
 <td><p class="first">The network displays training accuracy statistics at this interval, measured in epochs.</p>
-<p>Default: <code class="docutils literal"><span class="pre">5</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">5</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'display_epoch':</span> <span class="pre">5}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'display_epoch':</span> <span class="pre">5}</span></code></dt>
 <dd><ul class="first last simple">
 <li>display accuracy statistics every five epochs</li>
 </ul>
@@ -375,13 +367,13 @@ If a query has more words than <code class="docutils literal"><span class="pre">
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">number_of_epochs</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">number_of_epochs</span></code></td>
 <td><p class="first">Total number of complete iterations of the training data to feed into the network.
 In each iteration, the data is shuffled to break any prior sequence patterns.</p>
-<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'number_of_epochs':</span> <span class="pre">20}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'number_of_epochs':</span> <span class="pre">20}</span></code></dt>
 <dd><ul class="first last simple">
 <li>iterate through the training data twenty times</li>
 </ul>
@@ -389,12 +381,12 @@ In each iteration, the data is shuffled to break any prior sequence patterns.</p
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">optimizer</span></code></td>
-<td><p class="first">Optimizer to use to minimize the network’s stochastic objective function.</p>
-<p>Default: <code class="docutils literal"><span class="pre">'adam'</span></code></p>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">optimizer</span></code></td>
+<td><p class="first">Optimizer to use to minimize the network's stochastic objective function.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'adam'</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'optimizer':</span> <span class="pre">'adam'}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'optimizer':</span> <span class="pre">'adam'}</span></code></dt>
 <dd><ul class="first last simple">
 <li>use the Adam optimizer to minimize the objective function</li>
 </ul>
@@ -402,15 +394,15 @@ In each iteration, the data is shuffled to break any prior sequence patterns.</p
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">learning_rate</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">learning_rate</span></code></td>
 <td><p class="first">Parameter to control the size of weight and bias changes
 of the training algorithm as it learns.</p>
 <p><a class="reference external" href="https://en.wikibooks.org/wiki/Artificial_Neural_Networks/Error-Correction_Learning">This</a>
 article explains Learning Rate in technical terms.</p>
-<p>Default: <code class="docutils literal"><span class="pre">0.005</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0.005</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'learning_rate':</span> <span class="pre">0.005}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'learning_rate':</span> <span class="pre">0.005}</span></code></dt>
 <dd><ul class="first last simple">
 <li>set learning rate to 0.005</li>
 </ul>
@@ -418,17 +410,17 @@ article explains Learning Rate in technical terms.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">dense_keep_prob</span></code></td>
-<td><p class="first">In the context of the ‘’dropout’’ technique (a regularization method to prevent overfitting),
-keep probability specifies the proportion of nodes to “keep”—that is, to exempt from dropout
-during the network’s learning phase.</p>
-<p>The <code class="docutils literal"><span class="pre">dense_keep_prob</span></code> parameter sets the keep probability of the nodes
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">dense_keep_prob</span></code></td>
+<td><p class="first">In the context of the ''dropout'' technique (a regularization method to prevent overfitting),
+keep probability specifies the proportion of nodes to &quot;keep&quot;—that is, to exempt from dropout
+during the network's learning phase.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">dense_keep_prob</span></code> parameter sets the keep probability of the nodes
 in the dense network layer that connects the output of the LSTM layer
 to the nodes that predict the named entities.</p>
-<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0.5</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'dense_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'dense_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
 <dd><ul class="first last simple">
 <li>50% of the nodes in the dense layer will not be turned off by dropout</li>
 </ul>
@@ -436,12 +428,12 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">lstm_input_keep_prob</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">lstm_input_keep_prob</span></code></td>
 <td><p class="first">Keep probability for the nodes that constitute the inputs to the LSTM cell.</p>
-<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0.5</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'lstm_input_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lstm_input_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
 <dd><ul class="first last simple">
 <li>50% of the nodes that are inputs to the LSTM cell will not be turned off by dropout</li>
 </ul>
@@ -449,12 +441,12 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">lstm_output_keep_prob</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">lstm_output_keep_prob</span></code></td>
 <td><p class="first">Keep probability for the nodes that constitute the outputs of the LSTM cell.</p>
-<p>Default: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0.5</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'lstm_output_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lstm_output_keep_prob':</span> <span class="pre">0.5}</span></code></dt>
 <dd><ul class="first last simple">
 <li>50% of the nodes that are outputs of the LSTM cell will not be turned off by dropout</li>
 </ul>
@@ -462,12 +454,12 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">token_lstm_hidden_state_dimension</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">token_lstm_hidden_state_dimension</span></code></td>
 <td><p class="first">Number of states per LSTM cell.</p>
-<p>Default: <code class="docutils literal"><span class="pre">300</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">300</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'token_lstm_hidden_state_dimension':</span> <span class="pre">300}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'token_lstm_hidden_state_dimension':</span> <span class="pre">300}</span></code></dt>
 <dd><ul class="first last simple">
 <li>an LSTM cell will have 300 states</li>
 </ul>
@@ -475,13 +467,13 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">token_embedding_dimension</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">token_embedding_dimension</span></code></td>
 <td><p class="first">Number of dimensions for word embeddings.</p>
 <p>Allowed values: [50, 100, 200, 300].</p>
-<p>Default: <code class="docutils literal"><span class="pre">300</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">300</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'token_embedding_dimension':</span> <span class="pre">300}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'token_embedding_dimension':</span> <span class="pre">300}</span></code></dt>
 <dd><ul class="first last simple">
 <li>each word embedding will have 300 dimensions</li>
 </ul>
@@ -489,12 +481,12 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">gaz_encoding_dimension</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">gaz_encoding_dimension</span></code></td>
 <td><p class="first">Number of nodes to connect to the gazetteer encodings in a fully-connected network.</p>
-<p>Default: <code class="docutils literal"><span class="pre">100</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">100</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'gaz_encoding_dimension':</span> <span class="pre">100}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'gaz_encoding_dimension':</span> <span class="pre">100}</span></code></dt>
 <dd><ul class="first last simple">
 <li>100 nodes will be connected to the gazetteer encodings in a fully-connected network</li>
 </ul>
@@ -502,14 +494,14 @@ to the nodes that predict the named entities.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">max_char_per_word</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">max_char_per_word</span></code></td>
 <td><p class="first">The sequence model treats this as the maximum number of characters in a word.
-If a word has more characters than <code class="docutils literal"><span class="pre">max_char_per_word</span></code>, the surplus characters are discarded.</p>
+If a word has more characters than <code class="docutils literal notranslate"><span class="pre">max_char_per_word</span></code>, the surplus characters are discarded.</p>
 <p>Usually set to the size of the longest word in the training and test sets.</p>
-<p>Default: <code class="docutils literal"><span class="pre">20</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'max_char_per_word':</span> <span class="pre">20}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'max_char_per_word':</span> <span class="pre">20}</span></code></dt>
 <dd><ul class="first last simple">
 <li>a word can have a maximum of twenty characters</li>
 </ul>
@@ -517,14 +509,14 @@ If a word has more characters than <code class="docutils literal"><span class="p
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">use_crf_layer</span></code></td>
-<td><p class="first">If set to <code class="docutils literal"><span class="pre">True</span></code>, use a linear chain Conditional Random Field layer for the final layer,
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">use_crf_layer</span></code></td>
+<td><p class="first">If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, use a linear chain Conditional Random Field layer for the final layer,
 which predicts sequence tags.</p>
-<p>If set to <code class="docutils literal"><span class="pre">False</span></code>, use a softmax layer to predict sequence tags.</p>
-<p>Default: <code class="docutils literal"><span class="pre">False</span></code></p>
+<p>If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, use a softmax layer to predict sequence tags.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'use_crf_layer':</span> <span class="pre">True}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'use_crf_layer':</span> <span class="pre">True}</span></code></dt>
 <dd><ul class="first last simple">
 <li>use the CRF layer</li>
 </ul>
@@ -532,16 +524,16 @@ which predicts sequence tags.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">use_character_embeddings</span></code></td>
-<td><p class="first">If set to <code class="docutils literal"><span class="pre">True</span></code>, use the character embedding trained on the training data
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">use_character_embeddings</span></code></td>
+<td><p class="first">If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, use the character embedding trained on the training data
 using a convolutional network.</p>
-<p>If set to <code class="docutils literal"><span class="pre">False</span></code>, do not use character embeddings.</p>
+<p>If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, do not use character embeddings.</p>
 <p>Note: Using character embedding significantly increases training time
 compared to vanilla word embeddings only.</p>
-<p>Default: <code class="docutils literal"><span class="pre">False</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'use_character_embeddings':</span> <span class="pre">True}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'use_character_embeddings':</span> <span class="pre">True}</span></code></dt>
 <dd><ul class="first last simple">
 <li>use character embeddings</li>
 </ul>
@@ -549,15 +541,15 @@ compared to vanilla word embeddings only.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">char_window_sizes</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">char_window_sizes</span></code></td>
 <td><p class="first">List of window sizes for convolutions that the network should use
 to build the character embeddings.
 Usually in decreasing numerical order.</p>
-<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
-<p>Default: <code class="docutils literal"><span class="pre">[5]</span></code></p>
+<p>Note: This parameter is needed only if <code class="docutils literal notranslate"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">[5]</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'char_window_sizes':</span> <span class="pre">[5,</span> <span class="pre">3]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'char_window_sizes':</span> <span class="pre">[5,</span> <span class="pre">3]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>first, use a convolution of size 5</li>
 <li>next, feed the output of that convolution through a convolution of size 3</li>
@@ -566,13 +558,13 @@ Usually in decreasing numerical order.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">character_embedding_dimension</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">character_embedding_dimension</span></code></td>
 <td><p class="first">Initial dimension of each character before it is fed into the convolutional network.</p>
-<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
-<p>Default: <code class="docutils literal"><span class="pre">10</span></code></p>
+<p>Note: This parameter is needed only if <code class="docutils literal notranslate"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">10</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'character_embedding_dimension':</span> <span class="pre">10}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'character_embedding_dimension':</span> <span class="pre">10}</span></code></dt>
 <dd><ul class="first last simple">
 <li>initialize the dimension of each character to ten</li>
 </ul>
@@ -580,16 +572,16 @@ Usually in decreasing numerical order.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">word_level_character_embedding_size</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">word_level_character_embedding_size</span></code></td>
 <td><p class="first">The final dimension of each character after it is transformed
 by the convolutional network.</p>
-<p>Usually greater than <code class="docutils literal"><span class="pre">character_embedding_dimension</span></code> since it encodes
+<p>Usually greater than <code class="docutils literal notranslate"><span class="pre">character_embedding_dimension</span></code> since it encodes
 more information about orthography and semantics.</p>
-<p>Note: This parameter is needed only if <code class="docutils literal"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal"><span class="pre">True</span></code>.</p>
-<p>Default: <code class="docutils literal"><span class="pre">40</span></code></p>
+<p>Note: This parameter is needed only if <code class="docutils literal notranslate"><span class="pre">use_character_embeddings</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">40</span></code></p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'word_level_character_embedding_size':</span> <span class="pre">40}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'word_level_character_embedding_size':</span> <span class="pre">40}</span></code></dt>
 <dd><ul class="first last simple">
 <li>each character should have dimension of forty, after convolutional network training</li>
 </ul>

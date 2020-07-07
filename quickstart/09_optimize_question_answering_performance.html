@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 9: Optimize Question Answering Performance &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Step 9: Optimize Question Answering Performance &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -142,6 +142,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -159,6 +160,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -255,30 +257,20 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="step-9-optimize-question-answering-performance">
 <h1>Step 9: Optimize Question Answering Performance<a class="headerlink" href="#step-9-optimize-question-answering-performance" title="Permalink to this headline">¶</a></h1>
 <p>The MindMeld question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.</p>
-<p>To leverage the MindMeld question answerer in your application, you must first create your knowledge base, as described in <a class="reference internal" href="05_create_the_knowledge_base.html"><span class="doc">Step 5</span></a>. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the <code class="xref py py-class docutils literal"><span class="pre">QuestionAnswerer</span></code> component.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+<p>To leverage the MindMeld question answerer in your application, you must first create your knowledge base, as described in <a class="reference internal" href="05_create_the_knowledge_base.html"><span class="doc">Step 5</span></a>. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the <code class="xref py py-class docutils literal notranslate"><span class="pre">QuestionAnswerer</span></code> component.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -300,18 +292,18 @@
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your nearest Kwik-E-Mart is located at {store_name}.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Assuming you have already created an index, such as <code class="docutils literal"><span class="pre">stores</span></code>, and uploaded the knowledge base data, the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method provides a flexible mechanism for retrieving relevant results.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
+<p>Assuming you have already created an index, such as <code class="docutils literal notranslate"><span class="pre">stores</span></code>, and uploaded the knowledge base data, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> method provides a flexible mechanism for retrieving relevant results.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MM_APP_ROOT</span>
 python
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
 <span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
 <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &quot;store_name&quot;: &quot;23 Elm Street&quot;,</span>
 <span class="go">  &quot;open_time&quot;: &quot;7am&quot;,</span>
 <span class="go">  &quot;close_time&quot;: &quot;9pm&quot;,</span>
@@ -321,11 +313,11 @@ python
 </pre></div>
 </div>
 <p>Similarly, to retrieve store locations on Market Street, you could use something like:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;market&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;market&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">)</span>
 <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &quot;store_name&quot;: &quot;Pine and Market&quot;,</span>
 <span class="go">  &quot;open_time&quot;: &quot;6am&quot;,</span>
 <span class="go">  &quot;close_time&quot;: &quot;10pm&quot;,</span>
@@ -334,12 +326,12 @@ python
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>By default, the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.</p>
+<p>By default, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.</p>
 <div class="section" id="proximity-based-ranking">
 <h2>Proximity-Based Ranking<a class="headerlink" href="#proximity-based-ranking" title="Permalink to this headline">¶</a></h2>
 <p>Location-based ranking is fairly common in mobile applications. We have already seen an intent designed to provide the nearest retail locations for a given user in our Kwik-E-Mart example. Going further, to support proximity-based ranking, is straightforward to accomplish using the MindMeld question answerer.</p>
-<p>First, let’s assume that you have created a knowledge base for the <code class="docutils literal"><span class="pre">stores</span></code> index, which contains every retail location. Each store object also has a <code class="docutils literal"><span class="pre">location</span></code> field which contains latitude and longitude coordinates for each store.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+<p>First, let's assume that you have created a knowledge base for the <code class="docutils literal notranslate"><span class="pre">stores</span></code> index, which contains every retail location. Each store object also has a <code class="docutils literal notranslate"><span class="pre">location</span></code> field which contains latitude and longitude coordinates for each store.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;store_name&quot;</span><span class="o">:</span> <span class="s2">&quot;23 Elm Street&quot;</span><span class="p">,</span>
   <span class="s2">&quot;open_time&quot;</span><span class="o">:</span> <span class="s2">&quot;7am&quot;</span><span class="p">,</span>
   <span class="s2">&quot;close_time&quot;</span><span class="o">:</span> <span class="s2">&quot;9pm&quot;</span><span class="p">,</span>
@@ -358,14 +350,14 @@ python
 <span class="p">...</span>
 </pre></div>
 </div>
-<p>We can now retrieve the nearest stores using the <code class="docutils literal"><span class="pre">sort</span></code> argument of the <code class="xref py py-meth docutils literal"><span class="pre">get()</span></code> method
+<p>We can now retrieve the nearest stores using the <code class="docutils literal notranslate"><span class="pre">sort</span></code> argument of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> method
 as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_loc</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">37.790415</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">122.405218</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_loc</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">37.790415</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">122.405218</span><span class="p">}</span>
 <span class="n">stores</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">my_loc</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">)</span>
 <span class="n">stores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &quot;store_name&quot;: &quot;Pine and Market&quot;,</span>
 <span class="go">  &quot;open_time&quot;: &quot;6am&quot;,</span>
 <span class="go">  &quot;close_time&quot;: &quot;10pm&quot;,</span>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Key Concepts &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Key Concepts &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -252,28 +254,18 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="key-concepts">
 <h1>Key Concepts<a class="headerlink" href="#key-concepts" title="Permalink to this headline">¶</a></h1>
-<p>Every MindMeld developer should know the terms defined in this section. It’s best to read the entire section through, since later definitions build on earlier ones.</p>
+<p>Every MindMeld developer should know the terms defined in this section. It's best to read the entire section through, since later definitions build on earlier ones.</p>
 <dl class="glossary docutils">
 <dt id="term-app">app</dt>
 <dd><div class="first last line-block">
@@ -296,19 +288,19 @@
 <dt id="term-query-request">query / request</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">A user’s spoken or typed natural language input to the conversational app. MindMeld apps use statistical <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_processing">natural language processing</a> models to understand the query and determine what the user wants.</div>
+<div class="line">A user's spoken or typed natural language input to the conversational app. MindMeld apps use statistical <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_processing">natural language processing</a> models to understand the query and determine what the user wants.</div>
 </div>
 </dd>
 <dt id="term-domain">domain</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">A distinct area of knowledge with its own vocabulary, such as <code class="docutils literal"><span class="pre">weather</span></code>, <code class="docutils literal"><span class="pre">sports</span></code>, <code class="docutils literal"><span class="pre">traffic</span></code>, <code class="docutils literal"><span class="pre">movies</span></code>, or <code class="docutils literal"><span class="pre">travel</span></code>.</div>
+<div class="line">A distinct area of knowledge with its own vocabulary, such as <code class="docutils literal notranslate"><span class="pre">weather</span></code>, <code class="docutils literal notranslate"><span class="pre">sports</span></code>, <code class="docutils literal notranslate"><span class="pre">traffic</span></code>, <code class="docutils literal notranslate"><span class="pre">movies</span></code>, or <code class="docutils literal notranslate"><span class="pre">travel</span></code>.</div>
 </div>
 </dd>
 <dt id="term-intent">intent</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">Something that the user wants to accomplish, expressed as a short phrase, and associated with a domain. For example, the <code class="docutils literal"><span class="pre">book_flight</span></code> intent could be defined for the <code class="docutils literal"><span class="pre">travel</span></code> domain, and could be detected in query like ‘Get me on the redeye to New York tonight.’ Most domains have multiple intents.</div>
+<div class="line">Something that the user wants to accomplish, expressed as a short phrase, and associated with a domain. For example, the <code class="docutils literal notranslate"><span class="pre">book_flight</span></code> intent could be defined for the <code class="docutils literal notranslate"><span class="pre">travel</span></code> domain, and could be detected in query like 'Get me on the redeye to New York tonight.' Most domains have multiple intents.</div>
 <div class="line"><br /></div>
 <div class="line">The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.</div>
 </div>
@@ -316,9 +308,9 @@
 <dt id="term-entity">entity</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">A word or phrase that provides information necessary to fulfill a particular intent. Each entity belongs to a category specified by the entity’s associated <em>type</em>.</div>
+<div class="line">A word or phrase that provides information necessary to fulfill a particular intent. Each entity belongs to a category specified by the entity's associated <em>type</em>.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, a <code class="docutils literal"><span class="pre">book_flight</span></code> intent could have a <code class="docutils literal"><span class="pre">location</span></code> type for entities like ‘Miami’ and ‘Chicago O’Hare’, an <code class="docutils literal"><span class="pre">airline</span></code> type for entities like ‘Air India’ and ‘Southwest’, and a <code class="docutils literal"><span class="pre">date</span></code> type for entities like ‘July 4th’ and ‘New Years Day’.</div>
+<div class="line">For instance, a <code class="docutils literal notranslate"><span class="pre">book_flight</span></code> intent could have a <code class="docutils literal notranslate"><span class="pre">location</span></code> type for entities like 'Miami' and 'Chicago O'Hare', an <code class="docutils literal notranslate"><span class="pre">airline</span></code> type for entities like 'Air India' and 'Southwest', and a <code class="docutils literal notranslate"><span class="pre">date</span></code> type for entities like 'July 4th' and 'New Years Day'.</div>
 </div>
 </dd>
 <dt id="term-system-entity">system entity</dt>
@@ -332,7 +324,7 @@
 <div class="line"><br /></div>
 <div class="line">A label that specifies a sub-category in entities of the same type. Roles are used when identically-typed entities need to be interpreted differently in different contexts.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, in the query ‘Book a flight from SFO to JFK’, both ‘SFO’ and ‘JFK’ are location entities, but they would be assigned different roles: SFO would have the <code class="docutils literal"><span class="pre">origin</span></code> role, while ‘JFK’ would have the <code class="docutils literal"><span class="pre">destination</span></code> role.</div>
+<div class="line">For instance, in the query 'Book a flight from SFO to JFK', both 'SFO' and 'JFK' are location entities, but they would be assigned different roles: SFO would have the <code class="docutils literal notranslate"><span class="pre">origin</span></code> role, while 'JFK' would have the <code class="docutils literal notranslate"><span class="pre">destination</span></code> role.</div>
 </div>
 </dd>
 <dt id="term-knowledge-base-kb">knowledge base (KB)</dt>
@@ -340,7 +332,7 @@
 <div class="line"><br /></div>
 <div class="line">A comprehensive repository containing the universe of information an app needs to understand user queries and answer questions successfully.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, the knowledge base for a restaurant chain’s food ordering app might require a directory of its branch locations and details of the menu served at each store.</div>
+<div class="line">For instance, the knowledge base for a restaurant chain's food ordering app might require a directory of its branch locations and details of the menu served at each store.</div>
 </div>
 </dd>
 <dt id="term-knowledge-base-index">knowledge base index</dt>
@@ -348,13 +340,13 @@
 <div class="line"><br /></div>
 <div class="line">A collection of objects of the same type within the knowledge base. MindMeld organizes the knowledge base as a set of indexes for efficient retrieval and ranking based on developer-supplied search criteria.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, a food ordering app might have a <code class="docutils literal"><span class="pre">restaurant</span></code> index for storing the details of its branch locations, including metadata like name, address, phone number, cuisine type, and ratings for each entry. It might also have a separate <code class="docutils literal"><span class="pre">menu_items</span></code> index that stores all the dishes offered at its restaurant location with details like name, price, description and add-ons.</div>
+<div class="line">For instance, a food ordering app might have a <code class="docutils literal notranslate"><span class="pre">restaurant</span></code> index for storing the details of its branch locations, including metadata like name, address, phone number, cuisine type, and ratings for each entry. It might also have a separate <code class="docutils literal notranslate"><span class="pre">menu_items</span></code> index that stores all the dishes offered at its restaurant location with details like name, price, description and add-ons.</div>
 </div>
 </dd>
 <dt id="term-canonical-name">canonical name</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">The standardized or official name under which an entity is stored in the knowledge base. For instance, the beverage commonly known as ‘vanilla frappe’ or ‘vanilla frappuccino’ might have the canonical name of ‘Caffè Vanilla Frappuccino® Blended Coffee’ in the app’s <a class="reference external" href="https://www.starbucks.com/menu/drinks/frappuccino-blended-beverages/caffe-vanilla-frappuccino-blended-beverage">official catalog</a>.</div>
+<div class="line">The standardized or official name under which an entity is stored in the knowledge base. For instance, the beverage commonly known as 'vanilla frappe' or 'vanilla frappuccino' might have the canonical name of 'Caffè Vanilla Frappuccino® Blended Coffee' in the app's <a class="reference external" href="https://www.starbucks.com/menu/drinks/frappuccino-blended-beverages/caffe-vanilla-frappuccino-blended-beverage">official catalog</a>.</div>
 </div>
 </dd>
 <dt id="term-entity-synonym">entity synonym</dt>
@@ -362,7 +354,7 @@
 <div class="line"><br /></div>
 <div class="line">An alternate way of referring to an entity, apart from its canonical name. Synonyms can be abbreviated forms, nicknames, slang terms, translations, semantically equivalent expressions or just different names for the same entity.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, ‘vanilla frappuccino’, ‘vanilla frap’ and ‘iced vanilla frappe’ are all synonyms for the canonical name, ‘Caffè Vanilla Frappuccino® Blended Coffee’.</div>
+<div class="line">For instance, 'vanilla frappuccino', 'vanilla frap' and 'iced vanilla frappe' are all synonyms for the canonical name, 'Caffè Vanilla Frappuccino® Blended Coffee'.</div>
 </div>
 </dd>
 <dt id="term-entity-group">entity group</dt>
@@ -370,13 +362,13 @@
 <div class="line"><br /></div>
 <div class="line">A group of entities that together form a meaningful real-world concept. Each entity group has one main entity. Other entities in the group (if any) are considered attributes of the main entity.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, the query ‘Order one large squishee and a dozen donuts’ contains two entity groups. The order details for the ‘squishee’ product, including quantity and size, make up the entity group {‘one’, ‘large’, ‘squishee’}. The order details for the ‘donuts’ make up the entity group {‘a dozen’, ‘donuts’}.</div>
+<div class="line">For instance, the query 'Order one large squishee and a dozen donuts' contains two entity groups. The order details for the 'squishee' product, including quantity and size, make up the entity group {'one', 'large', 'squishee'}. The order details for the 'donuts' make up the entity group {'a dozen', 'donuts'}.</div>
 </div>
 </dd>
 <dt id="term-head-parent">head / parent</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">The principal entity being described in an entity group. In the entity group {‘one’, ‘large’, ‘squishee’}, ‘squishee’ is the head entity. Similarly, ‘donuts’ heads the entity group {‘a dozen’, ‘donuts’}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Head_(linguistics)">head (linguistics)</a>.</div>
+<div class="line">The principal entity being described in an entity group. In the entity group {'one', 'large', 'squishee'}, 'squishee' is the head entity. Similarly, 'donuts' heads the entity group {'a dozen', 'donuts'}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Head_(linguistics)">head (linguistics)</a>.</div>
 </div>
 </dd>
 <dt id="term-dependent-child">dependent / child</dt>
@@ -384,13 +376,13 @@
 <div class="line"><br /></div>
 <div class="line">An entity that describes or <a class="reference external" href="https://en.wikipedia.org/wiki/Grammatical_modifier">modifies</a> the principal entity (head) in an entity group.</div>
 <div class="line"><br /></div>
-<div class="line">For instance, in the group {‘one’, ‘large’, ‘squishee’} the entities ‘one’ and ‘large’ are the dependents of the head entity ‘squishee’. Similarly, ‘a dozen’ depends on the head ‘donuts’ in the entity group {‘a dozen’, ‘donuts’}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Dependent_(grammar)">dependent (linguistics)</a>.</div>
+<div class="line">For instance, in the group {'one', 'large', 'squishee'} the entities 'one' and 'large' are the dependents of the head entity 'squishee'. Similarly, 'a dozen' depends on the head 'donuts' in the entity group {'a dozen', 'donuts'}. See <a class="reference external" href="https://en.wikipedia.org/wiki/Dependent_(grammar)">dependent (linguistics)</a>.</div>
 </div>
 </dd>
 <dt id="term-natural-language-response-nlr">natural language response (NLR)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
-<div class="line">The app’s natural language reply to the user. It could be in the form of a text-based response, a spoken voice response, or both, depending on the platform capabilities. Fully automated <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_generation">natural language response generation</a> is still an area of active academic research. Real-world applications today, including all the popular personal assistants, instead rely on canned responses (<strong>templates</strong>) with placeholders (<strong>slots</strong>) that are filled in by the app at runtime.</div>
+<div class="line">The app's natural language reply to the user. It could be in the form of a text-based response, a spoken voice response, or both, depending on the platform capabilities. Fully automated <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_language_generation">natural language response generation</a> is still an area of active academic research. Real-world applications today, including all the popular personal assistants, instead rely on canned responses (<strong>templates</strong>) with placeholders (<strong>slots</strong>) that are filled in by the app at runtime.</div>
 <div class="line"><br /></div>
 </div>
 <table border="1" class="last docutils">
@@ -400,10 +392,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>Template with unfilled slots</td>
-<td>‘<code class="docutils literal"><span class="pre">{flight}</span></code> will depart from <code class="docutils literal"><span class="pre">{gate}</span></code> of <code class="docutils literal"><span class="pre">{terminal}</span></code> at <code class="docutils literal"><span class="pre">{time}</span></code>.’</td>
+<td>'<code class="docutils literal notranslate"><span class="pre">{flight}</span></code> will depart from <code class="docutils literal notranslate"><span class="pre">{gate}</span></code> of <code class="docutils literal notranslate"><span class="pre">{terminal}</span></code> at <code class="docutils literal notranslate"><span class="pre">{time}</span></code>.'</td>
 </tr>
 <tr class="row-even"><td>NLR with filled slots</td>
-<td>‘AA 20 will depart from gate 56A of terminal 2 at 3:30 PM’.</td>
+<td>'AA 20 will depart from gate 56A of terminal 2 at 3:30 PM'.</td>
 </tr>
 </tbody>
 </table>
@@ -429,7 +421,7 @@
 <dt id="term-dialogue-frame">dialogue frame</dt>
 <dd><div class="first last line-block">
 <div class="line"><br /></div>
-<div class="line">A container for any information that the app needs to persist across turns over the course of a single conversational interaction with a user. The dialogue frame serves as the app’s short-term memory and allows it to hold a coherent conversation with the user.</div>
+<div class="line">A container for any information that the app needs to persist across turns over the course of a single conversational interaction with a user. The dialogue frame serves as the app's short-term memory and allows it to hold a coherent conversation with the user.</div>
 </div>
 </dd>
 </dl>

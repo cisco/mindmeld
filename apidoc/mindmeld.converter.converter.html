@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.converter.converter module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.converter.converter module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,35 +252,25 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.converter.converter">
 <span id="mindmeld-converter-converter-module"></span><h1>mindmeld.converter.converter module<a class="headerlink" href="#module-mindmeld.converter.converter" title="Permalink to this headline">¶</a></h1>
-<p>This module contains the abstract Coverter class used to convert other software’s
+<p>This module contains the abstract Coverter class used to convert other software's
 projects into MindMeld projects</p>
 <dl class="class">
 <dt id="mindmeld.converter.converter.Converter">
 <em class="property">class </em><code class="descclassname">mindmeld.converter.converter.</code><code class="descname">Converter</code><a class="reference internal" href="../_modules/mindmeld/converter/converter.html#Converter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.converter.converter.Converter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>Abstract class that is used to instantiate concrete converter classes.
-The class contains the necessary functions to convert other software’s projects
+The class contains the necessary functions to convert other software's projects
 into MindMeld projects.</p>
 <dl class="method">
 <dt id="mindmeld.converter.converter.Converter.convert_project">
@@ -294,7 +286,7 @@ into MindMeld projects.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directory</strong> – Location where folder should be created.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directory</strong> -- Location where folder should be created.</td>
 </tr>
 </tbody>
 </table>
@@ -309,8 +301,8 @@ into MindMeld projects.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>mindmeld_project_directory</strong> – Location of MindMeld directory.</li>
-<li><strong>main_file_loc</strong> – Location where default __main__.py is stored.</li>
+<li><strong>mindmeld_project_directory</strong> -- Location of MindMeld directory.</li>
+<li><strong>main_file_loc</strong> -- Location where default __main__.py is stored.</li>
 </ul>
 </td>
 </tr>

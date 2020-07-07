@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Food Ordering &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Food Ordering &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -151,6 +151,7 @@
 <li class="toctree-l1"><a class="reference internal" href="video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -168,6 +169,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -264,28 +266,18 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="food-ordering">
 <h1>Food Ordering<a class="headerlink" href="#food-ordering" title="Permalink to this headline">¶</a></h1>
-<p>In this step-by-step walkthrough, you’ll build a conversational application that allows users to order food for delivery from nearby restaurants, using the MindMeld blueprint for this purpose.</p>
+<p>In this step-by-step walkthrough, you'll build a conversational application that allows users to order food for delivery from nearby restaurants, using the MindMeld blueprint for this purpose.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Please make sure to install and run all of the <a class="reference internal" href="../userguide/getting_started.html#getting-started-virtualenv-setup"><span class="std std-ref">pre-requisites</span></a> for MindMeld before continuing on with this blueprint tutorial.</p>
@@ -301,53 +293,53 @@
 <a class="reference internal image-reference" href="../_images/food_ordering_interactions.png"><img alt="../_images/food_ordering_interactions.png" class="align-center" src="../_images/food_ordering_interactions.png" style="width: 700px;" /></a>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
-<p class="last">Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking to order from a specific restaurant without choosing a dish; requesting a dish that is not available at the selected restaurant; asking for a restaurant location that doesn’t exist; choosing a customization option that is not applicable for the chosen dish, and so on.</p>
+<p class="last">Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking to order from a specific restaurant without choosing a dish; requesting a dish that is not available at the selected restaurant; asking for a restaurant location that doesn't exist; choosing a customization option that is not applicable for the chosen dish, and so on.</p>
 </div>
 </div>
 <div class="section" id="domain-intent-entity-hierarchy">
 <h2>3. Domain-Intent-Entity Hierarchy<a class="headerlink" href="#domain-intent-entity-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>Here is the NLP model hierarchy for our food ordering application.</p>
 <a class="reference internal image-reference" href="../_images/food_ordering_hierarchy.png"><img alt="../_images/food_ordering_hierarchy.png" class="align-center" src="../_images/food_ordering_hierarchy.png" style="width: 700px;" /></a>
-<p>The single domain, <code class="docutils literal"><span class="pre">ordering</span></code>, encompasses all of the functionality required to order food for delivery from nearby restaurants. The <code class="docutils literal"><span class="pre">ordering</span></code> domain supports the following intents:</p>
+<p>The single domain, <code class="docutils literal notranslate"><span class="pre">ordering</span></code>, encompasses all of the functionality required to order food for delivery from nearby restaurants. The <code class="docutils literal notranslate"><span class="pre">ordering</span></code> domain supports the following intents:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">greet</span></code> — User wants to start a conversation</li>
-<li><code class="docutils literal"><span class="pre">build_order</span></code> — User wants to make selections for food delivery</li>
-<li><code class="docutils literal"><span class="pre">place_order</span></code> — User wants to confirm and place an order</li>
-<li><code class="docutils literal"><span class="pre">start_over</span></code> — User wants to abandon current selections and restart the ordering process</li>
-<li><code class="docutils literal"><span class="pre">exit</span></code> — User wants to end the current conversation</li>
-<li><code class="docutils literal"><span class="pre">help</span></code> — User is confused or needs instructions on how to proceed</li>
-<li><code class="docutils literal"><span class="pre">unsupported</span></code> — User is talking about something other than food ordering</li>
+<li><code class="docutils literal notranslate"><span class="pre">greet</span></code> — User wants to start a conversation</li>
+<li><code class="docutils literal notranslate"><span class="pre">build_order</span></code> — User wants to make selections for food delivery</li>
+<li><code class="docutils literal notranslate"><span class="pre">place_order</span></code> — User wants to confirm and place an order</li>
+<li><code class="docutils literal notranslate"><span class="pre">start_over</span></code> — User wants to abandon current selections and restart the ordering process</li>
+<li><code class="docutils literal notranslate"><span class="pre">exit</span></code> — User wants to end the current conversation</li>
+<li><code class="docutils literal notranslate"><span class="pre">help</span></code> — User is confused or needs instructions on how to proceed</li>
+<li><code class="docutils literal notranslate"><span class="pre">unsupported</span></code> — User is talking about something other than food ordering</li>
 </ul>
 </div></blockquote>
-<p>For this app, only the <code class="docutils literal"><span class="pre">build_order</span></code> intent requires entity recognition. This intent supports the following entity types:</p>
+<p>For this app, only the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> intent requires entity recognition. This intent supports the following entity types:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">restaurant</span></code> — The name of a restaurant location</li>
-<li><code class="docutils literal"><span class="pre">cuisine</span></code> — The name of a cuisine</li>
-<li><code class="docutils literal"><span class="pre">category</span></code> — The name of a food category on a restaurant menu</li>
-<li><code class="docutils literal"><span class="pre">dish</span></code> — The name of a dish on a restaurant menu</li>
-<li><code class="docutils literal"><span class="pre">option</span></code> — The name of an available option (customization, add-on, etc.) for a dish</li>
-<li><code class="docutils literal"><span class="pre">sys_number</span></code> — The quantity of a given dish, captured by the <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">number system entity</span></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">restaurant</span></code> — The name of a restaurant location</li>
+<li><code class="docutils literal notranslate"><span class="pre">cuisine</span></code> — The name of a cuisine</li>
+<li><code class="docutils literal notranslate"><span class="pre">category</span></code> — The name of a food category on a restaurant menu</li>
+<li><code class="docutils literal notranslate"><span class="pre">dish</span></code> — The name of a dish on a restaurant menu</li>
+<li><code class="docutils literal notranslate"><span class="pre">option</span></code> — The name of an available option (customization, add-on, etc.) for a dish</li>
+<li><code class="docutils literal notranslate"><span class="pre">sys_number</span></code> — The quantity of a given dish, captured by the <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">number system entity</span></a></li>
 </ul>
 </div></blockquote>
-<p>The <code class="docutils literal"><span class="pre">sys_number</span></code> entity can play two roles (<code class="docutils literal"><span class="pre">num_orders</span></code> and <code class="docutils literal"><span class="pre">item_size</span></code>) so queries containing <code class="docutils literal"><span class="pre">sys_number</span></code> entities
-must be labeled accordingly. The <code class="docutils literal"><span class="pre">num_orders</span></code> role represents the number of desired orders and the
-<code class="docutils literal"><span class="pre">item_size</span></code> role represents the size of a desired item. The role annotation follows the entity annotation
-in the following manner: <code class="docutils literal"><span class="pre">can</span> <span class="pre">I</span> <span class="pre">have</span> <span class="pre">a</span> <span class="pre">{12|sys_number|item_size}</span> <span class="pre">ounce</span> <span class="pre">burger</span></code> and <code class="docutils literal"><span class="pre">{one|sys_number|num_orders}</span> <span class="pre">{parfait|dish}</span> <span class="pre">please.</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">sys_number</span></code> entity can play two roles (<code class="docutils literal notranslate"><span class="pre">num_orders</span></code> and <code class="docutils literal notranslate"><span class="pre">item_size</span></code>) so queries containing <code class="docutils literal notranslate"><span class="pre">sys_number</span></code> entities
+must be labeled accordingly. The <code class="docutils literal notranslate"><span class="pre">num_orders</span></code> role represents the number of desired orders and the
+<code class="docutils literal notranslate"><span class="pre">item_size</span></code> role represents the size of a desired item. The role annotation follows the entity annotation
+in the following manner: <code class="docutils literal notranslate"><span class="pre">can</span> <span class="pre">I</span> <span class="pre">have</span> <span class="pre">a</span> <span class="pre">{12|sys_number|item_size}</span> <span class="pre">ounce</span> <span class="pre">burger</span></code> and <code class="docutils literal notranslate"><span class="pre">{one|sys_number|num_orders}</span> <span class="pre">{parfait|dish}</span> <span class="pre">please.</span></code></p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
-<p class="last">While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., <code class="docutils literal"><span class="pre">check_order_status</span></code>, <code class="docutils literal"><span class="pre">get_calories</span></code>, and so on) and entities (e.g., <code class="docutils literal"><span class="pre">location</span></code>, <code class="docutils literal"><span class="pre">price_level</span></code>, and so on) that make sense for a food ordering use case.</p>
+<p class="last">While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., <code class="docutils literal notranslate"><span class="pre">check_order_status</span></code>, <code class="docutils literal notranslate"><span class="pre">get_calories</span></code>, and so on) and entities (e.g., <code class="docutils literal notranslate"><span class="pre">location</span></code>, <code class="docutils literal notranslate"><span class="pre">price_level</span></code>, and so on) that make sense for a food ordering use case.</p>
 </div>
 <p>To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">This application requires Elasticsearch for the QuestionAnswerer. Please make sure that Elasticsearch is running in another shell before proceeding to setup this blueprint.</p>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -c &quot;import mindmeld as mm; mm.blueprint(&#39;food_ordering&#39;);&quot;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -c &quot;import mindmeld as mm; mm.blueprint(&#39;food_ordering&#39;);&quot;</span>
 </pre></div>
 </div>
-<p>This should create a MindMeld project folder called <code class="docutils literal"><span class="pre">food_ordering</span></code> in your current directory with the following structure:</p>
+<p>This should create a MindMeld project folder called <code class="docutils literal notranslate"><span class="pre">food_ordering</span></code> in your current directory with the following structure:</p>
 <a class="reference internal image-reference" href="../_images/food_ordering_directory.png"><img alt="../_images/food_ordering_directory.png" class="align-center" src="../_images/food_ordering_directory.png" style="width: 250px;" /></a>
 </div>
 <div class="section" id="dialogue-states">
@@ -379,11 +371,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">greet</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">greet</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">welcome</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">welcome</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
@@ -392,12 +384,12 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-odd"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">build_order</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">build_order</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">build_order</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">build_order</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
@@ -408,11 +400,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-even"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">place_order</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">place_order</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">place_order</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">place_order</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
@@ -421,12 +413,12 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-odd"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">start_over</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">start_over</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">start_over</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">start_over</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
@@ -437,11 +429,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-even"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">exit</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">exit</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">say_goodbye</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code></div>
 </div>
 </td>
 <td><div class="first last line-block">
@@ -450,12 +442,12 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-odd"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">help</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">help</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">provide_help</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">provide_help</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
@@ -466,12 +458,12 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </td>
 </tr>
 <tr class="row-even"><td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">unsupported</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">unsupported</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">default</span></code></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">default</span></code></div>
 <div class="line"><br /></div>
 </div>
 </td>
@@ -483,11 +475,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </tr>
 </tbody>
 </table>
-<p>All dialogue states and their associated handlers are defined in the <code class="docutils literal"><span class="pre">__init__.py</span></code> application container file at the top level of the blueprint folder.</p>
+<p>All dialogue states and their associated handlers are defined in the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> application container file at the top level of the blueprint folder.</p>
 <p>Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.</p>
-<p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal"><span class="pre">welcome</span></code>, <code class="docutils literal"><span class="pre">start_over</span></code>, <code class="docutils literal"><span class="pre">say_goodbye</span></code>, <code class="docutils literal"><span class="pre">provide_help</span></code> and <code class="docutils literal"><span class="pre">default</span></code>.</p>
-<p>For example, here’s the <code class="docutils literal"><span class="pre">say_goodbye</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted “goodbye” responses:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal notranslate"><span class="pre">welcome</span></code>, <code class="docutils literal notranslate"><span class="pre">start_over</span></code>, <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code>, <code class="docutils literal notranslate"><span class="pre">provide_help</span></code> and <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<p>For example, here's the <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted &quot;goodbye&quot; responses:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user ends a conversation, clear the dialogue frame and say goodbye.</span>
@@ -499,9 +491,9 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Bye!&#39;</span><span class="p">,</span> <span class="s1">&#39;Goodbye!&#39;</span><span class="p">,</span> <span class="s1">&#39;Have a nice day.&#39;</span><span class="p">,</span> <span class="s1">&#39;See you later.&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>By contrast, the handler logic for the <code class="docutils literal"><span class="pre">build_order</span></code> and <code class="docutils literal"><span class="pre">place_order</span></code> dialogue states is more substantial, because they contain the core business logic for our application. In these dialogue state handlers, we use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> and external API calls to process the transaction.</p>
-<p>We can illustrate this with a simplistic implementation of the <code class="docutils literal"><span class="pre">build_order</span></code> handler:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;build_order&#39;</span><span class="p">)</span>
+<p>By contrast, the handler logic for the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> and <code class="docutils literal notranslate"><span class="pre">place_order</span></code> dialogue states is more substantial, because they contain the core business logic for our application. In these dialogue state handlers, we use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> and external API calls to process the transaction.</p>
+<p>We can illustrate this with a simplistic implementation of the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> handler:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;build_order&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">build_order</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user expresses an intent to make food selections, build up the order by</span>
@@ -535,15 +527,15 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
     <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>This code assumes that every user query contains a <code class="docutils literal"><span class="pre">restaurant</span></code> entity and at least one <code class="docutils literal"><span class="pre">dish</span></code> entity. Using the Question Answerer (within the <code class="xref py py-func docutils literal"><span class="pre">_get_restaurant_from_kb()</span></code> and <code class="xref py py-func docutils literal"><span class="pre">_resolve_dish()</span></code> functions not shown above), it selects the most likely restaurant and dishes requested by the user. Next, it saves this information in the dialogue frame for use in future conversational turns, and presents it to the user via the responder object.</p>
-<p>For a more realistic implementation of <code class="docutils literal"><span class="pre">build_order</span></code> that deals with varied user flows and the full code behind all the dialogue state handlers, see the <code class="docutils literal"><span class="pre">__init__.py</span></code> file in the blueprint folder.</p>
+<p>This code assumes that every user query contains a <code class="docutils literal notranslate"><span class="pre">restaurant</span></code> entity and at least one <code class="docutils literal notranslate"><span class="pre">dish</span></code> entity. Using the Question Answerer (within the <code class="xref py py-func docutils literal notranslate"><span class="pre">_get_restaurant_from_kb()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">_resolve_dish()</span></code> functions not shown above), it selects the most likely restaurant and dishes requested by the user. Next, it saves this information in the dialogue frame for use in future conversational turns, and presents it to the user via the responder object.</p>
+<p>For a more realistic implementation of <code class="docutils literal notranslate"><span class="pre">build_order</span></code> that deals with varied user flows and the full code behind all the dialogue state handlers, see the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file in the blueprint folder.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
-<p>Extend the <code class="docutils literal"><span class="pre">build_order</span></code> dialogue state handler in <code class="docutils literal"><span class="pre">__init__.py</span></code> to handle more user flows or handle the existing ones in a smarter way. See the suggestions for improvements in the comments in the <code class="docutils literal"><span class="pre">__init__.py</span></code> code. Here are a few more:</p>
+<p>Extend the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> dialogue state handler in <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> to handle more user flows or handle the existing ones in a smarter way. See the suggestions for improvements in the comments in the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> code. Here are a few more:</p>
 <ul class="last simple">
-<li>Make it possible to select restaurants by <code class="docutils literal"><span class="pre">cuisine</span></code> or to search for dishes by <code class="docutils literal"><span class="pre">category</span></code>. These are already modeled as entities in the blueprint and available as part of the restaurant and dish metadata stored in the knowledge base. But <code class="docutils literal"><span class="pre">build_order</span></code> needs some additional code to handle queries containing these entities.</li>
+<li>Make it possible to select restaurants by <code class="docutils literal notranslate"><span class="pre">cuisine</span></code> or to search for dishes by <code class="docutils literal notranslate"><span class="pre">category</span></code>. These are already modeled as entities in the blueprint and available as part of the restaurant and dish metadata stored in the knowledge base. But <code class="docutils literal notranslate"><span class="pre">build_order</span></code> needs some additional code to handle queries containing these entities.</li>
 <li>After providing restaurant suggestions to a user based on a requested dish, do not ask the user to repeat the dish selection from scratch in the next turn. Instead, keep track of the dish the user was originally interested in. Then, when the user makes a restaurant selection, add the dish to the check-out basket.</li>
-<li>Update the natural language response templates to include resolved options that are stored in the dialogue frame (<code class="docutils literal"><span class="pre">responder.frame['dishes']</span></code>) for each dish. Try to construct your responses such that if someone orders the same dish with different options, instead of saying ‘<em>I have 3 orders of steak from …</em>’ your app could respond with something like ‘<em>I have 1 order of steak medium rare and 2 orders of steak well done from …</em>’.</li>
+<li>Update the natural language response templates to include resolved options that are stored in the dialogue frame (<code class="docutils literal notranslate"><span class="pre">responder.frame['dishes']</span></code>) for each dish. Try to construct your responses such that if someone orders the same dish with different options, instead of saying '<em>I have 3 orders of steak from ...</em>' your app could respond with something like '<em>I have 1 order of steak medium rare and 2 orders of steak well done from ...</em>'.</li>
 </ul>
 </div>
 </div>
@@ -552,12 +544,12 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <p>The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants from <a class="reference external" href="https://primenow.amazon.com/restaurants">Amazon Restaurants</a>. The knowledge base comprises two indexes in <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">restaurants</span></code> — information about restaurant locations</li>
-<li><code class="docutils literal"><span class="pre">menu_items</span></code> — information about dishes on different restaurants’ menus</li>
+<li><code class="docutils literal notranslate"><span class="pre">restaurants</span></code> — information about restaurant locations</li>
+<li><code class="docutils literal notranslate"><span class="pre">menu_items</span></code> — information about dishes on different restaurants' menus</li>
 </ul>
 </div></blockquote>
-<p>For example, here’s the knowledge base entry in the <code class="docutils literal"><span class="pre">restaurants</span></code> index for “Basa Seafood Express,” a seafood restaurant in San Francisco:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+<p>For example, here's the knowledge base entry in the <code class="docutils literal notranslate"><span class="pre">restaurants</span></code> index for &quot;Basa Seafood Express,&quot; a seafood restaurant in San Francisco:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;cuisine_types&quot;</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;Seafood&quot;</span><span class="p">,</span> <span class="s2">&quot;Sushi&quot;</span><span class="p">],</span>
     <span class="s2">&quot;rating&quot;</span><span class="o">:</span> <span class="mf">3.2</span><span class="p">,</span>
     <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Basa Seafood Express&quot;</span><span class="p">,</span>
@@ -616,8 +608,8 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Here’s a knowledge base entry in the <code class="docutils literal"><span class="pre">menu_items</span></code> index for a dish from the above restaurant.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+<p>Here's a knowledge base entry in the <code class="docutils literal notranslate"><span class="pre">menu_items</span></code> index for a dish from the above restaurant.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;category&quot;</span><span class="o">:</span> <span class="s2">&quot;Nigiri Sushi (2 Pcs)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;menu_id&quot;</span><span class="o">:</span> <span class="s2">&quot;78eb0100-029d-4efc-8b8c-77f97dc875b5&quot;</span><span class="p">,</span>
     <span class="s2">&quot;description&quot;</span><span class="o">:</span> <span class="s2">&quot;Nigiri Sushi&quot;</span><span class="p">,</span>
@@ -633,17 +625,17 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Assuming that you have Elasticsearch installed, running the <code class="xref py py-func docutils literal"><span class="pre">blueprint()</span></code> command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to query the indexes.</p>
+<p>Assuming that you have Elasticsearch installed, running the <code class="xref py py-func docutils literal notranslate"><span class="pre">blueprint()</span></code> command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to query the indexes.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer.</p>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;menu_items&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">   &quot;size_group&quot;: &quot;pizzasize&quot;,</span>
 <span class="go">   &quot;menu_id&quot;: &quot;57572a43-f9fc-4a1c-96fe-788d544b1f2d&quot;,</span>
 <span class="go">   &quot;restaurant_id&quot;: &quot;B01DEEGQBK&quot;,</span>
@@ -715,8 +707,8 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line">“How would you talk to a conversational app</div>
-<div class="line">to place orders for food?”</div>
+<div class="line">&quot;How would you talk to a conversational app</div>
+<div class="line">to place orders for food?&quot;</div>
 </div>
 </td>
 </tr>
@@ -727,9 +719,9 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">build_order</span></code>: “What would you say to the app</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">build_order</span></code>: &quot;What would you say to the app</div>
 <div class="line">to make food or restaurant selections and create</div>
-<div class="line">your delivery order?”</div>
+<div class="line">your delivery order?&quot;</div>
 </div>
 </td>
 </tr>
@@ -740,9 +732,9 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">build_order</span></code>: “Annotate all occurrences of restaurant,</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">build_order</span></code>: &quot;Annotate all occurrences of restaurant,</div>
 <div class="line">cuisine, category, dish and option names</div>
-<div class="line">in the given query.”</div>
+<div class="line">in the given query.&quot;</div>
 </div>
 </td>
 </tr>
@@ -755,11 +747,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">restaurant</span></code>: “What are the different ways in which</div>
-<div class="line">you would refer to this restaurant location?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">restaurant</span></code>: &quot;What are the different ways in which</div>
+<div class="line">you would refer to this restaurant location?&quot;</div>
 <div class="line"><br /></div>
-<div class="line"><code class="docutils literal"><span class="pre">dish</span></code>: “What names would you use to refer</div>
-<div class="line">to this item on the restaurant menu?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">dish</span></code>: &quot;What names would you use to refer</div>
+<div class="line">to this item on the restaurant menu?&quot;</div>
 </div>
 </td>
 </tr>
@@ -770,34 +762,34 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">sys_number</span></code>: “Annotate all entities with their</div>
-<div class="line">corresponding roles, e.g. <code class="docutils literal"><span class="pre">num_orders</span></code> and <code class="docutils literal"><span class="pre">item_size</span></code>.”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">sys_number</span></code>: &quot;Annotate all entities with their</div>
+<div class="line">corresponding roles, e.g. <code class="docutils literal notranslate"><span class="pre">num_orders</span></code> and <code class="docutils literal notranslate"><span class="pre">item_size</span></code>.&quot;</div>
 <div class="line"><br /></div>
 </div>
 </td>
 </tr>
 </tbody>
 </table>
-<p>The <code class="docutils literal"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal"><span class="pre">entities</span></code> directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal notranslate"><span class="pre">entities</span></code> directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.</p>
 <div class="admonition-exercise-1 admonition">
 <p class="first admonition-title">Exercise 1</p>
 <ul class="last simple">
 <li>Study the best practices around training data generation and annotation for conversational apps in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> of the Step-By-Step Guide. Following those principles, create additional labeled data for all the intents in this blueprint. Read more about <a class="reference internal" href="../userguide/nlp.html"><span class="doc">NLP model evaluation and error analysis</span></a> in the User Guide. Then apply what you have learned in evaluating your app, using your newly-created labeled data as held-out validation data.</li>
-<li>Complete the following exercise if you are extending the blueprint to build your own food ordering app. For app-agnostic, generic intents like <code class="docutils literal"><span class="pre">greet</span></code>, <code class="docutils literal"><span class="pre">exit</span></code>, and <code class="docutils literal"><span class="pre">help</span></code>, start by simply reusing the blueprint data to train NLP models for your food ordering app. For <code class="docutils literal"><span class="pre">build_order</span></code> and any other app-specific intents, gather new training data tailored to the relevant entities (restaurants, dishes, etc.). Apply the approach you learned in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a>.</li>
+<li>Complete the following exercise if you are extending the blueprint to build your own food ordering app. For app-agnostic, generic intents like <code class="docutils literal notranslate"><span class="pre">greet</span></code>, <code class="docutils literal notranslate"><span class="pre">exit</span></code>, and <code class="docutils literal notranslate"><span class="pre">help</span></code>, start by simply reusing the blueprint data to train NLP models for your food ordering app. For <code class="docutils literal notranslate"><span class="pre">build_order</span></code> and any other app-specific intents, gather new training data tailored to the relevant entities (restaurants, dishes, etc.). Apply the approach you learned in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a>.</li>
 </ul>
 </div>
 </div>
 <div class="section" id="training-the-nlp-classifiers">
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
-<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld’s default machine learning settings.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">Loading queries from file ordering/build_order/train.txt</span>
 <span class="go">Loading queries from file ordering/exit/train.txt</span>
 <span class="go">Loading queries from file ordering/greet/train.txt</span>
@@ -820,13 +812,13 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
-<p class="last">During active development, it’s helpful to increase the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">MindMeld logging level</span></a> to better understand what’s happening behind the scenes. All code snippets here assume that logging level has been set to verbose.</p>
+<p class="last">During active development, it's helpful to increase the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">MindMeld logging level</span></a> to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.</p>
 </div>
-<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
+<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;ordering&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;ordering&#39;,</span>
 <span class="go">  &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                  &#39;span&#39;: {&#39;end&#39;: 24, &#39;start&#39;: 11},</span>
 <span class="go">                  &#39;text&#39;: &#39;mujaddara wrap&#39;,</span>
@@ -939,17 +931,17 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 <p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom food ordering data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.</p>
 <p>Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;ordering&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;ordering&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1]},</span>
 <span class="go"> &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
 <span class="go"> &#39;in-gaz&#39;: {},</span>
@@ -957,9 +949,9 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier’s <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. Here are a few examples.</p>
+<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier's <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. Here are a few examples.</p>
 <p>Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;bag-of-words&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span>
             <span class="s1">&#39;freq&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;bins&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
             <span class="s1">&#39;in-gaz&#39;</span><span class="p">:</span> <span class="p">{},</span>
@@ -968,16 +960,16 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
 <span class="go">Best accuracy: 98.36%, params: {&#39;C&#39;: 10000, &#39;class_weight&#39;: {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0}, &#39;fit_intercept&#39;: False}</span>
 </pre></div>
 </div>
 <p>Change the classification model to random forest instead of the default logistic regression:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;rforest&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-fold&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;class_bias&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]}})</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;rforest&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-fold&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;class_bias&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]}})</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
 <span class="go">Best accuracy: 94.12%, params: {&#39;class_weight&#39;: {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0}}</span>
 </pre></div>
@@ -990,8 +982,8 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 <div class="section" id="parser-configuration">
 <span id="food-ordering-parser"></span><h2>8. Parser Configuration<a class="headerlink" href="#parser-configuration" title="Permalink to this headline">¶</a></h2>
-<p>Once the NLP classification models are trained, you can configure and run the MindMeld <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> to link related entities into meaningful entity groups. The application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>, at the top level of the blueprint folder, contains the following parser configuration:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="nx">PARSER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>Once the NLP classification models are trained, you can configure and run the MindMeld <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> to link related entities into meaningful entity groups. The application configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, at the top level of the blueprint folder, contains the following parser configuration:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">PARSER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;dish&#39;</span><span class="o">:</span> <span class="p">{</span>
         <span class="s1">&#39;option&#39;</span><span class="o">:</span> <span class="p">{</span><span class="s1">&#39;linking_words&#39;</span><span class="o">:</span> <span class="p">{</span><span class="s1">&#39;with&#39;</span><span class="p">}},</span>
         <span class="s1">&#39;sys_number&#39;</span><span class="o">:</span> <span class="p">{</span><span class="s1">&#39;max_instances&#39;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="o">:</span> <span class="nx">False</span><span class="p">}</span>
@@ -1003,16 +995,16 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </pre></div>
 </div>
 <p>This configuration specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes. An option entity, in turn, can have its own associated quantity entity. These are the <em>head-dependent relations</em> between the entities. The configuration also defines constraints which improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. These constraints may include the number of allowed dependents of a certain kind, the allowed attachment directions, and so on. See the <a class="reference internal" href="../userguide/parser.html"><span class="doc">User Guide</span></a> for a full list of configurable constraints.</p>
-<p>The parser runs as the last step in the NLP pipeline. The easiest way to test it is to use the Natural Language Processor’s <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;Two chicken kebab and a kibbi platter with a side of mujadara from palmyra&quot;</span>
+<p>The parser runs as the last step in the NLP pipeline. The easiest way to test it is to use the Natural Language Processor's <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;Two chicken kebab and a kibbi platter with a side of mujadara from palmyra&quot;</span>
 <span class="n">entities</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">query</span><span class="p">)[</span><span class="s1">&#39;entities&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>You can then look at the <code class="docutils literal"><span class="pre">children</span></code> property of each entity to see its dependent entities. For example, you can verify that the numeric quantity “two” gets attached to the dish “chicken kebab”:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<p>You can then look at the <code class="docutils literal notranslate"><span class="pre">children</span></code> property of each entity to see its dependent entities. For example, you can verify that the numeric quantity &quot;two&quot; gets attached to the dish &quot;chicken kebab&quot;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;chicken kebab&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;chicken kebab&#39;,</span>
 <span class="go"> &#39;type&#39;: &#39;dish&#39;,</span>
 <span class="go"> &#39;role&#39;: None,</span>
 <span class="go"> &#39;value&#39;: [{&#39;cname&#39;: &#39;Chicken Kebab&#39;,</span>
@@ -1063,11 +1055,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="go">   &#39;span&#39;: {&#39;start&#39;: 0, &#39;end&#39;: 2}}]}</span>
 </pre></div>
 </div>
-<p>Similarly, the option “mujadara” should apply to the second dish, “kibbi platter”:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<p>Similarly, the option &quot;mujadara&quot; should apply to the second dish, &quot;kibbi platter&quot;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;kibbi platter&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;kibbi platter&#39;,</span>
 <span class="go"> &#39;type&#39;: &#39;dish&#39;,</span>
 <span class="go"> &#39;role&#39;: None,</span>
 <span class="go"> &#39;value&#39;: [{&#39;cname&#39;: &#39;Kibbi Platter&#39;,</span>
@@ -1158,11 +1150,11 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <span class="go"> }</span>
 </pre></div>
 </div>
-<p>Lastly, the restaurant “Palmyra” is a standalone entity without any dependents and hence has no <code class="docutils literal"><span class="pre">children</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<p>Lastly, the restaurant &quot;Palmyra&quot; is a standalone entity without any dependents and hence has no <code class="docutils literal notranslate"><span class="pre">children</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entities</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;palmyra&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;text&#39;: &#39;palmyra&#39;,</span>
 <span class="go"> &#39;type&#39;: &#39;restaurant&#39;,</span>
 <span class="go"> &#39;role&#39;: None,</span>
 <span class="go"> &#39;value&#39;: [{&#39;cname&#39;: &#39;Palmyra&#39;,</span>
@@ -1178,41 +1170,41 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 <p class="first admonition-title">Exercise</p>
 <ul class="last simple">
 <li>Experiment with the different constraints in the parser configuration and observe how it affects parsing accuracy.</li>
-<li>Think of any additional entity relationships you might want to capture when extending the blueprint with new entity types for your own use case. For instance, the blueprint treats <code class="docutils literal"><span class="pre">restaurant</span></code> as a standalone entity. However, you might want to introduce related entities like <code class="docutils literal"><span class="pre">location</span></code> (to search for restaurants by geographical area or address) or <code class="docutils literal"><span class="pre">price_level</span></code> (the number of “dollar signs” or average price per person at a restaurant). In that case, you would need to update the parser configuration to extract these new relations.</li>
+<li>Think of any additional entity relationships you might want to capture when extending the blueprint with new entity types for your own use case. For instance, the blueprint treats <code class="docutils literal notranslate"><span class="pre">restaurant</span></code> as a standalone entity. However, you might want to introduce related entities like <code class="docutils literal notranslate"><span class="pre">location</span></code> (to search for restaurants by geographical area or address) or <code class="docutils literal notranslate"><span class="pre">price_level</span></code> (the number of &quot;dollar signs&quot; or average price per person at a restaurant). In that case, you would need to update the parser configuration to extract these new relations.</li>
 </ul>
 </div>
 </div>
 <div class="section" id="using-the-question-answerer">
 <h2>9. Using the Question Answerer<a class="headerlink" href="#using-the-question-answerer" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our <code class="docutils literal"><span class="pre">welcome</span></code> dialogue state handler, we use the Question Answerer to retrieve the top three entries in our <code class="docutils literal"><span class="pre">restaurants</span></code> index and present their names as suggestions to the user.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
+<p>The <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our <code class="docutils literal notranslate"><span class="pre">welcome</span></code> dialogue state handler, we use the Question Answerer to retrieve the top three entries in our <code class="docutils literal notranslate"><span class="pre">restaurants</span></code> index and present their names as suggestions to the user.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.question_answerer</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">restaurants</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="p">[</span><span class="n">restaurant</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">restaurant</span> <span class="ow">in</span> <span class="n">restaurants</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> &quot;Firetrail Pizza&quot;,</span>
 <span class="go"> &quot;Grandma&#39;s Deli &amp; Cafe&quot;,</span>
 <span class="go"> &quot;The Salad Place&quot;</span>
 <span class="go">]</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">build_order</span></code> handler retrieves details about the user’s restaurant and dish selections from the knowledge base, and uses the information to</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">build_order</span></code> handler retrieves details about the user's restaurant and dish selections from the knowledge base, and uses the information to</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li>Suggest restaurants to the user that offer their requested dishes</li>
-<li>Resolve the requested dish name to the most likely entry on a restaurant’s menu</li>
+<li>Resolve the requested dish name to the most likely entry on a restaurant's menu</li>
 <li>Verify that a requested dish is offered at the selected restaurant</li>
 <li>Verify that a requested option is applicable for the selected dish</li>
 <li>Get pricing for the requested dish and options</li>
 </ol>
 </div></blockquote>
-<p>Look at the <code class="docutils literal"><span class="pre">build_order</span></code> implementation in <code class="docutils literal"><span class="pre">__init__.py</span></code> to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.</p>
+<p>Look at the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> implementation in <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the <a class="reference internal" href="../userguide/kb.html"><span class="doc">User Guide</span></a> for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
 <ul class="last simple">
-<li>Use the Question Answerer within the <code class="docutils literal"><span class="pre">build_order</span></code> state handler to add support for searching for restaurants by <code class="docutils literal"><span class="pre">cuisine</span></code> and searching for dishes by <code class="docutils literal"><span class="pre">category</span></code>.</li>
+<li>Use the Question Answerer within the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> state handler to add support for searching for restaurants by <code class="docutils literal notranslate"><span class="pre">cuisine</span></code> and searching for dishes by <code class="docutils literal notranslate"><span class="pre">category</span></code>.</li>
 <li>When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors, and evaluate whether this provides a more relevant list of suggestions to the user.</li>
 <li>Think of other important data that would be useful to have in the knowledge base for a food ordering use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.</li>
 </ul>
@@ -1220,19 +1212,19 @@ in the following manner: <code class="docutils literal"><span class="pre">can</s
 </div>
 <div class="section" id="testing-and-deployment">
 <h2>10. Testing and Deployment<a class="headerlink" href="#testing-and-deployment" title="Permalink to this headline">¶</a></h2>
-<p>Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the <code class="xref py py-class docutils literal"><span class="pre">Conversation</span></code> class in MindMeld to perform an end-to-end test of your conversational app.</p>
+<p>Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the <code class="xref py py-class docutils literal notranslate"><span class="pre">Conversation</span></code> class in MindMeld to perform an end-to-end test of your conversational app.</p>
 <p>For instance:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Get me a pad thai and pinapple fried rice from thep phanom thai&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Sure, I have 1 order of 62. Pad Thai and 1 order of 66. Pineapple Fried Rice from Thep Phanom Thai Restaurant for a total price of $34.00. Would you like to place the order?&#39;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Sure, I have 1 order of 62. Pad Thai and 1 order of 66. Pineapple Fried Rice from Thep Phanom Thai Restaurant for a total price of $34.00. Would you like to place the order?&#39;]</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">say()</span></code> method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app’s Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">say()</span></code> method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.</p>
 <p>You can also try out multi-turn dialogues:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi there!&#39;</span><span class="p">)</span>
 <span class="go">[&#39;Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma&#39;s Deli &amp; Cafe, The Salad Place&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;I&#39;d like to order from Saffron 685 today&quot;</span><span class="p">)</span>

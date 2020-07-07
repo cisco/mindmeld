@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.gazetteer module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.gazetteer module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.gazetteer">
@@ -274,18 +266,18 @@
 <dl class="class">
 <dt id="mindmeld.gazetteer.Gazetteer">
 <em class="property">class </em><code class="descclassname">mindmeld.gazetteer.</code><code class="descname">Gazetteer</code><span class="sig-paren">(</span><em>name</em>, <em>exclude_ngrams=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/gazetteer.html#Gazetteer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This class holds the following  fields, which are extracted and exported to file.</p>
 <dl class="attribute">
 <dt id="mindmeld.gazetteer.Gazetteer.entity_count">
 <code class="descname">entity_count</code><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer.entity_count" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – Total entities in the file</p>
+<dd><p><em>int</em> -- Total entities in the file</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.gazetteer.Gazetteer.pop_dict">
 <code class="descname">pop_dict</code><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer.pop_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary containing the entity name as a key and the popularity score
+<dd><p><em>dict</em> -- A dictionary containing the entity name as a key and the popularity score
 as the value. If there are more than one entity with the same name, the popularity is
 the maximum value across all duplicate entities.</p>
 </dd></dl>
@@ -293,20 +285,20 @@ the maximum value across all duplicate entities.</p>
 <dl class="attribute">
 <dt id="mindmeld.gazetteer.Gazetteer.index">
 <code class="descname">index</code><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer.index" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary containing the inverted index, which maps terms and n-grams
+<dd><p><em>dict</em> -- A dictionary containing the inverted index, which maps terms and n-grams
 to the set of documents which contain them</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.gazetteer.Gazetteer.entities">
 <code class="descname">entities</code><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer.entities" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of all entities</p>
+<dd><p><em>list</em> -- A list of all entities</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mindmeld.gazetteer.Gazetteer.sys_types">
 <code class="descname">sys_types</code><a class="headerlink" href="#mindmeld.gazetteer.Gazetteer.sys_types" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>set</em> – The set of nested numeric types for this entity</p>
+<dd><p><em>set</em> -- The set of nested numeric types for this entity</p>
 </dd></dl>
 
 <dl class="method">
@@ -317,7 +309,7 @@ to the set of documents which contain them</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the gazetteer should be stored</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The location on disk where the gazetteer should be stored</td>
 </tr>
 </tbody>
 </table>
@@ -331,7 +323,7 @@ to the set of documents which contain them</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>serialized_gaz</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The serialized gaz object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>serialized_gaz</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- The serialized gaz object</td>
 </tr>
 </tbody>
 </table>
@@ -345,7 +337,7 @@ to the set of documents which contain them</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The location on disk where the gazetteer is stored</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gaz_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The location on disk where the gazetteer is stored</td>
 </tr>
 </tbody>
 </table>
@@ -366,10 +358,10 @@ to the set of documents which contain them</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The filename of the entity data file.</li>
-<li><strong>popularity_cutoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – A threshold at which entities with
+<li><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The filename of the entity data file.</li>
+<li><strong>popularity_cutoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) -- A threshold at which entities with
 popularity below this value are ignored.</li>
-<li><strong>normalizer</strong> (<em>function</em>) – A function that normalizes text.</li>
+<li><strong>normalizer</strong> (<em>function</em>) -- A function that normalizes text.</li>
 </ul>
 </td>
 </tr>
@@ -386,9 +378,9 @@ popularity below this value are ignored.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of dicts containing canonnical names and whitelists of a
+<li><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of dicts containing canonnical names and whitelists of a
 particular entity</li>
-<li><strong>normalizer</strong> (<em>func</em>) – A QueryFactory normalization function that is used to normalize
+<li><strong>normalizer</strong> (<em>func</em>) -- A QueryFactory normalization function that is used to normalize
 the input mapping data before they are added to the gazetteer.</li>
 </ul>
 </td>
@@ -408,9 +400,9 @@ the input mapping data before they are added to the gazetteer.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tokens</strong> (<em>list of str</em>) – A list of word tokens.</li>
-<li><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The minimum length of n-gram to yield.</li>
-<li><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The maximum length of n-gram to yield.</li>
+<li><strong>tokens</strong> (<em>list of str</em>) -- A list of word tokens.</li>
+<li><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The minimum length of n-gram to yield.</li>
+<li><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) -- The maximum length of n-gram to yield.</li>
 </ul>
 </td>
 </tr>

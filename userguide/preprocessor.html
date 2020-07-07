@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Preprocessor &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Working with the Preprocessor &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -163,6 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -259,23 +261,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="working-with-the-preprocessor">
@@ -290,22 +282,22 @@
 <p>Examples of some common preprocessing tasks include spelling correction, punctuation removal, handling special characters, sentence segmentation, and other kinds of application-specific text normalization.</p>
 <div class="section" id="implement-the-preprocessor">
 <h2>Implement the preprocessor<a class="headerlink" href="#implement-the-preprocessor" title="Permalink to this headline">¶</a></h2>
-<p>You can use the <code class="xref py py-class docutils literal"><span class="pre">Preprocessor</span></code> abstract class provided by MindMeld as a template for defining your own custom preprocessing logic.</p>
+<p>You can use the <code class="xref py py-class docutils literal notranslate"><span class="pre">Preprocessor</span></code> abstract class provided by MindMeld as a template for defining your own custom preprocessing logic.</p>
 <p>The base class contains two methods:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="xref py py-meth docutils literal"><span class="pre">process()</span></code>: takes in a text string and returns the processed string</li>
-<li><code class="xref py py-meth docutils literal"><span class="pre">get_char_index_map()</span></code>: generates the character mapping from the processed string to the original text string.</li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code>: takes in a text string and returns the processed string</li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_char_index_map()</span></code>: generates the character mapping from the processed string to the original text string.</li>
 </ul>
 </div></blockquote>
-<p>While implementing the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method is mandatory and key to defining the functionality of your preprocessor, implementation of the <code class="xref py py-meth docutils literal"><span class="pre">get_char_index_map()</span></code> is optional. However, to ensure the proper functioning of downstream NLP components, it is essential that you implement this function whenever the length (character count) of the input query is changed by the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
+<p>While implementing the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method is mandatory and key to defining the functionality of your preprocessor, implementation of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_char_index_map()</span></code> is optional. However, to ensure the proper functioning of downstream NLP components, it is essential that you implement this function whenever the length (character count) of the input query is changed by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method.</p>
 <div class="section" id="example-stemming-as-a-preprocessing-step">
 <h3>Example: Stemming as a preprocessing step<a class="headerlink" href="#example-stemming-as-a-preprocessing-step" title="Permalink to this headline">¶</a></h3>
-<p>In this example, we define a basic preprocessor that does <a class="reference external" href="https://en.wikipedia.org/wiki/Stemming">stemming</a> using the <a class="reference external" href="https://tartarus.org/martin/PorterStemmer/">Porter Stemmer</a> implementation from <a class="reference external" href="https://www.nltk.org/">NLTK</a>. Stemming reduces each word to a base or root form called the word stem. E.g., the words “fish”, “fishes” and “fishing” all have the same stem, “fish”. This kind of preprocessing is widely used in information retrieval systems as a <a class="reference external" href="https://en.wikipedia.org/wiki/Query_expansion">query expansion</a> technique to improve search engine recall.</p>
-<p>You will need to install the NLTK package to try out the example below. Add the following code to a file named <code class="docutils literal"><span class="pre">stem_processor.py</span></code> and put it in your application folder.</p>
+<p>In this example, we define a basic preprocessor that does <a class="reference external" href="https://en.wikipedia.org/wiki/Stemming">stemming</a> using the <a class="reference external" href="https://tartarus.org/martin/PorterStemmer/">Porter Stemmer</a> implementation from <a class="reference external" href="https://www.nltk.org/">NLTK</a>. Stemming reduces each word to a base or root form called the word stem. E.g., the words &quot;fish&quot;, &quot;fishes&quot; and &quot;fishing&quot; all have the same stem, &quot;fish&quot;. This kind of preprocessing is widely used in information retrieval systems as a <a class="reference external" href="https://en.wikipedia.org/wiki/Query_expansion">query expansion</a> technique to improve search engine recall.</p>
+<p>You will need to install the NLTK package to try out the example below. Add the following code to a file named <code class="docutils literal notranslate"><span class="pre">stem_processor.py</span></code> and put it in your application folder.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-text">stem_processor.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
-<div class="highlight-python"><div class="highlight"><pre><span></span>  <span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">Preprocessor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>  <span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">Preprocessor</span>
   <span class="kn">from</span> <span class="nn">nltk.stem</span> <span class="kn">import</span> <span class="n">PorterStemmer</span>
 
 
@@ -371,10 +363,10 @@
 </div>
 <div class="section" id="use-the-preprocessor">
 <h2>Use the preprocessor<a class="headerlink" href="#use-the-preprocessor" title="Permalink to this headline">¶</a></h2>
-<p>To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the <code class="xref py py-class docutils literal"><span class="pre">Application</span></code> object in the application container file, <code class="docutils literal"><span class="pre">__init__.py</span></code>.</p>
+<p>To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the <code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code> object in the application container file, <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span> <span class="nn">.stem_processor</span> <span class="kn">import</span> <span class="n">StemProcessor</span>
 
 <span class="n">preprocessor</span> <span class="o">=</span> <span class="n">StemProcessor</span><span class="p">()</span>

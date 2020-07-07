@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 1: Select the Right Use Case &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Step 1: Select the Right Use Case &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -252,23 +254,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="step-1-select-the-right-use-case">
@@ -285,20 +277,20 @@
 <td>Conversational interfaces do not come with instruction manuals, and there is little opportunity to teach users about the supported functionality before they take it for a spin. The best use cases mimic an existing, familiar real-world human interaction so that users intuitively know what they can ask and how the service can help. For example, a conversational interface could mimic an interaction with a bank teller, a barista or a customer support rep.</td>
 </tr>
 <tr class="row-even"><td><strong>Does it save users time?</strong></td>
-<td>Conversational interfaces shine when they save users time. A conversational interface is viewed as an unwelcome impediment when a well-designed GUI would be faster. The most useful conversational experiences often center around a use case where users are looking to accomplish a specific task and know how to articulate it. For example, simply saying ‘play my smooth jazz playlist in the kitchen’ can be much faster than launching an app and navigating to the equivalent option by touch.</td>
+<td>Conversational interfaces shine when they save users time. A conversational interface is viewed as an unwelcome impediment when a well-designed GUI would be faster. The most useful conversational experiences often center around a use case where users are looking to accomplish a specific task and know how to articulate it. For example, simply saying 'play my smooth jazz playlist in the kitchen' can be much faster than launching an app and navigating to the equivalent option by touch.</td>
 </tr>
 <tr class="row-odd"><td><strong>Is it more convenient for the user?</strong></td>
-<td>Voice interfaces can be particularly useful when users’ hands and attention are occupied or no mobile device is within reach. If it makes sense to use your application while driving, biking, walking, exercising, cooking, or sitting on the couch, that application is likely to be an excellent candidate for a conversational interface.</td>
+<td>Voice interfaces can be particularly useful when users' hands and attention are occupied or no mobile device is within reach. If it makes sense to use your application while driving, biking, walking, exercising, cooking, or sitting on the couch, that application is likely to be an excellent candidate for a conversational interface.</td>
 </tr>
 <tr class="row-even"><td><strong>Does it hit the Goldilocks zone?</strong></td>
-<td>The best conversational applications fall squarely into the ‘Goldilocks zone.’ The range of functionality that they offer is both narrow enough to ensure that the machine learning models achieve high accuracy, and broad enough that users find the experience useful for a wide variety of tasks. Apps that are too narrow can be trivial and useless. Apps that are too broad can frustrate users by managing only hit-or-miss accuracy.</td>
+<td>The best conversational applications fall squarely into the 'Goldilocks zone.' The range of functionality that they offer is both narrow enough to ensure that the machine learning models achieve high accuracy, and broad enough that users find the experience useful for a wide variety of tasks. Apps that are too narrow can be trivial and useless. Apps that are too broad can frustrate users by managing only hit-or-miss accuracy.</td>
 </tr>
 <tr class="row-odd"><td><strong>Is it possible to get enough training data?</strong></td>
 <td>Even the best use cases fail when it is not possible or practical to collect enough training data to reflect the full range of envisioned functionality. For ideal use cases, training data can be easily generated from production traffic or crowdsourcing techniques. If training data for your use case can only be sourced from a small number of hard-to-find human experts, it is not likely to be a good candidate for a conversational interface.</td>
 </tr>
 </tbody>
 </table>
-<p>In this Guide we consider a simple conversational use case about a neighborhood retail store called Kwik-E-Mart. For instance, you could ask this service about store hours: ‘What time does the Kwik-E-Mart on Elm street close today?’ This rudimentary use case will serve as a reference example to highlight the key steps in building a useful conversational interface.</p>
+<p>In this Guide we consider a simple conversational use case about a neighborhood retail store called Kwik-E-Mart. For instance, you could ask this service about store hours: 'What time does the Kwik-E-Mart on Elm street close today?' This rudimentary use case will serve as a reference example to highlight the key steps in building a useful conversational interface.</p>
 </div>
 
 

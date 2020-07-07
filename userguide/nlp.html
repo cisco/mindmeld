@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Natural Language Processor &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Working with the Natural Language Processor &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -178,6 +179,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -274,33 +276,23 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="working-with-the-natural-language-processor">
 <h1>Working with the Natural Language Processor<a class="headerlink" href="#working-with-the-natural-language-processor" title="Permalink to this headline">¶</a></h1>
-<p>We have seen how the <a class="reference internal" href="architecture.html#arch-nlp"><span class="std std-ref">Natural Language Processor (NLP)</span></a> uses a pipeline of components to analyze the query. MindMeld encapsulates this pipeline in a higher-level abstraction, in the form of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.</p>
+<p>We have seen how the <a class="reference internal" href="architecture.html#arch-nlp"><span class="std std-ref">Natural Language Processor (NLP)</span></a> uses a pipeline of components to analyze the query. MindMeld encapsulates this pipeline in a higher-level abstraction, in the form of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ul class="last simple">
 <li>This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a>.</li>
-<li>This section requires the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a> blueprint application. To get the app, open a terminal and run <code class="docutils literal"><span class="pre">mindmeld</span> <span class="pre">blueprint</span> <span class="pre">home_assistant</span></code>.</li>
+<li>This section requires the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a> blueprint application. To get the app, open a terminal and run <code class="docutils literal notranslate"><span class="pre">mindmeld</span> <span class="pre">blueprint</span> <span class="pre">home_assistant</span></code>.</li>
 </ul>
 </div>
 <div class="section" id="instantiate-the-nlp-class">
@@ -312,20 +304,20 @@
 <li>Then, conduct experimentation in the Python shell.</li>
 </ul>
 </div></blockquote>
-<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class from the MindMeld <code class="xref py py-mod docutils literal"><span class="pre">nlp</span></code> module and instantiate an object with the path to your MindMeld project.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class from the MindMeld <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp</span></code> module and instantiate an object with the path to your MindMeld project.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
 </pre></div>
 </div>
-<p>The natural language processor automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the <code class="xref py py-attr docutils literal"><span class="pre">domains</span></code> attribute of the <code class="xref py py-obj docutils literal"><span class="pre">nlp</span></code> object to view the list of domains it identified.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span>
+<p>The natural language processor automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the <code class="xref py py-attr docutils literal notranslate"><span class="pre">domains</span></code> attribute of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">nlp</span></code> object to view the list of domains it identified.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;smart_home&#39;: &lt;DomainProcessor &#39;smart_home&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;times_and_dates&#39;: &lt;DomainProcessor &#39;times_and_dates&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;unknown&#39;: &lt;DomainProcessor &#39;unknown&#39; ready: False, dirty: False&gt;,</span>
@@ -333,11 +325,11 @@
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>View the list of <code class="xref py py-attr docutils literal"><span class="pre">intents</span></code> for each of the <code class="xref py py-attr docutils literal"><span class="pre">domains</span></code>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
+<p>View the list of <code class="xref py py-attr docutils literal notranslate"><span class="pre">intents</span></code> for each of the <code class="xref py py-attr docutils literal notranslate"><span class="pre">domains</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;change_alarm&#39;: &lt;IntentProcessor &#39;change_alarm&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;check_alarm&#39;: &lt;IntentProcessor &#39;check_alarm&#39; ready: False, dirty: False&gt;,</span>
 <span class="go"> &#39;remove_alarm&#39;: &lt;IntentProcessor &#39;remove_alarm&#39; ready: False, dirty: False&gt;,</span>
@@ -348,25 +340,25 @@
 <span class="go">...</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;check_weather&#39;: &lt;IntentProcessor &#39;check_weather&#39; ready: False, dirty: False&gt;}</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;check_weather&#39;: &lt;IntentProcessor &#39;check_weather&#39; ready: False, dirty: False&gt;}</span>
 </pre></div>
 </div>
 <p>Upon initialization, the natural language processor merely scans the directory structure of your project, but does not read in the training data files. At this point in our tutorial, it has no knowledge of the entities associated with each intent.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;check_weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;check_weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{}</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{}</span>
 </pre></div>
 </div>
-<p>The NLP learns about the entities when labeled queries are loaded at model training time. Once training is finished, you can use the <code class="xref py py-attr docutils literal"><span class="pre">entities</span></code> attribute to view the entity types identified for each intent. The code snippet below introduces the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> method for model training. This method can take several minutes to run.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<p>The NLP learns about the entities when labeled queries are loaded at model training time. Once training is finished, you can use the <code class="xref py py-attr docutils literal notranslate"><span class="pre">entities</span></code> attribute to view the entity types identified for each intent. The code snippet below introduces the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> method for model training. This method can take several minutes to run.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s1">&#39;check_weather&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;city&#39;: &lt;EntityProcessor &#39;city&#39; ready: True, dirty: True&gt;,</span>
 <span class="go"> &#39;sys_interval&#39;: &lt;EntityProcessor &#39;sys_interval&#39; ready: True, dirty: True&gt;,</span>
 <span class="go"> &#39;sys_time&#39;: &lt;EntityProcessor &#39;sys_time&#39; ready: True, dirty: True&gt;,</span>
@@ -374,33 +366,33 @@
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-attr docutils literal"><span class="pre">ready</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">dirty</span></code> attributes further describe the status of an NLP object.</p>
-<p>The <code class="xref py py-attr docutils literal"><span class="pre">ready</span></code> flag indicates whether the NLP instance is ready to process user input. Its value is <code class="docutils literal"><span class="pre">True</span></code> only if all the NLP classification models have been trained and can be used for making predictions on new queries.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">ready</span>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">ready</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">dirty</span></code> attributes further describe the status of an NLP object.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">ready</span></code> flag indicates whether the NLP instance is ready to process user input. Its value is <code class="docutils literal notranslate"><span class="pre">True</span></code> only if all the NLP classification models have been trained and can be used for making predictions on new queries.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">ready</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">False</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">False</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-attr docutils literal"><span class="pre">dirty</span></code> flag indicates whether the NLP object has changed since last loaded from or written to disk. Its value is <code class="docutils literal"><span class="pre">True</span></code> if the models have been retrained since the last disk I/O operation.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">dirty</span>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">dirty</span></code> flag indicates whether the NLP object has changed since last loaded from or written to disk. Its value is <code class="docutils literal notranslate"><span class="pre">True</span></code> if the models have been retrained since the last disk I/O operation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">dirty</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">False</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">False</span>
 </pre></div>
 </div>
-<p>So far in our tutorial, the NLP object has been initialized but has not yet been trained, so <code class="xref py py-attr docutils literal"><span class="pre">ready</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">dirty</span></code> are both false.</p>
+<p>So far in our tutorial, the NLP object has been initialized but has not yet been trained, so <code class="xref py py-attr docutils literal notranslate"><span class="pre">ready</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">dirty</span></code> are both false.</p>
 </div>
 <div class="section" id="train-the-nlp-pipeline">
 <span id="build-nlp"></span><h2>Train the NLP pipeline<a class="headerlink" href="#train-the-nlp-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>As described in <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a>, the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> method is the fastest way to train a baseline natural language processor. Depending on the complexity of your MindMeld project and the size of its training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<p>As described in <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html"><span class="doc">Step 7</span></a>, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> method is the fastest way to train a baseline natural language processor. Depending on the complexity of your MindMeld project and the size of its training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal notranslate"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">Loading queries from file ordering/build_order/train.txt</span>
 <span class="go">Loading queries from file ordering/exit/train.txt</span>
 <span class="go">Loading queries from file ordering/greet/train.txt</span>
@@ -417,19 +409,19 @@
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method loads all the training queries, checks them for annotation errors, then proceeds to build all the necessary NLP components using the machine learning settings defined in <code class="docutils literal"><span class="pre">config.py</span></code>, the app’s configuration file. The method applies MindMeld’s preset configuration for any component whose settings have not been specified.</p>
-<p>In so doing, the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method:</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method loads all the training queries, checks them for annotation errors, then proceeds to build all the necessary NLP components using the machine learning settings defined in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the app's configuration file. The method applies MindMeld's preset configuration for any component whose settings have not been specified.</p>
+<p>In so doing, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Calls the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method on the classifiers in the domain-intent-entity-role hierarchy to train them using the provided model, feature, and hyperparameter settings</li>
+<li>Calls the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method on the classifiers in the domain-intent-entity-role hierarchy to train them using the provided model, feature, and hyperparameter settings</li>
 <li>Builds the <a class="reference internal" href="entity_resolver.html"><span class="doc">Entity Resolver</span></a> using the provided entity mapping file</li>
 <li>Configures the <a class="reference internal" href="parser.html"><span class="doc">Language Parser</span></a> using the provided parser configuration file</li>
 </ul>
 </div></blockquote>
 <p id="build-nlp-with-config">These steps are described further in upcoming chapters, along with default settings for each component, and methods to override them with your own custom configurations.</p>
-<p>To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in <code class="docutils literal"><span class="pre">config.py</span></code>, for the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method to use instead of the MindMeld defaults.</p>
-<p>Here’s an example of a <code class="docutils literal"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the default configurations for the domain and intent classifiers.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, for the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method to use instead of the MindMeld defaults.</p>
+<p>Here's an example of a <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the default configurations for the domain and intent classifiers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span>
@@ -474,15 +466,15 @@
 <p>You will learn more about classifier configuration later in this chapter.</p>
 <div class="section" id="training-at-different-levels-of-the-nlp-hierarchy">
 <span id="build-partial-nlp"></span><h3>Training at different levels of the NLP hierarchy<a class="headerlink" href="#training-at-different-levels-of-the-nlp-hierarchy" title="Permalink to this headline">¶</a></h3>
-<p>While calling the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method on the <code class="xref py py-obj docutils literal"><span class="pre">nlp</span></code> object is the easiest way to build or rebuild all the classifiers, it can be time-consuming. Sometimes it is more efficient to only rebuild a subset of your classifiers. To do this, call the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method at the appropriate level in the domain-intent-entity-role hierarchy.</p>
-<p>For instance, the code below rebuilds the NLP models for one selected domain only, namely the <code class="docutils literal"><span class="pre">times_and_dates</span></code> domain of the <code class="docutils literal"><span class="pre">home_assistant</span></code> app.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<p>While calling the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method on the <code class="xref py py-obj docutils literal notranslate"><span class="pre">nlp</span></code> object is the easiest way to build or rebuild all the classifiers, it can be time-consuming. Sometimes it is more efficient to only rebuild a subset of your classifiers. To do this, call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method at the appropriate level in the domain-intent-entity-role hierarchy.</p>
+<p>For instance, the code below rebuilds the NLP models for one selected domain only, namely the <code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain of the <code class="docutils literal notranslate"><span class="pre">home_assistant</span></code> app.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;times_and_dates&#39;</span>
 <span class="go">Loading queries from file times_and_dates/change_alarm/train.txt</span>
 <span class="go">Loading queries from file times_and_dates/check_alarm/train.txt</span>
 <span class="go">Loading queries from file times_and_dates/remove_alarm/train.txt</span>
@@ -505,9 +497,9 @@
 <span class="go">Best accuracy: 97.18%, params: {&#39;C&#39;: 1000000, &#39;penalty&#39;: &#39;l1&#39;}</span>
 </pre></div>
 </div>
-<p>To specify a level in the domain-intent-entity-role when invoking the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method, choose one of the following patterns:</p>
+<p>To specify a level in the domain-intent-entity-role when invoking the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method, choose one of the following patterns:</p>
 <ol class="arabic simple">
-<li><code class="xref py py-meth docutils literal"><span class="pre">nlp.build()</span></code></li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp.build()</span></code></li>
 </ol>
 <blockquote>
 <div><div class="line-block">
@@ -515,38 +507,38 @@
 </div>
 </div></blockquote>
 <ol class="arabic simple" start="2">
-<li><code class="xref py py-meth docutils literal"><span class="pre">nlp.domains['d_name'].build()</span></code></li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp.domains['d_name'].build()</span></code></li>
 </ol>
 <blockquote>
 <div><div class="line-block">
-<div class="line">Trains the intent classifier for the <code class="docutils literal"><span class="pre">d_name</span></code> domain, the entity recognizers for all the intents under <code class="docutils literal"><span class="pre">d_name</span></code>, and the role classifiers for all the entity types contained within those intents.</div>
+<div class="line">Trains the intent classifier for the <code class="docutils literal notranslate"><span class="pre">d_name</span></code> domain, the entity recognizers for all the intents under <code class="docutils literal notranslate"><span class="pre">d_name</span></code>, and the role classifiers for all the entity types contained within those intents.</div>
 </div>
 </div></blockquote>
 <ol class="arabic simple" start="3">
-<li><code class="xref py py-meth docutils literal"><span class="pre">nlp.domains['d_name'].intents['i_name'].build()</span></code></li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp.domains['d_name'].intents['i_name'].build()</span></code></li>
 </ol>
 <blockquote>
 <div><div class="line-block">
-<div class="line">Trains the entity recognizer for the <code class="docutils literal"><span class="pre">i_name</span></code> intent, and the role classifiers for all the entity types in this intent.</div>
+<div class="line">Trains the entity recognizer for the <code class="docutils literal notranslate"><span class="pre">i_name</span></code> intent, and the role classifiers for all the entity types in this intent.</div>
 </div>
 </div></blockquote>
 <ol class="arabic simple" start="4">
-<li><code class="xref py py-meth docutils literal"><span class="pre">nlp.domains['d_name'].intents['i_name'].entities['e_name'].build()</span></code></li>
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">nlp.domains['d_name'].intents['i_name'].entities['e_name'].build()</span></code></li>
 </ol>
 <blockquote>
 <div><div class="line-block">
-<div class="line">Trains the role classifier for <code class="docutils literal"><span class="pre">e_name</span></code> entity type.</div>
+<div class="line">Trains the role classifier for <code class="docutils literal notranslate"><span class="pre">e_name</span></code> entity type.</div>
 </div>
 </div></blockquote>
 <p>More about fine-grained access to individual classifiers appears in the subsequent chapters.</p>
 </div>
 <div class="section" id="building-models-incrementally">
 <span id="incremental-builds"></span><h3>Building models incrementally<a class="headerlink" href="#building-models-incrementally" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> method by default retrains all NLP models from scratch. In most cases, however, you may just be modifying the configuration, training data, or resources (like gazetteers) of certain specific models within the NLP pipeline. In such cases, MindMeld can intelligently retrain only those models whose dependencies have changed and simply reuse the previous models for the ones that haven’t. To do so, set the <code class="xref py py-data docutils literal"><span class="pre">incremental</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method to <code class="docutils literal"><span class="pre">True</span></code>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> method by default retrains all NLP models from scratch. In most cases, however, you may just be modifying the configuration, training data, or resources (like gazetteers) of certain specific models within the NLP pipeline. In such cases, MindMeld can intelligently retrain only those models whose dependencies have changed and simply reuse the previous models for the ones that haven't. To do so, set the <code class="xref py py-data docutils literal notranslate"><span class="pre">incremental</span></code> parameter of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading queries from file smart_home/check_door/custom_test.txt</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading queries from file smart_home/check_door/custom_test.txt</span>
 <span class="go">Loading queries from file smart_home/check_lights/custom_test.txt</span>
 <span class="go">.</span>
 <span class="go">.</span>
@@ -563,7 +555,7 @@
 </div>
 <div class="section" id="classifier-configurations">
 <span id="config"></span><h3>Classifier configurations<a class="headerlink" href="#classifier-configurations" title="Permalink to this headline">¶</a></h3>
-<p>We have seen how the natural language processor’s <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method and the individual classifiers’ <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> methods use configurations to train models.</p>
+<p>We have seen how the natural language processor's <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method and the individual classifiers' <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> methods use configurations to train models.</p>
 <p>To be more precise, a classifier configuration defines the <a class="reference external" href="https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms">machine learning algorithm</a> to use, the <a class="reference external" href="https://en.wikipedia.org/wiki/Feature_(machine_learning)">features</a> to be extracted from the input data, and the methodology to use for <a class="reference external" href="https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)">hyperparameter selection</a>.</p>
 <p>MindMeld domain, intent, entity, and role classifiers all use a <em>configuration dictionary</em> to define the machine learning settings for model training.</p>
 <p>This section describes the structure and format of the configuration dictionary. Detailed explanation of configurable options for each type of classifier appears in subsequent chapters.</p>
@@ -573,16 +565,16 @@
 <ol class="arabic simple">
 <li><strong>Model Settings</strong> - The <a class="reference external" href="https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms">machine learning algorithm</a>  or modeling approach to use, along with any algorithm-specific settings.</li>
 </ol>
-<p>This snippet from a domain classifier configuration specifies a ‘<a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classifier</a>’ to be trained using a ‘<a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_regression">logistic regression</a>’ model.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
+<p>This snippet from a domain classifier configuration specifies a '<a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classifier</a>' to be trained using a '<a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_regression">logistic regression</a>' model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
 <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
    <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span><span class="p">,</span>
 <span class="p">},</span>
 <span class="o">...</span>
 </pre></div>
 </div>
-<p>This example, from entity recognition, specifies ‘<a class="reference external" href="https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model">maximum entropy markov model</a>’ as the machine learning algorithm and the ‘<a class="reference external" href="https://en.wikipedia.org/wiki/Inside_Outside_Beginning">Inside-Outside-Beginning</a>’ format as the tagging scheme. It further specifies the ‘<a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MaxAbsScaler">maximum absolute scaling</a>’ feature transformation operation as a preprocessing step.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;memm&#39;</span><span class="p">,</span>
+<p>This example, from entity recognition, specifies '<a class="reference external" href="https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model">maximum entropy markov model</a>' as the machine learning algorithm and the '<a class="reference external" href="https://en.wikipedia.org/wiki/Inside_Outside_Beginning">Inside-Outside-Beginning</a>' format as the tagging scheme. It further specifies the '<a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MaxAbsScaler">maximum absolute scaling</a>' feature transformation operation as a preprocessing step.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;memm&#39;</span><span class="p">,</span>
 <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
    <span class="s1">&#39;tag_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;IOB&#39;</span><span class="p">,</span>
    <span class="s1">&#39;feature_scaler&#39;</span><span class="p">:</span> <span class="s1">&#39;max-abs&#39;</span>
@@ -594,7 +586,7 @@
 <li><strong>Feature Extraction Settings</strong> - The <a class="reference external" href="https://en.wikipedia.org/wiki/Feature_(machine_learning)">features</a> to extract from the input query, along with any configurable settings for each feature group.</li>
 </ol>
 <p>These feature extraction settings are from a domain classifier configuration.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="o">...</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
    <span class="s1">&#39;bag-of-words&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span>
    <span class="s1">&#39;in-gaz&#39;</span><span class="p">:</span> <span class="p">{},</span>
@@ -607,7 +599,7 @@
 <p>The above configuration instructs MindMeld to extract four different groups of features for each input query:</p>
 <blockquote>
 <div><ol class="loweralpha simple">
-<li>‘<a class="reference external" href="http://scikit-learn.org/stable/modules/feature_extraction#the-bag-of-words-representation">Bag of n-grams</a>’ of length 1 (also called ‘bag of words’)</li>
+<li>'<a class="reference external" href="http://scikit-learn.org/stable/modules/feature_extraction#the-bag-of-words-representation">Bag of n-grams</a>' of length 1 (also called 'bag of words')</li>
 <li><a class="reference external" href="https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1">Gazetteer</a>-derived features</li>
 <li>Token frequency-based features, quantized into 5 <a class="reference external" href="https://en.wikipedia.org/wiki/Data_binning">bins</a></li>
 <li>Features derived from the query length</li>
@@ -616,8 +608,8 @@
 <ol class="arabic simple" start="3">
 <li><strong>Hyperparameter Settings</strong> - The <a class="reference external" href="https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)">hyperparameters</a> to use during model training, or the settings for choosing optimal hyperparameters.</li>
 </ol>
-<p>This role classifier configuration defines hyperparameters for its <a class="reference external" href="https://en.wikipedia.org/wiki/Maximum_entropy_classifier">maximum entropy classification model</a>. It specifies a value of 100 for the ‘<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model#logistic-regression">C</a>’ parameter and ‘<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model#logistic-regression">L1</a>’ as the norm to be used for <a class="reference external" href="https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification">regularization</a>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="o">...</span>
+<p>This role classifier configuration defines hyperparameters for its <a class="reference external" href="https://en.wikipedia.org/wiki/Maximum_entropy_classifier">maximum entropy classification model</a>. It specifies a value of 100 for the '<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model#logistic-regression">C</a>' parameter and '<a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model#logistic-regression">L1</a>' as the norm to be used for <a class="reference external" href="https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification">regularization</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span>
    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="s1">&#39;l1&#39;</span>
@@ -625,7 +617,7 @@
 </pre></div>
 </div>
 <p>You can also provide a hyperparameter grid instead of exact values and let MindMeld search for optimal settings. This type of configuration must specify both the hyperparameter search grid and settings for the selection methodology, as shown below.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="o">...</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="s1">&#39;param_selection&#39;</span><span class="p">:</span> <span class="p">{</span>
    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-fold&#39;</span><span class="p">,</span>
    <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
@@ -636,22 +628,22 @@
  <span class="p">}</span>
 </pre></div>
 </div>
-<p>The above configuration defines a grid with five potential values for the ‘C’ parameter and two possible values for the ‘penalty’ parameter. It also specifies that optimal values need to be found using a 10-fold cross-validated grid search over the provided parameter grid.</p>
+<p>The above configuration defines a grid with five potential values for the 'C' parameter and two possible values for the 'penalty' parameter. It also specifies that optimal values need to be found using a 10-fold cross-validated grid search over the provided parameter grid.</p>
 </div>
 <div class="section" id="using-custom-configurations">
 <span id="custom-configs"></span><h4>Using custom configurations<a class="headerlink" href="#using-custom-configurations" title="Permalink to this headline">¶</a></h4>
-<p>There are two ways to override MindMeld’s preset configurations for NLP classifiers.</p>
-<p>The first method, as described <a class="reference internal" href="#build-nlp-with-config"><span class="std std-ref">earlier</span></a>, is to define the classifier&nbsp;settings in your application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>. The classifier configuration must be defined as a dictionary with one of the following names to override the corresponding classifier’s default settings.</p>
+<p>There are two ways to override MindMeld's preset configurations for NLP classifiers.</p>
+<p>The first method, as described <a class="reference internal" href="#build-nlp-with-config"><span class="std std-ref">earlier</span></a>, is to define the classifier&nbsp;settings in your application configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>. The classifier configuration must be defined as a dictionary with one of the following names to override the corresponding classifier's default settings.</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="xref py py-data docutils literal"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code></li>
-<li><code class="xref py py-data docutils literal"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code></li>
-<li><code class="xref py py-data docutils literal"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code></li>
-<li><code class="xref py py-data docutils literal"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code></li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code></li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code></li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code></li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code></li>
 </ul>
 </div></blockquote>
-<p>These classifier configurations apply globally to every domain, intent, entity and role model trained as part of your NLP pipeline. There are certain situations where you might want a finer-grained control over the classifier settings for every individual model. For instance, you may find that an LSTM-powered entity recognizer is the optimal choice for detecting entities within one intent, but a MEMM model works better for a different intent. Similarly, you may want a decision tree-based intent model for one domain but a logistic regression model for another. Or you may want to specify that certain data files be included or excluded while training a particular intent or entity model. You can define such specialized configurations based on the domain, intent, and entity type through the <code class="xref py py-meth docutils literal"><span class="pre">get_intent_classifier_config()</span></code>, <code class="xref py py-meth docutils literal"><span class="pre">get_entity_recognizer_config()</span></code>, and <code class="xref py py-meth docutils literal"><span class="pre">get_role_classifier_config()</span></code>. Examples on how to use these methods are shown in the sections for the individual classifiers.</p>
-<p>Alternatively, you could pass configuration settings (like model type, features, and so on) as arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method of the appropriate classifier. Arguments passed to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> take precedence over both MindMeld defaults and settings defined in <code class="docutils literal"><span class="pre">config.py</span></code>. See individual classifier chapters for more about the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method.</p>
+<p>These classifier configurations apply globally to every domain, intent, entity and role model trained as part of your NLP pipeline. There are certain situations where you might want a finer-grained control over the classifier settings for every individual model. For instance, you may find that an LSTM-powered entity recognizer is the optimal choice for detecting entities within one intent, but a MEMM model works better for a different intent. Similarly, you may want a decision tree-based intent model for one domain but a logistic regression model for another. Or you may want to specify that certain data files be included or excluded while training a particular intent or entity model. You can define such specialized configurations based on the domain, intent, and entity type through the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_intent_classifier_config()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_entity_recognizer_config()</span></code>, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_role_classifier_config()</span></code>. Examples on how to use these methods are shown in the sections for the individual classifiers.</p>
+<p>Alternatively, you could pass configuration settings (like model type, features, and so on) as arguments to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method of the appropriate classifier. Arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> take precedence over both MindMeld defaults and settings defined in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>. See individual classifier chapters for more about the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method.</p>
 </div>
 <div class="section" id="configuring-rest-of-the-pipeline">
 <h4>Configuring rest of the pipeline<a class="headerlink" href="#configuring-rest-of-the-pipeline" title="Permalink to this headline">¶</a></h4>
@@ -661,11 +653,11 @@
 </div>
 <div class="section" id="run-the-nlp-pipeline">
 <span id="run-nlp"></span><h2>Run the NLP pipeline<a class="headerlink" href="#run-the-nlp-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>Run the trained NLP pipeline on a test query using the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.process()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method sends the query for sequential processing by each component in the NLP pipeline and returns the aggregated output from all of them.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
+<p>Run the trained NLP pipeline on a test query using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.process()</span></code> method. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method sends the query for sequential processing by each component in the NLP pipeline and returns the aggregated output from all of them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;I&#39;d like a mujaddara wrap and two chicken kebab from palmyra&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;domain&#39;: &#39;ordering&#39;,</span>
 <span class="go"> &#39;entities&#39;: [</span>
 <span class="go">   {</span>
@@ -749,12 +741,12 @@ children (dependents), etc.</td>
 </tr>
 </tbody>
 </table>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method executes the following steps:</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method executes the following steps:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Call the <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> (or equivalent) method for each classifier in the domain-intent-entity-role hierarchy to detect the domain, intent, entities and roles in the query</li>
-<li>Call the Entity Resolver’s <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> method to resolve all detected entities to their canonical forms</li>
-<li>Call the Language Parser’s <code class="xref py py-meth docutils literal"><span class="pre">parse_entities()</span></code> method to cluster the resolved entities</li>
+<li>Call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code> (or equivalent) method for each classifier in the domain-intent-entity-role hierarchy to detect the domain, intent, entities and roles in the query</li>
+<li>Call the Entity Resolver's <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code> method to resolve all detected entities to their canonical forms</li>
+<li>Call the Language Parser's <code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_entities()</span></code> method to cluster the resolved entities</li>
 <li>Return the detailed output from each component</li>
 </ul>
 </div></blockquote>
@@ -762,19 +754,19 @@ children (dependents), etc.</td>
 <div class="section" id="specifying-request-timestamp-and-time-zone">
 <span id="specify-timestamp"></span><h3>Specifying request timestamp and time zone<a class="headerlink" href="#specifying-request-timestamp-and-time-zone" title="Permalink to this headline">¶</a></h3>
 <p>For applications dealing with temporal events, you can specify the timestamp and time zone for each query to modify the default behavior of the NLP pipeline. This information affects how certain <a class="reference internal" href="entity_recognizer.html#system-entities"><span class="std std-ref">system entities</span></a> get resolved in MindMeld.</p>
-<p>To pass in this information, use these two optional parameters of the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method:</p>
+<p>To pass in this information, use these two optional parameters of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="xref py py-data docutils literal"><span class="pre">time_zone</span></code>: The name of an <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">IANA time zone</a>, such as ‘America/Los_Angeles’, or ‘Asia/Kolkata’</li>
-<li><code class="xref py py-data docutils literal"><span class="pre">timestamp</span></code>: A valid <a class="reference external" href="https://en.wikipedia.org/wiki/Unix_time">unix timestamp</a> for the current query</li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">time_zone</span></code>: The name of an <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">IANA time zone</a>, such as 'America/Los_Angeles', or 'Asia/Kolkata'</li>
+<li><code class="xref py py-data docutils literal notranslate"><span class="pre">timestamp</span></code>: A valid <a class="reference external" href="https://en.wikipedia.org/wiki/Unix_time">unix timestamp</a> for the current query</li>
 </ul>
 </div></blockquote>
-<p>We illustrate the use of these parameters below with some examples from the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">home assistant</span></a> blueprint. By default, the natural language processor infers time-related system entities using the timestamp at which the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method was invoked and the time zone of the server where the MindMeld app is running.</p>
+<p>We illustrate the use of these parameters below with some examples from the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">home assistant</span></a> blueprint. By default, the natural language processor infers time-related system entities using the timestamp at which the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method was invoked and the time zone of the server where the MindMeld app is running.</p>
 <p>The following code snippet was executed on the morning of May 11th, 2018 in the PDT (UTC-7:00) time zone.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
 <span class="go">      &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                      &#39;span&#39;: {&#39;end&#39;: 20, &#39;start&#39;: 17},</span>
 <span class="go">                      &#39;text&#39;: &#39;noon&#39;,</span>
@@ -786,11 +778,11 @@ children (dependents), etc.</td>
 <span class="go">    }</span>
 </pre></div>
 </div>
-<p>Observe how the NLP output for the same query changes when <code class="docutils literal"><span class="pre">'Asia/Kolkata'</span></code> (UTC+5:30) is specified as the <code class="xref py py-data docutils literal"><span class="pre">time_zone</span></code>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="s1">&#39;Asia/Kolkata&#39;</span><span class="p">)</span>
+<p>Observe how the NLP output for the same query changes when <code class="docutils literal notranslate"><span class="pre">'Asia/Kolkata'</span></code> (UTC+5:30) is specified as the <code class="xref py py-data docutils literal notranslate"><span class="pre">time_zone</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="s1">&#39;Asia/Kolkata&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
 <span class="go">      &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                      &#39;span&#39;: {&#39;end&#39;: 20, &#39;start&#39;: 17},</span>
 <span class="go">                      &#39;text&#39;: &#39;noon&#39;,</span>
@@ -802,12 +794,12 @@ children (dependents), etc.</td>
 <span class="go">    }</span>
 </pre></div>
 </div>
-<p>Use the <code class="xref py py-data docutils literal"><span class="pre">time_zone</span></code> parameter in your calls to the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.process()</span></code> method to ensure that your application behaves and responds appropriately for all your users regardless of their time zone.</p>
-<p>Next, we demonstrate the use of the <code class="xref py py-data docutils literal"><span class="pre">timestamp</span></code> parameter to reproduce how the NLP pipeline would have processed this query on the midnight (UTC) of January 1st, 2018, which corresponds to the Unix timestamp <a class="reference external" href="http://www.convert-unix-time.com/?t=1514764800">1514764800</a>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">1514764800</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="s1">&#39;Europe/London&#39;</span><span class="p">)</span>
+<p>Use the <code class="xref py py-data docutils literal notranslate"><span class="pre">time_zone</span></code> parameter in your calls to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.process()</span></code> method to ensure that your application behaves and responds appropriately for all your users regardless of their time zone.</p>
+<p>Next, we demonstrate the use of the <code class="xref py py-data docutils literal notranslate"><span class="pre">timestamp</span></code> parameter to reproduce how the NLP pipeline would have processed this query on the midnight (UTC) of January 1st, 2018, which corresponds to the Unix timestamp <a class="reference external" href="http://www.convert-unix-time.com/?t=1514764800">1514764800</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s1">&#39;Set an alarm for noon&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">1514764800</span><span class="p">,</span> <span class="n">time_zone</span><span class="o">=</span><span class="s1">&#39;Europe/London&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">    { &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
 <span class="go">      &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                      &#39;span&#39;: {&#39;end&#39;: 20, &#39;start&#39;: 17},</span>
 <span class="go">                      &#39;text&#39;: &#39;noon&#39;,</span>
@@ -819,27 +811,27 @@ children (dependents), etc.</td>
 <span class="go">    }</span>
 </pre></div>
 </div>
-<p>Use the <code class="xref py py-data docutils literal"><span class="pre">timestamp</span></code> parameter in conjunction with the <code class="xref py py-data docutils literal"><span class="pre">time_zone</span></code> parameter to ensure consistent responses when writing tests and inspecting how the NLP would respond at specific points of time.</p>
+<p>Use the <code class="xref py py-data docutils literal notranslate"><span class="pre">timestamp</span></code> parameter in conjunction with the <code class="xref py py-data docutils literal notranslate"><span class="pre">time_zone</span></code> parameter to ensure consistent responses when writing tests and inspecting how the NLP would respond at specific points of time.</p>
 </div>
 </div>
 <div class="section" id="evaluate-nlp-performance">
 <span id="evaluate-nlp"></span><h2>Evaluate NLP performance<a class="headerlink" href="#evaluate-nlp-performance" title="Permalink to this headline">¶</a></h2>
-<p>The&nbsp;cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline’s performance. However, the true measure of a machine-learned system’s real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries prepared in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">the same manner</span></a> as the training data. Names of files containing test queries have the prefix <code class="docutils literal"><span class="pre">test</span></code>. These files are placed within the intent subfolders, alongside the training data files.</p>
+<p>The&nbsp;cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries prepared in <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">the same manner</span></a> as the training data. Names of files containing test queries have the prefix <code class="docutils literal notranslate"><span class="pre">test</span></code>. These files are placed within the intent subfolders, alongside the training data files.</p>
 <a class="reference internal image-reference" href="../_images/kwik_e_mart_directory.png"><img alt="../_images/kwik_e_mart_directory.png" class="align-center" src="../_images/kwik_e_mart_directory.png" style="width: 350px;" /></a>
-<p>While training data is used for training and tuning the models, test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app. During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier’s output predictions are then compared against the ground truth labels to measure the model’s prediction accuracy. A successful production-grade conversational app must achieve test accuracies greater than 90% for all the classification models in its NLP pipeline.</p>
-<p>Run the trained NLP pipeline on the test data using the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.evaluate()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method sends each query in the test data through sequential processing by each component in the NLP pipeline and returns the aggregated accuracy and statistics from all of them.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<p>While training data is used for training and tuning the models, test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app. During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app must achieve test accuracies greater than 90% for all the classification models in its NLP pipeline.</p>
+<p>Run the trained NLP pipeline on the test data using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.evaluate()</span></code> method. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method sends each query in the test data through sequential processing by each component in the NLP pipeline and returns the aggregated accuracy and statistics from all of them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Intent classification accuracy for the &#39;store_info&#39; domain: 0.9830508474576272</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Intent classification accuracy for the &#39;store_info&#39; domain: 0.9830508474576272</span>
 <span class="go">Entity recognition accuracy for the &#39;store_info.get_store_hours&#39; intent: 0.7941176470588235</span>
 </pre></div>
 </div>
-<p>To get more detailed statistics on each of the classification models in addition to the accuracy, you can use the flag <code class="docutils literal"><span class="pre">print_stats=True</span></code>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">print_stats</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<p>To get more detailed statistics on each of the classification models in addition to the accuracy, you can use the flag <code class="docutils literal notranslate"><span class="pre">print_stats=True</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">print_stats</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Intent classification accuracy for the &#39;store_info&#39; domain: 0.9830508474576272</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Intent classification accuracy for the &#39;store_info&#39; domain: 0.9830508474576272</span>
 <span class="go">Overall statistics:</span>
 
 <span class="go">    accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro</span>
@@ -930,20 +922,20 @@ children (dependents), etc.</td>
 <blockquote>
 <div><ol class="arabic simple">
 <li><strong>Adding more training data</strong>: In most cases, model accuracy can be improved simply by adding more representative training data. Error analysis can help identify a relevant set of training queries to add. This helps the model generalize better and make more accurate predictions on the misclassified examples. Filling in gaps in the training data and improving the overall quality of labeled queries should always be the first step when debugging classifier performance.</li>
-<li><strong>Optimizing the classifier configuration</strong>: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor’s <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc., could help identify alternate configurations that produce more accurate models. However, unlike training data augmentation, this more advanced approach requires expertise in applied machine learning to run meaningful experiments and identify optimal classifier settings. For details about configuration options available for each NLP classifier, see the respective chapters.</li>
+<li><strong>Optimizing the classifier configuration</strong>: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc., could help identify alternate configurations that produce more accurate models. However, unlike training data augmentation, this more advanced approach requires expertise in applied machine learning to run meaningful experiments and identify optimal classifier settings. For details about configuration options available for each NLP classifier, see the respective chapters.</li>
 </ol>
 </div></blockquote>
 </div>
 <div class="section" id="select-data-for-experiments">
 <span id="custom-datasets"></span><h2>Select data for experiments<a class="headerlink" href="#select-data-for-experiments" title="Permalink to this headline">¶</a></h2>
 <p>During the course of experimentation, it is common to have multiple datasets for training and testing as you iterate on building the most optimal models for your NLP pipeline. Multiple training datasets allow you to try out different versions of training data for fitting your models and identifying the best performing one. They are also useful for building and deploying different variants of your models trained on different datasets from the same MindMeld project.</p>
-<p>Multiple testing datasets (or test sets) allow you to compute evaluation numbers on different versions of test data. A recommended practice is to have at least two different test sets in your project - a development set and a blind set. You should use the development set for frequent evaluation and error analysis to fine-tune your model’s parameters and improve its performance. The blind set, on the other hand, should merely be used for computing the final evaluation metrics without being open for detailed investigation.</p>
-<p>In MindMeld, a dataset is a collection of labeled query files that share the same filename prefix and are distributed across the different intent folders consistent with the MindMeld project structure. Each dataset is identified by a label which is the same as the common prefix shared by its constituent data files. By default, MindMeld uses all files within your intent folders that match the <code class="docutils literal"><span class="pre">'train*.txt'</span></code> pattern for training and the <code class="docutils literal"><span class="pre">'test*.txt'</span></code> pattern for testing. In other words, the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.evaluate()</span></code> methods use the datasets named <code class="docutils literal"><span class="pre">'train'</span></code> and <code class="docutils literal"><span class="pre">'test'</span></code> by default, respectively. To instead train or evaluate on a specific subset of files within your intent folders, use the <code class="xref py py-data docutils literal"><span class="pre">label_set</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> methods to identify the desired dataset.</p>
-<p>The code snippet below demonstrates how to train the NLP classifiers only using the <code class="docutils literal"><span class="pre">'custom_train'</span></code> dataset (i.e., the subset of data that matches the <code class="docutils literal"><span class="pre">'custom_train*.txt'</span></code> filename pattern):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">label_set</span><span class="o">=</span><span class="s1">&#39;custom_train&#39;</span><span class="p">)</span>
+<p>Multiple testing datasets (or test sets) allow you to compute evaluation numbers on different versions of test data. A recommended practice is to have at least two different test sets in your project - a development set and a blind set. You should use the development set for frequent evaluation and error analysis to fine-tune your model's parameters and improve its performance. The blind set, on the other hand, should merely be used for computing the final evaluation metrics without being open for detailed investigation.</p>
+<p>In MindMeld, a dataset is a collection of labeled query files that share the same filename prefix and are distributed across the different intent folders consistent with the MindMeld project structure. Each dataset is identified by a label which is the same as the common prefix shared by its constituent data files. By default, MindMeld uses all files within your intent folders that match the <code class="docutils literal notranslate"><span class="pre">'train*.txt'</span></code> pattern for training and the <code class="docutils literal notranslate"><span class="pre">'test*.txt'</span></code> pattern for testing. In other words, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.evaluate()</span></code> methods use the datasets named <code class="docutils literal notranslate"><span class="pre">'train'</span></code> and <code class="docutils literal notranslate"><span class="pre">'test'</span></code> by default, respectively. To instead train or evaluate on a specific subset of files within your intent folders, use the <code class="xref py py-data docutils literal notranslate"><span class="pre">label_set</span></code> parameter of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> methods to identify the desired dataset.</p>
+<p>The code snippet below demonstrates how to train the NLP classifiers only using the <code class="docutils literal notranslate"><span class="pre">'custom_train'</span></code> dataset (i.e., the subset of data that matches the <code class="docutils literal notranslate"><span class="pre">'custom_train*.txt'</span></code> filename pattern):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">label_set</span><span class="o">=</span><span class="s1">&#39;custom_train&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Loading raw queries from file greeting/exit/custom_train.txt</span>
 <span class="go">Loading raw queries from file greeting/greet/custom_train.txt</span>
 <span class="go">Loading raw queries from file smart_home/check_door/custom_train.txt</span>
@@ -953,11 +945,11 @@ children (dependents), etc.</td>
 <span class="go">.</span>
 </pre></div>
 </div>
-<p>Similarly, the following code snippet shows how to evaluate the NLP classifiers only using the <code class="docutils literal"><span class="pre">'custom_test'</span></code> dataset (i.e., the test queries from files matching the <code class="docutils literal"><span class="pre">'custom_test*.txt'</span></code> pattern):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">label_set</span><span class="o">=</span><span class="s1">&#39;custom_test&#39;</span><span class="p">)</span>
+<p>Similarly, the following code snippet shows how to evaluate the NLP classifiers only using the <code class="docutils literal notranslate"><span class="pre">'custom_test'</span></code> dataset (i.e., the test queries from files matching the <code class="docutils literal notranslate"><span class="pre">'custom_test*.txt'</span></code> pattern):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">label_set</span><span class="o">=</span><span class="s1">&#39;custom_test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading queries from file smart_home/check_door/custom_test.txt</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading queries from file smart_home/check_door/custom_test.txt</span>
 <span class="go">Loading queries from file smart_home/check_lights/custom_test.txt</span>
 <span class="go">Loading queries from file smart_home/check_thermostat/custom_test.txt</span>
 <span class="go">.</span>
@@ -969,24 +961,24 @@ children (dependents), etc.</td>
 </div>
 <div class="section" id="save-models-for-future-use">
 <h2>Save models for future use<a class="headerlink" href="#save-models-for-future-use" title="Permalink to this headline">¶</a></h2>
-<p>Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.dump()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">dump()</span></code> method saves all the trained models to a cache folder within your MindMeld project.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+<p>Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.dump()</span></code> method. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code> method saves all the trained models to a cache folder within your MindMeld project.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Saving intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Saving intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">Saving entity recognizer: domain=&#39;ordering&#39;, intent=&#39;build_order&#39;</span>
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>The saved models can then be loaded anytime using the <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcess.load()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<p>The saved models can then be loaded anytime using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcess.load()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading intent classifier: domain=&#39;ordering&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading intent classifier: domain=&#39;ordering&#39;</span>
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>Another option is to save just one specific NLP model, which is useful when you are actively experimenting with individual classifiers and want to checkpoint your work or save multiple model versions for comparison. This is done using the <code class="xref py py-meth docutils literal"><span class="pre">dump()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">load()</span></code> methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.</p>
+<p>Another option is to save just one specific NLP model, which is useful when you are actively experimenting with individual classifiers and want to checkpoint your work or save multiple model versions for comparison. This is done using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code> methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.</p>
 </div>
 </div>
 

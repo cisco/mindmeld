@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.stemmers module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.stemmers module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.stemmers">
@@ -274,49 +266,88 @@
 <dl class="class">
 <dt id="mindmeld.stemmers.EnglishNLTKStemmer">
 <em class="property">class </em><code class="descclassname">mindmeld.stemmers.</code><code class="descname">EnglishNLTKStemmer</code><span class="sig-paren">(</span><em>language=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#EnglishNLTKStemmer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.EnglishNLTKStemmer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.stemmers.EnglishNLTKStemmer.stem_word">
 <code class="descname">stem_word</code><span class="sig-paren">(</span><em>word</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#EnglishNLTKStemmer.stem_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.EnglishNLTKStemmer.stem_word" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The word to stem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A stemmed version of the word</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">stemmed word (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.stemmers.NoOpStemmer">
 <em class="property">class </em><code class="descclassname">mindmeld.stemmers.</code><code class="descname">NoOpStemmer</code><span class="sig-paren">(</span><em>language=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#NoOpStemmer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.NoOpStemmer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.stemmers.NoOpStemmer.stem_word">
 <code class="descname">stem_word</code><span class="sig-paren">(</span><em>word</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#NoOpStemmer.stem_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.NoOpStemmer.stem_word" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The word to stem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A stemmed version of the word</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">stemmed word (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.stemmers.SnowballNLTKStemmer">
 <em class="property">class </em><code class="descclassname">mindmeld.stemmers.</code><code class="descname">SnowballNLTKStemmer</code><span class="sig-paren">(</span><em>language=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#SnowballNLTKStemmer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.SnowballNLTKStemmer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#mindmeld.stemmers.Stemmer" title="mindmeld.stemmers.Stemmer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.stemmers.Stemmer</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.stemmers.SnowballNLTKStemmer.stem_word">
 <code class="descname">stem_word</code><span class="sig-paren">(</span><em>word</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#SnowballNLTKStemmer.stem_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.SnowballNLTKStemmer.stem_word" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The word to stem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A stemmed version of the word</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">stemmed word (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="mindmeld.stemmers.Stemmer">
 <em class="property">class </em><code class="descclassname">mindmeld.stemmers.</code><code class="descname">Stemmer</code><span class="sig-paren">(</span><em>language=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#Stemmer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.Stemmer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.stemmers.Stemmer.stem_word">
 <code class="descname">stem_word</code><span class="sig-paren">(</span><em>word</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/stemmers.html#Stemmer.stem_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.stemmers.Stemmer.stem_word" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the stem of a word. For example, the stem of the word ‘fishing’ is ‘fish’.</p>
+<dd><p>Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The word to stem</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The word to stem</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A stemmed version of the word</td>
 </tr>

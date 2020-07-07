@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.models.text_models module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.models.text_models module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.models.text_models">
@@ -276,7 +268,7 @@ of text.</p>
 <dl class="class">
 <dt id="mindmeld.models.text_models.TextModel">
 <em class="property">class </em><code class="descclassname">mindmeld.models.text_models.</code><code class="descname">TextModel</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/text_models.html#TextModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.text_models.TextModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mindmeld.models.model.html#mindmeld.models.model.Model" title="mindmeld.models.model.Model"><code class="xref py py-class docutils literal"><span class="pre">mindmeld.models.model.Model</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mindmeld.models.model.html#mindmeld.models.model.Model" title="mindmeld.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mindmeld.models.model.Model</span></code></a></p>
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.evaluate">
 <code class="descname">evaluate</code><span class="sig-paren">(</span><em>examples</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/text_models.html#TextModel.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.text_models.TextModel.evaluate" title="Permalink to this definition">¶</a></dt>
@@ -286,8 +278,8 @@ of text.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> – A list of examples to predict</li>
-<li><strong>labels</strong> – A list of expected labels</li>
+<li><strong>examples</strong> -- A list of examples to predict</li>
+<li><strong>labels</strong> -- A list of expected labels</li>
 </ul>
 </td>
 </tr>
@@ -313,10 +305,10 @@ training examples passed in.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of examples.</li>
-<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A parallel list to examples. The gold labels
+<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of examples.</li>
+<li><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A parallel list to examples. The gold labels
 for each example.</li>
-<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – Parameters to use when training. Parameter
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- Parameters to use when training. Parameter
 selection will be bypassed if this is provided</li>
 </ul>
 </td>
@@ -339,7 +331,7 @@ selection will be bypassed if this is provided</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The examples.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- The examples.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple containing:<blockquote>
 <div><ul class="simple">
@@ -369,9 +361,9 @@ label and returns the log probability of the difference.</dd>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>example</strong> (<em>Query</em>) – The query to be predicted</li>
-<li><strong>gold_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The gold label for this string</li>
-<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – A dynamic resource to aid NLP inference</li>
+<li><strong>example</strong> (<em>Query</em>) -- The query to be predicted</li>
+<li><strong>gold_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The gold label for this string</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) -- A dynamic resource to aid NLP inference</li>
 </ul>
 </td>
 </tr>
@@ -388,7 +380,30 @@ label and returns the log probability of the difference.</dd>
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>examples</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/text_models.html#TextModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.text_models.TextModel.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="docutils">
+<dt>Predicts a list of class labels for the given list of queries using the trained</dt>
+<dd>classification model</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of queries to predict</li>
+<li><strong>dynamic_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) -- A dictionary containing dynamic resource keys like
+dynamic gazetteers that is used to bias the NLP classifier</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of predicted labels per query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.predict_log_proba">
@@ -398,12 +413,49 @@ label and returns the log probability of the difference.</dd>
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.predict_proba">
 <code class="descname">predict_proba</code><span class="sig-paren">(</span><em>examples</em>, <em>dynamic_resource=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/text_models.html#TextModel.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.text_models.TextModel.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Runs prediction on each of the given queries and generates multiple hypotheses with their
+associated probabilities using the trained classification model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> (<em>list of mindmeld.core.Query</em>) -- a list of queries to train on</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of predicted labels                 with confidence scores</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of tuples of (<a class="reference internal" href="mindmeld.core.html#mindmeld.core.QueryEntity" title="mindmeld.core.QueryEntity">mindmeld.core.QueryEntity</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.select_params">
 <code class="descname">select_params</code><span class="sig-paren">(</span><em>examples</em>, <em>labels</em>, <em>selection_settings=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/models/text_models.html#TextModel.select_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.models.text_models.TextModel.select_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="docutils">
+<dt>Selects the best set of hyper-parameters for a given set of examples and true labels</dt>
+<dd>through cross-validation</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples</strong> -- A list of example queries</li>
+<li><strong>labels</strong> -- A list of labels associated with the queries</li>
+<li><strong>selection_settings</strong> -- A dictionary of parameter lists to select from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dictionary of optimized parameters to use</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mindmeld.models.text_models.TextModel.view_extracted_features">

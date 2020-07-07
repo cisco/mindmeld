@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Domain Classifier &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Working with the Domain Classifier &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -152,7 +153,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#classifier-configuration">Classifier configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#training-with-custom-configurations">Training with custom configurations</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#application-configuration-file">1. Application configuration file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#arguments-to-the-fit-method">2. Arguments to the <code class="docutils literal"><span class="pre">fit()</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arguments-to-the-fit-method">2. Arguments to the <code class="docutils literal notranslate"><span class="pre">fit()</span></code> method</a></li>
 </ul>
 </li>
 </ul>
@@ -173,6 +174,7 @@
 <li class="toctree-l1"><a class="reference internal" href="custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -269,23 +271,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="working-with-the-domain-classifier">
@@ -304,7 +296,7 @@
 <p class="first admonition-title">Note</p>
 <ul class="last simple">
 <li>This is an in-depth tutorial to work through from start to finish. Before you begin, read the <a class="reference internal" href="../index.html#quickstart"><span class="std std-ref">Step-by-Step Guide</span></a>, paying special attention to the <a class="reference internal" href="../quickstart/07_train_the_natural_language_processing_classifiers.html#domain-classification"><span class="std std-ref">Domain Classification</span></a> section.</li>
-<li>This section requires the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a> blueprint application. To get the app, open a terminal and run <code class="docutils literal"><span class="pre">mindmeld</span> <span class="pre">blueprint</span> <span class="pre">home_assistant</span></code>.</li>
+<li>This section requires the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant</span></a> blueprint application. To get the app, open a terminal and run <code class="docutils literal notranslate"><span class="pre">mindmeld</span> <span class="pre">blueprint</span> <span class="pre">home_assistant</span></code>.</li>
 </ul>
 </div>
 <div class="section" id="access-the-domain-classifier">
@@ -316,32 +308,32 @@
 <li>Then, conduct experimentation in the Python shell.</li>
 </ul>
 </div></blockquote>
-<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class from the MindMeld <code class="xref py py-mod docutils literal"><span class="pre">nlp</span></code> module and instantiate an object with the path to your MindMeld project.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<p>When you are ready to begin experimenting, import the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class from the MindMeld <code class="xref py py-mod docutils literal notranslate"><span class="pre">nlp</span></code> module and instantiate an object with the path to your MindMeld project.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;NaturalLanguageProcessor &#39;home_assistant&#39; ready: False, dirty: False&gt;</span>
 </pre></div>
 </div>
-<p>Access the <code class="xref py py-class docutils literal"><span class="pre">DomainClassifier</span></code> using the <code class="xref py py-attr docutils literal"><span class="pre">domain_classifier</span></code> attribute of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domain_classifier</span>
+<p>Access the <code class="xref py py-class docutils literal notranslate"><span class="pre">DomainClassifier</span></code> using the <code class="xref py py-attr docutils literal notranslate"><span class="pre">domain_classifier</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domain_classifier</span>
 <span class="n">dc</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;DomainClassifier ready: False, dirty: False&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;DomainClassifier ready: False, dirty: False&gt;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="train-the-domain-classifier">
 <h2>Train the domain classifier<a class="headerlink" href="#train-the-domain-classifier" title="Permalink to this headline">¶</a></h2>
-<p>Use the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.fit()</span></code> method to train a domain classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.</p>
-<div class="highlight-python" id="baseline-domain-fit"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
+<p>Use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.fit()</span></code> method to train a domain classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to <code class="docutils literal notranslate"><span class="pre">INFO</span></code> or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.</p>
+<div class="highlight-python notranslate" id="baseline-domain-fit"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">configure_logs</span><span class="p">;</span> <span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">No domain model configuration set. Using default.</span>
 <span class="go">Loading queries from file smart_home/check_thermostat/train.txt</span>
 <span class="go">Loading queries from file smart_home/close_door/train.txt</span>
@@ -369,15 +361,15 @@
 <span class="go">Best accuracy: 99.50%, params: {&#39;C&#39;: 10, &#39;fit_intercept&#39;: True}</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from <code class="docutils literal"><span class="pre">config.py</span></code>, the <a class="reference internal" href="nlp.html#build-nlp-with-config"><span class="std std-ref">app’s configuration file</span></a>. If no custom settings for domain classification are defined in <code class="docutils literal"><span class="pre">config.py</span></code>, the method uses the MindMeld preset <a class="reference internal" href="nlp.html#config"><span class="std std-ref">classifier configuration</span></a>.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the <a class="reference internal" href="nlp.html#build-nlp-with-config"><span class="std std-ref">app's configuration file</span></a>. If no custom settings for domain classification are defined in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the method uses the MindMeld preset <a class="reference internal" href="nlp.html#config"><span class="std std-ref">classifier configuration</span></a>.</p>
 <p>Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.</p>
 <div class="section" id="classifier-configuration">
 <h3>Classifier configuration<a class="headerlink" href="#classifier-configuration" title="Permalink to this headline">¶</a></h3>
-<p>Use the <code class="xref py py-attr docutils literal"><span class="pre">config</span></code> attribute of a trained classifier to view the <a class="reference internal" href="nlp.html#config"><span class="std std-ref">configuration</span></a> that the classifier is using. Here’s an example where we view the configuration of a baseline domain classifier trained using default settings:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<p>Use the <code class="xref py py-attr docutils literal notranslate"><span class="pre">config</span></code> attribute of a trained classifier to view the <a class="reference internal" href="nlp.html#config"><span class="std std-ref">configuration</span></a> that the classifier is using. Here's an example where we view the configuration of a baseline domain classifier trained using default settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;features&#39;: {</span>
 <span class="go">     &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1]},</span>
 <span class="go">     &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
@@ -399,22 +391,22 @@
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>Let’s take a look at the allowed values for each setting in a domain classifier configuration.</p>
+<p>Let's take a look at the allowed values for each setting in a domain classifier configuration.</p>
 <ol class="arabic simple">
 <li><strong>Model Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'model_type'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'model_type'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">Always <code class="docutils literal"><span class="pre">'text'</span></code>, since the domain classifier is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model.</p>
+<p class="last">Always <code class="docutils literal notranslate"><span class="pre">'text'</span></code>, since the domain classifier is a <a class="reference external" href="https://en.wikipedia.org/wiki/Text_classification">text classification</a> model.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'model_settings'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'model_settings'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p>Always a dictionary with the single key <code class="docutils literal"><span class="pre">'classifier_type'</span></code>, whose value specifies the machine learning model to use. Allowed values are shown in the table below.</p>
+<p>Always a dictionary with the single key <code class="docutils literal notranslate"><span class="pre">'classifier_type'</span></code>, whose value specifies the machine learning model to use. Allowed values are shown in the table below.</p>
 <table border="1" class="last docutils" id="sklearn-domain-models">
 <colgroup>
 <col width="8%" />
@@ -428,19 +420,19 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'logreg'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'logreg'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">Logistic regression</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">sklearn.linear_model.LogisticRegression</a></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'svm'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'svm'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/svm.html#svm-classification">Support vector machine</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC">sklearn.svm.SVC</a></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'dtree'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'dtree'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/tree.html#tree">Decision tree</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier">sklearn.tree.DecisionTreeClassifier</a></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'rforest'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'rforest'</span></code></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/ensemble.html#forest">Random forest</a></td>
 <td><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier">sklearn.ensemble.RandomForestClassifier</a></td>
 </tr>
@@ -452,7 +444,7 @@
 <li><strong>Feature Extraction Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'features'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'features'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
@@ -468,33 +460,33 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'bag-of-words'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'bag-of-words'</span></code></td>
 <td><p class="first">Generates n-grams of the specified lengths from the query text.</p>
 <p>Settings:</p>
 <p>A list of n-gram lengths to extract.</p>
 <p>Examples:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>only extracts words (unigrams)</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts unigrams, bigrams and trigrams</li>
 </ul>
 </dd>
 </dl>
-<p>Given the query “how are you”:</p>
+<p>Given the query &quot;how are you&quot;:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “how”, “are”, and “you”</li>
+<li>extracts &quot;how&quot;, &quot;are&quot;, and &quot;you&quot;</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “how”, “are”, “you”, “how are”, and “are you”</li>
+<li>extracts &quot;how&quot;, &quot;are&quot;, &quot;you&quot;, &quot;how are&quot;, and &quot;are you&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -503,7 +495,7 @@ threshold on their frequency. These frequencies are computed over the entire tra
 infrequent n-grams from being used as features. By default, this frequency is set to 0.</p>
 <p>Examples:</p>
 <blockquote class="last">
-<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
   <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
 <span class="p">}</span>
@@ -513,7 +505,7 @@ infrequent n-grams from being used as features. By default, this frequency is se
 <li>extracts all bigrams whose frequency in the training set is 5 or greater and all trigrams whose
 frequency is 8 or greater.</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
   <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 <span class="p">}</span>
@@ -525,14 +517,14 @@ frequency is 8 or greater.</li>
 </div></blockquote>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'freq'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'freq'</span></code></td>
 <td><p class="first">Generates a log-scaled count for each frequency bin, where the count represents the number of query tokens
 whose frequency falls into that bin. Frequency is measured by number of occurrences in the training data.</p>
 <p>Settings:</p>
 <p>Number of bins.</p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'bins':</span> <span class="pre">5}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'bins':</span> <span class="pre">5}</span></code></dt>
 <dd><ul class="first last simple">
 <li>quantizes the vocabulary frequency into 5 bins</li>
 </ul>
@@ -540,35 +532,35 @@ whose frequency falls into that bin. Frequency is measured by number of occurren
 </dl>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'enable-stemming'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'enable-stemming'</span></code></td>
 <td><p class="first">Stemming is the process of reducing inflected words to their word stem or base form. For example, word stem
-of “eating” is “eat”, word stem of “backwards” is “backward”. MindMeld extracts word stems using a variant
+of &quot;eating&quot; is &quot;eat&quot;, word stem of &quot;backwards&quot; is &quot;backward&quot;. MindMeld extracts word stems using a variant
 of the <a class="reference external" href="https://tartarus.org/martin/PorterStemmer/">Porter stemming algorithm</a> that only removes
 inflectional suffixes.</p>
-<p>This feature extends the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> and <code class="docutils literal"><span class="pre">'freq'</span></code> features described above.</p>
-<p>If this flag is set to <code class="docutils literal"><span class="pre">True</span></code>:</p>
+<p>This feature extends the <code class="docutils literal notranslate"><span class="pre">'bag-of-words'</span></code> and <code class="docutils literal notranslate"><span class="pre">'freq'</span></code> features described above.</p>
+<p>If this flag is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
 <ul class="simple">
 <li>The stemmed versions of the n-grams are extracted from the query in addition to regular n-grams when
-using the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> feature</li>
+using the <code class="docutils literal notranslate"><span class="pre">'bag-of-words'</span></code> feature</li>
 <li>Frequency counts for both unstemmed as well as stemmed versions of the query tokens are computed when
-using the <code class="docutils literal"><span class="pre">'freq'</span></code> feature</li>
+using the <code class="docutils literal notranslate"><span class="pre">'freq'</span></code> feature</li>
 </ul>
 <p>Example:</p>
 <blockquote class="last">
-<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s1">&#39;bag-of-words&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span>
     <span class="s1">&#39;enable-stemming&#39;</span><span class="p">:</span> <span class="bp">True</span>
  <span class="p">}</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>extracts [“two”, “orders”, “of”, “breadsticks”, <strong>“order”</strong>, <strong>“breadstick”</strong>] from the query “two
+<li>extracts [&quot;two&quot;, “orders&quot;, &quot;of&quot;, &quot;breadsticks&quot;, <strong>&quot;order&quot;</strong>, <strong>&quot;breadstick&quot;</strong>] from the query “two
 orders of breadsticks”.</li>
 </ul>
 </div></blockquote>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'word-shape'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'word-shape'</span></code></td>
 <td><p class="first">Generates word shapes of n-grams of the specified lengths from the query text. Word shapes are simplified
 representations which encode attributes such as capitalization, numerals, punctuation etc.
 Currently, we only encode whether a character is a digit or not.</p>
@@ -576,27 +568,27 @@ Currently, we only encode whether a character is a digit or not.</p>
 <p>A list of n-gram lengths to extract.</p>
 <p>Examples:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>only extracts word shapes of individual tokens (unigrams)</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts word shapes of unigrams, bigrams and trigrams</li>
 </ul>
 </dd>
 </dl>
-<p>Given the query “i want 12”:</p>
+<p>Given the query &quot;i want 12&quot;:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “x”, “xxxx”, and “dd”</li>
+<li>extracts &quot;x&quot;, &quot;xxxx&quot;, and &quot;dd&quot;</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts “x”, “xxxx”, “dd”, “x xxxx”, and “xxxx dd”</li>
+<li>extracts &quot;x&quot;, &quot;xxxx&quot;, &quot;dd&quot;, &quot;x xxxx&quot;, and &quot;xxxx dd&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -608,18 +600,18 @@ Currently, we only encode whether a character is a digit or not.</p>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'edge-ngrams'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'edge-ngrams'</span></code></td>
 <td><p class="first">Generates n-grams of the specified lengths from the edges (that is, the start and the end) of the query.</p>
 <p>Settings:</p>
 <p>A list of n-gram lengths to extract.</p>
 <p>Examples:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>only extracts the first and last word</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts all leading and trailing n-grams up to size 3</li>
 </ul>
@@ -627,31 +619,31 @@ Currently, we only encode whether a character is a digit or not.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'char-ngrams'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'char-ngrams'</span></code></td>
 <td><p class="first">Generates character n-grams of specified lengths from the query text.</p>
 <p>Examples:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts each character in the query (unigrams)</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts character unigrams, bigrams and trigrams</li>
 </ul>
 </dd>
 </dl>
-<p>Given the query “hi there”:</p>
+<p>Given the query &quot;hi there&quot;:</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts ‘h’, ‘i’, ‘ ‘, t’, ‘h’, ‘e’, ‘r’, and ‘e’</li>
+<li>extracts 'h', 'i', ' ', t', 'h', 'e', 'r', and 'e'</li>
 </ul>
 </dd>
-<dt><code class="docutils literal"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'lengths':</span> <span class="pre">[1,</span> <span class="pre">2]}</span></code></dt>
 <dd><ul class="first last simple">
-<li>extracts  ‘h’, ‘i’, ‘ ‘, ‘t’, ‘h’, ‘e’, ‘r’, ‘e’, ‘hi’, ‘i ‘, ‘ t’, ‘th’, ‘he’, ‘er’, and ‘re’</li>
+<li>extracts  'h', 'i', ' ', 't', 'h', 'e', 'r', 'e', 'hi', 'i ', ' t', 'th', 'he', 'er', and 're'</li>
 </ul>
 </dd>
 </dl>
@@ -660,7 +652,7 @@ a threshold on their frequency. These frequencies are computed over the entire t
 infrequent n-grams from being used as features. By default, this frequency is set to 0.</p>
 <p>Examples:</p>
 <blockquote class="last">
-<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
   <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
 <span class="p">}</span>
@@ -670,7 +662,7 @@ infrequent n-grams from being used as features. By default, this frequency is se
 <li>extracts all character bigrams whose frequency in the training set is 5 or greater and all character
 trigrams whose frequency is 8 or greater.</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;lengths&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
   <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 <span class="p">}</span>
@@ -683,13 +675,13 @@ trigrams.</li>
 </div></blockquote>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'sys-candidates'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'sys-candidates'</span></code></td>
 <td><p class="first">Generates a set of features indicating the presence of system entities in the query.</p>
 <p>Settings:</p>
 <p>The types of system entities to extract. If unspecified, all system entities will be considered by default.</p>
 <p>Example:</p>
 <dl class="last docutils">
-<dt><code class="docutils literal"><span class="pre">{'entities':</span> <span class="pre">['sys_number',</span> <span class="pre">'sys_time',</span> <span class="pre">'sys_phone-number']}</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">{'entities':</span> <span class="pre">['sys_number',</span> <span class="pre">'sys_time',</span> <span class="pre">'sys_phone-number']}</span></code></dt>
 <dd><ul class="first last simple">
 <li>extracts features indicating the presence of the above system entities</li>
 </ul>
@@ -697,15 +689,15 @@ trigrams.</li>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'in-gaz'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'in-gaz'</span></code></td>
 <td>Generates a set of features indicating the presence of query n-grams in different entity gazetteers,
 along with popularity information as defined in the gazetteer.</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'length'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'length'</span></code></td>
 <td>Generates a set of features that capture query length information.
 Computes the number of tokens and characters in the query, on both linear and log scales.</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'exact'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'exact'</span></code></td>
 <td>Returns the entire query text as a feature.</td>
 </tr>
 </tbody>
@@ -716,23 +708,23 @@ Computes the number of tokens and characters in the query, on both linear and lo
 <li><strong>Hyperparameter Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'params'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A dictionary of values to be used for model hyperparameters during training. Examples include the <code class="docutils literal"><span class="pre">'kernel'</span></code> parameter for SVM, <code class="docutils literal"><span class="pre">'penalty'</span></code> for logistic regression, <code class="docutils literal"><span class="pre">'max_depth'</span></code> for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the <a class="reference internal" href="#sklearn-domain-models"><span class="std std-ref">reference links</span></a> above for parameter lists.</p>
+<p class="last">A dictionary of values to be used for model hyperparameters during training. Examples include the <code class="docutils literal notranslate"><span class="pre">'kernel'</span></code> parameter for SVM, <code class="docutils literal notranslate"><span class="pre">'penalty'</span></code> for logistic regression, <code class="docutils literal notranslate"><span class="pre">'max_depth'</span></code> for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the <a class="reference internal" href="#sklearn-domain-models"><span class="std std-ref">reference links</span></a> above for parameter lists.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'param_selection'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'param_selection'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p>A dictionary of settings for <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search">hyperparameter selection</a>. Provides an alternative to the <code class="docutils literal"><span class="pre">'params'</span></code> dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.</p>
+<p>A dictionary of settings for <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search">hyperparameter selection</a>. Provides an alternative to the <code class="docutils literal notranslate"><span class="pre">'params'</span></code> dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.</p>
 <p>To estimate parameters, MindMeld needs two pieces of information from the developer:</p>
 <ol class="arabic simple">
-<li>The parameter space to search, as the value for the <code class="docutils literal"><span class="pre">'grid'</span></code> key</li>
-<li>The strategy for splitting the labeled data into training and validation sets, as the value for the <code class="docutils literal"><span class="pre">'type'</span></code> key</li>
+<li>The parameter space to search, as the value for the <code class="docutils literal notranslate"><span class="pre">'grid'</span></code> key</li>
+<li>The strategy for splitting the labeled data into training and validation sets, as the value for the <code class="docutils literal notranslate"><span class="pre">'type'</span></code> key</li>
 </ol>
-<p>Depending on the splitting scheme selected, the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.</p>
+<p>Depending on the splitting scheme selected, the <code class="xref py py-data docutils literal notranslate"><span class="pre">param_selection</span></code> dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="16%" />
@@ -744,10 +736,10 @@ Computes the number of tokens and characters in the query, on both linear and lo
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'grid'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'grid'</span></code></td>
 <td><p class="first">A dictionary which maps each hyperparameter to a list of potential values to search.
 Here is an example for a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression">logistic regression</a> model:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">],</span>
   <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">],</span>
    <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
@@ -757,52 +749,52 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <p class="last">See the <a class="reference internal" href="#sklearn-domain-models"><span class="std std-ref">reference links</span></a> above for details on the hyperparameters available for each model.</p>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">'type'</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">'type'</span></code></td>
 <td><p class="first">The <a class="reference external" href="http://scikit-learn.org/stable/modules/cross_validation">cross-validation</a> methodology to use. One of:</p>
 <ul class="last simple">
-<li><code class="docutils literal"><span class="pre">'k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold">K-folds</a></li>
-<li><code class="docutils literal"><span class="pre">'shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ShuffleSplit">Randomized folds</a></li>
-<li><code class="docutils literal"><span class="pre">'group-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold">K-folds with non-overlapping groups</a></li>
-<li><code class="docutils literal"><span class="pre">'group-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupShuffleSplit">Group-aware randomized folds</a></li>
-<li><code class="docutils literal"><span class="pre">'stratified-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold">Stratified k-folds</a></li>
-<li><code class="docutils literal"><span class="pre">'stratified-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit">Stratified randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold">K-folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ShuffleSplit">Randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'group-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold">K-folds with non-overlapping groups</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'group-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupShuffleSplit">Group-aware randomized folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'stratified-k-fold'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold">Stratified k-folds</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">'stratified-shuffle'</span></code>: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit">Stratified randomized folds</a></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">'k'</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">'k'</span></code></td>
 <td>Number of folds (splits)</td>
 </tr>
 </tbody>
 </table>
-<p class="last">To identify the parameters that give the highest accuracy, the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method does an <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search">exhaustive grid search</a> over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> can use these optimal parameters and skip the parameter selection process.</p>
+<p class="last">To identify the parameters that give the highest accuracy, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method does an <a class="reference external" href="http://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search">exhaustive grid search</a> over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> can use these optimal parameters and skip the parameter selection process.</p>
 </dd>
 </dl>
 <ol class="arabic simple" start="4">
 <li><strong>Custom Train/Test Settings</strong></li>
 </ol>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">'train_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'train_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A string representing a regex pattern that selects all training files for domain model training with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'train.*\.txt'</span></code>.</p>
+<p class="last">A string representing a regex pattern that selects all training files for domain model training with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal notranslate"><span class="pre">'train.*\.txt'</span></code>.</p>
 </dd>
-<dt><code class="docutils literal"><span class="pre">'test_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>)</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">'test_label_set'</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</dt>
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A string representing a regex pattern that selects all evaluation files for domain model testing with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal"><span class="pre">'test.*\.txt'</span></code>.</p>
+<p class="last">A string representing a regex pattern that selects all evaluation files for domain model testing with filenames that match the pattern. The default regex when this key is not specified is <code class="docutils literal notranslate"><span class="pre">'test.*\.txt'</span></code>.</p>
 </dd>
 </dl>
 </div>
 <div class="section" id="training-with-custom-configurations">
 <span id="build-domain-with-config"></span><h3>Training with custom configurations<a class="headerlink" href="#training-with-custom-configurations" title="Permalink to this headline">¶</a></h3>
-<p>To override MindMeld’s default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method with appropriate arguments.</p>
+<p>To override MindMeld's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method with appropriate arguments.</p>
 <div class="section" id="application-configuration-file">
 <h4>1. Application configuration file<a class="headerlink" href="#application-configuration-file" title="Permalink to this headline">¶</a></h4>
-<p>When you define custom classifier&nbsp;settings in <code class="docutils literal"><span class="pre">config.py</span></code>, the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.fit()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.build()</span></code> methods use those settings instead of MindMeld’s defaults. To do this, define a dictionary of your custom settings, named <code class="xref py py-data docutils literal"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code>.</p>
-<p>Here’s an example of a <code class="docutils literal"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the preset configuration for the domain classifier.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>When you define custom classifier&nbsp;settings in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.fit()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.build()</span></code> methods use those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named <code class="xref py py-data docutils literal notranslate"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code>.</p>
+<p>Here's an example of a <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file where custom settings optimized for the app override the preset configuration for the domain classifier.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DOMAIN_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span>
@@ -829,18 +821,18 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </pre></div>
 </div>
 <p>This method is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.</p>
-<p>Since this method requires updating a file each time you modify a setting, it’s less suitable for rapid prototyping than the method described next.</p>
+<p>Since this method requires updating a file each time you modify a setting, it's less suitable for rapid prototyping than the method described next.</p>
 </div>
 <div class="section" id="arguments-to-the-fit-method">
-<h4>2. Arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method<a class="headerlink" href="#arguments-to-the-fit-method" title="Permalink to this headline">¶</a></h4>
-<p>For experimenting with the domain classifier, the recommended method is to use arguments to the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. The main areas for exploration are feature extraction, hyperparameter tuning, and model selection.</p>
+<h4>2. Arguments to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method<a class="headerlink" href="#arguments-to-the-fit-method" title="Permalink to this headline">¶</a></h4>
+<p>For experimenting with the domain classifier, the recommended method is to use arguments to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. The main areas for exploration are feature extraction, hyperparameter tuning, and model selection.</p>
 <p><strong>Feature extraction</strong></p>
-<p>Let’s start with the baseline classifier we trained <a class="reference internal" href="#baseline-domain-fit"><span class="std std-ref">earlier</span></a>. Viewing the feature set reveals that, by default, the classifier uses unigrams for its bag of words features.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<p>Let's start with the baseline classifier we trained <a class="reference internal" href="#baseline-domain-fit"><span class="std std-ref">earlier</span></a>. Viewing the feature set reveals that, by default, the classifier uses unigrams for its bag of words features.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_features</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
 <span class="n">my_features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
@@ -850,16 +842,16 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>Now we want the classifier to look at longer phrases, which carry more context than unigrams. Change the <code class="docutils literal"><span class="pre">'lengths'</span></code> setting of the <code class="docutils literal"><span class="pre">'bag-of-words'</span></code> feature to extract longer n-grams. For this example, to extract single words (unigrams), bigrams, and trigrams, we’ll edit the <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary as shown below.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<p>Now we want the classifier to look at longer phrases, which carry more context than unigrams. Change the <code class="docutils literal notranslate"><span class="pre">'lengths'</span></code> setting of the <code class="docutils literal notranslate"><span class="pre">'bag-of-words'</span></code> feature to extract longer n-grams. For this example, to extract single words (unigrams), bigrams, and trigrams, we'll edit the <code class="xref py py-data docutils literal notranslate"><span class="pre">my_features</span></code> dictionary as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>We can also add more <a class="reference internal" href="#domain-features"><span class="std std-ref">supported features</span></a>. Suppose that our domains are such that the natural language patterns at the start or the end of a query are highly indicative of one domain or another. To capture this, we extract the leading and trailing phrases of different lengths — known as <em>edge n-grams</em> — from the query. The code below adds the new <code class="docutils literal"><span class="pre">'edge-ngrams'</span></code> feature to the existing <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;edge-ngrams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">}</span>
+<p>We can also add more <a class="reference internal" href="#domain-features"><span class="std std-ref">supported features</span></a>. Suppose that our domains are such that the natural language patterns at the start or the end of a query are highly indicative of one domain or another. To capture this, we extract the leading and trailing phrases of different lengths — known as <em>edge n-grams</em> — from the query. The code below adds the new <code class="docutils literal notranslate"><span class="pre">'edge-ngrams'</span></code> feature to the existing <code class="xref py py-data docutils literal notranslate"><span class="pre">my_features</span></code> dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_features</span><span class="p">[</span><span class="s1">&#39;edge-ngrams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;lengths&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">}</span>
 <span class="n">my_features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2, 3]},</span>
 <span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
@@ -869,11 +861,11 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>To retrain the classifier with the updated feature set, pass in the <code class="xref py py-data docutils literal"><span class="pre">my_features</span></code> dictionary as an argument to the <code class="xref py py-data docutils literal"><span class="pre">features</span></code> parameter of the <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. This trains the domain classification model with our new feature extraction settings, while continuing to use MindMeld defaults for model type (logistic regression) and hyperparameter selection.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">my_features</span><span class="p">)</span>
+<p>To retrain the classifier with the updated feature set, pass in the <code class="xref py py-data docutils literal notranslate"><span class="pre">my_features</span></code> dictionary as an argument to the <code class="xref py py-data docutils literal notranslate"><span class="pre">features</span></code> parameter of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. This trains the domain classification model with our new feature extraction settings, while continuing to use MindMeld defaults for model type (logistic regression) and hyperparameter selection.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">my_features</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
 <span class="go">Best accuracy: 99.60%, params: {&#39;C&#39;: 10, &#39;fit_intercept&#39;: True}</span>
 
@@ -881,12 +873,12 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </pre></div>
 </div>
 <p><strong>Hyperparameter tuning</strong></p>
-<p>View the model’s hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model for domain classification in MindMeld. These include: <code class="docutils literal"><span class="pre">'C'</span></code>, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to <code class="docutils literal"><span class="pre">'l2'</span></code>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span>
+<p>View the model's hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model for domain classification in MindMeld. These include: <code class="docutils literal notranslate"><span class="pre">'C'</span></code>, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to <code class="docutils literal notranslate"><span class="pre">'l2'</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">param_selection</span>
 <span class="n">my_param_settings</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;grid&#39;: {</span>
 <span class="go">           &#39;C&#39;: [10, 100, 1000, 10000, 100000],</span>
 <span class="go">           &#39;fit_intercept&#39;: [True, False]</span>
@@ -896,13 +888,13 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>For our first experiment, let’s reduce the range of values to search for <code class="docutils literal"><span class="pre">'C'</span></code>, and allow the hyperparameter estimation process to choose the ideal norm (<code class="docutils literal"><span class="pre">'l1'</span></code> or <code class="docutils literal"><span class="pre">'l2'</span></code>) for penalization. Pass the updated settings to <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> as arguments to the <code class="xref py py-data docutils literal"><span class="pre">param_selection</span></code> parameter. The <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose cross-validation accuracy is highest.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
+<p>For our first experiment, let's reduce the range of values to search for <code class="docutils literal notranslate"><span class="pre">'C'</span></code>, and allow the hyperparameter estimation process to choose the ideal norm (<code class="docutils literal notranslate"><span class="pre">'l1'</span></code> or <code class="docutils literal notranslate"><span class="pre">'l2'</span></code>) for penalization. Pass the updated settings to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> as arguments to the <code class="xref py py-data docutils literal notranslate"><span class="pre">param_selection</span></code> parameter. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose cross-validation accuracy is highest.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
 <span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;penalty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">]</span>
 <span class="n">my_param_settings</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;grid&#39;: {</span>
 <span class="go">           &#39;C&#39;: [10, 100, 1000],</span>
 <span class="go">           &#39;fit_intercept&#39;: [True, False],</span>
@@ -913,22 +905,22 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 10 splits</span>
 <span class="go">Best accuracy: 99.59%, params: {&#39;C&#39;: 1000, &#39;penalty&#39;: &#39;l2&#39;, &#39;fit_intercept&#39;: True}</span>
 </pre></div>
 </div>
 <p>Again, the exact accuracy number and the selected params might be different for a particular run.</p>
-<p>Finally, we’ll try a new cross-validation strategy of randomized folds, replacing the default of k-fold. We’ll also specify five folds instead of the default of ten folds. To so this, we modify the values of the   <code class="docutils literal"><span class="pre">'type'</span></code> and <code class="docutils literal"><span class="pre">'k'</span></code> keys in <code class="xref py py-data docutils literal"><span class="pre">my_param_settings</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<p>Finally, we'll try a new cross-validation strategy of randomized folds, replacing the default of k-fold. We'll also specify five folds instead of the default of ten folds. To so this, we modify the values of the   <code class="docutils literal notranslate"><span class="pre">'type'</span></code> and <code class="docutils literal notranslate"><span class="pre">'k'</span></code> keys in <code class="xref py py-data docutils literal notranslate"><span class="pre">my_param_settings</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;shuffle&#39;</span>
 <span class="n">my_param_settings</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;grid&#39;: {</span>
 <span class="go">           &#39;C&#39;: [10, 100, 1000],</span>
 <span class="go">           &#39;fit_intercept&#39;: [True, False],</span>
@@ -939,26 +931,26 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
 <span class="go">Best accuracy: 99.50%, params: {&#39;C&#39;: 100, &#39;fit_intercept&#39;: False, &#39;penalty&#39;: &#39;l2&#39;}</span>
 </pre></div>
 </div>
 <p>For a list of configurable hyperparameters for each model, along with available cross-validation methods, see <a class="reference internal" href="#domain-tuning"><span class="std std-ref">hyperparameter settings</span></a>.</p>
 <p><strong>Model selection</strong></p>
-<p>To try <a class="reference internal" href="#sklearn-domain-models"><span class="std std-ref">machine learning models</span></a> other than the default of logistic regression, we specify the new model as the argument to <code class="docutils literal"><span class="pre">model_settings</span></code>, then update the hyperparameter grid accordingly.</p>
+<p>To try <a class="reference internal" href="#sklearn-domain-models"><span class="std std-ref">machine learning models</span></a> other than the default of logistic regression, we specify the new model as the argument to <code class="docutils literal notranslate"><span class="pre">model_settings</span></code>, then update the hyperparameter grid accordingly.</p>
 <p>For example, a <a class="reference external" href="http://scikit-learn.org/stable/modules/svm">support vector machine (SVM)</a> with the same features as before, and parameter selection settings updated to search over the <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">SVM hyperparameters</a>, looks like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
  <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
  <span class="s1">&#39;kernel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">]</span>
 <span class="p">}</span>
 <span class="n">my_param_settings</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go"> &#39;grid&#39;: {</span>
 <span class="go">           &#39;C&#39;: [0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000],</span>
 <span class="go">           &#39;kernel&#39;: [&#39;linear&#39;, &#39;rbf&#39;, &#39;poly&#39;]</span>
@@ -968,16 +960,16 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">}</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;svm&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;svm&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
 <span class="go">Best accuracy: 99.56%, params: {&#39;C&#39;: 1000, &#39;kernel&#39;: &#39;rbf&#39;}</span>
 </pre></div>
 </div>
 <p>Meanwhile, a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier">random forest</a> <a class="reference external" href="http://scikit-learn.org/stable/modules/ensemble">ensemble</a> classifier would look like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_param_settings</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
  <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
  <span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;gini&#39;</span><span class="p">,</span> <span class="s1">&#39;entropy&#39;</span><span class="p">],</span>
  <span class="s1">&#39;warm_start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
@@ -985,7 +977,7 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;rforest&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">my_param_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Selecting hyperparameters using shuffle cross-validation with 5 splits</span>
 <span class="go">Best accuracy: 98.37%, params: {&#39;criterion&#39;: &#39;gini&#39;, &#39;n_estimators&#39;: 15, &#39;warm_start&#39;: False}</span>
 </pre></div>
@@ -995,23 +987,23 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </div>
 <div class="section" id="run-the-domain-classifier">
 <h2>Run the domain classifier<a class="headerlink" href="#run-the-domain-classifier" title="Permalink to this headline">¶</a></h2>
-<p>Run the trained domain classifier on a test query using the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.predict()</span></code> method, which returns the label for the domain whose predicted probability is highest.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s1">&#39;weather in san francisco?&#39;</span><span class="p">)</span>
+<p>Run the trained domain classifier on a test query using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.predict()</span></code> method, which returns the label for the domain whose predicted probability is highest.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s1">&#39;weather in san francisco?&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;weather&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;weather&#39;</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">At runtime, the natural language processor’s <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method calls <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.predict()</span></code> to classify the domain for an incoming query.</p>
+<p class="last">At runtime, the natural language processor's <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.predict()</span></code> to classify the domain for an incoming query.</p>
 </div>
-<p>We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible domain labels, use the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.predict_proba()</span></code> method. This is useful both for experimenting with classifier settings and for debugging classifier performance.</p>
+<p>We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible domain labels, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.predict_proba()</span></code> method. This is useful both for experimenting with classifier settings and for debugging classifier performance.</p>
 <p>The result is a list of tuples whose first element is the domain label and whose second element is the associated classification probability. These are ranked by domain, from most likely to least likely.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="s1">&#39;weather in san francisco?&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="s1">&#39;weather in san francisco?&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> (&#39;weather&#39;, 0.6),</span>
 <span class="go"> (&#39;smart_home&#39;, 0.05),</span>
 <span class="go"> (&#39;unknown&#39;, 0.25),</span>
@@ -1021,24 +1013,24 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </pre></div>
 </div>
 <p>An ideal classifier would assign a high probability to the expected (correct) class label for a test query, while assigning very low probabilities to incorrect labels.</p>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">predict()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">predict_proba()</span></code> methods take one query at a time. Next, we’ll see how to test a trained model on a batch of labeled test queries.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_proba()</span></code> methods take one query at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.</p>
 </div>
 <div class="section" id="evaluate-classifier-performance">
 <h2>Evaluate classifier performance<a class="headerlink" href="#evaluate-classifier-performance" title="Permalink to this headline">¶</a></h2>
 <p>Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your MindMeld project as described in the <a class="reference internal" href="nlp.html#evaluate-nlp"><span class="std std-ref">Natural Language Processor</span></a> chapter.</p>
-<p>Then, when you are ready, use the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.evaluate()</span></code> method, which</p>
+<p>Then, when you are ready, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.evaluate()</span></code> method, which</p>
 <blockquote>
 <div><ul class="simple">
 <li>strips away all ground truth annotations from the test queries,</li>
 <li>passes the resulting unlabeled queries to the trained domain classifier for prediction, and</li>
-<li>compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.</li>
+<li>compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.</li>
 </ul>
 </div></blockquote>
 <p>In the example below, the model gets 2,550 out of 2,563 test queries correct, resulting in an accuracy of 99.5%.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading queries from file times_and_dates/change_alarm/test.txt</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading queries from file times_and_dates/change_alarm/test.txt</span>
 <span class="go">Loading queries from file times_and_dates/check_alarm/test.txt</span>
 <span class="go">Loading queries from file times_and_dates/remove_alarm/test.txt</span>
 <span class="go">Loading queries from file times_and_dates/set_alarm/test.txt</span>
@@ -1063,13 +1055,13 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">&lt;StandardModelEvaluation score: 99.49%, 2550 of 2563 examples correct&gt;</span>
 </pre></div>
 </div>
-<p>The aggregate accuracy score we see above is only the beginning, because the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.</p>
-<p>Print all the model performance statistics reported by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<p>The aggregate accuracy score we see above is only the beginning, because the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.</p>
+<p>Print all the model performance statistics reported by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 <span class="nb">eval</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Overall statistics:</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Overall statistics:</span>
 
 <span class="go">   accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro</span>
 <span class="go">      0.995       0.995        2550        7676          13          13       0.954       0.995</span>
@@ -1095,8 +1087,8 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">  times_and_..              0              0              0            345</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">eval.get_stats()</span></code> method returns all the above statistics in a structured dictionary without printing them to the console.</p>
-<p>Let’s decipher the statistics output by the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval.get_stats()</span></code> method returns all the above statistics in a structured dictionary without printing them to the console.</p>
+<p>Let's decipher the statistics output by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method.</p>
 <dl class="docutils">
 <dt><strong>Overall Statistics</strong></dt>
 <dd><div class="first line-block">
@@ -1138,7 +1130,7 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <p>When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.</p>
 <ul class="last simple">
 <li><strong>Classes are balanced</strong> — When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.</li>
-<li><strong>Classes are imbalanced</strong> — In this case, it’s important to take the f1 scores into account.</li>
+<li><strong>Classes are imbalanced</strong> — In this case, it's important to take the f1 scores into account.</li>
 <li><strong>All f1 and accuracy scores are low</strong> — When domain classification is performing poorly across all domains, any of the following may be the problem: 1) You do not have enough training data for the model to learn, 2) you need to tune your model hyperparameters, or 3) you need to reconsider your domain structure to ensure that queries in different domain have different vocabularies — this may involve either combining or separating domains so that the resulting classes are easier for the classifier to distinguish.</li>
 <li><strong>f1 weighted is higher than f1 macro</strong> — This means that domains with fewer evaluation examples are performing poorly. Try adding more data to these domains or adding class weights to your hyperparameters.</li>
 <li><strong>f1 macro is higher than f1 weighted</strong> — This means that domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.</li>
@@ -1191,15 +1183,15 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <dd><div class="first line-block">
 <div class="line"><br /></div>
 </div>
-<p class="last">A <a class="reference external" href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified 32 instances of <code class="docutils literal"><span class="pre">weather</span></code> queries as <code class="docutils literal"><span class="pre">smart_home</span></code>.</p>
+<p class="last">A <a class="reference external" href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified 32 instances of <code class="docutils literal notranslate"><span class="pre">weather</span></code> queries as <code class="docutils literal notranslate"><span class="pre">smart_home</span></code>.</p>
 </dd>
 </dl>
-<p>Now we have a wealth of information about the performance of our classifier. Let’s go further and inspect the classifier’s predictions at the level of individual queries, to better understand error patterns.</p>
-<p>View the classifier predictions for the entire test set using the <code class="xref py py-attr docutils literal"><span class="pre">results</span></code> attribute of the returned <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-obj docutils literal"><span class="pre">eval</span></code></a> object. Each result is an instance of the <code class="xref py py-class docutils literal"><span class="pre">EvaluatedExample</span></code> class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="o">.</span><span class="n">results</span>
+<p>Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.</p>
+<p>View the classifier predictions for the entire test set using the <code class="xref py py-attr docutils literal notranslate"><span class="pre">results</span></code> attribute of the returned <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a> object. Each result is an instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">EvaluatedExample</span></code> class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm&#39;&gt;, expected=&#39;times_and_dates&#39;, predicted=&#39;times_and_dates&#39;, probas={&#39;smart_home&#39;: 0.050000000000000003, &#39;times_and_dates&#39;: 0.94999999999999996, &#39;unknown&#39;: 0.0, &#39;weather&#39;: 0.0}, label_type=&#39;class&#39;),</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, expected=&#39;times_and_dates&#39;, predicted=&#39;times_and_dates&#39;, probas={&#39;smart_home&#39;: 0.050000000000000003, &#39;times_and_dates&#39;: 0.94999999999999996, &#39;unknown&#39;: 0.0, &#39;weather&#39;: 0.0}, label_type=&#39;class&#39;)],</span>
 <span class="go"> ...</span>
@@ -1207,20 +1199,20 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </pre></div>
 </div>
 <p>Next, we look selectively at just the correct or incorrect predictions.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">correct_results</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">correct_results</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm&#39;&gt;, expected=&#39;times_and_dates&#39;, predicted=&#39;times_and_dates&#39;, probas={&#39;smart_home&#39;: 0.050000000000000003, &#39;times_and_dates&#39;: 0.94999999999999996, &#39;unknown&#39;: 0.0, &#39;weather&#39;: 0.0}, label_type=&#39;class&#39;),</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;change my 6 am alarm to 7 am&#39;&gt;, expected=&#39;times_and_dates&#39;, predicted=&#39;times_and_dates&#39;, probas={&#39;smart_home&#39;: 0.050000000000000003, &#39;times_and_dates&#39;: 0.94999999999999996, &#39;unknown&#39;: 0.0, &#39;weather&#39;: 0.0}, label_type=&#39;class&#39;),</span>
 <span class="go"> ...</span>
 <span class="go">]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;stop my timers&#39;&gt;, expected=&#39;times_and_dates&#39;, predicted=&#39;smart_home&#39;, probas={&#39;smart_home&#39;: 0.65000000000000002, &#39;times_and_dates&#39;: 0.29999999999999999, &#39;unknown&#39;: 0.050000000000000003, &#39;weather&#39;: 0.0}, label_type=&#39;class&#39;),</span>
 <span class="go"> EvaluatedExample(example=&lt;Query &#39;what is happening in germany right now?&#39;&gt;, expected=&#39;unknown&#39;, predicted=&#39;weather&#39;, probas={&#39;smart_home&#39;: 0.14999999999999999, &#39;times_and_dates&#39;: 0.0, &#39;unknown&#39;: 0.40000000000000002, &#39;weather&#39;: 0.45000000000000001}, label_type=&#39;class&#39;),</span>
 <span class="go"> ...</span>
@@ -1228,11 +1220,11 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </pre></div>
 </div>
 <p>Slicing and dicing these results for error analysis is easily done with <a class="reference external" href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehensions</a>.</p>
-<p>A simple example of this is inspecting incorrect predictions for a particular domain. For the <code class="docutils literal"><span class="pre">times_and_dates</span></code> domain, we get:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span>
+<p>A simple example of this is inspecting incorrect predictions for a particular domain. For the <code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain, we get:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;times_and_dates&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> (&lt;Query &#39;stop my timers&#39;&gt;,</span>
 <span class="go">  {</span>
 <span class="go">    &#39;smart_home&#39;: 0.65000000000000002,</span>
@@ -1244,12 +1236,12 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">]</span>
 </pre></div>
 </div>
-<p>In this case, only one test query from the <code class="docutils literal"><span class="pre">times_and_dates</span></code> domain got misclassified as <code class="docutils literal"><span class="pre">smart_home</span></code>. The correct label came in second, but lost by a significant margin in classification probability.</p>
-<p>Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all misclassified queries from a given domain, where the classifier’s confidence for the true label is very low. We’ll demonstrate this with the <code class="docutils literal"><span class="pre">weather</span></code> domain and a confidence of &lt;25%.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;weather&#39;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">25</span><span class="p">]</span>
+<p>In this case, only one test query from the <code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain got misclassified as <code class="docutils literal notranslate"><span class="pre">smart_home</span></code>. The correct label came in second, but lost by a significant margin in classification probability.</p>
+<p>Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all misclassified queries from a given domain, where the classifier's confidence for the true label is very low. We'll demonstrate this with the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain and a confidence of &lt;25%.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">example</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">eval</span><span class="o">.</span><span class="n">incorrect_results</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">expected</span> <span class="o">==</span> <span class="s1">&#39;weather&#39;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">probas</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">25</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[</span>
 <span class="go"> (&lt;Query &#39;check temperature outside&#39;&gt;,</span>
 <span class="go">  {</span>
 <span class="go">   &#39;smart_home&#39;: 0.84999999999999998,</span>
@@ -1270,18 +1262,18 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <span class="go">]</span>
 </pre></div>
 </div>
-<p>The result reveals queries where the domain was misclassified as <code class="docutils literal"><span class="pre">smart_home</span></code>, and where the language pattern was the word “check” followed some words, then the word “temperature” and some more words. We’ll call this the “check … temperature …” pattern.</p>
-<p>Try looking for similar queries in the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">training data</span></a>. You should discover that the <code class="docutils literal"><span class="pre">weather</span></code> domain does indeed lack labeled training queries that fit the pattern. But the <code class="docutils literal"><span class="pre">smart_home</span></code> domain, and the <code class="docutils literal"><span class="pre">check_thermostat</span></code> intent in particular, has plenty of queries that fit. This explains why the model chose <code class="docutils literal"><span class="pre">smart_home</span></code> over <code class="docutils literal"><span class="pre">weather</span></code> when classifying such queries.</p>
-<p>One potential solution is to add more training queries that fit the “check … temperature …” pattern to the <code class="docutils literal"><span class="pre">weather</span></code> domain. Then the classification model should more effectively learn to distinguish the two domains that it confused.</p>
-<p>Error analysis on the results of the <code class="xref py py-meth docutils literal"><span class="pre">evaluate()</span></code> method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described <a class="reference internal" href="#build-domain-with-config"><span class="std std-ref">earlier</span></a> in this chapter.</p>
+<p>The result reveals queries where the domain was misclassified as <code class="docutils literal notranslate"><span class="pre">smart_home</span></code>, and where the language pattern was the word &quot;check&quot; followed some words, then the word &quot;temperature&quot; and some more words. We'll call this the &quot;check ... temperature ...&quot; pattern.</p>
+<p>Try looking for similar queries in the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">training data</span></a>. You should discover that the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain does indeed lack labeled training queries that fit the pattern. But the <code class="docutils literal notranslate"><span class="pre">smart_home</span></code> domain, and the <code class="docutils literal notranslate"><span class="pre">check_thermostat</span></code> intent in particular, has plenty of queries that fit. This explains why the model chose <code class="docutils literal notranslate"><span class="pre">smart_home</span></code> over <code class="docutils literal notranslate"><span class="pre">weather</span></code> when classifying such queries.</p>
+<p>One potential solution is to add more training queries that fit the &quot;check ... temperature ...&quot; pattern to the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain. Then the classification model should more effectively learn to distinguish the two domains that it confused.</p>
+<p>Error analysis on the results of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code> method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described <a class="reference internal" href="#build-domain-with-config"><span class="std std-ref">earlier</span></a> in this chapter.</p>
 </div>
 <div class="section" id="viewing-features-extracted-for-classification">
 <h2>Viewing features extracted for classification<a class="headerlink" href="#viewing-features-extracted-for-classification" title="Permalink to this headline">¶</a></h2>
-<p>While training a new model or investigating a misclassification by the classifier, it is sometimes useful to view the extracted features to make sure they are as expected. For example, there may be non-ASCII characters in the query that are treated differently by the feature extractors, or the value assigned to a particular feature may be computed differently than you expected. Not extracting the right features could lead to misclassifications. In the example below, we view the features extracted for the query ‘set alarm for 7 am’ using <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.view_extracted_features()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">view_extracted_features</span><span class="p">(</span><span class="s2">&quot;set alarm for 7 am&quot;</span><span class="p">)</span>
+<p>While training a new model or investigating a misclassification by the classifier, it is sometimes useful to view the extracted features to make sure they are as expected. For example, there may be non-ASCII characters in the query that are treated differently by the feature extractors, or the value assigned to a particular feature may be computed differently than you expected. Not extracting the right features could lead to misclassifications. In the example below, we view the features extracted for the query 'set alarm for 7 am' using <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.view_extracted_features()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">view_extracted_features</span><span class="p">(</span><span class="s2">&quot;set alarm for 7 am&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;bag_of_words|length:1|ngram:set&#39;: 1,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;bag_of_words|length:1|ngram:set&#39;: 1,</span>
 <span class="go"> &#39;bag_of_words|length:1|ngram:alarm&#39;: 1,</span>
 <span class="go"> &#39;bag_of_words|length:1|ngram:for&#39;: 1,</span>
 <span class="go"> &#39;bag_of_words|length:1|ngram:#NUM&#39;: 1,</span>
@@ -1308,17 +1300,17 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </div>
 <div class="section" id="inspect-features-and-their-importance">
 <h2>Inspect features and their importance<a class="headerlink" href="#inspect-features-and-their-importance" title="Permalink to this headline">¶</a></h2>
-<p>Examining the learned feature weights of a machine-learned model can offer insights into its behavior. To analyze the prediction of the domain classifier on any query, you can inspect its features and their weights using <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> method. In particular, it is useful to compare the computed feature values for the query for the predicted class and the expected ground truth (also called <strong>gold</strong>) class. Looking at the feature values closely can help in identifying the features that are useful, those that aren’t, and even those that may be misleading or confusing for the model.</p>
-<p>Let us examine the results of <code class="xref py py-meth docutils literal"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> on the query “check temperature outside” with the gold domain <code class="docutils literal"><span class="pre">weather</span></code>. Focus on the ‘Feature’ and ‘Diff’ columns. A high negative value in the ‘Diff’ column for the features representing the presence of a <code class="docutils literal"><span class="pre">location</span></code> entity and the word ‘temperature’ imply that they are major indicators to the classifier that the query belongs to the <code class="docutils literal"><span class="pre">smart_home</span></code> domain over the <code class="docutils literal"><span class="pre">weather</span></code> domain. This reinforces our hypothesis from the previous section that we lack labeled training queries that fit the “check … temperature …” pattern in the <code class="docutils literal"><span class="pre">weather</span></code> domain.</p>
+<p>Examining the learned feature weights of a machine-learned model can offer insights into its behavior. To analyze the prediction of the domain classifier on any query, you can inspect its features and their weights using <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> method. In particular, it is useful to compare the computed feature values for the query for the predicted class and the expected ground truth (also called <strong>gold</strong>) class. Looking at the feature values closely can help in identifying the features that are useful, those that aren't, and even those that may be misleading or confusing for the model.</p>
+<p>Let us examine the results of <code class="xref py py-meth docutils literal notranslate"><span class="pre">NaturalLanguageProcessor.inspect()</span></code> on the query &quot;check temperature outside&quot; with the gold domain <code class="docutils literal notranslate"><span class="pre">weather</span></code>. Focus on the 'Feature' and 'Diff' columns. A high negative value in the 'Diff' column for the features representing the presence of a <code class="docutils literal notranslate"><span class="pre">location</span></code> entity and the word 'temperature' imply that they are major indicators to the classifier that the query belongs to the <code class="docutils literal notranslate"><span class="pre">smart_home</span></code> domain over the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain. This reinforces our hypothesis from the previous section that we lack labeled training queries that fit the &quot;check ... temperature ...&quot; pattern in the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Model inspection is currently only available for logistic models, so the example below demonstrates the functionality using a domain classifier trained with a logistic regression model.</p>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span><span class="s1">&#39;logreg&#39;</span><span class="p">})</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span><span class="s1">&#39;logreg&#39;</span><span class="p">})</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="s2">&quot;check temperature outside&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;weather&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Inspecting domain classification</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Inspecting domain classification</span>
 <span class="go">                                                                                              Feature   Value Pred_W(smart_home)     Pred_P Gold_W(weather)     Gold_P       Diff</span>
 <span class="go">bag_of_words|edge:left|length:1|ngram:check               bag_of_words|edge:left|length:1|ngram:check       1          [-0.0664]  [-0.0664]        [0.2985]   [0.2985]   [0.3649]</span>
 <span class="go">bag_of_words|edge:left|length:2|ngram:check tem...  bag_of_words|edge:left|length:2|ngram:check te...       1          [-0.0067]  [-0.0067]        [0.0212]   [0.0212]   [0.0279]</span>
@@ -1373,18 +1365,18 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </div>
 <div class="section" id="save-model-for-future-use">
 <h2>Save model for future use<a class="headerlink" href="#save-model-for-future-use" title="Permalink to this headline">¶</a></h2>
-<p>Save the trained domain classifier for later use by calling the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.dump()</span></code> method. The <code class="xref py py-meth docutils literal"><span class="pre">dump()</span></code> method serializes the trained model as a <a class="reference external" href="https://docs.python.org/3/library/pickle.html">pickle file</a> and saves it to the specified location on disk.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/domain_classifier.pkl&#39;</span><span class="p">)</span>
+<p>Save the trained domain classifier for later use by calling the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.dump()</span></code> method. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code> method serializes the trained model as a <a class="reference external" href="https://docs.python.org/3/library/pickle.html">pickle file</a> and saves it to the specified location on disk.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/domain_classifier.pkl&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Saving domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Saving domain classifier</span>
 </pre></div>
 </div>
-<p>You can load the saved model anytime using the <code class="xref py py-meth docutils literal"><span class="pre">DomainClassifier.load()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/domain_classifier.pkl&#39;</span><span class="p">)</span>
+<p>You can load the saved model anytime using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">DomainClassifier.load()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;experiments/domain_classifier.pkl&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Loading domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Loading domain classifier</span>
 </pre></div>
 </div>
 </div>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>mindmeld.components.entity_resolver module &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>mindmeld.components.entity_resolver module &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -84,7 +84,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -137,6 +137,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -154,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -250,23 +252,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-mindmeld.components.entity_resolver">
@@ -275,7 +267,7 @@
 <dl class="class">
 <dt id="mindmeld.components.entity_resolver.EntityResolver">
 <em class="property">class </em><code class="descclassname">mindmeld.components.entity_resolver.</code><code class="descname">EntityResolver</code><span class="sig-paren">(</span><em>app_path</em>, <em>resource_loader</em>, <em>entity_type</em>, <em>es_host=None</em>, <em>es_client=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/entity_resolver.html#EntityResolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.entity_resolver.EntityResolver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An entity resolver is used to resolve entities in a given query to their canonical values
 (usually linked to specific entries in a knowledge base).</p>
 <dl class="method">
@@ -289,7 +281,7 @@ The synonym info is then used by Question Answerer for text relevance matches.</
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If <code class="docutils literal"><span class="pre">True</span></code>, deletes and recreates the index from scratch instead of
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, deletes and recreates the index from scratch instead of
 updating the existing index with synonyms in the mapping.json.</td>
 </tr>
 </tbody>
@@ -300,29 +292,29 @@ updating the existing index with synonyms in the mapping.json.</td>
 <dt id="mindmeld.components.entity_resolver.EntityResolver.ingest_synonym">
 <em class="property">classmethod </em><code class="descname">ingest_synonym</code><span class="sig-paren">(</span><em>app_namespace</em>, <em>index_name</em>, <em>index_type='syn'</em>, <em>field_name=None</em>, <em>data=None</em>, <em>es_host=None</em>, <em>es_client=None</em>, <em>use_double_metaphone=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindmeld/components/entity_resolver.html#EntityResolver.ingest_synonym"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mindmeld.components.entity_resolver.EntityResolver.ingest_synonym" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads synonym documents from the mapping.json data into the
-specified index. If an index with the specified name doesn’t exist, a
+specified index. If an index with the specified name doesn't exist, a
 new index with that name will be created.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>app_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The namespace of the app. Used to prevent
+<li><strong>app_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The namespace of the app. Used to prevent
 collisions between the indices of this app and those of other
 apps.</li>
-<li><strong>index_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the new index to be created.</li>
-<li><strong>index_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – specify whether to import to synonym index or
+<li><strong>index_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The name of the new index to be created.</li>
+<li><strong>index_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- specify whether to import to synonym index or
 knowledge base object index. INDEX_TYPE_SYNONYM is the default
 which indicates the synonyms to be imported to synonym index,
 while INDEX_TYPE_KB indicates that the synonyms should be
 imported into existing knowledge base index.</li>
-<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – specify name of the knowledge base field that the
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- specify name of the knowledge base field that the
 synonym list corresponds to when index_type is
 INDEX_TYPE_SYNONYM.</li>
-<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of documents to be loaded into the index.</li>
-<li><strong>es_host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The Elasticsearch host server.</li>
-<li><strong>es_client</strong> (<em>Elasticsearch</em>) – The Elasticsearch client.</li>
-<li><strong>use_double_metaphone</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to use the phonetic mapping or not.</li>
+<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) -- A list of documents to be loaded into the index.</li>
+<li><strong>es_host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) -- The Elasticsearch host server.</li>
+<li><strong>es_client</strong> (<em>Elasticsearch</em>) -- The Elasticsearch client.</li>
+<li><strong>use_double_metaphone</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) -- Whether to use the phonetic mapping or not.</li>
 </ul>
 </td>
 </tr>
@@ -345,7 +337,7 @@ trained entity resolution model.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<em>Entity</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – An entity found in an input query, or a list of n-best entity                 objects.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<em>Entity</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) -- An entity found in an input query, or a list of n-best entity                 objects.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The top 20 resolved values for the provided entity.</td>
 </tr>

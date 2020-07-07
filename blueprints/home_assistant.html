@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Home Assistant &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Home Assistant &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -174,6 +175,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -270,28 +272,18 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="home-assistant">
 <span id="id1"></span><h1>Home Assistant<a class="headerlink" href="#home-assistant" title="Permalink to this headline">¶</a></h1>
-<p>In this step-by-step walkthrough, you’ll build a conversational application for a smart home that allows users to control different devices and appliances.</p>
+<p>In this step-by-step walkthrough, you'll build a conversational application for a smart home that allows users to control different devices and appliances.</p>
 <p>Working through this blueprint will teach you how to</p>
 <blockquote>
 <div><ul class="simple">
@@ -320,20 +312,20 @@
 </div>
 <div class="section" id="domain-intent-entity-hierarchy">
 <span id="home-model-hierarchy"></span><h2>3. Domain-Intent-Entity Hierarchy<a class="headerlink" href="#domain-intent-entity-hierarchy" title="Permalink to this headline">¶</a></h2>
-<p>The home assistant blueprint is organized into five domains: <code class="docutils literal"><span class="pre">Greeting</span></code>, <code class="docutils literal"><span class="pre">Smart</span> <span class="pre">Home</span></code>, <code class="docutils literal"><span class="pre">Time</span> <span class="pre">&amp;</span> <span class="pre">Dates</span></code>, <code class="docutils literal"><span class="pre">Weather</span></code>, and <code class="docutils literal"><span class="pre">Unknown</span></code>. Because the home assistant blueprint supports more activities, it requires more domains and intents than the Kwik-E-Mart blueprint does. For example, controlling the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliances, closing/opening doors, locking/unlocking doors, and so on.</p>
+<p>The home assistant blueprint is organized into five domains: <code class="docutils literal notranslate"><span class="pre">Greeting</span></code>, <code class="docutils literal notranslate"><span class="pre">Smart</span> <span class="pre">Home</span></code>, <code class="docutils literal notranslate"><span class="pre">Time</span> <span class="pre">&amp;</span> <span class="pre">Dates</span></code>, <code class="docutils literal notranslate"><span class="pre">Weather</span></code>, and <code class="docutils literal notranslate"><span class="pre">Unknown</span></code>. Because the home assistant blueprint supports more activities, it requires more domains and intents than the Kwik-E-Mart blueprint does. For example, controlling the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliances, closing/opening doors, locking/unlocking doors, and so on.</p>
 <p>The full list of intents for all domains is illustrated below.</p>
 <img alt="../_images/hierarchy_home_assistant.png" src="../_images/hierarchy_home_assistant.png" />
-<p>There are two types of entities in MindMeld: <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">System Entities</span></a> and <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">Custom Entities</span></a>. System entities are pre-defined in MindMeld. Examples include <code class="docutils literal"><span class="pre">sys_temperature</span></code>, <code class="docutils literal"><span class="pre">sys_time</span></code>, and <code class="docutils literal"><span class="pre">sys_interval</span></code>. Custom entities are defined by the developers of each application. Within each entity folder, the file <code class="docutils literal"><span class="pre">gazetteer.txt</span></code> contains the full list of values for each custom entity.</p>
+<p>There are two types of entities in MindMeld: <a class="reference internal" href="../userguide/entity_recognizer.html#system-entities"><span class="std std-ref">System Entities</span></a> and <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">Custom Entities</span></a>. System entities are pre-defined in MindMeld. Examples include <code class="docutils literal notranslate"><span class="pre">sys_temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">sys_time</span></code>, and <code class="docutils literal notranslate"><span class="pre">sys_interval</span></code>. Custom entities are defined by the developers of each application. Within each entity folder, the file <code class="docutils literal notranslate"><span class="pre">gazetteer.txt</span></code> contains the full list of values for each custom entity.</p>
 <p>Home assistant defines and uses the following custom entities, which are grouped by domains below:</p>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="first docutils">
 <dt>Smart Home</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">location</span></code>: detects household location, for example: “lock {back|location} door”</li>
-<li><code class="docutils literal"><span class="pre">appliance</span></code>: detects household appliances, for example: “can you turn on the {tv|appliance}?”</li>
-<li><code class="docutils literal"><span class="pre">all</span></code>: detects whether the user is referring to all household locations, as opposed to a particular location, for example: “turn on the lights in {all|all} room” and “lock the doors {everywhere|all}”.</li>
-<li><code class="docutils literal"><span class="pre">color</span></code>: detects color of the lights, for example: “turn the lights to {soft white|color}”</li>
+<li><code class="docutils literal notranslate"><span class="pre">location</span></code>: detects household location, for example: &quot;lock {back|location} door&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">appliance</span></code>: detects household appliances, for example: &quot;can you turn on the {tv|appliance}?&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">all</span></code>: detects whether the user is referring to all household locations, as opposed to a particular location, for example: &quot;turn on the lights in {all|all} room&quot; and &quot;lock the doors {everywhere|all}&quot;.</li>
+<li><code class="docutils literal notranslate"><span class="pre">color</span></code>: detects color of the lights, for example: &quot;turn the lights to {soft white|color}&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -341,8 +333,8 @@
 <li><dl class="first docutils">
 <dt>Time and dates</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">duration</span></code>: detects time duration, for example: “{15 minute|duration} alarm”</li>
-<li><code class="docutils literal"><span class="pre">interval</span></code>: detects time interval, for example: “cancel {tomorrow night|interval} s alarms”</li>
+<li><code class="docutils literal notranslate"><span class="pre">duration</span></code>: detects time duration, for example: &quot;{15 minute|duration} alarm&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">interval</span></code>: detects time interval, for example: &quot;cancel {tomorrow night|interval} s alarms&quot;</li>
 </ul>
 </dd>
 </dl>
@@ -350,25 +342,25 @@
 <li><dl class="first docutils">
 <dt>Weather</dt>
 <dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">city</span></code>: detects cities, for example: “what is the weather in {shanghai|city}”</li>
-<li><code class="docutils literal"><span class="pre">unit</span></code>: detects weather unit, for example: “what is the forecast for {london|city} in {celsius|unit}”</li>
+<li><code class="docutils literal notranslate"><span class="pre">city</span></code>: detects cities, for example: &quot;what is the weather in {shanghai|city}&quot;</li>
+<li><code class="docutils literal notranslate"><span class="pre">unit</span></code>: detects weather unit, for example: &quot;what is the forecast for {london|city} in {celsius|unit}&quot;</li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 </div></blockquote>
-<p>Home assistant uses three system entities: <code class="docutils literal"><span class="pre">sys_time</span></code> (time), <code class="docutils literal"><span class="pre">sys_interval</span></code> (interval) and <code class="docutils literal"><span class="pre">sys_temperature</span></code> (temperature). Some examples for annotation with system entities: “set my thermostat to turn on at {6 am|sys_time}” and “turn the heat off at {76 degrees|sys_temperature}”.</p>
-<p>Queries can include more than one entity of the same type. In “change my alarm from 7 am to 6 am”, for example, both “7 am” and “6 am” are <code class="docutils literal"><span class="pre">sys_time</span></code> entities. Just labeling both entities with the same type does not give MindMeld enough information to understand the meaning of the query. We need to show the different <em>roles</em> that these two <code class="docutils literal"><span class="pre">sys_time</span></code> entities play in creating meaning. One is an “old time” that the alarm was set to, and the other is a “new time” that the user wants as a new setting for the alarm. We annotate the example as “change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}.” This way, MindMeld can interpret each entity correctly. See <a class="reference internal" href="../userguide/role_classifier.html"><span class="doc">Role Classifier</span></a>.</p>
+<p>Home assistant uses three system entities: <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> (time), <code class="docutils literal notranslate"><span class="pre">sys_interval</span></code> (interval) and <code class="docutils literal notranslate"><span class="pre">sys_temperature</span></code> (temperature). Some examples for annotation with system entities: &quot;set my thermostat to turn on at {6 am|sys_time}&quot; and &quot;turn the heat off at {76 degrees|sys_temperature}&quot;.</p>
+<p>Queries can include more than one entity of the same type. In &quot;change my alarm from 7 am to 6 am&quot;, for example, both &quot;7 am&quot; and &quot;6 am&quot; are <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> entities. Just labeling both entities with the same type does not give MindMeld enough information to understand the meaning of the query. We need to show the different <em>roles</em> that these two <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> entities play in creating meaning. One is an &quot;old time&quot; that the alarm was set to, and the other is a &quot;new time&quot; that the user wants as a new setting for the alarm. We annotate the example as &quot;change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}.&quot; This way, MindMeld can interpret each entity correctly. See <a class="reference internal" href="../userguide/role_classifier.html"><span class="doc">Role Classifier</span></a>.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
-<p class="last">While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., <code class="docutils literal"><span class="pre">dim_lights</span></code>, <code class="docutils literal"><span class="pre">check_windows</span></code>, and so on) and entities (e.g., <code class="docutils literal"><span class="pre">awning</span></code>, <code class="docutils literal"><span class="pre">driveway</span></code>, and so on) that make sense for a home automation use case.</p>
+<p class="last">While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., <code class="docutils literal notranslate"><span class="pre">dim_lights</span></code>, <code class="docutils literal notranslate"><span class="pre">check_windows</span></code>, and so on) and entities (e.g., <code class="docutils literal notranslate"><span class="pre">awning</span></code>, <code class="docutils literal notranslate"><span class="pre">driveway</span></code>, and so on) that make sense for a home automation use case.</p>
 </div>
 <p>To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;home_assistant&#39;);&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import mindmeld as mm; mm.blueprint(&#39;home_assistant&#39;);&quot;</span>
 </pre></div>
 </div>
-<p>This should create a MindMeld project folder called <code class="docutils literal"><span class="pre">home_assistant</span></code> in your current directory with the following structure:</p>
+<p>This should create a MindMeld project folder called <code class="docutils literal notranslate"><span class="pre">home_assistant</span></code> in your current directory with the following structure:</p>
 <a class="reference internal image-reference" href="../_images/home_assistant_directory.png"><img alt="../_images/home_assistant_directory.png" class="align-center" src="../_images/home_assistant_directory.png" style="width: 250px;" /></a>
 </div>
 <div class="section" id="dialogue-states">
@@ -380,8 +372,8 @@
 <li>Define <strong>one dialogue state for multiple intents</strong>. This requires more work up front, but helps you consolidate duplicated dialogue state logic.</li>
 </ol>
 <p>Which approach is best varies from one application to another. Figuring that out always requires some trial and error. We will explore both options in detail.</p>
-<p>Let’s begin by defining a dialogue state for each of the intents for controlling doors (<code class="docutils literal"><span class="pre">close_door</span></code>, <code class="docutils literal"><span class="pre">open_door</span></code>, <code class="docutils literal"><span class="pre">lock_door</span></code>, and <code class="docutils literal"><span class="pre">unlock_door</span></code>):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<p>Let's begin by defining a dialogue state for each of the intents for controlling doors (<code class="docutils literal notranslate"><span class="pre">close_door</span></code>, <code class="docutils literal notranslate"><span class="pre">open_door</span></code>, <code class="docutils literal notranslate"><span class="pre">lock_door</span></code>, and <code class="docutils literal notranslate"><span class="pre">unlock_door</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -402,8 +394,8 @@
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>Observe that the controller logic (for example, setting the state variable for the door) is very similar for all four intents. That means we have an opportunity to define a single state, <code class="docutils literal"><span class="pre">handle_door</span></code>, for all of these intents:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<p>Observe that the controller logic (for example, setting the state variable for the door) is very similar for all four intents. That means we have an opportunity to define a single state, <code class="docutils literal notranslate"><span class="pre">handle_door</span></code>, for all of these intents:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
 <span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;open_door&#39;</span><span class="p">)</span>
 <span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;lock_door&#39;</span><span class="p">)</span>
 <span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unlock_door&#39;</span><span class="p">)</span>
@@ -417,20 +409,20 @@
 <p class="last">Analyze the way the home assistant blueprint uses the patterns <strong>one dialogue state for each intent</strong> and <strong>one dialogue state for multiple intents</strong>. Why is one pattern used in some situations and the other used in others?</p>
 </div>
 <p>Sometimes a dialogue state handler needs to be aware of the context from a previous state. This happens in the <strong>follow-up request pattern</strong>. Consider this conversational interaction:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>User: Turn on the lights.
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>User: Turn on the lights.
 App: Sure. Which lights?
 User: In the kitchen
 </pre></div>
 </div>
-<p>Observe that the first request leaves out some required information — the location of the light to turn on. Therefore, in the response, the application must prompt the user for the missing information. Most importantly, the app needs to “remember” context from the first request to understand the user’s second request, in which the user specifies the information that was missing.</p>
+<p>Observe that the first request leaves out some required information — the location of the light to turn on. Therefore, in the response, the application must prompt the user for the missing information. Most importantly, the app needs to &quot;remember&quot; context from the first request to understand the user's second request, in which the user specifies the information that was missing.</p>
 <p>Here is how the home assistant blueprint implements this pattern:</p>
 <ol class="arabic simple">
-<li>Define the <code class="docutils literal"><span class="pre">specify_location</span></code> intent</li>
-<li>Define the <code class="docutils literal"><span class="pre">specify_location</span></code> state</li>
-<li>Since multiple states (<code class="docutils literal"><span class="pre">close/open</span> <span class="pre">door</span></code>, <code class="docutils literal"><span class="pre">lock/unlock</span> <span class="pre">door</span></code>, <code class="docutils literal"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">lights</span></code>, <code class="docutils literal"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">appliance</span></code>, <code class="docutils literal"><span class="pre">check</span> <span class="pre">door/light</span></code>) can lead to the <code class="docutils literal"><span class="pre">specify</span> <span class="pre">location</span></code> state, pass the previous state/action information in the request object, as <code class="docutils literal"><span class="pre">request.frame['desired_action']</span></code></li>
+<li>Define the <code class="docutils literal notranslate"><span class="pre">specify_location</span></code> intent</li>
+<li>Define the <code class="docutils literal notranslate"><span class="pre">specify_location</span></code> state</li>
+<li>Since multiple states (<code class="docutils literal notranslate"><span class="pre">close/open</span> <span class="pre">door</span></code>, <code class="docutils literal notranslate"><span class="pre">lock/unlock</span> <span class="pre">door</span></code>, <code class="docutils literal notranslate"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">lights</span></code>, <code class="docutils literal notranslate"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">appliance</span></code>, <code class="docutils literal notranslate"><span class="pre">check</span> <span class="pre">door/light</span></code>) can lead to the <code class="docutils literal notranslate"><span class="pre">specify</span> <span class="pre">location</span></code> state, pass the previous state/action information in the request object, as <code class="docutils literal notranslate"><span class="pre">request.frame['desired_action']</span></code></li>
 </ol>
-<p>The code for <code class="docutils literal"><span class="pre">specify_location</span></code> looks like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;specify_location&#39;</span><span class="p">)</span>
+<p>The code for <code class="docutils literal notranslate"><span class="pre">specify_location</span></code> looks like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;specify_location&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">specify_location</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">selected_all</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -491,104 +483,104 @@ User: In the kitchen
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">greet</span></code></td>
-<td><code class="docutils literal"><span class="pre">greet</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">greet</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">greet</span></code></td>
 <td>Begin an interaction and welcome the user</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">check_weather</span></code></td>
-<td><code class="docutils literal"><span class="pre">check_weather</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">check_weather</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">check_weather</span></code></td>
 <td>Check the weather</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">check_door</span></code></td>
-<td><code class="docutils literal"><span class="pre">check_door</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">check_door</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">check_door</span></code></td>
 <td>Check the door</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">close_door</span></code></td>
-<td><code class="docutils literal"><span class="pre">close_door</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">close_door</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">close_door</span></code></td>
 <td>Close the door</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">open_door</span></code></td>
-<td><code class="docutils literal"><span class="pre">open_door</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">open_door</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">open_door</span></code></td>
 <td>To open the door</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">lock_door</span></code></td>
-<td><code class="docutils literal"><span class="pre">lock_door</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">lock_door</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">lock_door</span></code></td>
 <td>To lock the door</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">unlock_door</span></code></td>
-<td><code class="docutils literal"><span class="pre">unlock_door</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">unlock_door</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">unlock_door</span></code></td>
 <td>Unlock the door</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">turn_appliance_on</span></code></td>
-<td><code class="docutils literal"><span class="pre">turn_appliance_on</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">turn_appliance_on</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">turn_appliance_on</span></code></td>
 <td>Turn the appliance on</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">turn_appliance_off</span></code></td>
-<td><code class="docutils literal"><span class="pre">turn_appliance_off</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">turn_appliance_off</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">turn_appliance_off</span></code></td>
 <td>Turn the appliance off</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">check_lights</span></code></td>
-<td><code class="docutils literal"><span class="pre">check_lights</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">check_lights</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">check_lights</span></code></td>
 <td>Check the lights</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">turn_lights_on</span></code></td>
-<td><code class="docutils literal"><span class="pre">turn_lights_on</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">turn_lights_on</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">turn_lights_on</span></code></td>
 <td>Turn the lights on</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">turn_lights_off</span></code></td>
-<td><code class="docutils literal"><span class="pre">turn_lights_off</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">turn_lights_off</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">turn_lights_off</span></code></td>
 <td>Turn the lights off</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">check_thermostat</span></code></td>
-<td><code class="docutils literal"><span class="pre">check_thermostat</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">check_thermostat</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">check_thermostat</span></code></td>
 <td>Check the thermostat</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">set_thermostat</span></code></td>
-<td><code class="docutils literal"><span class="pre">set_thermostat</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">set_thermostat</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">set_thermostat</span></code></td>
 <td>Set the thermostat</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">turn_up_thermostat</span></code>,  <code class="docutils literal"><span class="pre">turn_down_thermostat</span></code></td>
-<td><code class="docutils literal"><span class="pre">change_thermostat</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">turn_up_thermostat</span></code>,  <code class="docutils literal notranslate"><span class="pre">turn_down_thermostat</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">change_thermostat</span></code></td>
 <td>Change the thermostat</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">change_alarm</span></code></td>
-<td><code class="docutils literal"><span class="pre">change_alarm</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">change_alarm</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">change_alarm</span></code></td>
 <td>Change the alarm</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">check_alarm</span></code></td>
-<td><code class="docutils literal"><span class="pre">check_alarm</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">check_alarm</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">check_alarm</span></code></td>
 <td>Check the alarm</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">remove_alarm</span></code></td>
-<td><code class="docutils literal"><span class="pre">remove_alarm</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">remove_alarm</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">remove_alarm</span></code></td>
 <td>Remove the alarm</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">set_alarm</span></code></td>
-<td><code class="docutils literal"><span class="pre">set_alarm</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">set_alarm</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">set_alarm</span></code></td>
 <td>Set the alarm</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">start_timer</span></code></td>
-<td><code class="docutils literal"><span class="pre">start_timer</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">start_timer</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">start_timer</span></code></td>
 <td>Start the timer</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">stop_timer</span></code></td>
-<td><code class="docutils literal"><span class="pre">stop_timer</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">stop_timer</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">stop_timer</span></code></td>
 <td>Stop the timer</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">specify_location</span></code></td>
-<td><code class="docutils literal"><span class="pre">specify_location</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">specify_location</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">specify_location</span></code></td>
 <td>Specify locations in the house</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">specify_time</span></code></td>
-<td><code class="docutils literal"><span class="pre">specify_time</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">specify_time</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">specify_time</span></code></td>
 <td>Specify the time in the follow up questions</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">exit</span></code></td>
-<td><code class="docutils literal"><span class="pre">exit</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">exit</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">exit</span></code></td>
 <td>End the current interaction</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">unknown</span></code></td>
-<td><code class="docutils literal"><span class="pre">unknown</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">unknown</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">unknown</span></code></td>
 <td>Prompt a user who has gone off-topic
 to get back to food ordering</td>
 </tr>
@@ -627,8 +619,8 @@ to get back to food ordering</td>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line">“How would you talk to a conversational app</div>
-<div class="line">to control your smart home appliances?”</div>
+<div class="line">&quot;How would you talk to a conversational app</div>
+<div class="line">to control your smart home appliances?&quot;</div>
 </div>
 </td>
 </tr>
@@ -643,13 +635,13 @@ to get back to food ordering</td>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">change_alarm</span></code> intent (<code class="docutils literal"><span class="pre">times_and_dates</span></code> domain):</div>
-<div class="line">“What would you say to the app to change your alarm time</div>
-<div class="line">from a previous set time to a new set time?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">change_alarm</span></code> intent (<code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain):</div>
+<div class="line">&quot;What would you say to the app to change your alarm time</div>
+<div class="line">from a previous set time to a new set time?&quot;</div>
 <div class="line"><br /></div>
-<div class="line"><code class="docutils literal"><span class="pre">set_alarm</span></code> intent (<code class="docutils literal"><span class="pre">times_and_dates</span></code> domain):</div>
-<div class="line">“What would you say to the app</div>
-<div class="line">to set a new alarm time?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">set_alarm</span></code> intent (<code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain):</div>
+<div class="line">&quot;What would you say to the app</div>
+<div class="line">to set a new alarm time?&quot;</div>
 </div>
 </td>
 </tr>
@@ -659,8 +651,8 @@ to get back to food ordering</td>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">set_alarm</span></code>: “Annotate all occurrences of</div>
-<div class="line"><code class="docutils literal"><span class="pre">sys_time</span></code> and <code class="docutils literal"><span class="pre">sys_interval</span></code> system entities in the given query”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">set_alarm</span></code>: &quot;Annotate all occurrences of</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">sys_time</span></code> and <code class="docutils literal notranslate"><span class="pre">sys_interval</span></code> system entities in the given query&quot;</div>
 </div>
 </td>
 </tr>
@@ -670,8 +662,8 @@ to get back to food ordering</td>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">set_alarm</span></code>: “Annotate all entities with their</div>
-<div class="line">corresponding roles, when needed, e.g., <code class="docutils literal"><span class="pre">old_time</span></code>, <code class="docutils literal"><span class="pre">new_time</span></code>”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">set_alarm</span></code>: &quot;Annotate all entities with their</div>
+<div class="line">corresponding roles, when needed, e.g., <code class="docutils literal notranslate"><span class="pre">old_time</span></code>, <code class="docutils literal notranslate"><span class="pre">new_time</span></code>&quot;</div>
 </div>
 </td>
 </tr>
@@ -682,9 +674,9 @@ to get back to food ordering</td>
 </div>
 </td>
 <td><div class="first last line-block">
-<div class="line"><code class="docutils literal"><span class="pre">city</span></code> entity: “Enumerate a list of names of cities”</div>
-<div class="line"><code class="docutils literal"><span class="pre">location</span></code> entity: “What are some names of</div>
-<div class="line">locations in your home?”</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">city</span></code> entity: &quot;Enumerate a list of names of cities&quot;</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">location</span></code> entity: &quot;What are some names of</div>
+<div class="line">locations in your home?&quot;</div>
 </div>
 </td>
 </tr>
@@ -693,29 +685,29 @@ to get back to food ordering</td>
 <p>In summary, the process is this:</p>
 <ol class="arabic simple">
 <li>Start with an exploratory data generation process, collecting varied examples of how the end user would interact with the app.</li>
-<li>Cluster the data into different domains based on functionality. For example, the home assistant application has to control appliances in a smart home, check the weather and control a smart alarm, so we divide these functions into the following domains: <code class="docutils literal"><span class="pre">greeting</span></code>, <code class="docutils literal"><span class="pre">smart_home</span></code>, <code class="docutils literal"><span class="pre">times_and_dates</span></code>, and <code class="docutils literal"><span class="pre">weather</span></code>.</li>
+<li>Cluster the data into different domains based on functionality. For example, the home assistant application has to control appliances in a smart home, check the weather and control a smart alarm, so we divide these functions into the following domains: <code class="docutils literal notranslate"><span class="pre">greeting</span></code>, <code class="docutils literal notranslate"><span class="pre">smart_home</span></code>, <code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code>, and <code class="docutils literal notranslate"><span class="pre">weather</span></code>.</li>
 <li>Once we establish a clear domain-intent-entity-role hierarchy, generate labeled data for each component in the hierarchy.</li>
 </ol>
-<p>The <code class="docutils literal"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal"><span class="pre">entities</span></code> directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">domains</span></code> directory contains the training data for intent classification and entity recognition. The <code class="docutils literal notranslate"><span class="pre">entities</span></code> directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.</p>
 <div class="admonition-exercise admonition">
 <p class="first admonition-title">Exercise</p>
 <ul class="last simple">
 <li>Read <a class="reference internal" href="../quickstart/06_generate_representative_training_data.html"><span class="doc">Step 6</span></a> of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about <a class="reference internal" href="../userguide/nlp.html"><span class="doc">NLP model evaluation and error analysis</span></a> in the user guide.</li>
-<li>To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like <code class="docutils literal"><span class="pre">greet</span></code> and <code class="docutils literal"><span class="pre">exit</span></code>. However, for core intents like <code class="docutils literal"><span class="pre">check_weather</span></code> in the <code class="docutils literal"><span class="pre">weather</span></code> domain, it’s recommended that you collect new training data that is tailored towards the entities (<code class="docutils literal"><span class="pre">city</span></code>, <code class="docutils literal"><span class="pre">duration</span></code>) that your application needs to support. Follow the same approach to gather new training data for the <code class="docutils literal"><span class="pre">check_weather</span></code> intent or any additional intents and entities needed for your application.</li>
+<li>To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like <code class="docutils literal notranslate"><span class="pre">greet</span></code> and <code class="docutils literal notranslate"><span class="pre">exit</span></code>. However, for core intents like <code class="docutils literal notranslate"><span class="pre">check_weather</span></code> in the <code class="docutils literal notranslate"><span class="pre">weather</span></code> domain, it's recommended that you collect new training data that is tailored towards the entities (<code class="docutils literal notranslate"><span class="pre">city</span></code>, <code class="docutils literal notranslate"><span class="pre">duration</span></code>) that your application needs to support. Follow the same approach to gather new training data for the <code class="docutils literal notranslate"><span class="pre">check_weather</span></code> intent or any additional intents and entities needed for your application.</li>
 </ul>
 </div>
 </div>
 <div class="section" id="training-the-nlp-classifiers">
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
-<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld’s default machine learning settings.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
+<p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
 <span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting domain classifier</span>
 <span class="go">Loading queries from file weather/check_weather/train.txt</span>
 <span class="go">Loading queries from file times_and_dates/remove_alarm/train.txt</span>
 <span class="go">Loading queries from file times_and_dates/start_timer/train.txt</span>
@@ -741,11 +733,11 @@ to get back to food ordering</td>
 <p class="first admonition-title">Tip</p>
 <p class="last">During active development, it helps to increase the <a class="reference internal" href="../userguide/getting_started.html"><span class="doc">MindMeld logging level</span></a> to better understand what is happening behind the scenes. All code snippets here assume that logging level is set to verbose.</p>
 </div>
-<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal"><span class="pre">process()</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;please set my alarm to 8am for tomorrow&quot;</span><span class="p">)</span>
+<p>To see how the trained NLP pipeline performs on a test query, use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="s2">&quot;please set my alarm to 8am for tomorrow&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{ &#39;domain&#39;: &#39;times_and_dates&#39;,</span>
 <span class="go">  &#39;entities&#39;: [ { &#39;role&#39;: None,</span>
 <span class="go">                  &#39;span&#39;: {&#39;end&#39;: 38, &#39;start&#39;: 23},</span>
 <span class="go">                  &#39;text&#39;: &#39;8am for tomorrow&#39;,</span>
@@ -762,17 +754,17 @@ to get back to food ordering</td>
 <p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom home assistant data, you may find that the default settings may not be optimal and you can get better accuracy by individually optimizing each of the NLP components.</p>
 <p>Because the home assistant app has five domains and over twenty intents, the classifiers need a fair amount of fine-tuning.</p>
 <p>Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;smart_home&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;smart_home&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&#39;logreg&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{&#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{&#39;bag-of-words&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;edge-ngrams&#39;: {&#39;lengths&#39;: [1, 2]},</span>
 <span class="go"> &#39;exact&#39;: {&#39;scaling&#39;: 10},</span>
 <span class="go"> &#39;freq&#39;: {&#39;bins&#39;: 5},</span>
@@ -781,22 +773,22 @@ to get back to food ordering</td>
 <span class="go">}</span>
 </pre></div>
 </div>
-<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier’s <code class="xref py py-meth docutils literal"><span class="pre">fit()</span></code> method. Intent classifer and role classifier examples follow.</p>
+<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> method. Intent classifer and role classifier examples follow.</p>
 </div>
 <div class="section" id="experiment-with-the-intent-classifiers">
 <h3>Experiment with the intent classifiers<a class="headerlink" href="#experiment-with-the-intent-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>We can change the feature extraction settings to use bag of trigrams in addition to the default bag of words:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;bag-of-words&#39;</span><span class="p">][</span><span class="s1">&#39;lengths&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;smart_home&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;smart_home&#39;</span>
 <span class="go">Selecting hyperparameters using k-fold cross-validation with 5 splits</span>
 <span class="go">Best accuracy: 97.95%, params: {&#39;C&#39;: 100, &#39;class_weight&#39;: {0: 2.1058169934640523, 1: 2.1058169934640523, 2: 0.9449346405228759, 3: 2.2581148121899366, 4: 1.7132480818414322, 5: 2.1058169934640523, 6: 0.7752149982800138, 7: 0.4041150092323926, 8: 2.234803921568627, 9: 1.4608823529411765, 10: 1.1334539969834088, 11: 1.100608519269777, 12: 1.1785055643879174, 13: 1.521981424148607, 14: 1.6213295074127212, 15: 1.129201680672269, 16: 2.8003619909502264}, &#39;fit_intercept&#39;: True}</span>
 </pre></div>
 </div>
 <p>We can also change the model for the intent classifier to Support Vector Machine (SVM) classifier, which works well for some datasets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">{</span>
    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
    <span class="s1">&#39;kernel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">]</span>
 <span class="p">}</span>
@@ -811,7 +803,7 @@ to get back to food ordering</td>
 <span class="n">ic</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;svm&#39;</span><span class="p">},</span> <span class="n">param_selection</span><span class="o">=</span><span class="n">param_selection_settings</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;smart_home&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Fitting intent classifier: domain=&#39;smart_home&#39;</span>
 <span class="go">Loading queries from file smart_home/check_lights/train.txt</span>
 <span class="go">Loading queries from file smart_home/specify_location/train.txt</span>
 <span class="go">Loading queries from file smart_home/turn_appliance_off/train.txt</span>
@@ -837,21 +829,21 @@ to get back to food ordering</td>
 </div>
 <div class="section" id="inspect-the-role-classifiers">
 <h3>Inspect the role classifiers<a class="headerlink" href="#inspect-the-role-classifiers" title="Permalink to this headline">¶</a></h3>
-<p>The home assistant application has role classifiers to distinguish between different role labels. For example, the annotated data in the <code class="docutils literal"><span class="pre">times_and_dates</span></code> domain and <code class="docutils literal"><span class="pre">check_alarm</span></code> intent has two types of roles: <code class="docutils literal"><span class="pre">old_time</span></code> and <code class="docutils literal"><span class="pre">new_time</span></code>. The role classifier detects these roles for the <code class="docutils literal"><span class="pre">sys_time</span></code> entity:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s2">&quot;times_and_dates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s2">&quot;change_alarm&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<p>The home assistant application has role classifiers to distinguish between different role labels. For example, the annotated data in the <code class="docutils literal notranslate"><span class="pre">times_and_dates</span></code> domain and <code class="docutils literal notranslate"><span class="pre">check_alarm</span></code> intent has two types of roles: <code class="docutils literal notranslate"><span class="pre">old_time</span></code> and <code class="docutils literal notranslate"><span class="pre">new_time</span></code>. The role classifier detects these roles for the <code class="docutils literal notranslate"><span class="pre">sys_time</span></code> entity:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s2">&quot;times_and_dates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s2">&quot;change_alarm&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s2">&quot;times_and_dates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s2">&quot;change_alarm&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="s2">&quot;sys_time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">role_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s2">&quot;times_and_dates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intents</span><span class="p">[</span><span class="s2">&quot;change_alarm&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="s2">&quot;sys_time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">role_classifier</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;StandardModelEvaluation score: 100.00%, 21 of 21 examples correct&gt;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&lt;StandardModelEvaluation score: 100.00%, 21 of 21 examples correct&gt;</span>
 </pre></div>
 </div>
-<p>In the above case, the role classifier was able to correctly distinguish between <code class="docutils literal"><span class="pre">new_time</span></code> and <code class="docutils literal"><span class="pre">old_time</span></code> for all test cases.</p>
+<p>In the above case, the role classifier was able to correctly distinguish between <code class="docutils literal notranslate"><span class="pre">new_time</span></code> and <code class="docutils literal notranslate"><span class="pre">old_time</span></code> for all test cases.</p>
 </div>
 <div class="section" id="inspect-the-configuration">
 <h3>Inspect the configuration<a class="headerlink" href="#inspect-the-configuration" title="Permalink to this headline">¶</a></h3>
-<p>The application configuration file, <code class="docutils literal"><span class="pre">config.py</span></code>, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named <code class="docutils literal"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code> and <code class="docutils literal"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code>, respectively; other dictionaries include <code class="docutils literal"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code> and <code class="docutils literal"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>. If no custom model configuration is added to <code class="docutils literal"><span class="pre">config.py</span></code> file, MindMeld uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">INTENT_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<p>The application configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named <code class="docutils literal notranslate"><span class="pre">DOMAIN_CLASSIFIER_CONFIG</span></code> and <code class="docutils literal notranslate"><span class="pre">INTENT_CLASSIFIER_CONFIG</span></code>, respectively; other dictionaries include <code class="docutils literal notranslate"><span class="pre">ENTITY_RECOGNIZER_CONFIG</span></code> and <code class="docutils literal notranslate"><span class="pre">ROLE_CLASSIFIER_CONFIG</span></code>. If no custom model configuration is added to <code class="docutils literal notranslate"><span class="pre">config.py</span></code> file, MindMeld uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INTENT_CLASSIFIER_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;model_type&#39;</span><span class="p">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model_settings&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;classifier_type&#39;</span><span class="p">:</span> <span class="s1">&#39;logreg&#39;</span>
@@ -886,8 +878,8 @@ to get back to food ordering</td>
 </div>
 <div class="section" id="parser-configuration">
 <h2>8. Parser Configuration<a class="headerlink" href="#parser-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The relationships between entities in the home assistant queries are simple ones. For example, in the annotated query <code class="docutils literal"><span class="pre">is</span> <span class="pre">the</span> <span class="pre">{back|location}</span> <span class="pre">door</span> <span class="pre">closed</span> <span class="pre">or</span> <span class="pre">open</span></code>, the <code class="docutils literal"><span class="pre">location</span></code> entity is self-sufficient, in that it is not described by any other entity.</p>
-<p>If you extended the app to support queries with more complex entity relationships, it would be necessary to specify <em>entity groups</em> and configure the parser accordingly. For example, in the query <code class="docutils literal"><span class="pre">is</span> <span class="pre">the</span> <span class="pre">{green|color}</span> <span class="pre">{back|location}</span> <span class="pre">door</span> <span class="pre">closed</span> <span class="pre">or</span> <span class="pre">open</span></code>, we would need to relate the <code class="docutils literal"><span class="pre">color</span></code> entity to the <code class="docutils literal"><span class="pre">location</span></code> entity, because one entity describes the other. The related entities would form an entity group. For more about entity groups and parser configurations, see the <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> chapter of the User Guide.</p>
+<p>The relationships between entities in the home assistant queries are simple ones. For example, in the annotated query <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">the</span> <span class="pre">{back|location}</span> <span class="pre">door</span> <span class="pre">closed</span> <span class="pre">or</span> <span class="pre">open</span></code>, the <code class="docutils literal notranslate"><span class="pre">location</span></code> entity is self-sufficient, in that it is not described by any other entity.</p>
+<p>If you extended the app to support queries with more complex entity relationships, it would be necessary to specify <em>entity groups</em> and configure the parser accordingly. For example, in the query <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">the</span> <span class="pre">{green|color}</span> <span class="pre">{back|location}</span> <span class="pre">door</span> <span class="pre">closed</span> <span class="pre">or</span> <span class="pre">open</span></code>, we would need to relate the <code class="docutils literal notranslate"><span class="pre">color</span></code> entity to the <code class="docutils literal notranslate"><span class="pre">location</span></code> entity, because one entity describes the other. The related entities would form an entity group. For more about entity groups and parser configurations, see the <a class="reference internal" href="../userguide/parser.html"><span class="doc">Language Parser</span></a> chapter of the User Guide.</p>
 <p>Since we do not have entity groups in the home assistant app, we do not need a parser configuration.</p>
 </div>
 <div class="section" id="using-the-question-answerer">
@@ -896,16 +888,16 @@ to get back to food ordering</td>
 </div>
 <div class="section" id="testing-and-deployment">
 <h2>10. Testing and Deployment<a class="headerlink" href="#testing-and-deployment" title="Permalink to this headline">¶</a></h2>
-<p>Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, perform an end-to-end test of the app using the <code class="xref py py-class docutils literal"><span class="pre">Conversation</span></code> class.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
+<p>Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, perform an end-to-end test of the app using the <code class="xref py py-class docutils literal notranslate"><span class="pre">Conversation</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;set alarm for 6am&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">[&#39;Ok, I have set your alarm for 06:00:00.&#39;]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Ok, I have set your alarm for 06:00:00.&#39;]</span>
 </pre></div>
 </div>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">say()</span></code> method:</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">say()</span></code> method:</p>
 <blockquote>
 <div><ul class="simple">
 <li>packages the input text in a user request object</li>
@@ -915,7 +907,7 @@ to get back to food ordering</td>
 </div></blockquote>
 <p>In the above example, we requested to set an alarm for 6 AM and the app responded, as expected, by confirming that the alarm was set.</p>
 <p>Try a multi-turn dialogues:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;Hi there!&#39;</span><span class="p">)</span>
 <span class="go">[&#39;Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;close the front door&quot;</span><span class="p">)</span>
@@ -931,10 +923,10 @@ to get back to food ordering</td>
 </pre></div>
 </div>
 <p>Alternatively, enter conversation mode directly from the command-line.</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">python -m home_assistant converse</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m home_assistant converse</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">You: What&#39;s the weather today in San Francisco?</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">You: What&#39;s the weather today in San Francisco?</span>
 <span class="go">App: The weather forecast in San Francisco is clouds with a min of 62.6 F and a max of 89.6 F</span>
 </pre></div>
 </div>

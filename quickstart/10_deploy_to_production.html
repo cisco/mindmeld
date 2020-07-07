@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 10: Deploy Trained Models &mdash; The Conversational AI Playbook 4.2.11 documentation</title>
+  <title>Step 10: Deploy Trained Models &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.2.11',
+              VERSION:'4.3.0',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.2.11
+                4.3.0
               </div>
             
           
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/video_discovery.html">Video Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/home_assistant.html">Home Assistant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../blueprints/hr_assistant.html">HR Assistant</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blueprints/banking.html">Banking Assistant</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -156,6 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../userguide/custom_features.html">Working with User-Defined Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/kb.html">Working with the Knowledge Base and Question Answerer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/dm.html">Working with the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/custom_action.html">Working with Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/internationalization.html">Internationalization support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../userguide/voice.html">Dealing with Voice Inputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../integrations/webex_teams.html">Webex Teams Integration</a></li>
@@ -252,62 +254,52 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="step-10-deploy-trained-models">
 <h1>Step 10: Deploy Trained Models<a class="headerlink" href="#step-10-deploy-trained-models" title="Permalink to this headline">¶</a></h1>
-<p>Once your application has been built, MindMeld makes it easy to test locally. In <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, we created an application container for your dialogue state handler logic. This was in the <code class="docutils literal"><span class="pre">__init__.py</span></code> file in the application root directory. To provide the necessary interface to manage deployment, we now create the <code class="docutils literal"><span class="pre">__main__.py</span></code> file with the following three lines of code.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<p>Once your application has been built, MindMeld makes it easy to test locally. In <a class="reference internal" href="04_define_the_dialogue_handlers.html"><span class="doc">Step 4</span></a>, we created an application container for your dialogue state handler logic. This was in the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file in the application root directory. To provide the necessary interface to manage deployment, we now create the <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> file with the following three lines of code.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">app</span>
     <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>We can now test our application locally.</p>
-<p>If you have not already, you must build your models before the application can be run. To build your models use the <code class="docutils literal"><span class="pre">build</span></code> command:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">cd $HOME</span>
+<p>If you have not already, you must build your models before the application can be run. To build your models use the <code class="docutils literal notranslate"><span class="pre">build</span></code> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd $HOME</span>
 <span class="go">python -m my_app build</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Building application my_app...complete.</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Building application my_app...complete.</span>
 </pre></div>
 </div>
-<p>To launch the web service use the <code class="docutils literal"><span class="pre">run</span></code> command:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">cd $HOME</span>
+<p>To launch the web service use the <code class="docutils literal notranslate"><span class="pre">run</span></code> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd $HOME</span>
 <span class="go">python -m my_app run</span>
 </pre></div>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">Numerical parser running, PID 20248</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Numerical parser running, PID 20248</span>
 <span class="go">Loading intent classifier: domain=&#39;store_info&#39;</span>
 <span class="go">...</span>
 <span class="go"> * Running on http://0.0.0.0:7150/ (Press CTRL+C to quit)</span>
 </pre></div>
 </div>
-<p>To test using any REST client (such as Postman or Advanced Rest Client), send <cite>POST</cite> requests to the web service endpoint at <code class="docutils literal"><span class="pre">http://localhost:7150/parse</span></code>. Alternately, you can use a <em class="manpage">curl</em> command from your terminal as follows:</p>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">curl -X POST -H &#39;Content-Type: application/json&#39; -d &#39;{&quot;text&quot;: &quot;order from firetrail&quot;}&#39; &quot;http://localhost:7150/parse&quot; | python -m json.tool</span>
+<p>To test using any REST client (such as Postman or Advanced Rest Client), send <cite>POST</cite> requests to the web service endpoint at <code class="docutils literal notranslate"><span class="pre">http://localhost:7150/parse</span></code>. Alternately, you can use a <em class="manpage">curl</em> command from your terminal as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">curl -X POST -H &#39;Content-Type: application/json&#39; -d &#39;{&quot;text&quot;: &quot;order from firetrail&quot;}&#39; &quot;http://localhost:7150/parse&quot; | python -m json.tool</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The MindMeld flask server is stateless, so in order to perform multi-turn dialogues with the server, copy the response returned from the server in the first turn and use that in the data parameter of the curl request in the next turn, along with the new <code class="docutils literal"><span class="pre">text</span></code> key, value.</p>
+<p class="last">The MindMeld flask server is stateless, so in order to perform multi-turn dialogues with the server, copy the response returned from the server in the first turn and use that in the data parameter of the curl request in the next turn, along with the new <code class="docutils literal notranslate"><span class="pre">text</span></code> key, value.</p>
 </div>
-<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">{</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>
 <span class="go">  &quot;dialogue_state&quot;: &quot;build_order&quot;,</span>
 <span class="go">  &quot;directives&quot;: [</span>
 <span class="go">    {</span>
