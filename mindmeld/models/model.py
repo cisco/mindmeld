@@ -1288,7 +1288,7 @@ class EntityLabelEncoder(LabelEncoder):
 
         Args:
             tags_by_example (list): A list of tags per query
-            kwargs (dict): A dict containing atleast the "examples" key, which is a
+            kwargs (dict): A dict containing at least the "examples" key, which is a
                 list of queries to process
 
         Returns:

@@ -34,6 +34,7 @@ CONFIG_DEPRECATION_MAPPING = {
     "ENTITY_RECOGNIZER_CONFIG": "ENTITY_MODEL_CONFIG",
     "ROLE_CLASSIFIER_CONFIG": "ROLE_MODEL_CONFIG",
     "ENTITY_RESOLVER_CONFIG": "ENTITY_RESOLUTION_CONFIG",
+    "QUESTION_ANSWERER_CONFIG": "QUESTION_ANSWERING_CONFIG",
     "get_entity_recognizer_config": "get_entity_model_config",
     "get_intent_classifier_config": "get_intent_model_config",
     "get_entity_resolver_config": "get_entity_resolution_model_config",
@@ -102,6 +103,8 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
 
+DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
+
 ENGLISH_LANGUAGE_CODE = "en"
 ENGLISH_US_LOCALE = "en_US"
 DEFAULT_LANGUAGE_CONFIG = {
@@ -109,90 +112,82 @@ DEFAULT_LANGUAGE_CONFIG = {
     "locale": ENGLISH_US_LOCALE,
 }
 
-DOC_TYPE = "document"
 
 # ElasticSearch mapping to define text analysis settings for text fields.
 # It defines specific index configuration for synonym indices. The common index configuration
 # is in default index template.
 DEFAULT_ES_SYNONYM_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "properties": {
-                "sort_factor": {"type": "double"},
-                "whitelist": {
-                    "type": "nested",
-                    "properties": {
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
                             },
-                            "analyzer": "default_analyzer",
-                        }
-                    },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
                 },
-            }
+            },
         }
     }
 }
 
 PHONETIC_ES_SYNONYM_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "properties": {
-                "sort_factor": {"type": "double"},
-                "whitelist": {
-                    "type": "nested",
-                    "properties": {
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
-                                "double_metaphone": {
-                                    "type": "text",
-                                    "analyzer": "phonetic_analyzer",
-                                },
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
                             },
-                            "analyzer": "default_analyzer",
-                        }
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                            "double_metaphone": {
+                                "type": "text",
+                                "analyzer": "phonetic_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+            "cname": {
+                "type": "text",
+                "analyzer": "default_analyzer",
+                "fields": {
+                    "raw": {"type": "keyword", "ignore_above": 256},
+                    "normalized_keyword": {
+                        "type": "text",
+                        "analyzer": "keyword_match_analyzer",
+                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
+                    "double_metaphone": {
+                        "type": "text",
+                        "analyzer": "phonetic_analyzer",
                     },
                 },
-                "cname": {
-                    "type": "text",
-                    "analyzer": "default_analyzer",
-                    "fields": {
-                        "raw": {"type": "keyword", "ignore_above": 256},
-                        "normalized_keyword": {
-                            "type": "text",
-                            "analyzer": "keyword_match_analyzer",
-                        },
-                        "char_ngram": {
-                            "type": "text",
-                            "analyzer": "char_ngram_analyzer",
-                        },
-                        "double_metaphone": {
-                            "type": "text",
-                            "analyzer": "phonetic_analyzer",
-                        },
-                    },
-                },
-            }
+            },
         }
     },
     "settings": {
@@ -258,36 +253,31 @@ DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
 DEFAULT_ES_INDEX_TEMPLATE = {
     "template": "*",
     "mappings": {
-        DOC_TYPE: {
-            "dynamic_templates": [
-                {
-                    "default_text": {
-                        "match": "*",
-                        "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "text",
-                            "analyzer": "default_analyzer",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "processed_text": {
-                                    "type": "text",
-                                    "analyzer": "english",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
+        "dynamic_templates": [
+            {
+                "default_text": {
+                    "match": "*",
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "text",
+                        "analyzer": "default_analyzer",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "processed_text": {"type": "text", "analyzer": "english",},
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
                             },
                         },
-                    }
+                    },
                 }
-            ],
-            "properties": {"id": {"type": "keyword"}},
-        }
+            }
+        ],
+        "properties": {"id": {"type": "keyword"}},
     },
     "settings": {
         "analysis": {
@@ -413,37 +403,35 @@ DEFAULT_ES_INDEX_TEMPLATE = {
 # The common configuration is defined in default index template
 DEFAULT_ES_QA_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "dynamic_templates": [
-                {
-                    "synonym_whitelist_text": {
-                        "match": "*$whitelist",
-                        "match_mapping_type": "object",
-                        "mapping": {
-                            "type": "nested",
-                            "properties": {
-                                "name": {
-                                    "type": "text",
-                                    "fields": {
-                                        "raw": {"type": "keyword", "ignore_above": 256},
-                                        "normalized_keyword": {
-                                            "type": "text",
-                                            "analyzer": "keyword_match_analyzer",
-                                        },
-                                        "char_ngram": {
-                                            "type": "text",
-                                            "analyzer": "char_ngram_analyzer",
-                                        },
+        "dynamic_templates": [
+            {
+                "synonym_whitelist_text": {
+                    "match": "*$whitelist",
+                    "match_mapping_type": "object",
+                    "mapping": {
+                        "type": "nested",
+                        "properties": {
+                            "name": {
+                                "type": "text",
+                                "fields": {
+                                    "raw": {"type": "keyword", "ignore_above": 256},
+                                    "normalized_keyword": {
+                                        "type": "text",
+                                        "analyzer": "keyword_match_analyzer",
                                     },
-                                    "analyzer": "default_analyzer",
-                                }
-                            },
+                                    "char_ngram": {
+                                        "type": "text",
+                                        "analyzer": "char_ngram_analyzer",
+                                    },
+                                },
+                                "analyzer": "default_analyzer",
+                            }
                         },
-                    }
+                    },
                 }
-            ],
-            "properties": {"location": {"type": "geo_point"}},
-        }
+            }
+        ],
+        "properties": {"location": {"type": "geo_point"}},
     }
 }
 
@@ -469,6 +457,19 @@ DEFAULT_NLP_CONFIG = {
 
 class NlpConfigError(Exception):
     pass
+
+
+def get_custom_action_config(app_path):
+    if not app_path:
+        return None
+    try:
+        custom_action_config = getattr(
+            _get_config_module(app_path), "CUSTOM_ACTION_CONFIG", None
+        )
+        return custom_action_config
+    except (OSError, IOError):
+        logger.error("No app configuration file found.")
+        return None
 
 
 def get_language_config(app_path):
@@ -652,6 +653,7 @@ def get_classifier_config(
         "entity": "ENTITY_RECOGNIZER_CONFIG",
         "entity_resolution": "ENTITY_RESOLVER_CONFIG",
         "role": "ROLE_CLASSIFIER_CONFIG",
+        "question_answering": "QUESTION_ANSWERER_CONFIG",
     }[clf_type]
     try:
         return copy.deepcopy(getattr(module_conf, attr_name))
@@ -681,6 +683,7 @@ def _get_default_classifier_config(clf_type):
             "entity_resolution": DEFAULT_ENTITY_RESOLVER_CONFIG,
             "role": DEFAULT_ROLE_CLASSIFIER_CONFIG,
             "language_config": DEFAULT_LANGUAGE_CONFIG,
+            "question_answering": DEFAULT_QUESTION_ANSWERER_CONFIG,
         }[clf_type]
     )
 

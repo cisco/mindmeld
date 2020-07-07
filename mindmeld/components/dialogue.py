@@ -424,7 +424,8 @@ class DialogueManager:
         res = handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if res and "dialogue_state" in res:
+        if res and isinstance(res, dict) and "dialogue_state" in res:
+            # TODO: check if this flow is executed, currently not covered in tests
             dialogue_state = ".".join([dialogue_state, res["dialogue_state"]])
         responder.dialogue_state = dialogue_state
         return responder
@@ -482,7 +483,12 @@ class DialogueManager:
         result_handler = await handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if result_handler and "dialogue_state" in result_handler:
+        if (
+            result_handler
+            and isinstance(result_handler, dict)
+            and "dialogue_state" in result_handler
+        ):
+            # TODO: check if this flow is executed, currently not covered in tests
             dialogue_state = "{}.{}".format(
                 dialogue_state, result_handler["dialogue_state"]
             )
@@ -805,11 +811,11 @@ class AutoEntityFilling:
             if entity_type in DEFAULT_SYS_ENTITIES:
                 # system entity validation - checks for presence of required system entity
 
-                entity_text = (
-                    str(request.entities[0]["value"][0]["value"])
-                    if request.entities
-                    else text
-                )
+                try:
+                    entity_text = str(request.entities[0]["value"][0]["value"])
+                except (KeyError, IndexError):
+                    entity_text = text
+
                 query = self._extract_query_features(entity_text)
 
                 resources = {}
@@ -822,12 +828,11 @@ class AutoEntityFilling:
             else:
                 # gazetteer validation
 
-                if request.entities:
+                try:
                     query = self._extract_query_features(
                         request.entities[0]["value"][0]["cname"]
                     )
-
-                if not query:
+                except (KeyError, IndexError):
                     query = self._extract_query_features(text)
 
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(
@@ -889,7 +894,11 @@ class AutoEntityFilling:
     def _end_slot_fill(self, request, responder, async_mode):
         # Returns filled entity objects as request.entities
         # We pass in the previous turn's responder's params to the current request
+
         request = self._app.app_manager.request_class(
+            text=request.text,
+            domain=request.domain,
+            intent=request.intent,
             entities=[slot.value for slot in self._local_form],
             context=request.context or {},
             history=request.history or [],
@@ -914,7 +923,7 @@ class AutoEntityFilling:
         self._retry_attempts = 0
         self._prompt_turn = False
 
-    def _retry_logic(self, responder, nlr):
+    def _retry_logic(self, request, responder, nlr):
         if self._retry_attempts < self._max_retries:
             self._retry_attempts += 1
             responder.reply(nlr)
@@ -922,7 +931,21 @@ class AutoEntityFilling:
             # max attempts exceeded, reset counter, exit auto_fill.
             self._retry_attempts = 0
             self._exit_flow(responder)
-            self._app.app_manager.dialogue_manager.reprocess()
+
+            # reprocess query to obtain intended nlp config, ignoring previous config.
+            processed_query = self._app.app_manager.nlp.process(query_text=request.text)
+
+            # create new request object from the current responder object.
+            request = self._app.app_manager.request_class(
+                context=request.context or {},
+                history=request.history or [],
+                frame=responder.frame or {},
+                params=FrozenParams(**responder.params.to_dict()),
+                **processed_query,
+            )
+
+            # call intended handler from reprocessed query.
+            self._app.app_manager.dialogue_manager.apply_handler(request, responder)
 
     def __call__(self, request, responder):
         """
@@ -963,7 +986,7 @@ class AutoEntityFilling:
 
                 if not _is_valid:
                     # retry logic
-                    self._retry_logic(responder, slot.retry_response)
+                    self._retry_logic(request, responder, slot.retry_response)
                     return
 
                 slot.value = Entity(
@@ -1194,6 +1217,8 @@ class Conversation:
         params (FrozenParams): The params returned by the most recent turn.
         force_sync (bool): Force synchronous return for `say()` and `process()` \
             even when app is in async mode.
+        verbose (bool, optional): If True, returns class probabilities along with class \
+                prediction.
     """
 
     _logger = mod_logger.getChild("Conversation")
@@ -1206,6 +1231,7 @@ class Conversation:
         context=None,
         default_params=None,
         force_sync=False,
+        verbose=False
     ):
         """
         Args:
@@ -1220,6 +1246,8 @@ class Conversation:
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
+            verbose (bool, optional): If True, returns class probabilities along with class \
+                prediction.
         """
         app = app or path.get_app(app_path)
         app.lazy_init(nlp)
@@ -1232,6 +1260,7 @@ class Conversation:
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
+        self.verbose = verbose	
 
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
@@ -1322,6 +1351,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
+            verbose=self.verbose
         )
         self.history = response.history
         self.frame = response.frame
@@ -1363,6 +1393,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
+            verbose=self.verbose
         )
         self.history = response.history
         self.frame = response.frame

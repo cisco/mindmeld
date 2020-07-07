@@ -813,3 +813,124 @@ We can perform the same search using the :meth:`query()` API as well.
 	To delete and reindex your data, follow the steps mentioned :ref:`here <import_kb>`.
 
 
+.. _semantic_embeddings:
+
+Leveraging semantic embeddings
+------------------------------
+The question answerer capabilities described so far rely purely on text-based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the knowledge base even if the search token wasn’t present in the uploaded data.
+
+To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
+
+The settings for semantic embeddings are part of the ``QUESTION_ANSWERER_CONFIG`` in the app configuration file, ``config.py``. To use semantic embeddings, you need to specify a supported ``model_type``,  the ``model_settings``, and the fields you would like to generate embeddings for in ``embedding_fields``. The ``embedding_fields`` parameter takes a dictionary where the key is the name of your index, and the value is a list of field names or regexes to match against the field names for that index.
+
+Using the HR Assistant blueprint as an example, here is what the question answerer config could look like.
+
+.. code:: python
+
+  QUESTION_ANSWERER_CONFIG = {
+      "model_type": "embedder",
+      "model_settings": {
+          "embedder_type": "bert",
+          "embedding_fields": {
+              "faq_data": ["question", "answer"]
+          }
+      }
+  }
+
+There are three available model types which leverage semantic embedders. The specified ``model_type`` is also the default ``query_type`` for all question answering calls for your application, but you can always pass in a different query type to your ``qa.get()`` command as desired.
+
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
+  | Model type            | Description                                                                                                |
+  +=======================+============================================================================================================+
+  | embedder              | Only leverage deep semantic embedders. This option allows for using deep semantic embedders like           |
+  |                       | Sentence-BERT or GloVe for doing vector-based retrieval.                                                   |
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
+  | embedder_keyword      | Leverage a combination of deep semantic embedders and text signals in a way that's optimized for search on |
+  |                       | keywords or short spans of text. GloVe may be preferable for this use case.                                |
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
+  | embedder_text         | Leverage a combination of deep semantic embedders and text signals in a way that's optimized for search on |
+  |                       | larger paragraphs or passages of unstructured text. Sentence-BERT is preferable for this use case.         |
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
+
+
+The two included embedder types are `Sentence-BERT <https://github.com/UKPLab/sentence-transformers>`_ and `GloVe <https://nlp.stanford.edu/projects/glove/>`_. 
+
+Sentence-BERT is a modification of the pretrained BERT network that uses siamese and triplet network structures to derive semantically meaningful sentence embeddings that can be compared using cosine-similarity. To use this embedder type, specify ``bert`` as the ``embedder_type`` in the ``model_settings``.
+
+Multiple models fine-tuned on BERT / RoBERTa / DistilBERT / ALBERT / XLNet are provided. You can view the full list `here <https://github.com/UKPLab/sentence-transformers#english-pre-trained-models>`_, and specify your choice of pre-trained model via the ``model_name`` parameter in the ``model_settings`` section of the config. The default is ``bert-base-nli-mean-tokens`` which is a BERT model trained on the `SNLI <https://nlp.stanford.edu/projects/snli/>`_ and `MultiNLI <https://cims.nyu.edu/~sbowman/multinli/>`_ datasets with mean-tokens pooling.
+
+The provided GloVe embeddings are word vectors trained on the `Wikipedia <https://dumps.wikimedia.org/>`_ and `Gigaword 5 <https://catalog.ldc.upenn.edu/LDC2011T07>`_ datasets. To use this embedder type, specify ``glove`` as the ``embedder_type`` in the ``model_settings``.
+
+The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the ``token_embedding_dimension`` in the ``model_settings`` section of the config (defaults to 300). For fields with more than one token, word vector averaging is used. 
+
+Once your config file is specified, you can load the Knowledge Base and the embeddings will automatically be generated as specified in the config and stored in your index as dense vectors. Note that you must pass the application path in order for the config to be processed. This can be done via the CLI command with the ``--app-path`` option or via the ``app_path`` parameter for the ``load_kb`` method.
+
+
+.. code-block:: console
+
+  mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl --app_path .
+
+All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache. 
+
+.. code-block:: console
+
+  .generated/indexes/<model_name>_cache.pkl
+
+If our built-in embedders don't fit your use case and you would like to use your own embedder, you can use the provided ``Embedder`` abstract class. You need to implement two methods: ``load`` and ``encode``. The load method will load and return your embedder model. The encode method will take a list of text strings and return a list of numpy vectors. You can register your class for use with MindMeld via the ``register_embedder`` method as shown below.
+
+.. code-block:: python
+
+  from mindmeld.models import Embedder, register_embedder 
+  
+  class MyEmbedder(Embedder): 
+      def load(self, **kwargs): 
+          # return the loaded model 
+      def encode(self, text_list): 
+          # encodes each query in the list  
+
+  register_embedder('my_embedder_name', MyEmbedder) 
+
+
+In many cases, you may like to provide some parameters to your ``load`` method to initialize your model in a certain way. The ``model_settings`` dictionary in the config will be passed to the load method as ``kwargs``, so any needed parameters can be specified there.
+
+
+.. code-block:: python
+
+  QUESTION_ANSWERER_CONFIG = { 
+      "model_type": "embedder", 
+      "model_settings": { 
+          "embedder_type": "my_embedder_name", 
+          "some_model_param": "my_model_param", 
+          "embedding_fields": {"faq": ['question', 'answer']} 
+      } 
+  } 
+
+
+Once your knowledge base has been created, to search it while leveraging vector similarity, we will use the :meth:`get()` API as before with one small modification. We set the ``query_type`` parameter to ``embedder``, ``embedder_keyword``, or ``embedder_text``. This will automatically find results for which the embedded search fields are close in cosine similarity to the embedded query.
+
+.. code:: python
+
+  answers = qa.get(index=index_name, query_type='embedder',
+                   question=query)
+
+You can search against multiple fields.
+
+.. code:: python
+
+  answers = qa.get(index=index_name, query_type='embedder',
+                   question=query, answer=query)
+
+
+And you can use a combination of embedder and text based search.
+
+.. code:: python
+
+  answers = qa.get(index=index_name, query_type='embedder_keyword',
+                   question=query, answer=query)
+
+  answers = qa.get(index=index_name, query_type='embedder_text',
+                 question=query, answer=query)
+
+.. note::
+
+    In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.

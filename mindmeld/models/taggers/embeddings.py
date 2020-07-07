@@ -192,6 +192,7 @@ class WordSequenceEmbedding:
         sequence_padding_length,
         token_embedding_dimension=None,
         token_pretrained_embedding_filepath=None,
+        use_padding=True,
     ):
         """Initializes the WordSequenceEmbedding class
 
@@ -211,6 +212,8 @@ class WordSequenceEmbedding:
 
         self._add_historic_embeddings()
 
+        self.use_padding = use_padding
+
     def encode_sequence_of_tokens(self, token_sequence):
         """Encodes a sequence of tokens into real value vectors.
 
@@ -221,10 +224,13 @@ class WordSequenceEmbedding:
             (list): Encoded sequence of tokens.
         """
         default_encoding = np.zeros(self.token_embedding_dimension)
-        encoded_query = [default_encoding] * self.sequence_padding_length
+        if self.use_padding:
+            encoded_query = [default_encoding] * self.sequence_padding_length
+        else:
+            encoded_query = [default_encoding] * len(token_sequence)
 
         for idx, token in enumerate(token_sequence):
-            if idx >= self.sequence_padding_length:
+            if idx >= self.sequence_padding_length and self.use_padding:
                 break
             encoded_query[idx] = self._encode_token(token)
 

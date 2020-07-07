@@ -1,0 +1,187 @@
+swagger: "2.0"
+info:
+  description: "This is an OpenAPI specification for MindMeld Action Server."
+  version: "1.0.0"
+  title: "MindMeld Action Server"
+basePath: "/v2"
+schemes:
+- "https"
+- "http"
+paths:
+  /action:
+    post:
+      summary: "Invoke an action "
+      description: ""
+      operationId: "invokeAction"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "data"
+        description: "MindMeld Data"
+        required: true
+        schema:
+          $ref: '#/definitions/Data'
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Responder'
+        405:
+          description: "Invalid input"
+
+definitions:
+  Data:
+    type: object
+    properties:
+      request:
+        type: object
+        description: "MindMeld request object"
+        $ref: '#/definitions/Request'
+      responder:
+        type: object
+        description: "MindMeld responder object"
+        $ref: '#/definitions/Responder'
+      action:
+        type: string
+        description: ""
+  Request:
+    type: "object"
+    description: "The request object is the object that encapsulates the information sent from the device client to the MM server"
+    properties:
+      text:
+        type: "string"
+        description: "The query text"
+      domain:
+        type: "string"
+        description: "Domain of the current query."
+      intent:
+        type: "string"
+        description: "Intent of the current query."
+      entities:
+        type: "array"
+        description: "A list of entities in the current query."
+        items:
+          type: object
+          $ref: "#/definitions/Entity"
+      context:
+        type: object
+        description: "Map containing front-end client state that is passed to the application from the client in the request."
+      params:
+        type: object
+        $ref: "#/definitions/Params"
+        description: "Map of stored data across multiple dialogue turns."
+  Transcript:
+    type: "object"
+    properties:
+      transcript:
+        type: "string"
+        description: "Transcription"
+      confidence:
+        type: "number"
+        description: "Transcription confidence"
+  Directive:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Directive Name"
+      type:
+        type: "string"
+        description: "Directive Type"
+        enum:
+        - "view"
+        - "action"
+      payload:
+        type: "object"
+        description: "JSON payload"
+  Domain:
+    type: object
+    properties:
+      value:
+        type: "string"
+      confidence:
+        type: "number"
+  Intent:
+    type: object
+    properties:
+      value:
+        type: "string"
+      confidence:
+        type: "number"
+  Entity:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+        description: "The text contents that span the entity"
+      type:
+        type: "string"
+        description: "Entity type"
+      role:
+        type: "string"
+        description: "Role type"
+      value:
+        type: "object"
+        description: "The resolved value of the entity"
+      display_text:
+        type: string
+        description: "A human readable text representation of the entity for use in natural language responses."
+      confidence:
+        type: number
+        description: "A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label."
+      is_system_entity:
+        type: boolean
+        description: "True if the entity is a system entity"
+  Params:
+    type: object
+    properties:
+      target_dialogue_state:
+        type: string
+        description: "The name of next turn's dialogue state (if set)"
+      dynamic_resoure:
+        type: string
+        description: "The additional values for gazetteer"
+      allowed_intents:
+        type: array
+        items:
+          type: string
+          description: "The name of the intent"
+        description: "The list of allowed intents for next turn (if set)"
+      time_zone:
+        type: string
+        description: "The time zone of the request"
+      language:
+        type: string
+        description: "The language of the request"
+      locale:
+        type: string
+        description: "The locale of the request"
+      timestamp:
+        type: string
+        description: "The timestamp of the request"
+
+  Responder:
+    type: object
+    properties:
+      directives:
+        type: array
+        description: "The list of directives (such as replies) to be sent to the user"
+        items:
+          type: object
+          $ref: '#/definitions/Directive'
+      frame:
+        type: object
+        description: "The frame object of the responder, which contains key-value pairs to send to the application"
+      params:
+        type: object
+        $ref: '#/definitions/Params'
+        description: "The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager"
+      slots:
+        type: object
+        description: "The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses"
+externalDocs:
+  description: "Find out more about MindMeld"
+  url: "http://www.mindmeld.com"

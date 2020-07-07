@@ -1,5 +1,7 @@
 LANGUAGE_CONFIG = {"language": "en", "locale": "en_CA"}
 
+CUSTOM_ACTION_CONFIG = {"url": "http://0.0.0.0:8080/"}
+
 NLP_CONFIG = {
     "resolve_entities_using_nbest_transcripts": ["store_info.get_store_hours"]
 }
