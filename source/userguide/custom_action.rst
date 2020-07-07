@@ -1,5 +1,5 @@
 Working with Custom Actions
-==========================
+===========================
 
 MindMeld 4.3 introduces Custom Actions which allow MindMeld developers to further separate their business
 logic from the conversational application. This paradigm shift helps to reduce the barriers to build and
@@ -14,9 +14,9 @@ Since the microservices are written in Java, the developers want to reuse as muc
 possible. Since the MindMeld application is in Python, they would have to re-implement their Java code to Python code.
 
 With Custom Actions, the developers can now shift the responsibility of fulfilling business logic to services that
-are outside of MindMeld applications, and these services can be implemented in any language.
-. The developers can specify the exact conditions (for example, matching a certain domain or intent) to execute
-the custom actions and the MindMeld application will interact with the custom action servers through http(s) requests.
+are outside of MindMeld applications, and these services can be implemented in any language. The developers can specify
+the exact conditions (for example, matching a certain domain or intent) to execute the custom actions and the MindMeld
+application will interact with the custom action servers through http(s) requests.
 
 
 OpenAPI Specification for client-server interaction
@@ -27,10 +27,10 @@ For easy viewing you can check out Swagger UI, which can also help to render Ope
 stubs in a variety of languages.
 
 Each request to the Custom Action Server includes two fields: ``request`` and ``responder``. The
-``request`` field encapsulates information from the ``Request`` object (text, NLP information, etc.) and the
-``responder`` field the ``Responder`` object (directives, frame, slots, params).
+``request`` field encapsulates information from the `Request <https://www.mindmeld.com/docs/apidoc/mindmeld.components.request.html#mindmeld.components.request.Request>`_
+object (text, NLP information, etc.) and the ``responder`` field the `Responder <https://www.mindmeld.com/docs/apidoc/mindmeld.components.dialogue.html#mindmeld.components.dialogue.DialogueResponder>`_ object (directives, frame, slots, params).
 
-In a normal MindMeld application each object is passed into the application handler for processing.
+In a normal MindMeld application, each object is passed into the application handler for processing.
 
 .. code-block:: python
 
@@ -38,9 +38,9 @@ In a normal MindMeld application each object is passed into the application hand
     def handle_intent(request, responder):
         # normal MindMeld application logic goes here
 
-In an analogous process, when we invoke the custom action, we are serializing the ``request`` and ``responder`` and
+In an analogous process to ``@app.handle``, when we invoke the custom action, we are serializing the ``request`` and ``responder`` and
 passing them into the body of the http request to the server. In the response, we simply expect it to contain all
-the fields of the `Responder` object which will be deserialized and processed before returning to the end client.
+the fields of the ``Responder`` object which will be deserialized and processed before returning to the end client.
 
 
 Configure Custom Actions for your MindMeld application
@@ -209,7 +209,7 @@ Instead of calling individual ``CustomAction`` in sequence, you can also use the
         CustomActionSequence(actions=['action_help', 'action_restart'], config=action_config).invoke(request, responder)
 
 For your convenience, we also provide helper functions (``invoke_custom_action``, ``invoke_action_async``) which wrap
-around the `CustomAction` class.
+around the ``CustomAction`` class.
 
 .. code-block:: python
 
