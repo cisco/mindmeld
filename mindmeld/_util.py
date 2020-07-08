@@ -36,7 +36,7 @@ from .exceptions import KnowledgeBaseConnectionError
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE_NAME = "mindmeld.cfg"
-BLUEPRINT_URL = "{mindmeld_url}/bp/{blueprint}/{filename}"
+BLUEPRINT_URL = "{mindmeld_url}/{blueprint}/{filename}"
 
 BLUEPRINT_APP_ARCHIVE = "app.tar.gz"
 BLUEPRINT_KB_ARCHIVE = "kb.tar.gz"

@@ -44,7 +44,7 @@ Next, we install ``python``, ``pip`` and ``virtualenv`` on the local machine usi
 
 .. code-block:: shell
 
-  bash -c "$(curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_lite_init.sh)"
+  bash -c "$(curl -s  https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_lite_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
@@ -127,7 +127,7 @@ If you are using a Ubuntu 16/18 machine, when you're ready to go, open a termina
 
 .. code-block:: shell
 
-  bash -c "$(curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_init.sh)"
+  bash -c "$(curl -s  https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
