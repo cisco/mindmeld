@@ -1,14 +1,12 @@
 import connexion
 
-from ..models.data import Data  # noqa: E501
-from ..models.responder import Responder  # noqa: E501
+from ..models.data import Data
+from ..models.responder import Responder
 from ..models.directive import Directive
 
 
-def invoke_action(data):  # noqa: E501
+def invoke_action(data):
     """Invoke an action 
-
-     # noqa: E501
 
     :param data: MindMeld Data
     :type data: dict | bytes
@@ -16,7 +14,7 @@ def invoke_action(data):  # noqa: E501
     :rtype: Responder
     """
     if connexion.request.is_json:
-        data = Data.from_dict(connexion.request.get_json())  # noqa: E501
+        data = Data.from_dict(connexion.request.get_json())
 
     action = data.action
     msg = None

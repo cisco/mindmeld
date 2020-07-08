@@ -23,16 +23,16 @@ class Responder(Model):
         frame: object = None,
         params: Params = None,
         slots: object = None,
-    ):  # noqa: E501
+    ):
         """Responder - a model defined in Swagger
 
-        :param directives: The directives of this Responder.  # noqa: E501
+        :param directives: The directives of this Responder.
         :type directives: List[Directive]
-        :param frame: The frame of this Responder.  # noqa: E501
+        :param frame: The frame of this Responder.
         :type frame: object
-        :param params: The params of this Responder.  # noqa: E501
+        :param params: The params of this Responder.
         :type params: Params
-        :param slots: The slots of this Responder.  # noqa: E501
+        :param slots: The slots of this Responder.
         :type slots: object
         """
         self.swagger_types = {
@@ -60,7 +60,7 @@ class Responder(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Responder of this Responder.  # noqa: E501
+        :return: The Responder of this Responder.
         :rtype: Responder
         """
         return util.deserialize_model(dikt, cls)
@@ -69,7 +69,7 @@ class Responder(Model):
     def directives(self) -> List[Directive]:
         """Gets the directives of this Responder.
 
-        The list of directives (such as replies) to be sent to the user  # noqa: E501
+        The list of directives (such as replies) to be sent to the user
 
         :return: The directives of this Responder.
         :rtype: List[Directive]
@@ -80,7 +80,7 @@ class Responder(Model):
     def directives(self, directives: List[Directive]):
         """Sets the directives of this Responder.
 
-        The list of directives (such as replies) to be sent to the user  # noqa: E501
+        The list of directives (such as replies) to be sent to the user
 
         :param directives: The directives of this Responder.
         :type directives: List[Directive]
@@ -92,7 +92,7 @@ class Responder(Model):
     def frame(self) -> object:
         """Gets the frame of this Responder.
 
-        The frame object of the responder, which contains key-value pairs to send to the application  # noqa: E501
+        The frame object of the responder, which contains key-value pairs to send to the application
 
         :return: The frame of this Responder.
         :rtype: object
@@ -103,7 +103,7 @@ class Responder(Model):
     def frame(self, frame: object):
         """Sets the frame of this Responder.
 
-        The frame object of the responder, which contains key-value pairs to send to the application  # noqa: E501
+        The frame object of the responder, which contains key-value pairs to send to the application
 
         :param frame: The frame of this Responder.
         :type frame: object
@@ -115,7 +115,7 @@ class Responder(Model):
     def params(self) -> Params:
         """Gets the params of this Responder.
 
-        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager  # noqa: E501
+        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager
 
         :return: The params of this Responder.
         :rtype: Params
@@ -126,7 +126,7 @@ class Responder(Model):
     def params(self, params: Params):
         """Sets the params of this Responder.
 
-        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager  # noqa: E501
+        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager
 
         :param params: The params of this Responder.
         :type params: Params
@@ -138,7 +138,7 @@ class Responder(Model):
     def slots(self) -> object:
         """Gets the slots of this Responder.
 
-        The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses  # noqa: E501
+        The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses
 
         :return: The slots of this Responder.
         :rtype: object
@@ -149,7 +149,7 @@ class Responder(Model):
     def slots(self, slots: object):
         """Sets the slots of this Responder.
 
-        The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses  # noqa: E501
+        The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses
 
         :param slots: The slots of this Responder.
         :type slots: object

@@ -19,14 +19,14 @@ class Data(Model):
 
     def __init__(
         self, request: Request = None, responder: Responder = None, action: str = None
-    ):  # noqa: E501
+    ):
         """Data - a model defined in Swagger
 
-        :param request: The request of this Data.  # noqa: E501
+        :param request: The request of this Data.
         :type request: Request
-        :param responder: The responder of this Data.  # noqa: E501
+        :param responder: The responder of this Data.
         :type responder: Responder
-        :param action: The action of this Data.  # noqa: E501
+        :param action: The action of this Data.
         :type action: str
         """
         self.swagger_types = {"request": Request, "responder": Responder, "action": str}
@@ -47,7 +47,7 @@ class Data(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Data of this Data.  # noqa: E501
+        :return: The Data of this Data.
         :rtype: Data
         """
         return util.deserialize_model(dikt, cls)
@@ -56,7 +56,7 @@ class Data(Model):
     def request(self) -> Request:
         """Gets the request of this Data.
 
-        MindMeld request object  # noqa: E501
+        MindMeld request object
 
         :return: The request of this Data.
         :rtype: Request
@@ -67,7 +67,7 @@ class Data(Model):
     def request(self, request: Request):
         """Sets the request of this Data.
 
-        MindMeld request object  # noqa: E501
+        MindMeld request object
 
         :param request: The request of this Data.
         :type request: Request
@@ -79,7 +79,7 @@ class Data(Model):
     def responder(self) -> Responder:
         """Gets the responder of this Data.
 
-        MindMeld responder object  # noqa: E501
+        MindMeld responder object
 
         :return: The responder of this Data.
         :rtype: Responder
@@ -90,7 +90,7 @@ class Data(Model):
     def responder(self, responder: Responder):
         """Sets the responder of this Data.
 
-        MindMeld responder object  # noqa: E501
+        MindMeld responder object
 
         :param responder: The responder of this Data.
         :type responder: Responder
@@ -102,7 +102,7 @@ class Data(Model):
     def action(self) -> str:
         """Gets the action of this Data.
 
-          # noqa: E501
+
 
         :return: The action of this Data.
         :rtype: str
@@ -113,7 +113,7 @@ class Data(Model):
     def action(self, action: str):
         """Sets the action of this Data.
 
-          # noqa: E501
+
 
         :param action: The action of this Data.
         :type action: str

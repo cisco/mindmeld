@@ -15,12 +15,12 @@ class Intent(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, value: str = None, confidence: float = None):  # noqa: E501
+    def __init__(self, value: str = None, confidence: float = None):
         """Intent - a model defined in Swagger
 
-        :param value: The value of this Intent.  # noqa: E501
+        :param value: The value of this Intent.
         :type value: str
-        :param confidence: The confidence of this Intent.  # noqa: E501
+        :param confidence: The confidence of this Intent.
         :type confidence: float
         """
         self.swagger_types = {"value": str, "confidence": float}
@@ -36,7 +36,7 @@ class Intent(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Intent of this Intent.  # noqa: E501
+        :return: The Intent of this Intent.
         :rtype: Intent
         """
         return util.deserialize_model(dikt, cls)

@@ -24,22 +24,22 @@ class Entity(Model):
         display_text: str = None,
         confidence: float = None,
         is_system_entity: bool = None,
-    ):  # noqa: E501
+    ):
         """Entity - a model defined in Swagger
 
-        :param text: The text of this Entity.  # noqa: E501
+        :param text: The text of this Entity.
         :type text: str
-        :param type: The type of this Entity.  # noqa: E501
+        :param type: The type of this Entity.
         :type type: str
-        :param role: The role of this Entity.  # noqa: E501
+        :param role: The role of this Entity.
         :type role: str
-        :param value: The value of this Entity.  # noqa: E501
+        :param value: The value of this Entity.
         :type value: object
-        :param display_text: The display_text of this Entity.  # noqa: E501
+        :param display_text: The display_text of this Entity.
         :type display_text: str
-        :param confidence: The confidence of this Entity.  # noqa: E501
+        :param confidence: The confidence of this Entity.
         :type confidence: float
-        :param is_system_entity: The is_system_entity of this Entity.  # noqa: E501
+        :param is_system_entity: The is_system_entity of this Entity.
         :type is_system_entity: bool
         """
         self.swagger_types = {
@@ -76,7 +76,7 @@ class Entity(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Entity of this Entity.  # noqa: E501
+        :return: The Entity of this Entity.
         :rtype: Entity
         """
         return util.deserialize_model(dikt, cls)
@@ -85,7 +85,7 @@ class Entity(Model):
     def text(self) -> str:
         """Gets the text of this Entity.
 
-        The text contents that span the entity  # noqa: E501
+        The text contents that span the entity
 
         :return: The text of this Entity.
         :rtype: str
@@ -96,7 +96,7 @@ class Entity(Model):
     def text(self, text: str):
         """Sets the text of this Entity.
 
-        The text contents that span the entity  # noqa: E501
+        The text contents that span the entity
 
         :param text: The text of this Entity.
         :type text: str
@@ -108,7 +108,7 @@ class Entity(Model):
     def type(self) -> str:
         """Gets the type of this Entity.
 
-        Entity type  # noqa: E501
+        Entity type
 
         :return: The type of this Entity.
         :rtype: str
@@ -119,7 +119,7 @@ class Entity(Model):
     def type(self, type: str):
         """Sets the type of this Entity.
 
-        Entity type  # noqa: E501
+        Entity type
 
         :param type: The type of this Entity.
         :type type: str
@@ -131,7 +131,7 @@ class Entity(Model):
     def role(self) -> str:
         """Gets the role of this Entity.
 
-        Role type  # noqa: E501
+        Role type
 
         :return: The role of this Entity.
         :rtype: str
@@ -142,7 +142,7 @@ class Entity(Model):
     def role(self, role: str):
         """Sets the role of this Entity.
 
-        Role type  # noqa: E501
+        Role type
 
         :param role: The role of this Entity.
         :type role: str
@@ -154,7 +154,7 @@ class Entity(Model):
     def value(self) -> object:
         """Gets the value of this Entity.
 
-        The resolved value of the entity  # noqa: E501
+        The resolved value of the entity
 
         :return: The value of this Entity.
         :rtype: object
@@ -165,7 +165,7 @@ class Entity(Model):
     def value(self, value: object):
         """Sets the value of this Entity.
 
-        The resolved value of the entity  # noqa: E501
+        The resolved value of the entity
 
         :param value: The value of this Entity.
         :type value: object
@@ -177,7 +177,7 @@ class Entity(Model):
     def display_text(self) -> str:
         """Gets the display_text of this Entity.
 
-        A human readable text representation of the entity for use in natural language responses.  # noqa: E501
+        A human readable text representation of the entity for use in natural language responses.
 
         :return: The display_text of this Entity.
         :rtype: str
@@ -188,7 +188,7 @@ class Entity(Model):
     def display_text(self, display_text: str):
         """Sets the display_text of this Entity.
 
-        A human readable text representation of the entity for use in natural language responses.  # noqa: E501
+        A human readable text representation of the entity for use in natural language responses.
 
         :param display_text: The display_text of this Entity.
         :type display_text: str
@@ -200,7 +200,7 @@ class Entity(Model):
     def confidence(self) -> float:
         """Gets the confidence of this Entity.
 
-        A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label.  # noqa: E501
+        A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label.
 
         :return: The confidence of this Entity.
         :rtype: float
@@ -211,7 +211,7 @@ class Entity(Model):
     def confidence(self, confidence: float):
         """Sets the confidence of this Entity.
 
-        A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label.  # noqa: E501
+        A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label.
 
         :param confidence: The confidence of this Entity.
         :type confidence: float
@@ -223,7 +223,7 @@ class Entity(Model):
     def is_system_entity(self) -> bool:
         """Gets the is_system_entity of this Entity.
 
-        True if the entity is a system entity  # noqa: E501
+        True if the entity is a system entity
 
         :return: The is_system_entity of this Entity.
         :rtype: bool
@@ -234,7 +234,7 @@ class Entity(Model):
     def is_system_entity(self, is_system_entity: bool):
         """Sets the is_system_entity of this Entity.
 
-        True if the entity is a system entity  # noqa: E501
+        True if the entity is a system entity
 
         :param is_system_entity: The is_system_entity of this Entity.
         :type is_system_entity: bool

@@ -15,12 +15,12 @@ class Domain(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, value: str = None, confidence: float = None):  # noqa: E501
+    def __init__(self, value: str = None, confidence: float = None):
         """Domain - a model defined in Swagger
 
-        :param value: The value of this Domain.  # noqa: E501
+        :param value: The value of this Domain.
         :type value: str
-        :param confidence: The confidence of this Domain.  # noqa: E501
+        :param confidence: The confidence of this Domain.
         :type confidence: float
         """
         self.swagger_types = {"value": str, "confidence": float}
@@ -36,7 +36,7 @@ class Domain(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Domain of this Domain.  # noqa: E501
+        :return: The Domain of this Domain.
         :rtype: Domain
         """
         return util.deserialize_model(dikt, cls)

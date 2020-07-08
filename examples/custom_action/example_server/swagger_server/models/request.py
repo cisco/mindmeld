@@ -24,20 +24,20 @@ class Request(Model):
         entities: List[Entity] = None,
         context: object = None,
         params: object = None,
-    ):  # noqa: E501
+    ):
         """Request - a model defined in Swagger
 
-        :param text: The text of this Request.  # noqa: E501
+        :param text: The text of this Request.
         :type text: str
-        :param domain: The domain of this Request.  # noqa: E501
+        :param domain: The domain of this Request.
         :type domain: str
-        :param intent: The intent of this Request.  # noqa: E501
+        :param intent: The intent of this Request.
         :type intent: str
-        :param entities: The entities of this Request.  # noqa: E501
+        :param entities: The entities of this Request.
         :type entities: List[Entity]
-        :param context: The context of this Request.  # noqa: E501
+        :param context: The context of this Request.
         :type context: object
-        :param params: The params of this Request.  # noqa: E501
+        :param params: The params of this Request.
         :type params: object
         """
         self.swagger_types = {
@@ -71,7 +71,7 @@ class Request(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Request of this Request.  # noqa: E501
+        :return: The Request of this Request.
         :rtype: Request
         """
         return util.deserialize_model(dikt, cls)
@@ -80,7 +80,7 @@ class Request(Model):
     def text(self) -> str:
         """Gets the text of this Request.
 
-        The query text  # noqa: E501
+        The query text
 
         :return: The text of this Request.
         :rtype: str
@@ -91,7 +91,7 @@ class Request(Model):
     def text(self, text: str):
         """Sets the text of this Request.
 
-        The query text  # noqa: E501
+        The query text
 
         :param text: The text of this Request.
         :type text: str
@@ -103,7 +103,7 @@ class Request(Model):
     def domain(self) -> str:
         """Gets the domain of this Request.
 
-        Domain of the current query.  # noqa: E501
+        Domain of the current query.
 
         :return: The domain of this Request.
         :rtype: str
@@ -114,7 +114,7 @@ class Request(Model):
     def domain(self, domain: str):
         """Sets the domain of this Request.
 
-        Domain of the current query.  # noqa: E501
+        Domain of the current query.
 
         :param domain: The domain of this Request.
         :type domain: str
@@ -126,7 +126,7 @@ class Request(Model):
     def intent(self) -> str:
         """Gets the intent of this Request.
 
-        Intent of the current query.  # noqa: E501
+        Intent of the current query.
 
         :return: The intent of this Request.
         :rtype: str
@@ -137,7 +137,7 @@ class Request(Model):
     def intent(self, intent: str):
         """Sets the intent of this Request.
 
-        Intent of the current query.  # noqa: E501
+        Intent of the current query.
 
         :param intent: The intent of this Request.
         :type intent: str
@@ -149,7 +149,7 @@ class Request(Model):
     def entities(self) -> List[Entity]:
         """Gets the entities of this Request.
 
-        A list of entities in the current query.  # noqa: E501
+        A list of entities in the current query.
 
         :return: The entities of this Request.
         :rtype: List[Entity]
@@ -160,7 +160,7 @@ class Request(Model):
     def entities(self, entities: List[Entity]):
         """Sets the entities of this Request.
 
-        A list of entities in the current query.  # noqa: E501
+        A list of entities in the current query.
 
         :param entities: The entities of this Request.
         :type entities: List[Entity]
@@ -172,7 +172,7 @@ class Request(Model):
     def context(self) -> object:
         """Gets the context of this Request.
 
-        Map containing front-end client state that is passed to the application from the client in the request.  # noqa: E501
+        Map containing front-end client state that is passed to the application from the client in the request.
 
         :return: The context of this Request.
         :rtype: object
@@ -183,7 +183,7 @@ class Request(Model):
     def context(self, context: object):
         """Sets the context of this Request.
 
-        Map containing front-end client state that is passed to the application from the client in the request.  # noqa: E501
+        Map containing front-end client state that is passed to the application from the client in the request.
 
         :param context: The context of this Request.
         :type context: object
@@ -195,7 +195,7 @@ class Request(Model):
     def params(self) -> object:
         """Gets the params of this Request.
 
-        Map of stored data across multiple dialogue turns.  # noqa: E501
+        Map of stored data across multiple dialogue turns.
 
         :return: The params of this Request.
         :rtype: object
@@ -206,7 +206,7 @@ class Request(Model):
     def params(self, params: object):
         """Sets the params of this Request.
 
-        Map of stored data across multiple dialogue turns.  # noqa: E501
+        Map of stored data across multiple dialogue turns.
 
         :param params: The params of this Request.
         :type params: object

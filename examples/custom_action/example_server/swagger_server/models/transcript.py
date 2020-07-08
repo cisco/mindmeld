@@ -15,12 +15,12 @@ class Transcript(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, transcript: str = None, confidence: float = None):  # noqa: E501
+    def __init__(self, transcript: str = None, confidence: float = None):
         """Transcript - a model defined in Swagger
 
-        :param transcript: The transcript of this Transcript.  # noqa: E501
+        :param transcript: The transcript of this Transcript.
         :type transcript: str
-        :param confidence: The confidence of this Transcript.  # noqa: E501
+        :param confidence: The confidence of this Transcript.
         :type confidence: float
         """
         self.swagger_types = {"transcript": str, "confidence": float}
@@ -36,7 +36,7 @@ class Transcript(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Transcript of this Transcript.  # noqa: E501
+        :return: The Transcript of this Transcript.
         :rtype: Transcript
         """
         return util.deserialize_model(dikt, cls)
@@ -45,7 +45,7 @@ class Transcript(Model):
     def transcript(self) -> str:
         """Gets the transcript of this Transcript.
 
-        Transcription  # noqa: E501
+        Transcription
 
         :return: The transcript of this Transcript.
         :rtype: str
@@ -56,7 +56,7 @@ class Transcript(Model):
     def transcript(self, transcript: str):
         """Sets the transcript of this Transcript.
 
-        Transcription  # noqa: E501
+        Transcription
 
         :param transcript: The transcript of this Transcript.
         :type transcript: str
@@ -68,7 +68,7 @@ class Transcript(Model):
     def confidence(self) -> float:
         """Gets the confidence of this Transcript.
 
-        Transcription confidence  # noqa: E501
+        Transcription confidence
 
         :return: The confidence of this Transcript.
         :rtype: float
@@ -79,7 +79,7 @@ class Transcript(Model):
     def confidence(self, confidence: float):
         """Sets the confidence of this Transcript.
 
-        Transcription confidence  # noqa: E501
+        Transcription confidence
 
         :param confidence: The confidence of this Transcript.
         :type confidence: float

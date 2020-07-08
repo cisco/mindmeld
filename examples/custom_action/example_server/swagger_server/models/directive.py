@@ -15,16 +15,14 @@ class Directive(Model):
     Do not edit the class manually.
     """
 
-    def __init__(
-        self, name: str = None, type: str = None, payload: object = None
-    ):  # noqa: E501
+    def __init__(self, name: str = None, type: str = None, payload: object = None):
         """Directive - a model defined in Swagger
 
-        :param name: The name of this Directive.  # noqa: E501
+        :param name: The name of this Directive.
         :type name: str
-        :param type: The type of this Directive.  # noqa: E501
+        :param type: The type of this Directive.
         :type type: str
-        :param payload: The payload of this Directive.  # noqa: E501
+        :param payload: The payload of this Directive.
         :type payload: object
         """
         self.swagger_types = {"name": str, "type": str, "payload": object}
@@ -41,7 +39,7 @@ class Directive(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Directive of this Directive.  # noqa: E501
+        :return: The Directive of this Directive.
         :rtype: Directive
         """
         return util.deserialize_model(dikt, cls)
@@ -50,7 +48,7 @@ class Directive(Model):
     def name(self) -> str:
         """Gets the name of this Directive.
 
-        Directive Name  # noqa: E501
+        Directive Name
 
         :return: The name of this Directive.
         :rtype: str
@@ -61,7 +59,7 @@ class Directive(Model):
     def name(self, name: str):
         """Sets the name of this Directive.
 
-        Directive Name  # noqa: E501
+        Directive Name
 
         :param name: The name of this Directive.
         :type name: str
@@ -73,7 +71,7 @@ class Directive(Model):
     def type(self) -> str:
         """Gets the type of this Directive.
 
-        Directive Type  # noqa: E501
+        Directive Type
 
         :return: The type of this Directive.
         :rtype: str
@@ -84,12 +82,12 @@ class Directive(Model):
     def type(self, type: str):
         """Sets the type of this Directive.
 
-        Directive Type  # noqa: E501
+        Directive Type
 
         :param type: The type of this Directive.
         :type type: str
         """
-        allowed_values = ["view", "action"]  # noqa: E501
+        allowed_values = ["view", "action"]
         if type not in allowed_values:
             raise ValueError(
                 "Invalid value for `type` ({0}), must be one of {1}".format(
@@ -103,7 +101,7 @@ class Directive(Model):
     def payload(self) -> object:
         """Gets the payload of this Directive.
 
-        JSON payload  # noqa: E501
+        JSON payload
 
         :return: The payload of this Directive.
         :rtype: object
@@ -114,7 +112,7 @@ class Directive(Model):
     def payload(self, payload: object):
         """Sets the payload of this Directive.
 
-        JSON payload  # noqa: E501
+        JSON payload
 
         :param payload: The payload of this Directive.
         :type payload: object
