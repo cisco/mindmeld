@@ -599,9 +599,6 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``custom_eval`` (func, optional): Custom validation function (should return bool:
     validated or not). For this function, the developer is provided with the current turn's ``request`` object.
 
-.. |br| raw:: html
-
-   <br />
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 
@@ -650,14 +647,14 @@ Transfer money in a banking app:
 
     @app.auto_fill(intent='transfermoney', form=form_transfermoney)
     def transfermoney_handler(request, responder):
-        for entity in request.entities:
-          if entity['type'] == 'account_en':
-              if entity['role'] == 'account_from':
-                  responder.slots['account_from'] = entity['value'][0]['cname']
-              elif entity['role'] == 'account_to':
-                  responder.slots['account_to'] = entity['value'][0]['cname']
-          else:
-              responder.slots['amount'] = entity['value'][0]['value']
+      for entity in request.entities:
+        if entity['type'] == 'account_en':
+          if entity['role'] == 'account_from':
+            responder.slots['account_from'] = entity['value'][0]['cname']
+          elif entity['role'] == 'account_to':
+            responder.slots['account_to'] = entity['value'][0]['cname']
+        else:
+          responder.slots['amount'] = entity['value'][0]['value']
 
       replies = ["All right. So, you're transferring {amount} from your "
                  "{account_from} to a {account_to}. Is that right?"]

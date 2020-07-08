@@ -69,6 +69,7 @@ def test_load_entity(query_factory):
     assert entity.entity.type == "store_name"
     assert entity.entity.text == "Elm Street"
 
+
 @pytest.mark.parametrize(
     "query",
     [

@@ -117,7 +117,7 @@ Install with virtualenv
 1. Install prerequisites
 """"""""""""""""""""""""
 
-On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mindmeld_init.sh script <https://devcenter.mindmeld.com/scripts/mindmeld_init.sh>`_.
+On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mindmeld_init.sh script <https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_init.sh>`_.
 
 .. note::
 

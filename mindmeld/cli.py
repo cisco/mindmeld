@@ -37,7 +37,7 @@ from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
-from .constants import DEVCENTER_URL, BINARIES_URL, DUCKLING_VERSION
+from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
@@ -457,7 +457,8 @@ def num_parser(start, port):
                 os.remove(exec_path)
 
         if not os.path.exists(exec_path):
-            url_components = [BINARIES_URL, "duckling", DUCKLING_VERSION, os.path.basename(exec_path)]
+            url_components = [BINARIES_URL, "duckling",
+                              DUCKLING_VERSION, os.path.basename(exec_path)]
             url = os.path.join(*url_components)
             logger.info(
                 "Could not find %s binary file, downloading from %s", exec_path, url
