@@ -1,3 +1,4 @@
 -e .[bot]
 -e .[tensorflow]
 -e .[bert]
+-e .[examples]
