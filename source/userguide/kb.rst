@@ -817,6 +817,11 @@ We can perform the same search using the :meth:`query()` API as well.
 
 Leveraging semantic embeddings
 ------------------------------
+
+.. note::
+
+    In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.
+
 The question answerer capabilities described so far rely purely on text-based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the knowledge base even if the search token wasn’t present in the uploaded data.
 
 To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
@@ -868,7 +873,7 @@ Once your config file is specified, you can load the Knowledge Base and the embe
 
 .. code-block:: console
 
-  mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl --app_path .
+  mindmeld load-kb hr_assistant faq_data data/hr_faq_data.json --app-path .
 
 All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache. 
 
@@ -930,7 +935,3 @@ And you can use a combination of embedder and text based search.
 
   answers = qa.get(index=index_name, query_type='embedder_text',
                  question=query, answer=query)
-
-.. note::
-
-    In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.
