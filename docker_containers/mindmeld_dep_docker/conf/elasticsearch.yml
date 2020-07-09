@@ -66,6 +66,9 @@ http.port: 9200
 # The default list of hosts is ["127.0.0.1", "[::1]"]
 #
 #discovery.zen.ping.unicast.hosts: ["host1", "host2"]
+discovery.type: single-node
+#cluster.initial_master_nodes: ["node-1"]
+#discovery.seed_hosts: ["node-1"]
 #
 # Prevent the "split brain" by configuring the majority of nodes (total number of master-eligible nodes / 2 + 1):
 #
