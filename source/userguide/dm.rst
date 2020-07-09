@@ -599,6 +599,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``custom_eval`` (func, optional): Custom validation function (should return bool:
     validated or not). For this function, the developer is provided with the current turn's ``request`` object.
 
+
 .. |br| raw:: html
 
 
