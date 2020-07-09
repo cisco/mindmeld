@@ -485,7 +485,7 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
            'k': 5,
            'scoring': 'accuracy',
            'grid': {
-               'penalty': ['none', 'l2'],
+               'penalty': ['l2'],
                'C': [0.01, 1, 100, 10000]
            },
        },
