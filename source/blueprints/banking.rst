@@ -400,7 +400,7 @@ Start by inspecting the baseline configurations that the different classifiers u
 
 .. code:: python
 
-   ic = nlp.domains['ordering'].intent_classifier
+   ic = nlp.domains['accounts_creditcards'].intent_classifier
    ic.config.model_settings['classifier_type']
 
 .. code-block:: console
