@@ -18,7 +18,16 @@ pip3 install -r requirements.txt
 python3 -m swagger_server
 ```
 
-and open your browser to here:
+Now you can make requests to hlocalhost:8080/v2/action.
+
+## View API with Swagger UI
+To view the API with local version of Swagger UI, you can install the Swagger UI dependency package:
+
+```
+pip install "connexion[swagger-ui]"
+```
+
+and open your browser to here to view:
 
 ```
 http://localhost:8080/v2/ui/
