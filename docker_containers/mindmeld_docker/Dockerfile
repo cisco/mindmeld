@@ -10,7 +10,8 @@
 # Pull base image.
 FROM ubuntu:18.04
 
-ENV ES_PKG_NAME elasticsearch-5.5.1
+ENV ES_PKG_NAME elasticsearch-7.8.0-linux-x86_64
+ENV ES_FOLDER_NAME elasticsearch-7.8.0
 
 # System packages
 RUN apt-get update && \
@@ -42,7 +43,7 @@ RUN \
     wget https://artifacts.elastic.co/downloads/elasticsearch/$ES_PKG_NAME.tar.gz && \
     tar xvzf $ES_PKG_NAME.tar.gz && \
     rm -f $ES_PKG_NAME.tar.gz && \
-    mv /$ES_PKG_NAME /elasticsearch
+    mv /$ES_FOLDER_NAME /elasticsearch
 
 RUN useradd -ms /bin/bash mindmeld
 RUN mkdir /elasticsearch/log
