@@ -44,7 +44,7 @@ class Params(Model):
         """
         self.swagger_types = {
             "target_dialogue_state": str,
-            "dynamic_resoure": str,
+            "dynamic_resource": str,
             "allowed_intents": List[str],
             "time_zone": str,
             "language": str,

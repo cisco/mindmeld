@@ -74,7 +74,7 @@ definitions:
           - "allowed_intents"
           time_zone: "time_zone"
           locale: "locale"
-          dynamic_resoure: "dynamic_resoure"
+          dynamic_resource: "dynamic_resource"
           timestamp: "timestamp"
         intent: "intent"
       responder:
@@ -94,7 +94,7 @@ definitions:
           - "allowed_intents"
           time_zone: "time_zone"
           locale: "locale"
-          dynamic_resoure: "dynamic_resoure"
+          dynamic_resource: "dynamic_resource"
           timestamp: "timestamp"
         frame: "{}"
       action: "action"
@@ -152,7 +152,7 @@ definitions:
         - "allowed_intents"
         time_zone: "time_zone"
         locale: "locale"
-        dynamic_resoure: "dynamic_resoure"
+        dynamic_resource: "dynamic_resource"
         timestamp: "timestamp"
       intent: "intent"
   Transcript:
@@ -239,7 +239,7 @@ definitions:
       target_dialogue_state:
         type: "string"
         description: "The name of next turn's dialogue state (if set)"
-      dynamic_resoure:
+      dynamic_resource:
         type: "string"
         description: "The additional values for gazetteer"
       allowed_intents:
@@ -268,7 +268,7 @@ definitions:
       - "allowed_intents"
       time_zone: "time_zone"
       locale: "locale"
-      dynamic_resoure: "dynamic_resoure"
+      dynamic_resource: "dynamic_resource"
       timestamp: "timestamp"
   Responder:
     type: "object"
@@ -309,7 +309,7 @@ definitions:
         - "allowed_intents"
         time_zone: "time_zone"
         locale: "locale"
-        dynamic_resoure: "dynamic_resoure"
+        dynamic_resource: "dynamic_resource"
         timestamp: "timestamp"
       frame: "{}"
 externalDocs:

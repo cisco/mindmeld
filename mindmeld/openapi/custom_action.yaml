@@ -12,7 +12,7 @@ paths:
     post:
       summary: "Invoke an action "
       description: ""
-      operationId: "invokeAction"
+      operationId: "invoke_action"
       consumes:
       - "application/json"
       produces:
@@ -141,8 +141,8 @@ definitions:
       target_dialogue_state:
         type: string
         description: "The name of next turn's dialogue state (if set)"
-      dynamic_resoure:
-        type: string
+      dynamic_resource:
+        type: object
         description: "The additional values for gazetteer"
       allowed_intents:
         type: array
