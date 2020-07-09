@@ -50,11 +50,14 @@ You can specify custom action configuration in ``config.py`` with the ``url`` fi
 
 .. code-block:: python
 
-    CUSTOM_ACTION_CONFIG = {"url": "http://0.0.0.0:8080/"}
+    CUSTOM_ACTION_CONFIG = {"url": "http://0.0.0.0:8080/v2/action"}
 
 Currently MindMeld also supports SSL encryption by specifying the following fields in
 the ``CUSTOM_ACTION_CONFIG``: ``cert``, ``public_key`` and ``private_key``. Each field
 is the path to the local location of the certificate, public and private key.
+
+In your Dialogue Manager, you can access the application's custom action config by referencing the application's
+property ``app.custom_action_config``.
 
 
 A Simple Custom Action Server
@@ -62,7 +65,7 @@ A Simple Custom Action Server
 
 To understand the behavior of Custom Actions, let's take a look at example of a Custom
 Action Server. Suppose that we have implemented the following server and it is running
-locally at address http://0.0.0.0:8080/.
+locally at address http://0.0.0.0:8080/v2/action.
 
 .. code-block:: python
 
@@ -125,7 +128,7 @@ specify the server by passing the custom action config directly into the applica
 
 .. code-block:: python
 
-    config = {"url": "http://0.0.0.0:8081/"}
+    config = {"url": "http://0.0.0.0:8080/v2/action"}
     app.custom_action(intent='deny', action='action_restart', config=config)
 
 If you want to execute a sequence of custom actions, you can pass the list of actions into
@@ -151,14 +154,22 @@ Here, in the final response, we will see only one reply: "Invoking action_restar
 Calling Individual Custom Actions inside a MindMeld application
 ---------------------------------------------------------------
 
-You can invoke individual custom actions by calling the ``CustomAction`` object directly.
+You can invoke individual custom actions by calling the ``CustomAction`` object directly. You can access the current
+application's custom action configuration from the application's property ``app.custom_action_config``.
 
 .. code-block:: python
 
     @app.handle(intent='restart')
     def action_check_out(request, responder):
-        from mindmeld.component import CustomAction
-        CustomAction(name='action_restart', config=action_config).invoke(request, responder)
+        from mindmeld.components import CustomAction
+        CustomAction(name='action_restart', config=app.custom_action_config).invoke(request, responder)
+
+Alternatively, you can define a new application's config and pass it directly into the ``CustomAction``.
+
+.. code-block:: python
+
+    config = {"url": "http://0.0.0.0:8080/v2/action"}
+    CustomAction(name='action_restart', config=config).invoke(request, responder)
 
 The advantage of invoking a custom action manually is that you can further refine and process
 the results from the custom actions. Here the resulting fields are merged into the ``responder``
@@ -171,7 +182,7 @@ object to set its behavior for handling the fields of the returned ``Responder``
 
     @app.handle(intent='restart')
     def action_check_out(request, responder):
-        CustomAction(name='action_restart', config=action_config, merge=True).invoke(request, responder)
+        CustomAction(name='action_restart', config=config, merge=True).invoke(request, responder)
 
 You can also invoke the CustomAction asynchronously as well:
 
@@ -179,7 +190,7 @@ You can also invoke the CustomAction asynchronously as well:
 
     @app.handle(intent='restart')
     async def action_check_out(request, responder):
-        await CustomAction(name='action_restart', config=action_config).invoke(request, responder, async_mode=True)
+        await CustomAction(name='action_restart', config=config).invoke(request, responder, async_mode=True)
 
 We can pipe multiple custom actions easily in a sequence and mix this sequence with any operation
 by the ``responder``.
@@ -189,8 +200,8 @@ by the ``responder``.
     @app.handle(intent='ask_help')
     def handle_ask_help(request, responder):
         responder.reply('I can help you')
-        CustomAction(name='action_help', config=action_config).invoke(request, responder)
-        CustomAction(name='action_restart', config=action_config).invoke(request, responder)
+        CustomAction(name='action_help', config=config).invoke(request, responder)
+        CustomAction(name='action_restart', config=config).invoke(request, responder)
 
 In the example above, first we choose to add a reply first, and then invoke two custom actions in sequence.
 
@@ -203,17 +214,17 @@ Instead of calling individual ``CustomAction`` in sequence, you can also use the
 
     @app.handle(intent='ask_help')
     def handle_ask_help(request, responder):
-        from mindmeld.component import CustomActionSequence
+        from mindmeld.components import CustomActionSequence
 
         responder.reply('I can help you')
-        CustomActionSequence(actions=['action_help', 'action_restart'], config=action_config).invoke(request, responder)
+        CustomActionSequence(actions=['action_help', 'action_restart'], config=config).invoke(request, responder)
 
-For your convenience, we also provide helper functions (``invoke_custom_action``, ``invoke_action_async``) which wrap
+For your convenience, we also provide helper functions (``invoke_custom_action``, ``invoke_custom_action_async``) which wrap
 around the ``CustomAction`` class.
 
 .. code-block:: python
 
     @app.handle(intent='restart')
     def action_check_out(request, responder):
-        from mindmeld.component import invoke_custom_action
+        from mindmeld.components import invoke_custom_action
         invoke_custom_action('action_restart', config, request, responder)
