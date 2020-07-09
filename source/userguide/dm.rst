@@ -610,56 +610,56 @@ Once the slot filling is complete, the filled in entities can be access through 
 Example use-case
 ^^^^^^^^^^^^^^^^
 
-Transfer money in a banking app:
+For the use case of transferring money in a banking assistant application, the fields of the account to transfer from, the account to transfer to, and the amount to transfer are all needed. Instead of writing all the logic to capture various combinations of these fields, according to what is missing, you can simply provide the form below. The application will then prompt the user for each missing field until all the required fields are populated and the action can be completed.
 
 .. code:: python
 
     from mindmeld.core import FormEntity
 
     def test_for_money(request):
-      return True if '$' in request.text else False
+        return True if '$' in request.text else False
 
     form_transfermoney = {
-      'entities':[
-          FormEntity(
-              entity='account_en',
-              role='account_from',
-              responses=['Sure. Transfer from which account?']
-              ),
-          FormEntity(
-              entity='account_en',
-              role='account_to',
-              responses=['To which account?']
-              hints=['checking', 'checkings', ....] # can be only from this list
-              ),
-          FormEntity(
-              entity='sys_amount-of-money',
-              responses=['And, how much do you want to transfer?'],
-              custom_eval=test_for_money # validates the user-response for this entity 
-              ),                         # using this custom developer-defined function
-                                         # checking for '$' sign.
-          ],
-      'max_retries': 1,
-      'exit_keys': ['cancel', 'quit', 'exit'],
-      'exit_msg': "Sorry I cannot help you. Please try again.""
-      }
+        'entities':[
+            FormEntity(
+                entity='account_en',
+                role='account_from',
+                responses=['Sure. Transfer from which account?']
+                ),
+            FormEntity(
+                entity='account_en',
+                role='account_to',
+                responses=['To which account?']
+                hints=['checking', 'checkings'] # can be only from this list
+                ),
+            FormEntity(
+                entity='sys_amount-of-money',
+                responses=['And, how much do you want to transfer?'],
+                custom_eval=test_for_money # validates the user-response for this entity 
+                ),                         # using this custom developer-defined function
+                                           # checking for '$' sign.
+            ],
+        'max_retries': 1,
+        'exit_keys': ['cancel', 'quit', 'exit'],
+        'exit_msg': "Sorry I cannot help you. Please try again."
+        }
 
 .. code:: python
 
     @app.auto_fill(intent='transfermoney', form=form_transfermoney)
     def transfermoney_handler(request, responder):
         for entity in request.entities:
-          if entity['type'] == 'account_en':
-              if entity['role'] == 'account_from':
-                  responder.slots['account_from'] = entity['value'][0]['cname']
-              elif entity['role'] == 'account_to':
-                  responder.slots['account_to'] = entity['value'][0]['cname']
-          else:
-              responder.slots['amount'] = entity['value'][0]['value']
+            if entity['type'] == 'account_en':
+                if entity['role'] == 'account_from':
+                    responder.slots['account_from'] = entity['value'][0]['cname']
+                elif entity['role'] == 'account_to':
+                    responder.slots['account_to'] = entity['value'][0]['cname']
+            else:
+                responder.slots['amount'] = entity['value'][0]['value']
 
-      replies = ["All right. So, you're transferring {amount} from your "
-                 "{account_from} to a {account_to}. Is that right?"]
-      responder.reply(replies)
+        replies = ["All right. So, you're transferring {amount} from your "
+                   "{account_from} to a {account_to}. Is that right?"]
+        responder.reply(replies)
 
 .. _dialogue_middleware:
 

@@ -30,13 +30,13 @@ from dateutil import tz
 from . import path
 from .components import QuestionAnswerer
 from .components._config import get_app_namespace
-from .constants import DEVCENTER_URL
+from .constants import BLUEPRINTS_URL
 from .exceptions import KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE_NAME = "mindmeld.cfg"
-BLUEPRINT_URL = "{mindmeld_url}/bp/{blueprint}/{filename}"
+BLUEPRINT_URL = "{mindmeld_url}/{blueprint}/{filename}"
 
 BLUEPRINT_APP_ARCHIVE = "app.tar.gz"
 BLUEPRINT_KB_ARCHIVE = "kb.tar.gz"
@@ -213,7 +213,7 @@ class Blueprint:
 
         local_archive = os.path.join(cache_dir, filename)
         remote_url = BLUEPRINT_URL.format(
-            mindmeld_url=DEVCENTER_URL, blueprint=name, filename=filename
+            mindmeld_url=BLUEPRINTS_URL, blueprint=name, filename=filename
         )
 
         res = requests.head(remote_url)
