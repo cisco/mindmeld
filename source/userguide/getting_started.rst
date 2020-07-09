@@ -121,7 +121,7 @@ On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set
 
 .. note::
 
-   The script installs the following components after a confirmation prompt: ``docker``, ``python3.6``, ``python-pip``, ``virtualenv`` and Elasticsearch 6.7.
+   The script installs the following components after a confirmation prompt: ``docker``, ``python3.6``, ``python-pip``, ``virtualenv`` and Elasticsearch 7.8.
 
 If you are using a Ubuntu 16/18 machine, when you're ready to go, open a terminal (shell) and run this command:
 
@@ -131,7 +131,7 @@ If you are using a Ubuntu 16/18 machine, when you're ready to go, open a termina
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
-For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 6.7 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:
+For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 7.8 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:
 
 macOS:
 
@@ -146,14 +146,14 @@ macOS:
 +---------------+--------------------------------------------------------------------------------------------------------+
 | virtualenv    |  ``sudo -H pip install --upgrade virtualenv``                                                          |
 +---------------+--------------------------------------------------------------------------------------------------------+
-| Elasticsearch |  See instructions below to download Elasticsearch 6.7                                                  |
+| Elasticsearch |  See instructions below to download Elasticsearch 7.8                                                  |
 +---------------+--------------------------------------------------------------------------------------------------------+
 
 .. code-block:: shell
 
-   curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.7.0.tar.gz -o elasticsearch-6.7.0.tar.gz
-   tar -zxvf elasticsearch-6.7.0.tar.gz
-   ./elasticsearch-6.7.0/bin/elasticsearch
+   curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-darwin-x86_64.tar.gz -o elasticsearch-7.8.0.tar.gz
+   tar -zxvf elasticsearch-7.8.0.tar.gz
+   ./elasticsearch-7.8.0/bin/elasticsearch
 
 
 Ubuntu:
@@ -167,7 +167,7 @@ Ubuntu:
 +---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | virtualenv    |  ``sudo apt install virtualenv``                                                                                                                                                                             |
 +---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Elasticsearch |  ``sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:6.7.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.7.0``|
+| Elasticsearch |  ``sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0``|
 +---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
