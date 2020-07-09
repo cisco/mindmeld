@@ -424,7 +424,8 @@ class DialogueManager:
         res = handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if res and "dialogue_state" in res:
+        if res and isinstance(res, dict) and "dialogue_state" in res:
+            # TODO: check if this flow is executed, currently not covered in tests
             dialogue_state = ".".join([dialogue_state, res["dialogue_state"]])
         responder.dialogue_state = dialogue_state
         return responder
@@ -482,7 +483,12 @@ class DialogueManager:
         result_handler = await handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if result_handler and "dialogue_state" in result_handler:
+        if (
+            result_handler
+            and isinstance(result_handler, dict)
+            and "dialogue_state" in result_handler
+        ):
+            # TODO: check if this flow is executed, currently not covered in tests
             dialogue_state = "{}.{}".format(
                 dialogue_state, result_handler["dialogue_state"]
             )
@@ -1211,6 +1217,8 @@ class Conversation:
         params (FrozenParams): The params returned by the most recent turn.
         force_sync (bool): Force synchronous return for `say()` and `process()` \
             even when app is in async mode.
+        verbose (bool, optional): If True, returns class probabilities along with class \
+                prediction.
     """
 
     _logger = mod_logger.getChild("Conversation")
@@ -1223,6 +1231,7 @@ class Conversation:
         context=None,
         default_params=None,
         force_sync=False,
+        verbose=False
     ):
         """
         Args:
@@ -1237,6 +1246,8 @@ class Conversation:
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
+            verbose (bool, optional): If True, returns class probabilities along with class \
+                prediction.
         """
         app = app or path.get_app(app_path)
         app.lazy_init(nlp)
@@ -1249,6 +1260,7 @@ class Conversation:
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
+        self.verbose = verbose	
 
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
@@ -1339,6 +1351,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
+            verbose=self.verbose
         )
         self.history = response.history
         self.frame = response.frame
@@ -1380,6 +1393,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
+            verbose=self.verbose
         )
         self.history = response.history
         self.frame = response.frame

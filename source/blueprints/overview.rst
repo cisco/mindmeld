@@ -16,6 +16,10 @@ MindMeld provides four blueprints:
 | | Blueprint                                     | |  Use Case                             | | Blueprint Name             |
 | |                                               | |                                       | | in Python                  |
 +=================================================+=========================================+==============================+
+| |  :doc:`Banking Assistant <banking>`           | | Users interact with a banking agent   | | ``banking_assistant``      |
+| |                                               | | to fulfill actions like transferring  | |                            |
+| |                                               | | money and paying bills                | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
 | |  :doc:`Food Ordering <food_ordering>`         | | Users order food for delivery         | | ``food_ordering``          |
 | |                                               | | from nearby restaurants               | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+

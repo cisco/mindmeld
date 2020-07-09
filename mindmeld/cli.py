@@ -111,8 +111,18 @@ def run_server(ctx, port, no_debug, reloader):
 @_app_cli.command("converse", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option("--context", help="JSON object to be used as the context")
-def converse(ctx, context):
-    """Starts a conversation with the app."""
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    help="Print the full metrics instead of just accuracy.",
+)
+def converse(ctx, context, verbose):
+    """
+    Starts a conversation with the app.
+    When the verbose flag is set to true, the confidences are included 
+    in the request objects passed to the intents 
+    """
 
     try:
         app = ctx.obj.get("app")
@@ -132,7 +142,7 @@ def converse(ctx, context):
             loop.run_until_complete(_converse_async(app, context))
             return
 
-        convo = Conversation(app=app, context=context)
+        convo = Conversation(app=app, context=context, verbose=verbose)
 
         while True:
             message = click.prompt("You")
@@ -401,15 +411,23 @@ def shared_cli():
 
 @shared_cli.command("load-kb", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option("-n", "--es-host", required=False)
+@click.option("-n", "--es-host", required=False, help="The ElasticSearch hostname.")
 @click.argument("app_namespace", required=True)
 @click.argument("index_name", required=True)
 @click.argument("data_file", required=True)
-def load_index(ctx, es_host, app_namespace, index_name, data_file):
+@click.option(
+    "--app-path",
+    required=False,
+    default=None,
+    help="Needed to access app config to generating embeddings.",
+)
+def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
     """Loads data into a question answerer index."""
 
     try:
-        QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
+        QuestionAnswerer.load_kb(
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
+        )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)

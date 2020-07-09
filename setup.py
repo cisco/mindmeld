@@ -8,11 +8,12 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    "aiohttp>=3.6.2",
     "attrs>=18.2",  # attrs has a stable API and does not use semver
     "Click~=6.0",
     "click-log==0.1.8",
     "distro~=1.3",
-    "elasticsearch5~=5.5",
+    "elasticsearch>=5.0",
     "Flask~=1.0",
     "Flask-Cors~=3.0",
     "future~=0.16.0",
@@ -48,7 +49,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.2.11",
+    version="4.3.1rc1",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -82,6 +83,11 @@ setup(
         "tensorflow": [
             'tensorflow~=1.2; python_version < "3.7"',
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
+        ],
+        "bert": [
+            'transformers~=2.11.0; python_version>="3.6"',
+            'sentence-transformers~=0.2.6; python_version>="3.6"',
+            "elasticsearch>=7.0",
         ],
     },
 )

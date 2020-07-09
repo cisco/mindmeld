@@ -153,7 +153,6 @@ macOS:
 
    curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.7.0.tar.gz -o elasticsearch-6.7.0.tar.gz
    tar -zxvf elasticsearch-6.7.0.tar.gz
-   cd elasticsearch-6.7.0/bin
    ./elasticsearch-6.7.0/bin/elasticsearch
 
 

@@ -47,6 +47,7 @@ BLUEPRINTS = {
     "template": {"kb": False},
     "video_discovery": {},
     "hr_assistant": {},
+    "banking_assistant": {}
 }
 
 
