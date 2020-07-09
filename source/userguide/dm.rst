@@ -601,7 +601,6 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
 .. |br| raw:: html
 
-   <br />
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 
@@ -612,7 +611,7 @@ Once the slot filling is complete, the filled in entities can be access through 
 Example use-case
 ^^^^^^^^^^^^^^^^
 
-Transfer money in a banking app:
+For the use case of transferring money in a banking assistant application, the fields of the account to transfer from, the account to transfer to, and the amount to transfer are all needed. Instead of writing all the logic to capture various combinations of these fields, according to what is missing, you can simply provide the form below. The application will then prompt the user for each missing field until all the required fields are populated and the action can be completed.
 
 .. code:: python
 
