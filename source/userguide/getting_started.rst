@@ -183,7 +183,7 @@ Native onboarding:
 
 .. code-block:: shell
 
-   curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-linux-x86_64.tar.gz -o elasticsearch-7.8.0.tar.gz
+   wget -O elasticsearch-7.8.0.tar.gz  https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-linux-x86_64.tar.gz
    tar -zxvf elasticsearch-7.8.0.tar.gz
    ./elasticsearch-7.8.0/bin/elasticsearch
 
