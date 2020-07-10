@@ -107,12 +107,15 @@ def test_load_markup_error(query_factory, query):
          "14:00:00.000", "hour"),
         ("join the {11:39|sys_time} meeting",
          "11:39", "sys_time", 9, "23:39:00.000", "minute"),
+        ("join the {1139|sys_time} meeting",
+         "1139", "sys_time", 9, "23:39:00.000", "minute"),
     ],
 )
 def test_load_system(query_factory, query, entity_value,
                      entity_type, entity_start_span, value, unit_or_grain):
     """Tests loading a query with a system entity"""
-    processed_query = markup.load_query(query, query_factory)
+    # We added a pm timestamp to bias duckling time resolution to resolve to pm times
+    processed_query = markup.load_query(query, query_factory, query_options={'timestamp': 1592002800})
 
     assert processed_query
     assert len(processed_query.entities) == 1
