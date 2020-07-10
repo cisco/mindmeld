@@ -96,21 +96,57 @@ def test_load_markup_error(query_factory, query):
 @pytest.mark.parametrize(
     "query, entity_value, entity_type, entity_start_span, value, unit_or_grain",
     [
-        ("show me houses under {600,000 dollars|sys_amount-of-money}",
-         "600,000 dollars", "sys_amount-of-money", 21, 600000, "$"),
-        ("pay me {400|sys_amount-of-money}",
-         "400", "sys_amount-of-money", 7, 400, "unknown"),
-        ("join the {2 p.m.|sys_time} meeting",
-         "2 p.m.", "sys_time", 9, "14:00:00.000", "hour"),
-        ("Let's meet at {2 pm on Sunday, August 19 2018|sys_time}",
-         "2 pm on Sunday, August 19 2018", "sys_time", 14,
-         "14:00:00.000", "hour"),
-        ("join the {11:39|sys_time} meeting",
-         "11:39", "sys_time", 9, "23:39:00.000", "minute"),
+        (
+            "show me houses under {600,000 dollars|sys_amount-of-money}",
+            "600,000 dollars",
+            "sys_amount-of-money",
+            21,
+            600000,
+            "$",
+        ),
+        (
+            "pay me {400|sys_amount-of-money}",
+            "400",
+            "sys_amount-of-money",
+            7,
+            400,
+            "unknown",
+        ),
+        (
+            "join the {2 p.m.|sys_time} meeting",
+            "2 p.m.",
+            "sys_time",
+            9,
+            "14:00:00.000",
+            "hour",
+        ),
+        (
+            "Let's meet at {2 pm on Sunday, August 19 2018|sys_time}",
+            "2 pm on Sunday, August 19 2018",
+            "sys_time",
+            14,
+            "14:00:00.000",
+            "hour",
+        ),
+        (
+            "join the {11:39|sys_time} meeting",
+            "11:39",
+            "sys_time",
+            9,
+            "23:39:00.000",
+            "minute",
+        ),
     ],
 )
-def test_load_system(query_factory, query, entity_value,
-                     entity_type, entity_start_span, value, unit_or_grain):
+def test_load_system(
+    query_factory,
+    query,
+    entity_value,
+    entity_type,
+    entity_start_span,
+    value,
+    unit_or_grain,
+):
     """Tests loading a query with a system entity"""
     processed_query = markup.load_query(query, query_factory)
 
@@ -123,11 +159,11 @@ def test_load_system(query_factory, query, entity_value,
     assert entity.span.start == entity_start_span
     assert not isinstance(entity.entity.value, str)
 
-    if entity_type == 'sys_amount-of-money':
+    if entity_type == "sys_amount-of-money":
         assert entity.entity.value == {"unit": unit_or_grain, "value": value}
     else:
-        assert entity.entity.value['grain'] == unit_or_grain
-        assert value in entity.entity.value['value']
+        assert entity.entity.value["grain"] == unit_or_grain
+        assert value in entity.entity.value["value"]
 
 
 @pytest.mark.dump
