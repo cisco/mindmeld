@@ -1,8 +1,7 @@
 Working with Custom Actions
 ===========================
 
-MindMeld 4.3 introduces Custom Actions which allow MindMeld developers to further separate their business
-logic from the conversational application.
+MindMeld 4.3 provides the ability for external applications to integrate custom dialogue management logic with MindMeld applications.
 
 
 Why Custom Actions?
