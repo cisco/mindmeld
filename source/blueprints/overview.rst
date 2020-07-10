@@ -20,7 +20,7 @@ MindMeld provides six blueprints:
 | |                                               | | to fulfill actions like transferring  | |                            |
 | |                                               | | money and paying bills                | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`HR Assistant <hr_assistant>`           | | Users interact with Human Resources   | | ``hr_assistant``           |
+| |  :doc:`HR Assistant <hr_assistant>`           | | Users interact with a Human Resources | | ``hr_assistant``           |
 | |                                               | | representative                        | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
 | |  :doc:`Food Ordering <food_ordering>`         | | Users order food for delivery         | | ``food_ordering``          |
@@ -70,7 +70,7 @@ Depending on which blueprint you choose to run, this Quick Start should take bet
 
 Open a Python shell and type the following commands to download and set up the blueprint application of your choice.
 
-  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``banking_assistant``, ``hr_assistatnt``, ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
+  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``banking_assistant``, ``hr_assistant``, ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
 
 .. code:: python
 
