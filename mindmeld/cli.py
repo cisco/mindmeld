@@ -120,8 +120,8 @@ def run_server(ctx, port, no_debug, reloader):
 def converse(ctx, context, verbose):
     """
     Starts a conversation with the app.
-    When the verbose flag is set to true, the confidences are included 
-    in the request objects passed to the intents 
+    When the verbose flag is set to true, the confidences are included
+    in the request objects passed to the intents
     """
 
     try:
@@ -475,8 +475,12 @@ def num_parser(start, port):
                 os.remove(exec_path)
 
         if not os.path.exists(exec_path):
-            url_components = [BINARIES_URL, "duckling",
-                              DUCKLING_VERSION, os.path.basename(exec_path)]
+            url_components = [
+                BINARIES_URL,
+                "duckling",
+                DUCKLING_VERSION,
+                os.path.basename(exec_path),
+            ]
             url = os.path.join(*url_components)
             logger.info(
                 "Could not find %s binary file, downloading from %s", exec_path, url

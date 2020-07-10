@@ -822,6 +822,10 @@ Leveraging semantic embeddings
 
     In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.
 
+.. note::
+
+    To use the BERT embedder, make sure you've installed the extra requirement with the command ``pip install mindmeld[bert]``.
+
 The question answerer capabilities described so far rely purely on text-based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the knowledge base even if the search token wasn’t present in the uploaded data.
 
 To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
@@ -881,7 +885,7 @@ All of the vectors generated at load time will be cached for faster retrieval at
 
   .generated/indexes/<model_name>_cache.pkl
 
-If our built-in embedders don't fit your use case and you would like to use your own embedder, you can use the provided ``Embedder`` abstract class. You need to implement two methods: ``load`` and ``encode``. The load method will load and return your embedder model. The encode method will take a list of text strings and return a list of numpy vectors. You can register your class for use with MindMeld via the ``register_embedder`` method as shown below.
+If our built-in embedders don't fit your use case and you would like to use your own embedder, you can use the provided ``Embedder`` abstract class. You need to implement two methods: ``load`` and ``encode``. The load method will load and return your embedder model. The encode method will take a list of text strings and return a list of numpy vectors. You can register your class for use with MindMeld via the ``register_embedder`` method as shown below. This code can be added to any new file, say ``custom_embedders.py``. You will then need to import it your application's ``__init__.py`` file.
 
 .. code-block:: python
 
@@ -894,6 +898,11 @@ If our built-in embedders don't fit your use case and you would like to use your
           # encodes each query in the list  
 
   register_embedder('my_embedder_name', MyEmbedder) 
+
+
+.. code-block:: python
+
+   import hr_assistant.custom_embedders
 
 
 In many cases, you may like to provide some parameters to your ``load`` method to initialize your model in a certain way. The ``model_settings`` dictionary in the config will be passed to the load method as ``kwargs``, so any needed parameters can be specified there.

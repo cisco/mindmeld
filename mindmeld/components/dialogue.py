@@ -1231,7 +1231,7 @@ class Conversation:
         context=None,
         default_params=None,
         force_sync=False,
-        verbose=False
+        verbose=False,
     ):
         """
         Args:
@@ -1260,7 +1260,7 @@ class Conversation:
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
-        self.verbose = verbose	
+        self.verbose = verbose
 
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
@@ -1351,7 +1351,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
-            verbose=self.verbose
+            verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame
@@ -1393,7 +1393,7 @@ class Conversation:
             context=self.context,
             frame=self.frame,
             history=self.history,
-            verbose=self.verbose
+            verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame

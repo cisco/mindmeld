@@ -1036,7 +1036,11 @@ class Search:
                 not self.field_info.is_text_field()
                 and not self.field_info.is_vector_field()
             ):
-                raise ValueError("Query can only be defined on text and vector fields.")
+                raise ValueError(
+                    "Query can only be defined on text and vector fields. If it is,"
+                    " try running load_kb with clean=True and reinitializing your"
+                    " QuestionAnswerer object."
+                )
 
     class FilterClause(Clause):
         """This class models a knowledge base filter clause."""

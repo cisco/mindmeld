@@ -109,6 +109,12 @@ If you are interested in using the LSTM entity recognizer, you will need to inst
 
   pip install mindmeld[tensorflow]
 
+If you are interested in leveraging pretrained BERT embedders for question answering, you will need to install the following dependency:
+
+.. code-block:: shell
+
+  pip install mindmeld[bert]
+
 .. _getting_started_virtualenv_setup:
 
 Install with virtualenv
