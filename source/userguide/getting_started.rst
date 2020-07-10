@@ -146,8 +146,10 @@ macOS:
 +---------------+--------------------------------------------------------------------------------------------------------+
 | virtualenv    |  ``sudo -H pip install --upgrade virtualenv``                                                          |
 +---------------+--------------------------------------------------------------------------------------------------------+
-| Elasticsearch |  See instructions below to download Elasticsearch 7.8                                                  |
+| Elasticsearch |  See instructions below to download and run Elasticsearch 7.8 natively or using docker                 |
 +---------------+--------------------------------------------------------------------------------------------------------+
+
+Native onboarding:
 
 .. code-block:: shell
 
@@ -156,25 +158,42 @@ macOS:
    ./elasticsearch-7.8.0/bin/elasticsearch
 
 
+Docker onboarding:
+
+.. code-block:: shell
+
+  sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+
+
 Ubuntu:
 
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|    Component  |    Command                                                                                                                                                                                                   |
-+===============+==============================================================================================================================================================================================================+
-| python3       |  ``sudo apt-get install python3.6``                                                                                                                                                                          |
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| pip           |  ``sudo apt install python-pip``                                                                                                                                                                             |
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| virtualenv    |  ``sudo apt install virtualenv``                                                                                                                                                                             |
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Elasticsearch |  ``sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0``|
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++---------------+-------------------------------------------------------------------------------+
+|    Component  |    Command                                                                    |
++===============+===============================================================================+
+| python3       |  ``sudo apt-get install python3.6``                                           |
++---------------+-------------------------------------------------------------------------------+
+| pip           |  ``sudo apt install python-pip``                                              |
++---------------+-------------------------------------------------------------------------------+
+| virtualenv    |  ``sudo apt install virtualenv``                                              |
++---------------+-------------------------------------------------------------------------------+
+| Elasticsearch |  See instructions below to download Elasticsearch 7.8 natively or using docker|
++---------------+-------------------------------------------------------------------------------+
+
+Native onboarding:
+
+.. code-block:: shell
+
+   curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-linux-x86_64.tar.gz -o elasticsearch-7.8.0.tar.gz
+   tar -zxvf elasticsearch-7.8.0.tar.gz
+   ./elasticsearch-7.8.0/bin/elasticsearch
 
 
-.. note::
+Docker onboarding:
 
-  We use docker for Elasticsearch in Ubuntu since provisioning it for the Ubuntu OS is convoluted. See here for more details if you want to set up
-  Elasticsearch from scratch on `Linux <https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elastic-stack-on-ubuntu-18-04>`_.:
+.. code-block:: shell
+
+  sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+
 
 2. Set up a virtual environment
 """""""""""""""""""""""""""""""
