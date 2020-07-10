@@ -265,10 +265,9 @@ numerical parser using Docker as shown below.
    docker pull mindmeldworkbench/duckling:master && docker run -p 0.0.0.0:7151:7151 mindmeldworkbench/duckling:master -ti -d
 
 
-.. warning::
+.. note::
 
-   The numerical parser is a critical component that MindMeld relies on. **Do not skip this step**
-   .
+   The numerical parser is an optional component of MindMeld. To turn off the numerical parser, in ``config.py``, set ``NLP_CONFIG = {"system_entity_recognizer": {}}``.
 
 
 .. _getting_started_begin_new_project:
