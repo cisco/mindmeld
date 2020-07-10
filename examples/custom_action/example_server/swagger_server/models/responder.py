@@ -1,9 +1,8 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
 
-from typing import List, Dict
+from typing import List
 
 from .base_model_ import Model
 from .directive import Directive
@@ -48,7 +47,6 @@ class Responder(Model):
             "params": "params",
             "slots": "slots",
         }
-
         self._directives = directives
         self._frame = frame
         self._params = params
@@ -115,7 +113,6 @@ class Responder(Model):
     def params(self) -> Params:
         """Gets the params of this Responder.
 
-        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager
 
         :return: The params of this Responder.
         :rtype: Params
@@ -126,7 +123,6 @@ class Responder(Model):
     def params(self, params: Params):
         """Sets the params of this Responder.
 
-        The params object of the responder, which contains parameters that influence the operations of the Dialogue Manager
 
         :param params: The params of this Responder.
         :type params: Params

@@ -1,9 +1,6 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
-
-from typing import List, Dict
 
 from .base_model_ import Model
 from .. import util
@@ -28,7 +25,6 @@ class Directive(Model):
         self.swagger_types = {"name": str, "type": str, "payload": object}
 
         self.attribute_map = {"name": "name", "type": "type", "payload": "payload"}
-
         self._name = name
         self._type = type
         self._payload = payload

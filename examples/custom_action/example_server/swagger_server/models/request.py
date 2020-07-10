@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from typing import List
 
 from .base_model_ import Model
+from .params import Params
 from .entity import Entity
 from .. import util
 
@@ -22,7 +23,7 @@ class Request(Model):
         intent: str = None,
         entities: List[Entity] = None,
         context: object = None,
-        params: object = None,
+        params: Params = None,
     ):
         """Request - a model defined in Swagger
 
@@ -37,7 +38,7 @@ class Request(Model):
         :param context: The context of this Request.
         :type context: object
         :param params: The params of this Request.
-        :type params: object
+        :type params: Params
         """
         self.swagger_types = {
             "text": str,
@@ -45,7 +46,7 @@ class Request(Model):
             "intent": str,
             "entities": List[Entity],
             "context": object,
-            "params": object,
+            "params": Params,
         }
 
         self.attribute_map = {
@@ -56,7 +57,6 @@ class Request(Model):
             "context": "context",
             "params": "params",
         }
-
         self._text = text
         self._domain = domain
         self._intent = intent
@@ -191,24 +191,22 @@ class Request(Model):
         self._context = context
 
     @property
-    def params(self) -> object:
+    def params(self) -> Params:
         """Gets the params of this Request.
 
-        Map of stored data across multiple dialogue turns.
 
         :return: The params of this Request.
-        :rtype: object
+        :rtype: Params
         """
         return self._params
 
     @params.setter
-    def params(self, params: object):
+    def params(self, params: Params):
         """Sets the params of this Request.
 
-        Map of stored data across multiple dialogue turns.
 
         :param params: The params of this Request.
-        :type params: object
+        :type params: Params
         """
 
         self._params = params

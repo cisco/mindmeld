@@ -1,9 +1,6 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
-
-from typing import List, Dict
 
 from .base_model_ import Model
 from .. import util
@@ -61,7 +58,6 @@ class Entity(Model):
             "confidence": "confidence",
             "is_system_entity": "is_system_entity",
         }
-
         self._text = text
         self._type = type
         self._role = role

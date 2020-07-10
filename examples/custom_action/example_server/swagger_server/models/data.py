@@ -1,9 +1,6 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
-
-from typing import List, Dict
 
 from .base_model_ import Model
 from .request import Request
@@ -36,7 +33,6 @@ class Data(Model):
             "responder": "responder",
             "action": "action",
         }
-
         self._request = request
         self._responder = responder
         self._action = action
@@ -56,7 +52,6 @@ class Data(Model):
     def request(self) -> Request:
         """Gets the request of this Data.
 
-        MindMeld request object
 
         :return: The request of this Data.
         :rtype: Request
@@ -67,7 +62,6 @@ class Data(Model):
     def request(self, request: Request):
         """Sets the request of this Data.
 
-        MindMeld request object
 
         :param request: The request of this Data.
         :type request: Request
@@ -79,7 +73,6 @@ class Data(Model):
     def responder(self) -> Responder:
         """Gets the responder of this Data.
 
-        MindMeld responder object
 
         :return: The responder of this Data.
         :rtype: Responder
@@ -90,7 +83,6 @@ class Data(Model):
     def responder(self, responder: Responder):
         """Sets the responder of this Data.
 
-        MindMeld responder object
 
         :param responder: The responder of this Data.
         :type responder: Responder
@@ -103,7 +95,6 @@ class Data(Model):
         """Gets the action of this Data.
 
 
-
         :return: The action of this Data.
         :rtype: str
         """
@@ -112,7 +103,6 @@ class Data(Model):
     @action.setter
     def action(self, action: str):
         """Sets the action of this Data.
-
 
 
         :param action: The action of this Data.

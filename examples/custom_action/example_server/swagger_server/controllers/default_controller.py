@@ -5,31 +5,23 @@ from ..models.responder import Responder
 from ..models.directive import Directive
 
 
-def invoke_action(data):
-    """Invoke an action 
+def invoke_action(body):
+    """Invoke an action
 
-    :param data: MindMeld Data
-    :type data: dict | bytes
+    This API accepts the serialized MindMeld Request and Responder and returns a serialized Responder
+
+    :param body:
+    :type body: dict | bytes
 
     :rtype: Responder
     """
+    directives = []
     if connexion.request.is_json:
-        data = Data.from_dict(connexion.request.get_json())
+        data = Data.from_dict(body)
 
-    action = data.action
-    msg = None
-
-    if action == "action_restart":
-        msg = "Restarting device..."
-    elif action == "action_check_in":
-        msg = "Checking you in now!"
-    elif action == "action_check_out":
-        msg = "You have been checked out!"
-    elif action == "action_call_people":
-        msg = "Perform call action on device."
-    else:
         msg = "Invoking {action} on custom server.".format(action=data.action)
 
-    reply = Directive(name="reply", payload={"text": msg}, type="view")
-    responder = (Responder(directives=[reply], frame={}),)
+        reply = Directive(name="reply", payload={"text": msg}, type="view")
+        directives.append(reply)
+    responder = Responder(directives=directives, frame={})
     return responder

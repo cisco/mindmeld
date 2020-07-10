@@ -1,9 +1,8 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
 
-from typing import List, Dict
+from typing import List
 
 from .base_model_ import Model
 from .. import util
@@ -18,19 +17,19 @@ class Params(Model):
     def __init__(
         self,
         target_dialogue_state: str = None,
-        dynamic_resoure: str = None,
+        dynamic_resource: object = None,
         allowed_intents: List[str] = None,
         time_zone: str = None,
         language: str = None,
         locale: str = None,
-        timestamp: str = None,
+        timestamp: int = None,
     ):
         """Params - a model defined in Swagger
 
         :param target_dialogue_state: The target_dialogue_state of this Params.
         :type target_dialogue_state: str
-        :param dynamic_resoure: The dynamic_resoure of this Params.
-        :type dynamic_resoure: str
+        :param dynamic_resource: The dynamic_resource of this Params.
+        :type dynamic_resource: object
         :param allowed_intents: The allowed_intents of this Params.
         :type allowed_intents: List[str]
         :param time_zone: The time_zone of this Params.
@@ -40,30 +39,29 @@ class Params(Model):
         :param locale: The locale of this Params.
         :type locale: str
         :param timestamp: The timestamp of this Params.
-        :type timestamp: str
+        :type timestamp: int
         """
         self.swagger_types = {
             "target_dialogue_state": str,
-            "dynamic_resource": str,
+            "dynamic_resource": object,
             "allowed_intents": List[str],
             "time_zone": str,
             "language": str,
             "locale": str,
-            "timestamp": str,
+            "timestamp": int,
         }
 
         self.attribute_map = {
             "target_dialogue_state": "target_dialogue_state",
-            "dynamic_resoure": "dynamic_resoure",
+            "dynamic_resource": "dynamic_resource",
             "allowed_intents": "allowed_intents",
             "time_zone": "time_zone",
             "language": "language",
             "locale": "locale",
             "timestamp": "timestamp",
         }
-
         self._target_dialogue_state = target_dialogue_state
-        self._dynamic_resoure = dynamic_resoure
+        self._dynamic_resource = dynamic_resource
         self._allowed_intents = allowed_intents
         self._time_zone = time_zone
         self._language = language
@@ -105,27 +103,27 @@ class Params(Model):
         self._target_dialogue_state = target_dialogue_state
 
     @property
-    def dynamic_resoure(self) -> str:
-        """Gets the dynamic_resoure of this Params.
+    def dynamic_resource(self) -> object:
+        """Gets the dynamic_resource of this Params.
 
         The additional values for gazetteer
 
-        :return: The dynamic_resoure of this Params.
-        :rtype: str
+        :return: The dynamic_resource of this Params.
+        :rtype: object
         """
-        return self._dynamic_resoure
+        return self._dynamic_resource
 
-    @dynamic_resoure.setter
-    def dynamic_resoure(self, dynamic_resoure: str):
-        """Sets the dynamic_resoure of this Params.
+    @dynamic_resource.setter
+    def dynamic_resource(self, dynamic_resource: object):
+        """Sets the dynamic_resource of this Params.
 
         The additional values for gazetteer
 
-        :param dynamic_resoure: The dynamic_resoure of this Params.
-        :type dynamic_resoure: str
+        :param dynamic_resource: The dynamic_resource of this Params.
+        :type dynamic_resource: object
         """
 
-        self._dynamic_resoure = dynamic_resoure
+        self._dynamic_resource = dynamic_resource
 
     @property
     def allowed_intents(self) -> List[str]:
@@ -220,24 +218,24 @@ class Params(Model):
         self._locale = locale
 
     @property
-    def timestamp(self) -> str:
+    def timestamp(self) -> int:
         """Gets the timestamp of this Params.
 
         The timestamp of the request
 
         :return: The timestamp of this Params.
-        :rtype: str
+        :rtype: int
         """
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, timestamp: str):
+    def timestamp(self, timestamp: int):
         """Sets the timestamp of this Params.
 
         The timestamp of the request
 
         :param timestamp: The timestamp of this Params.
-        :type timestamp: str
+        :type timestamp: int
         """
 
         self._timestamp = timestamp
