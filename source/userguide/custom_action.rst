@@ -2,8 +2,7 @@ Working with Custom Actions
 ===========================
 
 MindMeld 4.3 introduces Custom Actions which allow MindMeld developers to further separate their business
-logic from the conversational application. This paradigm shift helps to reduce the barriers to build and
-deploy conversational applications.
+logic from the conversational application.
 
 
 Why Custom Actions?
@@ -71,15 +70,13 @@ locally at address http://0.0.0.0:8080/v2/action.
 
     import connexion
 
-    from ..models.data import Data  # noqa: E501
-    from ..models.responder import Responder  # noqa: E501
+    from ..models.data import Data
+    from ..models.responder import Responder
     from ..models.directive import Directive
 
 
-    def invoke_action(data):  # noqa: E501
+    def invoke_action(data):
         """Invoke an action
-
-         # noqa: E501
 
         :param data: MindMeld Data
         :type data: dict | bytes
@@ -87,7 +84,7 @@ locally at address http://0.0.0.0:8080/v2/action.
         :rtype: Responder
         """
         if connexion.request.is_json:
-            data = Data.from_dict(connexion.request.get_json())  # noqa: E501
+            data = Data.from_dict(connexion.request.get_json())
 
         action = data.action
         msg = 'Invoking {action} on custom server.'.format(action=data.action)
