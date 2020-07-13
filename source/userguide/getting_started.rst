@@ -34,7 +34,7 @@ In the Docker setup, we use Docker only for running MindMeld dependencies, namel
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/dep:latest
+   docker pull mindmeldworkbench/dep:es_7
    docker run -ti -d -p 0.0.0.0:9200:9200 -p 0.0.0.0:7151:7151 -p 0.0.0.0:9300:9300 mindmeldworkbench/dep
 
 2. Install prerequisites
