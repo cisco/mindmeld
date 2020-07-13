@@ -39,6 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         ./scripts/py_dep_install.sh
+        pip install mindmeld[examples]
       env:
         MM_EXTRAS: ${{ matrix.mm-extras }}
         
