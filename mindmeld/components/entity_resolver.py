@@ -79,10 +79,7 @@ class EntityResolver:
         num_canonical_entities = len(
             self._resource_loader.get_entity_map(self.type).get("entities", [])
         )
-        if num_canonical_entities == 0:
-            self._no_canonical_entities = True
-        else:
-            self._no_canonical_entities = False
+        self._no_canonical_entities = num_canonical_entities == 0
 
     @property
     def _es_index_name(self):
