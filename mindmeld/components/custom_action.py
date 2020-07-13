@@ -100,7 +100,7 @@ class CustomAction:
         if status_code == 200:
             for field in RESPONSE_FIELDS:
                 if field not in result_json:
-                    logger.warning(
+                    logger.info(
                         "`%s` not in the response of custom action %s.",
                         field,
                         self._name,
