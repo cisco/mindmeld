@@ -112,6 +112,28 @@ In this example, the server simply returns a reply directive for each action req
         responder = Responder(directives=directives, frame={})
         return responder
 
+To test the server, you can run the following code snippet:
+
+.. code-block:: python
+
+    from mindmeld.components.custom_action import CustomAction
+    action_config = {'url': 'http://localhost:8080/action'}
+
+    action = CustomAction(name='action_call_people', config=action_config)
+    from mindmeld.components.request import Request
+    from mindmeld.components.dialogue import DialogueResponder
+
+    # should get 400 since the request fields are missing
+    action.invoke(Request(), DialogueResponder())
+
+    # synchronous case
+    request = Request(text='some text', domain='some domain', intent='some intent')
+    responder = DialogueResponder()
+
+    # we should see a successful request and one reply directive
+    action.invoke(request, responder)
+    print('Directives:', responder.directives)
+
 You can explore the implementation of the Request and Responder data objects in our sample server to return different
 fields of MindMeld.
 
