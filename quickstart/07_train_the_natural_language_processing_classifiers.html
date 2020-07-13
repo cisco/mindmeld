@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 7: Train the Natural Language Processing Classifiers &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Step 7: Train the Natural Language Processing Classifiers &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -359,7 +359,7 @@ python
 <span id="id1"></span><h2>Domain Classification<a class="headerlink" href="#domain-classification" title="Permalink to this headline">¶</a></h2>
 <p>The domain classifier (also called the domain model) is a text classification model that is trained using the labeled queries across all domains. Our simple app only has one domain and hence does not need a domain classifier. However, complex conversational apps such as the popular virtual assistants on smartphones and smart speakers today have to handle queries from varied domains such as weather, navigation, sports, finance, and music, among others. Such apps use domain classification as the first step to narrow down the focus of the subsequent classifiers in the NLP pipeline.</p>
 <p>To see the domain classifier in action, you can download and try out the <code class="docutils literal notranslate"><span class="pre">home_assistant</span></code> blueprint application.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 </pre></div>
@@ -519,7 +519,7 @@ Springfield Mall
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">recognizer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s1">&#39;When does the store on Elm Street close?&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(&lt;QueryEntity &#39;Elm Street&#39; (&#39;store_name&#39;) char: [23-32], tok: [5-6]&gt;,)</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(&lt;QueryEntity &#39;Elm Street&#39; (&#39;store_name&#39;)</span> <span class="go">char: [23-32], tok: [5-6]&gt;,)</span>
 </pre></div>
 </div>
 <p>See the <a class="reference internal" href="../userguide/entity_recognizer.html"><span class="doc">User Guide</span></a> for more about entity recognizer training and evaluation options.</p>

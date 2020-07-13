@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Home Assistant &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Home Assistant &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -373,32 +373,32 @@
 </ol>
 <p>Which approach is best varies from one application to another. Figuring that out always requires some trial and error. We will explore both options in detail.</p>
 <p>Let's begin by defining a dialogue state for each of the intents for controlling doors (<code class="docutils literal notranslate"><span class="pre">close_door</span></code>, <code class="docutils literal notranslate"><span class="pre">open_door</span></code>, <code class="docutils literal notranslate"><span class="pre">lock_door</span></code>, and <code class="docutils literal notranslate"><span class="pre">unlock_door</span></code>):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;open_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;open_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">open_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;lock_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;lock_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">lock_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unlock_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unlock_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">unlock_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 </pre></div>
 </div>
 <p>Observe that the controller logic (for example, setting the state variable for the door) is very similar for all four intents. That means we have an opportunity to define a single state, <code class="docutils literal notranslate"><span class="pre">handle_door</span></code>, for all of these intents:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;open_door&#39;</span><span class="p">)</span>
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;lock_door&#39;</span><span class="p">)</span>
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unlock_door&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;open_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;lock_door&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unlock_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">handle_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -422,9 +422,9 @@ User: In the kitchen
 <li>Since multiple states (<code class="docutils literal notranslate"><span class="pre">close/open</span> <span class="pre">door</span></code>, <code class="docutils literal notranslate"><span class="pre">lock/unlock</span> <span class="pre">door</span></code>, <code class="docutils literal notranslate"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">lights</span></code>, <code class="docutils literal notranslate"><span class="pre">turn</span> <span class="pre">on/off</span> <span class="pre">appliance</span></code>, <code class="docutils literal notranslate"><span class="pre">check</span> <span class="pre">door/light</span></code>) can lead to the <code class="docutils literal notranslate"><span class="pre">specify</span> <span class="pre">location</span></code> state, pass the previous state/action information in the request object, as <code class="docutils literal notranslate"><span class="pre">request.frame['desired_action']</span></code></li>
 </ol>
 <p>The code for <code class="docutils literal notranslate"><span class="pre">specify_location</span></code> looks like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;specify_location&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;specify_location&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">specify_location</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
-    <span class="n">selected_all</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">selected_all</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">selected_location</span><span class="p">:</span>
@@ -701,7 +701,7 @@ to get back to food ordering</td>
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
 <p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
-<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;home_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
@@ -852,7 +852,7 @@ to get back to food ordering</td>
         <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-fold&#39;</span><span class="p">,</span>
         <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
         <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+            <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
             <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
             <span class="s1">&#39;class_bias&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="p">}</span>

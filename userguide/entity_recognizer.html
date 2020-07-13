@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Entity Recognizer &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Working with the Entity Recognizer &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -319,8 +319,8 @@
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ul class="last simple">
-<li>Currently MindMeld uses a fork of Duckling for system entity recognition. However, MindMeld Duckling binaries are only available in certain operating systems.</li>
-<li>If Duckling is not available for your OS, you can either use a dockerized version of Duckling or turn it off completely (see section below).</li>
+<li>Currently MindMeld uses a fork of Duckling for system entity recognition. However, MindMeld Duckling binaries are only available in certain operating systems (ubuntu-16.04, ubuntu-18.04 &amp; MacOS).</li>
+<li>If Duckling is not available for your OS, you can either use a dockerized version of Duckling (see <a class="reference internal" href="getting_started.html"><span class="doc">Getting Started</span></a>) or turn it off (see section below).</li>
 <li>Turning off Duckling will not have any impact on Custom Entities.</li>
 </ul>
 </div>
@@ -623,7 +623,7 @@ addition to regular n-grams when using the <code class="docutils literal notrans
              <span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
          <span class="p">}</span>
      <span class="p">},</span>
-     <span class="s1">&#39;enable-stemming&#39;</span><span class="p">:</span> <span class="bp">True</span>
+     <span class="s1">&#39;enable-stemming&#39;</span><span class="p">:</span> <span class="kc">True</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -753,7 +753,7 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">],</span>
   <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">],</span>
-   <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+   <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1012,7 +1012,7 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 </div>
 <p>For an example experiment, we'll turn off feature scaling and change the tagging scheme to IOBES, while leaving defaults in place for feature extraction and hyperparameter selection.</p>
 <p>Retrain the entity recognition model with our updated settings:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_model_settings</span><span class="p">[</span><span class="s1">&#39;feature_scaler&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_model_settings</span><span class="p">[</span><span class="s1">&#39;feature_scaler&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">my_model_settings</span><span class="p">[</span><span class="s1">&#39;tag_scheme&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;IOBES&#39;</span>
 <span class="n">er</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model_settings</span><span class="o">=</span><span class="n">my_model_settings</span><span class="p">)</span>
 </pre></div>
@@ -1039,7 +1039,7 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">er</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s1">&#39;Weather in San Francisco next week&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(&lt;QueryEntity &#39;San Francisco&#39; (&#39;city&#39;) char: [11-23], tok: [2-3]&gt;,</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(&lt;QueryEntity &#39;San Francisco&#39; (&#39;city&#39;)</span> <span class="go">char: [11-23], tok: [2-3]&gt;,</span>
 <span class="go"> &lt;QueryEntity &#39;next week&#39; (&#39;sys_time&#39;) char: [25-33], tok: [4-5]&gt;)</span>
 </pre></div>
 </div>
@@ -1052,8 +1052,8 @@ Here is an example for a <a class="reference external" href="http://scikit-learn
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">er</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="s1">&#39;Weather in San Francisco next week&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">((&lt;QueryEntity &#39;San Francisco&#39; (&#39;city&#39;) char: [11-23], tok: [2-3]&gt;, 0.9994949555840245),</span>
-<span class="go">(&lt;QueryEntity &#39;next week&#39; (&#39;sys_time&#39;) char: [25-33], tok: [4-5]&gt;, 0.9994573416716696))</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">((&lt;QueryEntity &#39;San Francisco&#39; (&#39;city&#39;)</span> <span class="go">char: [11-23], tok: [2-3]&gt;, 0.9994949555840245),</span>
+<span class="gp gp-VirtualEnv">(&lt;QueryEntity &#39;next week&#39; (&#39;sys_time&#39;)</span> <span class="go">char: [25-33], tok: [4-5]&gt;, 0.9994573416716696))</span>
 </pre></div>
 </div>
 <p>An ideal entity recognizer would assign a high confidence score to the expected (correct) class label for a test query, while assigning very low probabilities to incorrect labels.</p>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Video Discovery &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Video Discovery &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -532,7 +532,7 @@
 <p>Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.</p>
 <p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal notranslate"><span class="pre">welcome</span></code>, <code class="docutils literal notranslate"><span class="pre">start_over</span></code>, <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code>, <code class="docutils literal notranslate"><span class="pre">provide_help</span></code>, <code class="docutils literal notranslate"><span class="pre">handle_unsupported</span></code>, <code class="docutils literal notranslate"><span class="pre">say_something_nice</span></code>, <code class="docutils literal notranslate"><span class="pre">handle_insult</span></code> and <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 <p>For example, here's the <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted &quot;goodbye&quot; responses:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user ends a conversation, clear the dialogue frame and say goodbye.</span>
@@ -545,7 +545,7 @@
 </div>
 <p>By contrast, the handler logic for the <code class="docutils literal notranslate"><span class="pre">show_content</span></code> dialogue state is more substantial, because it contains the core business logic for our application. In this dialogue state handler, we use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> to process the transaction.</p>
 <p>You can see this in the general implementation of the <code class="docutils literal notranslate"><span class="pre">show_content</span></code> handler:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;browse&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;browse&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">show_content</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user looks for a movie or TV show, fetch the documents from the knowledge base</span>
@@ -932,7 +932,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;video_discovery&#39;</span><span class="p">)</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s2">&quot;Show me movies with Tom Hanks&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">{</span>

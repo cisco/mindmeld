@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Step 9: Optimize Question Answering Performance &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Step 9: Optimize Question Answering Performance &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -274,7 +274,7 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">send_nearest_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">user_location</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span>
@@ -289,7 +289,7 @@
     <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
 
     <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;target_store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_store</span>
-    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your nearest Kwik-E-Mart is located at {store_name}.&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your nearest Kwik-E-Mart is located at </span><span class="si">{store_name}</span><span class="s1">.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Assuming you have already created an index, such as <code class="docutils literal notranslate"><span class="pre">stores</span></code>, and uploaded the knowledge base data, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> method provides a flexible mechanism for retrieving relevant results.</p>

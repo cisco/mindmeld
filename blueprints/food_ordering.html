@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Food Ordering &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Food Ordering &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -479,7 +479,7 @@ in the following manner: <code class="docutils literal notranslate"><span class=
 <p>Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.</p>
 <p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal notranslate"><span class="pre">welcome</span></code>, <code class="docutils literal notranslate"><span class="pre">start_over</span></code>, <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code>, <code class="docutils literal notranslate"><span class="pre">provide_help</span></code> and <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 <p>For example, here's the <code class="docutils literal notranslate"><span class="pre">say_goodbye</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted &quot;goodbye&quot; responses:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user ends a conversation, clear the dialogue frame and say goodbye.</span>
@@ -493,7 +493,7 @@ in the following manner: <code class="docutils literal notranslate"><span class=
 </div>
 <p>By contrast, the handler logic for the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> and <code class="docutils literal notranslate"><span class="pre">place_order</span></code> dialogue states is more substantial, because they contain the core business logic for our application. In these dialogue state handlers, we use the <a class="reference internal" href="../userguide/kb.html"><span class="doc">Question Answerer</span></a> and external API calls to process the transaction.</p>
 <p>We can illustrate this with a simplistic implementation of the <code class="docutils literal notranslate"><span class="pre">build_order</span></code> handler:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;build_order&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;build_order&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">build_order</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user expresses an intent to make food selections, build up the order by</span>
@@ -522,8 +522,8 @@ in the following manner: <code class="docutils literal notranslate"><span class=
     <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;restaurant_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_restaurant</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;dish_names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dish</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dish</span> <span class="ow">in</span> <span class="n">selected_dishes</span><span class="p">])</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">dish</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dish</span> <span class="ow">in</span> <span class="n">selected_dishes</span><span class="p">])</span>
-    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sure, I got {dish_names} from {restaurant_name} for a total &#39;</span>
-                    <span class="s1">&#39;price of ${price:.2f}. Would you like to place the order?&#39;</span><span class="p">)</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Sure, I got </span><span class="si">{dish_names}</span><span class="s1"> from </span><span class="si">{restaurant_name}</span><span class="s1"> for a total &#39;</span>
+                    <span class="s1">&#39;price of $</span><span class="si">{price:.2f}</span><span class="s1">. Would you like to place the order?&#39;</span><span class="p">)</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -783,7 +783,7 @@ in the following manner: <code class="docutils literal notranslate"><span class=
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
 <p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
-<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>

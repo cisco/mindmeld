@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>HR Assistant &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>HR Assistant &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -427,22 +427,22 @@ In addition, they can also use the assistant to answer frequently asked question
 <h2>4. Dialogue States<a class="headerlink" href="#dialogue-states" title="Permalink to this headline">¶</a></h2>
 <p>Dialogue state logic can be arbitrarily complex. Simple dialogue state handlers just return a canned text response, while sophisticated ones can call third party APIs, calculate state transitions, and return complex responses.</p>
 <p>Let's begin by looking at some of the dialogue states for the intents in the <code class="docutils literal notranslate"><span class="pre">general</span></code> domain:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;age&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;age&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_info_age</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;state&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;state&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_info_state</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;position&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;position&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_info_position</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_info&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_info_default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -450,12 +450,12 @@ In addition, they can also use the assistant to answer frequently asked question
 </div>
 <p>Observe that the same intent has multiple dialogue states that specify a <code class="docutils literal notranslate"><span class="pre">has_entity</span></code> field, except for the last case which serves as the default case. In other words, Mindmeld will feed the request to the dialogue state handler if there is a match between an entity found in the user query and the entity that the dialogue state handler accepts. If none of the entities are found, Mindmeld will default to the last case that does not specify an entity. This is where the system can follow up with the user and ask for any information needed to complete the query.</p>
 <p>We can see this paradigm followed in the domain <code class="docutils literal notranslate"><span class="pre">salary</span></code> as well:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;time_recur&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;time_recur&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_salary_for_interval</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_salary&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_salary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
 
     <span class="o">...</span>
@@ -601,7 +601,7 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
 </div>
 <div class="section" id="knowledge-base">
 <h2>5. Knowledge Base<a class="headerlink" href="#knowledge-base" title="Permalink to this headline">¶</a></h2>
-<p>The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from <a class="reference external" href="https://www.kaggle.com/rhuebner/human-resources-data-set">Kaggle</a> and frequently asked human resources questions from <cite>UC Berkeley &lt;https://hr.berkeley.edu/faq-page&gt;</cite>. The knowledge base comprises of two indices in <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>:</p>
+<p>The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from <a class="reference external" href="https://www.kaggle.com/rhuebner/human-resources-data-set">Kaggle</a> and frequently asked human resources questions from <a class="reference external" href="https://hr.berkeley.edu/faq-page">UC Berkeley</a>. The knowledge base comprises of two indices in <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>:</p>
 <blockquote>
 <div><ul class="simple">
 <li><code class="docutils literal notranslate"><span class="pre">user_data</span></code> — information about employees</li>
@@ -922,7 +922,7 @@ App: Daniel Davis is Single                             <span class="c1"># get_i
         <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-fold&#39;</span><span class="p">,</span>
         <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
         <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+            <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
             <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
             <span class="s1">&#39;class_bias&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="p">}</span>

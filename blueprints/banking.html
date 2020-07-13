@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Banking Assistant &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Banking Assistant &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -440,7 +440,7 @@ to get back to banking tasks</td>
 <p>Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.</p>
 <p>The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include <code class="docutils literal notranslate"><span class="pre">greet</span></code>, <code class="docutils literal notranslate"><span class="pre">order_checks</span></code>, <code class="docutils literal notranslate"><span class="pre">apply_loan</span></code>, <code class="docutils literal notranslate"><span class="pre">activate_creditcard</span></code> and <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 <p>For example, here's the <code class="docutils literal notranslate"><span class="pre">order_checks</span></code> state handler, where we clear the <a class="reference internal" href="../userguide/dm.html"><span class="doc">dialogue frame</span></a> and use the <a class="reference internal" href="../userguide/dm.html"><span class="doc">responder</span></a> object to reply with one of our scripted responses:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;order_checks&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;order_checks&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">order_checks</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user requests a checkbook, begin the order process and notify user</span>
@@ -452,7 +452,7 @@ to get back to banking tasks</td>
 </div>
 <p>By contrast, the handler logic for the <code class="docutils literal notranslate"><span class="pre">pay_creditcard</span></code> and <code class="docutils literal notranslate"><span class="pre">setup_autopay</span></code> dialogue states is more substantial, because they contain more complex logic for handling user information in our application. In these dialogue state handlers, we will need to retrieve data and also make updates to the data which will ideally require a call to an external API.</p>
 <p>We can illustrate this with an implementation of the <code class="docutils literal notranslate"><span class="pre">setup_autopay</span></code> handler:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;setup_autopay&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;setup_autopay&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">setup_autopay</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user expresses an intent to activate autopay, check to see if it has</span>
@@ -479,8 +479,8 @@ to get back to banking tasks</td>
 </div>
 <p>This code is a simpler example of how to incorporate a third party API, the <code class="docutils literal notranslate"><span class="pre">_get</span></code> and <code class="docutils literal notranslate"><span class="pre">_put</span></code> methods are used here to mimic an API calls to get information and push an update.</p>
 <p>Here we will illustrate a simple version of the <code class="docutils literal notranslate"><span class="pre">pay_creditcard</span></code> handler, which is more complex than the prior handler and uses custom and system entities:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;pay_creditcard&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">setup_autopay</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;pay_creditcard&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">pay_creditcard</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When the user expresses an intent to make a credit card payment, check to see if</span>
 <span class="sd">    they have specified a numerical amount or a generic amount like minimum</span>
@@ -492,20 +492,20 @@ to get back to banking tasks</td>
             <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;payment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
             <span class="c1">#if it is minimum proceed to handle a payment for the minimum amount of the total credit balance</span>
             <span class="k">if</span><span class="p">(</span><span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;payment&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;minimum&#39;</span><span class="p">):</span>
-                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Ok we have scheduled your credit card payment for your {payment} balance of ${min}&#39;</span><span class="p">])</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Ok we have scheduled your credit card payment for your </span><span class="si">{payment}</span><span class="s1"> balance of $</span><span class="si">{min}</span><span class="s1">&#39;</span><span class="p">])</span>
                 <span class="c1">#update the user data with the new amount for the credit balance</span>
                 <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;credit&#39;</span><span class="p">,</span> <span class="n">_get</span><span class="p">(</span><span class="s1">&#39;credit&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">])</span>
                 <span class="c1">#update the checking account to reflect the payment made</span>
                 <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="n">get</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">])</span>
             <span class="c1">#if it is balance handle it similar to minimum but with the amount being the total credit debt</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Sure, we have scheduled your credit card payment for your {payment} of ${total_balance}.&#39;</span><span class="p">])</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Sure, we have scheduled your credit card payment for your </span><span class="si">{payment}</span><span class="s1"> of $</span><span class="si">{total_balance}</span><span class="s1">.&#39;</span><span class="p">])</span>
                 <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;credit&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="n">get</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;total_balance&#39;</span><span class="p">])</span>
         <span class="c1">#handle the system entity of the exact dollar amount they want to pay off</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
-            <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Ok we have scheduled your credit card payment for {amount}&#39;</span><span class="p">])</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Ok we have scheduled your credit card payment for </span><span class="si">{amount}</span><span class="s1">&#39;</span><span class="p">])</span>
             <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;credit&#39;</span><span class="p">,</span> <span class="n">_get</span><span class="p">(</span><span class="s1">&#39;credit&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
             <span class="n">_put</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="n">get</span><span class="p">(</span><span class="s1">&#39;checking&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">])</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">listen</span><span class="p">()</span>
@@ -535,7 +535,7 @@ to get back to banking tasks</td>
 <span class="p">}</span>
 
 <span class="c1">#the @app.auto_fill decorator indicates it is a dialogue state handler that requires a form and uses the slot filling logic</span>
-<span class="nd">@app.auto_fill</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;check_balances&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">balance_form</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">auto_fill</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;check_balances&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">balance_form</span><span class="p">)</span>
 <span class="c1">#Control is passed on to this dialogue state handler one the slot-filling process is completed and all required entities in this form have been obtained.</span>
 <span class="k">def</span> <span class="nf">check_balances_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">user_data</span><span class="p">:</span>
@@ -545,7 +545,7 @@ to get back to banking tasks</td>
             <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_type&#39;</span><span class="p">:</span>
                 <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
                 <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
-                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your {account} account balance is {amount}&#39;</span><span class="p">)</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;Your </span><span class="si">{account}</span><span class="s1"> account balance is </span><span class="si">{amount}</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -654,7 +654,7 @@ to get back to banking tasks</td>
 <h2>7. Training the NLP Classifiers<a class="headerlink" href="#training-the-nlp-classifiers" title="Permalink to this headline">¶</a></h2>
 <p>Train a baseline NLP system for the blueprint app. The <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> method of the <code class="xref py py-class docutils literal notranslate"><span class="pre">NaturalLanguageProcessor</span></code> class, used as shown below, applies MindMeld's default machine learning settings.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components.nlp</span> <span class="kn">import</span> <span class="n">NaturalLanguageProcessor</span>
-<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">nlp</span> <span class="o">=</span> <span class="n">NaturalLanguageProcessor</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;banking_assistant&#39;</span><span class="p">)</span>
 <span class="n">nlp</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
@@ -733,7 +733,7 @@ to get back to banking tasks</td>
 </div>
 <p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom banking assistant data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.</p>
 <p>Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;ordering&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ic</span> <span class="o">=</span> <span class="n">nlp</span><span class="o">.</span><span class="n">domains</span><span class="p">[</span><span class="s1">&#39;accounts_creditcards&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">intent_classifier</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_settings</span><span class="p">[</span><span class="s1">&#39;classifier_type&#39;</span><span class="p">]</span>
 </pre></div>
 </div>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Entity Resolver &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Working with the Entity Resolver &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -491,7 +491,7 @@
 <h3>About the <cite>EntityResolver.fit()</cite> method<a class="headerlink" href="#about-the-entityresolver-fit-method" title="Permalink to this headline">¶</a></h3>
 <p>When <code class="xref py py-meth docutils literal notranslate"><span class="pre">EntityResolver.fit()</span></code> method is run for the first time, MindMeld creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine.</p>
 <p>For the sake of speed, subsequent calls to <code class="xref py py-meth docutils literal notranslate"><span class="pre">EntityResolver.fit()</span></code> update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">er</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">clean</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">er</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">clean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Unlike the other NLP components, <em>EntityResolver.dump()</em> and <em>EntityResolver.load()</em> do not do anything since there are no model weights to be saved to disk. Everything needed exists in the Elasticsearch index and the entity mapping files.</p>

@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Getting Started &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Getting Started &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -334,7 +334,7 @@
 <li>First, <a class="reference external" href="https://www.docker.com/community-edition#/download">install Docker</a>, and run it.</li>
 <li>Then, open a terminal (shell) and run these commands:</li>
 </ol>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker pull mindmeldworkbench/dep:latest
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker pull mindmeldworkbench/dep:es_7
 docker run -ti -d -p <span class="m">0</span>.0.0.0:9200:9200 -p <span class="m">0</span>.0.0.0:7151:7151 -p <span class="m">0</span>.0.0.0:9300:9300 mindmeldworkbench/dep
 </pre></div>
 </div>
@@ -342,7 +342,7 @@ docker run -ti -d -p <span class="m">0</span>.0.0.0:9200:9200 -p <span class="m"
 <div class="section" id="install-prerequisites">
 <h4>2. Install prerequisites<a class="headerlink" href="#install-prerequisites" title="Permalink to this headline">¶</a></h4>
 <p>Next, we install <code class="docutils literal notranslate"><span class="pre">python</span></code>, <code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">virtualenv</span></code> on the local machine using a script we made. These are pre-requisite libraries needed for most python projects. Currently, the script works for Mac and Ubuntu 16/18 operating systems:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_lite_init.sh<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_lite_init.sh<span class="k">)</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <p>If you encounter any issues, see <a class="reference internal" href="#getting-started-troubleshooting"><span class="std std-ref">Troubleshooting</span></a>.</p>
@@ -393,23 +393,27 @@ docker run -ti -d -p <span class="m">0</span>.0.0.0:9200:9200 -p <span class="m"
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>tensorflow<span class="o">]</span>
 </pre></div>
 </div>
+<p>If you are interested in leveraging pretrained BERT embedders for question answering, you will need to install the following dependency:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install mindmeld<span class="o">[</span>bert<span class="o">]</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="install-with-virtualenv">
 <span id="getting-started-virtualenv-setup"></span><h3>Install with virtualenv<a class="headerlink" href="#install-with-virtualenv" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="id1">
 <h4>1. Install prerequisites<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
-<p>On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the <a class="reference external" href="https://devcenter.mindmeld.com/scripts/mindmeld_init.sh">mindmeld_init.sh script</a>.</p>
+<p>On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the <a class="reference external" href="https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_init.sh">mindmeld_init.sh script</a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The script installs the following components after a confirmation prompt: <code class="docutils literal notranslate"><span class="pre">docker</span></code>, <code class="docutils literal notranslate"><span class="pre">python3.6</span></code>, <code class="docutils literal notranslate"><span class="pre">python-pip</span></code>, <code class="docutils literal notranslate"><span class="pre">virtualenv</span></code> and Elasticsearch 6.7.</p>
+<p class="last">The script installs the following components after a confirmation prompt: <code class="docutils literal notranslate"><span class="pre">docker</span></code>, <code class="docutils literal notranslate"><span class="pre">python3.6</span></code>, <code class="docutils literal notranslate"><span class="pre">python-pip</span></code>, <code class="docutils literal notranslate"><span class="pre">virtualenv</span></code> and Elasticsearch 7.8.</p>
 </div>
 <p>If you are using a Ubuntu 16/18 machine, when you're ready to go, open a terminal (shell) and run this command:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_init.sh<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash -c <span class="s2">&quot;</span><span class="k">$(</span>curl -s  https://raw.githubusercontent.com/cisco/mindmeld/master/scripts/mindmeld_init.sh<span class="k">)</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <p>If you encounter any issues, see <a class="reference internal" href="#getting-started-troubleshooting"><span class="std std-ref">Troubleshooting</span></a>.</p>
-<p>For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 6.7 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:</p>
+<p>For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 7.8 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:</p>
 <p>macOS:</p>
 <table border="1" class="docutils">
 <colgroup>
@@ -435,21 +439,25 @@ docker run -ti -d -p <span class="m">0</span>.0.0.0:9200:9200 -p <span class="m"
 <td><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-H</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">virtualenv</span></code></td>
 </tr>
 <tr class="row-even"><td>Elasticsearch</td>
-<td>See instructions below to download Elasticsearch 6.7</td>
+<td>See instructions below to download and run Elasticsearch 7.8 natively or using docker</td>
 </tr>
 </tbody>
 </table>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.7.0.tar.gz -o elasticsearch-6.7.0.tar.gz
-tar -zxvf elasticsearch-6.7.0.tar.gz
-<span class="nb">cd</span> elasticsearch-6.7.0/bin
-./elasticsearch-6.7.0/bin/elasticsearch
+<p>Native onboarding:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-darwin-x86_64.tar.gz -o elasticsearch-7.8.0.tar.gz
+tar -zxvf elasticsearch-7.8.0.tar.gz
+./elasticsearch-7.8.0/bin/elasticsearch
+</pre></div>
+</div>
+<p>Docker onboarding:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 <span class="o">&amp;&amp;</span> sudo docker run -d -p <span class="m">9200</span>:9200 -p <span class="m">9300</span>:9300 -e <span class="s2">&quot;discovery.type=single-node&quot;</span> docker.elastic.co/elasticsearch/elasticsearch:7.8.0
 </pre></div>
 </div>
 <p>Ubuntu:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="7%" />
-<col width="93%" />
+<col width="16%" />
+<col width="84%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Component</th>
@@ -467,14 +475,19 @@ tar -zxvf elasticsearch-6.7.0.tar.gz
 <td><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">virtualenv</span></code></td>
 </tr>
 <tr class="row-odd"><td>Elasticsearch</td>
-<td><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">docker.elastic.co/elasticsearch/elasticsearch:6.7.0</span> <span class="pre">&amp;&amp;</span> <span class="pre">sudo</span> <span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">-p</span> <span class="pre">9200:9200</span> <span class="pre">-p</span> <span class="pre">9300:9300</span> <span class="pre">-e</span> <span class="pre">&quot;discovery.type=single-node&quot;</span> <span class="pre">docker.elastic.co/elasticsearch/elasticsearch:6.7.0</span></code></td>
+<td>See instructions below to download Elasticsearch 7.8 natively or using docker</td>
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">We use docker for Elasticsearch in Ubuntu since provisioning it for the Ubuntu OS is convoluted. See here for more details if you want to set up
-Elasticsearch from scratch on <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elastic-stack-on-ubuntu-18-04">Linux</a>.:</p>
+<p>Native onboarding:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget -O elasticsearch-7.8.0.tar.gz  https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.0-linux-x86_64.tar.gz
+tar -zxvf elasticsearch-7.8.0.tar.gz
+./elasticsearch-7.8.0/bin/elasticsearch
+</pre></div>
+</div>
+<p>Docker onboarding:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 <span class="o">&amp;&amp;</span> sudo docker run -d -p <span class="m">9200</span>:9200 -p <span class="m">9300</span>:9300 -e <span class="s2">&quot;discovery.type=single-node&quot;</span> docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+</pre></div>
 </div>
 </div>
 <div class="section" id="id2">
@@ -537,10 +550,9 @@ numerical parser using Docker as shown below.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker pull mindmeldworkbench/duckling:master <span class="o">&amp;&amp;</span> docker run -p <span class="m">0</span>.0.0.0:7151:7151 mindmeldworkbench/duckling:master -ti -d
 </pre></div>
 </div>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">The numerical parser is a critical component that MindMeld relies on. <strong>Do not skip this step</strong>
-.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The numerical parser is an optional component of MindMeld. To turn off the numerical parser, in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, set <code class="docutils literal notranslate"><span class="pre">NLP_CONFIG</span> <span class="pre">=</span> <span class="pre">{&quot;system_entity_recognizer&quot;:</span> <span class="pre">{}}</span></code>.</p>
 </div>
 </div>
 </div>
@@ -578,7 +590,7 @@ Here you can enter your own input and get an immediate response back. Try &quot;
 <div class="section" id="using-the-python-shell">
 <h4>Using the Python shell<a class="headerlink" href="#using-the-python-shell" title="Permalink to this headline">¶</a></h4>
 <p>To try out the <a class="reference internal" href="../blueprints/home_assistant.html"><span class="doc">Home Assistant blueprint</span></a>, run these commands in your Python shell:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">blueprint</span> <span class="o">=</span> <span class="s1">&#39;home_assistant&#39;</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">blueprint</span><span class="p">)</span>
@@ -607,7 +619,7 @@ conversational applications. See <a class="reference internal" href="../blueprin
 </div>
 <div class="section" id="id5">
 <h4>Using the Python shell<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="s1">&#39;template&#39;</span><span class="p">,</span> <span class="s1">&#39;my_app&#39;</span><span class="p">)</span>
 </pre></div>
@@ -676,7 +688,7 @@ The <code class="docutils literal notranslate"><span class="pre">INFO</span></co
 <li><code class="xref py py-data docutils literal notranslate"><span class="pre">level</span></code>: The <a class="reference external" href="https://docs.python.org/3/howto/logging.html#logging-levels">logging level</a>.</li>
 </ol>
 <p>Here's an example usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 </pre></div>
 </div>

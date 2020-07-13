@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>WhatsApp Integration &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>WhatsApp Integration &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -314,7 +314,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
 <span class="sd">    A sample server class for Whatsapp integration with any MindMeld application</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">nlp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">,</span> <span class="n">nlp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the server.</span>
@@ -331,7 +331,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
         <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="n">app_path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-        <span class="nd">@self.app.route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
         <span class="k">def</span> <span class="nf">handle_message</span><span class="p">():</span>  <span class="c1"># pylint: disable=unused-variable</span>
             <span class="n">incoming_msg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Body&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="n">MessagingResponse</span><span class="p">()</span>
@@ -349,7 +349,7 @@ In this tutorial, you will create a WhatsApp bot based on the <a class="referenc
     <span class="n">configure_logs</span><span class="p">()</span>
     <span class="n">server</span> <span class="o">=</span> <span class="n">WhatsappBotServer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;whatsapp&#39;</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
     <span class="n">port_number</span> <span class="o">=</span> <span class="mi">8080</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running server on port {}...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">port_number</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Running server on port </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">port_number</span><span class="p">))</span>
     <span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port_number</span><span class="p">)</span>
 </pre></div>
 </div>

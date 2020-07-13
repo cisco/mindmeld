@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Knowledge Base and Question Answerer &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Working with the Knowledge Base and Question Answerer &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -499,7 +499,7 @@ or movie names like <code class="docutils literal notranslate"><span class="pre"
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>For this tutorial, we will be using the <code class="docutils literal notranslate"><span class="pre">food_ordering</span></code> blueprint application. You can download this application by running these commands:</p>
-<div class="last highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="last highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">configure_logs</span><span class="p">()</span>
 <span class="n">mm</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
 </pre></div>
@@ -568,7 +568,7 @@ or movie names like <code class="docutils literal notranslate"><span class="pre"
 <p id="import-kb">To fully recreate an existing index from scratch, you can run a clean load as follows.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 <span class="n">qa</span> <span class="o">=</span> <span class="n">QuestionAnswerer</span><span class="p">(</span><span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">)</span>
-<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">data_file</span><span class="o">=</span><span class="s1">&#39;food_ordering/data/restaurants.json&#39;</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">qa</span><span class="o">.</span><span class="n">load_kb</span><span class="p">(</span><span class="n">app_namespace</span><span class="o">=</span><span class="s1">&#39;food_ordering&#39;</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;restaurants&#39;</span><span class="p">,</span> <span class="n">data_file</span><span class="o">=</span><span class="s1">&#39;food_ordering/data/restaurants.json&#39;</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will internally delete the existing index, create a new index and load the specified objects.</p>
@@ -1005,7 +1005,7 @@ or movie names like <code class="docutils literal notranslate"><span class="pre"
 <p>In this section we describe how to use the question answerer on knowledge bases with long, free-form text or <cite>unstructured data</cite>. For example, a company's Human Resources (HR) team could have documents about general policies of the company. We can use this data to develop an HR assistant that automatically answers any policy-related questions.</p>
 <p>To use the question answerer on unstructured text, we would follow the same steps mentioned before to prepare, index and load the knowledge base.</p>
 <p>Here is an example of what the knowledge base can look like for the HR assistant use case. It consists of frequently asked question and answer pairs.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="k">as</span> <span class="nn">mm</span>
 <span class="kn">from</span> <span class="nn">mm.components</span> <span class="kn">import</span> <span class="n">QuestionAnswerer</span>
 
 <span class="c1"># Download hr assistant blueprint</span>
@@ -1081,6 +1081,14 @@ or movie names like <code class="docutils literal notranslate"><span class="pre"
 </div>
 <div class="section" id="leveraging-semantic-embeddings">
 <span id="semantic-embeddings"></span><h2>Leveraging semantic embeddings<a class="headerlink" href="#leveraging-semantic-embeddings" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To use the BERT embedder, make sure you've installed the extra requirement with the command <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindmeld[bert]</span></code>.</p>
+</div>
 <p>The question answerer capabilities described so far rely purely on text-based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the knowledge base even if the search token wasn’t present in the uploaded data.</p>
 <p>To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.</p>
 <p>The settings for semantic embeddings are part of the <code class="docutils literal notranslate"><span class="pre">QUESTION_ANSWERER_CONFIG</span></code> in the app configuration file, <code class="docutils literal notranslate"><span class="pre">config.py</span></code>. To use semantic embeddings, you need to specify a supported <code class="docutils literal notranslate"><span class="pre">model_type</span></code>,  the <code class="docutils literal notranslate"><span class="pre">model_settings</span></code>, and the fields you would like to generate embeddings for in <code class="docutils literal notranslate"><span class="pre">embedding_fields</span></code>. The <code class="docutils literal notranslate"><span class="pre">embedding_fields</span></code> parameter takes a dictionary where the key is the name of your index, and the value is a list of field names or regexes to match against the field names for that index.</p>
@@ -1130,14 +1138,14 @@ larger paragraphs or passages of unstructured text. Sentence-BERT is preferable 
 <p>The provided GloVe embeddings are word vectors trained on the <a class="reference external" href="https://dumps.wikimedia.org/">Wikipedia</a> and <a class="reference external" href="https://catalog.ldc.upenn.edu/LDC2011T07">Gigaword 5</a> datasets. To use this embedder type, specify <code class="docutils literal notranslate"><span class="pre">glove</span></code> as the <code class="docutils literal notranslate"><span class="pre">embedder_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">model_settings</span></code>.</p>
 <p>The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the <code class="docutils literal notranslate"><span class="pre">token_embedding_dimension</span></code> in the <code class="docutils literal notranslate"><span class="pre">model_settings</span></code> section of the config (defaults to 300). For fields with more than one token, word vector averaging is used.</p>
 <p>Once your config file is specified, you can load the Knowledge Base and the embeddings will automatically be generated as specified in the config and stored in your index as dense vectors. Note that you must pass the application path in order for the config to be processed. This can be done via the CLI command with the <code class="docutils literal notranslate"><span class="pre">--app-path</span></code> option or via the <code class="docutils literal notranslate"><span class="pre">app_path</span></code> parameter for the <code class="docutils literal notranslate"><span class="pre">load_kb</span></code> method.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl --app_path .</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mindmeld load-kb hr_assistant faq_data data/hr_faq_data.json --app-path .</span>
 </pre></div>
 </div>
 <p>All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">.generated/indexes/&lt;model_name&gt;_cache.pkl</span>
 </pre></div>
 </div>
-<p>If our built-in embedders don't fit your use case and you would like to use your own embedder, you can use the provided <code class="docutils literal notranslate"><span class="pre">Embedder</span></code> abstract class. You need to implement two methods: <code class="docutils literal notranslate"><span class="pre">load</span></code> and <code class="docutils literal notranslate"><span class="pre">encode</span></code>. The load method will load and return your embedder model. The encode method will take a list of text strings and return a list of numpy vectors. You can register your class for use with MindMeld via the <code class="docutils literal notranslate"><span class="pre">register_embedder</span></code> method as shown below.</p>
+<p>If our built-in embedders don't fit your use case and you would like to use your own embedder, you can use the provided <code class="docutils literal notranslate"><span class="pre">Embedder</span></code> abstract class. You need to implement two methods: <code class="docutils literal notranslate"><span class="pre">load</span></code> and <code class="docutils literal notranslate"><span class="pre">encode</span></code>. The load method will load and return your embedder model. The encode method will take a list of text strings and return a list of numpy vectors. You can register your class for use with MindMeld via the <code class="docutils literal notranslate"><span class="pre">register_embedder</span></code> method as shown below. This code can be added to any new file, say <code class="docutils literal notranslate"><span class="pre">custom_embedders.py</span></code>. You will then need to import it your application's <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.models</span> <span class="kn">import</span> <span class="n">Embedder</span><span class="p">,</span> <span class="n">register_embedder</span>
 
 <span class="k">class</span> <span class="nc">MyEmbedder</span><span class="p">(</span><span class="n">Embedder</span><span class="p">):</span>
@@ -1147,6 +1155,9 @@ larger paragraphs or passages of unstructured text. Sentence-BERT is preferable 
         <span class="c1"># encodes each query in the list</span>
 
 <span class="n">register_embedder</span><span class="p">(</span><span class="s1">&#39;my_embedder_name&#39;</span><span class="p">,</span> <span class="n">MyEmbedder</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hr_assistant.custom_embedders</span>
 </pre></div>
 </div>
 <p>In many cases, you may like to provide some parameters to your <code class="docutils literal notranslate"><span class="pre">load</span></code> method to initialize your model in a certain way. The <code class="docutils literal notranslate"><span class="pre">model_settings</span></code> dictionary in the config will be passed to the load method as <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>, so any needed parameters can be specified there.</p>
@@ -1177,10 +1188,6 @@ larger paragraphs or passages of unstructured text. Sentence-BERT is preferable 
 <span class="n">answers</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index_name</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="s1">&#39;embedder_text&#39;</span><span class="p">,</span>
                <span class="n">question</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">answer</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
 </pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.</p>
 </div>
 </div>
 </div>

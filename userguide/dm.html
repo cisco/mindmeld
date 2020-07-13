@@ -18,7 +18,7 @@
     gtag('config', 'UA-138982267-1');
   </script>
 
-  <title>Working with the Dialogue Manager &mdash; The Conversational AI Playbook 4.3.0 documentation</title>
+  <title>Working with the Dialogue Manager &mdash; The Conversational AI Playbook 4.3.1rc1 documentation</title>
   
 
 
@@ -36,7 +36,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'4.3.0',
+              VERSION:'4.3.1rc1',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -86,7 +86,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.1rc1
               </div>
             
           
@@ -330,32 +330,32 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">prompt_for_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;store_name&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">,</span> <span class="n">has_entity</span><span class="o">=</span><span class="s1">&#39;store_name&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unsupported&#39;</span><span class="p">)</span>
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;unsupported&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">send_help</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">confirm_store</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">pass</span>
 
@@ -603,11 +603,11 @@ milliseconds</td>
 <p class="last"><code class="xref py py-meth docutils literal notranslate"><span class="pre">responder.reply()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">responder.speak()</span></code> accept a single template, or a list of templates. If a list is provided, the DM selects one item at random. This makes your conversational agent a little more varied and life-like.</p>
 </div>
 <p id="dialogue-example">Consider a basic dialogue state handler that greets a user by name, retrieving the user's name from the request context.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;greet&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">welcome</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello, {name}. &#39;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello, </span><span class="si">{name}</span><span class="s1">. &#39;</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;Hello. &#39;</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
@@ -634,7 +634,7 @@ milliseconds</td>
 </div>
 <p>Using this construct allows the dialogue handler to guide the user along a conversational path until the user provides the necessary information.</p>
 <p>For example, in this snippet, once the user enters the <code class="docutils literal notranslate"><span class="pre">close_door</span></code> state, the flow is directed to remain in the <code class="docutils literal notranslate"><span class="pre">close_door</span></code> state until the user either provides a particular location (&quot;close door in the kitchen&quot;), or specifies all doors (&quot;close all doors&quot;).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">selected_all</span> <span class="o">=</span> <span class="n">_get_command_for_all</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -649,7 +649,7 @@ milliseconds</td>
 </pre></div>
 </div>
 <p>Passing <code class="docutils literal notranslate"><span class="pre">targeted_only=True</span></code> to <code class="xref py py-meth docutils literal notranslate"><span class="pre">app.handle()</span></code> will make the handler reachable only if it is specified by setting <code class="docutils literal notranslate"><span class="pre">target_dialogue_state</span></code> in the params object. When <code class="docutils literal notranslate"><span class="pre">targeted_only</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">domain</span></code>, <code class="docutils literal notranslate"><span class="pre">intent</span></code>, <code class="docutils literal notranslate"><span class="pre">handle_entity</span></code>, and <code class="docutils literal notranslate"><span class="pre">has_entities</span></code> must not be passed.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">targeted_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="c1"># only reachable via responder.params.target_dialogue_state = &#39;close_door&#39; in a prior turn</span>
     <span class="k">pass</span>
@@ -670,7 +670,7 @@ milliseconds</td>
 </div>
 <p>The first element in the list, <code class="docutils literal notranslate"><span class="pre">smart_home.close_door</span></code>, supports the &quot;happy path.&quot; The second, <code class="docutils literal notranslate"><span class="pre">greeting.*</span></code>, supports the unexpected &quot;Hello&quot; variant. The elements in the list must use dot-delimited notation to specify domains and intents. The asterisk ('*') wildcard means that <em>any</em> intent within the specified domain is allowed.</p>
 <p>Using this construct allows the dialogue handler to cover (1) the single-query case, (2) the &quot;happy path&quot; multi-query-sequence case, and (3) a variant of the multi-query-sequence case where the user unexpectedly responds to the &quot;Of course, which door?&quot; prompt by uttering a greeting:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;close_door&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">close_door</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">selected_all</span> <span class="o">=</span> <span class="n">_get_command_for_all</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="n">selected_location</span> <span class="o">=</span> <span class="n">_get_location</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -703,7 +703,7 @@ milliseconds</td>
 <p>In this conversation flow, the application retrieves places that serve pizza from its knowledge base and lists them in its response to the user. It is possible that word &quot;Firetrail&quot; has not been seen by the NLP models as part of their training data before and it is also absent from the &quot;restaurant&quot; gazetteer. This may result in the entity recognizer failing to recognize the word as the name of a restaurant in the next user query.</p>
 <p>In such a scenario, we can use information from the previous turn to help the NLP classification in the next turn. From the app's response, we know the names of restaurants that the user is most likely&nbsp;to choose from in the follow-up turn. MindMeld allows you to dynamically inject these new entities into the gazetteer at prediction time, providing useful signals to the NLP models.</p>
 <p>You can pass the entities, along with their popularity information as a <code class="docutils literal notranslate"><span class="pre">dynamic_resource</span></code> to the responder object as shown below. This will allow the entity recognizer to boost n-grams associated with the entity data listed in the dynamic_resource. Currently, we only support the <code class="docutils literal notranslate"><span class="pre">'gazetteer'</span></code> key in the <code class="docutils literal notranslate"><span class="pre">dynamic_resource</span></code> attribute of the responder.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;place_order&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;place_order&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">place_order</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">restaurant_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extreme Pizza&#39;</span><span class="p">,</span> <span class="s1">&#39;Buca Di Beppo&#39;</span><span class="p">,</span> <span class="s1">&#39;Firetrail Pizza&#39;</span><span class="p">]</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">dynamic_resource</span><span class="p">[</span><span class="s1">&#39;gazetteers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;restaurant&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">((</span><span class="n">restaurant</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">restaurant</span> <span class="ow">in</span> <span class="n">restaurant_list</span><span class="p">)}</span>
@@ -746,10 +746,10 @@ milliseconds</td>
 <div class="section" id="creating-a-dialogue-flow">
 <h3>Creating a dialogue flow<a class="headerlink" href="#creating-a-dialogue-flow" title="Permalink to this headline">¶</a></h3>
 <p>To instantiate a dialogue flow, we first need to designate a handler function to be the entry point for the flow. We do so by decorating the desired dialogue state handler with the <code class="docutils literal notranslate"><span class="pre">&#64;app.dialogue_flow</span></code> method, which has the same signature as a normal handler and similar properties. The designated function (<code class="docutils literal notranslate"><span class="pre">send_store_hours</span></code> in the example below) will be invoked when the request matches the specified attributes such as domain and intent.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@app.dialogue_flow</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;store_info&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">dialogue_flow</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;store_info&#39;</span><span class="p">,</span> <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
-    <span class="n">active_store</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="n">store_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;store_name&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">active_store</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">store_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;store_name&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">store_entity</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">stores</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">question_answerer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;stores&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">store_entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -769,8 +769,8 @@ milliseconds</td>
         <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;store_name&#39;</span><span class="p">]</span>
         <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;open_time&#39;</span><span class="p">]</span>
         <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_store</span><span class="p">[</span><span class="s1">&#39;close_time&#39;</span><span class="p">]</span>
-        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;The {store_name} Kwik-E-Mart opens at {open_time} and &#39;</span>
-                        <span class="s1">&#39;closes at {close_time}.&#39;</span><span class="p">)</span>
+        <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;The </span><span class="si">{store_name}</span><span class="s1"> Kwik-E-Mart opens at </span><span class="si">{open_time}</span><span class="s1"> and &#39;</span>
+                        <span class="s1">&#39;closes at </span><span class="si">{close_time}</span><span class="s1">.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
@@ -798,7 +798,7 @@ milliseconds</td>
 <div class="section" id="continuing-a-dialogue-flow">
 <h3>Continuing a dialogue flow<a class="headerlink" href="#continuing-a-dialogue-flow" title="Permalink to this headline">¶</a></h3>
 <p>Similar to the <code class="docutils literal notranslate"><span class="pre">&#64;app.handle</span></code> decorator for regular dialogue state handlers, we can use a <code class="docutils literal notranslate"><span class="pre">&#64;send_store_hours.handle</span></code> decorator to designate different handlers within this flow. We can also designate a default handler by setting <code class="docutils literal notranslate"><span class="pre">default=True</span></code>. The default handler is invoked if there is no matching handler for the request, for example, if the user asks about nearest store instead, which is a different intent that is not handled in this flow.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">default_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">responder</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
@@ -811,7 +811,7 @@ milliseconds</td>
 </div>
 <p>An important caveat to note is that we also need to add a flow-specific handler for <cite>the original entry intent</cite> (in this case, <code class="docutils literal notranslate"><span class="pre">get_store_hours</span></code>).
 Otherwise, <code class="docutils literal notranslate"><span class="pre">get_store_hours</span></code> queries would be handled by the default handler.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;get_store_hours&#39;</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">send_store_hours_in_flow_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">send_store_hours</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 </pre></div>
@@ -825,12 +825,12 @@ Otherwise, <code class="docutils literal notranslate"><span class="pre">get_stor
 <li>We can designate an exit state handler by setting <code class="docutils literal notranslate"><span class="pre">exit_flow=True</span></code>, as in the <code class="docutils literal notranslate"><span class="pre">exit_handler</span></code> code snippet below. After the dialogue manager enters this state, subsequent turns are not bound to the flow.</li>
 <li>We can force the current flow to exit immediately and return to the main dialogue manager flow by invoking <code class="xref py py-meth docutils literal notranslate"><span class="pre">Responder.reprocess()</span></code> method as shown in the <code class="docutils literal notranslate"><span class="pre">transition_flows</span></code> code snippet below.</li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">,</span> <span class="n">exit_flow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">,</span> <span class="n">exit_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">exit_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">([</span><span class="s1">&#39;Bye&#39;</span><span class="p">,</span> <span class="s1">&#39;Goodbye&#39;</span><span class="p">,</span> <span class="s1">&#39;Have a nice day.&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="nd">@send_store_hours</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;find_nearest_store&#39;</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">transition_flows</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">del</span> <span class="n">request</span>
     <span class="k">del</span> <span class="n">responder</span>
@@ -853,9 +853,8 @@ Otherwise, <code class="docutils literal notranslate"><span class="pre">get_stor
 </ul>
 </li>
 </ul>
-<ul>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">FormEntity</span></code> is a class that allows creation of entity objects for slot filling and comprises of the following attributes:</p>
 <ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">FormEntity</span></code> is a class that allows creation of entity objects for slot filling and comprises of the following attributes:<ul>
 <li><code class="docutils literal notranslate"><span class="pre">entity</span></code> (str, required): Entity name.</li>
 <li><code class="docutils literal notranslate"><span class="pre">role</span></code> (str, optional): The role of the entity.</li>
 <li><code class="docutils literal notranslate"><span class="pre">responses</span></code> (list or str, optional): Message for prompting the user for missing entities.</li>
@@ -866,9 +865,6 @@ Otherwise, <code class="docutils literal notranslate"><span class="pre">get_stor
 <li><code class="docutils literal notranslate"><span class="pre">custom_eval</span></code> (func, optional): Custom validation function (should return bool:
 validated or not). For this function, the developer is provided with the current turn's <code class="docutils literal notranslate"><span class="pre">request</span></code> object.</li>
 </ul>
-<blockquote>
-<div><p>&lt;br /&gt;</p>
-</div></blockquote>
 </li>
 </ul>
 <p>Once the slot filling is complete, the filled in entities can be access through <code class="docutils literal notranslate"><span class="pre">request.entities</span></code> in the same manner as any other handler.</p>
@@ -880,52 +876,52 @@ validated or not). For this function, the developer is provided with the current
 </div>
 <div class="section" id="example-use-case">
 <h3>Example use-case<a class="headerlink" href="#example-use-case" title="Permalink to this headline">¶</a></h3>
-<p>Transfer money in a banking app:</p>
+<p>For the use case of transferring money in a banking assistant application, the fields of the account to transfer from, the account to transfer to, and the amount to transfer are all needed. Instead of writing all the logic to capture various combinations of these fields, according to what is missing, you can simply provide the form below. The application will then prompt the user for each missing field until all the required fields are populated and the action can be completed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.core</span> <span class="kn">import</span> <span class="n">FormEntity</span>
 
 <span class="k">def</span> <span class="nf">test_for_money</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-  <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="s1">&#39;$&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">text</span> <span class="k">else</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="s1">&#39;$&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">text</span> <span class="k">else</span> <span class="kc">False</span>
 
 <span class="n">form_transfermoney</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;entities&#39;</span><span class="p">:[</span>
-      <span class="n">FormEntity</span><span class="p">(</span>
-          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
-          <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_from&#39;</span><span class="p">,</span>
-          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sure. Transfer from which account?&#39;</span><span class="p">]</span>
-          <span class="p">),</span>
-      <span class="n">FormEntity</span><span class="p">(</span>
-          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
-          <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_to&#39;</span><span class="p">,</span>
-          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;To which account?&#39;</span><span class="p">]</span>
-          <span class="n">hints</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="s1">&#39;checkings&#39;</span><span class="p">,</span> <span class="o">....</span><span class="p">]</span> <span class="c1"># can be only from this list</span>
-          <span class="p">),</span>
-      <span class="n">FormEntity</span><span class="p">(</span>
-          <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;sys_amount-of-money&#39;</span><span class="p">,</span>
-          <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;And, how much do you want to transfer?&#39;</span><span class="p">],</span>
-          <span class="n">custom_eval</span><span class="o">=</span><span class="n">test_for_money</span> <span class="c1"># validates the user-response for this entity</span>
-          <span class="p">),</span>                         <span class="c1"># using this custom developer-defined function</span>
-                                     <span class="c1"># checking for &#39;$&#39; sign.</span>
-      <span class="p">],</span>
-  <span class="s1">&#39;max_retries&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-  <span class="s1">&#39;exit_keys&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;quit&#39;</span><span class="p">,</span> <span class="s1">&#39;exit&#39;</span><span class="p">],</span>
-  <span class="s1">&#39;exit_msg&#39;</span><span class="p">:</span> <span class="s2">&quot;Sorry I cannot help you. Please try again.&quot;&quot;</span>
-  <span class="p">}</span>
+    <span class="s1">&#39;entities&#39;</span><span class="p">:[</span>
+        <span class="n">FormEntity</span><span class="p">(</span>
+            <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_from&#39;</span><span class="p">,</span>
+            <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sure. Transfer from which account?&#39;</span><span class="p">]</span>
+            <span class="p">),</span>
+        <span class="n">FormEntity</span><span class="p">(</span>
+            <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;account_en&#39;</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="s1">&#39;account_to&#39;</span><span class="p">,</span>
+            <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;To which account?&#39;</span><span class="p">]</span>
+            <span class="n">hints</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;checking&#39;</span><span class="p">,</span> <span class="s1">&#39;checkings&#39;</span><span class="p">]</span> <span class="c1"># can be only from this list</span>
+            <span class="p">),</span>
+        <span class="n">FormEntity</span><span class="p">(</span>
+            <span class="n">entity</span><span class="o">=</span><span class="s1">&#39;sys_amount-of-money&#39;</span><span class="p">,</span>
+            <span class="n">responses</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;And, how much do you want to transfer?&#39;</span><span class="p">],</span>
+            <span class="n">custom_eval</span><span class="o">=</span><span class="n">test_for_money</span> <span class="c1"># validates the user-response for this entity</span>
+            <span class="p">),</span>                         <span class="c1"># using this custom developer-defined function</span>
+                                       <span class="c1"># checking for &#39;$&#39; sign.</span>
+        <span class="p">],</span>
+    <span class="s1">&#39;max_retries&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;exit_keys&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;quit&#39;</span><span class="p">,</span> <span class="s1">&#39;exit&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;exit_msg&#39;</span><span class="p">:</span> <span class="s2">&quot;Sorry I cannot help you. Please try again.&quot;</span>
+    <span class="p">}</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.auto_fill</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;transfermoney&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form_transfermoney</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">auto_fill</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;transfermoney&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form_transfermoney</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">transfermoney_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_en&#39;</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_from&#39;</span><span class="p">:</span>
-              <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_from&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
-          <span class="k">elif</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_to&#39;</span><span class="p">:</span>
-              <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-          <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_en&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_from&#39;</span><span class="p">:</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_from&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;account_to&#39;</span><span class="p">:</span>
+                <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;account_to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cname&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">responder</span><span class="o">.</span><span class="n">slots</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
-  <span class="n">replies</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;All right. So, you&#39;re transferring {amount} from your &quot;</span>
-             <span class="s2">&quot;{account_from} to a {account_to}. Is that right?&quot;</span><span class="p">]</span>
-  <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">replies</span><span class="p">)</span>
+    <span class="n">replies</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;All right. So, you&#39;re transferring </span><span class="si">{amount}</span><span class="s2"> from your &quot;</span>
+               <span class="s2">&quot;</span><span class="si">{account_from}</span><span class="s2"> to a </span><span class="si">{account_to}</span><span class="s2">. Is that right?&quot;</span><span class="p">]</span>
+    <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">replies</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -938,7 +934,7 @@ validated or not). For this function, the developer is provided with the current
 <p class="last">The <code class="docutils literal notranslate"><span class="pre">handler</span></code> argument is a keyword argument, and must always be named <code class="docutils literal notranslate"><span class="pre">handler</span></code>.</p>
 </div>
 <p>To register middleware with an application, decorate the middleware function with the <code class="xref py py-meth docutils literal notranslate"><span class="pre">app.middleware()</span></code> method. Here is an example middleware function which handles unexpected exceptions:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.middleware</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span>
 <span class="k">def</span> <span class="nf">error_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
@@ -951,21 +947,21 @@ validated or not). For this function, the developer is provided with the current
 </pre></div>
 </div>
 <p>As you can see the above middleware function calls the handler function. Middleware are called before dialogue state handlers in the order they are registered. Here is an example with two middleware functions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.middleware</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span>
 <span class="k">def</span> <span class="nf">first_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
     <span class="c1"># this will be called first</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;hello from the first middleware&#39;</span><span class="p">)</span>
     <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;goodbye from the first middleware&#39;</span><span class="p">)</span>
 
-<span class="nd">@app.middleware</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span>
 <span class="k">def</span> <span class="nf">second_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
     <span class="c1"># this will be called second</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;hello from the second middleware&#39;</span><span class="p">)</span>
     <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;goodbye from the second middleware&#39;</span><span class="p">)</span>
 
-<span class="nd">@app.handle</span><span class="p">()</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;this is the default dialogue state&#39;</span><span class="p">)</span>
 </pre></div>
@@ -1024,27 +1020,27 @@ Python have language features to deal with this problem, like the
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld</span> <span class="kn">import</span> <span class="n">Application</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="nd">@app.middleware</span>
-<span class="n">async</span> <span class="k">def</span> <span class="nf">middle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">middle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
     <span class="c1"># preprocessing</span>
     <span class="c1"># …</span>
 
-    <span class="n">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
     <span class="c1"># postprocessing</span>
     <span class="c1"># …</span>
 
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
-<span class="n">async</span> <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
-    <span class="n">await</span> <span class="n">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">)</span>
 
 
-<span class="nd">@app.handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
-<span class="n">async</span> <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">intent</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">responder</span><span class="p">):</span>
     <span class="n">responder</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1061,7 +1057,7 @@ or <code class="docutils literal notranslate"><span class="pre">process()</span>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">from</span> <span class="nn">mindmeld.components.dialogue</span> <span class="kn">import</span> <span class="n">Conversation</span>
 <span class="c1"># use force_sync at creation time</span>
-<span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/kwik_e_mart&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/kwik_e_mart&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1071,7 +1067,7 @@ or <code class="docutils literal notranslate"><span class="pre">process()</span>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># use force_sync at invocation time</span>
 <span class="n">convo</span> <span class="o">=</span> <span class="n">Conversation</span><span class="p">(</span><span class="n">nlp</span><span class="o">=</span><span class="n">nlp</span><span class="p">,</span> <span class="n">app_path</span><span class="o">=</span><span class="s1">&#39;/path/to/kwik_e_mart&#39;</span><span class="p">)</span>
-<span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">convo</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">force_sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[&#39;Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?&#39;,</span>
