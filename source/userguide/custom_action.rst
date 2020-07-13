@@ -62,8 +62,8 @@ A Simple Custom Action Server
 -----------------------------
 
 To understand the behavior of Custom Actions, let's take a look at example of a Custom Action Server. We have added a
-sample server in the github directory under `examples/custom_action/example_server`. This server is adapted from the
-sample server that is auto-generated from our OpenAPI protocol.
+sample server for Python 3.6+ in the github directory under `examples/custom_action/example_server`. This server is adapted from the
+sample server that is auto-generated from our OpenAPI protocol using the `Swagger Online Editor <https://editor.swagger.io/>`_.
 
 To install the optional dependency for the sample server, you can run the following command in the terminal:
 
