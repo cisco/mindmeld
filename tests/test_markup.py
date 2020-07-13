@@ -157,7 +157,9 @@ def test_load_system(
 ):
     """Tests loading a query with a system entity"""
     # We added a pm timestamp to bias duckling time resolution to resolve to pm times
-    processed_query = markup.load_query(query, query_factory, query_options={'timestamp': 1592002800})
+    processed_query = markup.load_query(
+        query, query_factory, query_options={"timestamp": 1592002800}
+    )
 
     assert processed_query
     assert len(processed_query.entities) == 1
