@@ -45,7 +45,6 @@ test_requirements = [
     "pytest-cov==2.4.0",
     "pytest-asyncio==0.8.0",
     "black>=19.10b0 ; python_version >= '3.6'",
-    "connexion>=2.7.0",
 ]
 
 setup(
@@ -90,6 +89,6 @@ setup(
             'sentence-transformers~=0.2.6; python_version>="3.6"',
             "elasticsearch>=7.0",
         ],
-        "examples": ["connexion>=2.7.0",],
+        "examples": ["connexion>=2.7.0; python_version>="3.6"",],
     },
 )
