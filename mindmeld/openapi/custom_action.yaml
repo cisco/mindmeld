@@ -131,7 +131,7 @@ components:
           description: "The locale of the request"
           nullable: true
         timestamp:
-          type: int
+          type: integer
           description: "The timestamp of the request"
           nullable: true
 
