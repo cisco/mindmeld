@@ -89,6 +89,6 @@ setup(
             'sentence-transformers~=0.2.6; python_version>="3.6"',
             "elasticsearch>=7.0",
         ],
-        "examples": ["connexion>=2.7.0; python_version>="3.6"",],
+        "examples": ['connexion>=2.7.0; python_version>="3.6"',],
     },
 )
