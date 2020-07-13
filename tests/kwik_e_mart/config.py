@@ -6,14 +6,6 @@ NLP_CONFIG = {
     "resolve_entities_using_nbest_transcripts": ["store_info.get_store_hours"]
 }
 
-QUESTION_ANSWERER_CONFIG = {
-    "model_type": "embedder",
-    "model_settings": {
-        "embedder_type": "bert",
-        "embedding_fields": {"stores": ["store_name", "address"]},
-    },
-}
-
 DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg",},
