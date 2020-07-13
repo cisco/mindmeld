@@ -187,7 +187,7 @@ Here we will illustrate a simple version of the ``pay_creditcard`` handler, whic
 .. code:: python
 
     @app.handle(intent='pay_creditcard')
-    def setup_autopay(request, responder):
+    def pay_creditcard(request, responder):
         """
         When the user expresses an intent to make a credit card payment, check to see if
 	they have specified a numerical amount or a generic amount like minimum
@@ -400,7 +400,7 @@ Start by inspecting the baseline configurations that the different classifiers u
 
 .. code:: python
 
-   ic = nlp.domains['ordering'].intent_classifier
+   ic = nlp.domains['accounts_creditcards'].intent_classifier
    ic.config.model_settings['classifier_type']
 
 .. code-block:: console
