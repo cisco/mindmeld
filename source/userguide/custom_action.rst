@@ -58,21 +58,26 @@ In your Dialogue Manager, you can access the application's custom action config 
 property ``app.custom_action_config``.
 
 
-A Simple Custom Action Server
+A Sample Custom Action Server
 -----------------------------
 
 To understand the behavior of Custom Actions, let's take a look at example of a Custom Action Server. We have added a
 sample server for Python 3.6+ in the github directory under `examples/custom_action/example_server`. This server is adapted from the
 sample server that is auto-generated from our OpenAPI protocol using the `Swagger Online Editor <https://editor.swagger.io/>`_.
 
-To install the optional dependency for the sample server, you can run the following command in the terminal:
+To setup the sample server, you can run the following command in the terminal:
 
 .. code-block:: console
 
     pip install mindmeld[examples]
 
-    # to view the MindMeld API in the local browser:
+    # optionally, to view the MindMeld API in the local browser:
     pip install "connexion[swagger-ui]"
+
+
+    git clone git@github.com:cisco/mindmeld.git
+
+    cd mindmeld/examples/custom_action/example_server
 
     # to run the server
     python -m swagger_server
