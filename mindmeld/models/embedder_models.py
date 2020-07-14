@@ -33,7 +33,7 @@ try:
 
     register_bert = True
 except ImportError:
-    logger.warning("Must install the extra [bert] to use the built in embbedder.")
+    logger.info("Must install the extra [bert] to use the built in embbedder.")
     register_bert = False
 
 
