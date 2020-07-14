@@ -29,13 +29,17 @@ In the Docker setup, we use Docker only for running MindMeld dependencies, namel
 1. Pull and run Docker container
 """"""""""""""""""""""""""""""""
 
+.. note::
+
+  The following instruction references our docker container with Elasticsearch 7 which is a requirement for leveraging semantic embedding. ``mindmeldworkbench/dep:latest`` is still available with an older version of Elasticsearch.
+
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
 #. Then, open a terminal (shell) and run these commands:
 
 .. code-block:: shell
 
    docker pull mindmeldworkbench/dep:es_7
-   docker run -ti -d -p 0.0.0.0:9200:9200 -p 0.0.0.0:7151:7151 -p 0.0.0.0:9300:9300 mindmeldworkbench/dep
+   docker run -ti -d -p 0.0.0.0:9200:9200 -p 0.0.0.0:7151:7151 -p 0.0.0.0:9300:9300 mindmeldworkbench/dep:es_7
 
 2. Install prerequisites
 """"""""""""""""""""""""
