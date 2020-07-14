@@ -1,7 +1,7 @@
-Managing Optional Dependency
-============================
+Managing Optional Dependencies
+==============================
 
-MindMeld depends on Duckling for numerical parsing and ElasticSearch for Entity Resolution and Question Answering. However if your application does not need these components, you can turn off them by configuring your MindMeld application.
+MindMeld depends on Duckling for numerical parsing and Elasticsearch for Entity Resolution and Question Answering. If your application does not need these components or the fully optimized versions of these components, you can configure your MindMeld application to not rely on Duckling or Elasticsearch.
 
 
 Turning off Duckling
@@ -27,4 +27,4 @@ If you choose not to use Elasticsearch, MindMeld provides a simple baseline vers
         'model_type': 'exact_match'
     }
 
-Similarly when your ``mapping.json`` is empty, the application will not make a call to ElasticSearch.
+This Exact Match model only resolves to an object when the text exactly matches a canonical name or synonym. Alternatively, when your ``mapping.json`` is empty (i.e. when your application does not include any information for entity resolution), MindMeld will not make a call to Elasticsearch.
