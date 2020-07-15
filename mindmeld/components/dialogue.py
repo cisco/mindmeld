@@ -717,12 +717,13 @@ class AutoEntityFilling:
     _logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
-    def __init__(self, entrance_handler, form, app):
+    def __init__(self, handler, form, app, clear_prev=False):
         self._app = app
-        self._entrance_handler = entrance_handler
+        self._entrance_handler = handler
         self._form = form
         self._local_form = None
         self._prompt_turn = None
+        self._clear_prev = clear_prev
         self._check_attr()
 
     def _check_attr(self):
@@ -876,20 +877,21 @@ class AutoEntityFilling:
 
     def _initial_fill(self, request):
         """Performs the first pass and fills the entity form with entity values available
-        in the initial query.
+        in the initial query. Bypassed if `clear_prev` is set to True.
 
         Args:
             request (Request): The request object.
         """
-        for entity in request.entities:
-            entity_type = entity["type"]
-            role = entity["role"]
+        if not self._clear_prev:
+            for entity in request.entities:
+                entity_type = entity["type"]
+                role = entity["role"]
 
-            for slot in self._local_form:
-                if entity_type == slot.entity:
-                    if (slot.role is None) or (role == slot.role):
-                        slot.value = entity
-                        break
+                for slot in self._local_form:
+                    if entity_type == slot.entity:
+                        if (slot.role is None) or (role == slot.role):
+                            slot.value = entity
+                            break
 
     def _end_slot_fill(self, request, responder, async_mode):
         # Returns filled entity objects as request.entities
@@ -1010,6 +1012,56 @@ class AutoEntityFilling:
             responder (DialogueResponder): The responder object.
         """
         self(request, responder)
+
+    def _check_invoke_complete(self, request, responder):
+        """Check if all entities captured for invoke, return control to handler"""
+        _captured = []
+        _reqd = []
+        if request.entities:
+            for e in request.entities:
+                _captured.append(e['type'])
+
+        for e in self._entity_form:
+            _reqd.append(e.entity)
+
+        # check if already filled in previous turn, reset call back to original
+        if sorted(_captured) == sorted(_reqd):
+            name = self._entrance_handler.__name__
+            if "previous_rule" in responder.frame:
+                self._app.app_manager.dialogue_manager.handler_map[name] = responder.frame[
+                    "previous_rule"
+                ]
+            else:
+                self._app.app_manager.dialogue_manager.handler_map[name] = self._entrance_handler
+            return True
+
+        return False
+
+    def invoke(self, request, responder):
+        """
+        Invoke slot-filling as a direct call without requiring a decorator.
+        """
+
+        if self._check_invoke_complete(request, responder):
+            return
+
+        # Set dialogue rule to auto_fill and
+        # store current rule for resetting once invoke is complete
+        name = self._entrance_handler.__name__
+        if name in self._app.app_manager.dialogue_manager.handler_map:
+            responder.frame[
+                "previous_rule"
+            ] = self._app.app_manager.dialogue_manager.handler_map[name]
+        self._app.app_manager.dialogue_manager.handler_map[name] = self.__call__
+
+        # re-run to continue flow
+        self._app.app_manager.dialogue_manager.reprocess()
+
+    async def invoke_async(self, request, responder):
+        """
+        Async invoke slot-filling as a direct call without requiring a decorator.
+        """
+        self.invoke(request, responder)
 
 
 class DialogueResponder:
