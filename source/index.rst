@@ -104,6 +104,7 @@ Contents
 
    userguide/getting_started
    userguide/architecture
+   userguide/optional_dependency
    userguide/preprocessor
    userguide/nlp
    userguide/domain_classifier
