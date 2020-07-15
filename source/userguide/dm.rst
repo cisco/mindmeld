@@ -572,8 +572,11 @@ As shown here, you can use the dialog flow functionality to effectively craft co
 Automatic Slot Filling for Entities
 -----------------------------------
 
-MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via applying the ``@app.auto_fill`` decorator for the dialogue state handler requiring entities to be obtained prior to applying the functionality defined within.
+MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via either applying the ``@app.auto_fill`` decorator to any dialogue state handler requiring entities to be obtained prior to applying the functionality defined within, or directly invoking a call to this feature at any point inside the handler.
 
+
+Using the ``@app.auto_fill`` decorator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This decorator replaces the need to define the ``@app.handle`` decorator. MindMeld will prompt the user for missing entities before applying the handler functionality by itself. The arguments required for this decorator are all the rules that would apply for that dialogue state (such as domain, intent, entities etc.), with the addition of a ``form`` argument.
 
 - ``form`` is a dictionary containing the following entries:
@@ -601,12 +604,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 
-.. note::
-   |
-    The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
-
-Example use-case
-^^^^^^^^^^^^^^^^
+**Example**
 
 For the use case of transferring money in a banking assistant application, the fields of the account to transfer from, the account to transfer to, and the amount to transfer are all needed. Instead of writing all the logic to capture various combinations of these fields, according to what is missing, you can simply provide the form below. The application will then prompt the user for each missing field until all the required fields are populated and the action can be completed.
 
@@ -620,14 +618,15 @@ For the use case of transferring money in a banking assistant application, the f
     form_transfermoney = {
         'entities':[
             FormEntity(
-                entity='account_en',
+                entity='account_type',
                 role='account_from',
-                responses=['Sure. Transfer from which account?']
+                responses=['Sure. Transfer from which account?'],
+                retry_response=["That account is not correct. Transfer from which account?"],
                 ),
             FormEntity(
-                entity='account_en',
+                entity='account_type',
                 role='account_to',
-                responses=['To which account?']
+                responses=['To which account?'],
                 hints=['checking', 'checkings'] # can be only from this list
                 ),
             FormEntity(
@@ -647,7 +646,7 @@ For the use case of transferring money in a banking assistant application, the f
     @app.auto_fill(intent='transfermoney', form=form_transfermoney)
     def transfermoney_handler(request, responder):
         for entity in request.entities:
-            if entity['type'] == 'account_en':
+            if entity['type'] == 'account_type':
                 if entity['role'] == 'account_from':
                     responder.slots['account_from'] = entity['value'][0]['cname']
                 elif entity['role'] == 'account_to':
@@ -658,6 +657,102 @@ For the use case of transferring money in a banking assistant application, the f
         replies = ["All right. So, you're transferring {amount} from your "
                    "{account_from} to a {account_to}. Is that right?"]
         responder.reply(replies)
+
+
+Subset forms and invoking slot-filling within in a dialogue handler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To support dynamically iterating through a form, we suggest the use of subset forms. Consider a case in which the initial form fetches a certain set of entities, and the flow ahead depends on the values of those captured entities. This requires capturing of further entities based on those values. For this, we recommend using subset forms.
+
+Take into consideration the previous example. Now, instead of a single pass form to capture all entities, say we want to check whether the account from which money is withdrawn is a savings account or not. If yes, then continue to fetch the other entities (using ``form_transfermoney_2``), otherwise send appropriate response.
+
+.. code:: python
+
+    from mindmeld.components.dialogue import AutoEntityFilling
+    from mindmeld.core import FormEntity
+
+    form_transfermoney_1 = {
+        'entities':[
+            FormEntity(
+                entity='account_type',
+                role='account_from',
+                responses=['Sure. Transfer from which account?']
+                ),
+            ]
+        }
+
+    form_transfermoney_2 = {
+        'entities':[
+            FormEntity(
+                entity='account_type',
+                role='account_to',
+                responses=['To which account?'],
+                hints=['checking', 'checkings']
+                ),
+            FormEntity(
+                entity='sys_amount-of-money',
+                responses=['And, how much do you want to transfer?'], 
+                ),
+            ],
+        'max_retries': 1,
+        'exit_keys': ['cancel', 'quit', 'exit'],
+        'exit_msg': "Sorry I cannot help you. Please try again."
+        }
+
+    @app.auto_fill(intent="transfer_money", form=form_transfermoney_1)
+    def transfer_money_handler(request, responder):
+        account = next((e['value'][0]['cname'] for e in request.entities if e['type'] == 'account_type'), None)
+        if account == 'savings':
+            responder.frame['account_from'] = account
+            AutoEntityFilling(handler=transfer_money_followup_handler, form=form_transfermoney_2, app=app).invoke(request, responder)
+        else:
+            responder.reply('Sorry, you can only transfer money from a savings account.')
+
+    def transfer_money_followup_handler(request, responder):
+        for entity in request.entities:
+            if entity['type'] == 'account_type':
+                if entity['role'] == 'account_to':
+                    responder.slots['account_to'] = entity['value'][0]['cname']
+            else:
+                responder.slots['amount'] = entity['value'][0]['value']
+
+        responder.slots['account_from'] = responder.frame['account_from']
+        replies = ["All right. So, you're transferring {amount} from your "
+               "{account_from} to a {account_to}. Is that right?"]
+        responder.reply(replies)
+
+
+Alternatively, the standalone call to this feature can be called independently of the auto_fill decorated handler as well.
+
+.. code:: python
+
+    @app.handle(intent="check_balances")
+    def check_balance(request, responder):
+        user = User(request) # fetch user information
+        responder.frame['user'] = user
+        AutoEntityFilling(handler=check_balance_followup_handler, form=balance_form, app=app).invoke(request, responder)
+
+    def check_balance_followup_handler(request, responder):
+        user = responder.frame['user']
+
+        if request.entities:
+            for entity in request.entities:
+                if entity["type"] == "account_type":
+                    responder.slots["account"] = entity["value"][0]["cname"]
+                    responder.slots["amount"] = user.get(responder.slots["account"])
+                    responder.reply(
+                        "Your {account} account balance is ${amount:.2f}"
+                    )
+
+.. note::
+   
+    * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order. 
+    .. |br|
+
+    * All entities that are required by the slot-filling form for an intent should be covered through example queries in the training files for that intent.
+    .. |br|    
+   
+    * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer `here <https://www.mindmeld.com/docs/userguide/entity_recognizer.html>`_. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
+
 
 .. _dialogue_middleware:
 

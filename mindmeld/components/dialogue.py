@@ -706,7 +706,7 @@ class DialogueFlow(DialogueManager):
         return handler
 
 
-class AutoEntityFilling:
+class AutoEntityFilling:   # pylint: disable=R0902
     """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
@@ -725,6 +725,7 @@ class AutoEntityFilling:
         self._local_form = None
         self._prompt_turn = None
         self._invoked = False
+        self._previous_rule = None
         self._check_attr()
 
     def _check_attr(self):
@@ -911,16 +912,14 @@ class AutoEntityFilling:
         if self._invoked:
             kwargs = {'domain': request.domain, 'intent': request.intent}
             name = self._entrance_handler.__name__
-            if "previous_rule" in responder.frame:
+            if self._previous_rule:
                 try:
                     self._app.app_manager.dialogue_manager.add_dialogue_rule(
-                        name, responder.frame["previous_rule"], **kwargs
+                        name, self._previous_rule, **kwargs
                     )
                 except AssertionError:
-                    self._app.app_manager.dialogue_manager.handler_map[name] = responder.frame[
-                        "previous_rule"
-                    ]
-                responder.frame["previous_rule"] = None
+                    self._app.app_manager.dialogue_manager.handler_map[name] = self._previous_rule
+                self._previous_rule = None
 
         self._exit_flow(responder)
 
@@ -1038,12 +1037,12 @@ class AutoEntityFilling:
         # store current rule for resetting once invoke is complete
 
         name = self._entrance_handler.__name__
-        _called_from = sys._getframe().f_back.f_code.co_name
 
-        responder.frame["_called_from"] = _called_from
-        responder.frame[
-            "previous_rule"
-        ] = self._app.app_manager.dialogue_manager.handler_map[_called_from]
+        try:
+            _called_from = sys._getframe().f_back.f_code.co_name
+            self._previous_rule = self._app.app_manager.dialogue_manager.handler_map[_called_from]
+        except (KeyError, AttributeError):
+            return
 
         try:
             self._app.app_manager.dialogue_manager.add_dialogue_rule(name, self.__call__, **kwargs)
