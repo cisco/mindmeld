@@ -1,6 +1,9 @@
 import pytest
 
 from mindmeld.components import Conversation
+from mindmeld.components.dialogue import DialogueResponder, AutoEntityFilling
+from mindmeld.components.request import Request
+from mindmeld.core import FormEntity
 from .test_dialogue_flow import assert_target_dialogue_state, assert_reply
 
 
@@ -93,6 +96,47 @@ def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
         directives,
         "Sorry, I did not get you. " "Which store would you like to know about?",
     )
+
+
+def handler(request, responder):
+    assert any(e["type"] == "store_name" for e in request.entities)
+
+
+def test(request):
+    # entity already passed in, this is to check flow.
+    return True
+
+
+@pytest.mark.conversation
+def test_auto_fill_invoke(kwik_e_mart_app):
+    """Tests slot-filling invoke functionality"""
+    app = kwik_e_mart_app
+    request = Request(
+        text="elm street",
+        domain="store_info",
+        intent="get_store_number",
+        entities=[
+            {"type": "store_name", "value": [{"cname": "23 Elm Street"}], "role": None}
+        ],
+    )
+    responder = DialogueResponder()
+    form = {
+        "entities": [
+            FormEntity(
+                entity="store_name",
+                value="23 Elm Street",
+                default_eval=False,
+                custom_eval=test,
+            )
+        ],
+    }
+
+    @app.handle(domain="store_info", intent="get_store_number")
+    def handler_main(request, responder):
+        print(request)
+        print(AutoEntityFilling(handler, form, app).invoke(request, responder))
+
+    handler_main(request, responder)
 
 
 @pytest.mark.conversation
