@@ -751,7 +751,7 @@ Alternatively, the standalone call to this feature can be called independently o
     * All entities that are required by the slot-filling form for an intent should be covered through example queries in the training files for that intent.
     .. |br|    
    
-    * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer `here <https://www.mindmeld.com/docs/userguide/entity_recognizer.html>`_. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
+    * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer :ref:`here <entity_recognition>`. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
 
 
 .. _dialogue_middleware:

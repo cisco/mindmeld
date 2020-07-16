@@ -720,7 +720,7 @@ class AutoEntityFilling:   # pylint: disable=R0902
 
     def __init__(self, handler, form, app):
         self._app = app
-        self._entrance_handler = handler
+        self._handler = handler
         self._form = form
         self._local_form = None
         self._prompt_turn = None
@@ -761,7 +761,7 @@ class AutoEntityFilling:   # pylint: disable=R0902
         responder.params.allowed_intents = tuple(
             ["{}.{}".format(request.domain, request.intent)]
         )
-        responder.params.target_dialogue_state = self._entrance_handler.__name__
+        responder.params.target_dialogue_state = self._handler.__name__
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -910,9 +910,13 @@ class AutoEntityFilling:   # pylint: disable=R0902
         )
 
         if self._invoked:
-            kwargs = {'domain': request.domain, 'intent': request.intent}
-            name = self._entrance_handler.__name__
+            kwargs = {'targeted_only': False}
+            name = self._handler.__name__
             if self._previous_rule:
+                # The following is to reset the previously modified dialogue rule back to
+                # its original state. If the the rule cannot be added, the mapping is changed back.
+                # This is done so that the rule conditions map to the original handler instead of
+                # mapping to the auto-fill standalone call at all times.
                 try:
                     self._app.app_manager.dialogue_manager.add_dialogue_rule(
                         name, self._previous_rule, **kwargs
@@ -928,10 +932,10 @@ class AutoEntityFilling:   # pylint: disable=R0902
         return self._end_slot_fill_sync(request, responder)
 
     def _end_slot_fill_sync(self, request, responder):
-        return self._entrance_handler(request, responder)
+        return self._handler(request, responder)
 
     async def _end_slot_fill_async(self, request, responder):
-        return await self._entrance_handler(request, responder)
+        return await self._handler(request, responder)
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
@@ -1031,17 +1035,23 @@ class AutoEntityFilling:   # pylint: disable=R0902
         Invoke slot-filling as a direct call without requiring a decorator.
         """
         self._invoked = True
-        kwargs = {'domain': request.domain, 'intent': request.intent}
+
+        # ensures that the slot-filling function is targeted.
+        kwargs = {'targeted_only': True}
 
         # Set dialogue rule to auto_fill and
-        # store current rule for resetting once invoke is complete
+        # store current rule for resetting once invoke is complete.
 
-        name = self._entrance_handler.__name__
+        name = self._handler.__name__
 
         try:
+            # fetches the name of the function that invoked this class.
             _called_from = sys._getframe().f_back.f_code.co_name
             self._previous_rule = self._app.app_manager.dialogue_manager.handler_map[_called_from]
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError) as e:
+            self._logger.warning(
+                "Auto-Fill invoke failed with warning: '{}'".format(str(e))
+            )
             return
 
         try:
