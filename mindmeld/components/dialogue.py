@@ -706,7 +706,7 @@ class DialogueFlow(DialogueManager):
         return handler
 
 
-class AutoEntityFilling:   # pylint: disable=R0902
+class AutoEntityFilling:
     """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
@@ -722,9 +722,8 @@ class AutoEntityFilling:   # pylint: disable=R0902
         self._app = app
         self._handler = handler
         self._form = form
-        self._local_form = None
+        self._local_entity_form = None
         self._prompt_turn = None
-        self._invoked = False
         self._previous_rule = None
         self._check_attr()
 
@@ -766,7 +765,7 @@ class AutoEntityFilling:   # pylint: disable=R0902
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
         self._prompt_turn = None
-        self._local_form = None
+        self._local_entity_form = None
         responder.params.allowed_intents = tuple()
         responder.exit_flow()
 
@@ -888,7 +887,7 @@ class AutoEntityFilling:   # pylint: disable=R0902
             entity_type = entity["type"]
             role = entity["role"]
 
-            for slot in self._local_form:
+            for slot in self._local_entity_form:
                 if entity_type == slot.entity:
                     if (slot.role is None) or (role == slot.role):
                         slot.value = entity
@@ -902,28 +901,12 @@ class AutoEntityFilling:   # pylint: disable=R0902
             text=request.text,
             domain=request.domain,
             intent=request.intent,
-            entities=[slot.value for slot in self._local_form],
+            entities=[slot.value for slot in self._local_entity_form],
             context=request.context or {},
             history=request.history or [],
             frame=responder.frame or {},
             params=request.params,
         )
-
-        if self._invoked:
-            kwargs = {'targeted_only': False}
-            name = self._handler.__name__
-            if self._previous_rule:
-                # The following is to reset the previously modified dialogue rule back to
-                # its original state. If the the rule cannot be added, the mapping is changed back.
-                # This is done so that the rule conditions map to the original handler instead of
-                # mapping to the auto-fill standalone call at all times.
-                try:
-                    self._app.app_manager.dialogue_manager.add_dialogue_rule(
-                        name, self._previous_rule, **kwargs
-                    )
-                except AssertionError:
-                    self._app.app_manager.dialogue_manager.handler_map[name] = self._previous_rule
-                self._previous_rule = None
 
         self._exit_flow(responder)
 
@@ -982,16 +965,16 @@ class AutoEntityFilling:   # pylint: disable=R0902
 
         self._set_next_turn(request, responder)
 
-        if self._prompt_turn is None or self._local_form is None:
+        if self._prompt_turn is None or self._local_entity_form is None:
             # Entering the flow
             self._prompt_turn = True
-            self._local_form = copy.deepcopy(self._entity_form)
+            self._local_entity_form = copy.deepcopy(self._entity_form)
             self._retry_attempts = 0
 
             # Fill the form with the entities in the first query
             self._initial_fill(request)
 
-        for slot in self._local_form:
+        for slot in self._local_entity_form:
 
             if not slot.value:
                 # check if user has been prompted for this entity slot
@@ -1034,8 +1017,6 @@ class AutoEntityFilling:   # pylint: disable=R0902
         """
         Invoke slot-filling as a direct call without requiring a decorator.
         """
-        self._invoked = True
-
         # ensures that the slot-filling function is targeted.
         kwargs = {'targeted_only': True}
 
@@ -1055,6 +1036,9 @@ class AutoEntityFilling:   # pylint: disable=R0902
             return
 
         try:
+            # sets a dialogue rule for the handler passed in this invoke call to iteratively call
+            # the slot-filling flow till completion or exit. This rule is added temporarily for this
+            # flow and reset for the handler with every new invoke call.
             self._app.app_manager.dialogue_manager.add_dialogue_rule(name, self.__call__, **kwargs)
         except AssertionError:
             self._app.app_manager.dialogue_manager.handler_map[name] = self.__call__

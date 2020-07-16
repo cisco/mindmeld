@@ -638,7 +638,7 @@ For the use case of transferring money in a banking assistant application, the f
             ],
         'max_retries': 1,
         'exit_keys': ['cancel', 'quit', 'exit'],
-        'exit_msg': "Sorry I cannot help you. Please try again."
+        'exit_msg': "Sorry I cannot help you with this transfer. Please try again."
         }
 
 .. code:: python
@@ -677,7 +677,10 @@ Take into consideration the previous example. Now, instead of a single pass form
                 role='account_from',
                 responses=['Sure. Transfer from which account?']
                 ),
-            ]
+            ],
+        'max_retries': 2,
+        'exit_keys': ['cancel', 'quit', 'exit'],
+        'exit_msg': "Sorry I cannot help you with this transfer. Please try again."
         }
 
     form_transfermoney_2 = {
@@ -686,6 +689,7 @@ Take into consideration the previous example. Now, instead of a single pass form
                 entity='account_type',
                 role='account_to',
                 responses=['To which account?'],
+                retry_response=["That account is not correct. Transfer to which account?"]
                 hints=['checking', 'checkings']
                 ),
             FormEntity(
@@ -695,7 +699,7 @@ Take into consideration the previous example. Now, instead of a single pass form
             ],
         'max_retries': 1,
         'exit_keys': ['cancel', 'quit', 'exit'],
-        'exit_msg': "Sorry I cannot help you. Please try again."
+        'exit_msg': "Sorry I cannot help you with this transfer. Please try again."
         }
 
     @app.auto_fill(intent="transfer_money", form=form_transfermoney_1)
@@ -738,7 +742,7 @@ Alternatively, the standalone call to this feature can be called independently o
             for entity in request.entities:
                 if entity["type"] == "account_type":
                     responder.slots["account"] = entity["value"][0]["cname"]
-                    responder.slots["amount"] = user.get(responder.slots["account"])
+                    responder.slots["amount"] = user.get(responder.slots["account"]) # calls external function to get balance
                     responder.reply(
                         "Your {account} account balance is ${amount:.2f}"
                     )
