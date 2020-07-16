@@ -12,7 +12,6 @@
 # limitations under the License.
 
 """This module contains the dialogue manager component of MindMeld"""
-import sys
 import asyncio
 import copy
 import json
@@ -710,21 +709,22 @@ class AutoEntityFilling:
     """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
-
-    Attributes:
-        app (Application): The application that initializes this flow.
     """
 
     _logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
     def __init__(self, handler, form, app):
+        """
+        handler (func): The function to which control is returned after completion of flow.
+        form (dict): Developer-defined slot-filling form.
+        app (Application): The application that initializes this flow.
+        """
         self._app = app
         self._handler = handler
         self._form = form
         self._local_entity_form = None
         self._prompt_turn = None
-        self._previous_rule = None
         self._check_attr()
 
     def _check_attr(self):
@@ -1020,20 +1020,7 @@ class AutoEntityFilling:
         # ensures that the slot-filling function is targeted.
         kwargs = {'targeted_only': True}
 
-        # Set dialogue rule to auto_fill and
-        # store current rule for resetting once invoke is complete.
-
         name = self._handler.__name__
-
-        try:
-            # fetches the name of the function that invoked this class.
-            _called_from = sys._getframe().f_back.f_code.co_name
-            self._previous_rule = self._app.app_manager.dialogue_manager.handler_map[_called_from]
-        except (KeyError, AttributeError) as e:
-            self._logger.warning(
-                "Auto-Fill invoke failed with warning: '{}'".format(str(e))
-            )
-            return
 
         try:
             # sets a dialogue rule for the handler passed in this invoke call to iteratively call

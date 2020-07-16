@@ -1,5 +1,5 @@
 import pytest
-
+from mock import MagicMock
 from mindmeld.components import Conversation
 from mindmeld.components.dialogue import DialogueResponder, AutoEntityFilling
 from mindmeld.components.request import Request
@@ -98,15 +98,6 @@ def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
     )
 
 
-def handler_sub(request, responder):
-    assert any(e["type"] == "store_name" for e in request.entities)
-
-
-def test(request):
-    # entity already passed in, this is to check flow.
-    return True
-
-
 @pytest.mark.conversation
 def test_auto_fill_invoke(kwik_e_mart_app):
     """Tests slot-filling invoke functionality"""
@@ -121,22 +112,32 @@ def test_auto_fill_invoke(kwik_e_mart_app):
     )
     responder = DialogueResponder()
 
+    # custom eval func
+    def test_custom_eval(request):
+        # entity already passed in, this is to check custom eval flow.
+        return True
+
+    # mock handler for invoke
+    f = MagicMock()
+    f.__name__ = 'handler_sub'
+
     form = {
         "entities": [
             FormEntity(
                 entity="store_name",
                 value="23 Elm Street",
                 default_eval=False,
-                custom_eval=test,
+                custom_eval=test_custom_eval,
             )
         ],
     }
 
     @app.handle(domain="store_info", intent="get_store_number")
     def handler_main(request, responder):
-        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
+        AutoEntityFilling(f, form, app).invoke(request, responder)
 
     handler_main(request, responder)
+    f.assert_called_once_with(request, responder)
 
 
 @pytest.mark.conversation

@@ -572,10 +572,10 @@ As shown here, you can use the dialog flow functionality to effectively craft co
 Automatic Slot Filling for Entities
 -----------------------------------
 
-MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This can done via either:
+MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This can be done via either:
 
 - Applying the ``@app.auto_fill`` decorator to any dialogue state handler or
-- Directly invoking a slot-filling call inside a handler or
+- Directly invoking a slot-filling call inside a handler
 
 
 Using the ``@app.auto_fill`` decorator
@@ -664,9 +664,11 @@ For the use case of transferring money in a banking assistant application, the f
 
 Subforms and invoking slot-filling within a dialogue handler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To support dynamic iteration through a form, we suggest the use of additional subforms or follow-up forms. Consider a case in which the initial form fetches a certain set of entities, and the flow ahead depends on the values of those captured entities. This requires capturing of further entities based on those values. For this, we recommend using further subforms.
+For more complex interactions (such as dynamic iteration through a form), we can use additional subforms or follow-up forms. Consider a case in which the initial form fetches a certain set of entities, and the flow ahead depends on the values of those captured entities. This requires the capturing of further entities based on those values.
 
-Take into consideration the previous example. Now, instead of a single pass form to capture all entities, say we want to check whether the account from which money is withdrawn is a savings account or not. If yes, then continue to fetch the other entities (using follow-up form ``form_transfermoney_2``), otherwise send appropriate response.
+Let's consider the previous example. Now, instead of a single pass form to capture all entities, suppose we want to check whether the account from which money is withdrawn is a savings account or not. If yes, then continue to fetch the other entities (using follow-up form ``form_transfermoney_2``), otherwise, send an appropriate response.
+
+**Examples**
 
 .. code:: python
 
@@ -707,6 +709,8 @@ Take into consideration the previous example. Now, instead of a single pass form
 
     @app.auto_fill(intent="transfer_money", form=form_transfermoney_1)
     def transfer_money_handler(request, responder):
+        """This handler checks the input from the first form and
+           decides the course of action."""
         account = next((e['value'][0]['cname'] for e in request.entities if e['type'] == 'account_type'), None)
         if account == 'savings':
             responder.frame['account_from'] = account
@@ -714,7 +718,10 @@ Take into consideration the previous example. Now, instead of a single pass form
         else:
             responder.reply('Sorry, you can only transfer money from a savings account.')
 
+
     def transfer_money_followup_handler(request, responder):
+        """Fetches new entities obtained through the second form and
+           processes them as appropriate"""
         for entity in request.entities:
             if entity['type'] == 'account_type':
                 if entity['role'] == 'account_to':
@@ -731,6 +738,22 @@ Take into consideration the previous example. Now, instead of a single pass form
 Alternatively, the standalone call to this feature can be called independently of the auto_fill decorated handler as well. Consider the following use-case to check account balance:
 
 .. code:: python
+
+    balance_form = {
+        'entities': [
+            FormEntity(
+                entity="account_type",
+                responses=["Sure. For which account - checkings, savings, or credit?"],
+                retry_response=[
+                    "That account is not correct."
+                    " Please try checkings, savings, or credit."
+                    ],
+                )
+            ],
+        'max_retries': 1,
+        'exit_keys': ['cancel', 'quit', 'exit'],
+        'exit_msg': "Sorry I cannot help you. Please try again."
+        }
 
     @app.handle(intent="check_balances")
     def check_balance(request, responder):
