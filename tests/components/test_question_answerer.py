@@ -300,6 +300,7 @@ def test_embedder_search_bert(food_ordering_with_bert):
 
 @pytest.mark.extras
 @pytest.mark.es7
+@pytest.mark.xfail(strict=False)
 def test_embedder_search_glove(food_ordering_with_glove):
     GLOVE_EMBEDDING_LEN = 300
     res = food_ordering_with_glove.get(
