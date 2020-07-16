@@ -98,7 +98,7 @@ def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
     )
 
 
-def handler(request, responder):
+def handler_sub(request, responder):
     assert any(e["type"] == "store_name" for e in request.entities)
 
 
@@ -120,6 +120,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
         ],
     )
     responder = DialogueResponder()
+
     form = {
         "entities": [
             FormEntity(
@@ -133,8 +134,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
 
     @app.handle(domain="store_info", intent="get_store_number")
     def handler_main(request, responder):
-        print(request)
-        print(AutoEntityFilling(handler, form, app).invoke(request, responder))
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
 
     handler_main(request, responder)
 
