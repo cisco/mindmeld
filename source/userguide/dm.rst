@@ -572,7 +572,10 @@ As shown here, you can use the dialog flow functionality to effectively craft co
 Automatic Slot Filling for Entities
 -----------------------------------
 
-MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via either applying the ``@app.auto_fill`` decorator to any dialogue state handler requiring entities to be obtained prior to applying the functionality defined within, or directly invoking a call to this feature at any point inside the handler.
+MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This can done via either:
+
+- Applying the ``@app.auto_fill`` decorator to any dialogue state handler or
+- Directly invoking a slot-filling call inside a handler or
 
 
 Using the ``@app.auto_fill`` decorator
@@ -659,11 +662,11 @@ For the use case of transferring money in a banking assistant application, the f
         responder.reply(replies)
 
 
-Subset forms and invoking slot-filling within in a dialogue handler
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To support dynamically iterating through a form, we suggest the use of subset forms. Consider a case in which the initial form fetches a certain set of entities, and the flow ahead depends on the values of those captured entities. This requires capturing of further entities based on those values. For this, we recommend using subset forms.
+Subforms and invoking slot-filling within a dialogue handler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To support dynamic iteration through a form, we suggest the use of additional subforms or follow-up forms. Consider a case in which the initial form fetches a certain set of entities, and the flow ahead depends on the values of those captured entities. This requires capturing of further entities based on those values. For this, we recommend using further subforms.
 
-Take into consideration the previous example. Now, instead of a single pass form to capture all entities, say we want to check whether the account from which money is withdrawn is a savings account or not. If yes, then continue to fetch the other entities (using ``form_transfermoney_2``), otherwise send appropriate response.
+Take into consideration the previous example. Now, instead of a single pass form to capture all entities, say we want to check whether the account from which money is withdrawn is a savings account or not. If yes, then continue to fetch the other entities (using follow-up form ``form_transfermoney_2``), otherwise send appropriate response.
 
 .. code:: python
 
@@ -725,7 +728,7 @@ Take into consideration the previous example. Now, instead of a single pass form
         responder.reply(replies)
 
 
-Alternatively, the standalone call to this feature can be called independently of the auto_fill decorated handler as well.
+Alternatively, the standalone call to this feature can be called independently of the auto_fill decorated handler as well. Consider the following use-case to check account balance:
 
 .. code:: python
 
