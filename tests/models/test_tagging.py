@@ -338,6 +338,7 @@ def test_lstm_er_model_no_tf(kwik_e_mart_nlp):
 
 @pytest.mark.extras
 @pytest.mark.tensorflow
+@pytest.mark.xfail(strict=False)
 def test_lstm_er_model(kwik_e_mart_nlp):
     config = {
         "model_type": "tagger",
