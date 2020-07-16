@@ -119,7 +119,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
 
     # mock handler for invoke
     f = MagicMock()
-    f.__name__ = 'handler_sub'
+    f.__name__ = "handler_sub"
 
     form = {
         "entities": [
@@ -137,7 +137,17 @@ def test_auto_fill_invoke(kwik_e_mart_app):
         AutoEntityFilling(f, form, app).invoke(request, responder)
 
     handler_main(request, responder)
+
+    # check whether the sub handler was invoked.
     f.assert_called_once_with(request, responder)
+
+    # check whether new rule has been added for sub handler.
+    assert any(
+        [
+            rule.dialogue_state == f.__name__
+            for rule in list(app.app_manager.dialogue_manager.rules)
+        ]
+    )
 
 
 @pytest.mark.conversation

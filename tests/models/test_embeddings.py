@@ -10,7 +10,7 @@ APP_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME
 )
 
-
+@pytest.mark.skip
 def test_embedding_size_is_correct():
     """Tests the size and type of the embedding"""
     token_to_embedding_mapping = GloVeEmbeddingsContainer(
@@ -19,7 +19,7 @@ def test_embedding_size_is_correct():
     assert len(token_to_embedding_mapping[b"sandberger"]) == 50
     assert type(token_to_embedding_mapping[b"sandberger"]) == ndarray
 
-
+@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.bert
 def test_bert_embedder():
@@ -30,7 +30,7 @@ def test_bert_embedder():
     assert len(encoded_vec) == 768
     assert type(encoded_vec) == ndarray
 
-
+@pytest.mark.skip
 def test_glove_embedder():
     embedder = GloveEmbedder(
         APP_PATH,
