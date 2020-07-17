@@ -709,19 +709,21 @@ class AutoEntityFilling:
     """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
-
-    Attributes:
-        app (Application): The application that initializes this flow.
     """
 
     _logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
-    def __init__(self, entrance_handler, form, app):
+    def __init__(self, handler, form, app):
+        """
+        handler (func): The function to which control is returned after completion of flow.
+        form (dict): Developer-defined slot-filling form.
+        app (Application): The application that initializes this flow.
+        """
         self._app = app
-        self._entrance_handler = entrance_handler
+        self._handler = handler
         self._form = form
-        self._local_form = None
+        self._local_entity_form = None
         self._prompt_turn = None
         self._check_attr()
 
@@ -758,12 +760,12 @@ class AutoEntityFilling:
         responder.params.allowed_intents = tuple(
             ["{}.{}".format(request.domain, request.intent)]
         )
-        responder.params.target_dialogue_state = self._entrance_handler.__name__
+        responder.params.target_dialogue_state = self._handler.__name__
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
         self._prompt_turn = None
-        self._local_form = None
+        self._local_entity_form = None
         responder.params.allowed_intents = tuple()
         responder.exit_flow()
 
@@ -885,7 +887,7 @@ class AutoEntityFilling:
             entity_type = entity["type"]
             role = entity["role"]
 
-            for slot in self._local_form:
+            for slot in self._local_entity_form:
                 if entity_type == slot.entity:
                     if (slot.role is None) or (role == slot.role):
                         slot.value = entity
@@ -899,7 +901,7 @@ class AutoEntityFilling:
             text=request.text,
             domain=request.domain,
             intent=request.intent,
-            entities=[slot.value for slot in self._local_form],
+            entities=[slot.value for slot in self._local_entity_form],
             context=request.context or {},
             history=request.history or [],
             frame=responder.frame or {},
@@ -913,10 +915,10 @@ class AutoEntityFilling:
         return self._end_slot_fill_sync(request, responder)
 
     def _end_slot_fill_sync(self, request, responder):
-        return self._entrance_handler(request, responder)
+        return self._handler(request, responder)
 
     async def _end_slot_fill_async(self, request, responder):
-        return await self._entrance_handler(request, responder)
+        return await self._handler(request, responder)
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
@@ -963,16 +965,16 @@ class AutoEntityFilling:
 
         self._set_next_turn(request, responder)
 
-        if self._prompt_turn is None or self._local_form is None:
+        if self._prompt_turn is None or self._local_entity_form is None:
             # Entering the flow
             self._prompt_turn = True
-            self._local_form = copy.deepcopy(self._entity_form)
+            self._local_entity_form = copy.deepcopy(self._entity_form)
             self._retry_attempts = 0
 
             # Fill the form with the entities in the first query
             self._initial_fill(request)
 
-        for slot in self._local_form:
+        for slot in self._local_entity_form:
 
             if not slot.value:
                 # check if user has been prompted for this entity slot
@@ -1010,6 +1012,32 @@ class AutoEntityFilling:
             responder (DialogueResponder): The responder object.
         """
         self(request, responder)
+
+    def invoke(self, request, responder):
+        """
+        Invoke slot-filling as a direct call without requiring a decorator.
+        """
+        # ensures that the slot-filling function is targeted.
+        kwargs = {'targeted_only': True}
+
+        name = self._handler.__name__
+
+        try:
+            # sets a dialogue rule for the handler passed in this invoke call to iteratively call
+            # the slot-filling flow till completion or exit. This rule is added temporarily for this
+            # flow and reset for the handler with every new invoke call.
+            self._app.app_manager.dialogue_manager.add_dialogue_rule(name, self.__call__, **kwargs)
+        except AssertionError:
+            self._app.app_manager.dialogue_manager.handler_map[name] = self.__call__
+
+        # re-run to continue flow
+        self(request, responder)
+
+    async def invoke_async(self, request, responder):
+        """
+        Async invoke slot-filling as a direct call without requiring a decorator.
+        """
+        await self.invoke(request, responder)
 
 
 class DialogueResponder:
