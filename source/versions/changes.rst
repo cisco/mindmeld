@@ -2,6 +2,13 @@ Recent Changes
 ==============
 
 
+MindMeld 4.3
+-------------
+
+
+MindMeld 4.3 provides new features for developers to develop and streamline their conversational applications and incorporate the latest innovations in NLP. To read more about the latest changes in MindMeld 4.3, check out `our article on Medium <https://medium.com/p/9fededbab58e/>`_.
+
+
 MindMeld 4.2
 -------------
 
