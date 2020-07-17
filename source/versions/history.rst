@@ -7,15 +7,15 @@ Package History
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Custom Action provides the ability for external applications to integrate custom dialogue management logic with MindMeld applications
+- Custom Actions provide the ability for applications to integrate external dialogue management logic with MindMeld applications
 
-- Question Answerer can leverage semantic embeddings (Elasticsearch 7 is required)
+- Question Answerer can now leverage deep-learning based semantic embeddings to produce more relevant answers to queries
 
-- Automatic slot filing provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent
+- Automatic slot filing allows an intuitive way for developers to automatically prompt users for missing slots to fulfill an intent
 
 - A new banking blueprint for enterprise use-cases
 
-- WhatsApp Integration
+- WhatsApp Bot Integration with MindMeld
 
 - Docker setup update to Elasticsearch 7
 
