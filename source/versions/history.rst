@@ -19,15 +19,15 @@ Major Features and Improvements
 
 - Docker setup update to Elasticsearch 7
 
-- MindMeld application can configure language and locale setting in the application config file
+- MindMeld application can configure language and locale settings in the application config file
 
 
 Bug fixes
 ^^^^^^^^^
 
-- Addressed an issue which caused MindMeld to be unable to detect system entities without any context (for example: "december 21st")
+- Addressed an issue which caused MindMeld to not detect system entities with no surrounding context (for example: "december 21st")
 
-- Previously, MindMeld applications required Elasticsearch even if the application did not need it (i.e having no entity to resolve); read :doc:`Managing Dependencies <../userguide/optional_dependency>` for more details
+- Previously, MindMeld applications called Elasticsearch even if the application did not functionally use it (i.e have no entity to resolve); This has been fixed in :doc:`Managing Dependencies <../userguide/optional_dependency>`
 
 - MindMeld had a dependency on Pandas which increased the overall library footprint and is removed in MindMeld 4.3
 
