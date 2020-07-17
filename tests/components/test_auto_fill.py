@@ -113,13 +113,14 @@ def test_auto_fill_invoke(kwik_e_mart_app):
     responder = DialogueResponder()
 
     # custom eval func
-    def test_custom_eval(request):
+    def test_custom_eval(r):
         # entity already passed in, this is to check custom eval flow.
+        del r
         return True
 
     # mock handler for invoke
-    f = MagicMock()
-    f.__name__ = "handler_sub"
+    handler_sub = MagicMock()
+    handler_sub.__name__ = "handler_sub"
 
     form = {
         "entities": [
@@ -134,17 +135,17 @@ def test_auto_fill_invoke(kwik_e_mart_app):
 
     @app.handle(domain="store_info", intent="get_store_number")
     def handler_main(request, responder):
-        AutoEntityFilling(f, form, app).invoke(request, responder)
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
 
     handler_main(request, responder)
 
     # check whether the sub handler was invoked.
-    f.assert_called_once_with(request, responder)
+    handler_sub.assert_called_once_with(request, responder)
 
     # check whether new rule has been added for sub handler.
     assert any(
         [
-            rule.dialogue_state == f.__name__
+            rule.dialogue_state == handler_sub.__name__
             for rule in list(app.app_manager.dialogue_manager.rules)
         ]
     )
