@@ -1,6 +1,24 @@
 Package History
 ===============
 
+4.3.1 (2020-06-17)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Custom Action provides the ability for external applications to integrate custom dialogue management logic with MindMeld applications
+
+- Question Answerer can leverage semantic embeddings (Elasticsearch 7 is required)
+
+- Automatic slot filing provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent
+
+- A new banking blueprint for enterprise use-cases
+
+- WhatsApp Integration
+
+- Docker setup update to Elasticsearch 7
+
 4.2.0 (2019-09-16)
 ------------------
 
