@@ -706,7 +706,7 @@ class DialogueFlow(DialogueManager):
 
 
 class AutoEntityFilling:
-    """A special dialogue flow subclass to implement Automatic Entity (Slot) Filling
+    """A class to implement Automatic Entity (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
     """
