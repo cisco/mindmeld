@@ -9,7 +9,7 @@ Major Features and Improvements
 
 - Custom Actions provide the ability for applications to integrate external dialogue management logic with MindMeld applications
 
-- Question Answerer can now leverage deep-learning based semantic embeddings to produce more relevant answers to queries
+- Question Answerer can now leverage deep-learning based semantic embeddings (BERT, Glove) to produce more relevant answers to queries (available for Elasticsearch 7 and above)
 
 - Automatic slot filing allows an intuitive way for developers to automatically prompt users for missing slots to fulfill an intent
 
@@ -18,6 +18,19 @@ Major Features and Improvements
 - WhatsApp Bot Integration with MindMeld
 
 - Docker setup update to Elasticsearch 7
+
+- MindMeld application can configure language and locale setting in the application config file
+
+
+Bug fixes
+^^^^^^^^^
+
+- Addressed an issue which caused MindMeld to be unable to detect system entities without any context (for example: "december 21st")
+
+- Previously, MindMeld applications required Elasticsearch even if the application did not need it (i.e having no entity to resolve); read :doc:`Managing Dependencies <../userguide/optional_dependency>` for more details
+
+- MindMeld had a dependency on Pandas which increased the overall library footprint and is removed in MindMeld 4.3
+
 
 4.2.0 (2019-09-16)
 ------------------
