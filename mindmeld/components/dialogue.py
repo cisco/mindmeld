@@ -706,7 +706,7 @@ class DialogueFlow(DialogueManager):
 
 
 class AutoEntityFilling:
-    """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
+    """A class to implement Automatic Entity (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
     """
@@ -716,9 +716,10 @@ class AutoEntityFilling:
 
     def __init__(self, handler, form, app):
         """
-        handler (func): The function to which control is returned after completion of flow.
-        form (dict): Developer-defined slot-filling form.
-        app (Application): The application that initializes this flow.
+        Args:
+            handler (func): The function to which control is returned after completion of flow.
+            form (dict): Developer-defined slot-filling form.
+            app (Application): The application that initializes this flow.
         """
         self._app = app
         self._handler = handler
