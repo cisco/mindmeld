@@ -6,8 +6,8 @@ MindMeld 4.3
 -------------
 
 
-MindMeld 4.3 provides developers tools to build powerful question/answering systems, integrate with external clients, a new MindMeld enterprise blueprint,
-and automatic slot filling. To read more about the latest changes in MindMeld 4.3, check out `our announcement on Medium <http://cs.co/mindmeld4-3>`_.
+MindMeld 4.3 provides developers tools to build powerful question-answering systems, integrate with external clients, a new enterprise blueprint,
+and automatic slot filling. To read more about the latest changes in MindMeld 4.3, check out `our announcement on the MindMeld Blog <http://cs.co/mindmeld4-3>`_.
 
 
 MindMeld 4.2
@@ -394,5 +394,4 @@ You now have the option of training your role classifiers using any of the text 
 **5. New metrics for entity recognition**
 
 Entity recognizer evaluation now exposes new metrics called *segment-level errors*. These make it easier to interpret and understand the model's sequence tagging performance. See :ref:`entity recognizer evaluation <entity_evaluation>`.
-
 
