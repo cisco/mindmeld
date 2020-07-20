@@ -2,6 +2,14 @@ Recent Changes
 ==============
 
 
+MindMeld 4.3
+-------------
+
+
+MindMeld 4.3 provides developers tools to build powerful question/answering systems, integrate with external clients, a new MindMeld enterprise blueprint,
+and automatic slot filling. To read more about the latest changes in MindMeld 4.3, check out `our announcement on Medium <http://cs.co/mindmeld4-3>`_.
+
+
 MindMeld 4.2
 -------------
 
