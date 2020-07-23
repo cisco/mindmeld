@@ -8,9 +8,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # Pull base image.
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
-ENV ES_PKG_NAME elasticsearch-5.5.1
+ENV ES_PKG_NAME elasticsearch-7.8.0-linux-x86_64
+ENV ES_FOLDER_NAME elasticsearch-7.8.0
 
 # System packages
 RUN apt-get update && \
@@ -21,7 +22,7 @@ RUN mkdir /root/.pip /root/.mindmeld /data
 
 # Install python pip
 RUN apt-get -y install python-pip python3-pip python-dev build-essential && \
-    apt-get -y install python-software-properties
+    apt-get -y install software-properties-common
 
 # Install Java
 RUN apt update
@@ -31,7 +32,7 @@ RUN apt install openjdk-8-jdk -y
 
 # Install duckling dependency
 RUN apt-get -y update && \
-    apt-get -y upgrade tzdata
+    DEBIAN_FRONTEND="noninteractive" apt-get -y upgrade tzdata
 
 # set JAVA_HOME
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -42,7 +43,7 @@ RUN \
     wget https://artifacts.elastic.co/downloads/elasticsearch/$ES_PKG_NAME.tar.gz && \
     tar xvzf $ES_PKG_NAME.tar.gz && \
     rm -f $ES_PKG_NAME.tar.gz && \
-    mv /$ES_PKG_NAME /elasticsearch
+    mv /$ES_FOLDER_NAME /elasticsearch
 
 RUN useradd -ms /bin/bash mindmeld
 RUN mkdir /elasticsearch/log
@@ -67,7 +68,7 @@ RUN pip3 install click-log==0.1.8
 
 ARG REBUILD_BLUEPRINT=unknown
 RUN mkdir -p home_assistant && \
-    wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/ && \
+    wget https://blueprints.mindmeld.com/home_assistant/app.tar.gz -P /root/projects/ && \
     tar -xvf /root/projects/app.tar.gz -C ./home_assistant
 
 RUN export LC_ALL=C.UTF-8 && \

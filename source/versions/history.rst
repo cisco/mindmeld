@@ -1,6 +1,37 @@
 Package History
 ===============
 
+4.3.1 (2020-06-17)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Custom Actions provide the ability for applications to integrate external dialogue management logic with MindMeld applications
+
+- Question Answerer can now leverage deep-learning based semantic embeddings (BERT, Glove) to produce more relevant answers to queries (available for Elasticsearch 7 and above)
+
+- Automatic slot filing allows an intuitive way for developers to automatically prompt users for missing slots to fulfill an intent
+
+- A new banking blueprint for enterprise use-cases
+
+- WhatsApp Bot Integration with MindMeld
+
+- Docker setup update to Elasticsearch 7
+
+- MindMeld application can configure language and locale settings in the application config file
+
+
+Bug fixes
+^^^^^^^^^
+
+- Addressed an issue which caused MindMeld to not detect system entities with no surrounding context (for example: "december 21st")
+
+- Previously, MindMeld applications called Elasticsearch even if the application did not functionally use it (i.e have no entity to resolve); This has been fixed in :doc:`Managing Dependencies <../userguide/optional_dependency>`
+
+- MindMeld had a dependency on Pandas which increased the overall library footprint and is removed in MindMeld 4.3
+
+
 4.2.0 (2019-09-16)
 ------------------
 

@@ -442,7 +442,11 @@ class DucklingRecognizer(SystemEntityRecognizer):
             )
 
         if len(entity_type_filtered_candidates) > 0:
-            return entity_type_filtered_candidates[-1]
+            # Duckling sorts most probable entity candidates higher than
+            # the lower probable candidates. So we return the best possible
+            # candidate in this case when multiple duckling candidates are
+            # returned.
+            return entity_type_filtered_candidates[0]
 
         language = query.language
         time_zone = query.time_zone

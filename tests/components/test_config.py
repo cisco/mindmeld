@@ -11,7 +11,11 @@ Tests for config module.
 
 import os
 
-from mindmeld.components._config import _expand_parser_config, get_classifier_config
+from mindmeld.components._config import (
+    _expand_parser_config,
+    get_classifier_config,
+    get_custom_action_config,
+)
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -137,3 +141,16 @@ def test_get_classifier_config_func_error():
     expected = {"error": "intent", "penalty": "l2", "C": 100}
 
     assert actual == expected
+
+
+def test_custom_action_config(kwik_e_mart_app_path):
+    actual = get_custom_action_config(kwik_e_mart_app_path)
+
+    assert "url" in actual
+    assert actual["url"] == "http://0.0.0.0:8080/"
+
+
+def test_custom_action_config_no_config(home_assistant_app_path):
+    actual = get_custom_action_config(home_assistant_app_path)
+
+    assert actual is None

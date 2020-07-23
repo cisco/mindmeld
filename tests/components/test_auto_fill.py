@@ -1,6 +1,9 @@
 import pytest
-
+from mock import MagicMock
 from mindmeld.components import Conversation
+from mindmeld.components.dialogue import DialogueResponder, AutoEntityFilling
+from mindmeld.components.request import Request
+from mindmeld.core import FormEntity
 from .test_dialogue_flow import assert_target_dialogue_state, assert_reply
 
 
@@ -58,6 +61,94 @@ def test_auto_fill_exit_flow(kwik_e_mart_app, qa_kwik_e_mart):
     directives = convo.process("exit").directives
     assert_reply(directives, "Sorry I cannot help you. Please try again.")
     assert_target_dialogue_state(convo, None)
+
+
+@pytest.mark.conversation
+def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
+    """Tests flow switching from inside slot filling to another intent when
+        the number of retry attempts are exceeded."""
+    convo = Conversation(app=kwik_e_mart_app)
+    directives = convo.process("What's the store phone number?").directives
+    assert_target_dialogue_state(convo, "send_store_phone")
+    assert_reply(directives, "Which store would you like to know about?")
+
+    directives = convo.process("goodbye").directives
+    assert_reply(
+        directives,
+        "Sorry, I did not get you. " "Which store would you like to know about?",
+    )
+
+    directives = convo.process("goodbye").directives
+    assert_reply(directives, ["Bye", "Goodbye", "Have a nice day."])
+
+
+@pytest.mark.conversation
+def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
+    """Tests default validation when user input has no entities.
+        Check is to see that flow doesn't break."""
+    convo = Conversation(app=kwik_e_mart_app)
+    directives = convo.process("What's the store phone number?").directives
+    assert_target_dialogue_state(convo, "send_store_phone")
+    assert_reply(directives, "Which store would you like to know about?")
+
+    directives = convo.process("123").directives
+    assert_reply(
+        directives,
+        "Sorry, I did not get you. " "Which store would you like to know about?",
+    )
+
+
+@pytest.mark.conversation
+def test_auto_fill_invoke(kwik_e_mart_app):
+    """Tests slot-filling invoke functionality"""
+    app = kwik_e_mart_app
+    request = Request(
+        text="elm street",
+        domain="store_info",
+        intent="get_store_number",
+        entities=[
+            {"type": "store_name", "value": [{"cname": "23 Elm Street"}], "role": None}
+        ],
+    )
+    responder = DialogueResponder()
+
+    # custom eval func
+    def test_custom_eval(r):
+        # entity already passed in, this is to check custom eval flow.
+        del r
+        return True
+
+    # mock handler for invoke
+    handler_sub = MagicMock()
+    handler_sub.__name__ = "handler_sub"
+
+    form = {
+        "entities": [
+            FormEntity(
+                entity="store_name",
+                value="23 Elm Street",
+                default_eval=False,
+                custom_eval=test_custom_eval,
+            )
+        ],
+    }
+
+    @app.handle(domain="store_info", intent="get_store_number")
+    def handler_main(request, responder):
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
+
+    handler_main(request, responder)
+
+    # check whether the sub handler was invoked.
+    handler_sub.assert_called_once_with(request, responder)
+
+    # check whether new rule has been added for sub handler.
+    assert any(
+        [
+            rule.dialogue_state == handler_sub.__name__
+            for rule in list(app.app_manager.dialogue_manager.rules)
+        ]
+    )
 
 
 @pytest.mark.conversation

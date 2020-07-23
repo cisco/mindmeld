@@ -16,7 +16,7 @@
 from .components.dialogue import Conversation
 
 
-class TestConversation(Conversation):
+class ConversationTestHelper(Conversation):
     """
     This class is used during testing to assert that we identify the correct domain and intent,
     receive the right text as a response, and navigate to the correct frame.

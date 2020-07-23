@@ -55,6 +55,9 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
+GEN_EMBEDDER_MODEL_PATH = os.path.join(
+    GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
+)
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -93,19 +96,25 @@ DUCKLING_UBUNTU16_PATH = os.path.join(
 DUCKLING_UBUNTU18_PATH = os.path.join(
     RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-18"
 )
+DUCKLING_CENTOS8_PATH = os.path.join(
+    RESOURCES_FOLDER, "duckling-x86_64-centos-8-core"
+)
 DUCKLING_OSX_PATH = os.path.join(RESOURCES_FOLDER, "duckling-x86_64-osx")
-DUCKLING_UBUNTU16_MD5 = "1688f12378a25c8662cf5fab053878e2"
-DUCKLING_UBUNTU18_MD5 = "13e60318956e04bda561d8c36a29891c"
-DUCKLING_OSX_MD5 = "e1f2a6654c3df0bd75cb8113e95c8508"
+DUCKLING_UBUNTU16_MD5 = "1e58b4e91d580d98c8ac4f5a69b0ebd1"
+DUCKLING_UBUNTU18_MD5 = "b9c4891b27731df97d7f01c33441a91c"
+DUCKLING_OSX_MD5 = "d01753261e6e7940b533f09dc17d0c19"
+DUCKLING_CENTOS8_MD5 = "f840176c2b96c0037edd9524faac5e93"
 DUCKLING_OS_MAPPINGS = {
     "ubuntu-16.04": DUCKLING_UBUNTU16_PATH,
     "ubuntu-18.04": DUCKLING_UBUNTU18_PATH,
     "darwin": DUCKLING_OSX_PATH,
+    "centos-8-core": DUCKLING_CENTOS8_PATH
 }
 DUCKLING_PATH_TO_MD5_MAPPINGS = {
     DUCKLING_UBUNTU16_PATH: DUCKLING_UBUNTU16_MD5,
     DUCKLING_UBUNTU18_PATH: DUCKLING_UBUNTU18_MD5,
     DUCKLING_OSX_PATH: DUCKLING_OSX_MD5,
+    DUCKLING_CENTOS8_PATH: DUCKLING_CENTOS8_MD5
 }
 
 EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, "data")
@@ -506,6 +515,23 @@ def get_ranking_file_path(app_path, index):
 
     """
     return RANKING_FILE_PATH.format(app_path=app_path, index=index)
+
+
+@safe_path
+def get_embedder_cache_file_path(app_path, embedder_type, model_name):
+    """Gets the path to the model_cache.json file for a given embedder model.
+
+    Args:
+        app_path (str): The path to the app data.
+        embedder_type (str): The name of the embedder type.
+        model_name (str): The name of the specific trained model.
+
+    Returns:
+        (str) The path for the json cached of the embedded values.
+    """
+    return GEN_EMBEDDER_MODEL_PATH.format(
+        app_path=app_path, embedder_type=embedder_type, model_name=model_name,
+    )
 
 
 @safe_path

@@ -261,7 +261,7 @@ Here are the intents and states in the HR assistant blueprint, as defined in the
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from `Kaggle <https://www.kaggle.com/rhuebner/human-resources-data-set>`_ and frequently asked human resources questions from `UC Berkeley <https://hr.berkeley.edu/faq-page>`. The knowledge base comprises of two indices in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from `Kaggle <https://www.kaggle.com/rhuebner/human-resources-data-set>`_ and frequently asked human resources questions from `UC Berkeley <https://hr.berkeley.edu/faq-page>`_. The knowledge base comprises of two indices in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
    - ``user_data`` — information about employees
    - ``faq_data`` - frequently asked question answer pairs

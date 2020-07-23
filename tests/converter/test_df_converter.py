@@ -4,7 +4,7 @@ import shutil
 import importlib
 
 from mindmeld.components import NaturalLanguageProcessor
-from mindmeld.test import TestConversation
+from mindmeld.test import ConversationTestHelper
 from mindmeld.converter.dialogflow import DialogflowConverter
 
 
@@ -68,7 +68,7 @@ def test_df_converter():
     mm_df_app = importlib.import_module("mm_df_converted_project").app
     mm_df_app.lazy_init(mm_df_nlp)
 
-    conv = TestConversation(app=mm_df_app)
+    conv = ConversationTestHelper(app=mm_df_app)
     conv.process("what is my balance")
     conv.assert_text("Here's your latest balance:")
     conv.assert_domain("app_specific")

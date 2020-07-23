@@ -24,15 +24,15 @@ logger = logging.getLogger(__name__)
 # The date keys are extracted from here
 # https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722
 TIME_GRAIN_TO_ORDER = {
-    "year": 0,
-    "quarter": 1,
-    "month": 2,
-    "week": 3,
+    "year": 8,
+    "quarter": 7,
+    "month": 6,
+    "week": 5,
     "day": 4,
-    "hour": 5,
-    "minute": 6,
-    "second": 7,
-    "milliseconds": 8,
+    "hour": 3,
+    "minute": 2,
+    "second": 1,
+    "milliseconds": 0,
 }
 
 

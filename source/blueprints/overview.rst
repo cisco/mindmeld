@@ -10,12 +10,19 @@ Blueprints are also ideal when you want to:
   - work through a tutorial on building practical applications using the MindMeld toolkit, or
   - bootstrap your app on MindMeld (assuming your app fits one of the MindMeld blueprint use cases)
 
-MindMeld provides four blueprints:
+MindMeld provides six blueprints:
 
 +-------------------------------------------------+-----------------------------------------+------------------------------+
 | | Blueprint                                     | |  Use Case                             | | Blueprint Name             |
 | |                                               | |                                       | | in Python                  |
 +=================================================+=========================================+==============================+
+| |  :doc:`Banking Assistant <banking>`           | | Users interact with a banking agent   | | ``banking_assistant``      |
+| |                                               | | to fulfill actions like transferring  | |                            |
+| |                                               | | money and paying bills                | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
+| |  :doc:`HR Assistant <hr_assistant>`           | | Users interact with a Human Resources | | ``hr_assistant``           |
+| |                                               | | representative                        | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
 | |  :doc:`Food Ordering <food_ordering>`         | | Users order food for delivery         | | ``food_ordering``          |
 | |                                               | | from nearby restaurants               | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
@@ -63,7 +70,7 @@ Depending on which blueprint you choose to run, this Quick Start should take bet
 
 Open a Python shell and type the following commands to download and set up the blueprint application of your choice.
 
-  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
+  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``banking_assistant``, ``hr_assistant``, ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
 
 .. code:: python
 

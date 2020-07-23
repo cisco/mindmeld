@@ -95,7 +95,7 @@ Contents
    blueprints/video_discovery
    blueprints/home_assistant
    blueprints/hr_assistant
-
+   blueprints/banking
 
 .. toctree::
    :maxdepth: 2
@@ -104,6 +104,7 @@ Contents
 
    userguide/getting_started
    userguide/architecture
+   userguide/optional_dependency
    userguide/preprocessor
    userguide/nlp
    userguide/domain_classifier
@@ -116,6 +117,7 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/custom_action
    userguide/internationalization
    userguide/voice
    integrations/webex_teams

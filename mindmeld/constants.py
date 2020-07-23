@@ -12,4 +12,6 @@
 # limitations under the License.
 DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
-DEVCENTER_URL = "https://devcenter.mindmeld.com"
+BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
+BINARIES_URL = "https://binaries.mindmeld.com"
+DUCKLING_VERSION = "20200701"

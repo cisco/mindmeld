@@ -22,6 +22,7 @@ from ..tokenizer import Tokenizer
 FEATURE_MAP = {}
 MODEL_MAP = {}
 LABEL_MAP = {}
+EMBEDDER_MAP = {}
 
 # Example types
 QUERY_EXAMPLE_TYPE = "query"
@@ -99,6 +100,26 @@ def get_label_encoder(config):
     return LABEL_MAP[config.label_type](config)
 
 
+def create_embedder_model(app_path, config):
+    """Creates and loads the embedder model.
+    """
+    embedder_config = config.get("model_settings", {})
+    embedding_fields = embedder_config.get("embedding_fields", [])
+    if len(embedding_fields) == 0:
+        # No embedding fields specified in the app config, continuing without embedder model.
+        return None
+    try:
+        embedder_type = embedder_config["embedder_type"]
+    except KeyError:
+        raise ValueError("Invalid model configuration: No provided embedder type.")
+
+    try:
+        return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
+    except KeyError:
+        msg = "Invalid model configuration: Unknown embedder type {!r}"
+        raise ValueError(msg.format(embedder_type))
+
+
 def register_model(model_type, model_class):
     """Registers a model for use with `create_model()`
 
@@ -106,9 +127,6 @@ def register_model(model_type, model_class):
         model_type (str): The model type as specified in model configs
         model_class (class): The model to register
     """
-    if model_type in MODEL_MAP:
-        raise ValueError("Model {!r} is already registered.".format(model_type))
-
     MODEL_MAP[model_type] = model_class
 
 
@@ -180,6 +198,14 @@ def register_label(label_type, label_encoder):
         raise ValueError(msg)
 
     LABEL_MAP[label_type] = label_encoder
+
+
+def register_embedder(embedder_type, embedder):
+    if embedder_type in EMBEDDER_MAP:
+        msg = "Embedder of type {!r} is already registered.".format(embedder_type)
+        raise ValueError(msg)
+
+    EMBEDDER_MAP[embedder_type] = embedder
 
 
 def mask_numerics(token):

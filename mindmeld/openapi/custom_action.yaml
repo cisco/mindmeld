@@ -1,0 +1,156 @@
+openapi: "3.0.3"
+info:
+  description: "This is an OpenAPI specification for MindMeld Action Server."
+  version: "1.0.0"
+  title: "MindMeld Action Server"
+paths:
+  /action:
+    post:
+      summary: "Invoke an action "
+      description: "This API accepts the serialized MindMeld Request and Responder and returns a serialized Responder"
+      operationId: "invoke_action"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data'
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Responder'
+        "405":
+          description: "Invalid input"
+
+components:
+  schemas:
+    Data:
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/Request'
+        responder:
+          $ref: '#/components/schemas/Responder'
+        action:
+          type: string
+          description: "The name of the action"
+    Request:
+      type: "object"
+      description: "The request object is the object that encapsulates the information sent from the device client to the MM server"
+      properties:
+        text:
+          type: "string"
+          description: "The query text"
+        domain:
+          type: "string"
+          description: "Domain of the current query."
+        intent:
+          type: "string"
+          description: "Intent of the current query."
+        entities:
+          type: "array"
+          description: "A list of entities in the current query."
+          items:
+            $ref: "#/components/schemas/Entity"
+        context:
+          type: object
+          description: "Map containing front-end client state that is passed to the application from the client in the request."
+        params:
+          $ref: "#/components/schemas/Params"
+    Directive:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "Directive Name"
+        type:
+          type: "string"
+          description: "Directive Type"
+          enum:
+          - "view"
+          - "action"
+        payload:
+          type: "object"
+          description: "JSON payload"
+    Entity:
+      type: "object"
+      properties:
+        text:
+          type: "string"
+          description: "The text contents that span the entity"
+        type:
+          type: "string"
+          description: "Entity type"
+        role:
+          type: "string"
+          description: "Role type"
+          nullable: true
+        value:
+          type: "object"
+          description: "The resolved value of the entity"
+        display_text:
+          type: string
+          description: "A human readable text representation of the entity for use in natural language responses."
+        confidence:
+          type: number
+          description: "A confidence value from 0 to 1 about how confident the entity recognizer was for the given class label."
+        is_system_entity:
+          type: boolean
+          description: "True if the entity is a system entity"
+    Params:
+      type: object
+      properties:
+        target_dialogue_state:
+          type: string
+          description: "The name of next turn's dialogue state (if set)"
+          nullable: true
+        dynamic_resource:
+          type: object
+          description: "The additional values for gazetteer"
+          nullable: true
+        allowed_intents:
+          type: array
+          items:
+            type: string
+            description: "The name of the intent"
+          description: "The list of allowed intents for next turn (if set)"
+          nullable: true
+        time_zone:
+          type: string
+          description: "The time zone of the request"
+          nullable: true
+        language:
+          type: string
+          description: "The language of the request"
+          nullable: true
+        locale:
+          type: string
+          description: "The locale of the request"
+          nullable: true
+        timestamp:
+          type: integer
+          description: "The timestamp of the request"
+          nullable: true
+
+    Responder:
+      type: object
+      properties:
+        directives:
+          type: array
+          description: "The list of directives (such as replies) to be sent to the user"
+          items:
+            $ref: '#/components/schemas/Directive'
+        frame:
+          type: object
+          description: "The frame object of the responder, which contains key-value pairs to send to the application"
+        params:
+          $ref: '#/components/schemas/Params'
+        slots:
+          type: object
+          description: "The slots object of the responder, which contains key-value pairs that can be used to render the natural language responses"
+externalDocs:
+  description: "Find out more about MindMeld"
+  url: "http://www.mindmeld.com"

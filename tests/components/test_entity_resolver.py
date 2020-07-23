@@ -34,7 +34,6 @@ def resolver(resource_loader, es_client):
         APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client
     )
     resolver.fit()
-    es_client.indices.flush(index="_all")
     return resolver
 
 
@@ -50,7 +49,6 @@ def resolver_text_rel(resource_loader, es_client):
     ) as _use_text_rel:
         _use_text_rel.return_value = False
         resolver.fit()
-        es_client.indices.flush(index="_all")
         return resolver
 
 
