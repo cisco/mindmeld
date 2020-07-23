@@ -467,6 +467,13 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
+DEFAULT_SYS_ANNOTATOR_CONFIG = { 
+    
+    "overwrite": False, 
+    'annotate': [
+        "*/*/*/*"
+        ] 
+}
 
 class NlpConfigError(Exception):
     pass
@@ -896,3 +903,36 @@ def get_nlp_config(app_path=None, config=None):
         pass
 
     return _get_default_nlp_config()
+
+
+def _get_default_sys_annotator_config():
+    return copy.deepcopy(DEFAULT_SYS_ANNOTATOR_CONFIG)
+
+def get_sys_annotator_config(app_path=None, config=None):
+    """Gets the fully specified processor configuration for the app at the
+    given path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+        config (dict, optional): A config object to use. This will
+            override the config specified by the app's config.py file.
+            If necessary, this object will be expanded to a fully
+            specified config object.
+
+    Returns:
+        dict: The system entity annotator config.
+    """
+
+    if config:
+        return config
+    try:
+        sys_annotator_config = getattr(
+            _get_config_module(app_path), "SYS_ANNOTATOR_CONFIG", DEFAULT_SYS_ANNOTATOR_CONFIG
+        )
+        print("LOADING SYS_ANNOTATOR CONFIG:", sys_annotator_config)
+        return sys_annotator_config
+    except (OSError, IOError):
+        logger.info(
+            "No app configuration file found. Using the default system entity recognizer config."
+        )
+        return _get_default_sys_annotator_config()
