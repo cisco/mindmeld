@@ -727,4 +727,3 @@ def dimensions_from_entity_types(entity_types):
     if not dims:
         return None
     return list(dims)
-# test
