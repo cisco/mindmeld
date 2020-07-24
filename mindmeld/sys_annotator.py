@@ -19,6 +19,8 @@ import spacy
 from .resource_loader import ResourceLoader
 from .components._config import get_sys_annotator_config
 from .system_entity_recognizer import DucklingRecognizer
+from .markup import load_query_file, dump_queries
+from .core import Entity, Span, QueryEntity
 
 
 logger = logging.getLogger(__name__)
@@ -43,11 +45,12 @@ class Annotator(ABC):
 
         # TODO: CHANGE TO UPDATE BY MOST SPECIFIC RULE INSTEAD OF OVERWRITE
         for rule in self.config["annotate"]:
-            pattern, entities = self._get_pattern(rule), self._get_entities(rule)
+            pattern = self._get_pattern(rule) 
             filtered_paths = self._resource_loader.filter_file_paths(
                 file_pattern=pattern, file_paths=all_file_paths 
             )
             for path in filtered_paths:
+                entities = self._get_entities(rule)
                 file_entities_map[path] = entities
 
         return file_entities_map
@@ -63,14 +66,83 @@ class Annotator(ABC):
         # TODO: ADD CHECK FOR VALID ENTITY
         return entities
     
+    def annotate(self):
+        """ Annotate data based on configurations in the config.py file.
+        """
+        for path in self.file_entities_map:
+            processed_queries = load_query_file(
+                file_path=path, app_path=self.app_path
+            )
+            for processed_query in processed_queries:
+                entity_types = self.file_entities_map[path]
+                self._annotate_query(
+                    processed_query=processed_query, entity_types=entity_types
+                )
+            annotated_queries = [query for query in dump_queries(processed_queries)]
+            with open(path, "w") as outfile:
+                outfile.write("\n".join(annotated_queries))
+                outfile.close()
+
+    def _annotate_query(self, processed_query, entity_types):
+        current_entities = list(processed_query.entities)
+        annotated_entities = self._get_annotated_entities(
+            processed_query=processed_query, entity_types=entity_types
+        )
+        final_entities = self._resolve_conflicts(
+            current_entities=current_entities, annotated_entities=annotated_entities
+        )
+        processed_query.entities = tuple(final_entities)
+
+    def _get_annotated_entities(self, processed_query, entity_types=None):
+        if len(entity_types) == 0:
+            return []
+        entity_types = None if entity_types == ["*"] else entity_types
+        items = self.parse(
+            sentence = processed_query.query.text, entity_types=entity_types
+        )
+        query_entities = [self._item_to_query_entity(item, processed_query) for item in items]
+        return query_entities if len(query_entities) > 0 else []
+
+    def _item_to_query_entity(self, item, processed_query):
+        span = Span(
+            start=item["start"], end=item["end"] - 1
+        )
+        entity = Entity(
+            text=item["body"], entity_type=item["dim"], value=item["value"]
+        )
+        query_entity = QueryEntity.from_query(
+            query=processed_query.query, span=span, entity=entity
+        )
+        return query_entity
+
+    def _resolve_conflicts(self, current_entities, annotated_entities):
+        final = []
+        while(len(current_entities) > 0 or len(annotated_entities) > 0):
+            if not current_entities:
+                return final + annotated_entities
+            if not annotated_entities:
+                return final + current_entities
+
+            curr_entity = current_entities[0]
+            annot_entity = annotated_entities[0]    
+
+            if curr_entity.span.end < annot_entity.span.start:
+                final.append(curr_entity)
+                current_entities.pop(0)
+            elif annot_entity.span.end < curr_entity.span.start:
+                final.append(annot_entity)
+                annotated_entities.pop(0)
+            else:
+                overwrite = self.config["overwrite"]
+                entity = annot_entity if overwrite else curr_entity
+                final.append(entity)
+                annotated_entities.pop(0)
+                current_entities.pop(0)
+        return final
+
     @abstractmethod
     def parse(self, sentence, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
-    
-    @abstractmethod
-    def annotate(self):
-        raise NotImplementedError("Subclasses must implement this method")
-
 
 class SpacyAnnotator(Annotator):
     """ Annotator class that uses spacy to generate annotations.
@@ -112,25 +184,18 @@ class SpacyAnnotator(Annotator):
         for entity in spacy_entities:
             if entity["dim"] in ["time", "date"]:
                 entity = self._resolve_time_date(entity, entity_types)
-
             elif entity["dim"] == "cardinal":
                 entity = self._resolve_cardinal(entity)
-
             elif entity["dim"] == "money":
                 entity = self._resolve_money(entity)
-                
             elif entity["dim"] == "ordinal":
                 entity = self._resolve_ordinal(entity)
-
             elif entity["dim"] == "quantity":
                 entity = self._resolve_quantity(entity)
-
             elif entity["dim"] == "percent":
                 entity = self._resolve_percent(entity)
-
             elif entity["dim"] == "person":
                 entity = self._resolve_person(entity)
-            
             else:
                 entity["dim"] = "sys_" + entity["dim"]
             
@@ -160,6 +225,7 @@ class SpacyAnnotator(Annotator):
         elif self._resolve_time_largest_substring(entity, candidates, time_entities):
             return entity
         else:
+            print("spacy_time", entity["body"])
             entity["dim"] = "spacy_time"
             return entity
         
@@ -198,8 +264,11 @@ class SpacyAnnotator(Annotator):
                 ):
                     largest_candidate = candidate
             if largest_candidate:
-                for key in ["body", "start", "end", "value"]:
-                    entity[key] = largest_candidate[key]
+                entity["body"] = largest_candidate["body"]
+                offset = entity["start"]
+                entity["start"] = offset + largest_candidate["start"]
+                entity["end"] = offset + largest_candidate["end"]
+                entity["value"] = largest_candidate["value"]
                 entity["dim"] = time_entity
                 return entity
             
@@ -244,6 +313,7 @@ class SpacyAnnotator(Annotator):
                     entity["dim"] = self.SYS_MAPPINGS[entity_type]
                     return entity
 
+        print("spacy_quantity", entity["body"])
         entity["dim"] = "spacy_quantity"
         return entity
     
@@ -270,6 +340,3 @@ class SpacyAnnotator(Annotator):
             entity["body"] = entity["body"][:-2]
             entity["end"] -= 2
         return entity
-
-    def annotate(self):
-        pass
