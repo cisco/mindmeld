@@ -76,10 +76,11 @@ class EntityResolver:
         self._es_host = es_host
         self._es_config = {"client": es_client, "pid": os.getpid()}
 
-        num_canonical_entities = len(
-            self._resource_loader.get_entity_map(self.type).get("entities", [])
-        )
-        self._no_canonical_entities = num_canonical_entities == 0
+        if self._is_system_entity:
+            canonical_entities = []
+        else:
+            canonical_entities = self._resource_loader.get_entity_map(self.type).get("entities", [])
+        self._no_canonical_entities = len(canonical_entities) == 0
 
     @property
     def _es_index_name(self):
