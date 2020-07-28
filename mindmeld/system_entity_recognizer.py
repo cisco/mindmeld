@@ -436,6 +436,20 @@ class DucklingRecognizer(SystemEntityRecognizer):
             )
 
         if len(entity_type_filtered_candidates) > 0:
+            # Duckling recommends sys_interval candidates with incomplete
+            # "to" duration time interval higher than candidates with complete
+            # "to" duration time interval. Therefore, we recommend the complete
+            # candidate over the incomplete one when all the candidates have the
+            # same "from" duration times.
+            if entity_type == "sys_interval":
+                from_vals = set([candidate.entity.value["value"][0] for candidate in entity_type_filtered_candidates])
+                # All of the candidates have the same "from" time
+                if len(from_vals) == 1:
+                    for candidate in entity_type_filtered_candidates:
+                        from_val, to_val = candidate.entity.value["value"]
+                        if from_val and to_val:
+                            return candidate
+
             # Duckling sorts most probable entity candidates higher than
             # the lower probable candidates. So we return the best possible
             # candidate in this case when multiple duckling candidates are
@@ -647,9 +661,8 @@ def duckling_item_to_entity(item):
             # Some intervals will only contain one value. The other value will be None in that case
             value["value"] = _construct_interval_helper(item["value"])
             if "values" in item["value"]:
-                value["values"] = []
-                for interval_item in item["value"]["values"]:
-                    value["values"].append(_construct_interval_helper(interval_item))
+                value["values"] = [_construct_interval_helper(interval_item) for interval_item in
+                                   item["value"]["values"]]
 
         # Get the unit if it exists
         if "unit" in item["value"]:
