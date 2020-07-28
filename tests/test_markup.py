@@ -177,6 +177,16 @@ def test_load_system(
         assert value in entity.entity.value["value"]
 
 
+def test_entity_values(query_factory):
+    processed_query = markup.load_query(
+        "lets meet {2 hours from now|sys_interval}", query_factory, query_options={"timestamp": 1592002800}
+    )
+    entity = processed_query.entities[0]
+    assert "values" in entity.entity.value
+    assert entity.entity.value["values"][0][0]
+    assert entity.entity.value["values"][0][1] is None
+
+
 @pytest.mark.dump
 @pytest.mark.system
 @pytest.mark.role

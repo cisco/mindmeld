@@ -278,12 +278,6 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
             if response.status_code == requests.codes["ok"]:
                 response_json = response.json()
-
-                # Remove the redundant 'values' key in the response['value'] dictionary
-                for i, entity_dict in enumerate(response_json):
-                    if "values" in entity_dict["value"]:
-                        del response_json[i]["value"]["values"]
-
                 return response_json, response.status_code
             else:
                 raise SystemEntityError("System entity status code is not 200.")
@@ -605,6 +599,16 @@ class DucklingRecognizer(SystemEntityRecognizer):
             return []
 
 
+def _construct_interval_helper(interval_item):
+    from_ = None
+    to_ = None
+    if "from" in interval_item:
+        from_ = interval_item["from"]["value"]
+    if "to" in interval_item:
+        to_ = interval_item["to"]["value"]
+    return from_, to_
+
+
 def duckling_item_to_entity(item):
     """Converts an item from the output of duckling into an Entity
 
@@ -628,6 +632,8 @@ def duckling_item_to_entity(item):
     ):
         num_type = dimension
         value["value"] = item["value"]["value"]
+        if "values" in item["value"]:
+            value["values"] = item["value"]["values"]
     else:
         type_ = item["value"]["type"]
         # num_type = f'{dimension}-{type_}'  # e.g. time-interval, temperature-value, etc
@@ -635,17 +641,15 @@ def duckling_item_to_entity(item):
 
         if type_ == "value":
             value["value"] = item["value"]["value"]
+            if "values" in item["value"]:
+                value["values"] = item["value"]["values"]
         elif type_ == "interval":
-            from_ = None
-            to_ = None
-
-            if "from" in item["value"]:
-                from_ = item["value"]["from"]["value"]
-            if "to" in item["value"]:
-                to_ = item["value"]["to"]["value"]
-
             # Some intervals will only contain one value. The other value will be None in that case
-            value["value"] = (from_, to_)
+            value["value"] = _construct_interval_helper(item["value"])
+            if "values" in item["value"]:
+                value["values"] = []
+                for interval_item in item["value"]["values"]:
+                    value["values"].append(_construct_interval_helper(interval_item))
 
         # Get the unit if it exists
         if "unit" in item["value"]:
