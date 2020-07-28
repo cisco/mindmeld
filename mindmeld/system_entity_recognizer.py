@@ -436,13 +436,14 @@ class DucklingRecognizer(SystemEntityRecognizer):
             )
 
         if len(entity_type_filtered_candidates) > 0:
-            # Duckling recommends sys_interval candidates with incomplete
+            # Duckling ranks sys_interval candidates with incomplete
             # "to" duration time interval higher than candidates with complete
             # "to" duration time interval. Therefore, we recommend the complete
             # candidate over the incomplete one when all the candidates have the
-            # same "from" duration times.
+            # same "from" duration time.
             if entity_type == "sys_interval":
-                from_vals = set([candidate.entity.value["value"][0] for candidate in entity_type_filtered_candidates])
+                from_vals = set(candidate.entity.value["value"][0]
+                                for candidate in entity_type_filtered_candidates)
                 # All of the candidates have the same "from" time
                 if len(from_vals) == 1:
                     for candidate in entity_type_filtered_candidates:
@@ -614,12 +615,8 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
 
 def _construct_interval_helper(interval_item):
-    from_ = None
-    to_ = None
-    if "from" in interval_item:
-        from_ = interval_item["from"]["value"]
-    if "to" in interval_item:
-        to_ = interval_item["to"]["value"]
+    from_ = interval_item.get("from", {}).get("value", None)
+    to_ = interval_item.get("to", {}).get("value", None)
     return from_, to_
 
 
@@ -647,7 +644,7 @@ def duckling_item_to_entity(item):
         num_type = dimension
         value["value"] = item["value"]["value"]
         if "values" in item["value"]:
-            value["values"] = item["value"]["values"]
+            value["additional_candidate_values"] = item["value"]["values"]
     else:
         type_ = item["value"]["type"]
         # num_type = f'{dimension}-{type_}'  # e.g. time-interval, temperature-value, etc
@@ -656,13 +653,14 @@ def duckling_item_to_entity(item):
         if type_ == "value":
             value["value"] = item["value"]["value"]
             if "values" in item["value"]:
-                value["values"] = item["value"]["values"]
+                value["additional_candidate_values"] = item["value"]["values"]
         elif type_ == "interval":
             # Some intervals will only contain one value. The other value will be None in that case
             value["value"] = _construct_interval_helper(item["value"])
             if "values" in item["value"]:
-                value["values"] = [_construct_interval_helper(interval_item) for interval_item in
-                                   item["value"]["values"]]
+                value["additional_candidate_values"] = \
+                    [_construct_interval_helper(interval_item) for
+                     interval_item in item["value"]["values"]]
 
         # Get the unit if it exists
         if "unit" in item["value"]:

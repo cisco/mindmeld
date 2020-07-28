@@ -176,6 +176,7 @@ def test_load_system(
         assert entity.entity.value["grain"] == unit_or_grain
         assert value in entity.entity.value["value"]
 
+
 @pytest.mark.load
 @pytest.mark.system
 @pytest.mark.parametrize(
@@ -183,17 +184,19 @@ def test_load_system(
     [("let's meet {after 3:00|sys_interval}", [('2020-06-12T15:00:00.000-07:00', None),
                                                ('2020-06-13T03:00:00.000-07:00', None),
                                                ('2020-06-13T15:00:00.000-07:00', None)]),
-     ("let's meet {until 3:00|sys_interval}", [('2020-06-12T03:00:00.000-07:00', '2020-06-12T13:00:00.000-07:00'),
-                                               ('2020-06-12T15:00:00.000-07:00', '2020-06-13T01:00:00.000-07:00'),
-                                               ('2020-06-13T03:00:00.000-07:00', '2020-06-13T13:00:00.000-07:00')]),
+     ("let's meet {until 3:00|sys_interval}",
+      [('2020-06-12T03:00:00.000-07:00', '2020-06-12T13:00:00.000-07:00'),
+       ('2020-06-12T15:00:00.000-07:00', '2020-06-13T01:00:00.000-07:00'),
+       ('2020-06-13T03:00:00.000-07:00', '2020-06-13T13:00:00.000-07:00')]),
      ("let's meet {from now until 3:00|sys_interval}",
       [('2020-06-12T11:00:39.000-07:00', '2020-06-12T15:00:01.000-07:00')])])
 def test_entity_values(query_factory, query, expected_values):
     # timestamp is for 2020-06-12T11:00:39.000-07:00
-    processed_query = markup.load_query(query, query_factory, query_options={"timestamp": 1591984839})
+    processed_query = markup.load_query(query, query_factory,
+                                        query_options={"timestamp": 1591984839})
     entity = processed_query.entities[0]
-    assert "values" in entity.entity.value
-    assert entity.entity.value['values'] == expected_values
+    assert "additional_candidate_values" in entity.entity.value
+    assert entity.entity.value['additional_candidate_values'] == expected_values
 
 
 @pytest.mark.dump
