@@ -80,7 +80,7 @@ class EntityResolver:
             canonical_entities = []
         else:
             canonical_entities = self._resource_loader.get_entity_map(self.type).get("entities", [])
-        self._no_canonical_entities = len(canonical_entities) == 0
+        self._no_canonical_entity_map = len(canonical_entities) == 0
 
     @property
     def _es_index_name(self):
@@ -200,7 +200,7 @@ class EntityResolver:
             clean (bool): If ``True``, deletes and recreates the index from scratch instead of
                           updating the existing index with synonyms in the mapping.json.
         """
-        if self._is_system_entity or self._no_canonical_entities:
+        if self._no_canonical_entity_map:
             return
 
         if not self._use_text_rel:
@@ -339,7 +339,7 @@ class EntityResolver:
             # system entities are already resolved
             return [top_entity.value]
 
-        if self._no_canonical_entities:
+        if self._no_canonical_entity_map:
             return []
 
         if not self._use_text_rel:
