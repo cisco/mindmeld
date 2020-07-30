@@ -630,7 +630,6 @@ def duckling_item_to_entity(item):
         Entity: The entity described by the duckling item
     """
     value = {}
-    alternate_values = []
     dimension = item["dim"]
 
     # These dimensions have no 'type' key in the 'value' dict
@@ -645,7 +644,7 @@ def duckling_item_to_entity(item):
         num_type = dimension
         value["value"] = item["value"]["value"]
         if "values" in item["value"]:
-            alternate_values = item["value"]["values"]
+            value["alternate_values"] = item["value"]["values"]
     else:
         type_ = item["value"]["type"]
         # num_type = f'{dimension}-{type_}'  # e.g. time-interval, temperature-value, etc
@@ -654,13 +653,14 @@ def duckling_item_to_entity(item):
         if type_ == "value":
             value["value"] = item["value"]["value"]
             if "values" in item["value"]:
-                alternate_values = item["value"]["values"]
+                value["alternate_values"] = item["value"]["values"]
         elif type_ == "interval":
             # Some intervals will only contain one value. The other value will be None in that case
             value["value"] = _construct_interval_helper(item["value"])
             if "values" in item["value"]:
-                alternate_values = \
-                    [_construct_interval_helper(interval_item) for interval_item in item["value"]["values"]]
+                value["alternate_values"] = \
+                    [_construct_interval_helper(interval_item) for
+                     interval_item in item["value"]["values"]]
 
         # Get the unit if it exists
         if "unit" in item["value"]:
@@ -680,7 +680,7 @@ def duckling_item_to_entity(item):
                     value["grain"] = item["value"]["to"].get("grain")
 
     entity_type = "sys_{}".format(num_type)
-    return Entity(item["body"], entity_type, value=value, alternate_values=alternate_values)
+    return Entity(item["body"], entity_type, value=value)
 
 
 def duckling_item_to_query_entity(query, item, offset=0):

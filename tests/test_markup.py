@@ -195,8 +195,8 @@ def test_entity_values(query_factory, query, expected_values):
     processed_query = markup.load_query(query, query_factory,
                                         query_options={"timestamp": 1591984839})
     entity = processed_query.entities[0]
-    assert "additional_candidate_values" in entity.entity.value
-    assert entity.entity.value['additional_candidate_values'] == expected_values
+    assert "alternate_values" in entity.entity.value
+    assert entity.entity.value['alternate_values'] == expected_values
 
 
 @pytest.mark.dump
