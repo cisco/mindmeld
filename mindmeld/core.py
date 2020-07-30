@@ -699,6 +699,7 @@ class Entity:
         entity_type,
         role=None,
         value=None,
+        alternate_values=[],
         display_text=None,
         confidence=None,
     ):
@@ -709,6 +710,7 @@ class Entity:
         self.display_text = display_text
         self.confidence = confidence
         self.is_system_entity = self.__class__.is_system_entity(entity_type)
+        self.alternate_values = alternate_values
 
     @staticmethod
     def is_system_entity(entity_type):  # pylint: disable=method-hidden
