@@ -683,7 +683,7 @@ class Entity:
         text (str): The text contents that span the entity
         type (str): The type of the entity
         role (str): The role of the entity
-        value (str): The resolved value of the entity
+        value (dict): The resolved value of the entity
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
         confidence (float): A confidence value from 0 to 1 about how confident the entity
@@ -699,7 +699,6 @@ class Entity:
         entity_type,
         role=None,
         value=None,
-        alternate_values=[],
         display_text=None,
         confidence=None,
     ):
@@ -710,7 +709,6 @@ class Entity:
         self.display_text = display_text
         self.confidence = confidence
         self.is_system_entity = self.__class__.is_system_entity(entity_type)
-        self.alternate_values = alternate_values
 
     @staticmethod
     def is_system_entity(entity_type):  # pylint: disable=method-hidden
