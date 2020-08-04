@@ -466,8 +466,8 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
     
     "overwrite": False, 
-    'annotate': [ "*/*/*/*" ],
-    'unannotate': None
+    "annotate": [ "*/*/*/*" ],
+    "unannotate": None
 }
 
 class NlpConfigError(Exception):
