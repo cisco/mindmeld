@@ -463,12 +463,11 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
-DEFAULT_SYS_ANNOTATOR_CONFIG = { 
+DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
     
     "overwrite": False, 
-    'annotate': [
-        "*/*/*/*"
-        ] 
+    'annotate': [ "*/*/*/*" ],
+    'unannotate': None
 }
 
 class NlpConfigError(Exception):
@@ -929,11 +928,11 @@ def get_nlp_config(app_path=None, config=None):
     return _get_default_nlp_config()
 
 
-def _get_default_sys_annotator_config():
-    return copy.deepcopy(DEFAULT_SYS_ANNOTATOR_CONFIG)
+def _get_default_auto_annotator_config():
+    return copy.deepcopy(DEFAULT_AUTO_ANNOTATOR_CONFIG)
 
-def get_sys_annotator_config(app_path=None, config=None):
-    """Gets the fully specified processor configuration for the app at the
+def get_auto_annotator_config(app_path=None, config=None):
+    """Gets the automatic annotator config for the app at the
     given path.
 
     Args:
@@ -944,19 +943,19 @@ def get_sys_annotator_config(app_path=None, config=None):
             specified config object.
 
     Returns:
-        dict: The system entity annotator config.
+        dict: The automatic annotator config.
     """
 
     if config:
         return config
     try:
-        sys_annotator_config = getattr(
-            _get_config_module(app_path), "SYS_ANNOTATOR_CONFIG", DEFAULT_SYS_ANNOTATOR_CONFIG
+        auto_annotator_config = getattr(
+            _get_config_module(app_path), "AUTO_ANNOTATOR_CONFIG", DEFAULT_AUTO_ANNOTATOR_CONFIG
         )
-        print("LOADING SYS_ANNOTATOR CONFIG:", sys_annotator_config)
-        return sys_annotator_config
+        print("LOADING AUTO_ANNOTATOR CONFIG:", auto_annotator_config)
+        return auto_annotator_config
     except (OSError, IOError):
         logger.info(
-            "No app configuration file found. Using the default system entity recognizer config."
+            "No app configuration file found. Using the default automatic annotator config."
         )
-        return _get_default_sys_annotator_config()
+        return _get_default_auto_annotator_config()
