@@ -437,7 +437,12 @@ class ResourceLoader:
             list: A list of file paths.
         """
         all_file_paths = file_paths or self.get_all_file_paths()
-        return [path for path in all_file_paths if re.match(file_pattern, path)]
+        matched_paths = [
+            path for path in all_file_paths if re.match(file_pattern, path)
+        ]
+        if len(matched_paths) == 0:
+            logger.warning("No matches were found for the file path pattern: %s", file_pattern)
+        return matched_paths
 
 
 

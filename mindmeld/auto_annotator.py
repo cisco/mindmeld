@@ -11,17 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from os import walk
 import re
 import logging
 import spacy
 
 from .resource_loader import ResourceLoader
-from .components._config import get_sys_annotator_config
+from .components._config import get_auto_annotator_config
 from .system_entity_recognizer import DucklingRecognizer
-from .markup import load_query_file, dump_queries
+from .markup import load_query, load_query_file, dump_queries
 from .core import Entity, Span, QueryEntity
-
+from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
 
@@ -33,18 +32,16 @@ class Annotator(ABC):
     def __init__(self, app_path, config=None, resource_loader=None, **kwargs):
         """Initializes an annotator."""
         self.app_path = app_path
-        self.config = get_sys_annotator_config(app_path=app_path,config=config)
+        self.config = get_auto_annotator_config(app_path=app_path,config=config)
         self._resource_loader = (
             resource_loader or ResourceLoader.create_resource_loader(app_path)
         )
-        self.file_entities_map = self._get_file_entities_map()
-        
-    def _get_file_entities_map(self):
+        self.annotate_file_entities_map = self._get_file_entities_map(key="annotate")
+
+    def _get_file_entities_map(self, key):
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path:[] for path in all_file_paths}
-
-        # TODO: CHANGE TO UPDATE BY MOST SPECIFIC RULE INSTEAD OF OVERWRITE
-        for rule in self.config["annotate"]:
+        for rule in self.config[key]:
             pattern = self._get_pattern(rule) 
             filtered_paths = self._resource_loader.filter_file_paths(
                 file_pattern=pattern, file_paths=all_file_paths 
@@ -52,36 +49,84 @@ class Annotator(ABC):
             for path in filtered_paths:
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
-
         return file_entities_map
 
     def _get_pattern(self, rule):
-        pattern = "/".join(rule.split("/")[:-1])
+        pattern = "/".join(rule.split("/")[:-1]) 
+        pattern = pattern.replace(".*", ".+")
         pattern = pattern.replace("*", ".+")
-        return ".*/" + pattern
+        prefix = ".*" if pattern[0] == "/" else ".*/"
+        return prefix + pattern
 
     def _get_entities(self, rule):
         entities = rule.split("/")[-1]
         entities = re.sub('[()]',"", entities).split("|")
-        # TODO: ADD CHECK FOR VALID ENTITY
-        return entities
-    
+        valid_entities = []
+        for entity in entities:
+            if entity=="*" or self.valid_entity_check(entity):
+                valid_entities.append(entity)
+            else:
+                logger.warning("%s is not a valid entity. Skipping entity.", entity)
+        return valid_entities
+
+    @abstractmethod
+    def valid_entity_check(self, entity):
+        return True
+
     def annotate(self):
         """ Annotate data based on configurations in the config.py file.
         """
-        for path in self.file_entities_map:
-            processed_queries = load_query_file(
-                file_path=path, app_path=self.app_path
+        file_entities_map = self.annotate_file_entities_map
+        self._modify_queries(file_entities_map, action="annotate")
+
+    def unannotate(self):
+        """ Unannotate data based on configurations in the config.py file.
+        """
+        if not self.config["unannotate"]:
+            logger.warning("Unnanotate is set to None in the config.")
+            return
+        file_entities_map = self._get_file_entities_map(key="unannotate")
+        self._modify_queries(file_entities_map, action="unannotate")
+
+    def _modify_queries(self, file_entities_map, action):
+        query_factory = QueryFactory.create_query_factory(self.app_path)
+        for path in file_entities_map:
+            processed_queries = self._get_processed_queries(
+                file_path=path, query_factory=query_factory
             )
+            # processed_queries = load_query_file(
+            #     file_path=path, app_path=self.app_path
+            # )
             for processed_query in processed_queries:
-                entity_types = self.file_entities_map[path]
-                self._annotate_query(
-                    processed_query=processed_query, entity_types=entity_types
-                )
+                entity_types = file_entities_map[path]
+                if action == "annotate":
+                    self._annotate_query(
+                        processed_query=processed_query, entity_types=entity_types
+                    )
+                elif action == "unannotate":
+                    self._unannotate_query(
+                        processed_query=processed_query, entity_types=entity_types
+                    )
             annotated_queries = [query for query in dump_queries(processed_queries)]
             with open(path, "w") as outfile:
-                outfile.write("\n".join(annotated_queries))
+                outfile.write("".join(annotated_queries))
                 outfile.close()
+
+    def _get_processed_queries(self, file_path, query_factory):
+        with open(file_path) as infile:
+            queries = infile.readlines()
+        processed_queries = []
+        for query in queries:
+            try:
+                processed_query = load_query(
+                    markup=query, query_factory=query_factory
+                )
+                processed_queries.append(processed_query)
+            except:
+                logger.warning(
+                    "Skipping query. Error in processing: " + query
+                )
+        return processed_queries
 
     def _annotate_query(self, processed_query, entity_types):
         current_entities = list(processed_query.entities)
@@ -116,29 +161,33 @@ class Annotator(ABC):
         return query_entity
 
     def _resolve_conflicts(self, current_entities, annotated_entities):
-        final = []
-        while(len(current_entities) > 0 or len(annotated_entities) > 0):
-            if not current_entities:
-                return final + annotated_entities
-            if not annotated_entities:
-                return final + current_entities
+        overwrite = self.config["overwrite"]
+        base_entities = annotated_entities if overwrite else current_entities
+        other_entities = current_entities if overwrite else annotated_entities
 
-            curr_entity = current_entities[0]
-            annot_entity = annotated_entities[0]    
+        additional_entities = []
+        for o_entity in other_entities:
+            no_overlaps = [
+                self._no_overlap(o_entity, b_entity) for b_entity in base_entities
+            ]
+            if all(no_overlaps):
+                additional_entities.append(o_entity)
+        return base_entities + additional_entities
 
-            if curr_entity.span.end < annot_entity.span.start:
-                final.append(curr_entity)
-                current_entities.pop(0)
-            elif annot_entity.span.end < curr_entity.span.start:
-                final.append(annot_entity)
-                annotated_entities.pop(0)
-            else:
-                overwrite = self.config["overwrite"]
-                entity = annot_entity if overwrite else curr_entity
-                final.append(entity)
-                annotated_entities.pop(0)
-                current_entities.pop(0)
-        return final
+    def _no_overlap(self, entity_one, entity_two):
+        return (
+            entity_one.span.start > entity_two.span.end or
+            entity_two.span.start > entity_one.span.end
+        )
+
+    def _unannotate_query(self, processed_query, entity_types):
+        if entity_types == ["*"]:
+            processed_query.entities = ()
+        final_entities = []
+        for query_entity in processed_query.entities:
+            if query_entity.entity.type not in entity_types:
+                final_entities.append(query_entity)
+        processed_query.entities = tuple(final_entities)
 
     @abstractmethod
     def parse(self, sentence, **kwargs):
@@ -162,6 +211,15 @@ class SpacyAnnotator(Annotator):
                         "distance": "sys_distance",
                         "quantity": "sys_weight"
                     }
+    
+    def valid_entity_check(self, entity):
+        entity = entity.lower().strip()
+        valid_entities = [
+            "sys_time", "sys_interval", "sys_duration", "sys_number", "sys_amount-of-money",
+            "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity", "sys_percent",
+            "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac", "sys_product",
+            "sys_event", "sys_law", "sys_langauge", "sys_work_of_art", "other_time", "other_quantity"]
+        return True if entity in valid_entities else False
 
     def parse(
         self,
@@ -213,7 +271,7 @@ class SpacyAnnotator(Annotator):
         candidates = self.duckling.get_candidates_for_text(entity["body"])
 
         if len(candidates) == 0:
-            entity["dim"] = "spacy_time"
+            entity["dim"] = "other_time"
             return entity
         
         time_entities = ["sys_duration", "sys_interval", "sys_time"]
@@ -225,8 +283,8 @@ class SpacyAnnotator(Annotator):
         elif self._resolve_time_largest_substring(entity, candidates, time_entities):
             return entity
         else:
-            print("spacy_time", entity["body"])
-            entity["dim"] = "spacy_time"
+            print("other_time", entity["body"])
+            entity["dim"] = "other_time"
             return entity
         
     def _get_time_entity_type(self, candidate):
@@ -300,7 +358,7 @@ class SpacyAnnotator(Annotator):
     def _resolve_quantity(self, entity):
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
-            entity["dim"] = "spacy_quantity"
+            entity["dim"] = "other_quantity"
             return entity
 
         for entity_type in ["distance", "quantity"]:
@@ -313,9 +371,35 @@ class SpacyAnnotator(Annotator):
                     entity["dim"] = self.SYS_MAPPINGS[entity_type]
                     return entity
 
-        print("spacy_quantity", entity["body"])
-        entity["dim"] = "spacy_quantity"
-        return entity
+        if self._resolve_quantity_largest_substring(entity, candidates):
+            return entity
+        else:
+            print("other_quantity", entity["body"])
+            entity["dim"] = "other_quantity"
+            return entity
+
+    def _resolve_quantity_largest_substring(self, entity, candidates):
+        for entity_type in ["distance", "quantity"]:
+            largest_candidate = None
+            for candidate in candidates:
+                candidate_entity = candidate["dim"]
+                if ( 
+                    candidate_entity == entity_type and
+                    candidate["body"] in entity["body"] and
+                    (
+                        not largest_candidate or
+                        len(candidate["body"]) > len(largest_candidate["body"])
+                    )                                                                   
+                ):
+                    largest_candidate = candidate
+            if largest_candidate:
+                entity["body"] = largest_candidate["body"]
+                offset = entity["start"]
+                entity["start"] = offset + largest_candidate["start"]
+                entity["end"] = offset + largest_candidate["end"]
+                entity["value"] = largest_candidate["value"]
+                entity["dim"] = entity_type
+                return entity
     
     def _resolve_percent(self, entity):
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
