@@ -683,7 +683,7 @@ class Entity:
         text (str): The text contents that span the entity
         type (str): The type of the entity
         role (str): The role of the entity
-        value (str): The resolved value of the entity
+        value (dict): The resolved value of the entity
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
         confidence (float): A confidence value from 0 to 1 about how confident the entity

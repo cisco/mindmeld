@@ -278,12 +278,6 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
             if response.status_code == requests.codes["ok"]:
                 response_json = response.json()
-
-                # Remove the redundant 'values' key in the response['value'] dictionary
-                for i, entity_dict in enumerate(response_json):
-                    if "values" in entity_dict["value"]:
-                        del response_json[i]["value"]["values"]
-
                 return response_json, response.status_code
             else:
                 raise SystemEntityError("System entity status code is not 200.")
@@ -442,6 +436,24 @@ class DucklingRecognizer(SystemEntityRecognizer):
             )
 
         if len(entity_type_filtered_candidates) > 0:
+            # Duckling ranks sys_interval candidates with incomplete
+            # "to" duration time interval higher than candidates with complete
+            # "to" duration time interval. Therefore, we recommend the complete
+            # candidate over the incomplete one when all the candidates have the
+            # same "from" duration time.
+            if entity_type == "sys_interval":
+                from_vals = set()
+                candidates_with_from_and_to_vals = []
+                for candidate in entity_type_filtered_candidates:
+                    from_val, to_val = candidate.entity.value["value"]
+                    from_vals.add(from_val)
+                    if from_val and to_val:
+                        candidates_with_from_and_to_vals.append(candidate)
+
+                if len(candidates_with_from_and_to_vals) > 0 and len(from_vals) == 1:
+                    # All of the candidates have the same "from" time
+                    return candidates_with_from_and_to_vals[0]
+
             # Duckling sorts most probable entity candidates higher than
             # the lower probable candidates. So we return the best possible
             # candidate in this case when multiple duckling candidates are
@@ -605,6 +617,12 @@ class DucklingRecognizer(SystemEntityRecognizer):
             return []
 
 
+def _construct_interval_helper(interval_item):
+    from_ = interval_item.get("from", {}).get("value", None)
+    to_ = interval_item.get("to", {}).get("value", None)
+    return from_, to_
+
+
 def duckling_item_to_entity(item):
     """Converts an item from the output of duckling into an Entity
 
@@ -628,6 +646,8 @@ def duckling_item_to_entity(item):
     ):
         num_type = dimension
         value["value"] = item["value"]["value"]
+        if "values" in item["value"]:
+            value["alternate_values"] = item["value"]["values"]
     else:
         type_ = item["value"]["type"]
         # num_type = f'{dimension}-{type_}'  # e.g. time-interval, temperature-value, etc
@@ -635,17 +655,15 @@ def duckling_item_to_entity(item):
 
         if type_ == "value":
             value["value"] = item["value"]["value"]
+            if "values" in item["value"]:
+                value["alternate_values"] = item["value"]["values"]
         elif type_ == "interval":
-            from_ = None
-            to_ = None
-
-            if "from" in item["value"]:
-                from_ = item["value"]["from"]["value"]
-            if "to" in item["value"]:
-                to_ = item["value"]["to"]["value"]
-
             # Some intervals will only contain one value. The other value will be None in that case
-            value["value"] = (from_, to_)
+            value["value"] = _construct_interval_helper(item["value"])
+            if "values" in item["value"]:
+                value["alternate_values"] = \
+                    [_construct_interval_helper(interval_item) for
+                     interval_item in item["value"]["values"]]
 
         # Get the unit if it exists
         if "unit" in item["value"]:
