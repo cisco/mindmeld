@@ -442,14 +442,17 @@ class DucklingRecognizer(SystemEntityRecognizer):
             # candidate over the incomplete one when all the candidates have the
             # same "from" duration time.
             if entity_type == "sys_interval":
-                from_vals = set(candidate.entity.value["value"][0]
-                                for candidate in entity_type_filtered_candidates)
-                # All of the candidates have the same "from" time
-                if len(from_vals) == 1:
-                    for candidate in entity_type_filtered_candidates:
-                        from_val, to_val = candidate.entity.value["value"]
-                        if from_val and to_val:
-                            return candidate
+                from_vals = set()
+                candidates_with_from_and_to_vals = []
+                for candidate in entity_type_filtered_candidates:
+                    from_val, to_val = candidate.entity.value["value"]
+                    from_vals.add(from_val)
+                    if from_val and to_val:
+                        candidates_with_from_and_to_vals.append(candidate)
+
+                if len(candidates_with_from_and_to_vals) > 0 and len(from_vals) == 1:
+                    # All of the candidates have the same "from" time
+                    return candidates_with_from_and_to_vals[0]
 
             # Duckling sorts most probable entity candidates higher than
             # the lower probable candidates. So we return the best possible
