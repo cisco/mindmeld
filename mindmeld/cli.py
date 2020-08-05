@@ -539,6 +539,7 @@ def _get_duckling_pid():
         pid.append(line.split()[0])
     return pid
 
+
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option(
@@ -551,7 +552,8 @@ def annotate(ctx, app_path, model):
     """Runs the automatic system entity annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model=model)
     spacy_annotator.annotate()
-    print("Annotation Complete")
+    logger.info("Annotation Complete.")
+
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
@@ -564,7 +566,7 @@ def unannotate(ctx, app_path):
     """Runs the automatic system entity annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model="en_core_web_lg")
     spacy_annotator.unannotate()
-    print("Process Complete")
+    logger.info("Unannotation Complete.")
 
 #
 # Module only Commands
