@@ -42,6 +42,7 @@ from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
 from .auto_annotator import SpacyAnnotator
+
 logger = logging.getLogger(__name__)
 
 click.disable_unicode_literals_warning = True
@@ -532,14 +533,13 @@ def _get_duckling_pid():
 
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
-@click.pass_context
 @click.option(
     "--app-path",
     required=True,
     help="Needed to access data to annotate and app config.",
 )
 @click.option("--model", required=False, default="en_core_web_lg")
-def annotate(ctx, app_path, model):
+def annotate(app_path, model):
     """Runs the automatic system entity annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model=model)
     spacy_annotator.annotate()
@@ -547,17 +547,17 @@ def annotate(ctx, app_path, model):
 
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
-@click.pass_context
 @click.option(
     "--app-path",
     required=True,
     help="Needed to access data to unannotate and app config.",
 )
-def unannotate(ctx, app_path):
+def unannotate(app_path):
     """Runs the automatic system entity annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model="en_core_web_lg")
     spacy_annotator.unannotate()
     logger.info("Unannotation Complete.")
+
 
 #
 # Module only Commands

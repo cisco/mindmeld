@@ -34,7 +34,7 @@ class Annotator(ABC):
     def __init__(self, app_path, config=None, resource_loader=None):
         """ Initializes an annotator."""
         self.app_path = app_path
-        self.config = get_auto_annotator_config(app_path=app_path,config=config)
+        self.config = get_auto_annotator_config(app_path=app_path, config=config)
         self._resource_loader = (
             resource_loader or ResourceLoader.create_resource_loader(app_path)
         )
@@ -53,7 +53,7 @@ class Annotator(ABC):
                 App to a list of entities.
         """
         all_file_paths = self._resource_loader.get_all_file_paths()
-        file_entities_map = {path:[] for path in all_file_paths}
+        file_entities_map = {path: [] for path in all_file_paths}
         rules = self.config[action]
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
@@ -91,7 +91,7 @@ class Annotator(ABC):
             valid_entities (list): List of valid entities specified in the rule.
         """
         entities = rule.split("/")[-1]
-        entities = re.sub('[()]',"", entities).split("|")
+        entities = re.sub("[()]", "", entities).split("|")
         valid_entities = []
         for entity in entities:
             if entity == "*" or self.valid_entity_check(entity):
@@ -171,9 +171,7 @@ class Annotator(ABC):
         processed_queries = []
         for query in queries:
             try:
-                processed_query = load_query(
-                    markup=query, query_factory=query_factory
-                )
+                processed_query = load_query(markup=query, query_factory=query_factory)
                 processed_queries.append(processed_query)
             except (AssertionError, MarkupError):
                 logger.warning("Skipping query. Error in processing: %s", query)
@@ -213,7 +211,9 @@ class Annotator(ABC):
         items = self.parse(
             sentence=processed_query.query.text, entity_types=entity_types
         )
-        query_entities = [Annotator._item_to_query_entity(item, processed_query) for item in items]
+        query_entities = [
+            Annotator._item_to_query_entity(item, processed_query) for item in items
+        ]
         return query_entities if len(query_entities) > 0 else []
 
     @staticmethod
@@ -229,12 +229,8 @@ class Annotator(ABC):
         Returns:
             query_entity (QueryEntity): The converted query entity.
         """
-        span = Span(
-            start=item["start"], end=item["end"] - 1
-        )
-        entity = Entity(
-            text=item["body"], entity_type=item["dim"], value=item["value"]
-        )
+        span = Span(start=item["start"], end=item["end"] - 1)
+        entity = Entity(text=item["body"], entity_type=item["dim"], value=item["value"])
         query_entity = QueryEntity.from_query(
             query=processed_query.query, span=span, entity=entity
         )
@@ -307,6 +303,7 @@ class Annotator(ABC):
 class SpacyAnnotator(Annotator):
     """ Annotator class that uses spacy to generate annotations.
     """
+
     def __init__(self, app_path, config=None, model="en_core_web_lg", **kwargs):
         super().__init__(app_path=app_path, config=config, **kwargs)
         logger.info("Loading spacy model %s.", model)
@@ -320,23 +317,38 @@ class SpacyAnnotator(Annotator):
             "person": "sys_person",
             "percent": "sys_percent",
             "distance": "sys_distance",
-            "quantity": "sys_weight"
+            "quantity": "sys_weight",
         }
 
     def valid_entity_check(self, entity):
         entity = entity.lower().strip()
         valid_entities = [
-            "sys_time", "sys_interval", "sys_duration", "sys_number", "sys_amount-of-money",
-            "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity", "sys_percent",
-            "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac", "sys_product",
-            "sys_event", "sys_law", "sys_langauge", "sys_work_of_art","sys_other_quantity"]
-        return (entity in valid_entities)
+            "sys_time",
+            "sys_interval",
+            "sys_duration",
+            "sys_number",
+            "sys_amount-of-money",
+            "sys_distance",
+            "sys_weight",
+            "sys_ordinal",
+            "sys_quantity",
+            "sys_percent",
+            "sys_org",
+            "sys_loc",
+            "sys_person",
+            "sys_gpe",
+            "sys_norp",
+            "sys_fac",
+            "sys_product",
+            "sys_event",
+            "sys_law",
+            "sys_langauge",
+            "sys_work_of_art",
+            "sys_other_quantity",
+        ]
+        return entity in valid_entities
 
-    def parse(
-        self,
-        sentence,
-        entity_types=None
-    ):
+    def parse(self, sentence, entity_types=None):
         doc = self.nlp(sentence)
         spacy_entities = [
             {
@@ -390,7 +402,9 @@ class SpacyAnnotator(Annotator):
 
         if SpacyAnnotator._resolve_time_exact_match(entity, candidates, time_entities):
             return entity
-        elif SpacyAnnotator._resolve_time_largest_substring(entity, candidates, time_entities):
+        elif SpacyAnnotator._resolve_time_largest_substring(
+            entity, candidates, time_entities
+        ):
             return entity
 
     @staticmethod
@@ -521,7 +535,7 @@ class SpacyAnnotator(Annotator):
         for candidate in candidates:
             if candidate["entity_type"] == "sys_number":
                 possible_values.append(candidate["value"]["value"])
-        entity['value']['value'] = max(possible_values) / 100
+        entity["value"]["value"] = max(possible_values) / 100
         return entity
 
     def _resolve_person(self, entity):
