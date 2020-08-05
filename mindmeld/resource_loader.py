@@ -457,7 +457,9 @@ class ResourceLoader:
             path for path in all_file_paths if re.match(file_pattern, path)
         ]
         if len(matched_paths) == 0:
-            logger.warning("No matches were found for the file path pattern: %s", file_pattern)
+            logger.warning(
+                "No matches were found for the file path pattern: %s", file_pattern
+            )
         return matched_paths
 
     def load_query_file(self, domain, intent, file_path, raw=False):

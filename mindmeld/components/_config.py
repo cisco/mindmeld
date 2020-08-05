@@ -466,7 +466,7 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "overwrite": False,
     "annotate": ["*/*/*/*"],
-    "unannotate": None
+    "unannotate": None,
 }
 
 
@@ -951,7 +951,9 @@ def get_auto_annotator_config(app_path=None, config=None):
         return config
     try:
         auto_annotator_config = getattr(
-            _get_config_module(app_path), "AUTO_ANNOTATOR_CONFIG", DEFAULT_AUTO_ANNOTATOR_CONFIG
+            _get_config_module(app_path),
+            "AUTO_ANNOTATOR_CONFIG",
+            DEFAULT_AUTO_ANNOTATOR_CONFIG,
         )
         print("LOADING AUTO_ANNOTATOR CONFIG:", auto_annotator_config)
         return auto_annotator_config
