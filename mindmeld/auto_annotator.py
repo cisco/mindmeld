@@ -18,17 +18,19 @@ import spacy
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
 from .system_entity_recognizer import DucklingRecognizer
-from .markup import load_query, load_query_file, dump_queries
+from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
+from .exceptions import MarkupError
 
 logger = logging.getLogger(__name__)
+
 
 class Annotator(ABC):
     """
     Abstract Annotator class that can be used to build a custom Annotation class.
     """
-    
+
     def __init__(self, app_path, config=None, resource_loader=None):
         """ Initializes an annotator."""
         self.app_path = app_path
@@ -45,7 +47,7 @@ class Annotator(ABC):
         Args:
             action (str): Can be "annotate" or "unannotate". Used as a key
                 to access a list of regex rules in the config dictionary.
-        
+
         Returns:
             file_entities_map (dict): A dictionary that maps file paths in an
                 App to a list of entities.
@@ -54,25 +56,26 @@ class Annotator(ABC):
         file_entities_map = {path:[] for path in all_file_paths}
         rules = self.config[action]
         for rule in rules:
-            pattern = self._get_pattern(rule) 
+            pattern = Annotator._get_pattern(rule)
             filtered_paths = self._resource_loader.filter_file_paths(
-                file_pattern=pattern, file_paths=all_file_paths 
+                file_pattern=pattern, file_paths=all_file_paths
             )
             for path in filtered_paths:
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
         return file_entities_map
 
-    def _get_pattern(self, rule):
+    @staticmethod
+    def _get_pattern(rule):
         """ Extract the portion of a regex rule that refers to file paths.
 
         Args:
             rule (str): Regex rule specifying allowed file paths and entities.
-        
+
         Returns:
             pattern (str): Regex pattern specifying allowed file paths.
         """
-        pattern = "/".join(rule.split("/")[:-1]) 
+        pattern = "/".join(rule.split("/")[:-1])
         pattern = pattern.replace(".*", ".+")
         pattern = pattern.replace("*", ".+")
         prefix = ".*" if pattern[0] == "/" else ".*/"
@@ -80,10 +83,10 @@ class Annotator(ABC):
 
     def _get_entities(self, rule):
         """ Extract the portion of a regex rule that refers to file paths.
-        
+
         Args:
             rule (str): Regex rule specifying allowed file paths and entities.
-        
+
         Returns:
             valid_entities (list): List of valid entities specified in the rule.
         """
@@ -91,7 +94,7 @@ class Annotator(ABC):
         entities = re.sub('[()]',"", entities).split("|")
         valid_entities = []
         for entity in entities:
-            if entity=="*" or self.valid_entity_check(entity):
+            if entity == "*" or self.valid_entity_check(entity):
                 valid_entities.append(entity)
             else:
                 logger.warning("%s is not a valid entity. Skipping entity.", entity)
@@ -103,7 +106,7 @@ class Annotator(ABC):
 
         Args:
             entity (str): Name of entity to annotate.
-        
+
         Returns:
             bool: Whether entity is valid.
         """
@@ -119,7 +122,7 @@ class Annotator(ABC):
         """ Unannotate data based on configurations in the config.py file.
         """
         if not self.config["unannotate"]:
-            logger.warning("Unnanotate is set to None in the config.")
+            logger.warning("'unannotate' is None in the config. Nothing to unannotate.")
             return
         file_entities_map = self._get_file_entities_map(action="unannotate")
         self._modify_queries(file_entities_map, action="unannotate")
@@ -133,7 +136,7 @@ class Annotator(ABC):
         """
         query_factory = QueryFactory.create_query_factory(self.app_path)
         for path in file_entities_map:
-            processed_queries = self._get_processed_queries(
+            processed_queries = Annotator._get_processed_queries(
                 file_path=path, query_factory=query_factory
             )
             for processed_query in processed_queries:
@@ -143,22 +146,23 @@ class Annotator(ABC):
                         processed_query=processed_query, entity_types=entity_types
                     )
                 elif action == "unannotate":
-                    self._unannotate_query(
+                    Annotator._unannotate_query(
                         processed_query=processed_query, entity_types=entity_types
                     )
-            annotated_queries = [query for query in dump_queries(processed_queries)]
+            annotated_queries = list(dump_queries(processed_queries))
             with open(path, "w") as outfile:
                 outfile.write("".join(annotated_queries))
                 outfile.close()
 
-    def _get_processed_queries(self, file_path, query_factory):
+    @staticmethod
+    def _get_processed_queries(file_path, query_factory):
         """ Converts queries in a given path to processed queries.
         Skips and presents a warning if loading the query creates an error.
 
         Args:
             file_path (str): Path to file containing queries.
             query_factory (QueryFactory): Used to generate processed queries.
-        
+
         Returns:
             processed_queries (list): List of processed queries from file.
         """
@@ -171,10 +175,8 @@ class Annotator(ABC):
                     markup=query, query_factory=query_factory
                 )
                 processed_queries.append(processed_query)
-            except:
-                logger.warning(
-                    "Skipping query. Error in processing: " + query
-                )
+            except (AssertionError, MarkupError):
+                logger.warning("Skipping query. Error in processing: %s", query)
         return processed_queries
 
     def _annotate_query(self, processed_query, entity_types):
@@ -201,7 +203,7 @@ class Annotator(ABC):
         Args:
             processed_query (ProcessedQuery): A processed query.
             entity_types (list): List of entities allowed for annotation.
-        
+
         Returns:
             query_entities (list): List of query entities.
         """
@@ -209,12 +211,13 @@ class Annotator(ABC):
             return []
         entity_types = None if entity_types == ["*"] else entity_types
         items = self.parse(
-            sentence = processed_query.query.text, entity_types=entity_types
+            sentence=processed_query.query.text, entity_types=entity_types
         )
-        query_entities = [self._item_to_query_entity(item, processed_query) for item in items]
+        query_entities = [Annotator._item_to_query_entity(item, processed_query) for item in items]
         return query_entities if len(query_entities) > 0 else []
 
-    def _item_to_query_entity(self, item, processed_query):
+    @staticmethod
+    def _item_to_query_entity(item, processed_query):
         """ Converts an item returned from parse into a query entity.
 
         Args:
@@ -243,7 +246,7 @@ class Annotator(ABC):
         Args:
             current_entities (list): List of existing query entities.
             annotated_entities (list): List of new query entities.
-        
+
         Returns:
             final_entities (list): List of resolved query entities.
         """
@@ -254,21 +257,23 @@ class Annotator(ABC):
         additional_entities = []
         for o_entity in other_entities:
             no_overlaps = [
-                self._no_overlap(o_entity, b_entity) for b_entity in base_entities
+                Annotator._no_overlap(o_entity, b_entity) for b_entity in base_entities
             ]
             if all(no_overlaps):
                 additional_entities.append(o_entity)
         return base_entities + additional_entities
 
-    def _no_overlap(self, entity_one, entity_two):
+    @staticmethod
+    def _no_overlap(entity_one, entity_two):
         """ Returns True if two query entities do not overlap.
         """
         return (
-            entity_one.span.start > entity_two.span.end or
-            entity_two.span.start > entity_one.span.end
+            entity_one.span.start > entity_two.span.end
+            or entity_two.span.start > entity_one.span.end
         )
 
-    def _unannotate_query(self, processed_query, entity_types):
+    @staticmethod
+    def _unannotate_query(processed_query, entity_types):
         """ Removes specified entities in a processed query.
 
         Args:
@@ -287,16 +292,17 @@ class Annotator(ABC):
     def parse(self, sentence, **kwargs):
         """ Extract entities from a sentence. Detected entities should be
         represented as dictionaries with the following keys: "body", "start"
-        (start index), "end" (end index), "value", "dim" (entity type). 
-        
+        (start index), "end" (end index), "value", "dim" (entity type).
+
         Args:
             sentence (str): Sentence to detect entities.
-        
+
         Returns:
             entities (list): List of entity dictionaries.
 
         """
         raise NotImplementedError("Subclasses must implement this method")
+
 
 class SpacyAnnotator(Annotator):
     """ Annotator class that uses spacy to generate annotations.
@@ -308,15 +314,15 @@ class SpacyAnnotator(Annotator):
         self.model = model
         self.duckling = DucklingRecognizer.get_instance()
         self.SYS_MAPPINGS = {
-                        "money": "sys_amount-of-money",
-                        "cardinal": "sys_number",
-                        "ordinal": "sys_ordinal",
-                        "person": "sys_person",
-                        "percent": "sys_percent",
-                        "distance": "sys_distance",
-                        "quantity": "sys_weight"
-                    }
-    
+            "money": "sys_amount-of-money",
+            "cardinal": "sys_number",
+            "ordinal": "sys_ordinal",
+            "person": "sys_person",
+            "percent": "sys_percent",
+            "distance": "sys_distance",
+            "quantity": "sys_weight"
+        }
+
     def valid_entity_check(self, entity):
         entity = entity.lower().strip()
         valid_entities = [
@@ -324,7 +330,7 @@ class SpacyAnnotator(Annotator):
             "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity", "sys_percent",
             "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac", "sys_product",
             "sys_event", "sys_law", "sys_langauge", "sys_work_of_art","sys_other_quantity"]
-        return True if entity in valid_entities else False
+        return (entity in valid_entities)
 
     def parse(
         self,
@@ -342,7 +348,7 @@ class SpacyAnnotator(Annotator):
             }
             for ent in doc.ents
         ]
-        
+
         entities = []
         for entity in spacy_entities:
             if entity["dim"] in ["time", "date"]:
@@ -361,13 +367,13 @@ class SpacyAnnotator(Annotator):
                 entity = self._resolve_person(entity)
             else:
                 entity["dim"] = "sys_" + entity["dim"]
-            
+
             if entity:
                 entities.append(entity)
 
         if entity_types:
             entities = [e for e in entities if e["dim"] in entity_types]
-        
+
         return entities
 
     def _resolve_time_date(self, entity, entity_types=None):
@@ -377,17 +383,18 @@ class SpacyAnnotator(Annotator):
 
         if len(candidates) == 0:
             return
-        
+
         time_entities = ["sys_duration", "sys_interval", "sys_time"]
         if entity_types:
             time_entities = [e for e in time_entities if e in entity_types]
-        
-        if self._resolve_time_exact_match(entity, candidates, time_entities):
+
+        if SpacyAnnotator._resolve_time_exact_match(entity, candidates, time_entities):
             return entity
-        elif self._resolve_time_largest_substring(entity, candidates, time_entities):
+        elif SpacyAnnotator._resolve_time_largest_substring(entity, candidates, time_entities):
             return entity
-        
-    def _get_time_entity_type(self, candidate):
+
+    @staticmethod
+    def _get_time_entity_type(candidate):
         if candidate["dim"] == "duration":
             return "sys_duration"
         if candidate["dim"] == "time":
@@ -395,30 +402,32 @@ class SpacyAnnotator(Annotator):
                 return "sys_interval"
             else:
                 return "sys_time"
-            
-    def _resolve_time_exact_match(self, entity, candidates, time_entities):
+
+    @staticmethod
+    def _resolve_time_exact_match(entity, candidates, time_entities):
         for candidate in candidates:
-            candidate_entity = self._get_time_entity_type(candidate)
-            if ( 
-                candidate_entity in time_entities and
-                candidate["body"] == entity["body"]
+            candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
+            if (
+                candidate_entity in time_entities
+                and candidate["body"] == entity["body"]
             ):
                 entity["dim"] = candidate_entity
                 entity["value"] = candidate["value"]
                 return entity
-    
-    def _resolve_time_largest_substring(self, entity, candidates, time_entities):
+
+    @staticmethod
+    def _resolve_time_largest_substring(entity, candidates, time_entities):
         for time_entity in time_entities:
             largest_candidate = None
             for candidate in candidates:
-                candidate_entity = self._get_time_entity_type(candidate)
-                if ( 
-                    candidate_entity == time_entity and
-                    candidate["body"] in entity["body"] and
-                    (
-                        not largest_candidate or
-                        len(candidate["body"]) > len(largest_candidate["body"])
-                    )                                                                   
+                candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
+                if (
+                    candidate_entity == time_entity
+                    and candidate["body"] in entity["body"]
+                    and (
+                        not largest_candidate
+                        or len(candidate["body"]) > len(largest_candidate["body"])
+                    )
                 ):
                     largest_candidate = candidate
             if largest_candidate:
@@ -429,31 +438,31 @@ class SpacyAnnotator(Annotator):
                 entity["value"] = largest_candidate["value"]
                 entity["dim"] = time_entity
                 return entity
-            
+
     def _resolve_cardinal(self, entity):
         return self._resolve_exact_match(entity)
-    
+
     def _resolve_money(self, entity):
         # TODO: Check if a '$' is infront of the token
         return self._resolve_exact_match(entity)
-        
+
     def _resolve_ordinal(self, entity):
         return self._resolve_exact_match(entity)
-            
+
     def _resolve_exact_match(self, entity):
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
-        
+
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
             return
-        
+
         for candidate in candidates:
             if (
                 candidate["entity_type"] == entity["dim"]
                 and entity["body"] == candidate["body"]
             ):
-                    entity["value"] = candidate["value"]
-                    return entity
+                entity["value"] = candidate["value"]
+                return entity
 
     def _resolve_quantity(self, entity):
         candidates = self.duckling.get_candidates_for_text(entity["body"])
@@ -464,31 +473,32 @@ class SpacyAnnotator(Annotator):
         for entity_type in ["distance", "quantity"]:
             for candidate in candidates:
                 if (
-                    candidate["dim"] == entity_type and
-                    candidate["body"] == entity["body"]
+                    candidate["dim"] == entity_type
+                    and candidate["body"] == entity["body"]
                 ):
                     entity["value"] = candidate["value"]
                     entity["dim"] = self.SYS_MAPPINGS[entity_type]
                     return entity
 
-        if self._resolve_quantity_largest_substring(entity, candidates):
+        if SpacyAnnotator._resolve_quantity_largest_substring(entity, candidates):
             return entity
         else:
             entity["dim"] = "sys_other_quantity"
             return entity
 
-    def _resolve_quantity_largest_substring(self, entity, candidates):
+    @staticmethod
+    def _resolve_quantity_largest_substring(entity, candidates):
         for entity_type in ["distance", "quantity"]:
             largest_candidate = None
             for candidate in candidates:
                 candidate_entity = candidate["dim"]
-                if ( 
-                    candidate_entity == entity_type and
-                    candidate["body"] in entity["body"] and
-                    (
-                        not largest_candidate or
-                        len(candidate["body"]) > len(largest_candidate["body"])
-                    )                                                                   
+                if (
+                    candidate_entity == entity_type
+                    and candidate["body"] in entity["body"]
+                    and (
+                        not largest_candidate
+                        or len(candidate["body"]) > len(largest_candidate["body"])
+                    )
                 ):
                     largest_candidate = candidate
             if largest_candidate:
@@ -499,10 +509,10 @@ class SpacyAnnotator(Annotator):
                 entity["value"] = largest_candidate["value"]
                 entity["dim"] = entity_type
                 return entity
-    
+
     def _resolve_percent(self, entity):
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
-        
+
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
             return
@@ -511,13 +521,12 @@ class SpacyAnnotator(Annotator):
         for candidate in candidates:
             if candidate["entity_type"] == "sys_number":
                 possible_values.append(candidate["value"]["value"])
-        entity['value']['value'] = max(possible_values)/100
+        entity['value']['value'] = max(possible_values) / 100
         return entity
 
-    
     def _resolve_person(self, entity):
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
-        
+
         if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
             entity["value"] = entity["body"][:-2]
             entity["body"] = entity["body"][:-2]

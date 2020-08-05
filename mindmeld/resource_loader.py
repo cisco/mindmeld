@@ -419,16 +419,16 @@ class ResourceLoader:
 
     def get_all_file_paths(self):
         """ Get a list of text file paths across all intents.
-        
+
         Returns:
             list: A list of all file paths.
         """
         file_iter = self._traverse_labeled_queries_files(file_pattern=".*.txt")
-        return [filename for a_domain, an_intent, filename in file_iter]
+        return [filename for a_doßmain, an_intent, filename in file_iter]
 
     def filter_file_paths(self, file_pattern=".*", file_paths=None):
         """ Get a list of file paths that match a specific file_pattern
-        
+
         Args:
             file_pattern (str): A regex pattern to filter on.
             file_paths (list): A list of file paths.
@@ -443,8 +443,6 @@ class ResourceLoader:
         if len(matched_paths) == 0:
             logger.warning("No matches were found for the file path pattern: %s", file_pattern)
         return matched_paths
-
-
 
     def load_query_file(self, domain, intent, file_path, raw=False):
         """Loads the queries from the specified file.

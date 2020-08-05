@@ -455,12 +455,12 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
-DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
-    
-    "overwrite": False, 
-    "annotate": [ "*/*/*/*" ],
+DEFAULT_AUTO_ANNOTATOR_CONFIG = {
+    "overwrite": False,
+    "annotate": ["*/*/*/*"],
     "unannotate": None
 }
+
 
 class NlpConfigError(Exception):
     pass
@@ -909,6 +909,7 @@ def get_nlp_config(app_path=None, config=None):
 
 def _get_default_auto_annotator_config():
     return copy.deepcopy(DEFAULT_AUTO_ANNOTATOR_CONFIG)
+
 
 def get_auto_annotator_config(app_path=None, config=None):
     """Gets the automatic annotator config for the app at the
