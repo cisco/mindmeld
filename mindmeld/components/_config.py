@@ -466,7 +466,7 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "overwrite": False,
     "annotate": ["*/*/*/*"],
-    "unannotate": None,
+    "unannotate": ["*/*/*/*"],
 }
 
 
@@ -955,7 +955,6 @@ def get_auto_annotator_config(app_path=None, config=None):
             "AUTO_ANNOTATOR_CONFIG",
             DEFAULT_AUTO_ANNOTATOR_CONFIG,
         )
-        print("LOADING AUTO_ANNOTATOR CONFIG:", auto_annotator_config)
         return auto_annotator_config
     except (OSError, IOError):
         logger.info(

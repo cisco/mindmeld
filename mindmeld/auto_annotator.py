@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 import re
 import logging
 import spacy
+from tqdm import tqdm
 
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
@@ -139,7 +140,8 @@ class Annotator(ABC):
             processed_queries = Annotator._get_processed_queries(
                 file_path=path, query_factory=query_factory
             )
-            for processed_query in processed_queries:
+            tqdm_desc = "Processing " + path + ": "
+            for processed_query in tqdm(processed_queries, ascii=True, desc=tqdm_desc):
                 entity_types = file_entities_map[path]
                 if action == "annotate":
                     self._annotate_query(
@@ -149,6 +151,7 @@ class Annotator(ABC):
                     Annotator._unannotate_query(
                         processed_query=processed_query, entity_types=entity_types
                     )
+
             annotated_queries = list(dump_queries(processed_queries))
             with open(path, "w") as outfile:
                 outfile.write("".join(annotated_queries))
@@ -295,7 +298,6 @@ class Annotator(ABC):
 
         Returns:
             entities (list): List of entity dictionaries.
-
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -343,12 +345,24 @@ class SpacyAnnotator(Annotator):
             "sys_event",
             "sys_law",
             "sys_langauge",
-            "sys_work_of_art",
-            "sys_other_quantity",
+            "sys_work-of-art",
+            "sys_other-quantity",
         ]
         return entity in valid_entities
 
     def parse(self, sentence, entity_types=None):
+        """ Extracts entities from a sentence. Detected entities should are
+        represented as dictionaries with the following keys: "body", "start"
+        (start index), "end" (end index), "value", "dim" (entity type).
+
+        Args:
+            sentence (str): Sentence to detect entities.
+            entity_types (list): List of entity types to parse. If None, all
+                possible entity types will be parsed.
+
+        Returns:
+            entities (list): List of entity dictionaries.
+        """
         doc = self.nlp(sentence)
         spacy_entities = [
             {
@@ -368,7 +382,7 @@ class SpacyAnnotator(Annotator):
             elif entity["dim"] == "cardinal":
                 entity = self._resolve_cardinal(entity)
             elif entity["dim"] == "money":
-                entity = self._resolve_money(entity)
+                entity = self._resolve_money(entity, sentence)
             elif entity["dim"] == "ordinal":
                 entity = self._resolve_ordinal(entity)
             elif entity["dim"] == "quantity":
@@ -378,7 +392,7 @@ class SpacyAnnotator(Annotator):
             elif entity["dim"] == "person":
                 entity = self._resolve_person(entity)
             else:
-                entity["dim"] = "sys_" + entity["dim"]
+                entity["dim"] = "sys_" + entity["dim"].replace("_", "-")
 
             if entity:
                 entities.append(entity)
@@ -389,8 +403,18 @@ class SpacyAnnotator(Annotator):
         return entities
 
     def _resolve_time_date(self, entity, entity_types=None):
-        """ Heuristic is to assign value if there is an exact body match. Order of priority
-        is duration, interval, time."""
+        """ Resolves a time related entity. First looks for an exact match, then
+        for the largest substring match. Order of priority is sys_duration, sys_interval,
+        and sys_time.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+            entity_types (list): List of entity types to parse. If None, all possible
+                entity types will be parsed.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
         candidates = self.duckling.get_candidates_for_text(entity["body"])
 
         if len(candidates) == 0:
@@ -402,13 +426,21 @@ class SpacyAnnotator(Annotator):
 
         if SpacyAnnotator._resolve_time_exact_match(entity, candidates, time_entities):
             return entity
-        elif SpacyAnnotator._resolve_time_largest_substring(
-            entity, candidates, time_entities
+        elif SpacyAnnotator._resolve_largest_substring(
+            entity, candidates, entity_types=time_entities, is_time_related=True
         ):
             return entity
 
     @staticmethod
     def _get_time_entity_type(candidate):
+        """ Determine the "sys" type given a time-related Duckling candidate dictionary.
+
+        Args:
+            candidate (dict): A Duckling candidate.
+
+        Returns:
+            entity_type (str): Entity type. ("sys_duration", "sys_interval" or "sys_time")
+        """
         if candidate["dim"] == "duration":
             return "sys_duration"
         if candidate["dim"] == "time":
@@ -419,6 +451,17 @@ class SpacyAnnotator(Annotator):
 
     @staticmethod
     def _resolve_time_exact_match(entity, candidates, time_entities):
+        """ Resolve a time-related entity given Duckling candidates on the first
+        exact match.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+            candidates (list): List of dictionary candidates returned by Duckling.parse().
+            time_entities (list): List of allowed time-related entity types.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
         for candidate in candidates:
             candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
             if (
@@ -430,40 +473,74 @@ class SpacyAnnotator(Annotator):
                 return entity
 
     @staticmethod
-    def _resolve_time_largest_substring(entity, candidates, time_entities):
-        for time_entity in time_entities:
-            largest_candidate = None
+    def _resolve_largest_substring(entity, candidates, entity_types, is_time_related):
+        """ Resolve an entity by the largest substring match given Duckling candidates.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+            candidates (list): List of dictionary candidates returned by Duckling.parse().
+            entity_types (list): List of entity types to check.
+            is_time_related (bool): Whether the entity is related to time.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
+        largest_candidate = None
+        resolved_entity_type = None
+        for entity_type in entity_types:
             for candidate in candidates:
-                candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
+                if is_time_related:
+                    candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
+                else:
+                    candidate_entity = candidate["dim"]
+
                 if (
-                    candidate_entity == time_entity
+                    candidate_entity == entity_type
                     and candidate["body"] in entity["body"]
                     and (
-                        not largest_candidate
+                        largest_candidate is None
                         or len(candidate["body"]) > len(largest_candidate["body"])
                     )
                 ):
                     largest_candidate = candidate
-            if largest_candidate:
-                entity["body"] = largest_candidate["body"]
-                offset = entity["start"]
-                entity["start"] = offset + largest_candidate["start"]
-                entity["end"] = offset + largest_candidate["end"]
-                entity["value"] = largest_candidate["value"]
-                entity["dim"] = time_entity
-                return entity
+                    resolved_entity_type = entity_type
+
+        if largest_candidate:
+            entity["body"] = largest_candidate["body"]
+            offset = entity["start"]
+            entity["start"] = offset + largest_candidate["start"]
+            entity["end"] = offset + largest_candidate["end"]
+            entity["value"] = largest_candidate["value"]
+            entity["dim"] = resolved_entity_type
+            return entity
 
     def _resolve_cardinal(self, entity):
         return self._resolve_exact_match(entity)
 
-    def _resolve_money(self, entity):
-        # TODO: Check if a '$' is infront of the token
+    def _resolve_money(self, entity, sentence):
+        # Update entity to include the $ symbol if it's left of the body text.
+        if "$" in sentence:
+            start = entity["start"]
+            if (start == 1 and sentence[0] == "$") or (
+                start > 1 and sentence[start - 2 : start] == " $"
+            ):
+                entity["start"] -= 1
+                entity["body"] = sentence[entity["start"] : entity["end"]]
+
         return self._resolve_exact_match(entity)
 
     def _resolve_ordinal(self, entity):
         return self._resolve_exact_match(entity)
 
     def _resolve_exact_match(self, entity):
+        """ Resolves an entity by exact match and corresponding type.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(entity["body"])
@@ -479,12 +556,23 @@ class SpacyAnnotator(Annotator):
                 return entity
 
     def _resolve_quantity(self, entity):
+        """ Resolves a quantity related entity. First looks for an exact match, then
+        for the largest substring match. Order of priority is "sys_distance" then "sys_quantity".
+        Unresolved entities are labelled as "sys_other-quantity"
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
-            entity["dim"] = "sys_other_quantity"
+            entity["dim"] = "sys_other-quantity"
             return entity
 
-        for entity_type in ["distance", "quantity"]:
+        entity_types = ["distance", "quantity"]
+        for entity_type in entity_types:
             for candidate in candidates:
                 if (
                     candidate["dim"] == entity_type
@@ -494,37 +582,24 @@ class SpacyAnnotator(Annotator):
                     entity["dim"] = self.SYS_MAPPINGS[entity_type]
                     return entity
 
-        if SpacyAnnotator._resolve_quantity_largest_substring(entity, candidates):
+        if SpacyAnnotator._resolve_largest_substring(
+            entity, candidates, entity_types=entity_types, is_time_related=False
+        ):
             return entity
         else:
-            entity["dim"] = "sys_other_quantity"
+            entity["dim"] = "sys_other-quantity"
             return entity
 
-    @staticmethod
-    def _resolve_quantity_largest_substring(entity, candidates):
-        for entity_type in ["distance", "quantity"]:
-            largest_candidate = None
-            for candidate in candidates:
-                candidate_entity = candidate["dim"]
-                if (
-                    candidate_entity == entity_type
-                    and candidate["body"] in entity["body"]
-                    and (
-                        not largest_candidate
-                        or len(candidate["body"]) > len(largest_candidate["body"])
-                    )
-                ):
-                    largest_candidate = candidate
-            if largest_candidate:
-                entity["body"] = largest_candidate["body"]
-                offset = entity["start"]
-                entity["start"] = offset + largest_candidate["start"]
-                entity["end"] = offset + largest_candidate["end"]
-                entity["value"] = largest_candidate["value"]
-                entity["dim"] = entity_type
-                return entity
-
     def _resolve_percent(self, entity):
+        """ Resolves an entity related to percentage. Uses a heuristic of finding
+        the largest candidate value and dividing by 100.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+
+        Returns:
+            entity (dict): A resolved entity dict or None if the entity isn't resolved.
+        """
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(entity["body"])
@@ -539,6 +614,15 @@ class SpacyAnnotator(Annotator):
         return entity
 
     def _resolve_person(self, entity):
+        """ Resolves a person entity by unlabelling a possessive "'s" from the
+        name if it exists.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+
+        Returns:
+            entity (dict): A resolved entity dict.
+        """
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
 
         if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
