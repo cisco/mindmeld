@@ -13,8 +13,10 @@
 from abc import ABC, abstractmethod
 import re
 import logging
-import spacy
+import os
+import importlib
 from tqdm import tqdm
+import spacy
 
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
@@ -306,10 +308,10 @@ class SpacyAnnotator(Annotator):
     """ Annotator class that uses spacy to generate annotations.
     """
 
-    def __init__(self, app_path, config=None, model="en_core_web_lg", **kwargs):
-        super().__init__(app_path=app_path, config=config, **kwargs)
-        logger.info("Loading spacy model %s.", model)
-        self.nlp = spacy.load(model)
+    def __init__(self, app_path, config=None, model="en_core_web_lg"):
+        super().__init__(app_path=app_path, config=config)
+
+        self.nlp = SpacyAnnotator._load_model(model)
         self.model = model
         self.duckling = DucklingRecognizer.get_instance()
         self.SYS_MAPPINGS = {
@@ -321,6 +323,33 @@ class SpacyAnnotator(Annotator):
             "distance": "sys_distance",
             "quantity": "sys_weight",
         }
+
+    @staticmethod
+    def _load_model(model):
+        """ Load Spacy English model. Download if needed.
+
+        Args:
+            model (str): Spacy model ("en_core_web_sm", "en_core_web_md", or
+                "en_core_web_lg").
+
+        Returns:
+            nlp (spacy.lang.en.English): Spacy language model.
+        """
+
+        if model in ["en_core_web_sm", "en_core_web_md", "en_core_web_lg"]:
+            logger.info("Loading Spacy model %s.", model)
+            try:
+                return spacy.load(model)
+            except OSError:
+                os.system("python -m spacy download " + model)
+                language_module = importlib.import_module(model)
+                return language_module.load()
+        else:
+            error_msg = (
+                "Unknown Spacy model name: {!r}. Model must be 'en_core_web_sm',"
+                " 'en_core_web_md', or 'en_core_web_lg'".format(model)
+            )
+            raise ValueError(error_msg)
 
     def valid_entity_check(self, entity):
         entity = entity.lower().strip()
@@ -626,7 +655,7 @@ class SpacyAnnotator(Annotator):
         entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
 
         if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
-            entity["value"] = entity["body"][:-2]
+            entity["value"] = {"value": entity["body"][:-2]}
             entity["body"] = entity["body"][:-2]
             entity["end"] -= 2
         return entity
