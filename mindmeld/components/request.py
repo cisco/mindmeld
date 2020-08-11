@@ -295,6 +295,10 @@ class FrozenParams(Params):
     dynamic_resource = attr.ib(default=immutables.Map(), converter=immutables.Map)
 
 
+def list_elems_to_immutable_map(value):
+    return tuple([immutables.Map(i) for i in value])
+
+
 @attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
 class Request:
     """
@@ -324,16 +328,26 @@ class Request:
 
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
-    entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
-    history = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    entities = attr.ib(
+        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+    )
+    history = attr.ib(
+        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+    )
     text = attr.ib(default=None)
     frame = attr.ib(default=immutables.Map(), converter=immutables.Map)
     params = attr.ib(default=FrozenParams())
     context = attr.ib(default=immutables.Map(), converter=immutables.Map)
     confidences = attr.ib(default=immutables.Map(), converter=immutables.Map)
-    nbest_transcripts_text = attr.ib(default=attr.Factory(tuple), converter=tuple)
-    nbest_transcripts_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
-    nbest_aligned_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    nbest_transcripts_text = attr.ib(
+        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+    )
+    nbest_transcripts_entities = attr.ib(
+        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+    )
+    nbest_aligned_entities = attr.ib(
+        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+    )
 
     def to_dict(self):
         return {
