@@ -68,7 +68,14 @@ Depending on which blueprint you choose to run, this Quick Start should take bet
 1. Download
 ^^^^^^^^^^^
 
-Open a Python shell and type the following commands to download and set up the blueprint application of your choice.
+Using command-line interface (CLI): use command `mindmeld blueprint [blueprint name]` to retrieve the blueprint. For example:
+
+.. code:: console
+
+   mindmeld blueprint food_ordering
+
+
+Use Python: use the following snippet to download and set up the blueprint application of your choice.
 
   - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``banking_assistant``, ``hr_assistant``, ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
 
@@ -84,6 +91,11 @@ Open a Python shell and type the following commands to download and set up the b
 
 Build the Natural Language Processing models that power the app.
 
+.. code:: console
+
+   python -m food_ordering build
+
+
 .. code:: python
 
    from mindmeld.components import NaturalLanguageProcessor
@@ -94,7 +106,31 @@ Build the Natural Language Processing models that power the app.
 3. Run
 ^^^^^^
 
-Interact with the app in the Python shell using the commands below. Try the queries shown in the examples, then try some queries of your own invention.
+Using command-line interface (CLI): you can use the command `python -m [blueprint's name] converse` to interact with the app.
+
+.. code:: console
+
+   python -m food_ordering converse
+
+   You: hi
+   App: Hello. Some nearby popular restaurants you can order delivery from are Basa Seafood Express, The Salad Place, Extreme Pizza
+   You: Get me a pepperoni pizza from firetrail pizza
+   Retrieve object from KB: index= 'restaurants', id= 'B01CT54GYE'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01D8TDFJM'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01ENMN5EI'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01D8TCLJ2'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01MZH61CG'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01N3BB25H'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01N4VEUBF'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01NCEYW8Z'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01D8TCZUC'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01MYFKNZW'.
+   Retrieve object from KB: index= 'menu_items', id= 'B01D8TCA48'.
+   App: Sure, I have 1 order of Pepperoni Pizza from Firetrail Pizza for a total price of $11.00. Would you like to place the order?
+   ...  Listening...
+
+
+Using Python: You can interact with the app with the following snippet. Try the queries shown in the examples, then try some queries of your own invention.
 
 *Food Ordering example*
 
