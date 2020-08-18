@@ -41,3 +41,5 @@ DOMAIN_MODEL_CONFIG = {
         "average-token-length": {},  # Custom feature
     },
 }
+
+MAX_HISTORY_LEN = 5
