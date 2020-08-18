@@ -15,6 +15,7 @@ from mindmeld.components._config import (
     _expand_parser_config,
     get_classifier_config,
     get_custom_action_config,
+    get_max_history_len,
 )
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -154,3 +155,9 @@ def test_custom_action_config_no_config(home_assistant_app_path):
     actual = get_custom_action_config(home_assistant_app_path)
 
     assert actual is None
+
+
+def test_max_history_len_config(food_ordering_app_path):
+    actual = get_max_history_len(food_ordering_app_path)
+
+    assert actual == 5
