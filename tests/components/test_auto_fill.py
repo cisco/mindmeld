@@ -152,6 +152,45 @@ def test_auto_fill_invoke(kwik_e_mart_app):
 
 
 @pytest.mark.conversation
+def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
+    """Tests slot-filling's custom validation with custom resolution"""
+    app = kwik_e_mart_app
+    request = Request(
+        text="what is the sum of 5 and 15?",
+        domain="some domain",
+        intent="some intent",
+    )
+    responder = DialogueResponder()
+
+    # custom eval func
+    def test_custom_eval(r):
+        return 5 + 15
+
+    form = {
+        "entities": [
+            FormEntity(
+                entity="sys_number",
+                default_eval=False,
+                custom_eval=test_custom_eval,
+            )
+        ],
+    }
+
+    def handler_sub(request, responder):
+        entity = next((e for e in request.entities if e['type'] == 'sys_number'), None)
+
+        # Check custom resolution validity
+        assert entity
+        assert entity["value"][0]["value"] == 20
+
+    @app.handle(domain="some domain", intent="some intent")
+    def handler(request, responder):
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
+
+    handler(request, responder)
+
+
+@pytest.mark.conversation
 @pytest.mark.asyncio
 async def test_auto_exit_flow_async(async_kwik_e_mart_app, qa_kwik_e_mart):
     """Tests auto fill for async apps."""

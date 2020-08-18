@@ -866,13 +866,26 @@ class AutoEntityFilling:
                 return False, _resolved_value
 
         if slot.custom_eval:
-            # Custom validation using function provided by developer. Should return True/False
-            # for validation status. If true, then continue, else fail overall validation.
+            # Custom validation using function provided by developer.
+            # Should return True/False/Custom Resolution value for validation status.
+            # If false, overall validation fails. If either true or a custom resolved
+            # value is returned, then the validation succeeds.
 
-            if not slot.custom_eval(request):
+            _validity = slot.custom_eval(request)
+            if _validity is False:
+                # For checking 'false' return cases
                 return False, _resolved_value
-            else:
-                extracted_feature.update({"custom_validated_entity": text})
+
+            if _validity is not True:
+                # For cases with custom resolution value return
+                if entity_type in DEFAULT_SYS_ENTITIES:
+                    # for custom system entity resolution
+                    _resolved_value = [{"value": _validity}]
+                else:
+                    # for custom gazetteer entity resolution
+                    _resolved_value = [{"cname": _validity}]
+
+            extracted_feature.update({"custom_validated_entity": text})
 
         # return True iff user input results in extracted features (i.e. successfully validated)
         return len(extracted_feature) > 0, _resolved_value
