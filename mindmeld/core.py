@@ -761,8 +761,9 @@ class FormEntity:
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
         user input against
-        custom_eval(func, optional): custom validation function (should return bool:
-        validated or not)
+        custom_eval(func, optional): custom validation function (should return either bool:
+        validated or not) or a custom resolved value for the entity. If custom resolved value
+        is returned, the slot response is considered to be valid.
     """
 
     def __init__(
