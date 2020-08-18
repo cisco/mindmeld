@@ -106,6 +106,7 @@ class ApplicationManager:
         self.dialogue_manager = DialogueManager(
             self.responder_class, async_mode=self.async_mode
         )
+        self.max_history_len = get_max_history_len(self._app_path) or self.MAX_HISTORY_LEN
 
     @property
     def ready(self):
@@ -286,8 +287,7 @@ class ApplicationManager:
 
         # limit length of history
         new_history = (prev_request,) + request.history
-        max_history_len = get_max_history_len(self._app_path) or self.MAX_HISTORY_LEN
-        dm_response.history = new_history[: max_history_len]
+        dm_response.history = new_history[: self.max_history_len]
 
         # validate outgoing params
         dm_response.params.validate_param("allowed_intents")
