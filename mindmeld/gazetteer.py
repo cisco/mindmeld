@@ -16,7 +16,7 @@ import logging
 import os
 from collections import defaultdict
 
-from sklearn.externals import joblib
+import joblib
 
 logger = logging.getLogger(__name__)
 
