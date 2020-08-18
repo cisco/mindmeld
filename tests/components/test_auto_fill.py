@@ -156,37 +156,38 @@ def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
     """Tests slot-filling's custom validation with custom resolution"""
     app = kwik_e_mart_app
     request = Request(
-        text="elm street",
-        domain="store_info",
-        intent="get_store_number",
-        entities=[
-            {"type": "store_name", "value": [{"cname": "23 Elm Street"}], "role": None}
-        ],
+        text="what is the sum of 5 and 15?",
+        domain="some domain",
+        intent="some intent",
     )
     responder = DialogueResponder()
 
     # custom eval func
     def test_custom_eval(r):
-        return r.entities["value"][0]["cname"]
+        return 5 + 15
 
     form = {
         "entities": [
             FormEntity(
-                entity="store_name",
+                entity="sys_number",
                 default_eval=False,
                 custom_eval=test_custom_eval,
             )
         ],
     }
 
-    @app.auto_fill(domain="store_info", intent="get_store_number", form=form)
-    def handler(request, responder):
-        return next((e for e in request.entities if e['type'] == 'store_name'), None)
+    def handler_sub(request, responder):
+        entity = next((e for e in request.entities if e['type'] == 'sys_number'), None)
 
-    # Check whether resolved entity was value was obtained
-    entity = handler(request, responder)
-    assert entity
-    assert entity["value"][0]["cname"] == "23 Elm Street"
+        # Check custom resolution validity
+        assert entity
+        assert entity["value"][0]["value"] == 20
+
+    @app.handle(domain="some domain", intent="some intent")
+    def handler(request, responder):
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
+
+    handler(request, responder)
 
 
 @pytest.mark.conversation

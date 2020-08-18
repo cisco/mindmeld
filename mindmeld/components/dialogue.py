@@ -875,11 +875,16 @@ class AutoEntityFilling:
             if _validity is False:
                 # For checking 'false' return cases
                 return False, _resolved_value
-      
+
             if _validity is not True:
                 # For cases with custom resolution value return
-                _resolved_value = [{"value": _validity}]
-        
+                if entity_type in DEFAULT_SYS_ENTITIES:
+                    # for custom system entity resolution
+                    _resolved_value = [{"value": _validity}]
+                else:
+                    # for custom gazetteer entity resolution
+                    _resolved_value = [{"cname": _validity}]
+
             extracted_feature.update({"custom_validated_entity": text})
 
         # return True iff user input results in extracted features (i.e. successfully validated)
