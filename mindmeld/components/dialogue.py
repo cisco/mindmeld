@@ -872,7 +872,7 @@ class AutoEntityFilling:
             # value is returned, then the validation succeeds.
 
             _validity = slot.custom_eval(request)
-            if not _validity:
+            if _validity is False:
                 # For checking 'false' return cases
                 return False, _resolved_value
       

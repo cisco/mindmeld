@@ -152,7 +152,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
 
 
 @pytest.mark.conversation
-def test_auto_fill_custom_validation_resolutioon(kwik_e_mart_app):
+def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
     """Tests slot-filling's custom validation with custom resolution"""
     app = kwik_e_mart_app
     request = Request(
