@@ -8,8 +8,16 @@ from immutables import Map
 
 @pytest.fixture
 def sample_request():
+    dict_list = [{"key": "value"}, {"key": "value"}, {"key": "value"}]
     return Request(
-        domain="some_domain", intent="some_intent", entities=(), text="some_text"
+        domain="some_domain",
+        intent="some_intent",
+        entities=(dict_list),
+        text="some_text",
+        history=(dict_list),
+        nbest_transcripts_text=(dict_list),
+        nbest_transcripts_entities=(dict_list),
+        nbest_aligned_entities=(dict_list),
     )
 
 
@@ -26,6 +34,13 @@ def test_intent(sample_request):
 def test_entities(sample_request):
     with pytest.raises(FrozenInstanceError):
         sample_request.entities = ("some_entity",)
+    for x in sample_request.entities:
+        assert isinstance(x, Map)
+
+
+def test_history(sample_request):
+    for x in sample_request.history:
+        assert isinstance(x, Map)
 
 
 def test_text(sample_request):
@@ -55,11 +70,20 @@ def test_nbest(sample_request):
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_text = ["some_text"]
 
+    for x in sample_request.nbest_transcripts_text:
+        assert isinstance(x, Map)
+
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_entities = [{"key": "value"}]
 
+    for x in sample_request.nbest_transcripts_entities:
+        assert isinstance(x, Map)
+
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_aligned_entities = [{"key": "value"}]
+
+    for x in sample_request.nbest_aligned_entities:
+        assert isinstance(x, Map)
 
 
 def test_immutability_of_sample_request_and_params():
