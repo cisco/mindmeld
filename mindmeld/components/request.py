@@ -296,6 +296,9 @@ class FrozenParams(Params):
 
 
 def list_elems_to_immutable_map(value):
+    """ Custom attrs converter. Converts a list of elements into a list of immutables.Map
+    objects.
+    """
     return tuple([immutables.Map(i) for i in value])
 
 

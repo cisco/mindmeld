@@ -1217,8 +1217,7 @@ class DialogueResponder:
             elif isinstance(value, tuple) and all(
                 isinstance(item, immutables.Map) for item in value
             ):
-                items = [dict(item) for item in value]
-                serialized_obj[attribute] = tuple(items)
+                serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             else:
