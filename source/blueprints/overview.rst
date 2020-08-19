@@ -68,14 +68,14 @@ Depending on which blueprint you choose to run, this Quick Start should take bet
 1. Download
 ^^^^^^^^^^^
 
-Using command-line interface (CLI): use command `mindmeld blueprint [blueprint name]` to retrieve the blueprint. For example:
+Using CLI: use the command `mindmeld blueprint [bp_name]` to retrieve the blueprint.
 
 .. code:: console
 
    mindmeld blueprint food_ordering
 
 
-Use Python: use the following snippet to download and set up the blueprint application of your choice.
+Using Python: use the following snippet to retrieve the blueprint.
 
   - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``banking_assistant``, ``hr_assistant``, ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
 
@@ -91,10 +91,14 @@ Use Python: use the following snippet to download and set up the blueprint appli
 
 Build the Natural Language Processing models that power the app.
 
+Using CLI:
+
 .. code:: console
 
    python -m food_ordering build
 
+
+Using Python:
 
 .. code:: python
 
@@ -106,7 +110,7 @@ Build the Natural Language Processing models that power the app.
 3. Run
 ^^^^^^
 
-Using command-line interface (CLI): you can use the command `python -m [blueprint's name] converse` to interact with the app.
+Using CLI: use the command `python -m [bp_name] converse` to interact with the app.
 
 .. code:: console
 
@@ -130,7 +134,7 @@ Using command-line interface (CLI): you can use the command `python -m [blueprin
    ...  Listening...
 
 
-Using Python: You can interact with the app with the following snippet. Try the queries shown in the examples, then try some queries of your own invention.
+Using Python: use the following snippet to interact with the app.
 
 *Food Ordering example*
 
