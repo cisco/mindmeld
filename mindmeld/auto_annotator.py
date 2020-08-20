@@ -150,7 +150,7 @@ class Annotator(ABC):
                         processed_query=processed_query, entity_types=entity_types
                     )
                 elif action == "unannotate":
-                    Annotator._unannotate_query(
+                    self._unannotate_query(
                         processed_query=processed_query, entity_types=entity_types
                     )
 
@@ -273,8 +273,8 @@ class Annotator(ABC):
             or entity_two.span.start > entity_one.span.end
         )
 
-    @staticmethod
-    def _unannotate_query(processed_query, entity_types):
+    # pylint: disable=R0201
+    def _unannotate_query(self, processed_query, entity_types):
         """ Removes specified entities in a processed query.
 
         Args:
@@ -314,7 +314,7 @@ class SpacyAnnotator(Annotator):
         self.nlp = SpacyAnnotator._load_model(model)
         self.model = model
         self.duckling = DucklingRecognizer.get_instance()
-        self.SYS_MAPPINGS = {
+        self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS = {
             "money": "sys_amount-of-money",
             "cardinal": "sys_number",
             "ordinal": "sys_ordinal",
@@ -570,7 +570,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict or None if the entity isn't resolved.
         """
-        entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
+        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
@@ -608,7 +608,9 @@ class SpacyAnnotator(Annotator):
                     and candidate["body"] == entity["body"]
                 ):
                     entity["value"] = candidate["value"]
-                    entity["dim"] = self.SYS_MAPPINGS[entity_type]
+                    entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[
+                        entity_type
+                    ]
                     return entity
 
         if SpacyAnnotator._resolve_largest_substring(
@@ -629,7 +631,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict or None if the entity isn't resolved.
         """
-        entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
+        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(entity["body"])
         if len(candidates) == 0:
@@ -652,7 +654,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict.
         """
-        entity["dim"] = self.SYS_MAPPINGS[entity["dim"]]
+        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
 
         if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
             entity["value"] = {"value": entity["body"][:-2]}

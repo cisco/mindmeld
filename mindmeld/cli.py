@@ -534,13 +534,11 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
-    required=True,
-    help="Needed to access data to annotate and app config.",
+    "--app-path", required=True, help="Needed to locate the application config file.",
 )
 @click.option("--model", required=False, default="en_core_web_lg")
 def annotate(app_path, model):
-    """Runs the automatic system entity annotator."""
+    """Runs the annotation command of the Auto Annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model=model)
     spacy_annotator.annotate()
     logger.info("Annotation Complete.")
@@ -548,12 +546,10 @@ def annotate(app_path, model):
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
-    required=True,
-    help="Needed to access data to unannotate and app config.",
+    "--app-path", required=True, help="Needed to locate the application config file.",
 )
 def unannotate(app_path):
-    """Runs the automatic system entity annotator."""
+    """Runs the unannotation command of the Auto Annotator."""
     spacy_annotator = SpacyAnnotator(app_path=app_path, model="en_core_web_lg")
     spacy_annotator.unannotate()
     logger.info("Unannotation Complete.")

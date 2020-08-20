@@ -907,10 +907,6 @@ def get_nlp_config(app_path=None, config=None):
     return _get_default_nlp_config()
 
 
-def _get_default_auto_annotator_config():
-    return copy.deepcopy(DEFAULT_AUTO_ANNOTATOR_CONFIG)
-
-
 def get_auto_annotator_config(app_path=None, config=None):
     """Gets the automatic annotator config for the app at the
     given path.
@@ -939,4 +935,4 @@ def get_auto_annotator_config(app_path=None, config=None):
         logger.info(
             "No app configuration file found. Using the default automatic annotator config."
         )
-        return _get_default_auto_annotator_config()
+        return DEFAULT_AUTO_ANNOTATOR_CONFIG
