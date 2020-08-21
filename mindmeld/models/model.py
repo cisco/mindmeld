@@ -1295,6 +1295,10 @@ class EntityLabelEncoder(LabelEncoder):
             list: A list of decoded labels per query
         """
         # TODO: support decoding multiple queries at once
+        if not hasattr(self, "system_entity_recognizer"):
+            # app built with older version of MM (< 4.3) does not save label encoder with system
+            # entity recognizer
+            self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
         examples = kwargs["examples"]
         labels = [
             get_entities_from_tags(examples[idx], tags, self.system_entity_recognizer)
