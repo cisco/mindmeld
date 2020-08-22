@@ -33,7 +33,6 @@ import distro
 import requests
 from tqdm import tqdm
 
-
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
@@ -502,8 +501,6 @@ def clean(ctx, query_cache, model_cache, days):
         logger.info("No generated data to delete")
 
 
-
-
 #
 # Shared commands
 #
@@ -700,7 +697,6 @@ def convert(ctx, df, rs, project_path, mindmeld_path=None):
     except IOError as e:
         logger.error(e)
         ctx.exit(1)
-
 
 
 #
