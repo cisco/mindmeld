@@ -24,6 +24,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, wait
 from copy import deepcopy
 from multiprocessing import cpu_count
+from tqdm import tqdm
 
 from .. import path
 from ..core import Bunch, ProcessedQuery
@@ -402,7 +403,7 @@ class NaturalLanguageProcessor(Processor):
         domain_classifier (DomainClassifier): The domain classifier for this application.
     """
 
-    def __init__(self, app_path, resource_loader=None, config=None):
+    def __init__(self, app_path, resource_loader=None, config=None, progress_bar=None):
         """Initializes a natural language processor object
 
         Args:
@@ -421,10 +422,11 @@ class NaturalLanguageProcessor(Processor):
         self.name = app_path
         self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)
+        self.progress_bar = progress_bar or tqdm(total=0, desc="Classifier progress")
 
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(
-                app_path, domain, self.resource_loader
+                app_path, domain, self.resource_loader, self.progress_bar
             )
 
         nbest_transcripts_nlp_classes = self.config.get(
@@ -454,6 +456,11 @@ class NaturalLanguageProcessor(Processor):
         return self._children
 
     def _build(self, incremental=False, label_set=None):
+
+        # reset display for the progress bar. This is important for repeated use of the
+        # progress bar
+        self.progress_bar.reset()
+
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
             current_ts = datetime.datetime.fromtimestamp(int(time.time())).strftime(
@@ -759,7 +766,7 @@ class DomainProcessor(Processor):
         """The intents supported within this domain (dict)."""
         return self._children
 
-    def __init__(self, app_path, domain, resource_loader=None):
+    def __init__(self, app_path, domain, resource_loader=None, progress_bar=None):
         """Initializes a domain processor object
 
         Args:
@@ -770,9 +777,12 @@ class DomainProcessor(Processor):
         super().__init__(app_path, resource_loader)
         self.name = domain
         self.intent_classifier = IntentClassifier(self.resource_loader, domain)
+        self.progress_bar = progress_bar
+        self.progress_bar.total += 1
+
         for intent in path.get_intents(app_path, domain):
             self._children[intent] = IntentProcessor(
-                app_path, domain, intent, self.resource_loader
+                app_path, domain, intent, self.resource_loader, self.progress_bar
             )
 
     def _build(self, incremental=False, label_set=None):
@@ -782,6 +792,9 @@ class DomainProcessor(Processor):
         self.intent_classifier.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
+
+        self.progress_bar.update(1)
+        self.progress_bar.refresh()
 
     def _dump(self):
         if len(self.intents) == 1:
@@ -987,7 +1000,7 @@ class IntentProcessor(Processor):
         entity_recognizer (EntityRecognizer): The entity recognizer for this intent.
     """
 
-    def __init__(self, app_path, domain, intent, resource_loader=None):
+    def __init__(self, app_path, domain, intent, resource_loader=None, progress_bar=None):
         """Initializes an intent processor object
 
         Args:
@@ -999,8 +1012,9 @@ class IntentProcessor(Processor):
         super().__init__(app_path, resource_loader)
         self.domain = domain
         self.name = intent
-
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
+        self.progress_bar = progress_bar
+        self.progress_bar.total += 1
 
         try:
             self.parser = Parser(self.resource_loader, domain=domain, intent=intent)
@@ -1032,6 +1046,9 @@ class IntentProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
+        self.progress_bar.update(1)
+        self.progress_bar.refresh()
+
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
@@ -1041,6 +1058,7 @@ class IntentProcessor(Processor):
                 self.name,
                 entity_type,
                 self.resource_loader,
+                self.progress_bar
             )
             self._children[entity_type] = processor
 
@@ -1354,7 +1372,7 @@ class EntityProcessor(Processor):
         role_classifier (RoleClassifier): The role classifier for this entity type.
     """
 
-    def __init__(self, app_path, domain, intent, entity_type, resource_loader=None):
+    def __init__(self, app_path, domain, intent, entity_type, resource_loader=None, progress_bar=None):
         """Initializes an entity processor object
 
         Args:
@@ -1377,12 +1395,17 @@ class EntityProcessor(Processor):
             app_path, self.resource_loader, entity_type
         )
 
+        self.progress_bar = progress_bar
+        self.progress_bar.total += 1
+
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
         self.role_classifier.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
         self.entity_resolver.fit()
+        self.progress_bar.update(1)
+        self.progress_bar.refresh()
 
     def _dump(self):
         model_path, incremental_model_path = path.get_role_model_paths(
