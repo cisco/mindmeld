@@ -1296,7 +1296,8 @@ class EntityLabelEncoder(LabelEncoder):
         """
         # TODO: support decoding multiple queries at once
         if not hasattr(self, "system_entity_recognizer"):
-            # app built with older version of MM (< 4.3) does not save label encoder with sys recognizer
+            # app built with older version of MM (< 4.3) does not save label encoder with system
+            # entity recognizer
             self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
         examples = kwargs["examples"]
         labels = [
