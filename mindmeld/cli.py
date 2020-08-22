@@ -33,6 +33,7 @@ import distro
 import requests
 from tqdm import tqdm
 
+
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
@@ -47,6 +48,13 @@ logger = logging.getLogger(__name__)
 click.disable_unicode_literals_warning = True
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "auto_envvar_prefix": "MM"}
+
+# TODO: better way to do this?
+DVC_INIT_ERROR_MESSAGE = "you are not inside of a DVC repository"
+DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
+
+DVC_INIT_HELP = "Run 'dvc init' to instantiate this project as a DVC repository"
+DVC_ADD_DOES_NOT_EXIST_HELP = "The folder {dvc_add_path} does not exist"
 
 
 def _version_msg():
@@ -74,6 +82,102 @@ def _app_cli(ctx):
 
     if ctx.obj is None:
         ctx.obj = {}
+
+
+def _dvc_add_helper(path):
+    """
+    Returns True if successful, False otherwise along with helper message
+    :param path:
+    :return:
+    """
+    p = subprocess.Popen(["dvc", "add", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Get DVC error message from standard error
+    output, error = p.communicate()
+    error_string = error.decode('utf-8')
+
+    if DVC_INIT_ERROR_MESSAGE in error_string:
+        return False, DVC_INIT_HELP
+    elif DVC_ADD_DOES_NOT_EXIST_MESSAGE in error_string:
+        return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=path)
+    else:
+        return True, None
+
+
+@_app_cli.command("vc", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def vc(ctx):
+    app = ctx.obj.get("app")
+    app_path = app.app_path
+
+    # Initialize repo
+    p = subprocess.Popen(["dvc", "init"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = p.communicate()
+    error_string = error.decode('utf-8')
+
+    if error_string:
+        logger.error(f"Error during initialization: {error_string}")
+        return
+
+    # Set up a local remote
+    local_remote_path = os.path.join(app_path, "dvc_local_remote")
+    p = subprocess.Popen(["dvc", "remote", "add", "-d", "myremote", local_remote_path],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = p.communicate()
+    error_string = error.decode('utf-8')
+
+    if error_string:
+        logger.error(f"Error during local remote set up: {error_string}")
+        return
+
+    subprocess.Popen(["git", "add", ".dvc/config"],
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    logger.info(f"Successfully instantiated DVC repo and set up local remote in {local_remote_path}")
+    logger.info("The newly generated dvc config file (.dvc/config) has been added to git staging")
+
+
+@_app_cli.command("save", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def save(ctx):
+    """
+    Assuming the
+    :param ctx:
+    :return:
+    """
+    app = ctx.obj.get("app")
+    app_path = app.app_path
+
+    generated_model_folder = os.path.join(app_path, '.generated')
+
+    success, error_string = _dvc_add_helper(generated_model_folder)
+    if not success:
+        logger.error(f"Error during saving: {error_string}")
+        return
+
+    subprocess.Popen(["dvc", "push"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    subprocess.Popen(["git", "add", f"{app_path}/.generated.dvc"],
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    logger.info("Successfully added .generated model folder to dvc")
+    logger.info(f"The newly generated .dvc file ({app_path}/.generated.dvc) has been added to git staging")
+
+
+@_app_cli.command("checkout", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option("-H", "--hash", type=str)
+def checkout(ctx, hash):
+    p = subprocess.Popen(["git", "checkout", hash], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p.wait()
+    p = subprocess.Popen(["dvc", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = p.communicate()
+    error_string = error.decode('utf-8')
+
+    if error_string:
+        logger.error(f"Error during dvc checkout: {error_string}")
+        return
+
+    logger.info(f"Successfully checked out models corresponding to hash {hash}")
 
 
 @_app_cli.command("run", context_settings=CONTEXT_SETTINGS)
@@ -398,6 +502,8 @@ def clean(ctx, query_cache, model_cache, days):
         logger.info("No generated data to delete")
 
 
+
+
 #
 # Shared commands
 #
@@ -594,6 +700,7 @@ def convert(ctx, df, rs, project_path, mindmeld_path=None):
     except IOError as e:
         logger.error(e)
         ctx.exit(1)
+
 
 
 #
