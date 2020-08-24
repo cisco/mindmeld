@@ -34,13 +34,13 @@ def test_intent(sample_request):
 def test_entities(sample_request):
     with pytest.raises(FrozenInstanceError):
         sample_request.entities = ("some_entity",)
-    for x in sample_request.entities:
-        assert isinstance(x, Map)
+    _test_tuple_of_immutable_maps(sample_request.entities)
 
 
 def test_history(sample_request):
     for x in sample_request.history:
         assert isinstance(x, Map)
+    _test_tuple_of_immutable_maps(sample_request.history)
 
 
 def test_text(sample_request):
@@ -69,21 +69,24 @@ def test_nbest(sample_request):
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_text = ["some_text"]
-
-    for x in sample_request.nbest_transcripts_text:
-        assert isinstance(x, Map)
+    _test_tuple_of_immutable_maps(sample_request.nbest_transcripts_text)
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_entities = [{"key": "value"}]
-
-    for x in sample_request.nbest_transcripts_entities:
-        assert isinstance(x, Map)
+    _test_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_aligned_entities = [{"key": "value"}]
+    _test_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
 
-    for x in sample_request.nbest_aligned_entities:
-        assert isinstance(x, Map)
+
+def _test_tuple_of_immutable_maps(tuple_of_immutable_maps):
+    for idx, immutable_map in enumerate(tuple_of_immutable_maps):
+        with pytest.raises(TypeError):
+            tuple_of_immutable_maps[idx] = {"key": "value"}
+        assert isinstance(immutable_map, Map)
+        with pytest.raises(TypeError):
+            immutable_map["key"] = "value"
 
 
 def test_immutability_of_sample_request_and_params():
