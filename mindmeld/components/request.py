@@ -295,7 +295,7 @@ class FrozenParams(Params):
     dynamic_resource = attr.ib(default=immutables.Map(), converter=immutables.Map)
 
 
-def list_elems_to_immutable_map(value):
+def tuple_elems_to_immutable_map(value):
     """ Custom attrs converter. Converts a list of elements into a list of immutables.Map
     objects.
     """
@@ -332,10 +332,10 @@ class Request:
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
     entities = attr.ib(
-        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
     history = attr.ib(
-        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
     text = attr.ib(default=None)
     frame = attr.ib(default=immutables.Map(), converter=immutables.Map)
@@ -343,13 +343,13 @@ class Request:
     context = attr.ib(default=immutables.Map(), converter=immutables.Map)
     confidences = attr.ib(default=immutables.Map(), converter=immutables.Map)
     nbest_transcripts_text = attr.ib(
-        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
     nbest_transcripts_entities = attr.ib(
-        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
     nbest_aligned_entities = attr.ib(
-        default=attr.Factory(tuple), converter=list_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
 
     def to_dict(self):
