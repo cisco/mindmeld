@@ -777,12 +777,17 @@ class DomainProcessor(Processor):
         super().__init__(app_path, resource_loader)
         self.name = domain
         self.intent_classifier = IntentClassifier(self.resource_loader, domain)
-        self.progress_bar = progress_bar
-        self.progress_bar.total += 1
+        intents = path.get_intents(app_path, domain)
 
-        for intent in path.get_intents(app_path, domain):
+        # If there is only one intent in the domain, the classifier would not run
+        # hence we only account for classifiers were there are two or more intents
+        if len(intents) > 1:
+            self.progress_bar = progress_bar
+            self.progress_bar.total += 1
+
+        for intent in intents:
             self._children[intent] = IntentProcessor(
-                app_path, domain, intent, self.resource_loader, self.progress_bar
+                app_path, domain, intent, self.resource_loader, progress_bar
             )
 
     def _build(self, incremental=False, label_set=None):
@@ -793,8 +798,9 @@ class DomainProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
-        self.progress_bar.update(1)
-        self.progress_bar.refresh()
+        if len(self._children) > 1:
+            self.progress_bar.update(1)
+            self.progress_bar.refresh()
 
     def _dump(self):
         if len(self.intents) == 1:
