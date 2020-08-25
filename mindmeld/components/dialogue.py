@@ -1032,7 +1032,7 @@ class AutoEntityFilling:
         Invoke slot-filling as a direct call without requiring a decorator.
         """
         # ensures that the slot-filling function is targeted.
-        kwargs = {'targeted_only': True}
+        kwargs = {"targeted_only": True}
 
         name = self._handler.__name__
 
@@ -1040,7 +1040,9 @@ class AutoEntityFilling:
             # sets a dialogue rule for the handler passed in this invoke call to iteratively call
             # the slot-filling flow till completion or exit. This rule is added temporarily for this
             # flow and reset for the handler with every new invoke call.
-            self._app.app_manager.dialogue_manager.add_dialogue_rule(name, self.__call__, **kwargs)
+            self._app.app_manager.dialogue_manager.add_dialogue_rule(
+                name, self.__call__, **kwargs
+            )
         except AssertionError:
             self._app.app_manager.dialogue_manager.handler_map[name] = self.__call__
 
@@ -1225,6 +1227,10 @@ class DialogueResponder:
         for attribute, value in vars(instance).items():
             if isinstance(value, (Params, Request, FrozenParams)):
                 serialized_obj[attribute] = DialogueResponder.to_json(value)
+            elif isinstance(value, tuple) and all(
+                isinstance(item, immutables.Map) for item in value
+            ):
+                serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             else:
