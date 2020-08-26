@@ -411,6 +411,8 @@ class NaturalLanguageProcessor(Processor):
             resource_loader (ResourceLoader): An object which can load resources for the processor
             config (dict): A config object with processor settings (e.g. if to use n-best
                 transcripts)
+            progress_bar (tqdm object): A tqdm object or an object inherited from tqdm to track
+                training progress
         """
         super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
@@ -422,7 +424,7 @@ class NaturalLanguageProcessor(Processor):
         self.name = app_path
         self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)
-        self.progress_bar = progress_bar or tqdm(total=0, desc="Classifier progress")
+        self.progress_bar = progress_bar
 
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(
@@ -459,7 +461,8 @@ class NaturalLanguageProcessor(Processor):
 
         # reset display for the progress bar. This is important for repeated use of the
         # progress bar
-        self.progress_bar.reset()
+        if isinstance(self.progress_bar, tqdm):
+            self.progress_bar.reset()
 
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
@@ -773,6 +776,8 @@ class DomainProcessor(Processor):
             app_path (str): The path to the directory containing the app's data
             domain (str): The name of the domain
             resource_loader (ResourceLoader): An object which can load resources for the processor
+            progress_bar (tqdm object): A tqdm object or an object with the tqdm interface to track
+                training progress
         """
         super().__init__(app_path, resource_loader)
         self.name = domain
@@ -781,8 +786,8 @@ class DomainProcessor(Processor):
 
         # If there is only one intent in the domain, the classifier would not run
         # hence we only account for classifiers were there are two or more intents
-        if len(intents) > 1:
-            self.progress_bar = progress_bar
+        self.progress_bar = progress_bar
+        if len(intents) > 1 and self.progress_bar is not None:
             self.progress_bar.total += 1
 
         for intent in intents:
@@ -798,7 +803,7 @@ class DomainProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
-        if len(self._children) > 1:
+        if len(self._children) > 1 and self.progress_bar is not None:
             self.progress_bar.update(1)
             self.progress_bar.refresh()
 
@@ -1014,13 +1019,16 @@ class IntentProcessor(Processor):
             domain (str): The domain this intent belongs to.
             intent (str): The name of this intent.
             resource_loader (ResourceLoader): An object which can load resources for the processor.
+            progress_bar (tqdm object): A tqdm object or an object with the tqdm interface to track
+                training progress
         """
         super().__init__(app_path, resource_loader)
         self.domain = domain
         self.name = intent
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
         self.progress_bar = progress_bar
-        self.progress_bar.total += 1
+        if isinstance(self.progress_bar, tqdm):
+            self.progress_bar.total += 1
 
         try:
             self.parser = Parser(self.resource_loader, domain=domain, intent=intent)
@@ -1052,8 +1060,9 @@ class IntentProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
-        self.progress_bar.update(1)
-        self.progress_bar.refresh()
+        if isinstance(self.progress_bar, tqdm):
+            self.progress_bar.update(1)
+            self.progress_bar.refresh()
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -1388,6 +1397,8 @@ class EntityProcessor(Processor):
             intent (str): The intent this entity belongs to.
             entity_type (str): The type of this entity.
             resource_loader (ResourceLoader): An object which can load resources for the processor.
+            progress_bar (tqdm object): A tqdm object or an object with the tqdm interface to track
+                training progress
         """
         super().__init__(app_path, resource_loader)
         self.domain = domain
@@ -1403,7 +1414,8 @@ class EntityProcessor(Processor):
         )
 
         self.progress_bar = progress_bar
-        self.progress_bar.total += 1
+        if isinstance(self.progress_bar, tqdm):
+            self.progress_bar.total += 1
 
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
@@ -1411,8 +1423,9 @@ class EntityProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
         self.entity_resolver.fit()
-        self.progress_bar.update(1)
-        self.progress_bar.refresh()
+        if isinstance(self.progress_bar, tqdm):
+            self.progress_bar.update(1)
+            self.progress_bar.refresh()
 
     def _dump(self):
         model_path, incremental_model_path = path.get_role_model_paths(
