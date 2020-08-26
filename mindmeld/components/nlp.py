@@ -1094,6 +1094,7 @@ class IntentProcessor(Processor):
                 self.name,
                 entity_type,
                 self.resource_loader,
+                self.progress_bar
             )
             self._children[entity_type] = processor
 
