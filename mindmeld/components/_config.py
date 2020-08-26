@@ -456,8 +456,10 @@ DEFAULT_NLP_CONFIG = {
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
+    # "annotator_class": "SpacyAnnotator", (TODO)
     "overwrite": False,
-    "annotate": ["*/*/*/*"],
+    "annotate": [{"domains": "*", "intents": "*", "files": "*", "entities": "*",}],
+    "unannotate_supported_entities_only": True,
     "unannotate": None,
 }
 

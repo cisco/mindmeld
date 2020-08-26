@@ -70,34 +70,57 @@ class Annotator(ABC):
 
     @staticmethod
     def _get_pattern(rule):
-        """ Extract the portion of a regex rule that refers to file paths.
+        """ Convert a rule represented as a dictionary with the keys "domains", "intents",
+        "entities" into a regex pattern.
 
         Args:
-            rule (str): Regex rule specifying allowed file paths and entities.
+            rule (dict): Annotation/Unannotation rule.
 
         Returns:
             pattern (str): Regex pattern specifying allowed file paths.
         """
-        pattern = "/".join(rule.split("/")[:-1])
-        pattern = pattern.replace(".*", ".+")
-        pattern = pattern.replace("*", ".+")
-        prefix = ".*" if pattern[0] == "/" else ".*/"
-        return prefix + pattern
+        pattern = []
+        for x in ["domains", "intents", "files"]:
+            processed_segment = Annotator._process_segment(rule[x])
+            pattern.append(processed_segment)
+        pattern = "/".join(pattern)
+        return ".*/" + pattern
 
-    def _get_entities(self, rule):
-        """ Extract the portion of a regex rule that refers to file paths.
+    @staticmethod
+    def _process_segment(segment):
+        """ Process an individual segment from a rule dictionary.
 
         Args:
-            rule (str): Regex rule specifying allowed file paths and entities.
+            segment (str): Section of a rule dictionary ("domains", "intents", "entities").
+
+        Returns:
+            segment (str): Cleaned section of the rule dictionary.
+        """
+        segment = re.sub("[()]", "", segment)
+        segment = segment.replace(".*", ".+")
+        segment = segment.replace("*", ".+")
+        segment = segment.split("|")
+        segment = "|".join([x.strip() for x in segment])
+        segment = "(" + segment + ")" if "|" in segment else segment
+        return segment
+
+    def _get_entities(self, rule):
+        """ Process the entities specified in a rule dictionary. Check if they are valid
+        for the given annotator.
+
+        Args:
+            rule (dict): Annotation/Unannotation rule with an "entities" key.
 
         Returns:
             valid_entities (list): List of valid entities specified in the rule.
         """
-        entities = rule.split("/")[-1]
-        entities = re.sub("[()]", "", entities).split("|")
+        if rule["entities"].strip() == "*":
+            return ["*"]
+        entities = re.sub("[()]", "", rule["entities"]).split("|")
         valid_entities = []
         for entity in entities:
-            if entity == "*" or self.valid_entity_check(entity):
+            entity = entity.strip()
+            if self.valid_entity_check(entity):
                 valid_entities.append(entity)
             else:
                 logger.warning("%s is not a valid entity. Skipping entity.", entity)
@@ -151,7 +174,7 @@ class Annotator(ABC):
                     )
                 elif action == "unannotate":
                     self._unannotate_query(
-                        processed_query=processed_query, entity_types=entity_types
+                        processed_query=processed_query, remove_entities=entity_types
                     )
 
             annotated_queries = list(dump_queries(processed_queries))
@@ -274,20 +297,26 @@ class Annotator(ABC):
         )
 
     # pylint: disable=R0201
-    def _unannotate_query(self, processed_query, entity_types):
-        """ Removes specified entities in a processed query.
+    def _unannotate_query(self, processed_query, remove_entities):
+        """ Removes specified entities in a processed query. If all entities are being
+        removed, this function will not remove entities that the annotator does not support
+        unless it is explicitly specified to do so in the config with the param
+        "unannotate_supported_entities_only" (boolean).
 
         Args:
             processed_query (ProcessedQuery): A processed query.
-            entity_types (list): List of entities to remove.
+            remove_entities (list): List of entities to remove.
         """
-        if entity_types == ["*"]:
-            processed_query.entities = ()
-        final_entities = []
+        remove_supported_only = self.config["unannotate_supported_entities_only"]
+        keep_entities = []
         for query_entity in processed_query.entities:
-            if query_entity.entity.type not in entity_types:
-                final_entities.append(query_entity)
-        processed_query.entities = tuple(final_entities)
+            if remove_entities == ["*"]:
+                is_supported_entity = self.valid_entity_check(query_entity.entity.type)
+                if remove_supported_only and not is_supported_entity:
+                    keep_entities.append(query_entity)
+            elif query_entity.entity.type not in remove_entities:
+                keep_entities.append(query_entity)
+        processed_query.entities = tuple(keep_entities)
 
     @abstractmethod
     def parse(self, sentence, **kwargs):
