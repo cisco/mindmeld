@@ -918,7 +918,7 @@ def get_nlp_config(app_path=None, config=None):
     return _get_default_nlp_config()
 
 
-def get_tokenizer_config(app_path=None, config=None):
+def get_tokenizer_config(app_path=None):
     """Gets the tokenizer configuration for the app at the specified path.
 
     Args:

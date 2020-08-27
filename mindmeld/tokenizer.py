@@ -30,7 +30,7 @@ class Tokenizer:
 
     _ASCII_CUTOFF = ord("\u0080")
 
-    def __init__(self, app_path, exclude_from_norm=None):
+    def __init__(self, app_path=None, exclude_from_norm=None):
         """Initializes the tokenizer.
 
         Args:
@@ -306,6 +306,7 @@ class Tokenizer:
                 norm_token_text = self.multiple_replace(
                     norm_token_text, self.keep_special_compiled
                 )
+                print(norm_token_text)
             else:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
