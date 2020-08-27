@@ -184,7 +184,7 @@ def test_sentiment_query_feature(home_assistant_nlp, query, feature_type, expect
     if feature_type == "combined" and extracted_features["sentiment|combined"] > 0:
         sentiment = "pos"
     elif feature_type == "separate" and \
-        extracted_features["sentiment|positive"] > extracted_features["sentiment|negative"]:
+            extracted_features["sentiment|positive"] > extracted_features["sentiment|negative"]:
         sentiment = "pos"
     assert sentiment == expected_sentiment
 

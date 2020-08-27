@@ -20,9 +20,9 @@ import logging
 import os
 import re
 import time
-import nltk
 from collections import Counter
 from copy import deepcopy
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from . import markup, path
@@ -146,7 +146,8 @@ class ResourceLoader:
         """
         return self.query_factory.tokenizer
 
-    def get_sentiment_analyzer(self):
+    @staticmethod
+    def get_sentiment_analyzer():
         """
         Returns a sentiment analyzer and downloads the necessary data libraries required from nltk
         """
