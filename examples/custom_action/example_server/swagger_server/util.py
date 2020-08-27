@@ -4,13 +4,16 @@ import six
 
 try:
     from typing import GenericMeta  # python 3.6
+
     Generic = GenericMeta
-    _attr_flag_ = '__extra__'
+    _attr_flag_ = "__extra__"
 except ImportError:
     # in 3.7, use _GenericAlias instead of GenericMeta
     from typing import _GenericAlias
+
     Generic = _GenericAlias
-    _attr_flag_ = '__origin__'
+    _attr_flag_ = "__origin__"
+
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
@@ -32,9 +35,9 @@ def _deserialize(data, klass):
     elif klass == datetime.datetime:
         return deserialize_datetime(data)
     elif type(klass) == Generic:
-        if getattr(klass,_attr_flag_) == list:
+        if getattr(klass, _attr_flag_) == list:
             return _deserialize_list(data, klass.__args__[0])
-        if getattr(klass,_attr_flag_) == dict:
+        if getattr(klass, _attr_flag_) == dict:
             return _deserialize_dict(data, klass.__args__[1])
     else:
         return deserialize_model(data, klass)

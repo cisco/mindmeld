@@ -79,7 +79,9 @@ class EntityResolver:
         if self._is_system_entity:
             canonical_entities = []
         else:
-            canonical_entities = self._resource_loader.get_entity_map(self.type).get("entities", [])
+            canonical_entities = self._resource_loader.get_entity_map(self.type).get(
+                "entities", []
+            )
         self._no_canonical_entity_map = len(canonical_entities) == 0
 
     @property
