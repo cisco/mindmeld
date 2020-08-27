@@ -175,15 +175,21 @@ class Tokenizer:
         }
 
         # Create a regular expression  from the dictionary keys
-        # and add app-specific regex config to the list
-        self.keep_special_compiled = re.compile(
-            "((%s))&(%s)"
-            % (
-                ")|(".join(keep_special_regex_list),
-                ")|(".join(self.config["patterns"]),
-            ),
-            re.UNICODE,
-        )
+        # and add app-specific regex config to the list if specified
+
+        if self.config["patterns"]:
+            self.keep_special_compiled = re.compile(
+                "((%s))&(%s)"
+                % (
+                    ")|(".join(keep_special_regex_list),
+                    ")|(".join(self.config["patterns"]),
+                ),
+                re.UNICODE,
+            )
+        else:
+            self.keep_special_compiled = re.compile(
+                "(%s)" % ")|(".join(keep_special_regex_list), re.UNICODE
+            )
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
     # Needed for train-roles where queries are deep copied (and thus tokenizer).
