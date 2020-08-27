@@ -455,6 +455,10 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
+DEFAULT_TOKENIZER_CONFIG = {
+    "patterns": [],
+}
+
 
 class NlpConfigError(Exception):
     pass
@@ -912,3 +916,28 @@ def get_nlp_config(app_path=None, config=None):
         pass
 
     return _get_default_nlp_config()
+
+
+def get_tokenizer_config(app_path=None, config=None):
+    """Gets the tokenizer configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+        config (dict, optional): A config object to use. This will
+            override the config specified by the app's config.py file.
+            If necessary, this object will be expanded to a fully
+            specified config object.
+
+    Returns:
+        dict: The tokenizer configuration.
+    """
+    if not app_path:
+        return DEFAULT_TOKENIZER_CONFIG
+    try:
+        tokenizer_config = getattr(
+            _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
+        )
+        return tokenizer_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_TOKENIZER_CONFIG

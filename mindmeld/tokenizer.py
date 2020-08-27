@@ -16,8 +16,10 @@
 import codecs
 import logging
 import re
+import unicodedata
 
 from .path import ASCII_FOLDING_DICT_PATH
+from .components._config import get_tokenizer_config
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ class Tokenizer:
 
     _ASCII_CUTOFF = ord("\u0080")
 
-    def __init__(self, exclude_from_norm=None):
+    def __init__(self, app_path, exclude_from_norm=None):
         """Initializes the tokenizer.
 
         Args:
@@ -37,6 +39,7 @@ class Tokenizer:
 
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
+        self.config = get_tokenizer_config(app_path)
         self._init_regex()
 
     def _init_regex(self):
@@ -50,60 +53,61 @@ class Tokenizer:
 
         exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
 
-        # This is more of a tactical fix at this moment. Will probably need a more generic way
-        # to handle all currency symbols.
-        currency_symbols = "$¥"
+        # fetches all currency symbols in unicode
+        currency_symbols = u"".join(
+            chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
+        )
         to_exclude = currency_symbols + "".join(self.exclude_from_norm)
 
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
         # Make keep special regex list
         keep_special_regex_list.append(
-            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"
-        )  # noqa: W605
+            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
+        )
         keep_special_regex_list.append(
-            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"
-        )  # noqa: W605
+            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
+        )
         keep_special_regex_list.append(
-            "?P<pattern1>(?P<pattern1_replace>"
-            + letter_pattern_str  # noqa: W605
+            "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
+            + letter_pattern_str
             + ")"
-            + "[^\w\d\s&"
+            + "[^\w\d\s&"  # noqa: W605
             + exception_chars
-            + "]+(?=[\d]+)"
-        )  # noqa: W605
+            + "]+(?=[\d]+)"  # noqa: W605
+        )
         keep_special_regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"
-            + exception_chars  # noqa: W605
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
+            + exception_chars
             + "]+"
             + "u(?="
             + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
         keep_special_regex_list.append(
             "?P<pattern3>(?P<pattern3_replace>"
             + letter_pattern_str
             + ")"  # noqa: W605
-            + "[^\w\d\s&"
+            + "[^\w\d\s&"  # noqa: W605
             + exception_chars
             + "]+"
             + "(?="  # noqa: W605
             + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
         keep_special_regex_list.append(
-            "?P<escape1>(?P<escape1_replace>[\w\d]+)"
+            "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
             + "[^\w\d\s"  # noqa: W605
             + exception_chars
             + "]+"
-            + "(?=\|)"
-        )  # noqa: W605
+            + "(?=\|)"  # noqa: W605
+        )
         keep_special_regex_list.append(
-            "?P<escape2>(?P<escape2_replace>[\]\}]+)"
+            "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
             + "[^\w\d\s"  # noqa: W605
             + exception_chars
             + "]+(?=s)"
-        )  # noqa: W605
+        )
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
@@ -112,13 +116,13 @@ class Tokenizer:
             "?P<pattern1>(?P<pattern1_replace>"
             + letter_pattern_str
             + ")"  # noqa: W605
-            + "[^\w\d\s&]+(?=[\d]+)"
-        )  # noqa: W605
+            + "[^\w\d\s&]+(?=[\d]+)"  # noqa: W605
+        )
         regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?="
-            + letter_pattern_str  # noqa: W605
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?="  # noqa: W605
+            + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
         regex_list.append(
             "?P<pattern3>(?P<pattern3_replace>"
             + letter_pattern_str
@@ -126,7 +130,7 @@ class Tokenizer:
             + "[^\w\d\s&]+(?="  # noqa: W605
             + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
 
         # commonalities between lists
         regex_list.append("?P<underscore>_")  # noqa: W605
@@ -171,8 +175,14 @@ class Tokenizer:
         }
 
         # Create a regular expression  from the dictionary keys
+        # and add app-specific regex config to the list
         self.keep_special_compiled = re.compile(
-            "(%s)" % ")|(".join(keep_special_regex_list), re.UNICODE
+            "((%s))&(%s)"
+            % (
+                ")|(".join(keep_special_regex_list),
+                ")|(".join(self.config["patterns"]),
+            ),
+            re.UNICODE,
         )
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
@@ -232,7 +242,11 @@ class Tokenizer:
             str: The text with replacement specified by self.replace_lookup
         """
         # For each match, look-up corresponding value in dictionary
-        return compiled.sub(self._one_xlat, text)
+        try:
+            return compiled.sub(self._one_xlat, text)
+        except KeyError:
+            # In case of custom/app-specific tokenizer configuration
+            return text
 
     def normalize(self, text, keep_special_chars=True):
         """
@@ -488,9 +502,9 @@ class Tokenizer:
         )
 
     @staticmethod
-    def create_tokenizer():
+    def create_tokenizer(app_path=None):
         """Creates the tokenizer for the app
         Returns:
             Tokenizer: a tokenizer
         """
-        return Tokenizer()
+        return Tokenizer(app_path=app_path)
