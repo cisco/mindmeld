@@ -44,6 +44,7 @@ from .helpers import (
     get_label_encoder,
     ingest_dynamic_gazetteer,
     register_label,
+    SENTIMENT_ANALYZER,
 )
 from ..system_entity_recognizer import SystemEntityRecognizer
 from .taggers.taggers import (
@@ -1190,6 +1191,8 @@ class Model:
         for rname in required_resources:
             if rname == ENABLE_STEMMING:
                 continue
+            if rname == SENTIMENT_ANALYZER:
+                self._resources[rname] = resource_loader.get_sentiment_analyzer()
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(
                     rname

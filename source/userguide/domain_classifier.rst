@@ -355,6 +355,22 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
+  | ``'sentiment'``       | Generates a feature or a set of features to representing the intensity of positive, negative or neutral    |
+  |                       | sentiment in the query.                                                                                    |
+  |                       |                                                                                                            |
+  |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | The type of measurement required. If unspecified, a single score will be computed to measure sentiment.    |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'intensity_type': 'combined'}``                                                                         |
+  |                       | - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to   |
+  |                       |   +1 (extreme positive).                                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'intensity_type': 'separate'}``                                                                         |
+  |                       | - extracts three features, one for each sentiment (positive, neutral and negative)                         |
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 .. _domain_tuning:
 
