@@ -14,6 +14,7 @@
 """This module contains helper methods for consuming Elasticsearch."""
 import logging
 import os
+import sys
 
 from elasticsearch import ConnectionError as EsConnectionError
 from elasticsearch import (
@@ -341,7 +342,7 @@ def load_index(
 
         count = 0
         # create the progess bar with docs count
-        pbar = tqdm(total=docs_count)
+        pbar = tqdm(total=docs_count, desc="Loading Elasticsearch index {}".format(index_name))
 
         es_version_7 = is_es_version_7(es_client)
         for okay, result in version_compatible_streaming_bulk(

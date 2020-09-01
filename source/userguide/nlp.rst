@@ -794,7 +794,7 @@ Another option is to save just one specific NLP model, which is useful when you 
 Tracking classifier progress
 ----------------------------
 
-Training classifiers can be time-consuming, so progress tracking is important for client's to see how much longer the application will finis
+Training the NLU pipeline can be time-consuming depending on the number of models to be trained and the number of training examples for each of them. The following code snippet shows how you can do progress tracking while building your application. The progress bar will display the fraction of models that have been trained at any given time.
 
 .. code:: python
 
@@ -809,7 +809,7 @@ Training classifiers can be time-consuming, so progress tracking is important fo
 
    # Make sure the total parameter starts at 0 since the classifiers will increment the total as
    # they get initialized
-   pbar = tqdm(total=0, desc="Classifier progress")
+   pbar = tqdm(total=0, desc="NLP progress")
    nlp = NaturalLanguageProcessor(app_path='banking_assistant', progress_bar=pbar)
    nlp.build()
 
