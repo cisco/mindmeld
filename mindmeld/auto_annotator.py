@@ -15,8 +15,10 @@ import re
 import logging
 import os
 import importlib
+from enum import Enum
 from tqdm import tqdm
 import spacy
+
 
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
@@ -25,8 +27,14 @@ from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
+from .models.helpers import register_annotator
 
 logger = logging.getLogger(__name__)
+
+
+class AnnotatorAction(Enum):
+    ANNOTATE = "annotate"
+    UNANNOTATE = "unannotate"
 
 
 class Annotator(ABC):
@@ -57,7 +65,12 @@ class Annotator(ABC):
         """
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
-        rules = self.config[action]
+
+        if action == AnnotatorAction.ANNOTATE.value:
+            rules = self.config[AnnotatorAction.ANNOTATE.value]
+        elif action == AnnotatorAction.UNANNOTATE.value:
+            rules = self.config[AnnotatorAction.UNANNOTATE.value]
+
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
             filtered_paths = self._resource_loader.filter_file_paths(
@@ -168,11 +181,11 @@ class Annotator(ABC):
             tqdm_desc = "Processing " + path + ": "
             for processed_query in tqdm(processed_queries, ascii=True, desc=tqdm_desc):
                 entity_types = file_entities_map[path]
-                if action == "annotate":
+                if action == AnnotatorAction.ANNOTATE.value:
                     self._annotate_query(
                         processed_query=processed_query, entity_types=entity_types
                     )
-                elif action == "unannotate":
+                elif action == AnnotatorAction.UNANNOTATE.value:
                     self._unannotate_query(
                         processed_query=processed_query, remove_entities=entity_types
                     )
@@ -337,11 +350,11 @@ class SpacyAnnotator(Annotator):
     """ Annotator class that uses spacy to generate annotations.
     """
 
-    def __init__(self, app_path, config=None, model="en_core_web_lg"):
+    def __init__(self, app_path, config=None):
         super().__init__(app_path=app_path, config=config)
 
-        self.nlp = SpacyAnnotator._load_model(model)
-        self.model = model
+        self.model = self.config.get("spacy_model", "en_core_web_lg")
+        self.nlp = SpacyAnnotator._load_model(self.model)
         self.duckling = DucklingRecognizer.get_instance()
         self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS = {
             "money": "sys_amount-of-money",
@@ -690,3 +703,6 @@ class SpacyAnnotator(Annotator):
             entity["body"] = entity["body"][:-2]
             entity["end"] -= 2
         return entity
+
+
+register_annotator("SpacyAnnotator", SpacyAnnotator)
