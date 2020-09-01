@@ -41,7 +41,12 @@ from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
-from .auto_annotator import SpacyAnnotator
+from .components._config import get_auto_annotator_config
+from .models.helpers import create_annotator
+
+# pylint: disable=W0611
+# pylint: disable=W0614
+from . import auto_annotator
 
 logger = logging.getLogger(__name__)
 
@@ -536,11 +541,11 @@ def _get_duckling_pid():
 @click.option(
     "--app-path", required=True, help="Needed to locate the application config file.",
 )
-@click.option("--model", required=False, default="en_core_web_lg")
-def annotate(app_path, model):
+def annotate(app_path):
     """Runs the annotation command of the Auto Annotator."""
-    spacy_annotator = SpacyAnnotator(app_path=app_path, model=model)
-    spacy_annotator.annotate()
+    config = get_auto_annotator_config(app_path=app_path)
+    annotator = create_annotator(app_path=app_path, config=config)
+    annotator.annotate()
     logger.info("Annotation Complete.")
 
 
@@ -550,8 +555,9 @@ def annotate(app_path, model):
 )
 def unannotate(app_path):
     """Runs the unannotation command of the Auto Annotator."""
-    spacy_annotator = SpacyAnnotator(app_path=app_path, model="en_core_web_lg")
-    spacy_annotator.unannotate()
+    config = get_auto_annotator_config(app_path=app_path)
+    annotator = create_annotator(app_path=app_path, config=config)
+    annotator.unannotate()
     logger.info("Unannotation Complete.")
 
 

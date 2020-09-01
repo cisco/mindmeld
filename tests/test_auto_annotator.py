@@ -11,7 +11,7 @@ import pytest
 
 from mindmeld.auto_annotator import SpacyAnnotator
 
-SA = SpacyAnnotator("", model="en_core_web_lg")
+SA = SpacyAnnotator("")
 
 
 @pytest.mark.parametrize(
