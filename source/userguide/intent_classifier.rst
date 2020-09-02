@@ -396,6 +396,10 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |   such that their values add up to 1.                                                                      |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
+.. note::
+
+   To define your own features or custom versions of these in-built features, see :ref:`Working with User-Defined Features <custom_features>`.
+
 .. _intent_tuning:
 
 3. **Hyperparameter Settings**
