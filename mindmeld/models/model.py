@@ -39,12 +39,12 @@ from .helpers import (
     ENABLE_STEMMING,
     ENTITIES_LABEL_TYPE,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     entity_seqs_equal,
     get_feature_extractor,
     get_label_encoder,
     ingest_dynamic_gazetteer,
     register_label,
-    SENTIMENT_ANALYZER,
 )
 from ..system_entity_recognizer import SystemEntityRecognizer
 from .taggers.taggers import (

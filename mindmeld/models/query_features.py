@@ -994,7 +994,7 @@ def extract_query_string(scaling=1000, **kwargs):
 
 @register_query_feature(feature_name="sentiment")
 @requires(SENTIMENT_ANALYZER)
-def extract_sentiment(intensity_type='compound', **kwargs):
+def extract_sentiment(analyzer='composite', **kwargs):
     """Generates sentiment intensity scores for each query
 
     Returns:
@@ -1007,8 +1007,8 @@ def extract_sentiment(intensity_type='compound', **kwargs):
     def _extractor(query, resources):
         text = query.text
         sentiment_scores = resources[SENTIMENT_ANALYZER].polarity_scores(text)
-        if intensity_type == 'combined':
-            return {"sentiment|combined": sentiment_scores['compound']}
+        if analyzer == 'composite':
+            return {"sentiment|composite": sentiment_scores['compound']}
         else:
             return {
                 "sentiment|positive": sentiment_scores['pos'],

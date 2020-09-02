@@ -387,12 +387,13 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |                                                                                                            |
   |                       | Examples:                                                                                                  |
   |                       |                                                                                                            |
-  |                       | ``{'intensity_type': 'combined'}``                                                                         |
+  |                       | ``{'analyzer': 'composite'}``                                                                              |
   |                       | - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to   |
   |                       |   +1 (extreme positive).                                                                                   |
   |                       |                                                                                                            |
-  |                       | ``{'intensity_type': 'separate'}``                                                                         |
-  |                       | - extracts three features, one for each sentiment (positive, neutral and negative)                         |
+  |                       | ``{'analyzer': 'discrete'}``                                                                               |
+  |                       | - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative) |
+  |                       |   such that their values add up to 1.                                                                      |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 .. _intent_tuning:
