@@ -21,6 +21,7 @@ def test_embedding_size_is_correct():
     assert type(token_to_embedding_mapping[b"sandberger"]) == ndarray
 
 
+@pytest.mark.skip(reason="sentence bert embedding URL is failing to download")
 @pytest.mark.xfail(strict=False)
 @pytest.mark.extras
 @pytest.mark.bert

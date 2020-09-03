@@ -41,6 +41,7 @@ ENABLE_STEMMING = "enable-stemming"
 WORD_FREQ_RSC = "w_freq"
 WORD_NGRAM_FREQ_RSC = "w_ngram_freq"
 CHAR_NGRAM_FREQ_RSC = "c_ngram_freq"
+SENTIMENT_ANALYZER = "vader_classifier"
 OUT_OF_BOUNDS_TOKEN = "<$>"
 DEFAULT_SYS_ENTITIES = [
     "sys_time",

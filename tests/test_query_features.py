@@ -149,6 +149,47 @@ def test_domain_query_features(
 
 
 @pytest.mark.parametrize(
+    "query, feature_type, expected_sentiment",
+    [
+        ("I hate you", "composite", "neg"),
+        ("you are the worst", "discrete", "neg"),
+        ("I love you", "composite", "pos"),
+        ("you are the best", "discrete", "pos")
+    ]
+)
+def test_sentiment_query_feature(home_assistant_nlp, query, feature_type, expected_sentiment):
+    """
+    Test to make sure query level text model features work as expected
+    Args:
+        home_assistant_nlp: nlp object for the home_assistant blueprint
+        query: text query to use
+        feature_type: whether compound/individual
+        expected_sentiment: expected sentiment intensity pos/neg
+    """
+    intent_classifier_config_sentiment_feature = {
+        "model_type": "text",
+        "model_settings": {"classifier_type": "logreg"},
+        "params": {"C": 10,},
+        "features": {
+            "bag-of-words": {"lengths": [1, 2]},
+            "sentiment": {"analyzer": feature_type},
+        },
+    }
+
+    intent_classifier = home_assistant_nlp.domains['feedback'].intent_classifier
+    intent_classifier.fit(**intent_classifier_config_sentiment_feature)
+
+    extracted_features = intent_classifier.view_extracted_features(query)
+    sentiment = "neg"
+    if feature_type == "composite" and extracted_features["sentiment|composite"] > 0:
+        sentiment = "pos"
+    elif feature_type == "discrete" and \
+            extracted_features["sentiment|positive"] > extracted_features["sentiment|negative"]:
+        sentiment = "pos"
+    assert sentiment == expected_sentiment
+
+
+@pytest.mark.parametrize(
     "query, feature_keys, expected_feature_values, index",
     [
         # Test for extract_in_gaz_ngram_features

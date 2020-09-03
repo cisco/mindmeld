@@ -26,6 +26,7 @@ from .helpers import (
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     get_ngram,
     mask_numerics,
     register_query_feature,
@@ -988,6 +989,32 @@ def extract_query_string(scaling=1000, **kwargs):
 
         return {"exact|query:{}".format("<OOV>"): scaling}
 
+    return _extractor
+
+
+@register_query_feature(feature_name="sentiment")
+@requires(SENTIMENT_ANALYZER)
+def extract_sentiment(analyzer='composite', **kwargs):
+    """Generates sentiment intensity scores for each query
+
+    Returns:
+        (function) A feature extraction function that takes in a query and \
+            returns sentiment values across positive, negative and neutral
+
+    """
+    del kwargs
+
+    def _extractor(query, resources):
+        text = query.text
+        sentiment_scores = resources[SENTIMENT_ANALYZER].polarity_scores(text)
+        if analyzer == 'composite':
+            return {"sentiment|composite": sentiment_scores['compound']}
+        else:
+            return {
+                "sentiment|positive": sentiment_scores['pos'],
+                "sentiment|negative": sentiment_scores['neg'],
+                "sentiment|neutral": sentiment_scores['neu']
+            }
     return _extractor
 
 

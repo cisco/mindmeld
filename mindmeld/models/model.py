@@ -39,6 +39,7 @@ from .helpers import (
     ENABLE_STEMMING,
     ENTITIES_LABEL_TYPE,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     entity_seqs_equal,
     get_feature_extractor,
     get_label_encoder,
@@ -1190,6 +1191,8 @@ class Model:
         for rname in required_resources:
             if rname == ENABLE_STEMMING:
                 continue
+            if rname == SENTIMENT_ANALYZER:
+                self._resources[rname] = resource_loader.get_sentiment_analyzer()
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(
                     rname
