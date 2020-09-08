@@ -102,7 +102,7 @@ def _dvc_add_helper(path):
         return True, None
 
 
-@_app_cli.command("vc", context_settings=CONTEXT_SETTINGS)
+@_app_cli.command("dvc-instantiate", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def vc(ctx):
     app = ctx.obj.get("app")
@@ -135,7 +135,7 @@ def vc(ctx):
     logger.info("The newly generated dvc config file (.dvc/config) has been added to git staging")
 
 
-@_app_cli.command("save", context_settings=CONTEXT_SETTINGS)
+@_app_cli.command("dvc-save", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def save(ctx):
     """
@@ -162,7 +162,7 @@ def save(ctx):
     logger.info(f"The newly generated .dvc file ({app_path}/.generated.dvc) has been added to git staging")
 
 
-@_app_cli.command("checkout", context_settings=CONTEXT_SETTINGS)
+@_app_cli.command("dvc-checkout", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option("-H", "--hash", type=str)
 def checkout(ctx, hash):
