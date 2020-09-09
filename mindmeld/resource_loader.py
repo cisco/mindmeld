@@ -442,7 +442,7 @@ class ResourceLoader:
         file_iter = self._traverse_labeled_queries_files(file_pattern=file_pattern)
         return [filename for _, _, filename in file_iter]
 
-    def filter_file_paths(self, file_pattern=".*.txt", file_paths=None):
+    def filter_file_paths(self, file_pattern, file_paths=None):
         """ Get a list of file paths that match a specific file_pattern
 
         Args:

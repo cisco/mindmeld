@@ -32,8 +32,9 @@ from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
 logger = logging.getLogger(__name__)
 
-SPACY_ENGLISH_MODELS = ["en_core_web_sm", "en_core_web_md", "en_core_web_lg"]
-
+EN_CORE_WEB_SM = "en_core_web_sm"
+EN_CORE_WEB_MD = "en_core_web_md"
+EN_CORE_WEB_LG = "en_core_web_lg"
 
 class AnnotatorAction(Enum):
     ANNOTATE = "annotate"
@@ -356,7 +357,7 @@ class SpacyAnnotator(Annotator):
     def __init__(self, app_path, config=None):
         super().__init__(app_path=app_path, config=config)
 
-        self.model = self.config.get("spacy_model", "en_core_web_lg")
+        self.model = self.config.get("spacy_model", EN_CORE_WEB_LG)
         self.nlp = SpacyAnnotator._load_model(self.model)
         self.duckling = DucklingRecognizer.get_instance()
         self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS = {
@@ -381,7 +382,7 @@ class SpacyAnnotator(Annotator):
             nlp (spacy.lang.en.English): Spacy language model.
         """
 
-        if model in SPACY_ENGLISH_MODELS:
+        if model in [EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG]:
             logger.info("Loading Spacy model %s.", model)
             try:
                 return spacy.load(model)
@@ -391,8 +392,8 @@ class SpacyAnnotator(Annotator):
                 return language_module.load()
         else:
             error_msg = (
-                "Unknown Spacy model name: {!r}. Model must be 'en_core_web_sm',"
-                " 'en_core_web_md', or 'en_core_web_lg'".format(model)
+                "Unknown Spacy model name: {!r}. Model must be {},"
+                " {}, or {}".format(model, EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG)
             )
             raise ValueError(error_msg)
 
