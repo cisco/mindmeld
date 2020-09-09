@@ -15,3 +15,28 @@ DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
+
+SPACY_ANNOTATOR_SUPPORTED_ENTITIES = [
+    "sys_time",
+    "sys_interval",
+    "sys_duration",
+    "sys_number",
+    "sys_amount-of-money",
+    "sys_distance",
+    "sys_weight",
+    "sys_ordinal",
+    "sys_quantity",
+    "sys_percent",
+    "sys_org",
+    "sys_loc",
+    "sys_person",
+    "sys_gpe",
+    "sys_norp",
+    "sys_fac",
+    "sys_product",
+    "sys_event",
+    "sys_law",
+    "sys_langauge",
+    "sys_work-of-art",
+    "sys_other-quantity",
+]

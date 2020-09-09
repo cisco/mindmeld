@@ -164,7 +164,7 @@ def test_duration_parse(query, unit, value):
 @pytest.mark.parametrize(
     "query, grain, value",
     [
-        ("first day of May in 2017", "day", "2020-09-01T00:00:00.000-07:00"),
+        ("March 3rd 2012", "day", "2012-03-03T00:00:00.000-08:00"),
         ("Feb 18 2019", "day", "2019-02-18T00:00:00.000-08:00"),
         ("first thursday of 2015", "day", "2015-01-01T00:00:00.000-08:00"),
     ],
@@ -174,3 +174,47 @@ def test_time_parse(query, grain, value):
     assert grain == spacy_response["value"]["grain"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_time"
+
+
+@pytest.mark.parametrize(
+    "rule, pattern",
+    [
+        (
+            {
+                "domains": "faq|salary",
+                "intents": "*",
+                "files": "train.txt|test.txt",
+                "entities": "sys_amt-of-money|sys_time",
+            },
+            ".*/(faq|salary)/.+/(train.txt|test.txt)",
+        ),
+        (
+            {
+                "domains": "salary",
+                "intents": "get_salary_aggregate|get_salary",
+                "files": "train.txt|test.txt",
+                "entities": "(sys_amt-of-money)",
+            },
+            ".*/salary/(get_salary_aggregate|get_salary)/(train.txt|test.txt)",
+        ),
+        (
+            {
+                "domains": "date",
+                "intents": "get_date",
+                "files": "train.txt|test.txt",
+                "entities": "sys_duration|sys_interval|sys_time",
+            },
+            ".*/date/get_date/(train.txt|test.txt)",
+        ),
+        (
+            {"domains": "general", "intents": "*", "files": "*", "entities": "*"},
+            ".*/general/.+/.+",
+        ),
+        (
+            {"domains": "*", "intents": "*", "files": "*", "entities": "*"},
+            ".*/.+/.+/.+",
+        ),
+    ],
+)
+def test_rule_to_regex_pattern_parser(rule, pattern):
+    assert pattern == SA._get_pattern(rule)
