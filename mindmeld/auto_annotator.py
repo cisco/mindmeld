@@ -28,8 +28,11 @@ from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
+from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
 logger = logging.getLogger(__name__)
+
+SPACY_ENGLISH_MODELS = ["en_core_web_sm", "en_core_web_md", "en_core_web_lg"]
 
 
 class AnnotatorAction(Enum):
@@ -378,7 +381,7 @@ class SpacyAnnotator(Annotator):
             nlp (spacy.lang.en.English): Spacy language model.
         """
 
-        if model in ["en_core_web_sm", "en_core_web_md", "en_core_web_lg"]:
+        if model in SPACY_ENGLISH_MODELS:
             logger.info("Loading Spacy model %s.", model)
             try:
                 return spacy.load(model)
@@ -395,31 +398,7 @@ class SpacyAnnotator(Annotator):
 
     def valid_entity_check(self, entity):
         entity = entity.lower().strip()
-        valid_entities = [
-            "sys_time",
-            "sys_interval",
-            "sys_duration",
-            "sys_number",
-            "sys_amount-of-money",
-            "sys_distance",
-            "sys_weight",
-            "sys_ordinal",
-            "sys_quantity",
-            "sys_percent",
-            "sys_org",
-            "sys_loc",
-            "sys_person",
-            "sys_gpe",
-            "sys_norp",
-            "sys_fac",
-            "sys_product",
-            "sys_event",
-            "sys_law",
-            "sys_langauge",
-            "sys_work-of-art",
-            "sys_other-quantity",
-        ]
-        return entity in valid_entities
+        return entity in SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
     def parse(self, sentence, entity_types=None):
         """ Extracts entities from a sentence. Detected entities should are
