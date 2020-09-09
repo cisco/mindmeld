@@ -83,23 +83,23 @@ def _app_cli(ctx):
         ctx.obj = {}
 
 
-def _dvc_add_helper(path):
+def _dvc_add_helper(filepath):
     """
     Returns True if successful, False otherwise along with helper message
     :param path:
     :return:
     """
     p = subprocess.Popen(
-        ["dvc", "add", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["dvc", "add", filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     # Get DVC error message from standard error
-    output, error = p.communicate()
+    _, error = p.communicate()
     error_string = error.decode("utf-8")
 
     if DVC_INIT_ERROR_MESSAGE in error_string:
         return False, DVC_INIT_HELP
     elif DVC_ADD_DOES_NOT_EXIST_MESSAGE in error_string:
-        return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=path)
+        return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=filepath)
     else:
         return True, None
 
@@ -114,11 +114,11 @@ def vc(ctx):
     p = subprocess.Popen(
         ["dvc", "init"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    output, error = p.communicate()
+    _, error = p.communicate()
     error_string = error.decode("utf-8")
 
     if error_string:
-        logger.error("Error during initialization: {}".format(error_string))
+        logger.error("Error during initialization: %s", error_string)
         return
 
     # Set up a local remote
@@ -128,11 +128,11 @@ def vc(ctx):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    output, error = p.communicate()
+    _, error = p.communicate()
     error_string = error.decode("utf-8")
 
     if error_string:
-        logger.error("Error during local remote set up: {}".format(error_string))
+        logger.error("Error during local remote set up: %s", error_string)
         return
 
     subprocess.Popen(
@@ -140,7 +140,7 @@ def vc(ctx):
     )
 
     logger.info(
-        "Instantiated DVC repo and set up local remote in {}".format(local_remote_path)
+        "Instantiated DVC repo and set up local remote in %s", local_remote_path
     )
     logger.info(
         "The newly generated dvc config file (.dvc/config) has been added to git staging"
@@ -162,7 +162,7 @@ def save(ctx):
 
     success, error_string = _dvc_add_helper(generated_model_folder)
     if not success:
-        logger.error("Error during saving: {}".format(error_string))
+        logger.error("Error during saving: %s", error_string)
         return
 
     subprocess.Popen(["dvc", "push"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -175,31 +175,29 @@ def save(ctx):
 
     logger.info("Successfully added .generated model folder to dvc")
     logger.info(
-        "The newly generated .dvc file ({}/.generated.dvc) has been added to git staging".format(
-            app_path
-        )
+        "The newly generated .dvc file (%s/.generated.dvc) has been added to git staging",
+        app_path,
     )
 
 
 @_app_cli.command("dvc-checkout", context_settings=CONTEXT_SETTINGS)
-@click.pass_context
-@click.option("-H", "--hash", type=str)
-def checkout(ctx, hash):
+@click.option("-H", "--git_hash", type=str)
+def checkout(git_hash):
     p = subprocess.Popen(
-        ["git", "checkout", hash], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["git", "checkout", git_hash], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     p.wait()
     p = subprocess.Popen(
         ["dvc", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    output, error = p.communicate()
+    _, error = p.communicate()
     error_string = error.decode("utf-8")
 
     if error_string:
-        logger.error("Error during dvc checkout: {}.format(error_string)")
+        logger.error("Error during dvc checkout: %s", error_string)
         return
 
-    logger.info("Successfully checked out models corresponding to hash {}.format(hash)")
+    logger.info("Successfully checked out models corresponding to hash %s", git_hash)
 
 
 @_app_cli.command("run", context_settings=CONTEXT_SETTINGS)
