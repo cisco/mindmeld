@@ -36,6 +36,7 @@ EN_CORE_WEB_SM = "en_core_web_sm"
 EN_CORE_WEB_MD = "en_core_web_md"
 EN_CORE_WEB_LG = "en_core_web_lg"
 
+
 class AnnotatorAction(Enum):
     ANNOTATE = "annotate"
     UNANNOTATE = "unannotate"
@@ -393,7 +394,9 @@ class SpacyAnnotator(Annotator):
         else:
             error_msg = (
                 "Unknown Spacy model name: {!r}. Model must be {},"
-                " {}, or {}".format(model, EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG)
+                " {}, or {}".format(
+                    model, EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG
+                )
             )
             raise ValueError(error_msg)
 
