@@ -11,7 +11,10 @@ import pytest
 
 from mindmeld.auto_annotator import SpacyAnnotator
 
-SA = SpacyAnnotator("")
+
+@pytest.fixture(scope="module")
+def get_SA():
+    return SpacyAnnotator("./kwik_e_mart")
 
 
 @pytest.mark.parametrize(
@@ -24,8 +27,8 @@ SA = SpacyAnnotator("")
         ("5th", "5th", 5),
     ],
 )
-def test_ordinal_parse(query, body, value):
-    spacy_response = SA.parse(query)[0]
+def test_ordinal_parse(get_SA, query, body, value):
+    spacy_response = get_SA.parse(query)[0]
     assert body == spacy_response["body"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_ordinal"
@@ -43,8 +46,8 @@ def test_ordinal_parse(query, body, value):
         ("nine thousand and eight stories", "nine thousand and eight", 9008),
     ],
 )
-def test_cardinal_parse(query, body, value):
-    spacy_response = SA.parse(query)[0]
+def test_cardinal_parse(get_SA, query, body, value):
+    spacy_response = get_SA.parse(query)[0]
     assert body == spacy_response["body"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_number"
@@ -62,8 +65,8 @@ def test_cardinal_parse(query, body, value):
         ("two hundred and thirty percent", 0.3),
     ],
 )
-def test_percent_parse(query, value):
-    spacy_response = SA.parse(query)[0]
+def test_percent_parse(get_SA, query, value):
+    spacy_response = get_SA.parse(query)[0]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_percent"
 
@@ -80,8 +83,8 @@ def test_percent_parse(query, value):
         ("47.5 inches", "inch", 47.5),
     ],
 )
-def test_distance_parse(query, unit, value):
-    spacy_response = SA.parse(query)[0]
+def test_distance_parse(get_SA, query, unit, value):
+    spacy_response = get_SA.parse(query)[0]
     assert unit == spacy_response["value"]["unit"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_distance"
@@ -99,8 +102,8 @@ def test_distance_parse(query, unit, value):
         ("47.5 mg", "gram", 0.0475),
     ],
 )
-def test_weight_parse(query, unit, value):
-    spacy_response = SA.parse(query)[0]
+def test_weight_parse(get_SA, query, unit, value):
+    spacy_response = get_SA.parse(query)[0]
     assert unit == spacy_response["value"]["unit"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_weight"
@@ -115,8 +118,8 @@ def test_weight_parse(query, unit, value):
         ("Vickie Parilla", "Vickie Parilla"),
     ],
 )
-def test_person_parse(query, value):
-    spacy_response = SA.parse(query)[0]
+def test_person_parse(get_SA, query, value):
+    spacy_response = get_SA.parse(query)[0]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_person"
 
@@ -134,8 +137,8 @@ def test_person_parse(query, value):
         ("$70k", "$", 70000),
     ],
 )
-def test_money_parse(query, unit, value):
-    spacy_response = SA.parse(query)[0]
+def test_money_parse(get_SA, query, unit, value):
+    spacy_response = get_SA.parse(query)[0]
     assert unit == spacy_response["value"]["unit"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_amount-of-money"
@@ -154,8 +157,8 @@ def test_money_parse(query, unit, value):
         ("3 weeks", "week", 3),
     ],
 )
-def test_duration_parse(query, unit, value):
-    spacy_response = SA.parse(query)[0]
+def test_duration_parse(get_SA, query, unit, value):
+    spacy_response = get_SA.parse(query)[0]
     assert unit == spacy_response["value"]["unit"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_duration"
@@ -169,8 +172,8 @@ def test_duration_parse(query, unit, value):
         ("first thursday of 2015", "day", "2015-01-01T00:00:00.000-08:00"),
     ],
 )
-def test_time_parse(query, grain, value):
-    spacy_response = SA.parse(query)[0]
+def test_time_parse(get_SA, query, grain, value):
+    spacy_response = get_SA.parse(query)[0]
     assert grain == spacy_response["value"]["grain"]
     assert value == spacy_response["value"]["value"]
     assert spacy_response["dim"] == "sys_time"
@@ -216,5 +219,5 @@ def test_time_parse(query, grain, value):
         ),
     ],
 )
-def test_rule_to_regex_pattern_parser(rule, pattern):
-    assert pattern == SA._get_pattern(rule)
+def test_rule_to_regex_pattern_parser(get_SA, rule, pattern):
+    assert pattern == get_SA._get_pattern(rule)
