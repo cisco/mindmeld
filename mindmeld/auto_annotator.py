@@ -305,7 +305,6 @@ class Annotator(ABC):
                 additional_entities.append(o_entity)
         return base_entities + additional_entities
 
-
     # pylint: disable=R0201
     def _unannotate_query(self, processed_query, remove_entities):
         """ Removes specified entities in a processed query. If all entities are being
@@ -380,7 +379,7 @@ class SpacyAnnotator(Annotator):
             try:
                 return spacy.load(model)
             except OSError:
-                logger.warning("%s not found. Downloading model.", model)
+                logger.warning("%s not found. Downloading the model.", model)
                 os.system("python -m spacy download " + model)
                 language_module = importlib.import_module(model)
                 return language_module.load()
