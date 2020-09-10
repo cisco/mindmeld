@@ -40,3 +40,17 @@ SPACY_ANNOTATOR_SUPPORTED_ENTITIES = [
     "sys_work-of-art",
     "sys_other-quantity",
 ]
+
+def _no_overlap(entity_one, entity_two):
+    """ Returns True if two query entities do not overlap.
+    Args:
+        entity_one (QueryEntity): First entity.
+        entity_two (QueryEntity): Second Entity.
+
+    Returns:
+        no_overlap (bool): True if no overlap.
+    """
+    return (
+        entity_one.span.start > entity_two.span.end
+        or entity_two.span.start > entity_one.span.end
+    )
