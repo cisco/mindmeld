@@ -26,7 +26,6 @@ import subprocess
 import sys
 import time
 import warnings
-import importlib
 
 import click
 import click_log
@@ -44,7 +43,7 @@ from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMe
 from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
 from .components._config import get_auto_annotator_config
 from .models.helpers import create_annotator
-
+from . import auto_annotator  # noqa: F401 pylint: disable=W0611
 
 logger = logging.getLogger(__name__)
 
@@ -541,7 +540,6 @@ def _get_duckling_pid():
 )
 def annotate(app_path):
     """Runs the annotation command of the Auto Annotator."""
-    importlib.import_module("mindmeld.auto_annotator")
     config = get_auto_annotator_config(app_path=app_path)
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.annotate()
@@ -554,7 +552,6 @@ def annotate(app_path):
 )
 def unannotate(app_path):
     """Runs the unannotation command of the Auto Annotator."""
-    importlib.import_module("mindmeld.auto_annotator")
     config = get_auto_annotator_config(app_path=app_path)
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.unannotate()
