@@ -41,6 +41,7 @@ SPACY_ANNOTATOR_SUPPORTED_ENTITIES = [
     "sys_other-quantity",
 ]
 
+
 def _no_overlap(entity_one, entity_two):
     """ Returns True if two query entities do not overlap.
     Args:
