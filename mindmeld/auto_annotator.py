@@ -28,7 +28,7 @@ from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
-from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, _no_overlap
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class Annotator(ABC):
         Returns:
             bool: Whether entity is valid.
         """
-        return True
+        raise NotImplementedError("Subclasses must implement this method")
 
     def annotate(self):
         """ Annotate data based on configurations in the config.py file.
@@ -299,20 +299,12 @@ class Annotator(ABC):
         additional_entities = []
         for o_entity in other_entities:
             no_overlaps = [
-                Annotator._no_overlap(o_entity, b_entity) for b_entity in base_entities
+                _no_overlap(o_entity, b_entity) for b_entity in base_entities
             ]
             if all(no_overlaps):
                 additional_entities.append(o_entity)
         return base_entities + additional_entities
 
-    @staticmethod
-    def _no_overlap(entity_one, entity_two):
-        """ Returns True if two query entities do not overlap.
-        """
-        return (
-            entity_one.span.start > entity_two.span.end
-            or entity_two.span.start > entity_one.span.end
-        )
 
     # pylint: disable=R0201
     def _unannotate_query(self, processed_query, remove_entities):
