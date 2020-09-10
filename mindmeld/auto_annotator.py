@@ -388,7 +388,7 @@ class SpacyAnnotator(Annotator):
             try:
                 return spacy.load(model)
             except OSError:
-                logger.warning("%s not downloaded. Downloading model.", model)
+                logger.warning("%s not found. Downloading model.", model)
                 os.system("python -m spacy download " + model)
                 language_module = importlib.import_module(model)
                 return language_module.load()
