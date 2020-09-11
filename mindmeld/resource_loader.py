@@ -426,27 +426,24 @@ class ResourceLoader:
         file_iter = self._traverse_labeled_queries_files(file_pattern=file_pattern)
         return [filename for _, _, filename in file_iter]
 
-    def filter_file_paths(self, file_pattern, file_paths=None):
+    def filter_file_paths(self, compiled_pattern, file_paths=None):
         """ Get a list of file paths that match a specific file_pattern
 
         Args:
-            file_pattern (str): A regex pattern to filter on.
+            compiled_pattern (sre.SRE_Pattern): A compiled regex pattern to filter with.
             file_paths (list): A list of file paths.
 
         Returns:
             list: A list of file paths.
         """
         all_file_paths = file_paths or self.get_all_file_paths()
-        compiled_pattern = re.compile(file_pattern)
         matched_paths = []
         for file_path in all_file_paths:
             m = compiled_pattern.match(file_path)
             if m:
                 matched_paths.append(m.group())
         if len(matched_paths) == 0:
-            logger.warning(
-                "No matches were found for the file path pattern: %s", file_pattern
-            )
+            logger.warning("No matches were found for the given compiled pattern")
         return matched_paths
 
     def load_query_file(self, domain, intent, file_path, raw=False):
