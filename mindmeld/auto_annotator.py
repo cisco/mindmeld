@@ -78,8 +78,9 @@ class Annotator(ABC):
 
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
+            compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
-                file_pattern=pattern, file_paths=all_file_paths
+                compiled_pattern=compiled_pattern, file_paths=all_file_paths
             )
             for path in filtered_paths:
                 entities = self._get_entities(rule)
@@ -379,7 +380,9 @@ class SpacyAnnotator(Annotator):
             try:
                 return spacy.load(model)
             except OSError:
+
                 logger.warning("%s not found. Downloading the model.", model)
+
                 os.system("python -m spacy download " + model)
                 language_module = importlib.import_module(model)
                 return language_module.load()
