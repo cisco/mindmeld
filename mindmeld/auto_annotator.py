@@ -23,7 +23,7 @@ import spacy
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
 from .system_entity_recognizer import DucklingRecognizer
-from .markup import load_query, dump_queries
+from .markup import load_query, dump_query
 from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
@@ -185,21 +185,25 @@ class Annotator(ABC):
                 file_path=path, query_factory=query_factory
             )
             tqdm_desc = "Processing " + path + ": "
-            for processed_query in tqdm(processed_queries, ascii=True, desc=tqdm_desc):
-                entity_types = file_entities_map[path]
-                if action == AnnotatorAction.ANNOTATE.value:
-                    self._annotate_query(
-                        processed_query=processed_query, entity_types=entity_types
-                    )
-                elif action == AnnotatorAction.UNANNOTATE.value:
-                    self._unannotate_query(
-                        processed_query=processed_query, remove_entities=entity_types
-                    )
-
-            annotated_queries = list(dump_queries(processed_queries))
-            with open(path, "w") as outfile:
-                outfile.write("".join(annotated_queries))
+            temp_path = path.split(".txt")[0] + "_temp.txt"
+            os.rename(path, temp_path)
+            with open(path, "a+") as outfile:
+                for processed_query in tqdm(
+                    processed_queries, ascii=True, desc=tqdm_desc
+                ):
+                    entity_types = file_entities_map[path]
+                    if action == AnnotatorAction.ANNOTATE.value:
+                        self._annotate_query(
+                            processed_query=processed_query, entity_types=entity_types
+                        )
+                    elif action == AnnotatorAction.UNANNOTATE.value:
+                        self._unannotate_query(
+                            processed_query=processed_query,
+                            remove_entities=entity_types,
+                        )
+                    outfile.write(dump_query(processed_query))
                 outfile.close()
+            os.remove(temp_path)
 
     @staticmethod
     def _get_processed_queries(file_path, query_factory):
