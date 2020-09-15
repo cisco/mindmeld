@@ -16,7 +16,7 @@ requirements = [
     "elasticsearch>=5.0",
     "Flask~=1.0",
     "Flask-Cors~=3.0",
-    "future~=0.16.0",
+    "future~=0.17",
     "pycountry",  # uses calendar versioning
     "nltk~=3.2",
     "numpy~=1.15",
