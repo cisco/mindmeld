@@ -35,6 +35,7 @@ requirements = [
     "immutables~=0.9",
     "pyyaml>=5.1.1",
     "spacy>=2.3.0",
+    "mypy>=0.782",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
