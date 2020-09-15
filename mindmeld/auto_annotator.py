@@ -54,9 +54,11 @@ class Annotator(ABC):
         self._resource_loader = (
             resource_loader or ResourceLoader.create_resource_loader(app_path)
         )
-        self.annotate_file_entities_map = self._get_file_entities_map(action="annotate")
+        self.annotate_file_entities_map = self._get_file_entities_map(
+            action=AnnotatorAction.ANNOTATE
+        )
 
-    def _get_file_entities_map(self, action="annotate"):
+    def _get_file_entities_map(self, action: AnnotatorAction):
         """ Creates a dictionary that maps file paths to entities given
         regex rules defined in the config.
 
@@ -71,9 +73,9 @@ class Annotator(ABC):
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
 
-        if action == AnnotatorAction.ANNOTATE.value:
+        if action == AnnotatorAction.ANNOTATE:
             rules = self.config[AnnotatorAction.ANNOTATE.value]
-        elif action == AnnotatorAction.UNANNOTATE.value:
+        elif action == AnnotatorAction.UNANNOTATE:
             rules = self.config[AnnotatorAction.UNANNOTATE.value]
 
         for rule in rules:
@@ -161,7 +163,7 @@ class Annotator(ABC):
         """ Annotate data based on configurations in the config.py file.
         """
         file_entities_map = self.annotate_file_entities_map
-        self._modify_queries(file_entities_map, action="annotate")
+        self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
 
     def unannotate(self):
         """ Unannotate data based on configurations in the config.py file.
@@ -169,10 +171,12 @@ class Annotator(ABC):
         if not self.config["unannotate"]:
             logger.warning("'unannotate' is None in the config. Nothing to unannotate.")
             return
-        file_entities_map = self._get_file_entities_map(action="unannotate")
-        self._modify_queries(file_entities_map, action="unannotate")
+        file_entities_map = self._get_file_entities_map(
+            action=AnnotatorAction.UNANNOTATE
+        )
+        self._modify_queries(file_entities_map, action=AnnotatorAction.UNANNOTATE)
 
-    def _modify_queries(self, file_entities_map, action):
+    def _modify_queries(self, file_entities_map, action: AnnotatorAction):
         """ Iterates through App files and annotates or unannotates queries.
 
         Args:
@@ -186,24 +190,24 @@ class Annotator(ABC):
             )
             tqdm_desc = "Processing " + path + ": "
             temp_path = path.split(".txt")[0] + "_temp.txt"
-            os.rename(path, temp_path)
-            with open(path, "a+") as outfile:
+            with open(temp_path, "a+") as outfile:
                 for processed_query in tqdm(
                     processed_queries, ascii=True, desc=tqdm_desc
                 ):
                     entity_types = file_entities_map[path]
-                    if action == AnnotatorAction.ANNOTATE.value:
+                    if action == AnnotatorAction.ANNOTATE:
                         self._annotate_query(
                             processed_query=processed_query, entity_types=entity_types
                         )
-                    elif action == AnnotatorAction.UNANNOTATE.value:
+                    elif action == AnnotatorAction.UNANNOTATE:
                         self._unannotate_query(
                             processed_query=processed_query,
                             remove_entities=entity_types,
                         )
                     outfile.write(dump_query(processed_query))
                 outfile.close()
-            os.remove(temp_path)
+            os.remove(path)
+            os.rename(temp_path, path)
 
     @staticmethod
     def _get_processed_queries(file_path, query_factory):
