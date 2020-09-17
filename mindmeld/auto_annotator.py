@@ -451,7 +451,7 @@ class SpacyAnnotator(Annotator):
                     params["entity_types"] = entity_types
                 elif entity["dim"] in ["money"]:
                     params["sentence"] = sentence
-                entity_resolution_func_map[entity["dim"]](**params)
+                entity = entity_resolution_func_map[entity["dim"]](**params)
             else:
                 entity["dim"] = "sys_" + entity["dim"].replace("_", "-")
 
@@ -557,7 +557,7 @@ class SpacyAnnotator(Annotator):
                 if is_time_related:
                     candidate_entity = SpacyAnnotator._get_time_entity_type(candidate)
                 else:
-                    candidate_entity = candidate["dim"]
+                    candidate_entity = candidate["entity_type"]
 
                 if (
                     candidate_entity == entity_type
@@ -580,7 +580,13 @@ class SpacyAnnotator(Annotator):
             return entity
 
     def _resolve_cardinal(self, entity):
-        return self._resolve_exact_match(entity)
+        if self._resolve_exact_match(entity):
+            return entity
+        candidates = self.duckling.get_candidates_for_text(entity["body"])
+        if self._resolve_largest_substring(
+            entity, candidates, entity_types=["sys_number"], is_time_related=False
+        ):
+            return entity
 
     def _resolve_money(self, entity, sentence):
         # Update entity to include the $ symbol if it's left of the body text.
