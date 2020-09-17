@@ -62,7 +62,7 @@ def test_cardinal_parse(get_SA, query, body, value):
         ("thirty eight percent", 0.38),
         ("12%", 0.12),
         ("seventy two percent", 0.72),
-        ("two hundred and thirty percent", 0.3),
+        ("thirty percent", 0.3),
     ],
 )
 def test_percent_parse(get_SA, query, value):
