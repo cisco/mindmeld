@@ -432,22 +432,26 @@ class SpacyAnnotator(Annotator):
             for ent in doc.ents
         ]
 
+        entity_resolution_func_map = {
+            "time": self._resolve_time_date,
+            "date": self._resolve_time_date,
+            "cardinal": self._resolve_cardinal,
+            "money": self._resolve_money,
+            "ordinal": self._resolve_ordinal,
+            "quantity": self._resolve_quantity,
+            "percent": self._resolve_percent,
+            "person": self._resolve_person,
+        }
+
         entities = []
         for entity in spacy_entities:
-            if entity["dim"] in ["time", "date"]:
-                entity = self._resolve_time_date(entity, entity_types)
-            elif entity["dim"] == "cardinal":
-                entity = self._resolve_cardinal(entity)
-            elif entity["dim"] == "money":
-                entity = self._resolve_money(entity, sentence)
-            elif entity["dim"] == "ordinal":
-                entity = self._resolve_ordinal(entity)
-            elif entity["dim"] == "quantity":
-                entity = self._resolve_quantity(entity)
-            elif entity["dim"] == "percent":
-                entity = self._resolve_percent(entity)
-            elif entity["dim"] == "person":
-                entity = self._resolve_person(entity)
+            if entity["dim"] in entity_resolution_func_map:
+                params = {"entity": entity}
+                if entity["dim"] in ["time", "date"]:
+                    params["entity_types"] = entity_types
+                elif entity["dim"] in ["money"]:
+                    params["sentence"] = sentence
+                entity_resolution_func_map[entity["dim"]](**params)
             else:
                 entity["dim"] = "sys_" + entity["dim"].replace("_", "-")
 
@@ -460,9 +464,13 @@ class SpacyAnnotator(Annotator):
         return entities
 
     def _resolve_time_date(self, entity, entity_types=None):
-        """ Resolves a time related entity. First looks for an exact match, then
-        for the largest substring match. Order of priority is sys_duration, sys_interval,
-        and sys_time.
+        """ Resolves a time related entity. First, an exact match is searched for. If
+        not found, the largest substring match is searched for. If the span of the entity
+        does not share the exact span match with duckling entities then it is likely that
+        spacy has recognized an additional word in the span. For example, "nearly 15 minutes"
+        doesn't have an exact match but the largest substring match correctly resolves for
+        the substring "15 minutes". Order of priority for the time entities is sys_duration,
+        sys_interval, and sys_time.
 
         Args:
             entity (dict): A dictionary representing an entity.
