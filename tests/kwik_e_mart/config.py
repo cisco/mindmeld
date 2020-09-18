@@ -8,14 +8,18 @@ NLP_CONFIG = {
 
 DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {
+        "classifier_type": "logreg",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
         "grid": {"fit_intercept": [True, False], "C": [10, 100, 1000, 10000, 100000]},
     },
     "features": {
-        "bag-of-words": {"lengths": [1],},
+        "bag-of-words": {
+            "lengths": [1],
+        },
         "freq": {"bins": 5},
         "in-gaz": {},
         "exact": {},

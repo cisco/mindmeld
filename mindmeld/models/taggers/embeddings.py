@@ -268,8 +268,7 @@ class WordSequenceEmbedding:
                 )
 
     def save_embeddings(self):
-        """Save extracted embeddings to historic pickle file.
-        """
+        """Save extracted embeddings to historic pickle file."""
         output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, "wb")
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()
@@ -357,8 +356,7 @@ class CharacterSequenceEmbedding:
             self.token_to_embedding_mapping[char] = historic_char_embeddings.get(char)
 
     def save_embeddings(self):
-        """Save extracted embeddings to historic pickle file.
-        """
+        """Save extracted embeddings to historic pickle file."""
         output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, "wb")
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()

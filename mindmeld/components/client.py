@@ -32,7 +32,10 @@ class ConversationClient:
     _logger = mod_logger.getChild("ConversationClient")
 
     def __init__(
-        self, url="http://localhost:7150/parse", context=None, default_params=None,
+        self,
+        url="http://localhost:7150/parse",
+        context=None,
+        default_params=None,
     ):
         """
         Args:

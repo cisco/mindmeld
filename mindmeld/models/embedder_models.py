@@ -43,8 +43,7 @@ class Embedder(ABC):
     """
 
     def __init__(self, app_path, **kwargs):
-        """Initializes an embedder.
-        """
+        """Initializes an embedder."""
         self.model_name = kwargs.get("model_name", "default")
         self.cache_path = path.get_embedder_cache_file_path(
             app_path, kwargs.get("embedder_type", "default"), self.model_name
@@ -83,8 +82,7 @@ class Embedder(ABC):
         pass
 
     def clear_cache(self):
-        """Deletes the cache file.
-        """
+        """Deletes the cache file."""
         if os.path.exists(self.cache_path):
             os.remove(self.cache_path)
 
@@ -107,8 +105,7 @@ class Embedder(ABC):
         return encoded
 
     def dump(self):
-        """Dumps the cache to disk.
-        """
+        """Dumps the cache to disk."""
         with open(self.cache_path, "wb") as fp:
             pickle.dump(self.cache, fp)
 
@@ -174,8 +171,7 @@ class GloveEmbedder(Embedder):
         return encoded_vecs
 
     def dump(self):
-        """Dumps the cache to disk.
-        """
+        """Dumps the cache to disk."""
         super().dump()
         self.model.save_embeddings()
 

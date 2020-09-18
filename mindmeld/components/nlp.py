@@ -1011,7 +1011,9 @@ class IntentProcessor(Processor):
         entity_recognizer (EntityRecognizer): The entity recognizer for this intent.
     """
 
-    def __init__(self, app_path, domain, intent, resource_loader=None, progress_bar=None):
+    def __init__(
+        self, app_path, domain, intent, resource_loader=None, progress_bar=None
+    ):
         """Initializes an intent processor object
 
         Args:
@@ -1073,7 +1075,7 @@ class IntentProcessor(Processor):
                 self.name,
                 entity_type,
                 self.resource_loader,
-                self.progress_bar
+                self.progress_bar,
             )
             self._children[entity_type] = processor
 
@@ -1103,7 +1105,7 @@ class IntentProcessor(Processor):
                 self.name,
                 entity_type,
                 self.resource_loader,
-                self.progress_bar
+                self.progress_bar,
             )
             self._children[entity_type] = processor
 
@@ -1388,8 +1390,15 @@ class EntityProcessor(Processor):
         role_classifier (RoleClassifier): The role classifier for this entity type.
     """
 
-    def __init__(self, app_path, domain, intent, entity_type,
-                 resource_loader=None, progress_bar=None):
+    def __init__(
+        self,
+        app_path,
+        domain,
+        intent,
+        entity_type,
+        resource_loader=None,
+        progress_bar=None,
+    ):
         """Initializes an entity processor object
 
         Args:
