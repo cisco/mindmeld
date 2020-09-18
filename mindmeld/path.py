@@ -528,7 +528,9 @@ def get_embedder_cache_file_path(app_path, embedder_type, model_name):
         (str) The path for the json cached of the embedded values.
     """
     return GEN_EMBEDDER_MODEL_PATH.format(
-        app_path=app_path, embedder_type=embedder_type, model_name=model_name,
+        app_path=app_path,
+        embedder_type=embedder_type,
+        model_name=model_name,
     )
 
 

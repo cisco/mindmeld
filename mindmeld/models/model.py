@@ -761,8 +761,7 @@ class SequenceModelEvaluation(ModelEvaluation):
 
 
 class EntityModelEvaluation(SequenceModelEvaluation):
-    """Generates some statistics specific to entity recognition
-    """
+    """Generates some statistics specific to entity recognition"""
 
     def _get_entity_boundary_stats(self):
         """
@@ -955,8 +954,10 @@ class Model:
         result = copy.deepcopy(params)
         for param in params:
             if param not in expected_params:
-                msg = "Unexpected param `{param}`, dropping it from model config.".format(
-                    param=param
+                msg = (
+                    "Unexpected param `{param}`, dropping it from model config.".format(
+                        param=param
+                    )
                 )
                 logger.warning(msg)
                 result.pop(param)
@@ -1267,7 +1268,7 @@ class EntityLabelEncoder(LabelEncoder):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
     def encode(self, labels, **kwargs):
-        """"Gets a list of joint app and system IOB tags from each query's entities.
+        """ "Gets a list of joint app and system IOB tags from each query's entities.
 
         Args:
             labels (list): A list of labels associated with each query

@@ -259,7 +259,7 @@ test_data_not_stemmed = [
 @pytest.mark.parametrize("query", test_data_not_stemmed)
 def test_nlp_for_non_stemmed_queries(kwik_e_mart_nlp, query):
     """Tests queries that are NOT in the training data but have their stemmed
-     versions in the training data"""
+    versions in the training data"""
     query_factory = QueryFactory.create_query_factory()
     stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
     assert query == stemmed_tokens[0]
@@ -277,7 +277,7 @@ test_data_need_stemming = [
 @pytest.mark.parametrize("query,stemmed_query", test_data_need_stemming)
 def test_nlp_for_stemmed_queries(kwik_e_mart_nlp, query, stemmed_query):
     """Tests queries that are NOT in the training data but have their stemmed
-     versions in the training data"""
+    versions in the training data"""
     query_factory = QueryFactory.create_query_factory()
     stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
     assert stemmed_query == stemmed_tokens[0]
@@ -289,7 +289,7 @@ test_data_stemmed = ["cancelled", "exited", "aborted"]
 @pytest.mark.parametrize("query", test_data_stemmed)
 def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
     """Tests queries that are NOT in the training data but have their stemmed
-     versions in the training data"""
+    versions in the training data"""
     response = kwik_e_mart_nlp.process(query)
     assert response["text"] == query
     assert response["domain"] == "store_info"

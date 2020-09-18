@@ -102,8 +102,7 @@ def get_label_encoder(config):
 
 
 def create_embedder_model(app_path, config):
-    """Creates and loads the embedder model.
-    """
+    """Creates and loads the embedder model."""
     embedder_config = config.get("model_settings", {})
     embedding_fields = embedder_config.get("embedding_fields", [])
     if len(embedding_fields) == 0:

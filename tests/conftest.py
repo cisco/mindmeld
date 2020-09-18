@@ -55,7 +55,9 @@ def lstm_entity_config():
             "feature_scaler": "max-abs",
         },
         "params": {"number_of_epochs": 1},
-        "features": {"in-gaz-span-seq": {},},
+        "features": {
+            "in-gaz-span-seq": {},
+        },
     }
 
 

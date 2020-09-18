@@ -43,7 +43,9 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {
+        "classifier_type": "logreg",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -181,7 +183,10 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
+                    "char_ngram": {
+                        "type": "text",
+                        "analyzer": "char_ngram_analyzer",
+                    },
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -267,7 +272,10 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {"type": "text", "analyzer": "english",},
+                            "processed_text": {
+                                "type": "text",
+                                "analyzer": "english",
+                            },
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",

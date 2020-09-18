@@ -66,7 +66,7 @@ def test_auto_fill_exit_flow(kwik_e_mart_app, qa_kwik_e_mart):
 @pytest.mark.conversation
 def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests flow switching from inside slot filling to another intent when
-        the number of retry attempts are exceeded."""
+    the number of retry attempts are exceeded."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
@@ -85,7 +85,7 @@ def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
 @pytest.mark.conversation
 def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests default validation when user input has no entities.
-        Check is to see that flow doesn't break."""
+    Check is to see that flow doesn't break."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
@@ -177,7 +177,7 @@ def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
     }
 
     def handler_sub(request, responder):
-        entity = next((e for e in request.entities if e['type'] == 'sys_number'), None)
+        entity = next((e for e in request.entities if e["type"] == "sys_number"), None)
 
         # Check custom resolution validity
         assert entity

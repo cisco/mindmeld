@@ -426,7 +426,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace, index_name, data_file, es_host, app_path=app_path,
+            app_namespace,
+            index_name,
+            data_file,
+            es_host,
+            app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
