@@ -1268,7 +1268,7 @@ class EntityLabelEncoder(LabelEncoder):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
     def encode(self, labels, **kwargs):
-        """ "Gets a list of joint app and system IOB tags from each query's entities.
+        """Gets a list of joint app and system IOB tags from each query's entities.
 
         Args:
             labels (list): A list of labels associated with each query
