@@ -235,7 +235,7 @@ class RoleClassifier(Classifier):
             logger.error("You must fit or load the model before running predict")
             return
         if len(self.roles) == 1:
-            return [(self.list(self.roles)[0], 1.0)]
+            return [(list(self.roles)[0], 1.0)]
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
