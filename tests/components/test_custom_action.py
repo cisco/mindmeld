@@ -142,7 +142,10 @@ def test_custom_action_no_merge():
         ]
         assert responder.frame == {"k2": "v2"}
         assert responder.slots == {"s2": "v2"}
-        assert tuple(responder.params.allowed_intents) == ("intent3", "intent4",)
+        assert tuple(responder.params.allowed_intents) == (
+            "intent3",
+            "intent4",
+        )
         assert responder.params.dynamic_resource == {"r2": "v2"}
         assert responder.params.target_dialogue_state == "some-state"
         assert responder.params.language == "some-language"

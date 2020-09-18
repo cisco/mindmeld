@@ -152,10 +152,10 @@ class ResourceLoader:
         Returns a sentiment analyzer and downloads the necessary data libraries required from nltk
         """
         try:
-            nltk.data.find('sentiment/vader_lexicon.zip')
+            nltk.data.find("sentiment/vader_lexicon.zip")
         except LookupError:
             logger.info("Downloading lexicon for sentiment analysis")
-            nltk.download('vader_lexicon')
+            nltk.download("vader_lexicon")
 
         return SentimentIntensityAnalyzer()
 
@@ -544,8 +544,8 @@ class ResourceLoader:
     def _build_char_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram character frequency dictionary of normalized query tokens
 
-           Args:
-               queries (list of Query): A list of all queries
+        Args:
+            queries (list of Query): A list of all queries
         """
         char_freq_dict = Counter()
         for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
@@ -562,8 +562,8 @@ class ResourceLoader:
     def _build_word_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram frequency dictionary of normalized query tokens
 
-           Args:
-               queries (list of Query): A list of all queries
+        Args:
+            queries (list of Query): A list of all queries
         """
         enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
         word_freq_dict = Counter()

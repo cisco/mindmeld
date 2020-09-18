@@ -324,8 +324,7 @@ class RasaConverter(Converter):
         self.create_directory(mindmeld_project_path + "/entities")
 
     def create_mindmeld_training_data(self):
-        """Method to transfer and reformat the training data in a Rasa Project
-        """
+        """Method to transfer and reformat the training data in a Rasa Project"""
         # read intents listed in domain.yml
         intents = self._read_intents()
 

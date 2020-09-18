@@ -229,7 +229,7 @@ class TextModel(Model):
         )
 
     def _get_feature_weight(self, feat_name, label_class):
-        """ Retrieves the feature weight from the coefficient matrix. If there are only two
+        """Retrieves the feature weight from the coefficient matrix. If there are only two
          classes, the feature vector is actually collapsed into one so we need some logic to
          handle that case.
 

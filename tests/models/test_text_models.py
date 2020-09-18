@@ -165,7 +165,9 @@ class TestTextModel:
                 "label_type": CLASS_LABEL_TYPE,
                 "model_settings": {"classifier_type": "logreg"},
                 "params": {"fit_intercept": True, "C": 100},
-                "features": {"bag-of-words": {"lengths": [1]},},
+                "features": {
+                    "bag-of-words": {"lengths": [1]},
+                },
             }
         )
         model = TextModel(config)

@@ -34,7 +34,7 @@ class Gazetteer:
         to the set of documents which contain them
       entities (list): A list of all entities
       sys_types (set): The set of nested numeric types for this entity
-     """
+    """
 
     def __init__(self, name, exclude_ngrams=False):
         """

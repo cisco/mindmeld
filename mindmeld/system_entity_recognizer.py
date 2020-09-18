@@ -74,7 +74,7 @@ class SystemEntityRecognizer(ABC):
 
     @staticmethod
     def get_instance():
-        """ Static access method. If there is no instance instantiated, we instantiate
+        """Static access method. If there is no instance instantiated, we instantiate
         NoOpSystemEntityRecognizer.
 
         Returns:
@@ -101,8 +101,8 @@ class SystemEntityRecognizer(ABC):
         ):
             SystemEntityRecognizer._instance = system_entity_recognizer
         elif app_path:
-            SystemEntityRecognizer._instance = SystemEntityRecognizer.load_from_app_path(
-                app_path
+            SystemEntityRecognizer._instance = (
+                SystemEntityRecognizer.load_from_app_path(app_path)
             )
         else:
             raise SystemEntityError(
@@ -245,7 +245,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
     @staticmethod
     def get_instance(url=None):
-        """ Static access method.
+        """Static access method.
         We get an instance for the Duckling URL. If there is no URL being passed,
           default to DEFAULT_DUCKLING_URL.
 
