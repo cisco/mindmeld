@@ -39,7 +39,7 @@ class Tokenizer:
 
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
-        self.config = get_tokenizer_config(app_path)
+        self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
         self._init_regex()
 
     def _init_regex(self):
@@ -48,66 +48,16 @@ class Tokenizer:
         """
         # List of regex's for matching and tokenizing when keep_special_chars=False
         regex_list = []
-        # List of regex's for matching and tokenizing when keep_special_chars=True
-        keep_special_regex_list = []
 
-        exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
-
-        # fetches all currency symbols in unicode
+        # fetches all currency symbols in unicode by iterating through the character set and
+        # selecting the currency symbols based on the unicode currency category 'Sc'
         currency_symbols = u"".join(
             chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
         )
-        to_exclude = currency_symbols + "".join(self.exclude_from_norm)
 
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
-        # Make keep special regex list
-        keep_special_regex_list.append(
-            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
-        )
-        keep_special_regex_list.append(
-            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
-        )
-        keep_special_regex_list.append(
-            "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
-            + letter_pattern_str
-            + ")"
-            + "[^\w\d\s&"  # noqa: W605
-            + exception_chars
-            + "]+(?=[\d]+)"  # noqa: W605
-        )
-        keep_special_regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
-            + exception_chars
-            + "]+"
-            + "u(?="
-            + letter_pattern_str
-            + ")"
-        )
-        keep_special_regex_list.append(
-            "?P<pattern3>(?P<pattern3_replace>"
-            + letter_pattern_str
-            + ")"  # noqa: W605
-            + "[^\w\d\s&"  # noqa: W605
-            + exception_chars
-            + "]+"
-            + "(?="  # noqa: W605
-            + letter_pattern_str
-            + ")"
-        )
-        keep_special_regex_list.append(
-            "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
-            + "[^\w\d\s"  # noqa: W605
-            + exception_chars
-            + "]+"
-            + "(?=\|)"  # noqa: W605
-        )
-        keep_special_regex_list.append(
-            "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
-            + "[^\w\d\s"  # noqa: W605
-            + exception_chars
-            + "]+(?=s)"
-        )
+        to_exclude = currency_symbols + "".join(self.exclude_from_norm)
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
@@ -132,27 +82,13 @@ class Tokenizer:
             + ")"
         )
 
-        # commonalities between lists
         regex_list.append("?P<underscore>_")  # noqa: W605
-        keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
-
         regex_list.append("?P<begspace>^\s+")  # noqa: W605
-        keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
-
         regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-        keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-
         regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-        keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-
-        keep_special_regex_list.append("?P<bar> '|' ")  # noqa: W605
         regex_list.append("?P<bar> '|' ")  # noqa: W605
-
-        keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
         regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
-
         # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-        keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
         regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
 
         # Replace lookup based on regex
@@ -174,22 +110,15 @@ class Tokenizer:
             "apostrophe": (" ", None),
         }
 
-        # Create a regular expression  from the dictionary keys
-        # and add app-specific regex config to the list if specified
+        # Create compiled regex expressions
+        self.keep_special_compiled = re.compile(
+            "(%s)"
+            % (
+                ")|(".join(self.config["allowed_patterns"]),
+            ),
+            re.UNICODE
+        )
 
-        if self.config["patterns"]:
-            self.keep_special_compiled = re.compile(
-                "((%s))&(%s)"
-                % (
-                    ")|(".join(keep_special_regex_list),
-                    ")|(".join(self.config["patterns"]),
-                ),
-                re.UNICODE,
-            )
-        else:
-            self.keep_special_compiled = re.compile(
-                "(%s)" % ")|(".join(keep_special_regex_list), re.UNICODE
-            )
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
     # Needed for train-roles where queries are deep copied (and thus tokenizer).
@@ -312,7 +241,6 @@ class Tokenizer:
                 norm_token_text = self.multiple_replace(
                     norm_token_text, self.keep_special_compiled
                 )
-                print(norm_token_text)
             else:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
@@ -335,7 +263,6 @@ class Tokenizer:
 
             raw_token["norm_token_start"] = norm_token_start
             raw_token["norm_token_count"] = norm_token_count
-
         return norm_tokens
 
     @staticmethod

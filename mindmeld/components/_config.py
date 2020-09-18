@@ -19,6 +19,7 @@ import imp
 import logging
 import os
 import warnings
+import unicodedata
 
 from .. import path
 from .request import validate_language_code, validate_locale_code
@@ -456,7 +457,8 @@ DEFAULT_NLP_CONFIG = {
 }
 
 DEFAULT_TOKENIZER_CONFIG = {
-    "patterns": [],
+    # populated in the `get_tokenizer_config` func
+    "allowed_patterns": [],
 }
 
 
@@ -918,19 +920,93 @@ def get_nlp_config(app_path=None, config=None):
     return _get_default_nlp_config()
 
 
-def get_tokenizer_config(app_path=None):
+def _get_default_regex(exclude_from_norm):
+    # List of regex's for matching and tokenizing when keep_special_chars=True
+    keep_special_regex_list = []
+
+    exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
+
+    # fetches all currency symbols in unicode by iterating through the character set and
+    # selecting the currency symbols based on the unicode currency category 'Sc'
+    currency_symbols = u"".join(
+        chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
+    )
+    to_exclude = currency_symbols + "".join(exclude_from_norm)
+
+    letter_pattern_str = "[^\W\d_]+"  # noqa: W605
+
+    # Make keep special regex list
+    keep_special_regex_list.append(
+        "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
+        + letter_pattern_str
+        + ")"
+        + "[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+(?=[\d]+)"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "u(?="
+        + letter_pattern_str
+        + ")"
+    )
+    keep_special_regex_list.append(
+        "?P<pattern3>(?P<pattern3_replace>"
+        + letter_pattern_str
+        + ")"  # noqa: W605
+        + "[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "(?="  # noqa: W605
+        + letter_pattern_str
+        + ")"
+    )
+    keep_special_regex_list.append(
+        "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
+        + "[^\w\d\s"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "(?=\|)"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
+        + "[^\w\d\s"  # noqa: W605
+        + exception_chars
+        + "]+(?=s)"
+    )
+
+    keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
+    keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
+    keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
+    keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
+    keep_special_regex_list.append("?P<bar> '|' ")  # noqa: W605
+    keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
+    # handle the apostrophes used at the end of a possessive form, e.g. dennis'
+    keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
+
+    return keep_special_regex_list
+
+
+def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     """Gets the tokenizer configuration for the app at the specified path.
 
     Args:
         app_path (str, optional): The location of the MindMeld app
-        config (dict, optional): A config object to use. This will
-            override the config specified by the app's config.py file.
-            If necessary, this object will be expanded to a fully
-            specified config object.
+        exclude_from_norm (list, optional): chars to exclude from normalization
 
     Returns:
         dict: The tokenizer configuration.
     """
+    DEFAULT_TOKENIZER_CONFIG["allowed_patterns"] = _get_default_regex(exclude_from_norm)
+
     if not app_path:
         return DEFAULT_TOKENIZER_CONFIG
     try:
