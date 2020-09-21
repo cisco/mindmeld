@@ -158,7 +158,7 @@ make it {72 degrees|sys_temperature|room_temperature} in {bathroom|location}
 make it {79 degrees|sys_temperature|room_temperature} in the {bedroom|location}
 change thermostat in the {kitchen|location} to {69|sys_temperature|room_temperature}
 set the thermostat in the {bedroom|location} to {80|sys_temperature|room_temperature}
-it s freezing bring the heat up to 70
+it s freezing bring the heat up to {70|sys_temperature|room_temperature}
 set the air conditioning to {65|sys_temperature|room_temperature}
 change the temperature to {65 degrees|sys_temperature|room_temperature}
 please change the thermostat setting to {68|sys_temperature|room_temperature} in the {family room|location}
