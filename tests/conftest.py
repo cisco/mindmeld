@@ -175,13 +175,14 @@ def duckling():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer, duckling):
+def query_factory(tokenizer, preprocessor, stemmer):
     """For creating queries"""
     return QueryFactory(
         tokenizer=tokenizer,
         preprocessor=preprocessor,
         stemmer=stemmer,
-        system_entity_recognizer=duckling,
+        system_entity_recognizer=None,
+        duckling=True,
     )
 
 
