@@ -48,6 +48,15 @@ click.disable_unicode_literals_warning = True
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "auto_envvar_prefix": "MM"}
 
+# deprecation warning for python 3.5
+if sys.version[:3] == "3.5":
+    deprecation_msg = (
+        "DEPRECATION: Python 3.5 reached end of life on 13 Sept 2020. MindMeld will deprecate"
+        " official support for Python 3.5 in the next release. Please consider migrating"
+        " your application to Python 3.6 and above."
+    )
+    logger.warning(deprecation_msg)
+
 
 def _version_msg():
     """Returns the MindMeld version, location and Python powering it."""
@@ -426,11 +435,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace,
-            index_name,
-            data_file,
-            es_host,
-            app_path=app_path,
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
