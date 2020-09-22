@@ -39,8 +39,8 @@ class QueryFactory:
         language (str): the language of the text
         locale (str): the locale of the text
         system_entity_recognizer (SystemEntityRecognizer): default to NoOpSystemEntityRecognizer
-        duckling (bool): if no system entity recognizer is initialized, this argument can be
-            used to initialize a new duckling recognizer instance.
+        duckling (bool): if no system entity recognizer is provided,
+            initialize a new Duckling recognizer instance.
     """
 
     def __init__(
@@ -169,8 +169,8 @@ class QueryFactory:
             stemmer (Stemmer, optional): The stemmer to use for stemming
             system_entity_recognizer (SystemEntityRecognizer): If not passed, we use either the one
                 from the application's configuration or NoOpSystemEntityRecognizer.
-            duckling (bool, optional): if no system entity recognizer is initialized, this argument
-                can be used to initialize a new duckling recognizer instance.
+            duckling (bool, optional): if no system entity recognizer is provided, 
+                 initialize a new Duckling recognizer instance.
 
         Returns:
             QueryFactory: A QueryFactory object that is used to create Query objects.
