@@ -17,6 +17,7 @@ This module contains the application manager
 import logging
 
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
+from .components._config import get_max_history_len
 from .components.dialogue import DialogueResponder
 from .components.request import FrozenParams, Params, Request
 from .resource_loader import ResourceLoader
@@ -65,7 +66,7 @@ class ApplicationManager:
             dialogue_manager (DialogueManager): The application's dialogue manager.
     """
 
-    MAX_HISTORY_LEN = 100
+    MAX_HISTORY_LEN = 10
     """The max number of turns in history."""
 
     def __init__(
@@ -104,6 +105,9 @@ class ApplicationManager:
         self.responder_class = responder_class or DialogueResponder
         self.dialogue_manager = DialogueManager(
             self.responder_class, async_mode=self.async_mode
+        )
+        self.max_history_len = (
+            get_max_history_len(self._app_path) or self.MAX_HISTORY_LEN
         )
 
     @property
@@ -285,7 +289,7 @@ class ApplicationManager:
 
         # limit length of history
         new_history = (prev_request,) + request.history
-        dm_response.history = new_history[: self.MAX_HISTORY_LEN]
+        dm_response.history = new_history[: self.max_history_len]
 
         # validate outgoing params
         dm_response.params.validate_param("allowed_intents")

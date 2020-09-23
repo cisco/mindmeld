@@ -7,6 +7,7 @@ User-defined features must follow the same format as MindMeld's in-built feature
 In this section, we will examine the components of a feature extractor function and
 explain how to write your own custom features.
 
+.. _custom_features:
 
 Custom Features File
 --------------------
@@ -78,7 +79,7 @@ Let's take a closer look at the salient parts of a feature extractor.
 
 .. code-block:: python
 
-    @register_query_feature(feature_name='average-token-length') 
+    @register_query_feature(feature_name='average-token-length')
 
 The ``feature_name`` parameter specifies the name by which the extractor will be referenced in the
 app's configuration file, ``config.py``. The feature name must be added as a key within the

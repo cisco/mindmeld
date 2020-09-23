@@ -667,15 +667,15 @@ class DialogueFlow(DialogueManager):
 
     async def _apply_flow_handler_async(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and sets the target dialogue
-       state to the flow state asynchronously.
+        state to the flow state asynchronously.
 
-       Args:
-           request (Request): The request object.
-           responder (DialogueResponder): The responder object.
+        Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
 
-       Returns:
-           (dict): A dict containing the dialogue state and directives.
-       """
+        Returns:
+            (dict): A dict containing the dialogue state and directives.
+        """
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -866,13 +866,26 @@ class AutoEntityFilling:
                 return False, _resolved_value
 
         if slot.custom_eval:
-            # Custom validation using function provided by developer. Should return True/False
-            # for validation status. If true, then continue, else fail overall validation.
+            # Custom validation using function provided by developer.
+            # Should return True/False/Custom Resolution value for validation status.
+            # If false, overall validation fails. If either true or a custom resolved
+            # value is returned, then the validation succeeds.
 
-            if not slot.custom_eval(request):
+            _validity = slot.custom_eval(request)
+            if _validity is False:
+                # For checking 'false' return cases
                 return False, _resolved_value
-            else:
-                extracted_feature.update({"custom_validated_entity": text})
+
+            if _validity is not True:
+                # For cases with custom resolution value return
+                if entity_type in DEFAULT_SYS_ENTITIES:
+                    # for custom system entity resolution
+                    _resolved_value = [{"value": _validity}]
+                else:
+                    # for custom gazetteer entity resolution
+                    _resolved_value = [{"cname": _validity}]
+
+            extracted_feature.update({"custom_validated_entity": text})
 
         # return True iff user input results in extracted features (i.e. successfully validated)
         return len(extracted_feature) > 0, _resolved_value
@@ -1019,7 +1032,7 @@ class AutoEntityFilling:
         Invoke slot-filling as a direct call without requiring a decorator.
         """
         # ensures that the slot-filling function is targeted.
-        kwargs = {'targeted_only': True}
+        kwargs = {"targeted_only": True}
 
         name = self._handler.__name__
 
@@ -1027,7 +1040,9 @@ class AutoEntityFilling:
             # sets a dialogue rule for the handler passed in this invoke call to iteratively call
             # the slot-filling flow till completion or exit. This rule is added temporarily for this
             # flow and reset for the handler with every new invoke call.
-            self._app.app_manager.dialogue_manager.add_dialogue_rule(name, self.__call__, **kwargs)
+            self._app.app_manager.dialogue_manager.add_dialogue_rule(
+                name, self.__call__, **kwargs
+            )
         except AssertionError:
             self._app.app_manager.dialogue_manager.handler_map[name] = self.__call__
 
@@ -1212,6 +1227,10 @@ class DialogueResponder:
         for attribute, value in vars(instance).items():
             if isinstance(value, (Params, Request, FrozenParams)):
                 serialized_obj[attribute] = DialogueResponder.to_json(value)
+            elif isinstance(value, tuple) and all(
+                isinstance(item, immutables.Map) for item in value
+            ):
+                serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             else:

@@ -386,6 +386,10 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 
 .. note::
 
+   To define your own features or custom versions of these in-built features, see :ref:`Working with User-Defined Features <custom_features>`.
+
+.. note::
+
   The LSTM model only supports the 'in-gaz-span-seq' feature since, for entity recognition tasks, it requires a minimal set of input features to achieve accuracies comparable to traditional models.
 
 .. _entity_tuning:

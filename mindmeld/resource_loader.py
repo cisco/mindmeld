@@ -22,6 +22,8 @@ import re
 import time
 from collections import Counter
 from copy import deepcopy
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from . import markup, path
 from .constants import DEFAULT_TRAIN_SET_REGEX
@@ -36,6 +38,7 @@ from .models.helpers import (
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     mask_numerics,
 )
 from .path import MODEL_CACHE_PATH
@@ -142,6 +145,19 @@ class ResourceLoader:
             tokenizer (Tokenizer): The resource loaders tokenizer
         """
         return self.query_factory.tokenizer
+
+    @staticmethod
+    def get_sentiment_analyzer():
+        """
+        Returns a sentiment analyzer and downloads the necessary data libraries required from nltk
+        """
+        try:
+            nltk.data.find("sentiment/vader_lexicon.zip")
+        except LookupError:
+            logger.info("Downloading lexicon for sentiment analysis")
+            nltk.download("vader_lexicon")
+
+        return SentimentIntensityAnalyzer()
 
     def get_gazetteers_hash(self):
         """
@@ -528,8 +544,8 @@ class ResourceLoader:
     def _build_char_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram character frequency dictionary of normalized query tokens
 
-           Args:
-               queries (list of Query): A list of all queries
+        Args:
+            queries (list of Query): A list of all queries
         """
         char_freq_dict = Counter()
         for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
@@ -546,8 +562,8 @@ class ResourceLoader:
     def _build_word_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram frequency dictionary of normalized query tokens
 
-           Args:
-               queries (list of Query): A list of all queries
+        Args:
+            queries (list of Query): A list of all queries
         """
         enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
         word_freq_dict = Counter()
@@ -698,6 +714,7 @@ class ResourceLoader:
         QUERY_FREQ_RSC: lambda _: "constant",
         SYS_TYPES_RSC: lambda _: "constant",
         ENABLE_STEMMING: lambda _: "constant",
+        SENTIMENT_ANALYZER: lambda _: "constant",
     }
 
 

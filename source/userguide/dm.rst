@@ -406,7 +406,7 @@ You can pass the entities, along with their popularity information as a ``dynami
    @app.handle(intent='place_order')
    def place_order(request, responder):
        restaurant_list = ['Extreme Pizza', 'Buca Di Beppo', 'Firetrail Pizza']
-       responder.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
+       responder.params.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
        prompt = "I found pizza at " + ', '.join(restaurant_list) + '. Where would you like to order from?'
        responder.prompt(prompt)
 
@@ -602,8 +602,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``value`` (str, optional): The resolved value of the entity.
   - ``default_eval`` (bool, optional): Use system validation (default: True).
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
-  - ``custom_eval`` (func, optional): Custom validation function (should return bool:
-    validated or not). For this function, the developer is provided with the current turn's ``request`` object.
+  - ``custom_eval`` (func, optional): Custom validation function (should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object.
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 

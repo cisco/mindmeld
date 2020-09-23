@@ -74,7 +74,7 @@ class SystemEntityRecognizer(ABC):
 
     @staticmethod
     def get_instance():
-        """ Static access method. If there is no instance instantiated, we instantiate
+        """Static access method. If there is no instance instantiated, we instantiate
         NoOpSystemEntityRecognizer.
 
         Returns:
@@ -101,8 +101,8 @@ class SystemEntityRecognizer(ABC):
         ):
             SystemEntityRecognizer._instance = system_entity_recognizer
         elif app_path:
-            SystemEntityRecognizer._instance = SystemEntityRecognizer.load_from_app_path(
-                app_path
+            SystemEntityRecognizer._instance = (
+                SystemEntityRecognizer.load_from_app_path(app_path)
             )
         else:
             raise SystemEntityError(
@@ -245,7 +245,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
     @staticmethod
     def get_instance(url=None):
-        """ Static access method.
+        """Static access method.
         We get an instance for the Duckling URL. If there is no URL being passed,
           default to DEFAULT_DUCKLING_URL.
 
@@ -661,9 +661,10 @@ def duckling_item_to_entity(item):
             # Some intervals will only contain one value. The other value will be None in that case
             value["value"] = _construct_interval_helper(item["value"])
             if "values" in item["value"]:
-                value["alternate_values"] = \
-                    [_construct_interval_helper(interval_item) for
-                     interval_item in item["value"]["values"]]
+                value["alternate_values"] = [
+                    _construct_interval_helper(interval_item)
+                    for interval_item in item["value"]["values"]
+                ]
 
         # Get the unit if it exists
         if "unit" in item["value"]:

@@ -66,7 +66,7 @@ def test_auto_fill_exit_flow(kwik_e_mart_app, qa_kwik_e_mart):
 @pytest.mark.conversation
 def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests flow switching from inside slot filling to another intent when
-        the number of retry attempts are exceeded."""
+    the number of retry attempts are exceeded."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
@@ -85,7 +85,7 @@ def test_auto_fill_switch_flow(kwik_e_mart_app, qa_kwik_e_mart):
 @pytest.mark.conversation
 def test_auto_fill_validation_missing_entities(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests default validation when user input has no entities.
-        Check is to see that flow doesn't break."""
+    Check is to see that flow doesn't break."""
     convo = Conversation(app=kwik_e_mart_app)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
@@ -149,6 +149,45 @@ def test_auto_fill_invoke(kwik_e_mart_app):
             for rule in list(app.app_manager.dialogue_manager.rules)
         ]
     )
+
+
+@pytest.mark.conversation
+def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
+    """Tests slot-filling's custom validation with custom resolution"""
+    app = kwik_e_mart_app
+    request = Request(
+        text="what is the sum of 5 and 15?",
+        domain="some domain",
+        intent="some intent",
+    )
+    responder = DialogueResponder()
+
+    # custom eval func
+    def test_custom_eval(r):
+        return 5 + 15
+
+    form = {
+        "entities": [
+            FormEntity(
+                entity="sys_number",
+                default_eval=False,
+                custom_eval=test_custom_eval,
+            )
+        ],
+    }
+
+    def handler_sub(request, responder):
+        entity = next((e for e in request.entities if e["type"] == "sys_number"), None)
+
+        # Check custom resolution validity
+        assert entity
+        assert entity["value"][0]["value"] == 20
+
+    @app.handle(domain="some domain", intent="some intent")
+    def handler(request, responder):
+        AutoEntityFilling(handler_sub, form, app).invoke(request, responder)
+
+    handler(request, responder)
 
 
 @pytest.mark.conversation

@@ -236,7 +236,7 @@ class Query:
     @property
     def locale(self):
         """The locale representing the ISO 639-1/2 language code and
-            ISO3166 alpha 2 country code separated by an underscore character."""
+        ISO3166 alpha 2 country code separated by an underscore character."""
         return self._locale
 
     @property
@@ -761,8 +761,9 @@ class FormEntity:
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
         user input against
-        custom_eval(func, optional): custom validation function (should return bool:
-        validated or not)
+        custom_eval(func, optional): custom validation function (should return either bool:
+        validated or not) or a custom resolved value for the entity. If custom resolved value
+        is returned, the slot response is considered to be valid.
     """
 
     def __init__(

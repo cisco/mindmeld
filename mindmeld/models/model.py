@@ -39,6 +39,7 @@ from .helpers import (
     ENABLE_STEMMING,
     ENTITIES_LABEL_TYPE,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     entity_seqs_equal,
     get_feature_extractor,
     get_label_encoder,
@@ -760,8 +761,7 @@ class SequenceModelEvaluation(ModelEvaluation):
 
 
 class EntityModelEvaluation(SequenceModelEvaluation):
-    """Generates some statistics specific to entity recognition
-    """
+    """Generates some statistics specific to entity recognition"""
 
     def _get_entity_boundary_stats(self):
         """
@@ -954,8 +954,10 @@ class Model:
         result = copy.deepcopy(params)
         for param in params:
             if param not in expected_params:
-                msg = "Unexpected param `{param}`, dropping it from model config.".format(
-                    param=param
+                msg = (
+                    "Unexpected param `{param}`, dropping it from model config.".format(
+                        param=param
+                    )
                 )
                 logger.warning(msg)
                 result.pop(param)
@@ -1190,6 +1192,8 @@ class Model:
         for rname in required_resources:
             if rname == ENABLE_STEMMING:
                 continue
+            if rname == SENTIMENT_ANALYZER:
+                self._resources[rname] = resource_loader.get_sentiment_analyzer()
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(
                     rname
@@ -1264,7 +1268,7 @@ class EntityLabelEncoder(LabelEncoder):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
     def encode(self, labels, **kwargs):
-        """"Gets a list of joint app and system IOB tags from each query's entities.
+        """Gets a list of joint app and system IOB tags from each query's entities.
 
         Args:
             labels (list): A list of labels associated with each query
@@ -1295,6 +1299,10 @@ class EntityLabelEncoder(LabelEncoder):
             list: A list of decoded labels per query
         """
         # TODO: support decoding multiple queries at once
+        if not hasattr(self, "system_entity_recognizer"):
+            # app built with older version of MM (< 4.3) does not save label encoder with system
+            # entity recognizer
+            self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
         examples = kwargs["examples"]
         labels = [
             get_entities_from_tags(examples[idx], tags, self.system_entity_recognizer)

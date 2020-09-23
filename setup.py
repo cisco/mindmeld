@@ -10,7 +10,7 @@ with open("README.md") as readme_file:
 requirements = [
     "aiohttp>=3.6.2",
     "attrs>=18.2",  # attrs has a stable API and does not use semver
-    "Click~=6.0",
+    "Click~=7.1",
     "click-log==0.1.8",
     "distro~=1.3",
     "elasticsearch>=5.0",
@@ -40,7 +40,7 @@ setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
 
 test_requirements = [
     "flake8==3.5.0",
-    "pylint==1.6.5",
+    "pylint~=2.5.3",
     "pytest==3.8.0",
     "pytest-cov==2.4.0",
     "pytest-asyncio==0.8.0",
@@ -56,7 +56,9 @@ setup(
     author="Cisco Systems, Inc.",
     author_email="contact@mindmeld.com",
     url="https://github.com/cisco/mindmeld",
-    packages=["mindmeld",],
+    packages=[
+        "mindmeld",
+    ],
     package_dir={"mindmeld": "mindmeld"},
     entry_points={"console_scripts": ["mindmeld=mindmeld.cli:cli"]},
     include_package_data=True,
@@ -89,6 +91,8 @@ setup(
             'sentence-transformers~=0.2.6; python_version>="3.6"',
             "elasticsearch>=7.0",
         ],
-        "examples": ['connexion>=2.7.0; python_version>="3.6"',],
+        "examples": [
+            'connexion>=2.7.0; python_version>="3.6"',
+        ],
     },
 )

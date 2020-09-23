@@ -197,7 +197,12 @@ class TestMaxInstancesParser:
 class TestParserLinkWords:
     """A set of tests for a parser with link words"""
 
-    CONFIG = {"dish": {"option": {"linking_words": {"with"}}, "size": {},}}
+    CONFIG = {
+        "dish": {
+            "option": {"linking_words": {"with"}},
+            "size": {},
+        }
+    }
 
     @classmethod
     def setup_class(cls):

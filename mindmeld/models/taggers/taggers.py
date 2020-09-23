@@ -448,7 +448,10 @@ class BoundaryCounts:
 
 def _get_tag_label(token):
     """Splits a token into its tag and label."""
-    tag, label, = token.split("|")
+    (
+        tag,
+        label,
+    ) = token.split("|")
     return tag, label
 
 
@@ -470,16 +473,14 @@ def _all_O(entity):
 
 
 def _is_boundary_error(pred_entity, exp_entity):
-    """Returns true if the predicted and expected entity form a boundary error
-    """
+    """Returns true if the predicted and expected entity form a boundary error"""
     trimmed_pred_entity = [token[1] for token in pred_entity if token[0] == B_TAG]
     trimmed_exp_entity = [token[1] for token in exp_entity if token[0] == B_TAG]
     return trimmed_pred_entity == trimmed_exp_entity
 
 
 def _new_tag(last_entity, curr_tag):
-    """Returns true if the current tag is different than the tag of the last entity
-    """
+    """Returns true if the current tag is different than the tag of the last entity"""
     if len(last_entity) < 1 or not curr_tag:
         return False
     elif (
@@ -516,8 +517,7 @@ def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
 
 
 def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts):
-    """Gets the boundary counts for the expected and predicted sequence of entities.
-    """
+    """Gets the boundary counts for the expected and predicted sequence of entities."""
     # Initialize values
     in_coding_region = False
     start = True
