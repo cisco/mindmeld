@@ -120,6 +120,7 @@ Contents
    userguide/custom_action
    userguide/internationalization
    userguide/voice
+   userguide/dvc
    integrations/webex_teams
    integrations/whatsapp
 
