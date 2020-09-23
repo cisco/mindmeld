@@ -63,6 +63,12 @@ def test_nlp_process_for_roles(home_assistant_nlp, example, role_type):
     assert result["confidences"]["roles"][1]
 
 
+def test_single_role_label(home_assistant_nlp):
+    "Testing for a single role type if only one type is annotated"
+    result = home_assistant_nlp.process("turn it to 70 degrees")
+    assert result["entities"][0]["role"] == "room_temperature"
+
+
 def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_app_path):
     # clear model cache
     model_cache_path = MODEL_CACHE_PATH.format(app_path=home_assistant_app_path)

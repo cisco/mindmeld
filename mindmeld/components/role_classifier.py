@@ -208,6 +208,8 @@ class RoleClassifier(Classifier):
         if not self._model:
             logger.error("You must fit or load the model before running predict")
             return
+        if len(self.roles) == 1:
+            return list(self.roles)[0]
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -232,6 +234,8 @@ class RoleClassifier(Classifier):
         if not self._model:
             logger.error("You must fit or load the model before running predict")
             return
+        if len(self.roles) == 1:
+            return [(list(self.roles)[0], 1.0)]
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -313,7 +317,7 @@ class RoleClassifier(Classifier):
                     labels.append(entity.entity.role)
 
         unique_labels = set(labels)
-        if len(unique_labels) == 1:
+        if len(unique_labels) == 0:
             # No roles
             return (), ()
         if None in unique_labels:
