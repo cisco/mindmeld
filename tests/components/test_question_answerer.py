@@ -127,6 +127,8 @@ def test_basic_search(answerer):
     res = answerer.get(index="store_name", store_name="peanut", address="peanut st")
     assert len(res) > 0
 
+    # check that score is included in response
+    assert res[0].get('_score') is not None
 
 def test_basic_relative_search(relative_answerer):
     """Test basic search."""
