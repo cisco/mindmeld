@@ -545,7 +545,7 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="Needed to locate the application config file.",
+    "--app-path", required=True, help="The application's path.",
 )
 def annotate(app_path):
     """Runs the annotation command of the Auto Annotator."""
