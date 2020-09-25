@@ -26,6 +26,7 @@ from .helpers import (
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
+    SENTIMENT_ANALYZER,
     get_ngram,
     mask_numerics,
     register_query_feature,
@@ -36,8 +37,7 @@ from .helpers import (
 @register_query_feature(feature_name="in-gaz-span-seq")
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_span_features(**kwargs):
-    """Returns a feature extractor for properties of spans in gazetteers
-    """
+    """Returns a feature extractor for properties of spans in gazetteers"""
     del kwargs
 
     def _extractor(query, resources):
@@ -208,8 +208,7 @@ def extract_in_gaz_span_features(**kwargs):
 @register_query_feature(feature_name="in-gaz-ngram-seq")
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_ngram_features(**kwargs):
-    """Returns a feature extractor for surrounding ngrams in gazetteers
-    """
+    """Returns a feature extractor for surrounding ngrams in gazetteers"""
     del kwargs
 
     def _extractor(query, resources):
@@ -402,8 +401,10 @@ def extract_bag_of_words_features(
                         stemmed_n_gram = get_ngram(
                             stemmed_tokens, i + int(start), int(length)
                         )
-                        stemmed_feat_name = "bag_of_words_stemmed|length:{}|word_pos:{}".format(
-                            length, start
+                        stemmed_feat_name = (
+                            "bag_of_words_stemmed|length:{}|word_pos:{}".format(
+                                length, start
+                            )
                         )
                         if (
                             resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1)
@@ -446,8 +447,7 @@ def char_ngrams(n, word, **kwargs):
 @register_query_feature(feature_name="enable-stemming")
 @requires(ENABLE_STEMMING)
 def enabled_stemming(**kwargs):
-    """Feature extractor for enabling stemming of the query
-    """
+    """Feature extractor for enabling stemming of the query"""
     del kwargs
 
     def _extractor(query, resources):
@@ -465,15 +465,15 @@ def extract_char_ngrams_features(
 ):
     """Returns a character n-gram feature extractor.
 
-        Args:
-            ngram_lengths_to_start_positions (dict):
-            The window of tokens to be considered relative to the
-            current token while extracting char n-grams
-            thresholds (int): Cut off value to include word in n-gram vocab
+    Args:
+        ngram_lengths_to_start_positions (dict):
+        The window of tokens to be considered relative to the
+        current token while extracting char n-grams
+        thresholds (int): Cut off value to include word in n-gram vocab
 
-        Returns:
-            (function) The feature extractor.
-        """
+    Returns:
+        (function) The feature extractor.
+    """
     del kwargs
     threshold_list = list(thresholds)
     char_thresholds = threshold_list + [0] * (
@@ -499,8 +499,10 @@ def extract_char_ngrams_features(
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
                         if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 1) > threshold:
-                            feat_name = "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
-                                length, start, j
+                            feat_name = (
+                                "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
+                                    length, start, j
+                                )
                             )
                             feat_seq[i][feat_name] = c_gram
                 threshold_index += 1
@@ -530,8 +532,10 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
             for i in entity.token_span:
                 for j in start_positions:
                     if 0 <= i - j < len(feat_seq):
-                        feat_name = "sys_candidate|type:{}|granularity:{}|pos:{}".format(
-                            entity.entity.type, entity.entity.value.get("grain"), j
+                        feat_name = (
+                            "sys_candidate|type:{}|granularity:{}|pos:{}".format(
+                                entity.entity.type, entity.entity.value.get("grain"), j
+                            )
                         )
                         feat_seq[i - j][feat_name] = 1
                         feat_name = "sys_candidate|type:{}|granularity:{}|pos:{}|log_len".format(
@@ -563,14 +567,14 @@ def update_features_sequence(feat_seq, update_feat_seq, **kwargs):
 def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
     """Extract character ngrams of specified lengths.
 
-        Args:
-            lengths (list of int): The ngram length.
-            thresholds (list of int): frequency cut off value to include ngram in vocab
+    Args:
+        lengths (list of int): The ngram length.
+        thresholds (list of int): frequency cut off value to include ngram in vocab
 
-        Returns:
-            (function) An feature extraction function that takes a query and
-                returns character ngrams of specified lengths.
-        """
+    Returns:
+        (function) An feature extraction function that takes a query and
+            returns character ngrams of specified lengths.
+    """
     del kwargs
     threshold_list = list(thresholds)
     char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
@@ -987,6 +991,33 @@ def extract_query_string(scaling=1000, **kwargs):
                 return {"exact|query:{}".format(stemmed_query_key): scaling}
 
         return {"exact|query:{}".format("<OOV>"): scaling}
+
+    return _extractor
+
+
+@register_query_feature(feature_name="sentiment")
+@requires(SENTIMENT_ANALYZER)
+def extract_sentiment(analyzer="composite", **kwargs):
+    """Generates sentiment intensity scores for each query
+
+    Returns:
+        (function) A feature extraction function that takes in a query and \
+            returns sentiment values across positive, negative and neutral
+
+    """
+    del kwargs
+
+    def _extractor(query, resources):
+        text = query.text
+        sentiment_scores = resources[SENTIMENT_ANALYZER].polarity_scores(text)
+        if analyzer == "composite":
+            return {"sentiment|composite": sentiment_scores["compound"]}
+        else:
+            return {
+                "sentiment|positive": sentiment_scores["pos"],
+                "sentiment|negative": sentiment_scores["neg"],
+                "sentiment|neutral": sentiment_scores["neu"],
+            }
 
     return _extractor
 

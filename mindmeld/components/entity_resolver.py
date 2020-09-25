@@ -79,7 +79,9 @@ class EntityResolver:
         if self._is_system_entity:
             canonical_entities = []
         else:
-            canonical_entities = self._resource_loader.get_entity_map(self.type).get("entities", [])
+            canonical_entities = self._resource_loader.get_entity_map(self.type).get(
+                "entities", []
+            )
         self._no_canonical_entity_map = len(canonical_entities) == 0
 
     @property
@@ -310,8 +312,7 @@ class EntityResolver:
         return {"items": item_map, "synonyms": syn_map}
 
     def _fit_exact_match(self):
-        """Fits a simple exact match entity resolution model when Elasticsearch is not available.
-        """
+        """Fits a simple exact match entity resolution model when Elasticsearch is not available."""
         entity_map = self._resource_loader.get_entity_map(self.type)
         self._exact_match_mapping = self._process_entity_map(
             self.type, entity_map, self._normalizer

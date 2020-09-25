@@ -16,7 +16,7 @@ class TestDefaultController(BaseTestCase):
     def test_invoke_action(self):
         """Test case for invoke_action
 
-        Invoke an action 
+        Invoke an action
         """
         data = Data()
         response = self.client.open(

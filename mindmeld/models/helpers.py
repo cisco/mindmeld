@@ -41,6 +41,7 @@ ENABLE_STEMMING = "enable-stemming"
 WORD_FREQ_RSC = "w_freq"
 WORD_NGRAM_FREQ_RSC = "w_ngram_freq"
 CHAR_NGRAM_FREQ_RSC = "c_ngram_freq"
+SENTIMENT_ANALYZER = "vader_classifier"
 OUT_OF_BOUNDS_TOKEN = "<$>"
 DEFAULT_SYS_ENTITIES = [
     "sys_time",
@@ -101,8 +102,7 @@ def get_label_encoder(config):
 
 
 def create_embedder_model(app_path, config):
-    """Creates and loads the embedder model.
-    """
+    """Creates and loads the embedder model."""
     embedder_config = config.get("model_settings", {})
     embedding_fields = embedder_config.get("embedding_fields", [])
     if len(embedding_fields) == 0:

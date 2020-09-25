@@ -8,8 +8,16 @@ from immutables import Map
 
 @pytest.fixture
 def sample_request():
+    dict_list = [{"key": "value"}, {"key": "value"}, {"key": "value"}]
     return Request(
-        domain="some_domain", intent="some_intent", entities=(), text="some_text"
+        domain="some_domain",
+        intent="some_intent",
+        entities=(dict_list),
+        text="some_text",
+        history=(dict_list),
+        nbest_transcripts_text=(dict_list),
+        nbest_transcripts_entities=(dict_list),
+        nbest_aligned_entities=(dict_list),
     )
 
 
@@ -26,6 +34,13 @@ def test_intent(sample_request):
 def test_entities(sample_request):
     with pytest.raises(FrozenInstanceError):
         sample_request.entities = ("some_entity",)
+    assert_tuple_of_immutable_maps(sample_request.entities)
+
+
+def test_history(sample_request):
+    for x in sample_request.history:
+        assert isinstance(x, Map)
+    assert_tuple_of_immutable_maps(sample_request.history)
 
 
 def test_text(sample_request):
@@ -54,12 +69,24 @@ def test_nbest(sample_request):
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_text = ["some_text"]
+    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_text)
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_transcripts_entities = [{"key": "value"}]
+    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
 
     with pytest.raises(FrozenInstanceError):
         sample_request.nbest_aligned_entities = [{"key": "value"}]
+    assert_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
+
+
+def assert_tuple_of_immutable_maps(tuple_of_immutable_maps):
+    for idx, immutable_map in enumerate(tuple_of_immutable_maps):
+        with pytest.raises(TypeError):
+            tuple_of_immutable_maps[idx] = {"key": "value"}
+        assert isinstance(immutable_map, Map)
+        with pytest.raises(TypeError):
+            immutable_map["key"] = "value"
 
 
 def test_immutability_of_sample_request_and_params():

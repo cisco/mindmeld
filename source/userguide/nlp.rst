@@ -789,3 +789,27 @@ The saved models can then be loaded anytime using the :meth:`NaturalLanguageProc
    ...
 
 Another option is to save just one specific NLP model, which is useful when you are actively experimenting with individual classifiers and want to checkpoint your work or save multiple model versions for comparison. This is done using the :meth:`dump` and :meth:`load` methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.
+
+
+Tracking classifier progress
+----------------------------
+
+Training the NLU pipeline can be time-consuming depending on the number of models to be trained and the number of training examples for each of them. The following code snippet shows how you can do progress tracking while building your application. The progress bar will display the fraction of models that have been trained at any given time.
+
+.. code:: python
+
+   import mindmeld
+   import logging
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   from tqdm import tqdm
+
+   # Setting the logging level to ERROR prevents the tqdm progress bar from interleaving
+   # with other logging messages that are written to stdout.
+   mindmeld.configure_logs(level=logging.ERROR)
+
+   # Make sure the total parameter starts at 0 since the classifiers will increment the total as
+   # they get initialized
+   pbar = tqdm(total=0, desc="NLP progress")
+   nlp = NaturalLanguageProcessor(app_path='banking_assistant', progress_bar=pbar)
+   nlp.build()
+

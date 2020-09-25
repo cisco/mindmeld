@@ -406,7 +406,7 @@ You can pass the entities, along with their popularity information as a ``dynami
    @app.handle(intent='place_order')
    def place_order(request, responder):
        restaurant_list = ['Extreme Pizza', 'Buca Di Beppo', 'Firetrail Pizza']
-       responder.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
+       responder.params.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
        prompt = "I found pizza at " + ', '.join(restaurant_list) + '. Where would you like to order from?'
        responder.prompt(prompt)
 

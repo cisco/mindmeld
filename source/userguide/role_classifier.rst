@@ -254,6 +254,10 @@ Let's take a look at the allowed values for each setting in a role classifier co
   | ``'other-entities'``      | Encodes information about the other entities present in the query than the current one.                    |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
 
+.. note::
+
+   To define your own features or custom versions of these in-built features, see :ref:`Working with User-Defined Features <custom_features>`.
+
 .. _role_tuning:
 
 3. **Hyperparameter Settings**

@@ -378,6 +378,27 @@ Let's take a look at the allowed values for each setting in an intent classifier
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
+  | ``'sentiment'``       | Generates a feature or a set of features to representing the intensity of positive, negative or neutral    |
+  |                       | sentiment in the query.                                                                                    |
+  |                       |                                                                                                            |
+  |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | The type of measurement required. If unspecified, a single score will be computed to measure sentiment.    |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'analyzer': 'composite'}``                                                                              |
+  |                       | - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to   |
+  |                       |   +1 (extreme positive).                                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'analyzer': 'discrete'}``                                                                               |
+  |                       | - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative) |
+  |                       |   such that their values add up to 1.                                                                      |
+  +-----------------------+------------------------------------------------------------------------------------------------------------+
+
+.. note::
+
+   To define your own features or custom versions of these in-built features, see :ref:`Working with User-Defined Features <custom_features>`.
 
 .. _intent_tuning:
 
