@@ -27,12 +27,12 @@ import sys
 import time
 import warnings
 
+from shutil import which
 import click
 import click_log
 import distro
 import requests
 from tqdm import tqdm
-from shutil import which
 
 from . import markup, path
 from ._util import blueprint
@@ -57,7 +57,7 @@ if sys.version_info < (3, 6):
         " your application to Python 3.6 and above."
     )
     logger.warning(deprecation_msg)
-    
+
 DVC_INIT_ERROR_MESSAGE = "you are not inside of a DVC repository"
 DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
 
