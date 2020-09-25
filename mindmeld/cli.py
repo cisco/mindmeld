@@ -41,7 +41,13 @@ from .components import Conversation, QuestionAnswerer
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
+from .path import (
+    MODEL_CACHE_PATH,
+    QUERY_CACHE_PATH,
+    QUERY_CACHE_TMP_PATH,
+    get_generated_data_folder,
+    get_dvc_local_remote_path,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +127,7 @@ def _bash_helper(command_list):
     :param command_list: Bash command formatted as a list, no spaces in each element
     :return: True if no errors, False + error string otherwise
     """
-    p = subprocess.Popen(
-        command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    p = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, error = p.communicate()
     error_string = error.decode("utf-8")
 
@@ -135,17 +139,19 @@ def _bash_helper(command_list):
 
 @_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option("--init", is_flag=True, required=False,
-              help="Instantiate DVC within a repository")
-@click.option("--save", is_flag=True, required=False,
-              help="Save built models using dvc")
-@click.option("--checkout_hash", required=False, help="Instantiate DVC within a repository")
-def dvc(ctx, init, save, checkout_hash):
+@click.option(
+    "--init", is_flag=True, required=False, help="Instantiate DVC within a repository"
+)
+@click.option(
+    "--save", is_flag=True, required=False, help="Save built models using dvc"
+)
+@click.option("--checkout", required=False, help="Instantiate DVC within a repository")
+def dvc(ctx, init, save, checkout):
     app = ctx.obj.get("app")
     app_path = app.app_path
 
     # Ensure that DVC is installed
-    if not which('dvc'):
+    if not which("dvc"):
         logger.error(
             "DVC is not installed. You can install DVC by running 'pip install dvc'"
         )
@@ -158,7 +164,7 @@ def dvc(ctx, init, save, checkout_hash):
             return
 
         # Set up a local remote
-        local_remote_path = os.path.join(app_path, "dvc_local_remote")
+        local_remote_path = get_dvc_local_remote_path(app_path)
         success, error_string = _bash_helper(
             ["dvc", "remote", "add", "-d", "myremote", local_remote_path]
         )
@@ -179,7 +185,7 @@ def dvc(ctx, init, save, checkout_hash):
             "The newly generated dvc config file (.dvc/config) has been added to git staging"
         )
     elif save:
-        generated_model_folder = os.path.join(app_path, ".generated")
+        generated_model_folder = get_generated_data_folder(app_path)
 
         success, error_string = _dvc_add_helper(generated_model_folder)
         if not success:
@@ -203,22 +209,20 @@ def dvc(ctx, init, save, checkout_hash):
             "The newly generated .dvc file (%s/.generated.dvc) has been added to git staging",
             app_path,
         )
-    elif checkout_hash:
-        success, error_string = _bash_helper(
-            ["git", "checkout", checkout_hash]
-        )
+    elif checkout:
+        success, error_string = _bash_helper(["git", "checkout", checkout])
         if not success:
             logger.error("Error during git checkout: %s", error_string)
             return
 
-        success, error_string = _bash_helper(
-            ["dvc", "pull"]
-        )
+        success, error_string = _bash_helper(["dvc", "pull"])
         if not success:
             logger.error("Error during dvc checkout: %s", error_string)
             return
 
-        logger.info("Successfully checked out models corresponding to hash %s", checkout_hash)
+        logger.info(
+            "Successfully checked out models corresponding to hash %s", checkout
+        )
 
 
 @_app_cli.command("run", context_settings=CONTEXT_SETTINGS)
