@@ -129,7 +129,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 |                                   | language processor                                                              |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`history`                   | List of previous and current responder objects (de-serialized) upto the         |
-|                                   | current conversation                                                            |
+|                                   | current conversation, currently up to a maximum default of 100 turns.           |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`text`                      | The query text, as passed in the request                                        |
 +-----------------------------------+---------------------------------------------------------------------------------+
@@ -150,6 +150,10 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`nbest_aligned_entities`    | List of lists of aligned entities for each of the n-best transcripts            |
 +-----------------------------------+---------------------------------------------------------------------------------+
+
+.. note::
+   The developer can set the maximum number of turn to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
+
 
 ``params``
 ^^^^^^^^^^
@@ -205,7 +209,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 | :data:`slots`         | A dictionary containing key, value pairs used to fill NLR responses            |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`history`       | List of previous and current responder objects (de-serialized) upto the        |
-|                       | current conversation                                                           |
+|                       | current conversation, currently up to a maximum default of 100 turns.          |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`request`       | A reference to the immutable request object for the current turn               |
 +-----------------------+--------------------------------------------------------------------------------+
@@ -216,6 +220,9 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 |                       | methods described in the next table. WARNING: Do not directly modify this      |
 |                       | list, use the directive methods detailed below instead.                        |
 +-----------------------+--------------------------------------------------------------------------------+
+
+.. note::
+   The developer can set the maximum number of turn to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
 
 The table below details the ``responder`` methods to send actions, also termed ``directives``, back to the client. You can invoke more than one directive method in a handler, but note that they are executed on a first-in-first-out basis. Internally, the following methods append dictionary-type payloads to the ``directives`` attribute of the ``responder`` object.
 
@@ -774,11 +781,13 @@ Alternatively, the standalone call to this feature can be called independently o
 
 .. note::
    
-    * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order. 
-    .. |br|
+    * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
+
+.. note::
 
     * All entities that are required by the slot-filling form for an intent should be covered through example queries in the training files for that intent.
-    .. |br|    
+
+.. note::
    
     * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer :ref:`here <entity_recognition>`. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
 
