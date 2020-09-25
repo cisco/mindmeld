@@ -19,10 +19,10 @@ import imp
 import logging
 import os
 import warnings
-import unicodedata
 
 from .. import path
 from .request import validate_language_code, validate_locale_code
+from ..constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -921,17 +921,20 @@ def get_nlp_config(app_path=None, config=None):
 
 
 def _get_default_regex(exclude_from_norm):
+    """Gets the default special character regex for the Tokenizer config.
+
+    Args:
+        exclude_from_norm (optional) - list of chars to exclude from normalization
+
+    Returns:
+        list: default special character regex list
+    """
     # List of regex's for matching and tokenizing when keep_special_chars=True
     keep_special_regex_list = []
 
     exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
 
-    # fetches all currency symbols in unicode by iterating through the character set and
-    # selecting the currency symbols based on the unicode currency category 'Sc'
-    currency_symbols = u"".join(
-        chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
-    )
-    to_exclude = currency_symbols + "".join(exclude_from_norm)
+    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm)
 
     letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
@@ -987,7 +990,7 @@ def _get_default_regex(exclude_from_norm):
     keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
     keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
     keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-    keep_special_regex_list.append("?P<bar> '|' ")  # noqa: W605
+    keep_special_regex_list.append("?P<apos_space> '|' ")  # noqa: W605
     keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
     # handle the apostrophes used at the end of a possessive form, e.g. dennis'
     keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605

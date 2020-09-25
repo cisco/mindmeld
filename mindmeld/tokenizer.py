@@ -16,10 +16,10 @@
 import codecs
 import logging
 import re
-import unicodedata
 
 from .path import ASCII_FOLDING_DICT_PATH
 from .components._config import get_tokenizer_config
+from .constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +49,9 @@ class Tokenizer:
         # List of regex's for matching and tokenizing when keep_special_chars=False
         regex_list = []
 
-        # fetches all currency symbols in unicode by iterating through the character set and
-        # selecting the currency symbols based on the unicode currency category 'Sc'
-        currency_symbols = u"".join(
-            chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
-        )
-
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
-        to_exclude = currency_symbols + "".join(self.exclude_from_norm)
+        to_exclude = CURRENCY_SYMBOLS + "".join(self.exclude_from_norm)
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
@@ -86,7 +80,7 @@ class Tokenizer:
         regex_list.append("?P<begspace>^\s+")  # noqa: W605
         regex_list.append("?P<trailspace>\s+$")  # noqa: W605
         regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-        regex_list.append("?P<bar> '|' ")  # noqa: W605
+        regex_list.append("?P<apos_space> '|' ")  # noqa: W605
         regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
         # handle the apostrophes used at the end of a possessive form, e.g. dennis'
         regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
@@ -95,7 +89,7 @@ class Tokenizer:
         self.replace_lookup = {
             "apos_s": (" 's", None),
             "apos_poss": ("", None),
-            "bar": (" ", None),
+            "apos_space": (" ", None),
             "begspace": ("", None),
             "end": (" ", None),
             "escape1": ("{0}", "escape1_replace"),
@@ -181,7 +175,9 @@ class Tokenizer:
             return compiled.sub(self._one_xlat, text)
         except KeyError:
             # In case of custom/app-specific tokenizer configuration
-            return text
+            logger.info("Using custom tokenizer configuration.")
+            re_str = compiled.findall(text)
+            return "".join(re_str)
 
     def normalize(self, text, keep_special_chars=True):
         """
@@ -438,6 +434,10 @@ class Tokenizer:
     @staticmethod
     def create_tokenizer(app_path=None):
         """Creates the tokenizer for the app
+
+        Args:
+            app_path (str, optional): MindMeld Application Path
+
         Returns:
             Tokenizer: a tokenizer
         """
