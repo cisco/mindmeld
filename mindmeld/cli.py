@@ -32,6 +32,7 @@ import click_log
 import distro
 import requests
 from tqdm import tqdm
+from shutil import which
 
 from . import markup, path
 from ._util import blueprint
@@ -108,8 +109,28 @@ def _dvc_add_helper(filepath):
         return False, DVC_INIT_HELP
     elif DVC_ADD_DOES_NOT_EXIST_MESSAGE in error_string:
         return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=filepath)
+    elif error_string:
+        return False, error_string
     else:
         return True, None
+
+
+def _bash_helper(command_list):
+    """
+    Helper for running bash using subprocess and error handling
+    :param command_list: Bash command formatted as a list, no spaces in each element
+    :return: True if no errors, False + error string otherwise
+    """
+    p = subprocess.Popen(
+        command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    _, error = p.communicate()
+    error_string = error.decode("utf-8")
+
+    if error_string:
+        return False, error_string
+
+    return True, None
 
 
 @_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
@@ -123,34 +144,33 @@ def dvc(ctx, init, save, checkout_hash):
     app = ctx.obj.get("app")
     app_path = app.app_path
 
-    if init:
-        p = subprocess.Popen(
-            ["dvc", "init"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    # Ensure that DVC is installed
+    if not which('dvc'):
+        logger.error(
+            "DVC is not installed. You can install DVC by running 'pip install dvc'"
         )
-        _, error = p.communicate()
-        error_string = error.decode("utf-8")
+        return
 
-        if error_string:
+    if init:
+        success, error_string = _bash_helper(["dvc", "init"])
+        if not success:
             logger.error("Error during initialization: %s", error_string)
             return
 
         # Set up a local remote
         local_remote_path = os.path.join(app_path, "dvc_local_remote")
-        p = subprocess.Popen(
-            ["dvc", "remote", "add", "-d", "myremote", local_remote_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "add", "-d", "myremote", local_remote_path]
         )
-        _, error = p.communicate()
-        error_string = error.decode("utf-8")
-
-        if error_string:
+        if not success:
             logger.error("Error during local remote set up: %s", error_string)
             return
 
-        subprocess.Popen(
-            ["git", "add", ".dvc/config"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        # Add DVC config file to staging
+        success, error_string = _bash_helper(["git", "add", ".dvc/config"])
+        if not success:
+            logger.error("Error while adding dvc config file: %s", error_string)
+            return
 
         logger.info(
             "Instantiated DVC repo and set up local remote in %s", local_remote_path
@@ -166,13 +186,17 @@ def dvc(ctx, init, save, checkout_hash):
             logger.error("Error during saving: %s", error_string)
             return
 
-        subprocess.Popen(["dvc", "push"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        success, error_string = _bash_helper(["dvc", "push"])
+        if not success:
+            logger.error("Error during dvc push: %s", error_string)
+            return
 
-        subprocess.Popen(
-            ["git", "add", "{}/.generated.dvc".format(app_path)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        success, error_string = _bash_helper(
+            ["git", "add", "{}/.generated.dvc".format(app_path)]
         )
+        if not success:
+            logger.error("Error adding model dvc file: %s", error_string)
+            return
 
         logger.info("Successfully added .generated model folder to dvc")
         logger.info(
@@ -180,17 +204,17 @@ def dvc(ctx, init, save, checkout_hash):
             app_path,
         )
     elif checkout_hash:
-        p = subprocess.Popen(
-            ["git", "checkout", checkout_hash], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        success, error_string = _bash_helper(
+            ["git", "checkout", checkout_hash]
         )
-        p.wait()
-        p = subprocess.Popen(
-            ["dvc", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        _, error = p.communicate()
-        error_string = error.decode("utf-8")
+        if not success:
+            logger.error("Error during git checkout: %s", error_string)
+            return
 
-        if error_string:
+        success, error_string = _bash_helper(
+            ["dvc", "pull"]
+        )
+        if not success:
             logger.error("Error during dvc checkout: %s", error_string)
             return
 
