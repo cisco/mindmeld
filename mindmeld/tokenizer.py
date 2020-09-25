@@ -16,6 +16,7 @@
 import codecs
 import logging
 import re
+import sre_constants
 
 from .path import ASCII_FOLDING_DICT_PATH
 from .components._config import get_tokenizer_config
@@ -105,13 +106,19 @@ class Tokenizer:
         }
 
         # Create compiled regex expressions
-        self.keep_special_compiled = re.compile(
-            "(%s)"
-            % (
-                ")|(".join(self.config["allowed_patterns"]),
-            ),
-            re.UNICODE
-        )
+        try:
+            self.keep_special_compiled = re.compile(
+                "(%s)"
+                % (
+                    ")|(".join(self.config["allowed_patterns"]),
+                ),
+                re.UNICODE
+            )
+        except sre_constants.error:
+            logger.error(
+                "Custom regex compilation failed for the following patterns: %s",
+                ")|(".join(self.config["allowed_patterns"])
+            )
 
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
