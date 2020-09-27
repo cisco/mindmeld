@@ -606,7 +606,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``role`` (str, optional): The role of the entity.
   - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
   - ``retry_response`` (list or str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
-  - ``value`` (str, optional): The resolved value of the entity. (read note below for maintaining this value in a session).
+  - ``value`` (str, optional): The resolved value of the entity. (read :ref:`note <session_note>` for maintaining this value in a session).
   - ``default_eval`` (bool, optional): Use system validation (default: True).
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
   - ``custom_eval`` (func, optional): Custom validation function (should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object.
@@ -791,7 +791,9 @@ Alternatively, the standalone call to this feature can be called independently o
 
     * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer :ref:`here <entity_recognition>`. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
 
-    * When using the slot-filling flow repeatedly, the form is reset in every turn. In order to maintain values in the form across a session with multiple calls to this flow, the ``value`` attribute in the ``FormEntity`` object for the slot can be updated with a pre-defined value or a user-input value at an initial iteration of the form.
+    .. _session_note:
+
+    * **Maintaining slot values in a session:** When using the slot-filling flow repeatedly, the form is reset in every turn. In order to maintain values in the form across a session with multiple calls to this flow, the ``value`` attribute in the ``FormEntity`` object for the slot can be updated with a pre-defined value or a user-input value at an initial iteration of the form.
 
 
 .. _dialogue_middleware:
