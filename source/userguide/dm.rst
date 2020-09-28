@@ -129,7 +129,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 |                                   | language processor                                                              |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`history`                   | List of previous and current responder objects (de-serialized) upto the         |
-|                                   | current conversation, up to a maximum of 100 turns by default.           |
+|                                   | current conversation, up to a maximum of 100 turns by default.                  |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`text`                      | The query text, as passed in the request                                        |
 +-----------------------------------+---------------------------------------------------------------------------------+
@@ -209,7 +209,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 | :data:`slots`         | A dictionary containing key, value pairs used to fill NLR responses            |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`history`       | List of previous and current responder objects (de-serialized) upto the        |
-|                       | current conversation, currently up to a maximum of 100 turns by default.          |
+|                       | current conversation, currently up to a maximum of 100 turns by default.       |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`request`       | A reference to the immutable request object for the current turn               |
 +-----------------------+--------------------------------------------------------------------------------+
@@ -601,7 +601,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
    <br />
 
 - ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
-  
+
   - ``entity`` (str, required): Entity name.
   - ``role`` (str, optional): The role of the entity.
   - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
@@ -641,7 +641,7 @@ For the use case of transferring money in a banking assistant application, the f
             FormEntity(
                 entity='sys_amount-of-money',
                 responses=['And, how much do you want to transfer?'],
-                custom_eval=test_for_money # validates the user-response for this entity 
+                custom_eval=test_for_money # validates the user-response for this entity
                 ),                         # using this custom developer-defined function
                                            # checking for '$' sign.
             ],
@@ -705,7 +705,7 @@ Let's consider the previous example. Now, instead of a single pass form to captu
                 ),
             FormEntity(
                 entity='sys_amount-of-money',
-                responses=['And, how much do you want to transfer?'], 
+                responses=['And, how much do you want to transfer?'],
                 ),
             ],
         'max_retries': 1,
@@ -780,7 +780,7 @@ Alternatively, the standalone call to this feature can be called independently o
                     )
 
 .. note::
-   
+
     * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
 
 .. note::
@@ -788,7 +788,7 @@ Alternatively, the standalone call to this feature can be called independently o
     * All entities that are required by the slot-filling form for an intent should be covered through example queries in the training files for that intent.
 
 .. note::
-   
+
     * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer :ref:`here <entity_recognition>`. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
 
 
