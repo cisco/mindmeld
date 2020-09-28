@@ -129,7 +129,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 |                                   | language processor                                                              |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`history`                   | List of previous and current responder objects (de-serialized) upto the         |
-|                                   | current conversation, currently up to a maximum default of 100 turns.           |
+|                                   | current conversation, up to a maximum of 100 turns by default.           |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`text`                      | The query text, as passed in the request                                        |
 +-----------------------------------+---------------------------------------------------------------------------------+
@@ -152,7 +152,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 +-----------------------------------+---------------------------------------------------------------------------------+
 
 .. note::
-   The developer can set the maximum number of turn to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
+   The developer can set the maximum number of turns to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
 
 
 ``params``
@@ -209,7 +209,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 | :data:`slots`         | A dictionary containing key, value pairs used to fill NLR responses            |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`history`       | List of previous and current responder objects (de-serialized) upto the        |
-|                       | current conversation, currently up to a maximum default of 100 turns.          |
+|                       | current conversation, currently up to a maximum of 100 turns by default.          |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`request`       | A reference to the immutable request object for the current turn               |
 +-----------------------+--------------------------------------------------------------------------------+
@@ -222,7 +222,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 +-----------------------+--------------------------------------------------------------------------------+
 
 .. note::
-   The developer can set the maximum number of turn to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
+   The developer can set the maximum number of turns to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
 
 The table below details the ``responder`` methods to send actions, also termed ``directives``, back to the client. You can invoke more than one directive method in a handler, but note that they are executed on a first-in-first-out basis. Internally, the following methods append dictionary-type payloads to the ``directives`` attribute of the ``responder`` object.
 
