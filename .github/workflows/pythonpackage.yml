@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.6, 3.7]
         mm-extras: ["true", "false"]
         es_version: [5.6.16, 6.8.10, 7.7.1]
 
     steps:
     - uses: actions/checkout@v2
-  
+
     - uses: nyaruka/elasticsearch-action@v1
       with:
         elastic version: ${{ matrix.es_version }}
@@ -35,13 +35,13 @@ jobs:
         architecture: x64 # (x64 or x86) - defaults to x64
       env:
         MM_EXTRAS: ${{ matrix.mm-extras }}
-    
+
     - name: Install dependencies
       run: |
         ./scripts/py_dep_install.sh
       env:
         MM_EXTRAS: ${{ matrix.mm-extras }}
-        
+
     - name: Linting
       run: |
         ./lintme
@@ -54,13 +54,14 @@ jobs:
       uses: jakejarvis/wait-action@master
       with:
         time: '30s'
-    
+
     - name: Test with pytest
       run: |
         mkdir ~/test-reports
         pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld --ignore=examples/
       env:
         MM_EXTRAS: ${{ matrix.mm-extras }}
+        MM_SUBPROCESS_COUNT: 0
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2

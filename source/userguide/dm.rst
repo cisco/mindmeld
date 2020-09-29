@@ -129,7 +129,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 |                                   | language processor                                                              |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`history`                   | List of previous and current responder objects (de-serialized) upto the         |
-|                                   | current conversation                                                            |
+|                                   | current conversation, up to a maximum of 100 turns by default.                  |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`text`                      | The query text, as passed in the request                                        |
 +-----------------------------------+---------------------------------------------------------------------------------+
@@ -150,6 +150,10 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`nbest_aligned_entities`    | List of lists of aligned entities for each of the n-best transcripts            |
 +-----------------------------------+---------------------------------------------------------------------------------+
+
+.. note::
+   The developer can set the maximum number of turns to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
+
 
 ``params``
 ^^^^^^^^^^
@@ -205,7 +209,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 | :data:`slots`         | A dictionary containing key, value pairs used to fill NLR responses            |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`history`       | List of previous and current responder objects (de-serialized) upto the        |
-|                       | current conversation                                                           |
+|                       | current conversation, currently up to a maximum of 100 turns by default.       |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`request`       | A reference to the immutable request object for the current turn               |
 +-----------------------+--------------------------------------------------------------------------------+
@@ -216,6 +220,9 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 |                       | methods described in the next table. WARNING: Do not directly modify this      |
 |                       | list, use the directive methods detailed below instead.                        |
 +-----------------------+--------------------------------------------------------------------------------+
+
+.. note::
+   The developer can set the maximum number of turns to keep by setting the ``MAX_HISTORY_LEN`` field inside ``config.py``.
 
 The table below details the ``responder`` methods to send actions, also termed ``directives``, back to the client. You can invoke more than one directive method in a handler, but note that they are executed on a first-in-first-out basis. Internally, the following methods append dictionary-type payloads to the ``directives`` attribute of the ``responder`` object.
 
@@ -406,7 +413,7 @@ You can pass the entities, along with their popularity information as a ``dynami
    @app.handle(intent='place_order')
    def place_order(request, responder):
        restaurant_list = ['Extreme Pizza', 'Buca Di Beppo', 'Firetrail Pizza']
-       responder.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
+       responder.params.dynamic_resource['gazetteers'] = {'restaurant': dict((restaurant, 1.0) for restaurant in restaurant_list)}
        prompt = "I found pizza at " + ', '.join(restaurant_list) + '. Where would you like to order from?'
        responder.prompt(prompt)
 
@@ -594,12 +601,12 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
    <br />
 
 - ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
-  
+
   - ``entity`` (str, required): Entity name.
   - ``role`` (str, optional): The role of the entity.
   - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
   - ``retry_response`` (list or str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
-  - ``value`` (str, optional): The resolved value of the entity.
+  - ``value`` (str, optional): The resolved value of the entity. (Read :ref:`note <session_note>` for maintaining this value in the same session.)
   - ``default_eval`` (bool, optional): Use system validation (default: True).
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
   - ``custom_eval`` (func, optional): Custom validation function (should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object.
@@ -634,7 +641,7 @@ For the use case of transferring money in a banking assistant application, the f
             FormEntity(
                 entity='sys_amount-of-money',
                 responses=['And, how much do you want to transfer?'],
-                custom_eval=test_for_money # validates the user-response for this entity 
+                custom_eval=test_for_money # validates the user-response for this entity
                 ),                         # using this custom developer-defined function
                                            # checking for '$' sign.
             ],
@@ -698,7 +705,7 @@ Let's consider the previous example. Now, instead of a single pass form to captu
                 ),
             FormEntity(
                 entity='sys_amount-of-money',
-                responses=['And, how much do you want to transfer?'], 
+                responses=['And, how much do you want to transfer?'],
                 ),
             ],
         'max_retries': 1,
@@ -772,14 +779,43 @@ Alternatively, the standalone call to this feature can be called independently o
                         "Your {account} account balance is ${amount:.2f}"
                     )
 
+.. _session_note:
+
+Maintaining slot values in a session
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When using the slot-filling flow repeatedly, the form is reset in every turn. In order to maintain values in the form across a session with multiple calls to this flow, the ``value`` attribute in the ``FormEntity`` object for the slot can be updated with a pre-defined value or a user-input value at an initial iteration of the form. As an example, if the user asks for their balance of a particular account type, the ``value`` attribute can be populated with this response. Henceforth for all balance check inquiries by the user the app will show details for the same account without reprompting:
+
+.. code:: python
+
+  balance_form = {
+    'entities': [
+        FormEntity(
+            entity="account_type",
+            responses=["Sure. For which account - checkings, savings, or credit?"],
+            )
+        ],
+    'max_retries': 1,
+    'exit_keys': ['cancel', 'quit', 'exit'],
+    'exit_msg': "Sorry I cannot help you. Please try again."
+    }
+
+  @app.auto_fill(intent="check_balances", form=balance_form)
+  def check_balance(request, responder):
+      for entity in request.entities:
+            if entity["type"] == "account_type":
+                balance_form['entities'][0].value = entity["value"][0]["cname"]
+      ...
+
 .. note::
-   
-    * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order. 
-    .. |br|
+
+    * The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
+
+.. note::
 
     * All entities that are required by the slot-filling form for an intent should be covered through example queries in the training files for that intent.
-    .. |br|    
-   
+
+.. note::
+
     * For better training the entity recognizer corresponding to the slot-filling intent, a separate training file ``train_label_set`` covering examples of the entities to be captured by the form can be defined. You can find more details about defining this file and modifying the entity recognizer :ref:`here <entity_recognition>`. This also allows intent and domain classifiers to be trained independently of such queries and learn appropriate context.
 
 

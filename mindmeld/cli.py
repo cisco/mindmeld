@@ -48,6 +48,15 @@ click.disable_unicode_literals_warning = True
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "auto_envvar_prefix": "MM"}
 
+# deprecation warning for python 3.5
+if sys.version_info < (3, 6):
+    deprecation_msg = (
+        "DEPRECATION: Python 3.5 reached end of life on 13 Sept 2020. MindMeld will deprecate"
+        " official support for Python 3.5 in the next release. Please consider migrating"
+        " your application to Python 3.6 and above."
+    )
+    logger.warning(deprecation_msg)
+
 
 def _version_msg():
     """Returns the MindMeld version, location and Python powering it."""

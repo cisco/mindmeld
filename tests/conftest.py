@@ -55,7 +55,9 @@ def lstm_entity_config():
             "feature_scaler": "max-abs",
         },
         "params": {"number_of_epochs": 1},
-        "features": {"in-gaz-span-seq": {},},
+        "features": {
+            "in-gaz-span-seq": {},
+        },
     }
 
 
@@ -173,13 +175,14 @@ def duckling():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer, duckling):
+def query_factory(tokenizer, preprocessor, stemmer):
     """For creating queries"""
     return QueryFactory(
         tokenizer=tokenizer,
         preprocessor=preprocessor,
         stemmer=stemmer,
-        system_entity_recognizer=duckling,
+        system_entity_recognizer=None,
+        duckling=True,
     )
 
 

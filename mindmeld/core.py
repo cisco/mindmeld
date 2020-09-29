@@ -236,7 +236,7 @@ class Query:
     @property
     def locale(self):
         """The locale representing the ISO 639-1/2 language code and
-            ISO3166 alpha 2 country code separated by an underscore character."""
+        ISO3166 alpha 2 country code separated by an underscore character."""
         return self._locale
 
     @property

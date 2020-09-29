@@ -667,15 +667,15 @@ class DialogueFlow(DialogueManager):
 
     async def _apply_flow_handler_async(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and sets the target dialogue
-       state to the flow state asynchronously.
+        state to the flow state asynchronously.
 
-       Args:
-           request (Request): The request object.
-           responder (DialogueResponder): The responder object.
+        Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
 
-       Returns:
-           (dict): A dict containing the dialogue state and directives.
-       """
+        Returns:
+            (dict): A dict containing the dialogue state and directives.
+        """
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:

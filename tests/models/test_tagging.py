@@ -283,7 +283,11 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
         },
         "params": params,
         "features": {
-            "bag-of-words-seq": {"ngram_lengths_to_start_positions": {1: [0],}},
+            "bag-of-words-seq": {
+                "ngram_lengths_to_start_positions": {
+                    1: [0],
+                }
+            },
         },
     }
     er = (
@@ -319,7 +323,11 @@ def test_lstm_er_model_no_tf(kwik_e_mart_nlp):
             "token_lstm_hidden_state_dimension": 200,
         },
         "features": {
-            "bag-of-words-seq": {"ngram_lengths_to_start_positions": {1: [0],}},
+            "bag-of-words-seq": {
+                "ngram_lengths_to_start_positions": {
+                    1: [0],
+                }
+            },
         },
     }
     er = (
@@ -354,7 +362,11 @@ def test_lstm_er_model(kwik_e_mart_nlp):
             "token_lstm_hidden_state_dimension": 200,
         },
         "features": {
-            "bag-of-words-seq": {"ngram_lengths_to_start_positions": {1: [0],}},
+            "bag-of-words-seq": {
+                "ngram_lengths_to_start_positions": {
+                    1: [0],
+                }
+            },
         },
     }
     er = (

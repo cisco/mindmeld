@@ -118,7 +118,12 @@ def test_dialogue_state_rule_exception():
     rule2 = DialogueStateRule(
         dialogue_state="some-state", has_entities=["entity_2", "entity_3"]
     )
-    assert rule2.entity_types == frozenset(("entity_2", "entity_3",))
+    assert rule2.entity_types == frozenset(
+        (
+            "entity_2",
+            "entity_3",
+        )
+    )
 
     with pytest.raises(ValueError):
         DialogueStateRule(
@@ -144,7 +149,7 @@ class TestDialogueManager:
 
     def test_default(self, dm):
         """Default dialogue state when no rules match
-           This will select the rule with default=True"""
+        This will select the rule with default=True"""
         request = create_request("other", "other")
         response = create_responder(request)
         result = dm.apply_handler(request, response)

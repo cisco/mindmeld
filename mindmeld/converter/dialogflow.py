@@ -130,7 +130,7 @@ class DialogflowConverter(Converter):
     # =========================
 
     def _create_entities_directories(self, entities):
-        """ Creates directories + files for all languages/files.
+        """Creates directories + files for all languages/files.
         Currently does not use meta data in entityName.json files (the keys in var entities).
         """
         for languages in entities.values():
@@ -307,13 +307,13 @@ class DialogflowConverter(Converter):
         target_train.close()
 
     def _get_file_names(self, level):
-        """ Gets the names of the entities from Dialogflow as a dictionary.
+        """Gets the names of the entities from Dialogflow as a dictionary.
         levels (str): either "entities" or "intents"
 
         ex. if we had the following files in our entities directory:
             ["test.json", "test_entries_en.json", "test_entries_de.json"]
         it returns:
-            {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
+            {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}}"""
 
         directory = os.path.join(self.dialogflow_project_directory, level)
         files = os.listdir(directory)
@@ -361,7 +361,7 @@ class DialogflowConverter(Converter):
         return name
 
     def clean_check(self, name, lst):
-        """ Takes in a list of strings and a name.
+        """Takes in a list of strings and a name.
         Returns name cleaned if the cleaned name is not found in lst."""
         cleaned = self.clean_name(name)
 
@@ -464,7 +464,9 @@ class DialogflowConverter(Converter):
                 )
             else:
                 self.code_gen.generate_function(
-                    handle=handle, function_name=function_name, replies=replies,
+                    handle=handle,
+                    function_name=function_name,
+                    replies=replies,
                 )
 
     # =========================
@@ -472,7 +474,7 @@ class DialogflowConverter(Converter):
     # =========================
 
     def convert_project(self):
-        """ Converts a Dialogflow project into a MindMeld project.
+        """Converts a Dialogflow project into a MindMeld project.
 
         Dialogflow projects consist of entities and intents.
             note on languages:
