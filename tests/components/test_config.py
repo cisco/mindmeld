@@ -16,6 +16,7 @@ from mindmeld.components._config import (
     get_classifier_config,
     get_custom_action_config,
     get_max_history_len,
+    get_tokenizer_config,
 )
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -161,3 +162,12 @@ def test_max_history_len_config(food_ordering_app_path):
     actual = get_max_history_len(food_ordering_app_path)
 
     assert actual == 5
+
+
+def test_tokenizer_config(food_ordering_app_path):
+    actual = get_tokenizer_config(food_ordering_app_path)
+
+    expected = {"allowed_patterns": ['\w+\.', '\{.*\|.*\}']}  # noqa: W605
+
+    assert "allowed_patterns" in actual
+    assert actual == expected
