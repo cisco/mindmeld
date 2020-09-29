@@ -80,7 +80,7 @@ class TestDialogueManager:
     @pytest.mark.asyncio
     async def test_default(self, dm):
         """Default dialogue state when no rules match
-           This will select the rule with default=True"""
+        This will select the rule with default=True"""
         request = create_request("other", "other")
         result = await dm.apply_handler(request, create_responder(request))
         assert result.dialogue_state == "default"

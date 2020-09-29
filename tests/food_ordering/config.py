@@ -30,7 +30,9 @@ INTENT_MODEL_CONFIG = {
 DOMAIN_MODEL_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 10,},
+    "params": {
+        "C": 10,
+    },
     "features": {
         "bag-of-words": {"lengths": [1, 2]},
         "edge-ngrams": {"lengths": [1, 2]},
@@ -41,5 +43,11 @@ DOMAIN_MODEL_CONFIG = {
         "average-token-length": {},  # Custom feature
     },
 }
+
+
+TOKENIZER_CONFIG = {
+    "allowed_patterns": ['\w+\.', '\{.*\|.*\}'],  # noqa: W605
+}
+
 
 MAX_HISTORY_LEN = 5

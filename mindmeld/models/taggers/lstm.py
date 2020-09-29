@@ -313,7 +313,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         return return_dict
 
     def _construct_embedding_network(self):
-        """ Constructs a network based on the word embedding and gazetteer
+        """Constructs a network based on the word embedding and gazetteer
         inputs and concatenates them together
 
         Returns:
@@ -355,7 +355,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         return combined_embedding_tf
 
     def apply_convolution(self, input_tensor, batch_size, char_window_size):
-        """ Constructs a convolution network of a specific window size
+        """Constructs a convolution network of a specific window size
 
         Args:
             input_tensor (tensor): The input tensor to the network
@@ -422,7 +422,11 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         )
 
         char_convolution_bias = tf.Variable(
-            tf.random_normal([self.word_level_character_embedding_size,])
+            tf.random_normal(
+                [
+                    self.word_level_character_embedding_size,
+                ]
+            )
         )
 
         char_convolution_bias = tf.tile(char_convolution_bias, [self.padding_length])
@@ -441,7 +445,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         return word_level_char_embedding
 
     def _define_optimizer_and_cost(self):
-        """ This function defines the optimizer and cost function of the LSTM model
+        """This function defines the optimizer and cost function of the LSTM model
 
         Returns:
             AdamOptimizer, Tensor: The optimizer function to reduce loss and the loss values
@@ -476,7 +480,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         return optimizer_tf, cost_tf
 
     def _calculate_score(self, output_arr, label_arr, seq_lengths_arr):
-        """ This function calculates the sequence score of all the queries,
+        """This function calculates the sequence score of all the queries,
         that is, the total number of queries where all the tags are predicted
         correctly.
 
@@ -601,7 +605,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         return lstm_cell
 
     def _construct_lstm_network(self, input_tensor):
-        """ This function constructs the Bi-Directional LSTM network
+        """This function constructs the Bi-Directional LSTM network
 
         Args:
             input_tensor (Tensor): Input tensor to the LSTM network

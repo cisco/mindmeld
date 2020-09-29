@@ -41,7 +41,9 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 ## Quick Start
 
-Assuming you have pip installed with Python 3.5, Python 3.6 or Python 3.7 and Elasticsearch running in the background:
+> :warning: Python 3.5 reached end of life on 13 Sept 2020. MindMeld will deprecate official support for Python 3.5 in the next release. 
+
+Assuming you have pip installed with Python 3.5 (deprecated), Python 3.6 or Python 3.7 and Elasticsearch running in the background:
 
 ```
 pip install mindmeld

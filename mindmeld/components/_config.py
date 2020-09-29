@@ -22,6 +22,7 @@ import warnings
 
 from .. import path
 from .request import validate_language_code, validate_locale_code
+from ..constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,9 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {
+        "classifier_type": "logreg",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -181,7 +184,10 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
+                    "char_ngram": {
+                        "type": "text",
+                        "analyzer": "char_ngram_analyzer",
+                    },
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -267,7 +273,10 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {"type": "text", "analyzer": "english",},
+                            "processed_text": {
+                                "type": "text",
+                                "analyzer": "english",
+                            },
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -453,6 +462,11 @@ DEFAULT_NLP_CONFIG = {
         "type": DUCKLING_SERVICE_NAME,
         "url": DEFAULT_DUCKLING_URL,
     },
+}
+
+DEFAULT_TOKENIZER_CONFIG = {
+    # populated in the `get_tokenizer_config` func
+    "allowed_patterns": [],
 }
 
 
@@ -912,3 +926,105 @@ def get_nlp_config(app_path=None, config=None):
         pass
 
     return _get_default_nlp_config()
+
+
+def _get_default_regex(exclude_from_norm):
+    """Gets the default special character regex for the Tokenizer config.
+
+    Args:
+        exclude_from_norm (optional) - list of chars to exclude from normalization
+
+    Returns:
+        list: default special character regex list
+    """
+    # List of regex's for matching and tokenizing when keep_special_chars=True
+    keep_special_regex_list = []
+
+    exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
+
+    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm or [])
+
+    letter_pattern_str = "[^\W\d_]+"  # noqa: W605
+
+    # Make keep special regex list
+    keep_special_regex_list.append(
+        "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
+        + letter_pattern_str
+        + ")"
+        + "[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+(?=[\d]+)"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "u(?="
+        + letter_pattern_str
+        + ")"
+    )
+    keep_special_regex_list.append(
+        "?P<pattern3>(?P<pattern3_replace>"
+        + letter_pattern_str
+        + ")"  # noqa: W605
+        + "[^\w\d\s&"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "(?="  # noqa: W605
+        + letter_pattern_str
+        + ")"
+    )
+    keep_special_regex_list.append(
+        "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
+        + "[^\w\d\s"  # noqa: W605
+        + exception_chars
+        + "]+"
+        + "(?=\|)"  # noqa: W605
+    )
+    keep_special_regex_list.append(
+        "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
+        + "[^\w\d\s"  # noqa: W605
+        + exception_chars
+        + "]+(?=s)"
+    )
+
+    keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
+    keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
+    keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
+    keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
+    keep_special_regex_list.append("?P<apos_space> '|' ")  # noqa: W605
+    keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
+    # handle the apostrophes used at the end of a possessive form, e.g. dennis'
+    keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
+
+    return keep_special_regex_list
+
+
+def get_tokenizer_config(app_path=None, exclude_from_norm=None):
+    """Gets the tokenizer configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+        exclude_from_norm (list, optional): chars to exclude from normalization
+
+    Returns:
+        dict: The tokenizer configuration.
+    """
+    DEFAULT_TOKENIZER_CONFIG["allowed_patterns"] = _get_default_regex(exclude_from_norm)
+
+    if not app_path:
+        return DEFAULT_TOKENIZER_CONFIG
+    try:
+        tokenizer_config = getattr(
+            _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
+        )
+        return tokenizer_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_TOKENIZER_CONFIG
