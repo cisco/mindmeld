@@ -176,7 +176,7 @@ class QueryFactory:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
         language, locale = get_language_config(app_path)
-        tokenizer = tokenizer or Tokenizer.create_tokenizer()
+        tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
         stemmer = stemmer or get_language_stemmer(language_code=language)
         if system_entity_recognizer:
             sys_entity_recognizer = system_entity_recognizer

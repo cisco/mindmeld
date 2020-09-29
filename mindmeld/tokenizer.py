@@ -16,8 +16,11 @@
 import codecs
 import logging
 import re
+import sre_constants
 
 from .path import ASCII_FOLDING_DICT_PATH
+from .components._config import get_tokenizer_config
+from .constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +31,7 @@ class Tokenizer:
 
     _ASCII_CUTOFF = ord("\u0080")
 
-    def __init__(self, exclude_from_norm=None):
+    def __init__(self, app_path=None, exclude_from_norm=None):
         """Initializes the tokenizer.
 
         Args:
@@ -37,6 +40,7 @@ class Tokenizer:
 
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
+        self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
         self._init_regex()
 
     def _init_regex(self):
@@ -45,65 +49,10 @@ class Tokenizer:
         """
         # List of regex's for matching and tokenizing when keep_special_chars=False
         regex_list = []
-        # List of regex's for matching and tokenizing when keep_special_chars=True
-        keep_special_regex_list = []
-
-        exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
-
-        # This is more of a tactical fix at this moment. Will probably need a more generic way
-        # to handle all currency symbols.
-        currency_symbols = "$¥"
-        to_exclude = currency_symbols + "".join(self.exclude_from_norm)
 
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
-        # Make keep special regex list
-        keep_special_regex_list.append(
-            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<pattern1>(?P<pattern1_replace>"
-            + letter_pattern_str  # noqa: W605
-            + ")"
-            + "[^\w\d\s&"
-            + exception_chars
-            + "]+(?=[\d]+)"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"
-            + exception_chars  # noqa: W605
-            + "]+"
-            + "u(?="
-            + letter_pattern_str
-            + ")"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<pattern3>(?P<pattern3_replace>"
-            + letter_pattern_str
-            + ")"  # noqa: W605
-            + "[^\w\d\s&"
-            + exception_chars
-            + "]+"
-            + "(?="  # noqa: W605
-            + letter_pattern_str
-            + ")"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<escape1>(?P<escape1_replace>[\w\d]+)"
-            + "[^\w\d\s"  # noqa: W605
-            + exception_chars
-            + "]+"
-            + "(?=\|)"
-        )  # noqa: W605
-        keep_special_regex_list.append(
-            "?P<escape2>(?P<escape2_replace>[\]\}]+)"
-            + "[^\w\d\s"  # noqa: W605
-            + exception_chars
-            + "]+(?=s)"
-        )  # noqa: W605
+        to_exclude = CURRENCY_SYMBOLS + "".join(self.exclude_from_norm)
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
@@ -112,13 +61,13 @@ class Tokenizer:
             "?P<pattern1>(?P<pattern1_replace>"
             + letter_pattern_str
             + ")"  # noqa: W605
-            + "[^\w\d\s&]+(?=[\d]+)"
-        )  # noqa: W605
+            + "[^\w\d\s&]+(?=[\d]+)"  # noqa: W605
+        )
         regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?="
-            + letter_pattern_str  # noqa: W605
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?="  # noqa: W605
+            + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
         regex_list.append(
             "?P<pattern3>(?P<pattern3_replace>"
             + letter_pattern_str
@@ -126,36 +75,22 @@ class Tokenizer:
             + "[^\w\d\s&]+(?="  # noqa: W605
             + letter_pattern_str
             + ")"
-        )  # noqa: W605
+        )
 
-        # commonalities between lists
         regex_list.append("?P<underscore>_")  # noqa: W605
-        keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
-
         regex_list.append("?P<begspace>^\s+")  # noqa: W605
-        keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
-
         regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-        keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-
         regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-        keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-
-        keep_special_regex_list.append("?P<bar> '|' ")  # noqa: W605
-        regex_list.append("?P<bar> '|' ")  # noqa: W605
-
-        keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
+        regex_list.append("?P<apos_space> '|' ")  # noqa: W605
         regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
-
         # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-        keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
         regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
 
         # Replace lookup based on regex
         self.replace_lookup = {
             "apos_s": (" 's", None),
             "apos_poss": ("", None),
-            "bar": (" ", None),
+            "apos_space": (" ", None),
             "begspace": ("", None),
             "end": (" ", None),
             "escape1": ("{0}", "escape1_replace"),
@@ -170,10 +105,21 @@ class Tokenizer:
             "apostrophe": (" ", None),
         }
 
-        # Create a regular expression  from the dictionary keys
-        self.keep_special_compiled = re.compile(
-            "(%s)" % ")|(".join(keep_special_regex_list), re.UNICODE
-        )
+        # Create compiled regex expressions
+        try:
+            self.keep_special_compiled = re.compile(
+                "(%s)"
+                % (
+                    ")|(".join(self.config["allowed_patterns"]),
+                ),
+                re.UNICODE
+            )
+        except sre_constants.error:
+            logger.error(
+                "Custom regex compilation failed for the following patterns: %s",
+                ")|(".join(self.config["allowed_patterns"])
+            )
+
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
     # Needed for train-roles where queries are deep copied (and thus tokenizer).
@@ -232,7 +178,13 @@ class Tokenizer:
             str: The text with replacement specified by self.replace_lookup
         """
         # For each match, look-up corresponding value in dictionary
-        return compiled.sub(self._one_xlat, text)
+        try:
+            return compiled.sub(self._one_xlat, text)
+        except KeyError:
+            # In case of custom/app-specific tokenizer configuration
+            logger.info("Using custom tokenizer configuration.")
+            re_str = compiled.findall(text)
+            return "".join([e[0] if len(e) > 1 else e for e in re_str])
 
     def normalize(self, text, keep_special_chars=True):
         """
@@ -314,7 +266,6 @@ class Tokenizer:
 
             raw_token["norm_token_start"] = norm_token_start
             raw_token["norm_token_count"] = norm_token_count
-
         return norm_tokens
 
     @staticmethod
@@ -488,9 +439,13 @@ class Tokenizer:
         )
 
     @staticmethod
-    def create_tokenizer():
+    def create_tokenizer(app_path=None):
         """Creates the tokenizer for the app
+
+        Args:
+            app_path (str, optional): MindMeld Application Path
+
         Returns:
             Tokenizer: a tokenizer
         """
-        return Tokenizer()
+        return Tokenizer(app_path=app_path)
