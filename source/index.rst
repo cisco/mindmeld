@@ -119,6 +119,7 @@ Contents
    userguide/dm
    userguide/auto_annotator
    userguide/custom_action
+   userguide/tokenizer
    userguide/internationalization
    userguide/voice
    integrations/webex_teams

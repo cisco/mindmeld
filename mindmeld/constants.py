@@ -10,6 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import unicodedata
+
 DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
@@ -55,3 +57,10 @@ def _no_overlap(entity_one, entity_two):
         entity_one.span.start > entity_two.span.end
         or entity_two.span.start > entity_one.span.end
     )
+
+
+# fetches all currency symbols in unicode by iterating through the character set and
+# selecting the currency symbols based on the unicode currency category 'Sc'
+CURRENCY_SYMBOLS = u"".join(
+    chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
+)

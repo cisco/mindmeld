@@ -8,14 +8,23 @@ test_markup
 Tests for `markup` module.
 """
 # pylint: disable=I0011,W0621
+import os
 import pytest
 
 from mindmeld.tokenizer import Tokenizer
+
+APP_NAME = "food_ordering"
+APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 
 
 @pytest.fixture
 def tokenizer():
     return Tokenizer()
+
+
+@pytest.fixture
+def custom_tokenizer():
+    return Tokenizer(app_path=APP_PATH)
 
 
 def test_tokenize_raw(tokenizer):
@@ -207,3 +216,13 @@ def test_mapping_2(tokenizer):
         27: 31,
         28: 32,
     }
+
+
+def test_custom_tokenizer(tokenizer, custom_tokenizer):
+    """Compares behavior across custom and default tokenizers"""
+    raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
+    normalized = tokenizer.normalize(raw, False)
+    custom_normalized = custom_tokenizer.normalize(raw, True)
+
+    assert normalized == "is s o b gonna be on at 8 p m"
+    assert custom_normalized == "is s.o.b. ,, gonna be on at 8 p.m."

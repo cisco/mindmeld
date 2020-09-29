@@ -44,4 +44,10 @@ DOMAIN_MODEL_CONFIG = {
     },
 }
 
+
+TOKENIZER_CONFIG = {
+    "allowed_patterns": ['\w+\.', '\{.*\|.*\}'],  # noqa: W605
+}
+
+
 MAX_HISTORY_LEN = 5

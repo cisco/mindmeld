@@ -127,6 +127,8 @@ def test_basic_search(answerer):
     res = answerer.get(index="store_name", store_name="peanut", address="peanut st")
     assert len(res) > 0
 
+    # check that score is included in response
+    assert res[0].get('_score') is not None
 
 def test_basic_relative_search(relative_answerer):
     """Test basic search."""
@@ -274,12 +276,10 @@ def test_advanced_search_validation(answerer):
 @pytest.mark.bert
 @pytest.mark.es7
 def test_embedder_search_bert(food_ordering_with_bert):
-    BERT_EMBEDDING_LEN = 768
     res = food_ordering_with_bert.get(
         index="menu_items_bert", query_type="embedder", name="pasta with tomato sauce"
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
 
     res = food_ordering_with_bert.get(
         index="menu_items_bert",
@@ -287,7 +287,6 @@ def test_embedder_search_bert(food_ordering_with_bert):
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
 
     res = food_ordering_with_bert.get(
         index="menu_items_bert",
@@ -295,19 +294,16 @@ def test_embedder_search_bert(food_ordering_with_bert):
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == BERT_EMBEDDING_LEN
 
 
 @pytest.mark.extras
 @pytest.mark.es7
 @pytest.mark.xfail(strict=False)
 def test_embedder_search_glove(food_ordering_with_glove):
-    GLOVE_EMBEDDING_LEN = 300
     res = food_ordering_with_glove.get(
         index="menu_items_glove", query_type="embedder", name="pasta with tomato sauce"
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN
 
     res = food_ordering_with_glove.get(
         index="menu_items_glove",
@@ -315,7 +311,6 @@ def test_embedder_search_glove(food_ordering_with_glove):
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN
 
     res = food_ordering_with_glove.get(
         index="menu_items_glove",
@@ -323,4 +318,3 @@ def test_embedder_search_glove(food_ordering_with_glove):
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
-    assert len(res[0].get("name_embedding")) == GLOVE_EMBEDDING_LEN

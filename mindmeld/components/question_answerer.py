@@ -833,7 +833,14 @@ class Search:
             es_query = self._build_es_query(size=size)
 
             response = self.client.search(index=self.index, body=es_query)
-            results = [hit["_source"] for hit in response["hits"]["hits"]]
+
+            # construct results, removing embedding metadata and exposing score
+            results = []
+            for hit in response["hits"]["hits"]:
+                item = {key: val for (key, val) in hit["_source"].items()
+                        if not key.endswith(EMBEDDING_FIELD_STRING)}
+                item['_score'] = hit['_score']
+                results.append(item)
             return results
         except EsConnectionError as e:
             logger.error(
