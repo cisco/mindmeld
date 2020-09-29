@@ -934,7 +934,7 @@ def _get_default_regex(exclude_from_norm):
 
     exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
 
-    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm)
+    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm or [])
 
     letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
