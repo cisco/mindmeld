@@ -606,7 +606,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``role`` (str, optional): The role of the entity.
   - ``responses`` (list or str, optional): Message for prompting the user for missing entities.
   - ``retry_response`` (list or str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
-  - ``value`` (str, optional): The resolved value of the entity.
+  - ``value`` (str, optional): The resolved value of the entity. (Read :ref:`note <session_note>` for maintaining this value in the same session.)
   - ``default_eval`` (bool, optional): Use system validation (default: True).
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
   - ``custom_eval`` (func, optional): Custom validation function (should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object.
@@ -778,6 +778,33 @@ Alternatively, the standalone call to this feature can be called independently o
                     responder.reply(
                         "Your {account} account balance is ${amount:.2f}"
                     )
+
+.. _session_note:
+
+Maintaining slot values in a session
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When using the slot-filling flow repeatedly, the form is reset in every turn. In order to maintain values in the form across a session with multiple calls to this flow, the ``value`` attribute in the ``FormEntity`` object for the slot can be updated with a pre-defined value or a user-input value at an initial iteration of the form. As an example, if the user asks for their balance of a particular account type, the ``value`` attribute can be populated with this response. Henceforth for all balance check inquiries by the user the app will show details for the same account without reprompting:
+
+.. code:: python
+
+  balance_form = {
+    'entities': [
+        FormEntity(
+            entity="account_type",
+            responses=["Sure. For which account - checkings, savings, or credit?"],
+            )
+        ],
+    'max_retries': 1,
+    'exit_keys': ['cancel', 'quit', 'exit'],
+    'exit_msg': "Sorry I cannot help you. Please try again."
+    }
+
+  @app.auto_fill(intent="check_balances", form=balance_form)
+  def check_balance(request, responder):
+      for entity in request.entities:
+            if entity["type"] == "account_type":
+                balance_form['entities'][0].value = entity["value"][0]["cname"]
+      ...
 
 .. note::
 
