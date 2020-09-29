@@ -13,7 +13,7 @@ import pytest
 
 from mindmeld.tokenizer import Tokenizer
 
-APP_NAME = "kwik_e_mart"
+APP_NAME = "food_ordering"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 
 

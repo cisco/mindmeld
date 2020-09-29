@@ -184,7 +184,7 @@ class Tokenizer:
             # In case of custom/app-specific tokenizer configuration
             logger.info("Using custom tokenizer configuration.")
             re_str = compiled.findall(text)
-            return "".join(re_str)
+            return "".join([e[0] if len(e) > 1 else e for e in re_str])
 
     def normalize(self, text, keep_special_chars=True):
         """

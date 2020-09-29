@@ -164,10 +164,10 @@ def test_max_history_len_config(food_ordering_app_path):
     assert actual == 5
 
 
-def test_tokenizer_config(kwik_e_mart_app_path):
-    actual = get_tokenizer_config(kwik_e_mart_app_path)
+def test_tokenizer_config(food_ordering_app_path):
+    actual = get_tokenizer_config(food_ordering_app_path)
 
-    expected = {"allowed_patterns": ['\w+\.']}  # noqa: W605
+    expected = {"allowed_patterns": ['\w+\.', '\{.*\|.*\}']}  # noqa: W605
 
     assert "allowed_patterns" in actual
     assert actual == expected

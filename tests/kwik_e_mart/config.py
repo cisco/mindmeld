@@ -103,11 +103,6 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
 }
 
 
-TOKENIZER_CONFIG = {
-    "allowed_patterns": ['\w+\.'],  # noqa: W605
-}
-
-
 def get_entity_recognizer_config(domain, intent):
     if domain == "store_info" and intent == "get_store_hours":
         return TEST_ENTITY_RECOGNIZER_CONFIG
