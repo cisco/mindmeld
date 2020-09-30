@@ -118,6 +118,7 @@ Contents
    userguide/kb
    userguide/dm
    userguide/custom_action
+   userguide/tokenizer
    userguide/internationalization
    userguide/voice
    integrations/webex_teams

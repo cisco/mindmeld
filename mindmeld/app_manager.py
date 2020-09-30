@@ -66,7 +66,7 @@ class ApplicationManager:
             dialogue_manager (DialogueManager): The application's dialogue manager.
     """
 
-    MAX_HISTORY_LEN = 10
+    MAX_HISTORY_LEN = 100
     """The max number of turns in history."""
 
     def __init__(
