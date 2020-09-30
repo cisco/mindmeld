@@ -74,7 +74,7 @@ def create_model(config):
         return MODEL_MAP[config.model_type](config)
     except KeyError:
         msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config.model_type))
+        raise KeyError(msg.format(config.model_type))
 
 
 def create_annotator(app_path, config):

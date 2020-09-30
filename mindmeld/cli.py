@@ -557,14 +557,14 @@ def annotate(app_path):
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="Needed to locate the application config file.",
+    "--app-path", required=True, help="The application's path.",
 )
 def unannotate(app_path):
     """Runs the unannotation command of the Auto Annotator."""
     config = get_auto_annotator_config(app_path=app_path)
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.unannotate()
-    logger.info("Unannotation Complete.")
+    logger.info("Annotation Removal Complete.")
 
 
 #

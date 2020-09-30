@@ -312,7 +312,8 @@ class Annotator(ABC):
             ]
             if all(no_overlaps):
                 additional_entities.append(o_entity)
-        return base_entities + additional_entities
+        base_entities.extend(additional_entities)
+        return base_entities
 
     # pylint: disable=R0201
     def _unannotate_query(self, processed_query, remove_entities):
