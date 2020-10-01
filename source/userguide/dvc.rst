@@ -85,4 +85,4 @@ The save command creates a file (.generated.dvc) that tracks the trained models.
 .. code-block:: console
 
    # Use git log to get the git commit hash you want to checkout
-   python -m home_assistant dvc --checkout_hash [HASH]
+   python -m home_assistant dvc --checkout [HASH]
