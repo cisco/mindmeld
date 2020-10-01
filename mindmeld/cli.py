@@ -70,6 +70,14 @@ DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
 DVC_INIT_HELP = "Run 'dvc init' to instantiate this project as a DVC repository"
 DVC_ADD_DOES_NOT_EXIST_HELP = "The folder {dvc_add_path} does not exist"
 
+DVC_COMMAND_HELP_MESSAGE = (
+    "Options:"
+    "\n\t--init\t\tInstantiate DVC within a repository"
+    "\n\t--save\t\tSave built models using dvc"
+    "\n\t--checkout HASH\tCheckout repo and models corresponding to git hash"
+    "\n\t--help\t\tShow this message and exit\n"
+)
+
 
 def _version_msg():
     """Returns the MindMeld version, location and Python powering it."""
@@ -101,8 +109,12 @@ def _app_cli(ctx):
 def _dvc_add_helper(filepath):
     """
     Returns True if successful, False otherwise along with helper message
-    :param path:
-    :return:
+
+    Args:
+        filepath (str): path to file/folder to add to DVC
+
+    Returns:
+        (tuple) True if no errors, False + error string otherwise
     """
     p = subprocess.Popen(
         ["dvc", "add", filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -124,8 +136,12 @@ def _dvc_add_helper(filepath):
 def _bash_helper(command_list):
     """
     Helper for running bash using subprocess and error handling
-    :param command_list: Bash command formatted as a list, no spaces in each element
-    :return: True if no errors, False + error string otherwise
+
+    Args:
+        command_list (list): Bash command formatted as a list, no spaces in each element
+
+    Returns:
+        (tuple) True if no errors, False + error string otherwise
     """
     p = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, error = p.communicate()
@@ -146,19 +162,26 @@ def _bash_helper(command_list):
     "--save", is_flag=True, required=False, help="Save built models using dvc"
 )
 @click.option("--checkout", required=False, help="Instantiate DVC within a repository")
-def dvc(ctx, init, save, checkout):
+@click.option(
+    "--help",
+    "help_",
+    is_flag=True,
+    required=False,
+    help="Print message showing available options",
+)
+def dvc(ctx, init, save, checkout, help_):
     app = ctx.obj.get("app")
     app_path = app.app_path
 
     # Ensure that DVC is installed
     if not which("dvc"):
         logger.error(
-            "DVC is not installed. You can install DVC by running 'pip install dvc'"
+            "DVC is not installed. You can install DVC by running 'pip install dvc'."
         )
         return
 
     if init:
-        success, error_string = _bash_helper(["dvc", "init"])
+        success, error_string = _bash_helper(["dvc", "init", "--subdir"])
         if not success:
             logger.error("Error during initialization: %s", error_string)
             return
@@ -223,6 +246,11 @@ def dvc(ctx, init, save, checkout):
         logger.info(
             "Successfully checked out models corresponding to hash %s", checkout
         )
+    elif help_:
+        logger.info(DVC_COMMAND_HELP_MESSAGE)
+    else:
+        logger.error("No option provided, see options below.")
+        logger.info(DVC_COMMAND_HELP_MESSAGE)
 
 
 @_app_cli.command("run", context_settings=CONTEXT_SETTINGS)

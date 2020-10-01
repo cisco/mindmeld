@@ -7,6 +7,28 @@ files and directories in concert with Git without storing the data itself in Git
 
 You can find more info about DVC in the `official documentation <https://dvc.org/doc>`_.
 
+The functionality of the DVC command within Mindmeld is shown in the table below.
+
+Available Options
+-----------------
+
++-----------------+------------------------------------------------------------------------+
+| **Option**      | **Description**                                                        |
++-----------------+------------------------------------------------------------------------+
+| --init          | Initializes DVC within a repository. Must be run before other options. |
++-----------------+------------------------------------------------------------------------+
+| --save          | Saves models using DVC. Run after model building finishes.             |
++-----------------+------------------------------------------------------------------------+
+| --checkout HASH | Checks out the repo state and models corresponding to a git hash.      |
+|                 | The --save option must have been run before committing the hash for    |
+|                 | model checkout to work.                                                |
++-----------------+------------------------------------------------------------------------+
+| --help          | Show the available options and their descriptions.                     |
++-----------------+------------------------------------------------------------------------+
+
+
+We will use the Home Assistant blueprint to demonstrate the various command options.
+
 
 Example: Home Assistant Blueprint
 ---------------------------------
