@@ -111,21 +111,18 @@ class Tokenizer:
             self._custom = True
 
         # Create compiled regex expressions
+        combined_re = ")|(".join(
+            self.config["allowed_patterns"] or self.config["default_allowed_patterns"]
+        )
+
         try:
             self.keep_special_compiled = re.compile(
-                "(%s)"
-                % (
-                    ")|(".join(
-                        self.config["allowed_patterns"]
-                        or self.config["default_allowed_patterns"]
-                    ),
-                ),
-                re.UNICODE,
+                "(%s)" % (combined_re,), re.UNICODE,
             )
         except sre_constants.error:
             logger.error(
-                "Custom regex compilation failed for the following patterns: %s",
-                ")|(".join(self.config["allowed_patterns"]),
+                "Regex compilation failed for the following patterns: %s",
+                combined_re,
             )
 
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
@@ -204,6 +201,10 @@ class Tokenizer:
             # In case of custom/app-specific tokenizer configuration
             logger.info("Using custom tokenizer configuration.")
             re_str = compiled.findall(text)
+
+            # For the custom regex pattern, the following first filters the list of matches to
+            # only keep the non-NULL matches. The filtered object is converted to a list and the
+            # first matching object is selected.
             return "".join([list(filter(None, e))[0] for e in re_str])
 
     def normalize(self, text, keep_special_chars=True):
