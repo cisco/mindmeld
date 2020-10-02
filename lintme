@@ -1,12 +1,8 @@
 #!/bin/bash
 
-EXCLUDE_ASYNC=`python -c "import sys; print('True' if sys.version_info >= (3,5) else '')"`
 BLACK=`python -c "import sys; print('True' if sys.version_info >= (3,6) else '')"`
 
 FLAKE8_OPTIONS=""
-if [[ -z "$EXCLUDE_ASYNC" ]]; then
-  FLAKE8_OPTIONS="--exclude=*_async.py"
-fi
 
 if [ "$MM_EXTRAS" == "true" ]; then
   PYLINT_OPTIONS=""
@@ -14,9 +10,7 @@ else
   PYLINT_OPTIONS="--ignore mindmeld/bot"
 fi
 
-if [[ "$BLACK" ]]; then
-  black --check .
-fi
+black --check .
 
 flake8 mindmeld tests $FLAKE8_OPTIONS
 pylint mindmeld $PYLINT_OPTIONS
