@@ -187,10 +187,10 @@ class Tokenizer:
         # For each match, look-up corresponding value in dictionary
         try:
             filtered = compiled.sub(self._one_xlat, text)
-            
+
             if self._custom:
-                return self.compiled.sub(self._one_xlat, text)                
-            
+                return self.compiled.sub(self._one_xlat, text)
+
             return filtered
 
         except KeyError:
@@ -214,8 +214,7 @@ class Tokenizer:
         norm_tokens = self.tokenize(text, keep_special_chars)
         normalized_text = " ".join(t["entity"] for t in norm_tokens)
 
-        # print(normalized_text)
-        return 'normalized text: '+normalized_text
+        return normalized_text
 
     def tokenize(self, text, keep_special_chars=True):
         """Tokenizes the input text, normalizes the token text, and returns normalized tokens.
