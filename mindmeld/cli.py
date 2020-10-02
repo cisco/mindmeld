@@ -128,7 +128,7 @@ def _dvc_add_helper(filepath):
         return False, DVC_INIT_HELP
     elif DVC_ADD_DOES_NOT_EXIST_MESSAGE in error_string:
         return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=filepath)
-    elif error_string:
+    elif p.returncode != 0:
         return False, error_string
     else:
         return True, None
@@ -148,7 +148,7 @@ def _bash_helper(command_list):
     _, error = p.communicate()
     error_string = error.decode("utf-8")
 
-    if error_string:
+    if p.returncode != 0:
         return False, error_string
 
     return True, None
