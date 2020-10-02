@@ -41,6 +41,7 @@ class Tokenizer:
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
         self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
+        self._custom = False
         self._init_regex()
 
     def _init_regex(self):
@@ -105,19 +106,23 @@ class Tokenizer:
             "apostrophe": (" ", None),
         }
 
+        # Check if custom pattern is being used or MM defined
+        if self.config.get("allowed_patterns"):
+            self._custom = True
+
         # Create compiled regex expressions
+        combined_re = ")|(".join(
+            self.config["allowed_patterns"] or self.config["default_allowed_patterns"]
+        )
+
         try:
             self.keep_special_compiled = re.compile(
-                "(%s)"
-                % (
-                    ")|(".join(self.config["allowed_patterns"]),
-                ),
-                re.UNICODE
+                "(%s)" % (combined_re,), re.UNICODE,
             )
         except sre_constants.error:
             logger.error(
-                "Custom regex compilation failed for the following patterns: %s",
-                ")|(".join(self.config["allowed_patterns"])
+                "Regex compilation failed for the following patterns: %s",
+                combined_re,
             )
 
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
@@ -179,12 +184,28 @@ class Tokenizer:
         """
         # For each match, look-up corresponding value in dictionary
         try:
-            return compiled.sub(self._one_xlat, text)
+
+            # Checks if replacement can be found in pre-defined match object (non-custom).
+            # If no key in match object, go to custom tokenizer handling in Exception.
+            filtered = compiled.sub(self._one_xlat, text)
+
+            # If no key error and custom tokenizer was involved
+            # then the token has unwanted special characters. Remove them and return.
+            if self._custom:
+                return self.compiled.sub(self._one_xlat, text)
+
+            # Return filtered list if non-custom tokenizer.
+            return filtered
+
         except KeyError:
             # In case of custom/app-specific tokenizer configuration
             logger.info("Using custom tokenizer configuration.")
             re_str = compiled.findall(text)
-            return "".join([e[0] if len(e) > 1 else e for e in re_str])
+
+            # For the custom regex pattern, the following first filters the list of matches to
+            # only keep the non-NULL matches. The filtered object is converted to a list and the
+            # first matching object is selected.
+            return "".join([list(filter(None, e))[0] for e in re_str])
 
     def normalize(self, text, keep_special_chars=True):
         """
