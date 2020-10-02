@@ -110,14 +110,12 @@ class Tokenizer:
 
         if "allowed_patterns" in self.config:
             self._custom = True
-        else:
-            self.config["allowed_patterns"] = self.config["default_allowed_patterns"]
 
         try:
             self.keep_special_compiled = re.compile(
                 "(%s)"
                 % (
-                    ")|(".join(self.config["allowed_patterns"]),
+                    ")|(".join(self.config["allowed_patterns"] or self.config["default_allowed_patterns"]),
                 ),
                 re.UNICODE
             )
