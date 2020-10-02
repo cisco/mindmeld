@@ -41,6 +41,7 @@ class Tokenizer:
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
         self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
+        self._custom = False
         self._init_regex()
 
     def _init_regex(self):
@@ -106,6 +107,12 @@ class Tokenizer:
         }
 
         # Create compiled regex expressions
+
+        if "allowed_patterns" in self.config:
+            self._custom = True
+        else:
+            self.config["allowed_patterns"] = self.config["default_allowed_patterns"]
+
         try:
             self.keep_special_compiled = re.compile(
                 "(%s)"
@@ -179,12 +186,18 @@ class Tokenizer:
         """
         # For each match, look-up corresponding value in dictionary
         try:
-            return compiled.sub(self._one_xlat, text)
+            filtered = compiled.sub(self._one_xlat, text)
+            
+            if self._custom:
+                return self.compiled.sub(self._one_xlat, text)                
+            
+            return filtered
+
         except KeyError:
             # In case of custom/app-specific tokenizer configuration
             logger.info("Using custom tokenizer configuration.")
             re_str = compiled.findall(text)
-            return "".join([e[0] if len(e) > 1 else e for e in re_str])
+            return "".join([list(filter(None, e))[0] for e in re_str])
 
     def normalize(self, text, keep_special_chars=True):
         """
@@ -201,7 +214,8 @@ class Tokenizer:
         norm_tokens = self.tokenize(text, keep_special_chars)
         normalized_text = " ".join(t["entity"] for t in norm_tokens)
 
-        return normalized_text
+        # print(normalized_text)
+        return 'normalized text: '+normalized_text
 
     def tokenize(self, text, keep_special_chars=True):
         """Tokenizes the input text, normalizes the token text, and returns normalized tokens.
