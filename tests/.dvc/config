@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = /Users/alexhua/Repos/mindmeld/tests/home_assistant/dvc_local_remote

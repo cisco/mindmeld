@@ -9,8 +9,8 @@ You can find more info about DVC in the `official documentation <https://dvc.org
 
 The functionality of the DVC command within Mindmeld is shown in the table below.
 
-Available Options
------------------
+Available Options in Mindmeld
+-----------------------------
 
 +-----------------+------------------------------------------------------------------------+
 | **Option**      | **Description**                                                        |
@@ -22,6 +22,9 @@ Available Options
 | --checkout HASH | Checks out the repo state and models corresponding to a git hash.      |
 |                 | The --save option must have been run before committing the hash for    |
 |                 | model checkout to work.                                                |
++-----------------+------------------------------------------------------------------------+
+| --destroy       | Remove all files associated with DVC from a directory.                 |
+|                 | Must be run in the directory that contains the .dvc folder             |
 +-----------------+------------------------------------------------------------------------+
 | --help          | Show the available options and their descriptions.                     |
 +-----------------+------------------------------------------------------------------------+
@@ -60,6 +63,21 @@ DVC requires a source code management (SCM) tool such as Git to operate.
 
 This will create all the files necessary for DVC to operate.
 
+.. code-block:: console
+
+  On branch master
+  Changes to be committed:
+    (use "git reset HEAD <file>..." to unstage)
+
+        new file:   .dvc/.gitignore
+        new file:   .dvc/config
+        new file:   .dvc/plots/confusion.json
+        new file:   .dvc/plots/default.json
+        new file:   .dvc/plots/scatter.json
+        new file:   .dvc/plots/smooth.json
+        new file:   .dvcignore
+
+
 4. **Build the models, save them using DVC, and commit the new files to Git.**
 
 .. code-block:: console
@@ -69,6 +87,14 @@ This will create all the files necessary for DVC to operate.
    git commit -m "Track models with dvc"
 
 The save command creates a file (.generated.dvc) that tracks the trained models.
+
+.. code-block:: console
+
+  On branch master
+  Changes to be committed:
+    (use "git reset HEAD <file>..." to unstage)
+
+        new file:   home_assistant/.generated.dvc
 
 5. **Add new training data and follow the same commands in Step 4.**
 

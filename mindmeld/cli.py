@@ -75,6 +75,7 @@ DVC_COMMAND_HELP_MESSAGE = (
     "\n\t--init\t\tInstantiate DVC within a repository"
     "\n\t--save\t\tSave built models using dvc"
     "\n\t--checkout HASH\tCheckout repo and models corresponding to git hash"
+    "\n\t--destroy\tRemove all files associated with DVC from a directory"
     "\n\t--help\t\tShow this message and exit\n"
 )
 
@@ -169,7 +170,13 @@ def _bash_helper(command_list):
     required=False,
     help="Print message showing available options",
 )
-def dvc(ctx, init, save, checkout, help_):
+@click.option(
+    "--destroy",
+    is_flag=True,
+    required=False,
+    help="Remove all files associated with dvc from directory",
+)
+def dvc(ctx, init, save, checkout, help_, destroy):
     app = ctx.obj.get("app")
     app_path = app.app_path
 
@@ -188,6 +195,7 @@ def dvc(ctx, init, save, checkout, help_):
 
         # Set up a local remote
         local_remote_path = get_dvc_local_remote_path(app_path)
+
         success, error_string = _bash_helper(
             ["dvc", "remote", "add", "-d", "myremote", local_remote_path]
         )
@@ -246,6 +254,15 @@ def dvc(ctx, init, save, checkout, help_):
         logger.info(
             "Successfully checked out models corresponding to hash %s", checkout
         )
+    elif destroy:
+        logger.info(
+            "This command must be run in the directory containing the .dvc/ folder. "
+            "It will remove all files associated with dvc from the directory."
+        )
+        input("Press any key to continue:")
+
+        # dvc destroy with -f flag always throws a benign error message so we don't handle
+        _bash_helper(["dvc", "destroy", "-f"])
     elif help_:
         logger.info(DVC_COMMAND_HELP_MESSAGE)
     else:
