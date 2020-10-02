@@ -107,7 +107,7 @@ class Tokenizer:
         }
 
         # Check if custom pattern is being used or MM defined
-        if "allowed_patterns" in self.config and (self.config["allowed_patterns"]):
+        if self.config.get("allowed_patterns"):
             self._custom = True
 
         # Create compiled regex expressions
@@ -115,14 +115,17 @@ class Tokenizer:
             self.keep_special_compiled = re.compile(
                 "(%s)"
                 % (
-                    ")|(".join(self.config["allowed_patterns"] or self.config["default_allowed_patterns"]),
+                    ")|(".join(
+                        self.config["allowed_patterns"]
+                        or self.config["default_allowed_patterns"]
+                    ),
                 ),
-                re.UNICODE
+                re.UNICODE,
             )
         except sre_constants.error:
             logger.error(
                 "Custom regex compilation failed for the following patterns: %s",
-                ")|(".join(self.config["allowed_patterns"])
+                ")|(".join(self.config["allowed_patterns"]),
             )
 
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)

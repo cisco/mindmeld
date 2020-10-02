@@ -226,3 +226,18 @@ def test_custom_tokenizer(tokenizer, custom_tokenizer):
 
     assert normalized == "is s o b gonna be on at 8 p m"
     assert custom_normalized == "is s.o.b. gonna be on at 8 p.m."
+
+
+def test_custom_tokenizer_extra_special_chars(tokenizer, custom_tokenizer):
+    """Compares behavior across custom and default tokenizers for special characters
+    that have not been allowed in config"""
+    raw = "join O'reilly's pmr."
+    normalized = tokenizer.normalize(raw, True)
+    custom_normalized = custom_tokenizer.normalize(raw, True)
+
+    # Default MM behavior retains apos in the middle of words but doesn't recognize
+    # periods at the end.
+    # The custom tokenizer config defined accepts tokens ending with period but no apos
+    # as part of the tokens.
+    assert normalized == "join o'reilly 's pmr"
+    assert custom_normalized == 'join o reilly s pmr.'
