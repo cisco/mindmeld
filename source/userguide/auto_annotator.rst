@@ -8,11 +8,11 @@ The Auto Annotator
 
 .. note::
 
-   This section requires the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``.
+   The examples in this section require the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``.
 
 .. warning::
 
-   Changes by an Annotator cannot be undone and Mindmeld does not backup query data. We recommend using version control software such as Github.
+   Changes by an Auto Annotator cannot be undone and Mindmeld does not backup query data. We recommend using version control software such as Github.
 
 Default Auto Annotator: Spacy Annotator
 ---------------------------------------
@@ -27,11 +27,11 @@ Some of these entities are resolvable by Duckling.
 +========================+=========================+=============================================================================+
 | "sys_time"             | Yes                     | "today", "Tuesday, Feb 18" , "last week"                                    |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_interval"         | Yes                     | “from 9:30 to 11:00am”, “Monday to Friday”, “Tuesday 3pm to Wednesday 7pm”  |
+| "sys_interval"         | Yes                     | "from 9:30 to 11:00am", "Monday to Friday", "Tuesday 3pm to Wednesday 7pm"  |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_duration"         | Yes                     | "2 hours", "15 minutes", "3 days"                                           |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_number"           | Yes                     | "58", "two hundred”, "1,394,345.45”                                         |
+| "sys_number"           | Yes                     | "58", "two hundred", "1,394,345.45"                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_amount-of-money"  | Yes                     | "ten dollars", "seventy-eight euros", "$58.67"                              |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
@@ -39,17 +39,17 @@ Some of these entities are resolvable by Duckling.
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_weight"           | Yes                     | "400 pound", "3 grams", "47.5 mg"                                           |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_ordinal"          | Yes                     | “3rd place” (“3rd”), “fourth street” (“fourth”),  “5th”                     |
+| "sys_ordinal"          | Yes                     | "3rd place" ("3rd"), "fourth street" ("fourth"),  "5th"                     |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_percent"          | Yes                     | "four percent", "12%", "5 percent"                                          |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_org"              | No                      | “Cisco”, “IBM”, “Google”                                                    |
+| "sys_org"              | No                      | "Cisco", "IBM", "Google"                                                    |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_loc"              | No                      | "Europe", “Asia”, “the Alps”, “Pacific ocean”                               |
+| "sys_loc"              | No                      | "Europe", "Asia", "the Alps", "Pacific ocean"                               |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_person"           | No                      | “Blake Smith”, “Julia”, “Andy Neff”                                         |
+| "sys_person"           | No                      | "Blake Smith", "Julia", "Andy Neff"                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_gpe"              | No                      | “California”, “FL”, "New York City", "USA"                                  |
+| "sys_gpe"              | No                      | "California", "FL", "New York City", "USA"                                  |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_norp"             | No                      | Nationalities or religious or political groups.                             |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
@@ -61,11 +61,11 @@ Some of these entities are resolvable by Duckling.
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_law"              | No                      | Named documents made into laws.                                             |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_langauge"         | No                      | Any named language.                                                         |
+| "sys_language"         | No                      | Any named language.                                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | "sys_work-of-art"      | No                      | Titles of books, songs, etc.                                                |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
-| "sys_other-quantity"   | No                      | “40 degrees”                                                                |
+| "sys_other-quantity"   | No                      | "10 joules", "30 liters", "15 tons"                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 
 
@@ -74,7 +74,7 @@ To detect entities in a single sentence first create an instance of the :class:`
 .. code-block:: python
 
 	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path=”hr_assistant”, model=”en_core_web_lg”)
+	sa = SpacyAnnotator(app_path="hr_assistant")
 
 Then use the :meth:`parse` function.
 
@@ -121,15 +121,15 @@ In general, detected entities will be represented in the following format:
 
 	entity = { 
 
-		“body”: (substring of sentence), 
+		"body": (substring of sentence), 
 
-		“start”: (start index), 
+		"start": (start index), 
 
-		“end”: (end index + 1), 
+		"end": (end index + 1), 
 
-		“dim”: (entity type), 
+		"dim": (entity type), 
 
-		“value”: (resolved value, if it exists), 
+		"value": (resolved value, if it exists), 
 
 	}
 
@@ -139,7 +139,7 @@ For example, we can restrict the output of the previous example by doing the fol
 
 .. code-block:: python
 	
-	allowed_entites = ["sys_org”, “sys_amount-of-money”, “sys_time”]
+	allowed_entites = ["sys_org", "sys_amount-of-money", "sys_time"]
 	sentence = "Apple stock went up $10 last monday."
 	sa.parse(sentence=sentence, entity_types=allowed_entities) 
 
@@ -188,7 +188,7 @@ Let's take a look at the allowed values for each setting in an Auto Annotator co
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
 ``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
-Annotation rules are combined internally to create Regex patterns to match selected files. :attr:`*` can be used if all possibilities in a section are to be selected. :attr:`|` is used to represent “or”.  
+Annotation rules are combined internally to create Regex patterns to match selected files. :attr:`*` can be used if all possibilities in a section are to be selected. :attr:`|` is used to represent "or".  
 Let's take a look at an example annotation rule:
 
 .. code-block:: python
@@ -235,7 +235,7 @@ To unannotate by creating an instance of the :class:`Annotator` class, run:
 .. code-block:: python
 
 	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path=”hr_assistant”, model=”en_core_web_lg”)
+	sa = SpacyAnnotator(app_path="hr_assistant")
 
 	sa.unannotate()
 
@@ -307,7 +307,7 @@ To annotate by creating an instance of the :class:`Annotator` class, run:
 .. code-block:: python
 
 	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path=”hr_assistant”, model=”en_core_web_lg”)
+	sa = SpacyAnnotator(app_path="hr_assistant")
 
 	sa.annotate()
 
@@ -412,11 +412,11 @@ Entities returned by :attr:`parse()` must have the following format:
 .. code-block:: python
 
 	entity = { 
-		“body”: (substring of sentence), 
-		“start”: (start index), 
-		“end”: (end index + 1), 
-		“dim”: (entity type), 
-		“value”: (resolved value, if it exists), 
+		"body": (substring of sentence), 
+		"start": (start index), 
+		"end": (end index + 1), 
+		"dim": (entity type), 
+		"value": (resolved value, if it exists), 
 	}
 
 Registering Annotator to Enable Command-Line Use
