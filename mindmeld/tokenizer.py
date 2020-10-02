@@ -106,11 +106,11 @@ class Tokenizer:
             "apostrophe": (" ", None),
         }
 
-        # Create compiled regex expressions
-
-        if "allowed_patterns" in self.config:
+        # Check if custom pattern is being used or MM defined
+        if "allowed_patterns" in self.config and (self.config["allowed_patterns"]):
             self._custom = True
 
+        # Create compiled regex expressions
         try:
             self.keep_special_compiled = re.compile(
                 "(%s)"
@@ -184,11 +184,17 @@ class Tokenizer:
         """
         # For each match, look-up corresponding value in dictionary
         try:
+
+            # Checks if replacement can be found in pre-defined match object (non-custom).
+            # If no key in match object, go to custom tokenizer handling in Exception.
             filtered = compiled.sub(self._one_xlat, text)
 
+            # If no key error and custom tokenizer was involved
+            # then the token has unwanted special characters. Remove them and return.
             if self._custom:
                 return self.compiled.sub(self._one_xlat, text)
 
+            # Return filtered list if non-custom tokenizer.
             return filtered
 
         except KeyError:

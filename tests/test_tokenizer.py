@@ -225,4 +225,4 @@ def test_custom_tokenizer(tokenizer, custom_tokenizer):
     custom_normalized = custom_tokenizer.normalize(raw, True)
 
     assert normalized == "is s o b gonna be on at 8 p m"
-    assert custom_normalized == "is s.o.b. ,, gonna be on at 8 p.m."
+    assert custom_normalized == "is s.o.b. gonna be on at 8 p.m."
