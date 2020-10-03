@@ -36,6 +36,6 @@ As a default in MindMeld, the Tokenizer retains the following special characters
 1. All currency symbols in UNICODE.
 2. Entity annotation symbols ``{, }, |``.
 3. Decimal point in numeric values (e.g. ``124.45``).
-4. Apostrophe within tokens, such as ``O'Reilly``. Apostrophes at the end of tokens are removed, say ``dennis'``.
+4. Apostrophe within tokens, such as ``O'Reilly``. Apostrophes at the end of tokens are removed, say ``Dennis'``.
 
 Setting argument ``keep_special_chars=False`` in the Tokenizer would remove all special characters.
