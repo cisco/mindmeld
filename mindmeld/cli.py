@@ -40,7 +40,13 @@ from .components import Conversation, QuestionAnswerer
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
+from .path import (
+    MODEL_CACHE_PATH,
+    QUERY_CACHE_PATH,
+    QUERY_CACHE_TMP_PATH,
+    get_generated_data_folder,
+    get_dvc_local_remote_path,
+)
 from .components._config import get_auto_annotator_config
 from .models.helpers import create_annotator
 from . import auto_annotator  # noqa: F401 pylint: disable=W0611
