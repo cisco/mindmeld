@@ -85,7 +85,7 @@ class Tokenizer:
         regex_list.append("?P<apos_space> '|' ")  # noqa: W605
         regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
         # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-        regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
+        regex_list.append("?P<apos_poss>(^'(?=\S)|(?<=\S)'$)")  # noqa: W605
 
         # Replace lookup based on regex
         self.replace_lookup = {
