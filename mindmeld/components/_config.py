@@ -1016,7 +1016,7 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     Returns:
         dict: The tokenizer configuration.
     """
-    DEFAULT_TOKENIZER_CONFIG["allowed_patterns"] = _get_default_regex(exclude_from_norm)
+    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(exclude_from_norm)
 
     if not app_path:
         return DEFAULT_TOKENIZER_CONFIG

@@ -27,6 +27,7 @@ import sys
 import time
 import warnings
 
+from shutil import which
 import click
 import click_log
 import distro
@@ -40,7 +41,13 @@ from .components import Conversation, QuestionAnswerer
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
+from .path import (
+    MODEL_CACHE_PATH,
+    QUERY_CACHE_PATH,
+    QUERY_CACHE_TMP_PATH,
+    get_generated_data_folder,
+    get_dvc_local_remote_path,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +63,21 @@ if sys.version_info < (3, 6):
         " your application to Python 3.6 and above."
     )
     logger.warning(deprecation_msg)
+
+DVC_INIT_ERROR_MESSAGE = "you are not inside of a DVC repository"
+DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
+
+DVC_INIT_HELP = "Run 'dvc init' to instantiate this project as a DVC repository"
+DVC_ADD_DOES_NOT_EXIST_HELP = "The folder {dvc_add_path} does not exist"
+
+DVC_COMMAND_HELP_MESSAGE = (
+    "Options:"
+    "\n\t--init\t\tInstantiate DVC within a repository"
+    "\n\t--save\t\tSave built models using dvc"
+    "\n\t--checkout HASH\tCheckout repo and models corresponding to git hash"
+    "\n\t--destroy\tRemove all files associated with DVC from a directory"
+    "\n\t--help\t\tShow this message and exit\n"
+)
 
 
 def _version_msg():
@@ -83,6 +105,169 @@ def _app_cli(ctx):
 
     if ctx.obj is None:
         ctx.obj = {}
+
+
+def _dvc_add_helper(filepath):
+    """
+    Returns True if successful, False otherwise along with helper message
+
+    Args:
+        filepath (str): path to file/folder to add to DVC
+
+    Returns:
+        (tuple) True if no errors, False + error string otherwise
+    """
+    p = subprocess.Popen(
+        ["dvc", "add", filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    # Get DVC error message from standard error
+    _, error = p.communicate()
+    error_string = error.decode("utf-8")
+
+    if DVC_INIT_ERROR_MESSAGE in error_string:
+        return False, DVC_INIT_HELP
+    elif DVC_ADD_DOES_NOT_EXIST_MESSAGE in error_string:
+        return False, DVC_ADD_DOES_NOT_EXIST_HELP.format(dvc_add_path=filepath)
+    elif p.returncode != 0:
+        return False, error_string
+    else:
+        return True, None
+
+
+def _bash_helper(command_list):
+    """
+    Helper for running bash using subprocess and error handling
+
+    Args:
+        command_list (list): Bash command formatted as a list, no spaces in each element
+
+    Returns:
+        (tuple) True if no errors, False + error string otherwise
+    """
+    p = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, error = p.communicate()
+    error_string = error.decode("utf-8")
+
+    if p.returncode != 0:
+        return False, error_string
+
+    return True, None
+
+
+@_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option(
+    "--init", is_flag=True, required=False, help="Instantiate DVC within a repository"
+)
+@click.option(
+    "--save", is_flag=True, required=False, help="Save built models using dvc"
+)
+@click.option("--checkout", required=False, help="Instantiate DVC within a repository")
+@click.option(
+    "--help",
+    "help_",
+    is_flag=True,
+    required=False,
+    help="Print message showing available options",
+)
+@click.option(
+    "--destroy",
+    is_flag=True,
+    required=False,
+    help="Remove all files associated with dvc from directory",
+)
+def dvc(ctx, init, save, checkout, help_, destroy):
+    app = ctx.obj.get("app")
+    app_path = app.app_path
+
+    # Ensure that DVC is installed
+    if not which("dvc"):
+        logger.error(
+            "DVC is not installed. You can install DVC by running 'pip install dvc'."
+        )
+        return
+
+    if init:
+        success, error_string = _bash_helper(["dvc", "init", "--subdir"])
+        if not success:
+            logger.error("Error during initialization: %s", error_string)
+            return
+
+        # Set up a local remote
+        local_remote_path = get_dvc_local_remote_path(app_path)
+
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "add", "-d", "myremote", local_remote_path]
+        )
+        if not success:
+            logger.error("Error during local remote set up: %s", error_string)
+            return
+
+        # Add DVC config file to staging
+        success, error_string = _bash_helper(["git", "add", ".dvc/config"])
+        if not success:
+            logger.error("Error while adding dvc config file: %s", error_string)
+            return
+
+        logger.info(
+            "Instantiated DVC repo and set up local remote in %s", local_remote_path
+        )
+        logger.info(
+            "The newly generated dvc config file (.dvc/config) has been added to git staging"
+        )
+    elif save:
+        generated_model_folder = get_generated_data_folder(app_path)
+
+        success, error_string = _dvc_add_helper(generated_model_folder)
+        if not success:
+            logger.error("Error during saving: %s", error_string)
+            return
+
+        success, error_string = _bash_helper(["dvc", "push"])
+        if not success:
+            logger.error("Error during dvc push: %s", error_string)
+            return
+
+        success, error_string = _bash_helper(
+            ["git", "add", "{}/.generated.dvc".format(app_path)]
+        )
+        if not success:
+            logger.error("Error adding model dvc file: %s", error_string)
+            return
+
+        logger.info("Successfully added .generated model folder to dvc")
+        logger.info(
+            "The newly generated .dvc file (%s/.generated.dvc) has been added to git staging",
+            app_path,
+        )
+    elif checkout:
+        success, error_string = _bash_helper(["git", "checkout", checkout])
+        if not success:
+            logger.error("Error during git checkout: %s", error_string)
+            return
+
+        success, error_string = _bash_helper(["dvc", "pull"])
+        if not success:
+            logger.error("Error during dvc checkout: %s", error_string)
+            return
+
+        logger.info(
+            "Successfully checked out models corresponding to hash %s", checkout
+        )
+    elif destroy:
+        logger.info(
+            "This command must be run in the directory containing the .dvc/ folder. "
+            "It will remove all files associated with dvc from the directory."
+        )
+        input("Press any key to continue:")
+
+        # dvc destroy with -f flag always throws a benign error message so we don't handle
+        _bash_helper(["dvc", "destroy", "-f"])
+    elif help_:
+        logger.info(DVC_COMMAND_HELP_MESSAGE)
+    else:
+        logger.error("No option provided, see options below.")
+        logger.info(DVC_COMMAND_HELP_MESSAGE)
 
 
 @_app_cli.command("run", context_settings=CONTEXT_SETTINGS)
@@ -435,7 +620,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace, index_name, data_file, es_host, app_path=app_path,
+            app_namespace,
+            index_name,
+            data_file,
+            es_host,
+            app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)

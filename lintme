@@ -9,7 +9,7 @@ else
   PYLINT_OPTIONS="--ignore mindmeld/bot"
 fi
 
- black --check .
+black --check .
 
 flake8 mindmeld tests $FLAKE8_OPTIONS
 pylint mindmeld $PYLINT_OPTIONS
