@@ -188,8 +188,8 @@ Let's take a look at the allowed values for each setting in an Auto Annotator co
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
 ``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
-Annotation rules are combined internally to create Regex patterns to match selected files. :attr:`*` can be used if all possibilities in a section are to be selected. :attr:`|` is used to represent "or".  
-Let's take a look at an example annotation rule:
+Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`*` can be used if all possibilities in a section are to be selected, while possibilities within
+a section are expressed with the usual Regex special characters, such as :attr:`.` for any single character and :attr:`|` to represent "or". 
 
 .. code-block:: python
 
@@ -219,14 +219,14 @@ The rule above would annotate all text files named "train" or "test" in the "faq
 ``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
 ``'spacy_model'`` (:class:`str`): :attr:`en_core_web_lg` is used by default for the best performance. Alternative options are :attr:`en_core_web_sm` and :attr:`en_core_web_md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator`.
-If the selected english model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `english models <https://spacy.io/models/en>`_.
+If the selected English model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_.
 
 
 Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for Unannotation and Annotation using the :class:`SpacyAnnotator` class.
+We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class.
 
 Unannotate
 ^^^^^^^^^^
@@ -239,7 +239,7 @@ To unannotate by creating an instance of the :class:`Annotator` class, run:
 
 	sa.unannotate()
 
-Alternatively, you can :attr:`unannotate` using the Command-Line:
+Alternatively, you can :attr:`unannotate` using the command-line:
 
 .. code-block:: console
 
@@ -277,25 +277,25 @@ To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to
 
 .. note::
 
-	The contents of :attr:`annotate` in the config has no affect on unannotation. Similarly, :attr:`unannotate` in the config has no affect on annotation. These processes are independent and are only affected by the corresponding parameter in the config.
+	The content of :attr:`annotate` in the config has no effect on unannotation. Similarly, :attr:`unannotate` in the config has no affect on annotation. These processes are independent and are only affected by the corresponding parameter in the config.
 
 Before running the unannotation, we can see the first four queries in the train.txt file for the :attr:`get_date_range_aggregate` intent: 
 
-.. code-block:: python
+.. code-block:: none
 
 	{sum|function} of {non-citizen|citizendesc} people {hired|employment_action} {after|date_compare} {2005|sys_time}
 	What {percentage|function} of employees were {born|dob} {before|date_compare} {1992|sys_time}?
 	{us citizen|citizendesc} people with {birthday|dob} {before|date_compare} {1996|sys_time} {count|function}
-	{count|function} of {eligble non citizen|citizendesc} workers {born|dob} {before|date_compare} {1994|sys_time}
+	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} {1994|sys_time}
 
 After running :attr:`unannotate` we find that instances of :attr:`sys_time` have been unlabelled as expected.
 
-.. code-block:: python
+.. code-block:: none
 
 	{sum|function} of {non-citizen|citizendesc} people {hired|employment_action} {after|date_compare} 2005
 	What {percentage|function} of employees were {born|dob} {before|date_compare} 1992?
 	{us citizen|citizendesc} people with {birthday|dob} {before|date_compare} 1996 {count|function}
-	{count|function} of {eligble non citizen|citizendesc} workers {born|dob} {before|date_compare} 1994
+	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} 1994
 
 
 
@@ -311,7 +311,7 @@ To annotate by creating an instance of the :class:`Annotator` class, run:
 
 	sa.annotate()
 
-Alternatively, you can :attr:`annotate` using the Command-Line:
+Alternatively, you can :attr:`annotate` using the command-line:
 
 .. code-block:: console
 
@@ -341,7 +341,7 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 
 Before running the annotation, we can see the first four queries in the train.txt file for the :attr:`get_hierarchy_up` intent: 
 
-.. code-block:: python
+.. code-block:: none
 
 	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|name}
 	I wanna know {Tayana Jeannite|name}'s person in {leadership|manager} of her?
@@ -350,7 +350,7 @@ Before running the annotation, we can see the first four queries in the train.tx
 
 After running :attr:`annotate` we find that instances of :attr:`sys_person` have been labelled and have overwritten previous instances of the custom entity, :attr:`name`.
 
-.. code-block:: python
+.. code-block:: none
 
 	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|sys_person}
 	I wanna know {Tayana Jeannite|sys_person}'s person in {leadership|manager} of her?
@@ -419,10 +419,10 @@ Entities returned by :attr:`parse()` must have the following format:
 		"value": (resolved value, if it exists), 
 	}
 
-Registering Annotator to Enable Command-Line Use
+Registering Annotator to Enable command-line Use
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In order to use our :class:`CustomAnnotator` when running annotation/unannotation commands from the Command-Line, we must add the following line to the bottom of the :attr:`auto_annotator.py` file to register the class and ensure that it loads in the :attr:`cli.py` file.
+In order to use our :class:`CustomAnnotator` when running annotation/unannotation commands from the command-line, we must add the following line to the bottom of the :attr:`auto_annotator.py` file to register the class and ensure that it loads in the :attr:`cli.py` file.
 
 .. code-block:: python
 	
@@ -438,7 +438,7 @@ Be sure to update the :class:`annotator_class` parameter in the config with the 
 		...
 	}
 
-Now we can :attr:`annotate` with our custom annotator using the Command-Line:
+Now we can :attr:`annotate` with our custom annotator using the command-line:
 
 .. code-block:: console
 
@@ -458,7 +458,7 @@ Getting Custom Parameters from the Config
 		... 
 	}
 
-:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config and if it doesn't it will use the default value of "en_core_web_lg".
+:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
 
 .. code-block:: python
 
