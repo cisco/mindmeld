@@ -122,13 +122,9 @@ In general, detected entities will be represented in the following format:
 	entity = { 
 
 		"body": (substring of sentence), 
-
 		"start": (start index), 
-
 		"end": (end index + 1), 
-
 		"dim": (entity type), 
-
 		"value": (resolved value, if it exists), 
 
 	}
@@ -156,27 +152,16 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`S
 	DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
 
 		"annotator_class": "SpacyAnnotator",
-
 		"overwrite": False, 
-
 		"annotate": [ 
-
 			{ 
-
 				"domains": "*", 
-
 				"intents": "*", 
-
 				"files": "*", 
-
 				"entities": "*", 
-
 			} 
-
 		], 
-
 		"unannotate_supported_entities_only": True, 
-
 		"unannotate": None, 
 	}
 
@@ -194,15 +179,10 @@ a section are expressed with the usual Regex special characters, such as :attr:`
 .. code-block:: python
 
 	{
-
 		"domains": "faq|salary", 
-
 		"intents": "*", 
-
 		"files": "train.txt|test.txt", 
-
 		"entities": "sys_amount-of-money|sys_time", 
-
 	}
 
 The rule above would annotate all text files named "train" or "test" in the "faq" and "salary" domains. Only sys_amount-of-money and sys_time entities would be annotated.
@@ -226,7 +206,7 @@ Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class.
+We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class. For the this tutorial we will first describe unannotation and then annotation, however, in a normal workflow you are likely to annotate first and then unannotate any annotations you are not pleased with.
 
 Unannotate
 ^^^^^^^^^^
