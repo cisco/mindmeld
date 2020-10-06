@@ -120,8 +120,7 @@ class Annotator(ABC):
         segment = re.sub("[()]", "", segment)
         segment = segment.replace(".*", ".+")
         segment = segment.replace("*", ".+")
-        segment = segment.split("|")
-        segment = "|".join([x.strip() for x in segment])
+        segment = "|".join([x.strip() for x in segment.split("|")])
         segment = "(" + segment + ")" if "|" in segment else segment
         return segment
 

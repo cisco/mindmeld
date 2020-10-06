@@ -206,7 +206,7 @@ Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class. For the this tutorial we will first describe unannotation and then annotation, however, in a normal workflow you are likely to annotate first and then unannotate any annotations you are not pleased with.
+We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class. In this tutorial we will first describe unannotation and then annotation. However, in a normal workflow you are likely to annotate first and then unannotate any annotations you are not pleased with.
 
 Unannotate
 ^^^^^^^^^^
