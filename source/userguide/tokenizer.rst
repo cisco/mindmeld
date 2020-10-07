@@ -27,3 +27,15 @@ will allow the system to capture alphanumeric strings and
     }
 
 allows the system to capture only tokens that end with either a question mark or a period.
+
+
+Default Tokenizer Configuration
+-------------------------------
+As a default in MindMeld, the Tokenizer retains the following special characters in addition to alphanumeric characters and spaces:
+
+1. All currency symbols in UNICODE.
+2. Entity annotation symbols ``{, }, |``.
+3. Decimal point in numeric values (e.g. ``124.45``).
+4. Apostrophe within tokens, such as ``O'Reilly``. Apostrophes at the beginning/end of tokens are removed, say ``Dennis'`` or ``'Tis``.
+
+Setting argument ``keep_special_chars=False`` in the Tokenizer would remove all special characters.

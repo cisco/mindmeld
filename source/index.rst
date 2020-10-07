@@ -122,6 +122,7 @@ Contents
    userguide/tokenizer
    userguide/internationalization
    userguide/voice
+   userguide/dvc
    integrations/webex_teams
    integrations/whatsapp
 
