@@ -100,29 +100,8 @@ class Annotator(ABC):
         Returns:
             pattern (str): Regex pattern specifying allowed file paths.
         """
-        pattern = []
-        for x in ["domains", "intents", "files"]:
-            processed_segment = Annotator._process_segment(rule[x])
-            pattern.append(processed_segment)
-        pattern = "/".join(pattern)
-        return ".*/" + pattern
-
-    @staticmethod
-    def _process_segment(segment):
-        """ Process an individual segment from a rule dictionary.
-
-        Args:
-            segment (str): Section of a rule dictionary ("domains", "intents", "entities").
-
-        Returns:
-            segment (str): Cleaned section of the rule dictionary.
-        """
-        segment = re.sub("[()]", "", segment)
-        segment = segment.replace(".*", ".+")
-        segment = segment.replace("*", ".+")
-        segment = "|".join([x.strip() for x in segment.split("|")])
-        segment = "(" + segment + ")" if "|" in segment else segment
-        return segment
+        pattern = [rule[x] for x in ["domains", "intents", "files"]]
+        return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
         """ Process the entities specified in a rule dictionary. Check if they are valid
@@ -134,7 +113,7 @@ class Annotator(ABC):
         Returns:
             valid_entities (list): List of valid entities specified in the rule.
         """
-        if rule["entities"].strip() == "*":
+        if rule["entities"].strip() in ["*", ".*", ".+"]:
             return ["*"]
         entities = re.sub("[()]", "", rule["entities"]).split("|")
         valid_entities = []
@@ -352,7 +331,7 @@ class Annotator(ABC):
 
 
 class SpacyAnnotator(Annotator):
-    """ Annotator class that uses spacy to generate annotations.
+    """ (English) Annotator class that uses spacy to generate annotations.
     """
 
     def __init__(self, app_path, config=None):

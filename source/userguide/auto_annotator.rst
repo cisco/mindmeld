@@ -119,7 +119,7 @@ In general, detected entities will be represented in the following format:
 
 .. code-block:: python
 
-	entity = { 
+	entity = {
 
 		"body": (substring of sentence), 
 		"start": (start index), 
@@ -155,10 +155,10 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`S
 		"overwrite": False, 
 		"annotate": [ 
 			{ 
-				"domains": "*", 
-				"intents": "*", 
-				"files": "*", 
-				"entities": "*", 
+				"domains": ".*", 
+				"intents": ".*", 
+				"files": ".*", 
+				"entities": ".*", 
 			} 
 		], 
 		"unannotate_supported_entities_only": True, 
@@ -179,17 +179,19 @@ a section are expressed with the usual Regex special characters, such as :attr:`
 .. code-block:: python
 
 	{
-		"domains": "faq|salary", 
-		"intents": "*", 
-		"files": "train.txt|test.txt", 
-		"entities": "sys_amount-of-money|sys_time", 
+		"domains": "(faq|salary)", 
+		"intents": ".*", 
+		"files": "(train.txt|test.txt)", 
+		"entities": "(sys_amount-of-money|sys_time)", 
 	}
 
 The rule above would annotate all text files named "train" or "test" in the "faq" and "salary" domains. Only sys_amount-of-money and sys_time entities would be annotated.
+Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(train.txt|test.txt)" and this pattern is matched against all file paths in the domain folder of your Mindmeld application. 
 
-.. note::
+.. warning::
 
-	The order of the annotation rules matters. A rule will overwrite a previous rule if there are conflicts.
+	The order of the annotation rules matters. Each rule overwrites the list of entities to annotate for a file if the two rules include the same file. It is good practice to start with more generic rules first and then have more specific rules.
+	Be sure to use the regex "or" (:attr:`|`) if applying rules at the same level of specificity. Otherwise, if written as separate rules, the latter will overwrite the former.
 
 .. warning::
 	By default, all files in all intents across all domains will be annotated with all supported entities. Before annotating consider including custom annotation rules in :attr:`config.py`. 
@@ -243,7 +245,7 @@ To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to
 
 		"annotator_class": "SpacyAnnotator",
 		"overwrite": False, 
-		"annotate": [{"domains": "*", "intents": "*", "files": "*", "entities": "*"}],
+		"annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*"}],
 		"unannotate_supported_entities_only": True, 
 		"unannotate": [
 			{ 

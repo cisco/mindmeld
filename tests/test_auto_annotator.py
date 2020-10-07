@@ -184,18 +184,18 @@ def test_time_parse(get_SA, query, grain, value):
     [
         (
             {
-                "domains": "faq|salary",
-                "intents": "*",
-                "files": "train.txt|test.txt",
-                "entities": "sys_amt-of-money|sys_time",
+                "domains": "(faq|salary)",
+                "intents": ".*",
+                "files": "(train.txt|test.txt)",
+                "entities": "(sys_amt-of-money|sys_time)",
             },
-            ".*/(faq|salary)/.+/(train.txt|test.txt)",
+            ".*/(faq|salary)/.*/(train.txt|test.txt)",
         ),
         (
             {
                 "domains": "salary",
-                "intents": "get_salary_aggregate|get_salary",
-                "files": "train.txt|test.txt",
+                "intents": "(get_salary_aggregate|get_salary)",
+                "files": "(train.txt|test.txt)",
                 "entities": "(sys_amt-of-money)",
             },
             ".*/salary/(get_salary_aggregate|get_salary)/(train.txt|test.txt)",
@@ -204,18 +204,22 @@ def test_time_parse(get_SA, query, grain, value):
             {
                 "domains": "date",
                 "intents": "get_date",
-                "files": "train.txt|test.txt",
+                "files": "(train.txt|test.txt)",
                 "entities": "sys_duration|sys_interval|sys_time",
             },
             ".*/date/get_date/(train.txt|test.txt)",
         ),
         (
-            {"domains": "general", "intents": "*", "files": "*", "entities": "*"},
+            {"domains": "general", "intents": ".+", "files": ".+", "entities": "*"},
             ".*/general/.+/.+",
         ),
         (
-            {"domains": "*", "intents": "*", "files": "*", "entities": "*"},
+            {"domains": ".+", "intents": ".+", "files": ".+", "entities": "*"},
             ".*/.+/.+/.+",
+        ),
+        (
+            {"domains": "[A-Z]*", "intents": "[a-z]*", "files": "[a-z]*", "entities": "*"},
+            ".*/[A-Z]*/[a-z]*/[a-z]*",
         ),
     ],
 )
