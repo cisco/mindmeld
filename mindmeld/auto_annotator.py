@@ -568,14 +568,15 @@ class SpacyAnnotator(Annotator):
             return entity
 
     def _resolve_money(self, entity, sentence):
-        # Update entity to include the $ symbol if it's left of the body text.
-        if "$" in sentence:
-            start = entity["start"]
-            if (start == 1 and sentence[0] == "$") or (
-                start > 1 and sentence[start - 2 : start] == " $"
-            ):
-                entity["start"] -= 1
-                entity["body"] = sentence[entity["start"] : entity["end"]]
+        currency_symbols = ["$", "€", "£", "¥", "₹", "₩", "฿"]
+        for symbol in currency_symbols:
+            if symbol in sentence:
+                start = entity["start"]
+                if (start == 1 and sentence[0] == symbol) or (
+                    start > 1 and sentence[start - 2 : start] == " " + symbol
+                ):
+                    entity["start"] -= 1
+                    entity["body"] = sentence[entity["start"] : entity["end"]]
 
         return self._resolve_exact_match(entity)
 
