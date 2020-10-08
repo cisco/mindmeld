@@ -23,7 +23,7 @@ import spacy
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
 from .system_entity_recognizer import DucklingRecognizer
-from .markup import load_query, dump_query
+from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
@@ -167,25 +167,20 @@ class Annotator(ABC):
                 file_path=path, query_factory=query_factory
             )
             tqdm_desc = "Processing " + path + ": "
-            temp_path = path.split(".txt")[0] + "_temp.txt"
-            with open(temp_path, "a+") as outfile:
-                for processed_query in tqdm(
-                    processed_queries, ascii=True, desc=tqdm_desc
-                ):
-                    entity_types = file_entities_map[path]
-                    if action == AnnotatorAction.ANNOTATE:
-                        self._annotate_query(
-                            processed_query=processed_query, entity_types=entity_types
-                        )
-                    elif action == AnnotatorAction.UNANNOTATE:
-                        self._unannotate_query(
-                            processed_query=processed_query,
-                            remove_entities=entity_types,
-                        )
-                    outfile.write(dump_query(processed_query))
+            for processed_query in tqdm(processed_queries, ascii=True, desc=tqdm_desc):
+                entity_types = file_entities_map[path]
+                if action == AnnotatorAction.ANNOTATE:
+                    self._annotate_query(
+                        processed_query=processed_query, entity_types=entity_types
+                    )
+                elif action == AnnotatorAction.UNANNOTATE:
+                    self._unannotate_query(
+                        processed_query=processed_query, remove_entities=entity_types,
+                    )
+            with open(path, "w") as outfile:
+                processed_queries = [q for q in dump_queries(processed_queries)]
+                outfile.write("".join(processed_queries))
                 outfile.close()
-            os.remove(path)
-            os.rename(temp_path, path)
 
     @staticmethod
     def _get_processed_queries(file_path, query_factory):
@@ -332,6 +327,11 @@ class Annotator(ABC):
 
 class SpacyAnnotator(Annotator):
     """ (English) Annotator class that uses spacy to generate annotations.
+    Supported entities include: "sys_time", "sys_interval", "sys_duration", "sys_number",
+    "sys_amount-of-money", "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity",
+    "sys_percent", "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac",
+    "sys_product", "sys_event", "sys_law", "sys_langauge", "sys_work-of-art", "sys_other-quantity",
+    For more information on the supported entities for the Spacy Annotator check the MindMeld docs. 
     """
 
     def __init__(self, app_path, config=None):
@@ -367,9 +367,7 @@ class SpacyAnnotator(Annotator):
             try:
                 return spacy.load(model)
             except OSError:
-
                 logger.warning("%s not found. Downloading the model.", model)
-
                 os.system("python -m spacy download " + model)
                 language_module = importlib.import_module(model)
                 return language_module.load()
@@ -573,7 +571,7 @@ class SpacyAnnotator(Annotator):
             if symbol in sentence:
                 start = entity["start"]
                 if (start == 1 and sentence[0] == symbol) or (
-                    start > 1 and sentence[start - 2 : start] == " " + symbol
+                    start >= 2 and sentence[start - 2 : start] == " " + symbol
                 ):
                     entity["start"] -= 1
                     entity["body"] = sentence[entity["start"] : entity["end"]]
@@ -645,7 +643,8 @@ class SpacyAnnotator(Annotator):
 
     def _resolve_percent(self, entity):
         """ Resolves an entity related to percentage. Uses a heuristic of finding
-        the largest candidate value and dividing by 100.
+        the largest candidate value and dividing by 100. If the candidate value is
+        a float, the float value divided by 100 is immediately returned.
 
         Args:
             entity (dict): A dictionary representing an entity.
@@ -662,10 +661,12 @@ class SpacyAnnotator(Annotator):
         possible_values = []
         for candidate in candidates:
             if candidate["entity_type"] == "sys_number":
-                if "." in candidate["body"]:
-                    entity["value"]["value"] = float(candidate["body"]) / 100
+                value = candidate["value"]["value"]
+                if isinstance(value, float):
+                    entity["value"]["value"] = value / 100
                     return entity
-                possible_values.append(candidate["value"]["value"])
+                else:
+                    possible_values.append(value)
         entity["value"]["value"] = max(possible_values) / 100
         return entity
 
