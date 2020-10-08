@@ -271,6 +271,13 @@ what are your hours for the {little italy|store_name} store
 when does the {chinatown|store_name} location open {tomorrow|sys_time}
 what time do you close on {friday|sys_time} night at your {little italy|store_name} location
 is the {104 first street|store_name} store open this {sunday|sys_time}
+When does the {23 2nd street|store_name} store open {today|sys_time}
+how much longer is the {3 fourth street|store_name} store open?
+until when is the {18 2 street|store_name} store open on {Saturday|sys_time}?
+is the {786 2 street|store_name} open {today|sys_time}?
+when does the kwik-e-mart store on {21 fifth street|store_name} close?
+when does the store on {783 first street|store_name} open?
+Hours for the {65 4 street|store_name} store?
 When does it close?
 When does it open?
 What are its hours?
