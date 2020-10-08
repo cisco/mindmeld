@@ -257,6 +257,16 @@ def test_sentiment_query_feature(
             [math.log(10), math.log(3)],
             -1,
         ),
+        # Test for sys_candidate features for normalized text
+        (
+            "change alarm...from 8am to 9am",
+            [
+                "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
+                "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
+            ],
+            [math.log(10), math.log(3)],
+            -1,
+        ),
     ],
 )
 def test_entity_query_features(
