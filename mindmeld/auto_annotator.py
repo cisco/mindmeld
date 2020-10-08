@@ -178,8 +178,7 @@ class Annotator(ABC):
                         processed_query=processed_query, remove_entities=entity_types,
                     )
             with open(path, "w") as outfile:
-                processed_queries = [q for q in dump_queries(processed_queries)]
-                outfile.write("".join(processed_queries))
+                outfile.write("".join(list(dump_queries(processed_queries))))
                 outfile.close()
 
     @staticmethod
@@ -331,7 +330,7 @@ class SpacyAnnotator(Annotator):
     "sys_amount-of-money", "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity",
     "sys_percent", "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac",
     "sys_product", "sys_event", "sys_law", "sys_langauge", "sys_work-of-art", "sys_other-quantity",
-    For more information on the supported entities for the Spacy Annotator check the MindMeld docs. 
+    For more information on the supported entities for the Spacy Annotator check the MindMeld docs.
     """
 
     def __init__(self, app_path, config=None):

@@ -168,12 +168,12 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`S
 Let's take a look at the allowed values for each setting in an Auto Annotator configuration.
 
 
-``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation. By default, :class:`SpacyAnnotator` is used. 
+``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation when invoked from the command line. By default, :class:`SpacyAnnotator` is used. 
 
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
 ``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
-Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`*` can be used if all possibilities in a section are to be selected, while possibilities within
+Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`.*` can be used if all possibilities in a section are to be selected, while possibilities within
 a section are expressed with the usual Regex special characters, such as :attr:`.` for any single character and :attr:`|` to represent "or". 
 
 .. code-block:: python
@@ -349,7 +349,7 @@ A developer simply needs to implement two methods to create a custom annotator.
 
 Custom Annotator Boilerplate Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This section includes boilerplate code to build a :class:`CustomAnnotator` class to add to :attr:`auto_annotator.py`
+This section includes boilerplate code to build a :class:`CustomAnnotator` class to which you can add to your own python file, let's call it :attr:`custom_annotator.py`
 There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer has to implement the :meth:`parse` and :meth:`valid_entity_check` methods.
 
 .. code-block:: python
@@ -388,6 +388,10 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 			
 			]
 			return entity in supported_entities
+	
+	if __name__ == "__main__":
+		custom_annotator = CustomAnnotator(app_path="hr_assistant")
+		custom_annotator.annotate()
 
 Entities returned by :attr:`parse()` must have the following format:
 
@@ -401,31 +405,8 @@ Entities returned by :attr:`parse()` must have the following format:
 		"value": (resolved value, if it exists), 
 	}
 
-Registering Annotator to Enable command-line Use
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In order to use our :class:`CustomAnnotator` when running annotation/unannotation commands from the command-line, we must add the following line to the bottom of the :attr:`auto_annotator.py` file to register the class and ensure that it loads in the :attr:`cli.py` file.
-
-.. code-block:: python
-	
-	register_annotator("CustomAnnotator", CustomAnnotator)
-
-Be sure to update the :class:`annotator_class` parameter in the config with the registered name of your custom annotator.
-
-.. code-block:: python
-
-	AUTO_ANNOTATOR_CONFIG = { 
-		...
-		"annotator_class": "CustomAnnotator",
-		...
-	}
-
-Now we can :attr:`annotate` with our custom annotator using the command-line:
-
-.. code-block:: console
-
-	mindmeld annotate --app-path "hr_assistant"
-
+To run your custom Annotator, simply run in the command line: :attr:`python custom_annotator.py`.
+To run unannotation with your custom Annotator, change the last line in your script to :attr:`custom_annotator.unannotate()`.
 
 Getting Custom Parameters from the Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
