@@ -662,6 +662,9 @@ class SpacyAnnotator(Annotator):
         possible_values = []
         for candidate in candidates:
             if candidate["entity_type"] == "sys_number":
+                if "." in candidate["body"]:
+                    entity["value"]["value"] = float(candidate["body"]) / 100
+                    return entity
                 possible_values.append(candidate["value"]["value"])
         entity["value"]["value"] = max(possible_values) / 100
         return entity
