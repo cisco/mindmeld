@@ -14,7 +14,7 @@ the one on {evergreen|store_name}, open times
 please can you tell me if {springfield|store_name} is possibly open at this time on {friday|sys_time}
 are any stores open on {sunday|sys_time} at 9pm
 is the e mart on {russian district|store_name} open
-When is the {181st|store_name} location open {tomorrow|sys_time}?
+When is the {181st street|store_name} location open {tomorrow|sys_time}?
 Was {D street|store_name} open {yesterday|sys_time}?
 Is {257th|store_name} open on {Christmas|sys_time}?
 When can I go to {D street|store_name} location {tomorrow|sys_time}?
@@ -95,7 +95,7 @@ is the {chinatown|store_name} store open {tomorrow|sys_time}
 when do you open and close at the {little italy|store_name} store during {this week|sys_time}
 does the {chinatown|store_name} store open later on {sunday|sys_time}
 what time does the {little italy|store_name} store close on {christmas day|sys_time}
-is the store at {104 first|store_name} open on {mothers day|sys_time}
+is the store at {13 2 first street|store_name} open on {mothers day|sys_time}
 what time does the {fake street|store_name} store in {springfield|store_name} open on {tuesday|sys_time}
 are you guys open on {christmas day|sys_time} at your {north haverbrook|store_name} location
 what are your hours at the {chinatown|store_name} store on {fake|store_name}
@@ -103,7 +103,7 @@ when does the {springfield|store_name} store at {3rd|store_name} open {tomorrow|
 do you close early on {july 4th|sys_time} in your {chinatown|store_name} store
 is the {little italy|store_name} store in {springfield|store_name} open on the {Sunday|sys_time}
 What time will the {Industrial Road|store_name} location be open?
-Is the {156th Street|store_name} location open right now?
+Is the {15 6th Street|store_name} location open right now?
 Will the {12th Avenue|store_name} location be open {tomorrow|sys_time}?
 Is the {Industrial Road|store_name} store open on {Sunday|sys_time}
 Can I visit the {156th street|store_name} location {Monday|sys_time} morning?
@@ -124,7 +124,7 @@ When does the store on {Industrial Ave|store_name} close {tomorrow|sys_time}?
 What are the operating hours for the store on {12th Avenue|store_name} {tomorrow|sys_time}?
 What are the open hours at the {156th Street|store_name} location on {Monday next week|sys_time}?
 Is the {industrial road|store_name} location open 24 hours?
-What time does the {156th street|store_name} mart close on {Wednesday|sys_time}?
+What time does the {15 6 street|store_name} mart close on {Wednesday|sys_time}?
 Does the {Industrial Road|store_name} location close at 10?
 Does the location on {12th Avenue|store_name} close early {today|sys_time}?
 Does the location on {Industrial Road|store_name} close before midnight?
@@ -186,9 +186,9 @@ Does the store on {12th avenue|store_name} stay open passed 10PM?
 Can I still go to the store on {Industrial road|store_name} after 10?
 Will someone still be at the counter at {156th Street|store_name} if I come in after 9PM?
 Can I go to the store on {12th avenue|store_name} after midnight?
-Is the {156th|store_name} store still open after 930PM?
+Is the {156th street|store_name} store still open after 930PM?
 If I show up at 9am, will the {Industrial road|store_name} store be open already?
-Can I show up at the {12th Ave|store_name} store at 9am?
+Can I show up at the {12 4 Ave|store_name} store at 9am?
 when is {Duff Gardens|store_name} Store open {tomorrow|sys_time}?
 what are the operating hours of {duff gardens|store_name}?
 when will {duff gardens|store_name} store be open on {sunday|sys_time}?
@@ -247,7 +247,7 @@ what are the timings for the store on {e oak street|store_name}?
 when can I go to the store on {w oak street|store_name}?
 hours for the store on {rural rte 27|store_name}?
 Kwikemart on {w oak|store_name} store hours
-The kwikemart on {rr27|store_name} timings?
+The kwikemart on {rr27 street|store_name} timings?
 What are the hours of operation for the kwik-e-mart store on {w oak|store_name}?
 What are the timings for the {west oak|store_name} kwik e mart
 Hours for kwik e mart on {west oak|store_name}
@@ -265,7 +265,7 @@ Can I get a squishee from the {west oak|store_name} store {today|sys_time}?
 I want a squishee after work, will {e oak|store_name} be open?
 how late is your {chinatown|store_name} store open {today|sys_time}
 what time do you open at your {little italy|store_name} location
-what time does the {104 first|store_name} store close on {friday|sys_time}
+what time does the {10 1 street|store_name} store close on {friday|sys_time}
 is the {chinatown|store_name} store open on {sunday|sys_time}
 what are your hours for the {little italy|store_name} store
 when does the {chinatown|store_name} location open {tomorrow|sys_time}
