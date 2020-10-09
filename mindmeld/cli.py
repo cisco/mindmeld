@@ -624,11 +624,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace,
-            index_name,
-            data_file,
-            es_host,
-            app_path=app_path,
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
@@ -737,11 +733,16 @@ def _get_duckling_pid():
 @click.option(
     "--app-path", required=True, help="The application's path.",
 )
-def annotate(app_path):
+@click.option(
+    "--overwrite", is_flag=True, default=False, help="Overwrite existing annotations."
+)
+def annotate(app_path, overwrite):
     """Runs the annotation command of the Auto Annotator."""
     config = get_auto_annotator_config(app_path=app_path)
+    if overwrite:
+        config["overwrite"] = True
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.annotate()
+    annotator.annotate(config=config)
     logger.info("Annotation Complete.")
 
 
@@ -749,11 +750,19 @@ def annotate(app_path):
 @click.option(
     "--app-path", required=True, help="The application's path.",
 )
-def unannotate(app_path):
+@click.option(
+    "--all", is_flag=True, default=False, help="Unnanotate all entities in app data."
+)
+def unannotate(app_path, all):
     """Runs the unannotation command of the Auto Annotator."""
     config = get_auto_annotator_config(app_path=app_path)
+    if all:
+        config["unannotate"] = [
+            {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
+        ]
+        config["unannotate_supported_entities_only"] = False
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.unannotate()
+    annotator.unannotate(config=config)
     logger.info("Annotation Removal Complete.")
 
 
