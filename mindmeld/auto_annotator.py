@@ -28,7 +28,7 @@ from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
-from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, _no_overlap
+from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap
 
 logger = logging.getLogger(__name__)
 
@@ -571,8 +571,7 @@ class SpacyAnnotator(Annotator):
             return entity
 
     def _resolve_money(self, entity, sentence):
-        currency_symbols = ["$", "€", "£", "¥", "₹", "₩", "฿"]
-        for symbol in currency_symbols:
+        for symbol in CURRENCY_SYMBOLS:
             if symbol in sentence:
                 start = entity["start"]
                 if (start == 1 and sentence[0] == symbol) or (

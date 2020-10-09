@@ -361,8 +361,8 @@ Let's take a look at the allowed values for each setting in an Auto Annotator co
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
 ``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
-Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`.*` can be used if all possibilities in a section are to be selected, while possibilities within
-a section are expressed with the usual Regex special characters, such as :attr:` . ` for any single character and :attr:`|` to represent "or". 
+Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`'.*'` can be used if all possibilities in a section are to be selected, while possibilities within
+a section are expressed with the usual Regex special characters, such as :attr:`'.'` for any single character and :attr:`'|'` to represent "or". 
 
 .. code-block:: python
 
