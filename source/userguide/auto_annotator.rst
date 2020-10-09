@@ -16,9 +16,9 @@ The Auto Annotator
 
 Quick Start
 -----------
-This section briefly explains the use of the unannotate and annotate commands. For more details, read the next section.
+This section briefly explains the use of the ``annotate`` and ``unannotate`` commands. For more details, read the next section.
 
-First, copy and paste the config below into the :attr:`config.py` of the mindmeld app that you would like to remove annotations.
+First, copy and paste the configuration below into the :attr:`config.py` of the MindMeld app that you would like to operate on.
 
 .. code-block:: python
 
@@ -95,7 +95,7 @@ If you see the following message, you need to update the unannotate parameter in
 
 .. code-block:: console
 
-	'unannotate' is None in the config. Nothing to unannotate.
+	'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.
 
 
 Let's unannotate :attr:`sys_time` entities from the :attr:`get_date_range_aggregate` intent in the :attr:`date` domain.

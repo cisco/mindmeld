@@ -45,15 +45,21 @@ class AnnotatorAction(Enum):
 class Annotator(ABC):
     """
     Abstract Annotator class that can be used to build a custom Annotation class.
+
+
     """
 
-    def __init__(self, app_path, config=None, resource_loader=None):
-        """ Initializes an annotator."""
+    def __init__(self, app_path, config=None):
+        """ Initializes an annotator.
+        
+        Args:
+            app_path (str): The location of the MindMeld app
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
+        """
         self.app_path = app_path
-        self.config = get_auto_annotator_config(app_path=app_path, config=config)
-        self._resource_loader = (
-            resource_loader or ResourceLoader.create_resource_loader(app_path)
-        )
+        self.config = config or get_auto_annotator_config(app_path=app_path)
+        self._resource_loader = ResourceLoader.create_resource_loader(app_path)
         self.annotate_file_entities_map = self._get_file_entities_map(
             action=AnnotatorAction.ANNOTATE
         )
@@ -147,7 +153,7 @@ class Annotator(ABC):
         """ Unannotate data based on configurations in the config.py file.
         """
         if not self.config["unannotate"]:
-            logger.warning("'unannotate' is None in the config. Nothing to unannotate.")
+            logger.warning("'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.")
             return
         file_entities_map = self._get_file_entities_map(
             action=AnnotatorAction.UNANNOTATE
