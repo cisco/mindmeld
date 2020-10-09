@@ -49,14 +49,16 @@ class Annotator(ABC):
 
     """
 
-    def __init__(self, app_path):
+    def __init__(self, app_path, config=None):
         """ Initializes an annotator.
         
         Args:
             app_path (str): The location of the MindMeld app
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
         """
         self.app_path = app_path
-        self.config = get_auto_annotator_config(app_path=app_path)
+        self.config = config or get_auto_annotator_config(app_path=app_path)
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
         self.annotate_file_entities_map = self._get_file_entities_map(
             action=AnnotatorAction.ANNOTATE
@@ -352,13 +354,15 @@ class SpacyAnnotator(Annotator):
     For more information on the supported entities for the Spacy Annotator check the MindMeld docs.
     """
 
-    def __init__(self, app_path):
+    def __init__(self, app_path, config=None):
         """ Initializes an annotator.
         
         Args:
             app_path (str): The location of the MindMeld app
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
         """
-        super().__init__(app_path=app_path)
+        super().__init__(app_path=app_path, config=config)
 
         self.model = self.config.get("spacy_model", EN_CORE_WEB_LG)
         self.nlp = SpacyAnnotator._load_model(self.model)

@@ -94,7 +94,9 @@ def create_annotator(app_path, config):
             "Missing required argument in AUTO_ANNOTATOR_CONFIG: 'annotator_class'"
         )
     try:
-        return ANNOTATOR_MAP[config["annotator_class"]](app_path=app_path)
+        return ANNOTATOR_MAP[config["annotator_class"]](
+            app_path=app_path, config=config
+        )
     except KeyError:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config["annotator_class"]))

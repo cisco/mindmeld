@@ -742,7 +742,7 @@ def annotate(app_path, overwrite):
     if overwrite:
         config["overwrite"] = True
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.annotate(config=config)
+    annotator.annotate()
     logger.info("Annotation Complete.")
 
 
@@ -762,7 +762,7 @@ def unannotate(app_path, all):
         ]
         config["unannotate_supported_entities_only"] = False
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.unannotate(config=config)
+    annotator.unannotate()
     logger.info("Annotation Removal Complete.")
 
 
