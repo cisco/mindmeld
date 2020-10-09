@@ -739,10 +739,8 @@ def _get_duckling_pid():
 def annotate(app_path, overwrite):
     """Runs the annotation command of the Auto Annotator."""
     config = get_auto_annotator_config(app_path=app_path)
-    if overwrite:
-        config["overwrite"] = True
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.annotate()
+    annotator.annotate(overwrite=overwrite)
     logger.info("Annotation Complete.")
 
 
@@ -751,18 +749,13 @@ def annotate(app_path, overwrite):
     "--app-path", required=True, help="The application's path.",
 )
 @click.option(
-    "--all", is_flag=True, default=False, help="Unnanotate all entities in app data."
+    "--unannotate_all", is_flag=True, default=False, help="Unnanotate all entities in app data."
 )
-def unannotate(app_path, all):
+def unannotate(app_path, unannotate_all):
     """Runs the unannotation command of the Auto Annotator."""
     config = get_auto_annotator_config(app_path=app_path)
-    if all:
-        config["unannotate"] = [
-            {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
-        ]
-        config["unannotate_supported_entities_only"] = False
     annotator = create_annotator(app_path=app_path, config=config)
-    annotator.unannotate()
+    annotator.unannotate(unannotate_all=unannotate_all)
     logger.info("Annotation Removal Complete.")
 
 

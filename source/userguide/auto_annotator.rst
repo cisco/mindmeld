@@ -16,48 +16,17 @@ The Auto Annotator
 
 Quick Start
 -----------
-This section briefly explains the use of the ``annotate`` and ``unannotate`` commands. For more details, read the next section.
+This section briefly explains the use of the ``annotate`` and ``unannotate`` commands. For more details, please read the next section.
 
-First, copy and paste the configuration below into the :attr:`config.py` of the MindMeld app that you would like to operate on.
-
-.. code-block:: python
-
-	AUTO_ANNOTATOR_CONFIG = { 
-
-		"annotator_class": "SpacyAnnotator",
-		"overwrite": False, 
-		"annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*"}],
-		"unannotate_supported_entities_only": True, 
-		"unannotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*"}],
-	}
-
-To unannotate you can run python code or use the command-line.
-
-Python:
-
-.. code-block:: python
-
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
-
-	sa.unannotate()
+Before annotating the data, we will first remove all existing annotations using ``unannotate``. Be sure to include the :attr:`--unannotate_all` flag when running the following command in the command-line.
 
 Command-line:
 
 .. code-block:: console
 
-	mindmeld unannotate --app-path "hr_assistant"
+	mindmeld unannotate --app-path "hr_assistant" --unannotate_all
 
-You can annotate in a similar manner.
-
-Python:
-
-.. code-block:: python
-
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
-
-	sa.annotate()
+We can now proceed to ``annotate`` our data using the command below.
 
 Command-line:
 
@@ -71,34 +40,103 @@ Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for unannotation and annotation using the :class:`SpacyAnnotator` class. We will first describe unannotation and then annotation. However, in a normal workflow you are likely to annotate first and then unannotate any annotations you are not pleased with.
+We will demonstrate both approaches for annotation and unannotation using the :class:`SpacyAnnotator` class.
 
-Unannotate
-^^^^^^^^^^
-To unannotate by creating an instance of the :class:`Annotator` class, run:
+Annotate
+^^^^^^^^
+
+By default, all entity types supported by an Annotator will by annotated if they do not overlap with existing annotations.
+
+You can :attr:`annotate` using the command-line.
+To overwrite existing annotations that overlap with new annotations, pass in the optional param :attr:`--overwrite`.
+
+.. code-block:: console
+
+	mindmeld annotate --app-path "hr_assistant" --overwrite
+
+Alternatively, you can annotate by creating an instance of the :class:`Annotator` class and running the Python code below.
+An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
 	from mindmeld.auto_annotator import SpacyAnnotator 
 	sa = SpacyAnnotator(app_path="hr_assistant")
 
-	sa.unannotate()
+	sa.annotate(overwrite=True)
 
-Alternatively, you can :attr:`unannotate` using the command-line:
+If you do not want to annotate all supported entities, you can specify annotation rules instead.
+
+For example, let's annotate :attr:`sys_person` entities from the :attr:`get_hierarchy_up` intent in the :attr:`hierarchy` domain.
+To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to :attr:`config.py`.
+Notice that we are setting :attr:`overwrite` to True since we want to replace the existing custom entity label, :attr:`name`.
+
+.. code-block:: python
+
+	AUTO_ANNOTATOR_CONFIG = { 
+
+		"annotator_class": "SpacyAnnotator",
+		"overwrite": True, 
+		"annotate": [
+			{ 
+				"domains": "hierarchy", 
+				"intents": "get_hierarchy_up", 
+				"files": "train.txt",
+				"entities": "sys_person", 
+			}
+		],
+		"unannotate_supported_entities_only": True, 
+		"unannotate": None
+	}
+
+Before running the annotation, let's take a look at the first four queries in the train.txt file for the :attr:`get_hierarchy_up` intent: 
+
+.. code-block:: none
+
+	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|name}
+	I wanna know {Tayana Jeannite|name}'s person in {leadership|manager} of her?
+	is it correct to say that {Angela|name} is a {boss|manager}?
+	who all is {management|manager} of {tayana|name}
+
+After running :attr:`annotate` we find that instances of :attr:`sys_person` have been labelled and have overwritten previous instances of the custom entity, :attr:`name`.
+
+.. code-block:: none
+
+	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|sys_person}
+	I wanna know {Tayana Jeannite|sys_person}'s person in {leadership|manager} of her?
+	is it correct to say that {Angela|sys_person} is a {boss|manager}?
+	who all is {management|manager} of {tayana|sys_person}
+
+You can annotate with multiple annotation rules. For more details on annotation rules please read the "Auto Annotator Configuration" section below.
+
+Unannotate
+^^^^^^^^^^
+By default, only the entities that are supported by an Annotator will be unannotated.
+
+You can :attr:`unannotate` using the command-line. To unannotate all entities, pass in the optional param :attr:`--unannotate_all`.
 
 .. code-block:: console
 
-	mindmeld unannotate --app-path "hr_assistant"
+	mindmeld unannotate --app-path "hr_assistant" --unannotate_all
 
+To unannotate by creating an instance of the :class:`Annotator` class, run the Python code below.
+To unannotate all annotations, pass in the optional param :attr:`unannotate_all`.
 
-If you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`. You can refer to the config specifications in the section above.
+.. code-block:: python
+
+	from mindmeld.auto_annotator import SpacyAnnotator 
+	sa = SpacyAnnotator(app_path="hr_assistant")
+
+	sa.unannotate(unannotate_all=True)
+
+If :attr:`unannotate_all` is not set to True and you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
+You can refer to the config specifications in the "Auto Annotator Configuration" section below.
 
 .. code-block:: console
 
 	'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.
 
-
-Let's unannotate :attr:`sys_time` entities from the :attr:`get_date_range_aggregate` intent in the :attr:`date` domain.
+If you do not want to unannotate all entities, you can can specify annotation rules to be used for unannotation in the :attr:`unannotate` param of your config.
+For example, let's unannotate :attr:`sys_time` entities from the :attr:`get_date_range_aggregate` intent in the :attr:`date` domain.
 To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to :attr:`config.py`.
 
 
@@ -124,7 +162,7 @@ To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to
 
 	The content of :attr:`annotate` in the config has no effect on unannotation. Similarly, :attr:`unannotate` in the config has no affect on annotation. These processes are independent and are only affected by the corresponding parameter in the config.
 
-Before running the unannotation, we can see the first four queries in the train.txt file for the :attr:`get_date_range_aggregate` intent: 
+Before running the unannotation, let's take a look at the first four queries in the train.txt file for the :attr:`get_date_range_aggregate` intent: 
 
 .. code-block:: none
 
@@ -133,7 +171,7 @@ Before running the unannotation, we can see the first four queries in the train.
 	{us citizen|citizendesc} people with {birthday|dob} {before|date_compare} {1996|sys_time} {count|function}
 	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} {1994|sys_time}
 
-After running :attr:`unannotate` we find that instances of :attr:`sys_time` have been unlabelled as expected.
+After running :attr:`unannotate` we find that instances of :attr:`sys_time` have been unannotated as expected.
 
 .. code-block:: none
 
@@ -142,65 +180,6 @@ After running :attr:`unannotate` we find that instances of :attr:`sys_time` have
 	{us citizen|citizendesc} people with {birthday|dob} {before|date_compare} 1996 {count|function}
 	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} 1994
 
-
-
-Annotate
-^^^^^^^^
-
-To annotate by creating an instance of the :class:`Annotator` class, run:
-
-.. code-block:: python
-
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
-
-	sa.annotate()
-
-Alternatively, you can :attr:`annotate` using the command-line:
-
-.. code-block:: console
-
-	mindmeld annotate --app-path "hr_assistant"
-
-Let's annotate :attr:`sys_person` entities from the :attr:`get_hierarchy_up` intent in the :attr:`hierarchy` domain.
-To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to :attr:`config.py`.
-Notice that we are setting :attr:`overwrite` to True since we want to replace the existing custom entity label, :attr:`name`.
-
-.. code-block:: python
-
-	AUTO_ANNOTATOR_CONFIG = { 
-
-		"annotator_class": "SpacyAnnotator",
-		"overwrite": True, 
-		"annotate": [
-			{ 
-				"domains": "hierarchy", 
-				"intents": "get_hierarchy_up", 
-				"files": "train.txt",
-				"entities": "sys_person", 
-			}
-		],
-		"unannotate_supported_entities_only": True, 
-		"unannotate": None
-	}
-
-Before running the annotation, we can see the first four queries in the train.txt file for the :attr:`get_hierarchy_up` intent: 
-
-.. code-block:: none
-
-	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|name}
-	I wanna know {Tayana Jeannite|name}'s person in {leadership|manager} of her?
-	is it correct to say that {Angela|name} is a {boss|manager}?
-	who all is {management|manager} of {tayana|name}
-
-After running :attr:`annotate` we find that instances of :attr:`sys_person` have been labelled and have overwritten previous instances of the custom entity, :attr:`name`.
-
-.. code-block:: none
-
-	I wanna get a list of all of the employees that are currently {manage|manager} {caroline|sys_person}
-	I wanna know {Tayana Jeannite|sys_person}'s person in {leadership|manager} of her?
-	is it correct to say that {Angela|sys_person} is a {boss|manager}?
-	who all is {management|manager} of {tayana|sys_person}
 
 Default Auto Annotator: Spacy Annotator
 ---------------------------------------

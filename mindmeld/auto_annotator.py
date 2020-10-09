@@ -143,30 +143,36 @@ class Annotator(ABC):
         """
         raise NotImplementedError("Subclasses must implement this method")
 
-    def annotate(self, config=None):
+    def annotate(self, **kwargs):
         """ Annotate data based on configurations in the config.py file.
 
         Args:
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            kwargs (dict, optional): Configuration overrides can be passed in as arguments.
         """
-        if config:
-            self.config = config
+        for key, value in kwargs.items():
+            self.config[key] = value
         if not self.config["annotate"]:
             logger.warning("'annotate' field is not configured or misconfigured in the `config.py`. We can't find any file to annotate.")
             return
         file_entities_map = self.annotate_file_entities_map
         self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
 
-    def unannotate(self, config=None):
-        """ Unannotate data based on configurations in the config.py file.
+    def unannotate(self, **kwargs):
+        """ Unannotate data based on configurations in the config.py file. 
 
         Args:
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            kwargs (dict, optional): Configuration overrides can be passed in as arguments.
+            unannotate_all (bool): Unannotate all entities.
         """
-        if config:
-            self.config = config
+        for key, value in kwargs.items():
+            if key == "unannotate_all" and value:
+                self.config["unannotate"] = [
+                    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
+                ]
+                self.config["unannotate_supported_entities_only"] = False
+            else:
+                self.config[key] = value
+
         if not self.config["unannotate"]:
             logger.warning("'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.")
             return
