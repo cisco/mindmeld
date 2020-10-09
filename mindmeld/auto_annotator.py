@@ -49,16 +49,14 @@ class Annotator(ABC):
 
     """
 
-    def __init__(self, app_path, config=None):
+    def __init__(self, app_path):
         """ Initializes an annotator.
         
         Args:
             app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
         """
         self.app_path = app_path
-        self.config = config or get_auto_annotator_config(app_path=app_path)
+        self.config = get_auto_annotator_config(app_path=app_path)
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
         self.annotate_file_entities_map = self._get_file_entities_map(
             action=AnnotatorAction.ANNOTATE
@@ -143,15 +141,30 @@ class Annotator(ABC):
         """
         raise NotImplementedError("Subclasses must implement this method")
 
-    def annotate(self):
+    def annotate(self, config=None):
         """ Annotate data based on configurations in the config.py file.
+
+        Args:
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
         """
+        if config:
+            self.config = config
+        if not self.config["annotate"]:
+            logger.warning("'annotate' field is not configured or misconfigured in the `config.py`. We can't find any file to annotate.")
+            return
         file_entities_map = self.annotate_file_entities_map
         self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
 
-    def unannotate(self):
+    def unannotate(self, config=None):
         """ Unannotate data based on configurations in the config.py file.
+
+        Args:
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
         """
+        if config:
+            self.config = config
         if not self.config["unannotate"]:
             logger.warning("'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.")
             return
@@ -339,8 +352,13 @@ class SpacyAnnotator(Annotator):
     For more information on the supported entities for the Spacy Annotator check the MindMeld docs.
     """
 
-    def __init__(self, app_path, config=None):
-        super().__init__(app_path=app_path, config=config)
+    def __init__(self, app_path):
+        """ Initializes an annotator.
+        
+        Args:
+            app_path (str): The location of the MindMeld app
+        """
+        super().__init__(app_path=app_path)
 
         self.model = self.config.get("spacy_model", EN_CORE_WEB_LG)
         self.nlp = SpacyAnnotator._load_model(self.model)
