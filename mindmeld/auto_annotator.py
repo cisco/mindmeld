@@ -51,7 +51,7 @@ class Annotator(ABC):
 
     def __init__(self, app_path, config=None):
         """ Initializes an annotator.
-        
+
         Args:
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
@@ -162,14 +162,15 @@ class Annotator(ABC):
             self.config[key] = value
         if not self.config["annotate"]:
             logger.warning(
-                "'annotate' field is not configured or misconfigured in the `config.py`. We can't find any file to annotate."
+                ''''annotate' field is not configured or misconfigured in the `config.py`.
+                 We can't find any file to annotate.'''
             )
             return
         file_entities_map = self.annotate_file_entities_map
         self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
 
     def unannotate(self, **kwargs):
-        """ Unannotate data based on configurations in the config.py file. 
+        """ Unannotate data based on configurations in the config.py file.
 
         Args:
             kwargs (dict, optional): Configuration overrides can be passed in as arguments.
@@ -186,7 +187,8 @@ class Annotator(ABC):
 
         if not self.config["unannotate"]:
             logger.warning(
-                "'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate."
+                ''''unannotate' field is not configured or misconfigured in the `config.py`.
+                 We can't find any file to unannotate.'''
             )
             return
         file_entities_map = self._get_file_entities_map(
@@ -375,7 +377,7 @@ class SpacyAnnotator(Annotator):
 
     def __init__(self, app_path, config=None):
         """ Initializes an annotator.
-        
+
         Args:
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
@@ -426,7 +428,7 @@ class SpacyAnnotator(Annotator):
             )
             raise ValueError(error_msg)
 
-    def supported_entity_types(self):
+    def supported_entity_types(self):  # pylint: disable=W0236
         """
         Returns:
             supported_entity_types (list): List of supported entity types.
