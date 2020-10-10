@@ -749,7 +749,10 @@ def annotate(app_path, overwrite):
     "--app-path", required=True, help="The application's path.",
 )
 @click.option(
-    "--unannotate_all", is_flag=True, default=False, help="Unnanotate all entities in app data."
+    "--unannotate_all",
+    is_flag=True,
+    default=False,
+    help="Unnanotate all entities in app data.",
 )
 def unannotate(app_path, unannotate_all):
     """Runs the unannotation command of the Auto Annotator."""

@@ -131,7 +131,15 @@ class Annotator(ABC):
                 logger.warning("%s is not a valid entity. Skipping entity.", entity)
         return valid_entities
 
+    @property
     @abstractmethod
+    def supported_entity_types(self):
+        """
+        Returns:
+            supported_entity_types (list): List of supported entity types.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
     def valid_entity_check(self, entity):
         """ Determine if an entity type is valid.
 
@@ -141,7 +149,8 @@ class Annotator(ABC):
         Returns:
             bool: Whether entity is valid.
         """
-        raise NotImplementedError("Subclasses must implement this method")
+        entity = entity.lower().strip()
+        return entity in self.supported_entity_types
 
     def annotate(self, **kwargs):
         """ Annotate data based on configurations in the config.py file.
@@ -152,7 +161,9 @@ class Annotator(ABC):
         for key, value in kwargs.items():
             self.config[key] = value
         if not self.config["annotate"]:
-            logger.warning("'annotate' field is not configured or misconfigured in the `config.py`. We can't find any file to annotate.")
+            logger.warning(
+                "'annotate' field is not configured or misconfigured in the `config.py`. We can't find any file to annotate."
+            )
             return
         file_entities_map = self.annotate_file_entities_map
         self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
@@ -174,7 +185,9 @@ class Annotator(ABC):
                 self.config[key] = value
 
         if not self.config["unannotate"]:
-            logger.warning("'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate.")
+            logger.warning(
+                "'unannotate' field is not configured or misconfigured in the `config.py`. We can't find any file to unannotate."
+            )
             return
         file_entities_map = self._get_file_entities_map(
             action=AnnotatorAction.UNANNOTATE
@@ -413,9 +426,12 @@ class SpacyAnnotator(Annotator):
             )
             raise ValueError(error_msg)
 
-    def valid_entity_check(self, entity):
-        entity = entity.lower().strip()
-        return entity in SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+    def supported_entity_types(self):
+        """
+        Returns:
+            supported_entity_types (list): List of supported entity types.
+        """
+        return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
     def parse(self, sentence, entity_types=None):
         """ Extracts entities from a sentence. Detected entities should are
@@ -424,8 +440,8 @@ class SpacyAnnotator(Annotator):
 
         Args:
             sentence (str): Sentence to detect entities.
-            entity_types (list): List of entity types to parse. If None, all
-                possible entity types will be parsed.
+            entity_types (list): List of entity types to annotate. If None, all
+                possible entity types will be annotated.
 
         Returns:
             entities (list): List of entity dictionaries.
