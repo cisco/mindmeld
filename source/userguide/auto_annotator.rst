@@ -444,17 +444,14 @@ Getting Custom Parameters from the Config
 
 :attr:`spacy_model` is an example of an optional parameter in the config that is relevant only for a specific :class:`Annotator` class.
 
-:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
-
 .. code-block:: python
 
-	class SpacyAnnotator(Annotator):
-		""" Annotator class that uses spacy to generate annotations.
-		"""
+	AUTO_ANNOTATOR_CONFIG = { 
+		... 
+		"spacy_model": "en_core_web_md",
+		... 
+	}
 
-		def __init__(self, app_path, config=None):
-			super().__init__(app_path=app_path, config=config)
-
-			self.model = self.config.get("spacy_model", "en_core_web_lg")
+:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
 
 Custom parameters for custom annotators can be implemented in a similar fashion.
