@@ -80,6 +80,9 @@ RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, "ranking.json")
 APP_MODULE_PATH = os.path.join(APP_PATH, "app.py")
 CONFIG_MODULE_PATH = os.path.join(APP_PATH, "config.py")
 
+# DVC local remote folder
+DVC_LOCAL_REMOTE_PATH = os.path.join(APP_PATH, "dvc_local_remote")
+
 # Default config files
 RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, "resources")
 DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(
@@ -558,6 +561,11 @@ def get_config_module_path(app_path):
         str: The path of the config module file.
     """
     return CONFIG_MODULE_PATH.format(app_path=app_path)
+
+
+@safe_path
+def get_dvc_local_remote_path(app_path):
+    return DVC_LOCAL_REMOTE_PATH.format(app_path=app_path)
 
 
 def get_cached_blueprint_path(name):

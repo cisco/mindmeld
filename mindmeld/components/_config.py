@@ -1001,7 +1001,7 @@ def _get_default_regex(exclude_from_norm):
     keep_special_regex_list.append("?P<apos_space> '|' ")  # noqa: W605
     keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
     # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-    keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
+    keep_special_regex_list.append("?P<apos_poss>(^'(?=\S)|(?<=\S)'$)")  # noqa: W605
 
     return keep_special_regex_list
 
@@ -1016,7 +1016,7 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     Returns:
         dict: The tokenizer configuration.
     """
-    DEFAULT_TOKENIZER_CONFIG["allowed_patterns"] = _get_default_regex(exclude_from_norm)
+    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(exclude_from_norm)
 
     if not app_path:
         return DEFAULT_TOKENIZER_CONFIG
