@@ -368,7 +368,7 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 ``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
 ``'spacy_model'`` (:class:`str`): :attr:`en_core_web_lg` is used by default for the best performance. Alternative options are :attr:`en_core_web_sm` and :attr:`en_core_web_md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator`.
-If the selected English model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_.
+If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_. The Spacy Annotator is currently not designed to support other language but they may be used.
 
 
 Creating a Custom Annotator
@@ -381,7 +381,7 @@ A developer simply needs to implement two methods to create a custom annotator.
 Custom Annotator Boilerplate Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This section includes boilerplate code to build a :class:`CustomAnnotator` class to which you can add to your own python file, let's call it :attr:`custom_annotator.py`
-There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer has to implement the :meth:`parse` and :meth:`valid_entity_check` methods.
+There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer has to implement the :meth:`parse` and :meth:`supported_entity_types` methods.
 
 .. code-block:: python
 
@@ -407,18 +407,17 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 
 			return entities
 
-		def valid_entity_check(self, entity):
-			""" 
-			Args: entity (str): Name of entity to annotate.
-			Returns: bool: Whether entity is valid.
+		@property
+		def supported_entity_types(self):
 			"""
-			entity = entity.lower().strip()
-			supported_entities = [
+			Returns:
+				supported_entity_types (list): List of supported entity types.
+			"""
 
-			# TODO: Add list of supported entity names
-			
-			]
-			return entity in supported_entities
+			# TODO: Add the entities supported by CustomAnnotator to supported_entities (list)
+
+			supported_entities = []
+			return supported_entities
 	
 	if __name__ == "__main__":
 		custom_annotator = CustomAnnotator(app_path="hr_assistant")
