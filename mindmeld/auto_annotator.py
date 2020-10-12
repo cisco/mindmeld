@@ -150,7 +150,7 @@ class Annotator(ABC):
             bool: Whether entity is valid.
         """
         entity = entity.lower().strip()
-        return entity in self.supported_entity_types
+        return entity in self.supported_entity_types()
 
     def annotate(self, **kwargs):
         """ Annotate data based on configurations in the config.py file.
@@ -162,8 +162,8 @@ class Annotator(ABC):
             self.config[key] = value
         if not self.config["annotate"]:
             logger.warning(
-                ''''annotate' field is not configured or misconfigured in the `config.py`.
-                 We can't find any file to annotate.'''
+                """'annotate' field is not configured or misconfigured in the `config.py`.
+                 We can't find any file to annotate."""
             )
             return
         file_entities_map = self.annotate_file_entities_map
@@ -187,8 +187,8 @@ class Annotator(ABC):
 
         if not self.config["unannotate"]:
             logger.warning(
-                ''''unannotate' field is not configured or misconfigured in the `config.py`.
-                 We can't find any file to unannotate.'''
+                """'unannotate' field is not configured or misconfigured in the `config.py`.
+                 We can't find any file to unannotate."""
             )
             return
         file_entities_map = self._get_file_entities_map(
@@ -409,24 +409,23 @@ class SpacyAnnotator(Annotator):
         Returns:
             nlp (spacy.lang.en.English): Spacy language model.
         """
-
-        if model in [EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG]:
-            logger.info("Loading Spacy model %s.", model)
-            try:
-                return spacy.load(model)
-            except OSError:
-                logger.warning("%s not found. Downloading the model.", model)
-                os.system("python -m spacy download " + model)
-                language_module = importlib.import_module(model)
-                return language_module.load()
-        else:
-            error_msg = (
-                "Unknown Spacy model name: {!r}. Model must be {},"
-                " {}, or {}".format(
-                    model, EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG
-                )
+        if model not in [EN_CORE_WEB_SM, EN_CORE_WEB_MD, EN_CORE_WEB_LG]:
+            logger.warning(
+                "%s is not an English model. The Auto Annotator is currently not"
+                " designed for non-English models but they can be used.",
+                model,
             )
-            raise ValueError(error_msg)
+        logger.info("Loading Spacy model %s.", model)
+        try:
+            return spacy.load(model)
+        except OSError:
+            logger.warning("%s not found. Downloading the model.", model)
+            os.system("python -m spacy download " + model)
+            try:
+                language_module = importlib.import_module(model)
+            except ModuleNotFoundError:
+                raise ValueError("Unknown Spacy model name: {!r}.".format(model))
+            return language_module.load()
 
     def supported_entity_types(self):  # pylint: disable=W0236
         """
