@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
+from copy import deepcopy
 import re
 import logging
 import os
@@ -60,29 +61,28 @@ class Annotator(ABC):
         self.app_path = app_path
         self.config = config or get_auto_annotator_config(app_path=app_path)
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
-        self.annotate_file_entities_map = self._get_file_entities_map(
-            action=AnnotatorAction.ANNOTATE
-        )
 
-    def _get_file_entities_map(self, action: AnnotatorAction):
+    def _get_file_entities_map(self, action: AnnotatorAction, config):
         """ Creates a dictionary that maps file paths to entities given
         regex rules defined in the config.
 
         Args:
-            action (str): Can be "annotate" or "unannotate". Used as a key
+            action (AnnotatorAction): Can be "annotate" or "unannotate". Used as a key
                 to access a list of regex rules in the config dictionary.
+            config (dict): Config to use instead of the class config.
 
         Returns:
             file_entities_map (dict): A dictionary that maps file paths in an
                 App to a list of entities.
         """
+        config = config or self.config
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
 
         if action == AnnotatorAction.ANNOTATE:
-            rules = self.config[AnnotatorAction.ANNOTATE.value]
+            rules = config[AnnotatorAction.ANNOTATE.value]
         elif action == AnnotatorAction.UNANNOTATE:
-            rules = self.config[AnnotatorAction.UNANNOTATE.value]
+            rules = config[AnnotatorAction.UNANNOTATE.value]
 
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
@@ -158,16 +158,21 @@ class Annotator(ABC):
         Args:
             kwargs (dict, optional): Configuration overrides can be passed in as arguments.
         """
+        config = deepcopy(self.config)
         for key, value in kwargs.items():
-            self.config[key] = value
-        if not self.config["annotate"]:
+            config[key] = value
+        if not config["annotate"]:
             logger.warning(
                 """'annotate' field is not configured or misconfigured in the `config.py`.
                  We can't find any file to annotate."""
             )
             return
-        file_entities_map = self.annotate_file_entities_map
-        self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
+        file_entities_map = self._get_file_entities_map(
+            action=AnnotatorAction.ANNOTATE, config=config
+        )
+        self._modify_queries(
+            file_entities_map, action=AnnotatorAction.ANNOTATE, config=config
+        )
 
     def unannotate(self, **kwargs):
         """ Unannotate data based on configurations in the config.py file.
@@ -176,35 +181,41 @@ class Annotator(ABC):
             kwargs (dict, optional): Configuration overrides can be passed in as arguments.
             unannotate_all (bool): Unannotate all entities.
         """
+        config = deepcopy(self.config)
         for key, value in kwargs.items():
             if key == "unannotate_all" and value:
-                self.config["unannotate"] = [
+                config["unannotate"] = [
                     {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
                 ]
-                self.config["unannotate_supported_entities_only"] = False
+                config["unannotate_supported_entities_only"] = False
             else:
-                self.config[key] = value
+                config[key] = value
 
-        if not self.config["unannotate"]:
+        if not config["unannotate"]:
             logger.warning(
                 """'unannotate' field is not configured or misconfigured in the `config.py`.
                  We can't find any file to unannotate."""
             )
             return
         file_entities_map = self._get_file_entities_map(
-            action=AnnotatorAction.UNANNOTATE
+            action=AnnotatorAction.UNANNOTATE, config=config
         )
-        self._modify_queries(file_entities_map, action=AnnotatorAction.UNANNOTATE)
+        self._modify_queries(
+            file_entities_map, action=AnnotatorAction.UNANNOTATE, config=config
+        )
 
-    def _modify_queries(self, file_entities_map, action: AnnotatorAction):
+    def _modify_queries(self, file_entities_map, action: AnnotatorAction, config):
         """ Iterates through App files and annotates or unannotates queries.
 
         Args:
             file_entities_map (dict): A dictionary that maps a file paths
                 in an App to a list of entities.
+            action (AnnotatorAction): Can be "annotate" or "unannotate".
+            config (dict): Config to use instead of the class config.
         """
         query_factory = QueryFactory.create_query_factory(self.app_path)
-        for path in file_entities_map:
+        path_list = [p for p in file_entities_map if file_entities_map[p]]
+        for path in path_list:
             processed_queries = Annotator._get_processed_queries(
                 file_path=path, query_factory=query_factory
             )
@@ -213,11 +224,15 @@ class Annotator(ABC):
                 entity_types = file_entities_map[path]
                 if action == AnnotatorAction.ANNOTATE:
                     self._annotate_query(
-                        processed_query=processed_query, entity_types=entity_types
+                        processed_query=processed_query,
+                        entity_types=entity_types,
+                        config=config,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
-                        processed_query=processed_query, remove_entities=entity_types,
+                        processed_query=processed_query,
+                        remove_entities=entity_types,
+                        config=config,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -246,20 +261,23 @@ class Annotator(ABC):
                 logger.warning("Skipping query. Error in processing: %s", query)
         return processed_queries
 
-    def _annotate_query(self, processed_query, entity_types):
+    def _annotate_query(self, processed_query, entity_types, config):
         """ Updates the entities of a processed query with newly
         annotated entities.
 
         Args:
             processed_query (ProcessedQuery): The processed query to update.
             entity_types (list): List of entities allowed for annotation.
+            config (dict): Config to use instead of the class config.
         """
         current_entities = list(processed_query.entities)
         annotated_entities = self._get_annotated_entities(
             processed_query=processed_query, entity_types=entity_types
         )
         final_entities = self._resolve_conflicts(
-            current_entities=current_entities, annotated_entities=annotated_entities
+            current_entities=current_entities,
+            annotated_entities=annotated_entities,
+            config=config,
         )
         processed_query.entities = tuple(final_entities)
 
@@ -305,17 +323,19 @@ class Annotator(ABC):
         )
         return query_entity
 
-    def _resolve_conflicts(self, current_entities, annotated_entities):
+    def _resolve_conflicts(self, current_entities, annotated_entities, config):
         """ Resolve overlaps between existing entities and newly annotad entities.
 
         Args:
             current_entities (list): List of existing query entities.
             annotated_entities (list): List of new query entities.
+            config (dict): Config to use instead of the class config.
 
         Returns:
             final_entities (list): List of resolved query entities.
         """
-        overwrite = self.config["overwrite"]
+        config = config or self.config
+        overwrite = config["overwrite"]
         base_entities = annotated_entities if overwrite else current_entities
         other_entities = current_entities if overwrite else annotated_entities
 
@@ -330,7 +350,7 @@ class Annotator(ABC):
         return base_entities
 
     # pylint: disable=R0201
-    def _unannotate_query(self, processed_query, remove_entities):
+    def _unannotate_query(self, processed_query, remove_entities, config):
         """ Removes specified entities in a processed query. If all entities are being
         removed, this function will not remove entities that the annotator does not support
         unless it is explicitly specified to do so in the config with the param
@@ -339,8 +359,10 @@ class Annotator(ABC):
         Args:
             processed_query (ProcessedQuery): A processed query.
             remove_entities (list): List of entities to remove.
+            config (dict): Config to use instead of the class config.
         """
-        remove_supported_only = self.config["unannotate_supported_entities_only"]
+        config = config or self.config
+        remove_supported_only = config["unannotate_supported_entities_only"]
         keep_entities = []
         for query_entity in processed_query.entities:
             if remove_entities == ["*"]:
