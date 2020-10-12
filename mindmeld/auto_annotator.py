@@ -46,8 +46,6 @@ class AnnotatorAction(Enum):
 class Annotator(ABC):
     """
     Abstract Annotator class that can be used to build a custom Annotation class.
-
-
     """
 
     def __init__(self, app_path, config=None):
@@ -150,7 +148,7 @@ class Annotator(ABC):
             bool: Whether entity is valid.
         """
         entity = entity.lower().strip()
-        return entity in self.supported_entity_types()
+        return entity in self.supported_entity_types
 
     def annotate(self, **kwargs):
         """ Annotate data based on configurations in the config.py file.
@@ -449,6 +447,7 @@ class SpacyAnnotator(Annotator):
                 raise ValueError("Unknown Spacy model name: {!r}.".format(model))
             return language_module.load()
 
+    @property
     def supported_entity_types(self):  # pylint: disable=W0236
         """
         Returns:
