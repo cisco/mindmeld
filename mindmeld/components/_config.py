@@ -464,6 +464,15 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
+
+DEFAULT_AUTO_ANNOTATOR_CONFIG = {
+    "annotator_class": "SpacyAnnotator",
+    "overwrite": False,
+    "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}],
+    "unannotate_supported_entities_only": True,
+    "unannotate": None,
+}
+
 DEFAULT_TOKENIZER_CONFIG = {
     # populated in the `get_tokenizer_config` func
     "allowed_patterns": [],
@@ -926,6 +935,30 @@ def get_nlp_config(app_path=None, config=None):
         pass
 
     return _get_default_nlp_config()
+
+
+def get_auto_annotator_config(app_path=None):
+    """Gets the automatic annotator config for the app at the
+    given path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The automatic annotator config.
+    """
+    try:
+        auto_annotator_config = getattr(
+            _get_config_module(app_path),
+            "AUTO_ANNOTATOR_CONFIG",
+            DEFAULT_AUTO_ANNOTATOR_CONFIG,
+        )
+        return auto_annotator_config
+    except (OSError, IOError):
+        logger.info(
+            "No app configuration file found. Using the default automatic annotator config."
+        )
+        return DEFAULT_AUTO_ANNOTATOR_CONFIG
 
 
 def _get_default_regex(exclude_from_norm):

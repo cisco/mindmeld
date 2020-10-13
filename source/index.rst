@@ -117,6 +117,7 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/auto_annotator
    userguide/custom_action
    userguide/tokenizer
    userguide/internationalization

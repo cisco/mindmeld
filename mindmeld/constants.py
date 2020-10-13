@@ -18,6 +18,47 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
+SPACY_ANNOTATOR_SUPPORTED_ENTITIES = [
+    "sys_time",
+    "sys_interval",
+    "sys_duration",
+    "sys_number",
+    "sys_amount-of-money",
+    "sys_distance",
+    "sys_weight",
+    "sys_ordinal",
+    "sys_quantity",
+    "sys_percent",
+    "sys_org",
+    "sys_loc",
+    "sys_person",
+    "sys_gpe",
+    "sys_norp",
+    "sys_fac",
+    "sys_product",
+    "sys_event",
+    "sys_law",
+    "sys_langauge",
+    "sys_work-of-art",
+    "sys_other-quantity",
+]
+
+
+def _no_overlap(entity_one, entity_two):
+    """ Returns True if two query entities do not overlap.
+    Args:
+        entity_one (QueryEntity): First entity.
+        entity_two (QueryEntity): Second Entity.
+
+    Returns:
+        no_overlap (bool): True if no overlap.
+    """
+    return (
+        entity_one.span.start > entity_two.span.end
+        or entity_two.span.start > entity_one.span.end
+    )
+
+
 # fetches all currency symbols in unicode by iterating through the character set and
 # selecting the currency symbols based on the unicode currency category 'Sc'
 CURRENCY_SYMBOLS = u"".join(
