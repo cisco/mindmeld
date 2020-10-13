@@ -8,7 +8,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click~=6.0',
+    'Click~=7.1',
     'click-log==0.1.8',
     'elasticsearch5~=5.5',
     'Flask~=1.0',
