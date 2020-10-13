@@ -1,5 +1,5 @@
 Working with the Auto Annotator
-=====================================================
+===============================
 
 The Auto Annotator
 
@@ -379,7 +379,7 @@ A developer simply needs to implement two methods to create a custom annotator.
 
 
 Custom Annotator Boilerplate Code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This section includes boilerplate code to build a :class:`CustomAnnotator` class to which you can add to your own python file, let's call it :attr:`custom_annotator.py`
 There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer has to implement the :meth:`parse` and :meth:`supported_entity_types` methods.
 
