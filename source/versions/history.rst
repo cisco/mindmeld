@@ -1,6 +1,47 @@
 Package History
 ===============
 
+4.3.2 (2020-10-15)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Add auto entity annotating tool which leverages language models like BERT to add entity annotations to training queries
+
+- Add model tracking through DVC integration
+
+- Add sentiment feature for classifiers
+
+- Add support for custom resolution in custom evaluation function for Automatic Slotfilling
+
+- Allow the MindMeld tokenizer to preserve special characters
+
+- Allow the MindMeld app to configure the max history length that they should keep
+
+- Allow the role classifier to process a single label
+
+- Expose ES score in QA responses
+
+- Implement the progress bars for classifier training
+
+- Surface up values from Duckling
+
+
+Bug fixes
+^^^^^^^^^
+
+- Request entities should be an immutable map
+
+- Don't try to load system entity map if it is not there
+
+
+Legacy
+^^^^^^
+
+- Add log warnings for Python 3.5; we will remove official support in the next release
+
+
 4.3.1 (2020-06-17)
 ------------------
 
