@@ -7,13 +7,17 @@ Package History
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Add auto entity annotating tool which leverages language models like BERT to add entity annotations to training queries
+- Add auto entity annotating tool which leverages pre-trained NLP models to add entity annotations to training queries
 
 - Add model tracking through DVC integration
 
-- Add sentiment feature for classifiers
+- Add progress bars for classifier training
+
+- Add sentiment features for classifiers
 
 - Add support for custom resolution in custom evaluation function for Automatic Slotfilling
+
+- Allow detailed entity resolution from Duckling
 
 - Allow the MindMeld tokenizer to preserve special characters
 
@@ -21,25 +25,23 @@ Major Features and Improvements
 
 - Allow the role classifier to process a single label
 
-- Expose ES score in QA responses
-
-- Implement the progress bars for classifier training
-
-- Surface up values from Duckling
+- Expose Elasticsearch scoring in QA responses
 
 
 Bug fixes
 ^^^^^^^^^
 
-- Request entities should be an immutable map
+- Fixed issue were entities were not immutable in the request object
 
-- Don't try to load system entity map if it is not there
+- Fixed issue were the system entity recognizer would be loaded without being initialized
+
+- Fixed token mismatch issue in the system entity feature extractor for queries with special characters. Retraining entity recognition models that use sys-candidates-seq feature is recommended.
 
 
 Legacy
 ^^^^^^
 
-- Add log warnings for Python 3.5; we will remove official support in the next release
+- Add log warnings for Python 3.5; we will officially remove support in the next release
 
 
 4.3.1 (2020-06-17)
