@@ -262,7 +262,6 @@ class Annotator(ABC):
                     intent=intent,
                     query_factory=query_factory,
                 )
-                print("Processed Query", processed_query)
                 processed_queries.append(processed_query)
             except (AssertionError, MarkupError):
                 logger.warning("Skipping query. Error in processing: %s", query)
