@@ -370,6 +370,58 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 ``'spacy_model'`` (:class:`str`): :attr:`en_core_web_lg` is used by default for the best performance. Alternative options are :attr:`en_core_web_sm` and :attr:`en_core_web_md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator`.
 If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_. The Spacy Annotator is currently not designed to support other language but they may be used.
 
+Using the Bootstrap Annotator
+----------------------------
+The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is training on the existing labelled data.
+The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app  if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the train entity recognizer for the given intent after building .
+
+First, ensure that files that you would like to label have the same name or pattern. For example, you may label your files :attr:`bootstrap.txt` files across all intents.
+
+Update the :attr:`annotator_class` field in your :attr:`AUTO_ANNOTATOR_CONFIG` to be :class:`BootstrapAnnotator` and set your annotation rules to include your desired patterns.
+You can optionally set the :attr:`confidence_threshold` for labeling in the config as shown below. For this example, we will set it to 0.95. This means that entities will only be labelled if the entity recoginizer is 95% confident.
+
+.. code-block:: python
+
+	AUTO_ANNOTATOR_CONFIG = {
+		"annotator_class": "BootstrapAnnotator",
+		"confidence_threshold": 0.95,
+		...
+		"annotate": [
+			{
+				"domains": ".*",
+				"intents": ".*",
+				"files": ".*bootstrap.*\.txt",
+				"entities": ".*",
+			}
+		],
+	}
+
+Check your :attr:`ENTITY_RECOGNIZER_CONFIG` in :attr:`config.py`. Make sure that you explicitly specify the regex pattern for training and testing and that this pattern does not overlap with the pattern for your unlabeled data (E.g. :attr:`bootstrap.txt`).
+
+.. code-block:: python
+
+	ENTITY_RECOGNIZER_CONFIG = {
+		...
+		'train_label_set': 'train.*\.txt',
+		'test_label_set': 'test.*\.txt'
+	}
+
+To run from the command line:
+
+.. code-block:: console
+
+	mindmeld annotate --app-path "hr_assistant"
+
+Alternatively, you can annotate by creating an instance of the :class:`BootstrapAnnotator` class and running the Python code below.
+An optional param :attr:`overwrite` can be passed in here as well.
+
+.. code-block:: python
+
+	from mindmeld.auto_annotator import BootstrapAnnotator 
+	ba = BootstrapAnnotator(app_path="hr_assistant")
+
+	sa.annotate(overwrite=True)
+
 
 Creating a Custom Annotator
 ---------------------------
