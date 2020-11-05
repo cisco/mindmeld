@@ -420,7 +420,7 @@ An optional param :attr:`overwrite` can be passed in here as well.
 	from mindmeld.auto_annotator import BootstrapAnnotator 
 	ba = BootstrapAnnotator(app_path="hr_assistant")
 
-	sa.annotate(overwrite=True)
+	ba.annotate(overwrite=True)
 
 
 Creating a Custom Annotator
