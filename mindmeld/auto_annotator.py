@@ -777,7 +777,7 @@ class BootstrapAnnotator(Annotator):
     def __init__(self, app_path, config=None):
         super().__init__(app_path=app_path, config=config)
         self.confidence_threshold = self.config.get("confidence_threshold", 0)
-        print("BootstrapAnnotator is loading", self.app_path)
+        logger.info("BootstrapAnnotator is loading %s.", self.app_path)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.nlp.build()
 
@@ -790,10 +790,8 @@ class BootstrapAnnotator(Annotator):
         Returns: entities (list): List of entity dictionaries.
         """
         er = self.nlp.domains[domain].intents[intent].entity_recognizer
-        predict_proba_output = er.predict_proba(sentence)
         entities = []
-        for data in predict_proba_output:
-            entity, confidence = data
+        for entity, confidence in er.predict_proba(sentence):
             if (
                 not entity_types or entity.entity.type in entity_types
             ) and confidence >= self.confidence_threshold:

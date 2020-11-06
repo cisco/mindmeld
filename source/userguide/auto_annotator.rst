@@ -372,13 +372,13 @@ If the selected model is not in the current environment it will automatically be
 
 Using the Bootstrap Annotator
 ----------------------------
-The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is training on the existing labelled data.
-The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app  if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the train entity recognizer for the given intent after building .
+The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is trained on the existing labeled data.
+The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the trained entity recognizer for the given.
 
-First, ensure that files that you would like to label have the same name or pattern. For example, you may label your files :attr:`bootstrap.txt` files across all intents.
+First, ensure that files that you would like to label have the same name or pattern. For example, you may label your files :attr:`bootstrap.txt` across all intents.
 
 Update the :attr:`annotator_class` field in your :attr:`AUTO_ANNOTATOR_CONFIG` to be :class:`BootstrapAnnotator` and set your annotation rules to include your desired patterns.
-You can optionally set the :attr:`confidence_threshold` for labeling in the config as shown below. For this example, we will set it to 0.95. This means that entities will only be labelled if the entity recoginizer is 95% confident.
+You can optionally set the :attr:`confidence_threshold` for labeling in the config as shown below. For this example, we will set it to 0.95. This means that entities will only be labeled if the entity recognizer assigns a confidence score over 95% to the entity.
 
 .. code-block:: python
 
