@@ -422,6 +422,10 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 	ba.annotate(overwrite=True)
 
+.. note::
+
+   The Bootstrap Annotator is different from the :attr:`predict` command-line function. Running ``python -m hr_assistant predict bootstrap.txt -o labeled.tsv`` will output a tsv with annotated queries.
+   Unlike the Bootstrap Annotator, the :attr:`predict` only annotates a single file and does not use the entity recognizer of a specific intent. Instead, it uses the intent classified by :attr:`nlp.process(query_text)`.
 
 Creating a Custom Annotator
 ---------------------------

@@ -814,7 +814,6 @@ class BootstrapAnnotator(Annotator):
                     "value": entity.entity.value,
                     "role": role,
                 }
-                print("ENTITY FOUND", entity)
                 entities.append(entity)
         return entities
 
