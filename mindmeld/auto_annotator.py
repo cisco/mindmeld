@@ -307,6 +307,7 @@ class Annotator(ABC):
             domain=processed_query.domain,
             intent=processed_query.intent,
         )
+        print("ITEMS", items)
         query_entities = [
             Annotator._item_to_query_entity(item, processed_query) for item in items
         ]
@@ -318,7 +319,7 @@ class Annotator(ABC):
 
         Args:
             item (dict): Dictionary representing an entity with the keys -
-                "body", "start", "end", "value", "dim".
+                "body", "start", "end", "value", "dim". ("role" is an optional entity.)
             processed_query (ProcessedQuery): The processed query that the
                 entity is found in.
 
@@ -326,10 +327,15 @@ class Annotator(ABC):
             query_entity (QueryEntity): The converted query entity.
         """
         span = Span(start=item["start"], end=item["end"] - 1)
-        entity = Entity(text=item["body"], entity_type=item["dim"], value=item["value"])
+        role = item["role"] if "role" in item else None
+        print("ROLE FOUND", role)
+        entity = Entity(
+            text=item["body"], entity_type=item["dim"], role=role, value=item["value"]
+        )
         query_entity = QueryEntity.from_query(
             query=processed_query.query, span=span, entity=entity
         )
+        print("QUERY ENTITY", query_entity)
         return query_entity
 
     def _resolve_conflicts(self, current_entities, annotated_entities, config):
@@ -791,17 +797,24 @@ class BootstrapAnnotator(Annotator):
         """
         er = self.nlp.domains[domain].intents[intent].entity_recognizer
         entities = []
-        for entity, confidence in er.predict_proba(sentence):
+        for index, (entity, confidence) in enumerate(er.predict_proba(sentence)):
             if (
                 not entity_types or entity.entity.type in entity_types
             ) and confidence >= self.confidence_threshold:
+
+                role = self.nlp.process(
+                    sentence, allowed_nlp_classes={domain: {intent: {}}}
+                )["entities"][index]["role"]
+
                 entity = {
                     "body": entity.text,
                     "start": entity.span.start,
                     "end": entity.span.end + 1,
                     "dim": entity.entity.type,
                     "value": entity.entity.value,
+                    "role": role,
                 }
+                print("ENTITY FOUND", entity)
                 entities.append(entity)
         return entities
 
