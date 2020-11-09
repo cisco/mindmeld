@@ -307,7 +307,6 @@ class Annotator(ABC):
             domain=processed_query.domain,
             intent=processed_query.intent,
         )
-        print("ITEMS", items)
         query_entities = [
             Annotator._item_to_query_entity(item, processed_query) for item in items
         ]
@@ -328,14 +327,12 @@ class Annotator(ABC):
         """
         span = Span(start=item["start"], end=item["end"] - 1)
         role = item["role"] if "role" in item else None
-        print("ROLE FOUND", role)
         entity = Entity(
             text=item["body"], entity_type=item["dim"], role=role, value=item["value"]
         )
         query_entity = QueryEntity.from_query(
             query=processed_query.query, span=span, entity=entity
         )
-        print("QUERY ENTITY", query_entity)
         return query_entity
 
     def _resolve_conflicts(self, current_entities, annotated_entities, config):
