@@ -318,7 +318,7 @@ class Annotator(ABC):
 
         Args:
             item (dict): Dictionary representing an entity with the keys -
-                "body", "start", "end", "value", "dim". ("role" is an optional entity.)
+                "body", "start", "end", "value", "dim". ("role" is an optional attribute.)
             processed_query (ProcessedQuery): The processed query that the
                 entity is found in.
 

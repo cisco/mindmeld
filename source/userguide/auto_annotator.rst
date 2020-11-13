@@ -12,7 +12,7 @@ The Auto Annotator
 
 .. warning::
 
-   Changes by an Auto Annotator cannot be undone and Mindmeld does not backup query data. We recommend using version control software such as Github.
+   Changes by an Auto Annotator cannot be undone and MindMeld does not backup query data. We recommend using version control software such as Github.
 
 Quick Start
 -----------
@@ -184,7 +184,7 @@ After running :attr:`unannotate` we find that instances of :attr:`sys_time` have
 Default Auto Annotator: Spacy Annotator
 ---------------------------------------
 The :mod:`mindmeld.auto_annotator` module contains an abstract :class:`Annotator` class.
-This class serves as a base class for any Mindmeld Annotator including the :class:`SpacyAnnotator` class.
+This class serves as a base class for any MindMeld Annotator including the :class:`SpacyAnnotator` class.
 The :class:`SpacyAnnotator` leverages `Spacy's Named Entity Recognition <https://spacy.io/usage/linguistic-features#named-entities>`_ system to detect 21 different entities.
 Some of these entities are resolvable by Duckling. 
 
@@ -353,7 +353,7 @@ a section are expressed with the usual Regex special characters, such as :attr:`
 	}
 
 The rule above would annotate all text files named "train" or "test" in the "faq" and "salary" domains. Only sys_amount-of-money and sys_time entities would be annotated.
-Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(train.txt|test.txt)" and this pattern is matched against all file paths in the domain folder of your Mindmeld application. 
+Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(train.txt|test.txt)" and this pattern is matched against all file paths in the domain folder of your MindMeld application. 
 
 .. warning::
 
@@ -373,7 +373,7 @@ If the selected model is not in the current environment it will automatically be
 Using the Bootstrap Annotator
 ----------------------------
 The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is trained on the existing labeled data.
-The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the trained entity recognizer for the given.
+The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the trained entity recognizer for each given intent.
 
 First, ensure that files that you would like to label have the same name or pattern. For example, you may label your files :attr:`bootstrap.txt` across all intents.
 
@@ -450,7 +450,7 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 			
 			# Add additional attributes if needed
 
-		def parse(self, sentence, entity_types=None):
+		def parse(self, sentence, entity_types=None, **kwargs):
 			""" 
 			Args:
 				sentence (str): Sentence to detect entities.
