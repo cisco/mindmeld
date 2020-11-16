@@ -792,26 +792,26 @@ class BootstrapAnnotator(Annotator):
                         possible entity types will be parsed.
         Returns: entities (list): List of entity dictionaries.
         """
-        er = self.nlp.domains[domain].intents[intent].entity_recognizer
+        response = self.nlp.process(
+            sentence, allowed_nlp_classes={domain: {intent: {}}}, verbose=True
+        )
         entities = []
-        for index, (entity, confidence) in enumerate(er.predict_proba(sentence)):
-            if (
-                not entity_types or entity.entity.type in entity_types
-            ) and confidence >= self.confidence_threshold:
-
-                role = self.nlp.process(
-                    sentence, allowed_nlp_classes={domain: {intent: {}}}
-                )["entities"][index]["role"]
-
-                entity = {
-                    "body": entity.text,
-                    "start": entity.span.start,
-                    "end": entity.span.end + 1,
-                    "dim": entity.entity.type,
-                    "value": entity.entity.value,
-                    "role": role,
-                }
-                entities.append(entity)
+        for i, entity in enumerate(response["entities"]):
+            if not entity_types or entity["type"] in entity_types:
+                entity_confidence = response["confidences"]["entities"][i][
+                    entity["type"]
+                ]
+                if entity_confidence >= self.confidence_threshold:
+                    entities.append(
+                        {
+                            "body": entity["text"],
+                            "start": entity["span"]["start"],
+                            "end": entity["span"]["end"] + 1,
+                            "dim": entity["type"],
+                            "value": entity["value"],
+                            "role": entity["role"],
+                        }
+                    )
         return entities
 
     @property
