@@ -169,7 +169,7 @@ class QueryFactory:
             stemmer (Stemmer, optional): The stemmer to use for stemming
             system_entity_recognizer (SystemEntityRecognizer): If not passed, we use either the one
                 from the application's configuration or NoOpSystemEntityRecognizer.
-            duckling (bool, optional): if no system entity recognizer is provided, 
+            duckling (bool, optional): if no system entity recognizer is provided,
                  initialize a new Duckling recognizer instance.
 
         Returns:

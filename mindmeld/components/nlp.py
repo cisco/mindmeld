@@ -627,8 +627,8 @@ class NaturalLanguageProcessor(Processor):
         for allowed_intent in allowed_intents:
             nlp_entries = [None, None, None, None]
             entries = allowed_intent.split(".")
-            for i in range(len(entries)):
-                nlp_entries[i] = entries[i]
+            for idx, entry in enumerate(entries):
+                nlp_entries[idx] = entry
 
             domain, intent, entity, role = nlp_entries
 
@@ -647,7 +647,9 @@ class NaturalLanguageProcessor(Processor):
                     "Entity: {} is not in the NLP component hierarchy".format(entity)
                 )
 
-            if role and role not in self.domains[domain].intents[intent].entities[entity].role_classifier.roles:
+            roles = self.domains[domain].intents[intent].entities[entity].role_classifier.roles
+
+            if role and role not in roles:
                 raise AllowedNlpClassesKeyError(
                     "Role: {} is not in the NLP component hierarchy".format(role)
                 )
@@ -660,30 +662,24 @@ class NaturalLanguageProcessor(Processor):
                     # We initialize to an empty dictionary to extend capability for
                     # entity rules in the future
                     if entity and entity in self.domains[domain].intents[intent].entities.keys():
-                        if role and role in self.domains[domain].intents[intent].entities[entity].role_classifier.roles:
+                        roles = self.domains[
+                            domain].intents[intent].entities[entity].role_classifier.roles
+                        if role and role in roles:
                             nlp_components[domain][intent] = {
-                                entity: {
-                                    role: {}
-                                }
+                                entity: {role: {}}
                             }
                         else:
-                            nlp_components[domain][intent] = {
-                                entity: {}
-                            }
+                            nlp_components[domain][intent] = {entity: {}}
                     else:
                         nlp_components[domain][intent] = {}
             else:
                 if entity and entity in self.domains[domain].intents[intent].entities.keys():
-                    if role and role in self.domains[domain].intents[intent].entities[entity].role_classifier.roles:
-                        nlp_components[domain][intent] = {
-                            entity: {
-                                role: {}
-                            }
-                        }
+                    roles = self.domains[
+                        domain].intents[intent].entities[entity].role_classifier.roles
+                    if role and role in roles:
+                        nlp_components[domain][intent] = {entity: {role: {}}}
                     else:
-                        nlp_components[domain][intent] = {
-                            entity: {}
-                        }
+                        nlp_components[domain][intent] = {entity: {}}
                 else:
                     nlp_components[domain][intent] = {}
 
@@ -1205,7 +1201,6 @@ class IntentProcessor(Processor):
         """
         # TODO: Deprecate language argument
         del language
-        del allowed_nlp_classes
 
         query = self.create_query(
             query_text,
@@ -1327,9 +1322,9 @@ class IntentProcessor(Processor):
         )
         return [entity, role_confidence]
 
-    def _process_entities(self, query, entities, aligned_entities, allowed_nlp_classes, verbose=False):
+    def _process_entities(self, query, entities, aligned_entities,
+                          allowed_nlp_classes, verbose=False):
         """
-
         Args:
             query (Query, or tuple): The user input query, or a list of the n-best transcripts
                 query objects
@@ -1346,7 +1341,7 @@ class IntentProcessor(Processor):
 
         processed_entities = [deepcopy(e) for e in entities[0]]
         processed_entities_conf = self._process_list(
-            range(len(processed_entities)),
+            list(range(len(processed_entities))),
             "_classify_and_resolve_entities",
             *[query, processed_entities, aligned_entities, allowed_nlp_classes, verbose]
         )

@@ -27,7 +27,7 @@ from ..constants import CURRENCY_SYMBOLS
 logger = logging.getLogger(__name__)
 
 DUCKLING_SERVICE_NAME = "duckling"
-DEFAULT_DUCKLING_URL = "http://0.0.0.0:7151/parse"
+DEFAULT_DUCKLING_URL = "http://localhost:7151/parse"
 
 CONFIG_DEPRECATION_MAPPING = {
     "DOMAIN_CLASSIFIER_CONFIG": "DOMAIN_MODEL_CONFIG",
