@@ -281,7 +281,9 @@ class DucklingRecognizer(SystemEntityRecognizer):
                 return response_json, response.status_code
             else:
                 raise SystemEntityError("System entity status code is not 200.")
-        except requests.ConnectionError:
+        except requests.ConnectionError as e:
+            print("vijay")
+            print(e)
             sys.exit(
                 "Unable to connect to the system entity recognizer. Make sure it's "
                 "running by typing 'mindmeld num-parse' at the command line."
