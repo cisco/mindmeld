@@ -618,14 +618,21 @@ class NaturalLanguageProcessor(Processor):
         if intent not in nlp_components[domain]:
             nlp_components[domain][intent] = {}
 
-        if entity and entity in self.domains[domain].intents[intent].entities:
-            if entity not in nlp_components[domain][intent]:
-                nlp_components[domain][intent][entity] = {}
+        all_entities_intent = self.domains[domain].intents[intent].entities
+        valid_entities = filter(lambda candidate: entity and (candidate == entity or entity == "*"),
+                                all_entities_intent)
 
-            roles = self.domains[
-                domain].intents[intent].entities[entity].role_classifier.roles
-            if role and role in roles:
-                nlp_components[domain][intent][entity][role] = {}
+        for nlp_entity in valid_entities:
+            if nlp_entity not in nlp_components[domain][intent]:
+                nlp_components[domain][intent][nlp_entity] = {}
+
+            all_roles_in_entity = self.domains[
+                domain].intents[intent].entities[nlp_entity].role_classifier.roles
+            valid_roles = filter(lambda candidate: role and (candidate == role or role == "*"),
+                                 all_roles_in_entity)
+
+            for nlp_role in valid_roles:
+                nlp_components[domain][intent][nlp_entity][nlp_role] = {}
 
     def extract_allowed_intents(self, allowed_intents):
         """This function validates a user inputted list of allowed_intents against the NLP
