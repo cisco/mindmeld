@@ -656,18 +656,18 @@ class NaturalLanguageProcessor(Processor):
 
             domain, intent, entity, role = nlp_entries
 
-            if not domain or domain not in self.domains.keys():
+            if not domain or domain not in self.domains:
                 raise AllowedNlpClassesKeyError(
                     "Domain: {} is not in the NLP component hierarchy".format(domain)
                 )
 
-            if not intent or (intent != "*" and intent not in self.domains[domain].intents.keys()):
+            if not intent or (intent != "*" and intent not in self.domains[domain].intents):
                 raise AllowedNlpClassesKeyError(
                     "Intent: {} is not in the NLP component hierarchy".format(intent)
                 )
 
             if intent == "*":
-                for intent in self.domains[domain].intents.keys():
+                for intent in self.domains[domain].intents:
                     self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
             else:
                 self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)

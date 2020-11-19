@@ -202,7 +202,7 @@ test_data_10 = [
     ),
     (
         ["times_and_dates.change_alarm.sys_time"],
-        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}}}}},
+        {'times_and_dates': {'change_alarm': {'sys_time': {}}}},
     ),
 ]
 
