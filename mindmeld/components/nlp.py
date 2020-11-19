@@ -619,7 +619,7 @@ class NaturalLanguageProcessor(Processor):
             nlp_components[domain][intent] = {}
 
         all_entities_intent = self.domains[domain].intents[intent].entities
-        valid_entities = filter(lambda candidate: entity and (candidate == entity or entity == "*"),
+        valid_entities = filter(lambda candidate: entity and entity in {'*', candidate},
                                 all_entities_intent)
 
         for nlp_entity in valid_entities:
@@ -628,7 +628,7 @@ class NaturalLanguageProcessor(Processor):
 
             all_roles_in_entity = self.domains[
                 domain].intents[intent].entities[nlp_entity].role_classifier.roles
-            valid_roles = filter(lambda candidate: role and (candidate == role or role == "*"),
+            valid_roles = filter(lambda candidate: role and role in {'*', candidate},
                                  all_roles_in_entity)
 
             for nlp_role in valid_roles:
@@ -1553,7 +1553,7 @@ class EntityProcessor(Processor):
                         entity.entity.role = role_type
                         break
 
-                    if allowed_nlp_classes and role_type in allowed_nlp_classes.keys():
+                    if allowed_nlp_classes and role_type in allowed_nlp_classes:
                         entity.entity.role = role_type
                         break
 

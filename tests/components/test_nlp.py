@@ -112,6 +112,16 @@ def test_role_classification(home_assistant_nlp):
     response = home_assistant_nlp.process("5:30am", extracted_intents)
     assert response['entities'][0]['role'] == "old_time"
 
+    allowed_intents = ["times_and_dates.change_alarm.sys_time.*"]
+    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "new_time"
+
+    allowed_intents = ["times_and_dates.change_alarm.*.*"]
+    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "new_time"
+
 
 test_data_1 = [
     (
