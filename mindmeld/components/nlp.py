@@ -642,18 +642,6 @@ class NaturalLanguageProcessor(Processor):
                     "Intent: {} is not in the NLP component hierarchy".format(intent)
                 )
 
-            if entity and entity not in self.domains[domain].intents[intent].entities.keys():
-                raise AllowedNlpClassesKeyError(
-                    "Entity: {} is not in the NLP component hierarchy".format(entity)
-                )
-
-            roles = self.domains[domain].intents[intent].entities[entity].role_classifier.roles
-
-            if role and role not in roles:
-                raise AllowedNlpClassesKeyError(
-                    "Role: {} is not in the NLP component hierarchy".format(role)
-                )
-
             if domain not in nlp_components:
                 nlp_components[domain] = {}
 
@@ -662,26 +650,49 @@ class NaturalLanguageProcessor(Processor):
                     # We initialize to an empty dictionary to extend capability for
                     # entity rules in the future
                     if entity and entity in self.domains[domain].intents[intent].entities.keys():
+                        if not role:
+                            if intent not in nlp_components[domain]:
+                                nlp_components[domain][intent] = {entity: {}}
+                            else:
+                                nlp_components[domain][intent][entity] = {}
+                            continue
+
                         roles = self.domains[
                             domain].intents[intent].entities[entity].role_classifier.roles
-                        if role and role in roles:
-                            nlp_components[domain][intent] = {
-                                entity: {role: {}}
-                            }
-                        else:
-                            nlp_components[domain][intent] = {entity: {}}
+                        if role in roles:
+                            if intent not in nlp_components[domain]:
+                                nlp_components[domain][intent] = {entity: {role: {}}}
+                            else:
+                                if entity in nlp_components[domain][intent]:
+                                    nlp_components[domain][intent][entity][role] = {}
+                                else:
+                                    nlp_components[domain][intent][entity] = {role: {}}
                     else:
-                        nlp_components[domain][intent] = {}
+                        if intent not in nlp_components[domain]:
+                            nlp_components[domain][intent] = {}
             else:
                 if entity and entity in self.domains[domain].intents[intent].entities.keys():
+                    if not role:
+                        if intent not in nlp_components[domain]:
+                            nlp_components[domain][intent] = {entity: {}}
+                        else:
+                            nlp_components[domain][intent][entity] = {}
+                        continue
+
                     roles = self.domains[
                         domain].intents[intent].entities[entity].role_classifier.roles
-                    if role and role in roles:
-                        nlp_components[domain][intent] = {entity: {role: {}}}
-                    else:
-                        nlp_components[domain][intent] = {entity: {}}
+
+                    if role in roles:
+                        if intent not in nlp_components[domain]:
+                            nlp_components[domain][intent] = {entity: {role: {}}}
+                        else:
+                            if entity in nlp_components[domain][intent]:
+                                nlp_components[domain][intent][entity][role] = {}
+                            else:
+                                nlp_components[domain][intent][entity] = {role: {}}
                 else:
-                    nlp_components[domain][intent] = {}
+                    if intent not in nlp_components[domain]:
+                        nlp_components[domain][intent] = {}
 
         return nlp_components
 

@@ -142,7 +142,6 @@ def test_nlp_hierarchy_bias_for_user_bias(
     kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent, expected_entities
 ):
     """Tests user specified domain and intent biases"""
-    kwik_e_mart_nlp.load()
     extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
     response = kwik_e_mart_nlp.process(query, extracted_intents)
     assert response['text'] == query
@@ -150,6 +149,47 @@ def test_nlp_hierarchy_bias_for_user_bias(
     assert response['intent'] == expected_intent
     if expected_entities:
         assert response['entities'][0]['text'] == expected_entities
+
+
+test_data_10 = [
+    (
+        ["times_and_dates.change_alarm"],
+        {'times_and_dates': {'change_alarm': {}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}}}}},
+    ),
+    (
+        ["smart_home.set_thermostat.sys_temperature"],
+        {'smart_home': {'set_thermostat': {'sys_temperature': {}}}},
+    ),
+    (
+        ["smart_home.*.sys_temperature"],
+        {'smart_home': {'set_thermostat': {'sys_temperature': {}}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time",
+         "smart_home.set_thermostat.sys_temperature.room_temperature"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}}}},
+         'smart_home': {'set_thermostat': {'sys_temperature': {'room_temperature': {}}}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time", "times_and_dates.change_alarm.sys_time.old_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}}}}},
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "allowed_intents,expected_nlp_hierarchy", test_data_10
+)
+def test_nlp_hierarchy_for_allowed_intents(
+    home_assistant_nlp, allowed_intents, expected_nlp_hierarchy
+):
+    """Tests user specified domain and intent biases"""
+    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    assert extracted_intents == expected_nlp_hierarchy
 
 
 test_data_2 = [
