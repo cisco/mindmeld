@@ -102,7 +102,6 @@ def test_inspect_contains_language_information(kwik_e_mart_nlp, mocker):
 
 
 def test_role_classification(home_assistant_nlp):
-    home_assistant_nlp.load()
     allowed_intents = ["times_and_dates.change_alarm.sys_time.new_time"]
     extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
     response = home_assistant_nlp.process("5:30am", extracted_intents)
@@ -353,7 +352,6 @@ def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
 
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
-    kwik_e_mart_nlp.load()
     with pytest.raises(AllowedNlpClassesKeyError):
         kwik_e_mart_nlp.extract_allowed_intents(["unrelated_domain.*"])
     with pytest.raises(AllowedNlpClassesKeyError):

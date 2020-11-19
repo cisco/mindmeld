@@ -610,6 +610,23 @@ class NaturalLanguageProcessor(Processor):
             processed_query.confidence = scores
         return processed_query
 
+    def _update_nlp_hierarchy(self, nlp_components, domain, intent, entity=None, role=None):
+        # We assume that the intent is a correct child of the domain
+        if domain not in nlp_components:
+            nlp_components[domain] = {}
+
+        if intent not in nlp_components[domain]:
+            nlp_components[domain][intent] = {}
+
+        if entity and entity in self.domains[domain].intents[intent].entities:
+            if entity not in nlp_components[domain][intent]:
+                nlp_components[domain][intent][entity] = {}
+
+            roles = self.domains[
+                domain].intents[intent].entities[entity].role_classifier.roles
+            if role and role in roles:
+                nlp_components[domain][intent][entity][role] = {}
+
     def extract_allowed_intents(self, allowed_intents):
         """This function validates a user inputted list of allowed_intents against the NLP
         hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
@@ -632,67 +649,21 @@ class NaturalLanguageProcessor(Processor):
 
             domain, intent, entity, role = nlp_entries
 
-            if domain not in self.domains.keys():
+            if not domain or domain not in self.domains.keys():
                 raise AllowedNlpClassesKeyError(
                     "Domain: {} is not in the NLP component hierarchy".format(domain)
                 )
 
-            if intent and intent != "*" and intent not in self.domains[domain].intents.keys():
+            if not intent or (intent != "*" and intent not in self.domains[domain].intents.keys()):
                 raise AllowedNlpClassesKeyError(
                     "Intent: {} is not in the NLP component hierarchy".format(intent)
                 )
 
-            if domain not in nlp_components:
-                nlp_components[domain] = {}
-
             if intent == "*":
                 for intent in self.domains[domain].intents.keys():
-                    # We initialize to an empty dictionary to extend capability for
-                    # entity rules in the future
-                    if entity and entity in self.domains[domain].intents[intent].entities.keys():
-                        if not role:
-                            if intent not in nlp_components[domain]:
-                                nlp_components[domain][intent] = {entity: {}}
-                            else:
-                                nlp_components[domain][intent][entity] = {}
-                            continue
-
-                        roles = self.domains[
-                            domain].intents[intent].entities[entity].role_classifier.roles
-                        if role in roles:
-                            if intent not in nlp_components[domain]:
-                                nlp_components[domain][intent] = {entity: {role: {}}}
-                            else:
-                                if entity in nlp_components[domain][intent]:
-                                    nlp_components[domain][intent][entity][role] = {}
-                                else:
-                                    nlp_components[domain][intent][entity] = {role: {}}
-                    else:
-                        if intent not in nlp_components[domain]:
-                            nlp_components[domain][intent] = {}
+                    self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
             else:
-                if entity and entity in self.domains[domain].intents[intent].entities.keys():
-                    if not role:
-                        if intent not in nlp_components[domain]:
-                            nlp_components[domain][intent] = {entity: {}}
-                        else:
-                            nlp_components[domain][intent][entity] = {}
-                        continue
-
-                    roles = self.domains[
-                        domain].intents[intent].entities[entity].role_classifier.roles
-
-                    if role in roles:
-                        if intent not in nlp_components[domain]:
-                            nlp_components[domain][intent] = {entity: {role: {}}}
-                        else:
-                            if entity in nlp_components[domain][intent]:
-                                nlp_components[domain][intent][entity][role] = {}
-                            else:
-                                nlp_components[domain][intent][entity] = {role: {}}
-                else:
-                    if intent not in nlp_components[domain]:
-                        nlp_components[domain][intent] = {}
+                self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
 
         return nlp_components
 
