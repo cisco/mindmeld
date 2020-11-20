@@ -326,7 +326,7 @@ class Annotator(ABC):
             query_entity (QueryEntity): The converted query entity.
         """
         span = Span(start=item["start"], end=item["end"] - 1)
-        role = item["role"] if "role" in item else None
+        role = item.get("role")
         entity = Entity(
             text=item["body"], entity_type=item["dim"], role=role, value=item["value"]
         )
@@ -779,7 +779,7 @@ class BootstrapAnnotator(Annotator):
 
     def __init__(self, app_path, config=None):
         super().__init__(app_path=app_path, config=config)
-        self.confidence_threshold = self.config.get("confidence_threshold", 0)
+        self.confidence_threshold = float(self.config.get("confidence_threshold", 0))
         logger.info("BootstrapAnnotator is loading %s.", self.app_path)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.nlp.build()
