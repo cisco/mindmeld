@@ -103,22 +103,22 @@ def test_inspect_contains_language_information(kwik_e_mart_nlp, mocker):
 
 def test_role_classification(home_assistant_nlp):
     allowed_intents = ["times_and_dates.change_alarm.sys_time.new_time"]
-    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = home_assistant_nlp.process("5:30am", extracted_intents)
     assert response['entities'][0]['role'] == "new_time"
 
     allowed_intents = ["times_and_dates.change_alarm.sys_time.old_time"]
-    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = home_assistant_nlp.process("5:30am", extracted_intents)
     assert response['entities'][0]['role'] == "old_time"
 
     allowed_intents = ["times_and_dates.change_alarm.sys_time.*"]
-    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = home_assistant_nlp.process("5:30am", extracted_intents)
     assert response['entities'][0]['role'] == "new_time"
 
     allowed_intents = ["times_and_dates.change_alarm.*.*"]
-    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = home_assistant_nlp.process("5:30am", extracted_intents)
     assert response['entities'][0]['role'] == "new_time"
 
@@ -151,7 +151,7 @@ def test_nlp_hierarchy_bias_for_user_bias(
     kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent, expected_entities
 ):
     """Tests user specified domain and intent biases"""
-    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = kwik_e_mart_nlp.process(query, extracted_intents)
     assert response['text'] == query
     assert response['domain'] == expected_domain
@@ -214,7 +214,7 @@ def test_nlp_hierarchy_for_allowed_intents(
     home_assistant_nlp, allowed_intents, expected_nlp_hierarchy
 ):
     """Tests user specified domain and intent biases"""
-    extracted_intents = home_assistant_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
     assert extracted_intents == expected_nlp_hierarchy
 
 
@@ -238,7 +238,7 @@ def test_nlp_hierarchy_using_domains_intents(
     kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent
 ):
     """Tests user specified allowable domains and intents"""
-    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = kwik_e_mart_nlp.process(query, extracted_intents)
 
     assert response == {
@@ -380,9 +380,9 @@ def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
     with pytest.raises(AllowedNlpClassesKeyError):
-        kwik_e_mart_nlp.extract_allowed_intents(["unrelated_domain.*"])
+        kwik_e_mart_nlp.extract_allowed_nlp_components_list(["unrelated_domain.*"])
     with pytest.raises(AllowedNlpClassesKeyError):
-        kwik_e_mart_nlp.extract_allowed_intents(["store_info.unrelated_intent"])
+        kwik_e_mart_nlp.extract_allowed_nlp_components_list(["store_info.unrelated_intent"])
 
 
 def test_process_verbose_no_entity(kwik_e_mart_nlp):
