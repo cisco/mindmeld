@@ -1553,7 +1553,7 @@ class EntityProcessor(Processor):
                         entity.entity.role = role_type
                         break
 
-                    if allowed_nlp_classes and role_type in allowed_nlp_classes:
+                    if role_type in allowed_nlp_classes:
                         entity.entity.role = role_type
                         break
 
