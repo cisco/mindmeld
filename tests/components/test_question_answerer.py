@@ -130,6 +130,7 @@ def test_basic_search(answerer):
     # check that score is included in response
     assert res[0].get('_score') is not None
 
+
 def test_basic_relative_search(relative_answerer):
     """Test basic search."""
 
