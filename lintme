@@ -1,6 +1,5 @@
 #!/bin/bash
 
-BLACK=`python -c "import sys; print('True' if sys.version_info >= (3,6) else '')"`
 
 FLAKE8_OPTIONS=""
 

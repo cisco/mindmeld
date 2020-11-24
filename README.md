@@ -41,9 +41,7 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 ## Quick Start
 
-> :warning: Python 3.5 reached end of life on 13 Sept 2020. MindMeld will deprecate official support for Python 3.5 in the next release. 
-
-Assuming you have pip installed with Python 3.5 (deprecated), Python 3.6 or Python 3.7 and Elasticsearch running in the background:
+Assuming you have pip installed with Python 3.6 or Python 3.7 and Elasticsearch running in the background:
 
 ```
 pip install mindmeld
@@ -86,7 +84,7 @@ virtualenv -p python3 .
 source bin/activate
 ```
 
-For local development we recommend using Python 3.6 or 3.7 since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
+To develop MindMeld, you need Python 3.6 or Python 3.7. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
 
 Now we can install MindMeld and its dependencies:
 
