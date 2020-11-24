@@ -30,6 +30,8 @@ from .query_factory import QueryFactory
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
 from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap
+from .components import NaturalLanguageProcessor
+from .path import get_entity_types
 
 logger = logging.getLogger(__name__)
 
@@ -251,9 +253,15 @@ class Annotator(ABC):
         with open(file_path) as infile:
             queries = infile.readlines()
         processed_queries = []
+        domain, intent = file_path.split(os.sep)[-3:-1]
         for query in queries:
             try:
-                processed_query = load_query(markup=query, query_factory=query_factory)
+                processed_query = load_query(
+                    markup=query,
+                    domain=domain,
+                    intent=intent,
+                    query_factory=query_factory,
+                )
                 processed_queries.append(processed_query)
             except (AssertionError, MarkupError):
                 logger.warning("Skipping query. Error in processing: %s", query)
@@ -294,7 +302,10 @@ class Annotator(ABC):
             return []
         entity_types = None if entity_types == ["*"] else entity_types
         items = self.parse(
-            sentence=processed_query.query.text, entity_types=entity_types
+            sentence=processed_query.query.text,
+            entity_types=entity_types,
+            domain=processed_query.domain,
+            intent=processed_query.intent,
         )
         query_entities = [
             Annotator._item_to_query_entity(item, processed_query) for item in items
@@ -307,7 +318,7 @@ class Annotator(ABC):
 
         Args:
             item (dict): Dictionary representing an entity with the keys -
-                "body", "start", "end", "value", "dim".
+                "body", "start", "end", "value", "dim". ("role" is an optional attribute.)
             processed_query (ProcessedQuery): The processed query that the
                 entity is found in.
 
@@ -315,7 +326,10 @@ class Annotator(ABC):
             query_entity (QueryEntity): The converted query entity.
         """
         span = Span(start=item["start"], end=item["end"] - 1)
-        entity = Entity(text=item["body"], entity_type=item["dim"], value=item["value"])
+        role = item.get("role")
+        entity = Entity(
+            text=item["body"], entity_type=item["dim"], role=role, value=item["value"]
+        )
         query_entity = QueryEntity.from_query(
             query=processed_query.query, span=span, entity=entity
         )
@@ -455,7 +469,7 @@ class SpacyAnnotator(Annotator):
         """
         return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
-    def parse(self, sentence, entity_types=None):
+    def parse(self, sentence, entity_types=None, **kwargs):
         """ Extracts entities from a sentence. Detected entities should are
         represented as dictionaries with the following keys: "body", "start"
         (start index), "end" (end index), "value", "dim" (entity type).
@@ -759,4 +773,67 @@ class SpacyAnnotator(Annotator):
         return entity
 
 
+class BootstrapAnnotator(Annotator):
+    """ Bootstrap Annotator class used to generate annotations based on existing annotations.
+    """
+
+    def __init__(self, app_path, config=None):
+        super().__init__(app_path=app_path, config=config)
+        self.confidence_threshold = float(self.config.get("confidence_threshold", 0))
+        logger.info("BootstrapAnnotator is loading %s.", self.app_path)
+        self.nlp = NaturalLanguageProcessor(self.app_path)
+        self.nlp.build()
+
+    def parse(self, sentence, entity_types, domain: str, intent: str, **kwargs):
+        """
+        Args:
+                sentence (str): Sentence to detect entities.
+                entity_types (list): List of entity types to parse. If None, all
+                        possible entity types will be parsed.
+        Returns: entities (list): List of entity dictionaries.
+        """
+        response = self.nlp.process(
+            sentence, allowed_nlp_classes={domain: {intent: {}}}, verbose=True
+        )
+        entities = []
+        for i, entity in enumerate(response["entities"]):
+            if not entity_types or entity["type"] in entity_types:
+                entity_confidence = response["confidences"]["entities"][i][
+                    entity["type"]
+                ]
+                if entity_confidence >= self.confidence_threshold:
+                    entities.append(
+                        {
+                            "body": entity["text"],
+                            "start": entity["span"]["start"],
+                            "end": entity["span"]["end"] + 1,
+                            "dim": entity["type"],
+                            "value": entity["value"],
+                            "role": entity["role"],
+                        }
+                    )
+        return entities
+
+    @property
+    def supported_entity_types(self):  # pylint: disable=W0236
+        """
+        Returns:
+            supported_entity_types (list): List of supported entity types.
+        """
+        return get_entity_types(self.app_path)
+
+    def valid_entity_check(self, entity):
+        """ Determine if an entity type is valid.
+
+        Args:
+            entity (str): Name of entity to annotate.
+
+        Returns:
+            bool: Whether entity is valid.
+        """
+        entity = entity.lower().strip()
+        return Entity.is_system_entity(entity) or entity in self.supported_entity_types
+
+
 register_annotator("SpacyAnnotator", SpacyAnnotator)
+register_annotator("BootstrapAnnotator", BootstrapAnnotator)
