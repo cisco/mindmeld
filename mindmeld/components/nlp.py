@@ -435,7 +435,7 @@ class NaturalLanguageProcessor(Processor):
             "resolve_entities_using_nbest_transcripts", {}
         )
         if len(nbest_transcripts_nlp_classes) > 0:
-            nbest_transcripts_nlp_classes = self.extract_allowed_intents(
+            nbest_transcripts_nlp_classes = self.extract_allowed_nlp_components_list(
                 nbest_transcripts_nlp_classes
             )
 
@@ -610,13 +610,37 @@ class NaturalLanguageProcessor(Processor):
             processed_query.confidence = scores
         return processed_query
 
-    def extract_allowed_intents(self, allowed_intents):
-        """This function validates a user inputted list of allowed_intents against the NLP
+    def _update_nlp_hierarchy(self, nlp_components, domain, intent, entity=None, role=None):
+        # We assume that the intent is a correct child of the domain
+        if domain not in nlp_components:
+            nlp_components[domain] = {}
+
+        if intent not in nlp_components[domain]:
+            nlp_components[domain][intent] = {}
+
+        all_entities_intent = self.domains[domain].intents[intent].entities
+        valid_entities = filter(lambda candidate: entity and entity in {'*', candidate},
+                                all_entities_intent)
+
+        for nlp_entity in valid_entities:
+            if nlp_entity not in nlp_components[domain][intent]:
+                nlp_components[domain][intent][nlp_entity] = {}
+
+            all_roles_in_entity = self.domains[
+                domain].intents[intent].entities[nlp_entity].role_classifier.roles
+            valid_roles = filter(lambda candidate: role and role in {'*', candidate},
+                                 all_roles_in_entity)
+
+            for nlp_role in valid_roles:
+                nlp_components[domain][intent][nlp_entity][nlp_role] = {}
+
+    def extract_allowed_nlp_components_list(self, allowed_nlp_components_list):
+        """This function validates a user inputted list of allowed nlp components against the NLP
         hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
-        the validation of allowed_intents has passed.
+        the validation of list of allowed nlp components has passed.
 
         Args:
-            allowed_intents (list): A list of allowable intents in the format "domain.intent". \
+            allowed_nlp_components_list (list): A list of allowable intents in the format "domain.intent". \
                 If all intents need to be included, the syntax is "domain.*".
 
         Returns:
@@ -624,29 +648,29 @@ class NaturalLanguageProcessor(Processor):
         """
         nlp_components = {}
 
-        for allowed_intent in allowed_intents:
-            domain, intent = allowed_intent.split(".")
+        for allowed_nlp_component in allowed_nlp_components_list:
+            nlp_entries = [None, None, None, None]
+            entries = allowed_nlp_component.split(".")
+            for idx, entry in enumerate(entries):
+                nlp_entries[idx] = entry
 
-            if domain not in self.domains.keys():
+            domain, intent, entity, role = nlp_entries
+
+            if not domain or domain not in self.domains:
                 raise AllowedNlpClassesKeyError(
                     "Domain: {} is not in the NLP component hierarchy".format(domain)
                 )
 
-            if intent != "*" and intent not in self.domains[domain].intents.keys():
+            if not intent or (intent != "*" and intent not in self.domains[domain].intents):
                 raise AllowedNlpClassesKeyError(
                     "Intent: {} is not in the NLP component hierarchy".format(intent)
                 )
 
-            if domain not in nlp_components:
-                nlp_components[domain] = {}
-
             if intent == "*":
-                for intent in self.domains[domain].intents.keys():
-                    # We initialize to an empty dictionary to extend capability for
-                    # entity rules in the future
-                    nlp_components[domain][intent] = {}
+                for intent in self.domains[domain].intents:
+                    self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
             else:
-                nlp_components[domain][intent] = {}
+                self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
 
         return nlp_components
 
@@ -742,7 +766,7 @@ class NaturalLanguageProcessor(Processor):
                 "'allowed_intents' and 'allowed_nlp_classes' cannot be used together"
             )
         if allowed_intents:
-            allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
+            allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
 
         return super().process(
             query_text,
@@ -973,8 +997,15 @@ class DomainProcessor(Processor):
             intent = list(self.intents.keys())[0]
             if verbose:
                 intent_proba = [(intent, 1.0)]
+
+        if allowed_nlp_classes and intent in allowed_nlp_classes:
+            allowed_nlp_classes = allowed_nlp_classes[intent]
+        else:
+            allowed_nlp_classes = None
+
         processed_query = self.intents[intent].process_query(
-            query, dynamic_resource=dynamic_resource, verbose=verbose
+            query, allowed_nlp_classes=allowed_nlp_classes,
+            dynamic_resource=dynamic_resource, verbose=verbose
         )
         processed_query.intent = intent
         if intent_proba:
@@ -1159,7 +1190,6 @@ class IntentProcessor(Processor):
         """
         # TODO: Deprecate language argument
         del language
-        del allowed_nlp_classes
 
         query = self.create_query(
             query_text,
@@ -1168,7 +1198,8 @@ class IntentProcessor(Processor):
             language=self.language,
             locale=self._validate_locale(locale),
         )
-        processed_query = self.process_query(query, dynamic_resource=dynamic_resource)
+        processed_query = self.process_query(query, dynamic_resource=dynamic_resource,
+                                             allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
@@ -1263,12 +1294,16 @@ class IntentProcessor(Processor):
         return aligned_entities
 
     def _classify_and_resolve_entities(
-        self, idx, query, processed_entities, aligned_entities, verbose=False
+        self, idx, query, processed_entities, aligned_entities, allowed_nlp_classes, verbose=False
     ):
         entity = processed_entities[idx]
         # Run the role classification
+        if allowed_nlp_classes and entity.entity.type in allowed_nlp_classes:
+            entity_allowed_nlp_classes = allowed_nlp_classes[entity.entity.type]
+        else:
+            entity_allowed_nlp_classes = None
         entity, role_confidence = self.entities[entity.entity.type].process_entity(
-            query, processed_entities, idx, verbose
+            query, processed_entities, idx, entity_allowed_nlp_classes, verbose
         )
         # Run the entity resolution
         entity = self.entities[entity.entity.type].resolve_entity(
@@ -1276,9 +1311,9 @@ class IntentProcessor(Processor):
         )
         return [entity, role_confidence]
 
-    def _process_entities(self, query, entities, aligned_entities, verbose=False):
+    def _process_entities(self, query, entities, aligned_entities,
+                          allowed_nlp_classes, verbose=False):
         """
-
         Args:
             query (Query, or tuple): The user input query, or a list of the n-best transcripts
                 query objects
@@ -1295,9 +1330,9 @@ class IntentProcessor(Processor):
 
         processed_entities = [deepcopy(e) for e in entities[0]]
         processed_entities_conf = self._process_list(
-            range(len(processed_entities)),
+            list(range(len(processed_entities))),
             "_classify_and_resolve_entities",
-            *[query, processed_entities, aligned_entities, verbose]
+            *[query, processed_entities, aligned_entities, allowed_nlp_classes, verbose]
         )
         if processed_entities_conf:
             processed_entities, role_confidence = [
@@ -1326,7 +1361,7 @@ class IntentProcessor(Processor):
             return entity_confidence, [_pred_entities]
         return entity_confidence, entities
 
-    def process_query(self, query, dynamic_resource=None, verbose=False):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent.
 
@@ -1356,7 +1391,7 @@ class IntentProcessor(Processor):
 
         aligned_entities = self._align_entities(entities)
         processed_entities, role_confidence = self._process_entities(
-            query, entities, aligned_entities, verbose
+            query, entities, aligned_entities, allowed_nlp_classes, verbose
         )
 
         confidence = (
@@ -1484,7 +1519,7 @@ class EntityProcessor(Processor):
                     self.type,
                 )
 
-    def process_entity(self, query, entities, entity_index, verbose=False):
+    def process_entity(self, query, entities, entity_index, allowed_nlp_classes, verbose=False):
         """Processes the given entity using the hierarchy of natural language processing models \
         trained for this entity type.
 
@@ -1507,10 +1542,22 @@ class EntityProcessor(Processor):
 
         if self.role_classifier.roles:
             # Only run role classifier if there are roles!
-            if verbose:
-                role = self.role_classifier.predict_proba(query, entities, entity_index)
-                entity.entity.role = role[0][0]
-                confidence_score = dict(role)
+            if verbose or allowed_nlp_classes:
+                roles = self.role_classifier.predict_proba(query, entities, entity_index)
+                for role in roles:
+                    # the role confidences are sorted, so we will always be able to pick
+                    # the highest confidence role that matches the allowed_nlp_classes
+                    role_type = role[0]
+
+                    if not allowed_nlp_classes:
+                        entity.entity.role = role_type
+                        break
+
+                    if role_type in allowed_nlp_classes:
+                        entity.entity.role = role_type
+                        break
+
+                confidence_score = dict(roles)
             else:
                 entity.entity.role = self.role_classifier.predict(
                     query, entities, entity_index

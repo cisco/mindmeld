@@ -8,7 +8,8 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-   'dataclasses<0.8,>=0.7; python_version >= "3.6" and python_version < "3.7"',
+
+    'dataclasses<0.8,>=0.7; python_version >= "3.6" and python_version < "3.7"',
     "aiohttp>=3.6.2",
     "attrs>=18.2",  # attrs has a stable API and does not use semver
     "Click~=7.1",
@@ -53,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.2",
+    version="4.3.3",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",

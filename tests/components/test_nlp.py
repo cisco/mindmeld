@@ -101,40 +101,121 @@ def test_inspect_contains_language_information(kwik_e_mart_nlp, mocker):
     assert query.locale == "en_CA"
 
 
+def test_role_classification(home_assistant_nlp):
+    allowed_intents = ["times_and_dates.change_alarm.sys_time.new_time"]
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "new_time"
+
+    allowed_intents = ["times_and_dates.change_alarm.sys_time.old_time"]
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "old_time"
+
+    allowed_intents = ["times_and_dates.change_alarm.sys_time.*"]
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "new_time"
+
+    allowed_intents = ["times_and_dates.change_alarm.*.*"]
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
+    response = home_assistant_nlp.process("5:30am", extracted_intents)
+    assert response['entities'][0]['role'] == "new_time"
+
+
 test_data_1 = [
     (
         ["store_info.find_nearest_store"],
         "store near MG Road",
         "store_info",
-        "find_nearest_store",
+        "find_nearest_store", []
     ),
     (
         ["store_info.find_nearest_store", "store_info.greet"],
         "hello!",
         "store_info",
-        "greet",
+        "greet", []
     ),
-    (["store_info.find_nearest_store"], "hello!", "store_info", "find_nearest_store"),
-    (["store_info.*"], "hello!", "store_info", "greet"),
+    (["store_info.find_nearest_store"], "hello!", "store_info", "find_nearest_store", []),
+    (["store_info.*"], "hello!", "store_info", "greet", []),
+    (["store_info.get_store_hours.store_name"],
+     "will springfield mall be open and what time will it close",
+     "store_info", "get_store_hours", 'springfield mall')
 ]
 
 
 @pytest.mark.parametrize(
-    "allowed_intents,query,expected_domain,expected_intent", test_data_1
+    "allowed_intents,query,expected_domain,expected_intent,expected_entities", test_data_1
 )
 def test_nlp_hierarchy_bias_for_user_bias(
-    kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent
+    kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent, expected_entities
 ):
     """Tests user specified domain and intent biases"""
-    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = kwik_e_mart_nlp.process(query, extracted_intents)
+    assert response['text'] == query
+    assert response['domain'] == expected_domain
+    assert response['intent'] == expected_intent
+    if expected_entities:
+        assert response['entities'][0]['text'] == expected_entities
 
-    assert response == {
-        "text": query,
-        "domain": expected_domain,
-        "intent": expected_intent,
-        "entities": [],
-    }
+
+test_data_10 = [
+    (
+        ["times_and_dates.change_alarm"],
+        {'times_and_dates': {'change_alarm': {}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}}}}},
+    ),
+    (
+        ["smart_home.set_thermostat.sys_temperature"],
+        {'smart_home': {'set_thermostat': {'sys_temperature': {}}}},
+    ),
+    (
+        ["smart_home.*.sys_temperature"],
+        {'smart_home': {'set_thermostat': {'sys_temperature': {}}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time",
+         "smart_home.set_thermostat.sys_temperature.room_temperature"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}}}},
+         'smart_home': {'set_thermostat': {'sys_temperature': {'room_temperature': {}}}}},
+    ),
+    (
+        ["times_and_dates.*.sys_time.new_time", "times_and_dates.change_alarm.sys_time.old_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}}}}},
+    ),
+    (
+        ["times_and_dates.*.*.new_time", "times_and_dates.change_alarm.sys_time.*"],
+        {'times_and_dates': {'change_alarm': {'sys_interval': {},
+                                              'sys_time': {'new_time': {}, 'old_time': {}}}}},
+    ),
+    (
+        ["times_and_dates.change_alarm.*.new_time"],
+        {'times_and_dates': {'change_alarm': {'sys_interval': {}, 'sys_time': {'new_time': {}}}}},
+    ),
+    (
+        ["times_and_dates.change_alarm.sys_time.*"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}}}}},
+    ),
+    (
+        ["times_and_dates.change_alarm.sys_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {}}}},
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "allowed_intents,expected_nlp_hierarchy", test_data_10
+)
+def test_nlp_hierarchy_for_allowed_intents(
+    home_assistant_nlp, allowed_intents, expected_nlp_hierarchy
+):
+    """Tests user specified domain and intent biases"""
+    extracted_intents = home_assistant_nlp.extract_allowed_nlp_components_list(allowed_intents)
+    assert extracted_intents == expected_nlp_hierarchy
 
 
 test_data_2 = [
@@ -157,7 +238,7 @@ def test_nlp_hierarchy_using_domains_intents(
     kwik_e_mart_nlp, allowed_intents, query, expected_domain, expected_intent
 ):
     """Tests user specified allowable domains and intents"""
-    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_nlp_components_list(allowed_intents)
     response = kwik_e_mart_nlp.process(query, extracted_intents)
 
     assert response == {
@@ -298,12 +379,10 @@ def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
 
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
-    with pytest.raises(ValueError):
-        kwik_e_mart_nlp.extract_allowed_intents(["store_info"])
     with pytest.raises(AllowedNlpClassesKeyError):
-        kwik_e_mart_nlp.extract_allowed_intents(["unrelated_domain.*"])
+        kwik_e_mart_nlp.extract_allowed_nlp_components_list(["unrelated_domain.*"])
     with pytest.raises(AllowedNlpClassesKeyError):
-        kwik_e_mart_nlp.extract_allowed_intents(["store_info.unrelated_intent"])
+        kwik_e_mart_nlp.extract_allowed_nlp_components_list(["store_info.unrelated_intent"])
 
 
 def test_process_verbose_no_entity(kwik_e_mart_nlp):
