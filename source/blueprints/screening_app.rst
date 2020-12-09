@@ -5,7 +5,7 @@ In this step-by-step walkthrough, you'll build a conversational application for 
 
 Working through this blueprint will teach you how to
 
-   - configure a mindmeld application in a language different than English
+   - configure a MindMeld application in a language different than English
    - handle a large number of domains and intents
    - learn non-system entities
    - use dialogue flows to structure the conversation
@@ -17,7 +17,7 @@ Working through this blueprint will teach you how to
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This screening application would be offered by a public health department, and would ask questions in Spanish about an individual's medical history. Users should be able to provide answers to a series of questions and receive an assessment about their risk for prediabetes. They should be able to opt out of the questionnaire at any time.
+This screening application would be offered by a public health department and would ask questions in Spanish about an individual's medical history. Users should be able to provide answers to a series of questions and receive an assessment about their risk for prediabetes. They should be able to opt-out of the questionnaire at any time.
 A user's risk is calculated based on the `questionnaire <https://www.cdc.gov/diabetes/risktest/index.html>`_ provided by the American Diabetes Association and the Centers for Disease Control and Prevention.
 
 
@@ -26,7 +26,7 @@ A user's risk is calculated based on the `questionnaire <https://www.cdc.gov/dia
 
 The conversational flows for a health screening will primarily involve asking users a series of questions about their medical history relevant to prediabetes. Once all necessary questions have been asked, the users are informed of their risk for presenting prediabetes.
 
-Here is an examples of a scripted dialogue interaction for conversational flows. Although the screening is done in Spanish, for instructional purposes we demonstrate the same interaction in English.
+Here is an example of a scripted dialogue interaction for conversational flows. Although the screening is done in Spanish, for instructional purposes, we demonstrate the same interaction in English.
 
 .. image:: /images/screening_interactions.png
     :width: 700px
@@ -38,6 +38,8 @@ Here is an examples of a scripted dialogue interaction for conversational flows.
 Here is the NLP model hierarchy for our screening application.
 
 .. image:: /images/screening_hierarchy.png
+    :height: 600px
+    :align: center
 
 The screening blueprint is organized into two domains: ``greetings`` and ``prediabetes_screening``.
 
@@ -46,7 +48,7 @@ The full list of intents for both domains is illustrated below.
 The ``greetings`` domain supports the following intents:
 
    - ``greet`` — Greet the user and ask them if they would like to be screened for prediabetes.
-   - ``exit`` — Opt out of the screening and say bye to the user.
+   - ``exit`` — Opt-out of the screening and say bye to the user.
 
 The ``prediabetes_screening`` domain supports the following intents:
 
@@ -58,7 +60,7 @@ The ``prediabetes_screening`` domain supports the following intents:
    - ``answer_yes_gestational`` — User wants to answer the question regarding gestational diabetes with an implied "yes". For example, the answer: "During my first pregnancy" implies an affirmative response.
    - ``answer_yes_family`` — User wants to answer the question regarding family history of diabetes with an implied "yes".
    - ``answer_yes_hbp`` — User wants to answer the question regarding high blood pressure with an implied "yes".
-   - ``answer_yes_active`` — User wants to answer the question regarding physcial activity with an implied "yes".
+   - ``answer_yes_active`` — User wants to answer the question regarding physical activity with an implied "yes".
    - ``answer_height`` — User wants to provide their height.
    - ``answer_weight`` — User wants to provide their weight.
 
@@ -175,7 +177,7 @@ Observe that the dialogue states for ``confirm_send_next`` and ``negate_send_nex
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The screening blueprint is a straightforward question-answer application. It has no catalogs, and therefore does not need a knowledge base.
+The screening blueprint is a straightforward question-answer application. It has no catalogs and therefore does not need a knowledge base.
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
@@ -208,9 +210,6 @@ The ``domains`` directory contains the training data for intent classification a
 
    - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the user guide.
 
-   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``duration``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
-
-
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -221,9 +220,9 @@ Mindmeld supports `ISO 639-1 and ISO 639-2 language codes <https://en.wikipedia.
 `ISO 3166-2 locale codes <https://www.iso.org/obp/ui/#search/code/>`_. Locale codes are represented as ISO 639-1 language code
 and ISO3166 alpha 2 country code separated by an underscore character, for example, `en_US`.
 
-For the app to use Spanish in Mindmeld, the ``config.py`` file needs to configured as follows:
+For the app to use Spanish in Mindmeld, the ``config.py`` file needs to be configured as follows:
 
-.. code:: python
+.. code-block:: console
 
     LANGUAGE_CONFIG = {
         'language': 'es',
@@ -232,7 +231,7 @@ For the app to use Spanish in Mindmeld, the ``config.py`` file needs to configur
 
 Note that Mexico (MX) is set as the locale. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
 
-.. code:: python
+.. code-block:: console
 
     LANGUAGE_CONFIG = {
         'language': 'en',
@@ -246,7 +245,7 @@ Mindmeld supports most languages that can be tokenized like English. Apart from 
    dc = nlp.domain_classifier
    dc.view_extracted_features('quiero conocer mi riesgo')
 
-.. code::python
+.. code-block:: console
 
    {
       'bag_of_words_stemmed|length:1|ngram:conoc': 1,
