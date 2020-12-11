@@ -83,6 +83,10 @@ The screening blueprint uses one system entity: ``sys_number`` (number). Some ex
 
 This should create a MindMeld project folder called ``screening_app`` in your current directory with the following structure:
 
+.. image:: /images/directory_screening.png
+    :width: 250px
+    :align: center
+
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
