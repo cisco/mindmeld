@@ -75,7 +75,7 @@ The screening blueprint uses one system entity: ``sys_number`` (number). Some ex
 
 .. admonition:: Exercise
 
-    To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
+    To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.
 
 .. code-block:: shell
 
