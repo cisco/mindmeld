@@ -6,7 +6,7 @@ In this step-by-step walkthrough, you'll build a conversational application for 
 Working through this blueprint will teach you how to
 
    - configure a MindMeld application in a language different than English
-   - learn non-system entities
+   - learn custom entities
    - use dialogue flows to structure the conversation
 
 .. note::
@@ -74,7 +74,7 @@ The screening blueprint uses one system entity: ``sys_number`` (number). Some ex
 
 .. admonition:: Exercise
 
-    To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
+    To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.
 
 .. code-block:: shell
 
@@ -205,7 +205,7 @@ The labeled data for training our NLP pipeline was created using a combination o
 | | Annotate queries for training the Role Classifier                                     | | The screening blueprint does not use roles.                                                                       |
 | |                                                                                       | | For examples, please visit the home assistant blueprint.                                                          |
 +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| | Generation synonyms for gazetteer generation to improve entity recognition accuracies | | ``unit`` entity: "Enumerate a list of abbreviations for the unit"                                                 |
+| | Generate synonyms for gazetteer generation to improve entity recognition accuracies | | ``unit`` entity: "Enumerate a list of abbreviations for the unit"                                                 |
 | |                                                                                       | | ``gender`` entity: "What are different ways to indicate gender?"                                                  |
 +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
@@ -234,7 +234,7 @@ For the app to use Spanish in Mindmeld, the ``config.py`` file needs to be confi
         'locale': 'es_MX'
     }
 
-Note that Mexico (MX) is set as the locale. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
+Note that Mexico (MX) is set as the locale as a demonstration, but in the case of Spanish, all locales are treated the same. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
 
 .. code-block:: console
 
@@ -243,7 +243,7 @@ Note that Mexico (MX) is set as the locale. If the language and locale codes are
         'locale': 'en_US'
     }
 
-Mindmeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional Mindmeld components, Stemming and System entity resolution, that only support a subset of languages. Stemming is supported for Spanish.
+Mindmeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional Mindmeld components, stemming and system entities, that only support a subset of languages. Stemming and system entities are both supported for Spanish.
 
 .. code:: python
 
@@ -464,12 +464,12 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
 The :meth:`say` method:
 
  - packages the input text in a user request object
- - passes the object to the MindMeld Application Manager to a simulate an external user interaction with the app, and
+ - passes the object to the MindMeld Application Manager to simulate an external user interaction with the app, and
  - outputs the textual part of the response sent by the dialogue manager.
 
 In the above example, we opted into the screening and the app responded with the first of the questions.
 
-Try a multi-turn dialogues:
+Try a multi-turn dialogue:
 
 .. code:: python
 
