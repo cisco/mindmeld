@@ -7,7 +7,7 @@ Working through this blueprint will teach you how to
 
    - configure a MindMeld application in a language different than English
    - handle a large number of domains and intents
-   - learn non-system entities
+   - learn custom entities
    - use dialogue flows to structure the conversation
 
 .. note::
