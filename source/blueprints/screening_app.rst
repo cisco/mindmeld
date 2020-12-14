@@ -451,7 +451,7 @@ The :meth:`say` method:
 
 In the above example, we opted into the screening and the app responded with the first of the questions.
 
-Try a multi-turn dialogues:
+Try a multi-turn dialogue:
 
 .. code:: python
 
