@@ -1,7 +1,7 @@
 Health Screening
 ================
 
-In this step-by-step walkthrough, you'll build a conversational application for a health screening that allows users to identify their risk of prediabetes.
+In this step-by-step walkthrough, you'll build a conversational health screening application that allows users to identify their risk of prediabetes.
 
 Working through this blueprint will teach you how to
 
@@ -11,7 +11,7 @@ Working through this blueprint will teach you how to
 
 .. note::
 
-   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing on with this blueprint tutorial.
+   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing with this blueprint tutorial.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
@@ -23,7 +23,7 @@ A user's risk is calculated based on the `questionnaire <https://www.cdc.gov/dia
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational flows for a health screening will primarily involve asking users a series of questions about their medical history relevant to prediabetes. Once all necessary questions have been asked, the users are informed of their risk for presenting prediabetes.
+The conversational flows for health screening will primarily involve asking users a series of questions about their medical history relevant to prediabetes. Once all necessary questions have been answered, the users are informed of their risk for presenting prediabetes.
 
 Here is an example of a scripted dialogue interaction for conversational flows. Although the screening is done in Spanish, for instructional purposes, we demonstrate the same interaction in English.
 
@@ -63,7 +63,7 @@ The ``prediabetes_screening`` domain supports the following intents:
    - ``answer_height`` — User wants to provide their height.
    - ``answer_weight`` — User wants to provide their weight.
 
-There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in MindMeld. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains the full list of values for each custom entity.
+There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in MindMeld. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains a list of values for each custom entity. A gazetteer provides a very strong signal to the classification models; however, it does not need to be a comprehensive list of all possible values for the custom entity.
 
 The screening blueprint defines and uses the following custom entities:
 
@@ -175,7 +175,7 @@ Once a user has opted into the screening, a multi-turn dialogue begins where the
    def negate_send_next(request, responder):
       ...
 
-The ``@app.dialogue_flow`` decorator designates the flow's entry point. Once inside, every follow up turn will continue to be in this flow until we exit the flow. If the user tries to disrupt the flow by answering something unrelated to the screening, we gently reprompt the user to provide an answer for the current question. We can further control how the screening progresses by setting the ``allowed_intents`` attribute of the params object in the dialogue state handler. This attribute specifies a list of intents that you can set to force the language processor to choose from.
+The ``@app.dialogue_flow`` decorator designates the flow's entry point. Once inside, every follow up turn will continue to be in this flow until we exit the flow. If the user response disrupts the flow by answering something unrelated to the prompt, we gently reprompt the user to provide a relevant answer. We can further control how the screening progresses by setting the ``allowed_intents`` attribute of the params object in the dialogue state handler. This attribute specifies a list of intents that you can set to force the language processor to choose from.
 
 Observe that the dialogue states for ``confirm_send_next`` and ``negate_send_next`` have both the dialogue flow decorator and the normal decorator. These dialogue states handle explicit 'yes' and 'no' replies, respectively, that come both inside and outside the dialogue flow. For example, a user agreeing to the screening by saying ‘yes’ would be handled by the ``confirm_send_next`` dialogue state and would subsequently enter the dialogue flow. Similarly, a user answering ‘yes’ to a screening question would also be handled by this dialogue state.
 
@@ -413,7 +413,7 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 
 .. admonition:: Exercise
 
-   Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
+   Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
 
 
 8. Parser Configuration
