@@ -242,7 +242,7 @@ Note that Mexico (MX) is set as the locale. If the language and locale codes are
         'locale': 'en_US'
     }
 
-Mindmeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional Mindmeld components, Stemming and System entity resolution, that only support a subset of languages. Stemming is supported for Spanish.
+Mindmeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional Mindmeld components, stemming and system entities, that only support a subset of languages. Stemming and system entities are both supported for Spanish.
 
 .. code:: python
 
