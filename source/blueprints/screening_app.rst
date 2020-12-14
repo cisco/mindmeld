@@ -266,24 +266,9 @@ Mindmeld supports most languages that can be tokenized like English. Apart from 
       'bag_of_words|length:1|ngram:yo': 1,
       'bag_of_words|length:2|ngram:tengo veinte': 1,
       'bag_of_words|length:2|ngram:veinte anos': 1,
-      'bag_of_words|length:2|ngram:yo tengo': 1
-   }
-
-.. code:: python
-
-   nlp.process('yo tengo veinte años')
-
-.. code-block:: console
-
-   {
-      'domain': 'prediabetes_screening',
-      'entities': [{'role': None,
-               'span': {'end': 14, 'start': 9},
-               'text': 'veinte',
-               'type': 'sys_number',
-               'value': [{'value': 20}]}],
-      'intent': 'answer_age',
-      'text': 'yo tengo veinte años'
+      'bag_of_words|length:2|ngram:yo tengo': 1,
+      'sys_candidate|type:sys_number': 1,
+      'sys_candidate|type:sys_number|granularity:None': 1
    }
 
 Training the NLP Classifiers
