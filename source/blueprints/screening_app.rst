@@ -446,7 +446,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
 The :meth:`say` method:
 
  - packages the input text in a user request object
- - passes the object to the MindMeld Application Manager to a simulate an external user interaction with the app, and
+ - passes the object to the MindMeld Application Manager to simulate an external user interaction with the app, and
  - outputs the textual part of the response sent by the dialogue manager.
 
 In the above example, we opted into the screening and the app responded with the first of the questions.
