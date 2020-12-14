@@ -6,7 +6,6 @@ In this step-by-step walkthrough, you'll build a conversational application for 
 Working through this blueprint will teach you how to
 
    - configure a MindMeld application in a language different than English
-   - handle a large number of domains and intents
    - learn non-system entities
    - use dialogue flows to structure the conversation
 
@@ -17,7 +16,7 @@ Working through this blueprint will teach you how to
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This screening application would be offered by a public health department and would ask questions in Spanish about an individual's medical history. Users should be able to provide answers to a series of questions and receive an assessment about their risk for prediabetes. They should be able to opt-out of the questionnaire at any time.
+This screening application would be offered by a public health department through a messaging service like SMS or WhatsApp. Users should be able to provide answers to a series of questions asked in Spanish and receive an assessment about their risk for prediabetes. They should be able to opt-out of the questionnaire at any time.
 A user's risk is calculated based on the `questionnaire <https://www.cdc.gov/diabetes/risktest/index.html>`_ provided by the American Diabetes Association and the Centers for Disease Control and Prevention.
 
 
@@ -176,7 +175,9 @@ Once a user has opted into the screening, a multi-turn dialogue begins where the
    def negate_send_next(request, responder):
       ...
 
-Observe that the dialogue states for ``confirm_send_next`` and ``negate_send_next`` handle explicit 'yes' and 'no' replies that come both inside and outside the dialogue flow. 
+The ``@app.dialogue_flow`` decorator designates the flow's entry point. Once inside, every follow up turn will continue to be in this flow until we exit the flow. If the user tries to disrupt the flow by answering something unrelated to the screening, we gently reprompt the user to provide an answer for the current question. We can further control how the screening progresses by setting the ``allowed_intents`` attribute of the params object in the dialogue state handler. This attribute specifies a list of intents that you can set to force the language processor to choose from.
+
+Observe that the dialogue states for ``confirm_send_next`` and ``negate_send_next`` have both the dialogue flow decorator and the normal decorator. These dialogue states handle explicit 'yes' and 'no' replies, respectively, that come both inside and outside the dialogue flow. For example, a user agreeing to the screening by saying ‘yes’ would be handled by the ``confirm_send_next`` dialogue state and would subsequently enter the dialogue flow. Similarly, a user answering ‘yes’ to a screening question would also be handled by this dialogue state.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
@@ -247,25 +248,42 @@ Mindmeld supports most languages that can be tokenized like English. Apart from 
 .. code:: python
 
    dc = nlp.domain_classifier
-   dc.view_extracted_features('quiero conocer mi riesgo')
+   dc.view_extracted_features('yo tengo veinte años')
 
 .. code-block:: console
 
    {
-      'bag_of_words_stemmed|length:1|ngram:conoc': 1,
-      'bag_of_words_stemmed|length:1|ngram:mi': 1,
-      'bag_of_words_stemmed|length:1|ngram:quier': 1,
-      'bag_of_words_stemmed|length:1|ngram:riesg': 1,
-      'bag_of_words_stemmed|length:2|ngram:conoc mi': 1,
-      'bag_of_words_stemmed|length:2|ngram:mi riesg': 1,
-      'bag_of_words_stemmed|length:2|ngram:quier conoc': 1,
-      'bag_of_words|length:1|ngram:conocer': 1,
-      'bag_of_words|length:1|ngram:mi': 1,
-      'bag_of_words|length:1|ngram:quiero': 1,
-      'bag_of_words|length:1|ngram:riesgo': 1,
-      'bag_of_words|length:2|ngram:conocer mi': 1,
-      'bag_of_words|length:2|ngram:mi riesgo': 1,
-      'bag_of_words|length:2|ngram:quiero conocer': 1
+      'bag_of_words_stemmed|length:1|ngram:anos': 1,
+      'bag_of_words_stemmed|length:1|ngram:teng': 1,
+      'bag_of_words_stemmed|length:1|ngram:veint': 1,
+      'bag_of_words_stemmed|length:1|ngram:yo': 1,
+      'bag_of_words_stemmed|length:2|ngram:teng veint': 1,
+      'bag_of_words_stemmed|length:2|ngram:veint anos': 1,
+      'bag_of_words_stemmed|length:2|ngram:yo teng': 1,
+      'bag_of_words|length:1|ngram:anos': 1,
+      'bag_of_words|length:1|ngram:tengo': 1,
+      'bag_of_words|length:1|ngram:veinte': 1,
+      'bag_of_words|length:1|ngram:yo': 1,
+      'bag_of_words|length:2|ngram:tengo veinte': 1,
+      'bag_of_words|length:2|ngram:veinte anos': 1,
+      'bag_of_words|length:2|ngram:yo tengo': 1
+   }
+
+.. code:: python
+
+   nlp.process('yo tengo veinte años')
+
+.. code-block:: console
+
+   {
+      'domain': 'prediabetes_screening',
+      'entities': [{'role': None,
+               'span': {'end': 14, 'start': 9},
+               'text': 'veinte',
+               'type': 'sys_number',
+               'value': [{'value': 20}]}],
+      'intent': 'answer_age',
+      'text': 'yo tengo veinte años'
    }
 
 Training the NLP Classifiers
