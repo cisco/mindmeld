@@ -233,7 +233,7 @@ For the app to use Spanish in Mindmeld, the ``config.py`` file needs to be confi
         'locale': 'es_MX'
     }
 
-Note that Mexico (MX) is set as the locale. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
+Note that Mexico (MX) is set as the locale as a demonstration, but in the case of Spanish, all locales are treated the same. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
 
 .. code-block:: console
 
