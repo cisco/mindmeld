@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """This module contains the DialogflowConverter class used to convert Dialogflow projects
-into Mindmeld projects"""
+into MindMeld projects"""
 
 import json
 import logging
@@ -507,7 +507,7 @@ class DialogflowConverter(Converter):
         implement this. The converter is able to successfully convert dialogflow
         bots that support multiple languages.
 
-        Mindmeld:
+        MindMeld:
         - Users can store data locally
         - Users can build a knowledge base (currently beta in Dialogflow).
         - Users can configure the machine learning models to best suit their needs.
@@ -520,7 +520,7 @@ class DialogflowConverter(Converter):
         # Create project directory with sub folders
         self.create_mindmeld_directory()
 
-        # copy config file to the Mindmeld dir
+        # copy config file to the MindMeld dir
         if self.custom_config_file_path:
             copyfile(
                 self.custom_config_file_path,
@@ -531,6 +531,6 @@ class DialogflowConverter(Converter):
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 
-        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
+        # Transfer over test data from Dialogflow project and reformat to MindMeld project
         self.create_mindmeld_training_data()
         logger.info("Project converted.")

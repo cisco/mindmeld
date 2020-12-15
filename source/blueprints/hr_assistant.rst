@@ -160,7 +160,7 @@ Let's begin by looking at some of the dialogue states for the intents in the ``g
 
           ...
 
-Observe that the same intent has multiple dialogue states that specify a ``has_entity`` field, except for the last case which serves as the default case. In other words, Mindmeld will feed the request to the dialogue state handler if there is a match between an entity found in the user query and the entity that the dialogue state handler accepts. If none of the entities are found, Mindmeld will default to the last case that does not specify an entity. This is where the system can follow up with the user and ask for any information needed to complete the query.
+Observe that the same intent has multiple dialogue states that specify a ``has_entity`` field, except for the last case which serves as the default case. In other words, MindMeld will feed the request to the dialogue state handler if there is a match between an entity found in the user query and the entity that the dialogue state handler accepts. If none of the entities are found, MindMeld will default to the last case that does not specify an entity. This is where the system can follow up with the user and ask for any information needed to complete the query.
 
 
 
