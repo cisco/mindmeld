@@ -87,7 +87,7 @@ class MindMeldServer:
                 raise BadMindMeldRequestError(msg, status_code=415)
 
             safe_request = {}
-            for key in ["text", "params", "context", "frame", "history", "verbose"]:
+            for key in ["text", "params", "context", "frame", "form", "history", "verbose"]:
                 if key in request_json:
                     safe_request[key] = request_json[key]
             response = self._app_manager.parse(**safe_request)

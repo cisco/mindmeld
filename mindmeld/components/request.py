@@ -351,6 +351,9 @@ class Request:
     nbest_aligned_entities = attr.ib(
         default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
+    form = attr.ib(
+        default=None,
+    )
 
     def to_dict(self):
         return {

@@ -985,7 +985,7 @@ class AutoEntityFilling:
         # If form iteration in request object, continue using that. 
         # If None, set to original form.
         if request.form:
-            self._local_entity_form = request.form or []
+            self._local_entity_form = request.form or None
 
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
