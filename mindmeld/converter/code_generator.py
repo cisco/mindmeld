@@ -26,7 +26,7 @@ class CodeGenerator:
 
 class MindmeldCodeGenerator(CodeGenerator):
     """
-    This class generates Mindmeld specific python code blocks
+    This class generates MindMeld-specific python code blocks
     """
 
     def generate_handle(self, params):
