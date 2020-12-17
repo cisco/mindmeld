@@ -390,7 +390,7 @@ Using the Python shell
 The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using MindMeld.
 
 
-Upgrade Mindmeld
+Upgrade MindMeld
 ----------------
 
 To upgrade to the latest version of MindMeld, run ``pip install mindmeld --upgrade``

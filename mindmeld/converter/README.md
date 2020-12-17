@@ -1,4 +1,4 @@
-### Mindmeld Conversion Tool
+### MindMeld Conversion Tool
 
 __Introduction__  
 This tool is designed to help make the migration from other conversational AI platforms to MindMeld as seamless as possible. MindMeld has many advantages that make it an ideal solution for building conversational assistants, and with this tool you can easily transfer your existing projects into MindMeld to expand their capabilities. Currently, we offer support for projects built in Rasa and Dialogflow.
@@ -23,11 +23,11 @@ __Limitations__
 *Rasa Users:*  
 - Rasa has the ability to have custom actions, which is not supported by
 the converter.
-- Rasa has the ability to handle multiple intents per query, while Mindmeld
+- Rasa has the ability to handle multiple intents per query, while MindMeld
 does not.
 - Rasa training data may be json format, which is not currently supported.
 - Rasa has a feature called Rasa forms which is not currently supported.
-- Rasa's configuration files are not transfered, instead generic Mindmeld
+- Rasa's configuration files are not transfered, instead generic MindMeld
 configuration files are copied over.
 
 *Dialogflow Users:*

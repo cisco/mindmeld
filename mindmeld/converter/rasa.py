@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """This module contains the Rasacoverter class used to convert Rasa projects
-into Mindmeld projects"""
+into MindMeld projects"""
 
 import copy
 import logging
@@ -583,10 +583,10 @@ __all__ = ['app']
             f.write(string)
 
     def convert_project(self):
-        """Main function that will convert a Rasa project into a Mindmeld project.
+        """Main function that will convert a Rasa project into a MindMeld project.
 
         The Rasa project consists of three major files that contain much of data
-            that is converted into the Mindmeld project:
+            that is converted into the MindMeld project:
         /domain.yml - Contains all of the intents, entities, actions, and templates
             used in the rasa project
         /data/stories.md - Contains the stories which are used to match intents and
@@ -595,16 +595,16 @@ __all__ = ['app']
             training data may contain entities
 
         limitations:
-        - Rasa has the ability to handle multiple intents per query, while Mindmeld
+        - Rasa has the ability to handle multiple intents per query, while MindMeld
         does not.
         - Rasa training data may be json format, which is not currently supported.
         - Rasa has a feature called Rasa forms which is not currently supported.
-        - Rasa's configuration files are not transfered, instead generic Mindmeld
+        - Rasa's configuration files are not transfered, instead generic MindMeld
         configuration files are copied over.
         """
         # Create project directory with sub folders
         self.create_mindmeld_directory(self.mindmeld_project_directory)
-        # Transfer over test data from Rasa project and reformat to Mindmeld project
+        # Transfer over test data from Rasa project and reformat to MindMeld project
         self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
         self.create_main(self.mindmeld_project_directory, file_loc)

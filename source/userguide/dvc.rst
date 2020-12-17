@@ -1,15 +1,15 @@
 DVC for Model Tracking
 ======================
 
-We use Data Version Control, or DVC, in Mindmeld in order to track trained models in our applications. DVC is an
+We use Data Version Control, or DVC, in MindMeld in order to track trained models in our applications. DVC is an
 open-source version control system for data science and machine learning projects that enables versioning of large
 files and directories in concert with Git without storing the data itself in Git.
 
 You can find more info about DVC in the `official documentation <https://dvc.org/doc>`_.
 
-The functionality of the DVC command within Mindmeld is shown in the table below.
+The functionality of the DVC command within MindMeld is shown in the table below.
 
-Available Options in Mindmeld
+Available Options in MindMeld
 -----------------------------
 
 +-----------------+------------------------------------------------------------------------+

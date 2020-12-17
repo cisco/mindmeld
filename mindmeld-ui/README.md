@@ -1,4 +1,4 @@
-# Mindmeld UI
+# MindMeld UI
 
 This is a React application that can be run along with any of the blueprints, or any `mindmeld` based app.
 
@@ -47,7 +47,7 @@ REACT_APP_MINDMELD_URL = <MINDMELD_URL> # Set this if you need to point the UI t
 ```
 
 ### 4. Navigate the app
-First, you will need to run the Mindmeld app. If you are developing locally, you can do:
+First, you will need to run the MindMeld app. If you are developing locally, you can do:
 
 ```
 python -m [app-name] run`

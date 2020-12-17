@@ -55,7 +55,7 @@ At the `mindmeld-ui` directory, you can add a `.env` file that includes your con
 4. Navigate the app
 ^^^^^^^^^^^^^^^^^^^
 
-First, you will need to run the Mindmeld app. If you are developing locally, you can do:
+First, you will need to run the MindMeld app. If you are developing locally, you can do:
 
 .. code-block:: console
 

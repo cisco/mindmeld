@@ -104,7 +104,7 @@ To support the functionality we envision, our app needs one dialogue state for e
 +---------------------------------------------------+-----------------------------------+------------------------------------------------------------------------------------------------------------------+
 | ``answer_gender``                                 | ``set_gender_send_next``          | Record the user's gender and respond with the next question                                                      |
 +---------------------------------------------------+-----------------------------------+------------------------------------------------------------------------------------------------------------------+
-| ``answer_yes``                                    | ``confirm_send_next``             | If the user accepts the screening with an explicit "yes", the behavior is the same as ``opt_in``.                | 
+| ``answer_yes``                                    | ``confirm_send_next``             | If the user accepts the screening with an explicit "yes", the behavior is the same as ``opt_in``.                |
 |                                                   |                                   | If the answer is for a screening question, record ``True`` for that question and respond with the next question. |
 +---------------------------------------------------+-----------------------------------+------------------------------------------------------------------------------------------------------------------+
 | ``answer_no``                                     | ``negate_send_next``              | If the user rejects the screening, exit the conversation. If the answer is for a screening question, record      |
@@ -132,44 +132,44 @@ Once a user has opted into the screening, a multi-turn dialogue begins where the
    @app.dialogue_flow(domain='prediabetes_screening', intent='opt_in')
    def screen_prediabetes(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_age')
    def set_age_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_gender')
    def set_gender_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_yes_gestational')
    def confirm_gestational_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_yes_family')
    def confirm_family_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_yes_hbp')
    def confirm_hbp_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_yes_active')
    def confirm_active_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_height')
    def set_height_send_next(request, responder):
       ...
-      
+
    @screen_prediabetes.handle(intent='answer_weight')
    def set_weight_send_next(request, responder):
       ...
-      
+
    @app.handle(intent='answer_yes')
    @screen_prediabetes.handle(intent='answer_yes')
    def confirm_send_next(request, responder):
       ...
-      
+
    @app.handle(intent='answer_no')
    @screen_prediabetes.handle(intent='answer_no')
    def negate_send_next(request, responder):
@@ -221,11 +221,11 @@ The ``domains`` directory contains the training data for intent classification a
 Setting up language configuration
 """""""""""""""""""""""""""""""""
 
-Mindmeld supports `ISO 639-1 and ISO 639-2 language codes <https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes>`_ and
+MindMeld supports `ISO 639-1 and ISO 639-2 language codes <https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes>`_ and
 `ISO 3166-2 locale codes <https://www.iso.org/obp/ui/#search/code/>`_. Locale codes are represented as ISO 639-1 language code
 and ISO3166 alpha 2 country code separated by an underscore character, for example, `en_US`.
 
-For the app to use Spanish in Mindmeld, the ``config.py`` file needs to be configured as follows:
+For the app to use Spanish in MindMeld, the ``config.py`` file needs to be configured as follows:
 
 .. code-block:: console
 
@@ -234,7 +234,7 @@ For the app to use Spanish in Mindmeld, the ``config.py`` file needs to be confi
         'locale': 'es_MX'
     }
 
-Note that Mexico (MX) is set as the locale as a demonstration, but in the case of Spanish, all locales are treated the same. If the language and locale codes are not configured in ``config.py``, Mindmeld uses this default:
+Note that Mexico (MX) is set as the locale as a demonstration, but in the case of Spanish, all locales are treated the same. If the language and locale codes are not configured in ``config.py``, MindMeld uses this default:
 
 .. code-block:: console
 
@@ -243,7 +243,7 @@ Note that Mexico (MX) is set as the locale as a demonstration, but in the case o
         'locale': 'en_US'
     }
 
-Mindmeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional Mindmeld components, stemming and system entities, that only support a subset of languages. Stemming and system entities are both supported for Spanish.
+MindMeld supports most languages that can be tokenized like English. Apart from tokenization, there are two optional MindMeld components, stemming and system entities, that only support a subset of languages. Stemming and system entities are both supported for Spanish.
 
 .. code:: python
 
@@ -375,7 +375,7 @@ Start by inspecting the baseline configurations that the different classifiers u
 .. code-block:: console
 
    {
-      'bag-of-words': {'lengths': [1, 2]}, 
+      'bag-of-words': {'lengths': [1, 2]},
       'enable-stemming': True
    }
 
