@@ -19,7 +19,7 @@ import importlib
 from enum import Enum
 from tqdm import tqdm
 import spacy
-
+from google.cloud import translate_v2
 
 from .resource_loader import ResourceLoader
 from .components._config import get_auto_annotator_config
@@ -51,7 +51,7 @@ class Annotator(ABC):
     """
 
     def __init__(self, app_path, config=None):
-        """ Initializes an annotator.
+        """Initializes an annotator.
 
         Args:
             app_path (str): The location of the MindMeld app
@@ -63,7 +63,7 @@ class Annotator(ABC):
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
 
     def _get_file_entities_map(self, action: AnnotatorAction, config):
-        """ Creates a dictionary that maps file paths to entities given
+        """Creates a dictionary that maps file paths to entities given
         regex rules defined in the config.
 
         Args:
@@ -97,7 +97,7 @@ class Annotator(ABC):
 
     @staticmethod
     def _get_pattern(rule):
-        """ Convert a rule represented as a dictionary with the keys "domains", "intents",
+        """Convert a rule represented as a dictionary with the keys "domains", "intents",
         "entities" into a regex pattern.
 
         Args:
@@ -110,7 +110,7 @@ class Annotator(ABC):
         return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
-        """ Process the entities specified in a rule dictionary. Check if they are valid
+        """Process the entities specified in a rule dictionary. Check if they are valid
         for the given annotator.
 
         Args:
@@ -141,7 +141,7 @@ class Annotator(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     def valid_entity_check(self, entity):
-        """ Determine if an entity type is valid.
+        """Determine if an entity type is valid.
 
         Args:
             entity (str): Name of entity to annotate.
@@ -153,7 +153,7 @@ class Annotator(ABC):
         return entity in self.supported_entity_types
 
     def annotate(self, **kwargs):
-        """ Annotate data based on configurations in the config.py file.
+        """Annotate data based on configurations in the config.py file.
 
         Args:
             kwargs (dict, optional): Configuration overrides can be passed in as arguments.
@@ -175,7 +175,7 @@ class Annotator(ABC):
         )
 
     def unannotate(self, **kwargs):
-        """ Unannotate data based on configurations in the config.py file.
+        """Unannotate data based on configurations in the config.py file.
 
         Args:
             kwargs (dict, optional): Configuration overrides can be passed in as arguments.
@@ -185,7 +185,12 @@ class Annotator(ABC):
         for key, value in kwargs.items():
             if key == "unannotate_all" and value:
                 config["unannotate"] = [
-                    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
+                    {
+                        "domains": ".*",
+                        "intents": ".*",
+                        "files": ".*",
+                        "entities": ".*",
+                    }
                 ]
                 config["unannotate_supported_entities_only"] = False
             else:
@@ -205,7 +210,7 @@ class Annotator(ABC):
         )
 
     def _modify_queries(self, file_entities_map, action: AnnotatorAction, config):
-        """ Iterates through App files and annotates or unannotates queries.
+        """Iterates through App files and annotates or unannotates queries.
 
         Args:
             file_entities_map (dict): A dictionary that maps a file paths
@@ -240,7 +245,7 @@ class Annotator(ABC):
 
     @staticmethod
     def _get_processed_queries(file_path, query_factory):
-        """ Converts queries in a given path to processed queries.
+        """Converts queries in a given path to processed queries.
         Skips and presents a warning if loading the query creates an error.
 
         Args:
@@ -268,7 +273,7 @@ class Annotator(ABC):
         return processed_queries
 
     def _annotate_query(self, processed_query, entity_types, config):
-        """ Updates the entities of a processed query with newly
+        """Updates the entities of a processed query with newly
         annotated entities.
 
         Args:
@@ -288,7 +293,7 @@ class Annotator(ABC):
         processed_query.entities = tuple(final_entities)
 
     def _get_annotated_entities(self, processed_query, entity_types=None):
-        """ Creates a list of query entities after parsing the text of a
+        """Creates a list of query entities after parsing the text of a
         processed query.
 
         Args:
@@ -314,7 +319,7 @@ class Annotator(ABC):
 
     @staticmethod
     def _item_to_query_entity(item, processed_query):
-        """ Converts an item returned from parse into a query entity.
+        """Converts an item returned from parse into a query entity.
 
         Args:
             item (dict): Dictionary representing an entity with the keys -
@@ -336,7 +341,7 @@ class Annotator(ABC):
         return query_entity
 
     def _resolve_conflicts(self, current_entities, annotated_entities, config):
-        """ Resolve overlaps between existing entities and newly annotad entities.
+        """Resolve overlaps between existing entities and newly annotad entities.
 
         Args:
             current_entities (list): List of existing query entities.
@@ -363,7 +368,7 @@ class Annotator(ABC):
 
     # pylint: disable=R0201
     def _unannotate_query(self, processed_query, remove_entities, config):
-        """ Removes specified entities in a processed query. If all entities are being
+        """Removes specified entities in a processed query. If all entities are being
         removed, this function will not remove entities that the annotator does not support
         unless it is explicitly specified to do so in the config with the param
         "unannotate_supported_entities_only" (boolean).
@@ -387,7 +392,7 @@ class Annotator(ABC):
 
     @abstractmethod
     def parse(self, sentence, **kwargs):
-        """ Extract entities from a sentence. Detected entities should be
+        """Extract entities from a sentence. Detected entities should be
         represented as dictionaries with the following keys: "body", "start"
         (start index), "end" (end index), "value", "dim" (entity type).
 
@@ -401,7 +406,7 @@ class Annotator(ABC):
 
 
 class SpacyAnnotator(Annotator):
-    """ (English) Annotator class that uses spacy to generate annotations.
+    """(English) Annotator class that uses spacy to generate annotations.
     Supported entities include: "sys_time", "sys_interval", "sys_duration", "sys_number",
     "sys_amount-of-money", "sys_distance", "sys_weight", "sys_ordinal", "sys_quantity",
     "sys_percent", "sys_org", "sys_loc", "sys_person", "sys_gpe", "sys_norp", "sys_fac",
@@ -410,7 +415,7 @@ class SpacyAnnotator(Annotator):
     """
 
     def __init__(self, app_path, config=None):
-        """ Initializes an annotator.
+        """Initializes an annotator.
 
         Args:
             app_path (str): The location of the MindMeld app
@@ -434,7 +439,7 @@ class SpacyAnnotator(Annotator):
 
     @staticmethod
     def _load_model(model):
-        """ Load Spacy English model. Download if needed.
+        """Load Spacy English model. Download if needed.
 
         Args:
             model (str): Spacy model ("en_core_web_sm", "en_core_web_md", or
@@ -470,7 +475,7 @@ class SpacyAnnotator(Annotator):
         return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
     def parse(self, sentence, entity_types=None, **kwargs):
-        """ Extracts entities from a sentence. Detected entities should are
+        """Extracts entities from a sentence. Detected entities should are
         represented as dictionaries with the following keys: "body", "start"
         (start index), "end" (end index), "value", "dim" (entity type).
 
@@ -526,7 +531,7 @@ class SpacyAnnotator(Annotator):
         return entities
 
     def _resolve_time_date(self, entity, entity_types=None):
-        """ Resolves a time related entity. First, an exact match is searched for. If
+        """Resolves a time related entity. First, an exact match is searched for. If
         not found, the largest substring match is searched for. If the span of the entity
         does not share the exact span match with duckling entities then it is likely that
         spacy has recognized an additional word in the span. For example, "nearly 15 minutes"
@@ -560,7 +565,7 @@ class SpacyAnnotator(Annotator):
 
     @staticmethod
     def _get_time_entity_type(candidate):
-        """ Determine the "sys" type given a time-related Duckling candidate dictionary.
+        """Determine the "sys" type given a time-related Duckling candidate dictionary.
 
         Args:
             candidate (dict): A Duckling candidate.
@@ -578,7 +583,7 @@ class SpacyAnnotator(Annotator):
 
     @staticmethod
     def _resolve_time_exact_match(entity, candidates, time_entities):
-        """ Resolve a time-related entity given Duckling candidates on the first
+        """Resolve a time-related entity given Duckling candidates on the first
         exact match.
 
         Args:
@@ -601,7 +606,7 @@ class SpacyAnnotator(Annotator):
 
     @staticmethod
     def _resolve_largest_substring(entity, candidates, entity_types, is_time_related):
-        """ Resolve an entity by the largest substring match given Duckling candidates.
+        """Resolve an entity by the largest substring match given Duckling candidates.
 
         Args:
             entity (dict): A dictionary representing an entity.
@@ -666,7 +671,7 @@ class SpacyAnnotator(Annotator):
         return self._resolve_exact_match(entity)
 
     def _resolve_exact_match(self, entity):
-        """ Resolves an entity by exact match and corresponding type.
+        """Resolves an entity by exact match and corresponding type.
 
         Args:
             entity (dict): A dictionary representing an entity.
@@ -689,7 +694,7 @@ class SpacyAnnotator(Annotator):
                 return entity
 
     def _resolve_quantity(self, entity):
-        """ Resolves a quantity related entity. First looks for an exact match, then
+        """Resolves a quantity related entity. First looks for an exact match, then
         for the largest substring match. Order of priority is "sys_distance" then "sys_quantity".
         Unresolved entities are labelled as "sys_other-quantity"
 
@@ -726,7 +731,7 @@ class SpacyAnnotator(Annotator):
             return entity
 
     def _resolve_percent(self, entity):
-        """ Resolves an entity related to percentage. Uses a heuristic of finding
+        """Resolves an entity related to percentage. Uses a heuristic of finding
         the largest candidate value and dividing by 100. If the candidate value is
         a float, the float value divided by 100 is immediately returned.
 
@@ -755,7 +760,7 @@ class SpacyAnnotator(Annotator):
         return entity
 
     def _resolve_person(self, entity):
-        """ Resolves a person entity by unlabelling a possessive "'s" from the
+        """Resolves a person entity by unlabelling a possessive "'s" from the
         name if it exists.
 
         Args:
@@ -774,8 +779,7 @@ class SpacyAnnotator(Annotator):
 
 
 class BootstrapAnnotator(Annotator):
-    """ Bootstrap Annotator class used to generate annotations based on existing annotations.
-    """
+    """Bootstrap Annotator class used to generate annotations based on existing annotations."""
 
     def __init__(self, app_path, config=None):
         super().__init__(app_path=app_path, config=config)
@@ -823,7 +827,7 @@ class BootstrapAnnotator(Annotator):
         return get_entity_types(self.app_path)
 
     def valid_entity_check(self, entity):
-        """ Determine if an entity type is valid.
+        """Determine if an entity type is valid.
 
         Args:
             entity (str): Name of entity to annotate.
@@ -835,5 +839,300 @@ class BootstrapAnnotator(Annotator):
         return Entity.is_system_entity(entity) or entity in self.supported_entity_types
 
 
+class Translator(ABC):
+    """Abstract Translator Base Class for Translators to be used by Mindmeld."""
+
+    def __init__(self):
+        """Creates a translation client after finding the credential path."""
+        self.translate_client = None
+
+    @abstractmethod
+    def get_translate_client(self):
+        """
+        Args:
+            text (str): Input text
+        Returns:
+            language_code (str): Detected Language Code
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @abstractmethod
+    def detect_language(self, text):
+        """
+        Args:
+            text (str): Input text
+        Returns:
+            language_code (str): Detected Language Code
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @abstractmethod
+    def translate(self, text, destination_language):
+        """
+        Args:
+            text (str): Input text
+            destination_language (str): Language code for language to translate the given text to.
+        Returns:
+            translated_text (str): Translated text
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+
+class GoogleTranslator(Translator):
+    """Class for translation using the Google Translate API."""
+
+    def __init__(self):
+        """Initializes the translate_client."""
+        self.translate_client = self.get_translate_client()
+
+    def get_translate_client(self):
+        """Creates a translation client after finding the credential path."""
+        GoogleTranslator._check_credential_exists()
+        return translate_v2.Client()
+
+    @staticmethod
+    def _check_credential_exists():
+        """Searches environment variables for the path to google application credentials.
+
+        Returns:
+            credential_path (str): Path to google application credentials.
+        """
+        try:
+            return os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+        except KeyError:
+            raise KeyError(
+                "Google credential path not found. Export 'GOOGLE_CREDENTIAL_PATH' as"
+                " an environment variable."
+            )
+
+    def detect_language(self, text):
+        """
+        Args:
+            text (str): Input text
+        Returns:
+            language_code (str): Detected Language Code
+        """
+        return self.translate_client.detect_language(text)["language"]
+
+    def translate(self, text, target_language):
+        """
+        Args:
+            text (str): Input text
+            target_language (str): Language code for language to translate the given text to.
+        Returns:
+            translated_text (str): Translated text
+        """
+        return self.translate_client.translate(text, target_language=target_language)[
+            "translatedText"
+        ]
+
+
+class MultiLingualAnnotator(Annotator):
+    """Custom Annotator class used to generate annotations."""
+
+    def __init__(self, app_path, config=None):
+        """Initializes an annotator.
+
+        Args:
+            app_path (str): The location of the MindMeld app
+            config (dict, optional): A config object to use. This will
+                override the config specified by the app's config.py file.
+        """
+        super().__init__(app_path=app_path, config=config)
+        self.language = self.config.get("language", "en")
+        self.translator = self.get_translator()
+        self.en_annotator = SpacyAnnotator(app_path)
+
+    def get_translator(self):
+        """Creates a Translator object based on the translator class specified in the config.
+        If a translator is not specified, Duckling heuristics will be used.
+
+        Returns:
+            translator (Translator): Translator specified in the config, None if not specified.
+        """
+        if self.config.get("translator"):
+            translator_class_name = self.config.get("translator", "GoogleTranslator")
+            if translator_class_name == "GoogleTranslator":
+                return GoogleTranslator()
+            else:
+                logger.warning(
+                    "%s is not a valid translation class. Currently only ‘GoogleTranslator’"
+                    " is supported.", translator_class_name
+                )
+        logger.info(
+            "No Translator selected. MLA will detect entities based on Duckling heuristics."
+        )
+
+    def parse(self, sentence, entity_types=None, language=None, **kwargs):
+        """
+        Args:
+            sentence (str): Sentence to detect entities.
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
+            language (str): Language code for the language of the given sentence
+        Returns: entities (list): List of entity dictionaries.
+        """
+        language = language or self.language
+        params = {"sentence": sentence, "language": language}
+        duckling_entities = (
+            self._parse_with_translator(**params)
+            if self.translator
+            else self._parse_without_translator(**params)
+        )
+        if entity_types:
+            duckling_entities = [
+                e for e in duckling_entities if e["dim"] in entity_types
+            ]
+        return MultiLingualAnnotator.convert_duckling_candidates(duckling_entities)
+
+    def _parse_with_translator(self, sentence, language=None):
+        """Parse helper function to be used if a translator is present.
+
+        Args:
+            sentence (str): Sentence to detect entities.
+            language (str): Language code for the language of the given sentence
+        Returns: entities (list): List of duckling candidates.
+        """
+        candidates = self.en_annotator.duckling.get_candidates_for_text(
+            sentence, language=language
+        )
+        en_sentence = self.translator.translate(sentence, target_language="en")
+        en_entities = self.en_annotator.parse(en_sentence)
+
+        selected_candidates = []
+        for entity in en_entities:
+            i = 0
+            while i < len(candidates):
+                if entity["dim"] == candidates[i]["entity_type"]:
+                    if entity["value"] == candidates[i]["value"]:
+                        selected_candidates.append(candidates[i])
+                        break
+                    if (
+                        self.translator.translate(
+                            entity["body"], target_language=language
+                        )
+                        == candidates[i]["body"]
+                    ):
+                        selected_candidates.append(candidates[i])
+                        break
+                i += 1
+        return selected_candidates
+
+    def _parse_without_translator(self, sentence, language=None):
+        """Parse helper function to be used if a translator is not present.
+
+        Args:
+            sentence (str): Sentence to detect entities.
+            language (str): Language code for the language of the given sentence
+        Returns: entities (list): List of duckling candidates.
+        """
+        candidates = self.en_annotator.duckling.get_candidates_for_text(
+            sentence, language=language
+        )
+        final_spans = MultiLingualAnnotator._get_final_spans(candidates, sentence)
+        selected_candidates = []
+        for span in final_spans:
+            for candidate in candidates:
+                if span == (candidate["start"], candidate["end"]):
+                    if not (
+                        candidate["dim"] == "amount-of-money"
+                        and candidate["value"]["unit"] == "unknown"
+                    ):
+                        selected_candidates.append(candidate)
+                        break
+        return selected_candidates
+
+    @staticmethod
+    def convert_duckling_candidates(duckling_candidates):
+        """Converts duckling candidates into entity dictionaries.
+        Args:
+            duckling_candidates (list): List of Duckling candidates
+        Returns:
+            entities (list): List of converted entities.
+        """
+        return [
+            {
+                "body": entity["body"],
+                "start": entity["start"],
+                "end": entity["end"],
+                "dim": entity["entity_type"],
+                "value": entity["value"],
+            }
+            for entity in duckling_candidates
+        ]
+
+    @property
+    def supported_entity_types(self):  # pylint: disable=W0236
+        """
+        Returns:
+            supported_entity_types (list): List of supported entity types.
+        """
+        return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+
+    @staticmethod
+    def _has_overlap(span_one, span_two):
+        """Determines whether two spans overlap. Spans are two-element tuples with the format:
+        (start_index, end_index + 1).
+        """
+        return span_one[1] > span_two[0] and span_two[1] > span_one[0]
+
+    @staticmethod
+    def _is_larger(span_one, span_two):
+        """Determines whether the first spans is larger than the second. Spans are two-element
+        tuples with the format: (start_index, end_index + 1).
+        """
+        return span_one[1] - span_two[0] > span_one[1] - span_two[0]
+
+    @staticmethod
+    def _filter_mid_token_spans(spans, sentence):
+        """Removes any spans that end in-between a token.
+
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+            sentence (str): The original sentence parsed by duckling.
+        Returns:
+            filtered_spans (list): List of spans that do not end mid-token.
+        """
+        space_indices = [i for i in range(len(sentence)) if sentence[i] == " "]
+        return [
+            span
+            for span in spans
+            if span[1] in space_indices or span[1] >= len(sentence) - 2
+        ]
+
+    @staticmethod
+    def _get_largest_non_overlapping_candidates(spans):
+        """Finds the set of the largest non-overlapping candidates.
+
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+        """
+        selected_spans = []
+        for span in spans:
+            no_overlaps = True
+            for i, selected_span in enumerate(selected_spans):
+                if MultiLingualAnnotator._has_overlap(span, selected_span):
+                    no_overlaps = False
+                    if MultiLingualAnnotator._is_larger(span, selected_span):
+                        selected_spans[i] = span
+            if no_overlaps:
+                selected_spans.append(span)
+        return selected_spans
+
+    @staticmethod
+    def _get_final_spans(candidates, sentence):
+        """Pipeline function to filter candidate spans and find the largest non-overlapping candidates.
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+            sentence (str): The original sentence parsed by duckling.
+        Returns:
+            final_spans (list): Largest non-overlapping spans that do not end mid-token.
+        """
+        spans = [(i["start"], i["end"]) for i in candidates]
+        spans = MultiLingualAnnotator._filter_mid_token_spans(spans, sentence)
+        return MultiLingualAnnotator._get_largest_non_overlapping_candidates(spans)
+
+
 register_annotator("SpacyAnnotator", SpacyAnnotator)
 register_annotator("BootstrapAnnotator", BootstrapAnnotator)
+register_annotator("MultiLingualAnnotator", MultiLingualAnnotator)

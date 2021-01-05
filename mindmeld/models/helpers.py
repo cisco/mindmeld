@@ -93,13 +93,13 @@ def create_annotator(app_path, config):
         raise KeyError(
             "Missing required argument in AUTO_ANNOTATOR_CONFIG: 'annotator_class'"
         )
-    try:
+    if config["annotator_class"] in ANNOTATOR_MAP:
         return ANNOTATOR_MAP[config["annotator_class"]](
             app_path=app_path, config=config
         )
-    except KeyError:
+    else:
         msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config["annotator_class"]))
+        raise KeyError(msg.format(config["annotator_class"]))
 
 
 def get_feature_extractor(example_type, name):
