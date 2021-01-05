@@ -75,6 +75,7 @@ class EntityResolver:
         self._er_config = get_classifier_config("entity_resolution", app_path=app_path)
         self._es_host = es_host
         self._es_config = {"client": es_client, "pid": os.getpid()}
+        self.ready = False
 
         if self._is_system_entity:
             canonical_entities = []
@@ -202,6 +203,9 @@ class EntityResolver:
             clean (bool): If ``True``, deletes and recreates the index from scratch instead of
                           updating the existing index with synonyms in the mapping.json.
         """
+        if self.ready:
+            return
+
         if self._no_canonical_entity_map:
             return
 
@@ -270,6 +274,8 @@ class EntityResolver:
                 es_client=self._es_client,
                 use_double_metaphone=self._use_double_metaphone,
             )
+
+        self.ready = True
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer):

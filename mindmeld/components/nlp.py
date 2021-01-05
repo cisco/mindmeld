@@ -427,6 +427,10 @@ class NaturalLanguageProcessor(Processor):
         self.progress_bar = progress_bar
 
         for domain in path.get_domains(self._app_path):
+
+            if domain in self._children:
+                continue
+
             self._children[domain] = DomainProcessor(
                 app_path, domain, self.resource_loader, self.progress_bar
             )
@@ -815,6 +819,10 @@ class DomainProcessor(Processor):
             self.progress_bar.total += 1
 
         for intent in intents:
+
+            if intent in self._children:
+                continue
+
             self._children[intent] = IntentProcessor(
                 app_path, domain, intent, self.resource_loader, progress_bar
             )
@@ -1100,6 +1108,10 @@ class IntentProcessor(Processor):
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
+
+            if entity_type in self._children:
+                return
+
             processor = EntityProcessor(
                 self._app_path,
                 self.domain,
@@ -1130,6 +1142,10 @@ class IntentProcessor(Processor):
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
+
+            if entity_type in self._children:
+                continue
+
             processor = EntityProcessor(
                 self._app_path,
                 self.domain,
