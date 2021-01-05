@@ -228,8 +228,8 @@ def get_tags_from_entities(query, entities, scheme="IOB"):
     """
     try:
         iobs, types = _get_tags_from_entities(query, entities, scheme)
-    except IndexError:
-        raise MarkupError("Invalid entities {} in '{}'".format(entities, query))
+    except IndexError as e:
+        raise MarkupError("Invalid entities {} in '{}'".format(entities, query)) from e
     tags = ["|".join(args) for args in zip(iobs, types)]
     return tags
 

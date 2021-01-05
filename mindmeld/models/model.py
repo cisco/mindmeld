@@ -1111,8 +1111,8 @@ class Model:
                 "stratified-k-fold": self._stratified_k_fold_iterator,
                 "stratified-shuffle": self._stratified_shuffle_iterator,
             }.get(cv_type)(settings)
-        except KeyError:
-            raise ValueError("Unknown param selection type: {!r}".format(cv_type))
+        except KeyError as e:
+            raise ValueError("Unknown param selection type: {!r}".format(cv_type)) from e
 
         return cv_iterator
 

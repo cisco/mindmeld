@@ -165,9 +165,9 @@ class EntityRecognizer(Classifier):
             else:
                 self._model = create_model(self._model_config)
                 self._model.load(model_path, er_data)
-        except (OSError, IOError):
+        except (OSError, IOError) as e:
             msg = "Unable to load {}. Pickle file cannot be read from {!r}"
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
 
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):

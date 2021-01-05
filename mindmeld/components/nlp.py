@@ -447,7 +447,7 @@ class NaturalLanguageProcessor(Processor):
                 # We catch and fail open here since this uncaught exception can fail the API call
                 logger.error("Caught exception %s when extracting nlp "
                              "components from the resolve_entities_using_nbest_transcripts "
-                             "field" % e.message)
+                             "field", e.message)
                 nbest_transcripts_nlp_classes = {}
 
             for domain in nbest_transcripts_nlp_classes:
@@ -662,9 +662,9 @@ class NaturalLanguageProcessor(Processor):
 
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
-            entries = allowed_nlp_component.split(".")
-            for i in range(len(nlp_entries)):
-                nlp_entries[i] = entries[i]
+            entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
+            for idx, entry in enumerate(entries):
+                nlp_entries[idx] = entry
 
             domain, intent, entity, role = nlp_entries
 
@@ -783,7 +783,7 @@ class NaturalLanguageProcessor(Processor):
             except AllowedNlpClassesKeyError as e:
                 # We catch and fail open here since this uncaught exception can fail the API call
                 logger.error("Caught exception %s when extracting nlp components from the "
-                             "allowed_intents field" % e.message)
+                             "allowed_intents field", e.message)
                 allowed_nlp_classes = {}
 
         return super().process(

@@ -457,8 +457,8 @@ class SpacyAnnotator(Annotator):
             os.system("python -m spacy download " + model)
             try:
                 language_module = importlib.import_module(model)
-            except ModuleNotFoundError:
-                raise ValueError("Unknown Spacy model name: {!r}.".format(model))
+            except ModuleNotFoundError as e:
+                raise ValueError("Unknown Spacy model name: {!r}.".format(model)) from e
             return language_module.load()
 
     @property
