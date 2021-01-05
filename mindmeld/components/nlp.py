@@ -439,9 +439,16 @@ class NaturalLanguageProcessor(Processor):
             "resolve_entities_using_nbest_transcripts", {}
         )
         if len(nbest_transcripts_nlp_classes) > 0:
-            nbest_transcripts_nlp_classes = self.extract_allowed_nlp_components_list(
-                nbest_transcripts_nlp_classes
-            )
+            try:
+                nbest_transcripts_nlp_classes = self.extract_allowed_nlp_components_list(
+                    nbest_transcripts_nlp_classes
+                )
+            except AllowedNlpClassesKeyError as e:
+                # We catch and fail open here since this uncaught exception can fail the API call
+                logger.error("Caught exception %s when extracting nlp "
+                             "components from the resolve_entities_using_nbest_transcripts "
+                             "field" % e.message)
+                nbest_transcripts_nlp_classes = {}
 
             for domain in nbest_transcripts_nlp_classes:
                 for intent in nbest_transcripts_nlp_classes[domain]:
@@ -644,8 +651,9 @@ class NaturalLanguageProcessor(Processor):
         the validation of list of allowed nlp components has passed.
 
         Args:
-            allowed_nlp_components_list (list): A list of allowable intents in the format "domain.intent". \
-                If all intents need to be included, the syntax is "domain.*".
+            allowed_nlp_components_list (list): A list of allowable intents in the
+                format "domain.intent". If all intents need to be included, the
+                syntax is "domain.*".
 
         Returns:
             (dict): A dictionary of NLP hierarchy.
@@ -655,8 +663,8 @@ class NaturalLanguageProcessor(Processor):
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
             entries = allowed_nlp_component.split(".")
-            for idx, entry in enumerate(entries):
-                nlp_entries[idx] = entry
+            for i in range(len(nlp_entries)):
+                nlp_entries[i] = entries[i]
 
             domain, intent, entity, role = nlp_entries
 
@@ -770,7 +778,13 @@ class NaturalLanguageProcessor(Processor):
                 "'allowed_intents' and 'allowed_nlp_classes' cannot be used together"
             )
         if allowed_intents:
-            allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
+            try:
+                allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
+            except AllowedNlpClassesKeyError as e:
+                # We catch and fail open here since this uncaught exception can fail the API call
+                logger.error("Caught exception %s when extracting nlp components from the "
+                             "allowed_intents field" % e.message)
+                allowed_nlp_classes = {}
 
         return super().process(
             query_text,
