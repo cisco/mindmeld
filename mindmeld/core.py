@@ -76,8 +76,8 @@ class Bunch(dict):
     def __getattr__(self, key):
         try:
             return self[key]
-        except KeyError:
-            raise AttributeError(key)
+        except KeyError as e:
+            raise AttributeError(key) from e
 
     def __setstate__(self, state):
         pass
@@ -331,8 +331,8 @@ class Query:
         # None for mapping means 1-1 mapping
         try:
             return mapping[index] if mapping else index
-        except KeyError:
-            raise ValueError("Invalid index {}".format(index))
+        except KeyError as e:
+            raise ValueError("Invalid index {}".format(index)) from e
 
     def _unprocess_index(self, index, form_in):
         if form_in == TEXT_FORM_RAW:
@@ -346,8 +346,8 @@ class Query:
         # None for mapping means 1-1 mapping
         try:
             return mapping[index] if mapping else index
-        except KeyError:
-            raise ValueError("Invalid index {}".format(index))
+        except KeyError as e:
+            raise ValueError("Invalid index {}".format(index)) from e
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

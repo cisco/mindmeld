@@ -96,9 +96,9 @@ class TextModel(Model):
                 RANDOM_FOREST_TYPE: RandomForestClassifier,
                 SVM_TYPE: SVC,
             }[classifier_type]
-        except KeyError:
+        except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def _get_cv_scorer(self, selection_settings):
         """

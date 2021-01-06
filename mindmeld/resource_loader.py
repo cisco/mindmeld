@@ -267,10 +267,10 @@ class ResourceLoader:
             try:
                 with open(file_path, "r") as json_file:
                     json_data = json.load(json_file)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 raise MindMeldError(
                     "Could not load entity map (Invalid JSON): {!r}".format(file_path)
-                )
+                ) from e
 
         self._entity_files[entity_type]["mapping"]["data"] = json_data
         self._entity_files[entity_type]["mapping"]["loaded"] = time.time()

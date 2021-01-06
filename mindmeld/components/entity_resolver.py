@@ -493,7 +493,7 @@ class EntityResolver:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", ex.error, ex.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from ex
         except TransportError as ex:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -506,9 +506,9 @@ class EntityResolver:
                 "Unexpected error occurred when sending requests to "
                 "Elasticsearch: {} Status code: {} details: "
                 "{}".format(ex.error, ex.status_code, ex.info)
-            )
-        except ElasticsearchException:
-            raise EntityResolverError
+            ) from ex
+        except ElasticsearchException as ex:
+            raise EntityResolverError from ex
         else:
             hits = response["hits"]["hits"]
 
@@ -585,7 +585,7 @@ class EntityResolver:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
         except TransportError as e:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -594,6 +594,6 @@ class EntityResolver:
                 e.status_code,
                 e.info,
             )
-            raise EntityResolverError
-        except ElasticsearchException:
-            raise EntityResolverError
+            raise EntityResolverError from e
+        except ElasticsearchException as e:
+            raise EntityResolverError from e

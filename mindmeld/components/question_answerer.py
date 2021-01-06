@@ -249,7 +249,7 @@ class QuestionAnswerer:
                 )
                 raise KnowledgeBaseConnectionError(
                     es_host=self._es_client.transport.hosts
-                )
+                ) from e
             except TransportError as e:
                 logger.error(
                     "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -258,9 +258,9 @@ class QuestionAnswerer:
                     e.status_code,
                     e.info,
                 )
-                raise KnowledgeBaseError
-            except ElasticsearchException:
-                raise KnowledgeBaseError
+                raise KnowledgeBaseError from e
+            except ElasticsearchException as e:
+                raise KnowledgeBaseError from e
 
     def config(self, config):
         """Summary
@@ -846,7 +846,7 @@ class Search:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
             )
-            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts)
+            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts) from e
         except TransportError as e:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -855,9 +855,9 @@ class Search:
                 e.status_code,
                 e.info,
             )
-            raise KnowledgeBaseError
-        except ElasticsearchException:
-            raise KnowledgeBaseError
+            raise KnowledgeBaseError from e
+        except ElasticsearchException as e:
+            raise KnowledgeBaseError from e
 
     class Clause(ABC):
         """This class models an abstract knowledge base clause."""
