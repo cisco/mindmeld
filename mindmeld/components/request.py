@@ -17,86 +17,85 @@ import immutables
 import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
+from marshmallow import EXCLUDE, Schema
+from marshmallow import fields
 
 logger = logging.getLogger(__name__)
 
 
-def validate_language_code(param=None):
+def validate_language_code(value):
     """Validates language code parameters
     Args:
-        param (str, optional): The language code parameter
+        value (str): The language code parameter
 
     Returns:
         str: A validated language code or None if unvalidated
     """
-    if not param:
+    if not value:
         return None
-    if not isinstance(param, str):
-        logger.error("Invalid %r param: %s is not of type %s.", "language", param, str)
+
+    if not isinstance(value, str):
+        logger.error("Invalid language param: %s is not of type %s.", value, str)
         return None
 
     # The pycountry APIs need the param to be in lowercase for processing
-    param = param.lower()
+    value = value.lower()
 
-    if len(param) != 2 and len(param) != 3:
+    if len(value) != 2 and len(value) != 3:
         logger.error(
-            "Invalid %r param: %s is not a valid ISO 639-1 or ISO 639-2 language code.",
-            "locale",
-            param,
+            "Invalid language param: %s is not a valid ISO 639-1 or ISO 639-2 language code.",
+            value,
         )
         return None
 
-    if len(param) == 2 and not pycountry.languages.get(alpha_2=param):
+    if len(value) == 2 and not pycountry.languages.get(alpha_2=value):
         logger.error(
-            "Invalid %r param: %s is not a valid ISO 639-1 language code. "
+            "Invalid language param: %s is not a valid ISO 639-1 language code. "
             "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
-            "locale",
-            param,
+            value,
         )
         return None
 
-    if len(param) == 3 and not pycountry.languages.get(alpha_3=param):
+    if len(value) == 3 and not pycountry.languages.get(alpha_3=value):
         logger.error(
-            "Invalid %r param: %s is not a valid ISO 639-2 language code. "
+            "Invalid language param: %s is not a valid ISO 639-2 language code. "
             "See https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes for valid codes.",
-            "locale",
-            param,
+            value,
         )
         return None
 
-    return param
+    return value
 
 
-def validate_locale_code(param=None):
+def validate_locale_code(value):
     """Validates the locale code parameters
     Args:
-        param (str, optional): The locale code parameter
+        value (str): The locale code parameter
 
     Returns:
         str: A validated locale code or None if unvalidated
     """
-    if not param:
-        return None
-    if not isinstance(param, str):
-        logger.error("Invalid %r param: %s is not of type %s.", "locale", param, str)
+    if not value:
         return None
 
-    if len(param.split("_")) != 2:
-        logger.error("Invalid %r param: Not a valid locale.", param)
+    if not isinstance(value, str):
+        logger.error("Invalid locale_code param: %s is not of type %s.", value, str)
+
+    if len(value.split("_")) != 2:
+        logger.error("Invalid locale_code param: %s is not a valid locale.", value)
         return None
 
-    language_code = param.split("_")[0].lower()
+    language_code = value.split("_")[0].lower()
     if not validate_language_code(language_code):
         logger.error(
-            "Invalid %r param: %s is not a valid ISO 639-1 language code. "
+            "Invalid locale_code param: %s is not a valid ISO 639-1 language code. "
             "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
-            "locale",
             language_code,
         )
         return None
 
     # pycountry requires the country code to be upper-cased
-    country_code = param.split("_")[1].upper()
+    country_code = value.split("_")[1].upper()
     if not pycountry.countries.get(alpha_2=country_code):
         logger.error(
             "Invalid %r param: %s is not a valid ISO3166 alpha 2 country code. "
@@ -108,6 +107,24 @@ def validate_locale_code(param=None):
 
     # return the validated locale
     return language_code + "_" + country_code
+
+
+def validate_locale_code_with_reference_language_code(locale, reference_language_code):
+    """This function makes sure the locale is consistent with the app's language code"""
+    locale = validate_locale_code(locale)
+    # if the developer or app doesnt specify the locale, we just use the default locale
+    if not locale:
+        return
+
+    if locale.split("_")[0].lower() != reference_language_code.lower():
+        logger.error(
+            "Locale %s is inconsistent with app language code %s. "
+            "Set the language code in the config.py file."
+            "Using the default locale code instead.", locale, reference_language_code
+        )
+        return
+
+    return locale
 
 
 def _validate_time_zone(param=None):
@@ -148,15 +165,100 @@ def _validate_generic(name, ptype):
     return validator
 
 
-PARAM_VALIDATORS = {
-    "allowed_intents": _validate_generic("allowed_intents", (tuple, list)),
-    "target_dialogue_state": _validate_generic("target_dialogue_state", str),
-    "time_zone": _validate_time_zone,
-    "language": validate_language_code,
-    "locale": validate_locale_code,
-    "timestamp": _validate_generic("timestamp", int),
-    "dynamic_resource": _validate_generic("dynamic_resource", immutables.Map),
-}
+class LanguageCodeField(fields.String):
+
+    def _serialize(self,
+                   value,
+                   attribute,  # pylint: disable=unused-argument
+                   obj,  # pylint: disable=unused-argument
+                   **kwargs):
+        if value is None:
+            return ""
+        return str(value)
+
+    def _deserialize(self,
+                     value,
+                     attribute,  # pylint: disable=unused-argument
+                     data,  # pylint: disable=unused-argument
+                     **kwargs):
+        try:
+            return validate_language_code(value)
+        except ValueError as error:
+            logger.warning(
+                "Invalid language param: %s has a wrong value that caused %s.", value, error
+            )
+            return None
+
+
+class LocaleCodeField(fields.String):
+
+    def _serialize(self,
+                   value,
+                   attribute,  # pylint: disable=unused-argument
+                   obj,  # pylint: disable=unused-argument
+                   **kwargs):
+        if value is None:
+            return ""
+        return str(value)
+
+    def _deserialize(self,
+                     value,
+                     attribute,  # pylint: disable=unused-argument
+                     data,  # pylint: disable=unused-argument
+                     **kwargs):
+        try:
+            return validate_locale_code(value)
+        except ValueError as error:
+            logger.warning(
+                "Invalid locale_code param: %s has a wrong value that caused %s.", value, error
+            )
+            return None
+
+
+class TimeZoneField(fields.String):
+
+    def _serialize(self,
+                   value,
+                   attribute,  # pylint: disable=unused-argument
+                   obj,  # pylint: disable=unused-argument
+                   **kwargs):
+        if value is None:
+            return ""
+        return str(value)
+
+    def _deserialize(self,
+                     value,
+                     attribute,  # pylint: disable=unused-argument
+                     data,  # pylint: disable=unused-argument
+                     **kwargs):
+        try:
+            return timezone(value)
+        except ValueError as error:
+            logger.warning(
+                "Invalid time_zone param: %s has a wrong value that caused %s.", value, error
+            )
+            return None
+        except UnknownTimeZoneError:
+            logger.warning(
+                "Invalid time_zone param: %s is not a valid time zone.", value
+            )
+            return None
+
+
+class ParamsSchema(Schema):
+    allowed_intents = fields.List(fields.String, data_key='allowed_intents')
+    time_zone = TimeZoneField(data_key='time_zone', allow_none=True)
+    dynamic_resource = fields.Dict(data_key='dynamic_resource')
+    language = LanguageCodeField(allow_none=True)
+    locale = LocaleCodeField(allow_none=True)
+    timestamp = fields.Integer()
+    target_dialogue_state = fields.String(allow_none=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+params_schema = ParamsSchema()
 
 
 @attr.s(frozen=False, kw_only=True)
@@ -188,23 +290,6 @@ class Params:
     locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
-    def validate_param(self, name):
-        """
-        Perform validation on the value of a specific parameter in the Params object.
-
-        Args:
-            name (str): Name of the parameter to be validated.
-
-        Returns:
-            bool: True/False depending on success of the validation, None if the param name does
-                not exist.
-        """
-        validator = PARAM_VALIDATORS.get(name)
-        param = vars(self).get(name)
-        if param:
-            return validator(param)
-        return param
-
     def validate_dm_params(self, handler_map):
         """
         Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state
@@ -217,52 +302,28 @@ class Params:
         Returns:
             dict: single item dictionary with the parameter value if valid and None if not.
         """
-        target_dialogue_state = self.validate_param("target_dialogue_state")
-        if target_dialogue_state and target_dialogue_state not in handler_map:
+        if self.target_dialogue_state and self.target_dialogue_state not in handler_map:
             logger.error(
                 "Target dialogue state %s does not match any dialogue state names "
                 "in for the application. Not applying the target dialogue state "
                 "this turn.",
-                target_dialogue_state,
+                self.target_dialogue_state,
             )
             return {"target_dialogue_state": None}
-        return {"target_dialogue_state": target_dialogue_state}
-
-    def validate_nlp_params(self):
-        """
-        Validate language, locale, time zone, timestamp, and dynamic resource parameters
-            and return the params as a dictionary.
-
-        Returns:
-            dict: Mapping from parameter name to bool depending on validation.
-        """
-        return {
-            param: self.validate_param(param)
-            for param in (
-                "time_zone",
-                "timestamp",
-                "dynamic_resource",
-                "language",
-                "locale",
-            )
-        }
+        return {"target_dialogue_state": self.target_dialogue_state}
 
     def to_dict(self):
-        fields = [
-            "allowed_intents",
-            "target_dialogue_state",
-            "time_zone",
-            "timestamp",
-            "language",
-            "locale",
-            "dynamic_resource",
-        ]
-        _dic = {field: vars(self).get(field) for field in fields}
+        """This method is primarily implemented to return a mutable dictionary for the dynamic_resource
+            param and a mutable list for the allowed_intents param.
+        """
+        _dic = params_schema.dump(self)
+
         # converting from immutable map to just dictionary
         _dic["dynamic_resource"] = {
             key: _dic["dynamic_resource"][key] for key in _dic["dynamic_resource"]
         }
 
+        _dic["allowed_intents"] = list(_dic["allowed_intents"])
         return _dic
 
 
@@ -300,6 +361,24 @@ def tuple_elems_to_immutable_map(value):
     objects.
     """
     return tuple([immutables.Map(i) for i in value])
+
+
+class RequestSchema(Schema):
+    text = fields.String(required=True)
+    domain = fields.String()
+    intent = fields.String()
+    entities = fields.List(fields.String)
+    history = fields.List(fields.Dict)
+    params = fields.Nested(ParamsSchema)
+    context = fields.Dict()
+    confidences = fields.Dict()
+    nbest_transcripts_text = fields.List(fields.String)
+    nbest_transcripts_entities = fields.List(fields.Dict)
+    nbest_aligned_entities = fields.List(fields.Dict)
+    request_id = fields.String()
+
+
+request_schema = RequestSchema()
 
 
 @attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
@@ -358,6 +437,6 @@ class Request:
             "domain": self.domain,
             "intent": self.intent,
             "context": dict(self.context),
-            "params": self.params.to_dict(),
+            "params": params_schema.dump(self.params),
             "frame": dict(self.frame),
         }

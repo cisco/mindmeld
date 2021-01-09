@@ -113,7 +113,7 @@ def test_immutability_of_sample_request_and_params():
     "dynamic_resource",
     [
         (
-            ("some-intents", "some-intents-2"),
+            ["some-intents", "some-intents-2"],
             "some-state",
             "America/Los_Angeles",
             1234,
@@ -155,7 +155,7 @@ def test_serialization_params(
     "dynamic_resource",
     [
         (
-            ("some-intents", "some-intents-2"),
+            ["some-intents", "some-intents-2"],
             "some-state",
             "America/Los_Angeles",
             1234,

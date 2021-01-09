@@ -22,7 +22,7 @@ from functools import cmp_to_key, partial
 import immutables
 
 from .. import path
-from .request import FrozenParams, Params, Request
+from .request import FrozenParams, Params, Request, params_schema
 from ..core import Entity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -956,7 +956,7 @@ class AutoEntityFilling:
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
-                params=FrozenParams(**responder.params.to_dict()),
+                params=FrozenParams(**params_schema.dump(responder.params)),
                 **processed_query,
             )
 
@@ -1383,9 +1383,12 @@ class Conversation:
         internal_params = copy.deepcopy(self.params)
 
         if isinstance(params, dict):
+            # Validate params
+            params = params_schema.load(params)
             params = FrozenParams(**params)
-
         if isinstance(internal_params, dict):
+            # Validate internal params
+            internal_params = params_schema.load(internal_params)
             internal_params = FrozenParams(**internal_params)
 
         if params:
@@ -1401,6 +1404,9 @@ class Conversation:
             history=self.history,
             verbose=self.verbose,
         )
+
+        # Validate params
+        response.param = Params(**params_schema.load(response.params.to_dict()))
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
@@ -1425,6 +1431,7 @@ class Conversation:
         internal_params = copy.deepcopy(self.params)
 
         if isinstance(params, dict):
+            params = params_schema.load(params)
             params = FrozenParams(**params)
 
         if isinstance(internal_params, dict):
@@ -1443,6 +1450,8 @@ class Conversation:
             history=self.history,
             verbose=self.verbose,
         )
+        # Validate params
+        response.param = Params(**params_schema.load(response.params.to_dict()))
         self.history = response.history
         self.frame = response.frame
         self.params = response.params

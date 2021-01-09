@@ -193,16 +193,20 @@ class ApplicationManager:
                 history=history,
                 verbose=verbose,
             )
-
         params = freeze_params(params)
         history = history or []
         frame = frame or {}
         context = context or {}
+        dm_params = params.validate_dm_params(self.dialogue_manager.handler_map)
+        processed_query = self.nlp.process(query_text=text,
+                                           allowed_intents=params.allowed_intents,
+                                           locale=params.locale,
+                                           language=params.language,
+                                           time_zone=params.time_zone,
+                                           timestamp=params.timestamp,
+                                           dynamic_resource=params.dynamic_resource,
+                                           verbose=verbose)
 
-        allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
-        processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params
-        )
         request, response = self._pre_dm(
             processed_query=processed_query,
             context=context,
@@ -251,12 +255,17 @@ class ApplicationManager:
         context = context or {}
         history = history or []
         frame = frame or {}
-
-        allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
+        dm_params = params.validate_dm_params(self.dialogue_manager.handler_map)
         # TODO: make an async nlp
-        processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params
-        )
+        processed_query = self.nlp.process(query_text=text,
+                                           allowed_intents=params.allowed_intents,
+                                           locale=params.locale,
+                                           language=params.language,
+                                           time_zone=params.time_zone,
+                                           timestamp=params.timestamp,
+                                           dynamic_resource=params.dynamic_resource,
+                                           verbose=verbose)
+
         request, response = self._pre_dm(
             processed_query=processed_query,
             context=context,
@@ -271,17 +280,6 @@ class ApplicationManager:
         modified_dm_responder = self._post_dm(request, dm_responder)
         return modified_dm_responder
 
-    def _pre_nlp(self, params, verbose=False):
-        # validate params
-        allowed_intents = params.validate_param("allowed_intents")
-        nlp_params = params.validate_nlp_params()
-        nlp_params["verbose"] = verbose
-        return (
-            allowed_intents,
-            nlp_params,
-            params.validate_dm_params(self.dialogue_manager.handler_map),
-        )
-
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
         prev_request = DialogueResponder.to_json(dm_response)
@@ -291,9 +289,6 @@ class ApplicationManager:
         new_history = (prev_request,) + request.history
         dm_response.history = new_history[: self.max_history_len]
 
-        # validate outgoing params
-        dm_response.params.validate_param("allowed_intents")
-        dm_response.params.validate_param("target_dialogue_state")
         return dm_response
 
     def add_middleware(self, middleware):

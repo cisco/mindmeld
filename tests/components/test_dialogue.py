@@ -309,7 +309,7 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
         (
             "es",
             "INVALID_LOCALE_CODE",
-            {"lang": "EN", "latent": True, "locale": "en_CA"},
+            {"lang": "EN", "latent": True},
         ),
         ("eng", "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
     ],
