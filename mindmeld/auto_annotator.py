@@ -27,7 +27,10 @@ from .components.translators import (  # pylint: disable=W0611
     NoOpTranslator,
     GoogleTranslator,
 )
-from .system_entity_recognizer import DucklingRecognizer
+from .system_entity_recognizer import (
+    DucklingRecognizer,
+    convert_duckling_item_to_entity_dict,
+)
 from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
@@ -897,18 +900,21 @@ class MultiLingualAnnotator(Annotator):
         locale = locale or self.locale
         language = language or self.language
         if isinstance(self.translator, NoOpTranslator):
-            duckling_entities = self._parse_without_translator(
+            duckling_candidates = self._parse_without_translator(
                 sentence, entity_types=entity_types, language=language, locale=locale
             )
         else:
-            duckling_entities = self._parse_with_translator(
+            duckling_candidates = self._parse_with_translator(
                 sentence, entity_types=entity_types, language=language, locale=locale
             )
         if entity_types:
-            duckling_entities = [
-                e for e in duckling_entities if e["dim"] in entity_types
+            duckling_candidates = [
+                e for e in duckling_candidates if e["dim"] in entity_types
             ]
-        return MultiLingualAnnotator.convert_duckling_candidates(duckling_entities)
+        return [
+            convert_duckling_item_to_entity_dict(candidate)
+            for candidate in duckling_candidates
+        ]
 
     def _parse_with_translator(
         self, sentence, entity_types=None, language=None, locale=None
@@ -976,25 +982,6 @@ class MultiLingualAnnotator(Annotator):
                         selected_candidates.append(candidate)
                         break
         return selected_candidates
-
-    @staticmethod
-    def convert_duckling_candidates(duckling_candidates):
-        """Converts duckling candidates into entity dictionaries.
-        Args:
-            duckling_candidates (list): List of Duckling candidates
-        Returns:
-            entities (list): List of converted entities.
-        """
-        return [
-            {
-                "body": entity["body"],
-                "start": entity["start"],
-                "end": entity["end"],
-                "dim": entity["entity_type"],
-                "value": entity["value"],
-            }
-            for entity in duckling_candidates
-        ]
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236

@@ -39,7 +39,6 @@ requirements = [
     "pyyaml>=5.1.1",
     "spacy>=2.3.0",
     "mypy>=0.782",
-    "google-cloud-translate>=3.0.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -98,6 +97,9 @@ setup(
         ],
         "examples": [
             'connexion>=2.7.0; python_version>="3.6"',
+        ],
+        "language_annotator": [
+            "google-cloud-translate>=3.0.1",
         ],
     },
 )
