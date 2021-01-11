@@ -11,7 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Optional, Dict
+import datetime
+from typing import Optional, Dict, Any
+from datetime import timezone as dt_timezone
 import attr
 import immutables
 import pycountry
@@ -21,6 +23,13 @@ from marshmallow import EXCLUDE, Schema
 from marshmallow import fields
 
 logger = logging.getLogger(__name__)
+
+
+def _get_current_timestamp_in_milliseconds() -> int:
+    dt = datetime.datetime.now()
+    utc_time = dt.replace(tzinfo=dt_timezone.utc).timestamp()
+    utc_time_in_milliseconds = int(utc_time) * 1000
+    return utc_time_in_milliseconds
 
 
 def validate_language_code(value: Optional[str]) -> Optional[str]:
@@ -208,13 +217,53 @@ class TimeZoneField(fields.String):
             return None
 
 
+class TimestampField(fields.Integer):
+    def _serialize(self,
+                   value,
+                   attribute,  # pylint: disable=unused-argument
+                   obj,  # pylint: disable=unused-argument
+                   **kwargs):
+        if value is None:
+            return ""
+        return str(value)
+
+    def _deserialize(self,
+                     value,
+                     attribute,  # pylint: disable=unused-argument
+                     data,  # pylint: disable=unused-argument
+                     **kwargs):
+        try:
+            timestamp_str = str(value)
+            if len(timestamp_str) > 13:
+                logger.error("Invalid timestamp %s, it should be a 13 digit UTC "
+                             "timestamp representation precise to the nearest millisecond."
+                             "Using the process timestamp instead.", timestamp_str)
+                return _get_current_timestamp_in_milliseconds()
+
+            if len(timestamp_str) <= 10:
+                # Convert a second grain unix timestamp to millisecond
+                logger.debug(
+                    "Warning: Possible non-millisecond unix timestamp passed in %s. "
+                    "Multiplying it by 1000 to represent the timestamp in milliseconds.",
+                    timestamp_str
+                )
+                value *= 1000
+
+            return value
+        except ValueError as error:
+            logger.warning(
+                "Invalid timestamp param: %s has a wrong value that caused %s.", value, error
+            )
+            return _get_current_timestamp_in_milliseconds()
+
+
 class ParamsSchema(Schema):
-    allowed_intents = fields.List(fields.String, data_key='allowed_intents')
-    time_zone = TimeZoneField(data_key='time_zone', allow_none=True)
-    dynamic_resource = fields.Dict(data_key='dynamic_resource')
+    allowed_intents = fields.List(fields.String)
+    time_zone = TimeZoneField(allow_none=True)
+    dynamic_resource = fields.Dict()
     language = LanguageCodeField(allow_none=True)
     locale = LocaleCodeField(allow_none=True)
-    timestamp = fields.Integer()
+    timestamp = TimestampField()
     target_dialogue_state = fields.String(allow_none=True)
 
     class Meta:
@@ -250,7 +299,7 @@ class Params:
     locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
-    def validate_dm_params(self, handler_map: Dict) -> Dict:
+    def validate_dm_params(self, handler_map: Dict) -> Dict[str, Optional[str]]:
         """
         Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state
             for the application and returns that value in a dictionary.
@@ -272,7 +321,7 @@ class Params:
             return {"target_dialogue_state": None}
         return {"target_dialogue_state": self.target_dialogue_state}
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         """This method is primarily implemented to return a mutable dictionary for the dynamic_resource
             param and a mutable list for the allowed_intents param.
         """
@@ -388,7 +437,7 @@ class Request:
         default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "text": self.text,
             "domain": self.domain,

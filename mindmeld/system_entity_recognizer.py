@@ -386,13 +386,6 @@ class DucklingRecognizer(SystemEntityRecognizer):
             data["tz"] = time_zone
 
         if timestamp:
-            if len(str(timestamp)) <= 13:
-                logger.debug(
-                    "Warning: Possible non-millisecond unix timestamp passed in."
-                )
-            if len(str(timestamp)) <= 10:
-                # Convert a second grain unix timestamp to millisecond
-                timestamp *= 1000
             data["reftime"] = timestamp
 
         # Currently we rely on Duckling for parsing numerical data but in the future we can use
