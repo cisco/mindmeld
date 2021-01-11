@@ -10,25 +10,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
-from enum import Enum
 import json
 import logging
 import os
 import sys
+from abc import ABC, abstractmethod
+from enum import Enum
 
 import pycountry
 import requests
 
-
+from .components._config import (DEFAULT_DUCKLING_URL, get_system_entity_url_config,
+                                 is_duckling_configured)
 from .components.request import validate_language_code, validate_locale_code
-from .components._config import (
-    DEFAULT_DUCKLING_URL,
-    is_duckling_configured,
-    get_system_entity_url_config,
-)
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
-from .exceptions import SystemEntityResolutionError, MindMeldError
+from .exceptions import MindMeldError, SystemEntityResolutionError
 
 SUCCESSFUL_HTTP_CODE = 200
 SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 1.0)

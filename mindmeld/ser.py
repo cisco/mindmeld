@@ -13,6 +13,7 @@
 
 """This module contains the system entity recognizer."""
 import logging
+
 from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)

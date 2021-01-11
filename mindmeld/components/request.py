@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-
+from typing import Optional, Dict
 import attr
 import immutables
 import pycountry
@@ -23,7 +23,7 @@ from marshmallow import fields
 logger = logging.getLogger(__name__)
 
 
-def validate_language_code(value):
+def validate_language_code(value: Optional[str]) -> Optional[str]:
     """Validates language code parameters
     Args:
         value (str): The language code parameter
@@ -67,7 +67,7 @@ def validate_language_code(value):
     return value
 
 
-def validate_locale_code(value):
+def validate_locale_code(value: Optional[str]) -> Optional[str]:
     """Validates the locale code parameters
     Args:
         value (str): The locale code parameter
@@ -109,7 +109,8 @@ def validate_locale_code(value):
     return language_code + "_" + country_code
 
 
-def validate_locale_code_with_reference_language_code(locale, reference_language_code):
+def validate_locale_code_with_ref_language_code(locale: Optional[str],
+                                                reference_language_code: str) -> Optional[str]:
     """This function makes sure the locale is consistent with the app's language code"""
     locale = validate_locale_code(locale)
     # if the developer or app doesnt specify the locale, we just use the default locale
@@ -125,44 +126,6 @@ def validate_locale_code_with_reference_language_code(locale, reference_language
         return
 
     return locale
-
-
-def _validate_time_zone(param=None):
-    """Validates time zone parameters
-
-    Args:
-        param (str, optional): The time zone parameter
-
-    Returns:
-        str: The passed in time zone
-    """
-    if not param:
-        return None
-    if not isinstance(param, str):
-        logger.warning(
-            "Invalid %r param: %s is not of type %s.", "time_zone", param, str
-        )
-        return None
-    try:
-        timezone(param)
-    except UnknownTimeZoneError:
-        logger.warning(
-            "Invalid %r param: %s is not a valid time zone.", "time_zone", param
-        )
-        return None
-    return param
-
-
-def _validate_generic(name, ptype):
-    def validator(param):
-        if not isinstance(param, ptype):
-            logger.warning(
-                "Invalid %r param: %s is not of type %s.", name, param, ptype
-            )
-            param = None
-        return param
-
-    return validator
 
 
 class LanguageCodeField(fields.String):
@@ -258,9 +221,6 @@ class ParamsSchema(Schema):
         unknown = EXCLUDE
 
 
-params_schema = ParamsSchema()
-
-
 @attr.s(frozen=False, kw_only=True)
 class Params:
     """
@@ -290,7 +250,7 @@ class Params:
     locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
-    def validate_dm_params(self, handler_map):
+    def validate_dm_params(self, handler_map: Dict) -> Dict:
         """
         Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state
             for the application and returns that value in a dictionary.
@@ -312,7 +272,7 @@ class Params:
             return {"target_dialogue_state": None}
         return {"target_dialogue_state": self.target_dialogue_state}
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """This method is primarily implemented to return a mutable dictionary for the dynamic_resource
             param and a mutable list for the allowed_intents param.
         """
@@ -378,9 +338,6 @@ class RequestSchema(Schema):
     request_id = fields.String()
 
 
-request_schema = RequestSchema()
-
-
 @attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
 class Request:
     """
@@ -431,7 +388,7 @@ class Request:
         default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         return {
             "text": self.text,
             "domain": self.domain,
@@ -440,3 +397,7 @@ class Request:
             "params": params_schema.dump(self.params),
             "frame": dict(self.frame),
         }
+
+
+params_schema = ParamsSchema()
+request_schema = RequestSchema()

@@ -48,7 +48,7 @@ from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from .request import validate_locale_code_with_reference_language_code
+from .request import validate_locale_code_with_ref_language_code
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -774,7 +774,7 @@ class NaturalLanguageProcessor(Processor):
             query_text,
             allowed_nlp_classes=allowed_nlp_classes,
             time_zone=time_zone,
-            locale=validate_locale_code_with_reference_language_code(
+            locale=validate_locale_code_with_ref_language_code(
                 locale or self.locale, self.language),
             timestamp=timestamp,
             dynamic_resource=dynamic_resource,
@@ -926,7 +926,7 @@ class DomainProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=validate_locale_code_with_reference_language_code(
+            locale=validate_locale_code_with_ref_language_code(
                 locale or self.locale, self.language),
         )
         processed_query = self.process_query(
@@ -1212,7 +1212,7 @@ class IntentProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=validate_locale_code_with_reference_language_code(
+            locale=validate_locale_code_with_ref_language_code(
                 locale or self.locale, self.language)
         )
         processed_query = self.process_query(query, dynamic_resource=dynamic_resource,

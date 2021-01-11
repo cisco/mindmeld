@@ -21,11 +21,8 @@ import sys
 from .app_manager import ApplicationManager
 from .cli import app_cli
 from .components._config import get_custom_action_config
-from .components.custom_action import (
-    CustomActionException,
-    CustomActionSequence,
-)
-from .components.dialogue import DialogueFlow, DialogueResponder, AutoEntityFilling
+from .components.custom_action import CustomActionException, CustomActionSequence
+from .components.dialogue import AutoEntityFilling, DialogueFlow, DialogueResponder
 from .components.request import Request
 from .server import MindMeldServer
 

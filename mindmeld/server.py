@@ -26,8 +26,8 @@ from flask_cors import CORS
 
 from ._version import current as __version__
 from .components.dialogue import DialogueResponder
-from .exceptions import BadMindMeldRequestError
 from .components.request import request_schema
+from .exceptions import BadMindMeldRequestError
 
 logger = logging.getLogger(__name__)
 
