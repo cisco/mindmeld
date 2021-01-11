@@ -26,7 +26,7 @@ from .components._config import get_auto_annotator_config, get_language_config
 from .components.translators import (  # pylint: disable=W0611
     NoOpTranslator,
     GoogleTranslator,
-)  
+)
 from .system_entity_recognizer import DucklingRecognizer
 from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
@@ -930,21 +930,19 @@ class MultiLingualAnnotator(Annotator):
         en_entities = self.en_annotator.parse(en_sentence, entity_types=entity_types)
         selected_candidates = []
         for entity in en_entities:
-            i = 0
-            while i < len(candidates):
-                if entity["dim"] == candidates[i]["entity_type"]:
-                    if entity["value"] == candidates[i]["value"]:
-                        selected_candidates.append(candidates[i])
+            for candidate in candidates:
+                if entity["dim"] == candidate["entity_type"]:
+                    if entity["value"] == candidate["value"]:
+                        selected_candidates.append(candidate)
                         break
                     if (
                         self.translator.translate(
                             entity["body"], target_language=language
                         )
-                        == candidates[i]["body"]
+                        == candidate["body"]
                     ):
-                        selected_candidates.append(candidates[i])
+                        selected_candidates.append(candidate)
                         break
-                i += 1
         return selected_candidates
 
     def _parse_without_translator(
@@ -1032,12 +1030,11 @@ class MultiLingualAnnotator(Annotator):
         spans.sort(key=lambda span: span[1] - span[0], reverse=True)
         selected_spans = []
         for span in spans:
-            no_overlaps = True
-            for selected_span in selected_spans:
-                if MultiLingualAnnotator._has_overlap(span, selected_span):
-                    no_overlaps = False
-                    break
-            if no_overlaps:
+            has_overlaps = [
+                MultiLingualAnnotator._has_overlap(span, selected_span)
+                for selected_span in selected_spans
+            ]
+            if not any(has_overlaps):
                 selected_spans.append(span)
         return selected_spans
 
