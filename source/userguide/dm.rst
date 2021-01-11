@@ -172,8 +172,8 @@ The ``params`` attribute of the ``request`` object is an immutable :class:`Froze
 |                              | `IANA time zone <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>`_, |
 |                              | such as 'America/Los_Angeles', or 'Asia/Kolkata'                                  |
 +------------------------------+-----------------------------------------------------------------------------------+
-| :data:`timestamp`            | A valid 16-digit `unix timestamp <https://en.wikipedia.org/wiki/Unix_time>`_      |
-|                              | representation accurate to the nearest microsecond                                |
+| :data:`timestamp`            | A valid 13-digit `unix timestamp <https://en.wikipedia.org/wiki/Unix_time>`_      |
+|                              | representation accurate to the nearest millisecond                                |
 +------------------------------+-----------------------------------------------------------------------------------+
 | :data:`dynamic_resource`     | A dictionary containing data used to influence the language classifiers           |
 |                              | by adding resource data for the given turn (see dynamic gazetteer documentation)  |
