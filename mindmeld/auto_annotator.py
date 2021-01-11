@@ -15,14 +15,18 @@ from copy import deepcopy
 import re
 import logging
 import os
+import sys
 import importlib
 from enum import Enum
 from tqdm import tqdm
 import spacy
-from google.cloud import translate_v2
 
 from .resource_loader import ResourceLoader
-from .components._config import get_auto_annotator_config
+from .components._config import get_auto_annotator_config, get_language_config
+from .components.translators import (  # pylint: disable=W0611
+    NoOpTranslator,
+    GoogleTranslator,
+)  
 from .system_entity_recognizer import DucklingRecognizer
 from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
@@ -839,94 +843,6 @@ class BootstrapAnnotator(Annotator):
         return Entity.is_system_entity(entity) or entity in self.supported_entity_types
 
 
-class Translator(ABC):
-    """Abstract Translator Base Class for Translators to be used by Mindmeld."""
-
-    def __init__(self):
-        """Creates a translation client after finding the credential path."""
-        self.translate_client = None
-
-    @abstractmethod
-    def get_translate_client(self):
-        """
-        Args:
-            text (str): Input text
-        Returns:
-            language_code (str): Detected Language Code
-        """
-        raise NotImplementedError("Subclasses must implement this method")
-
-    @abstractmethod
-    def detect_language(self, text):
-        """
-        Args:
-            text (str): Input text
-        Returns:
-            language_code (str): Detected Language Code
-        """
-        raise NotImplementedError("Subclasses must implement this method")
-
-    @abstractmethod
-    def translate(self, text, destination_language):
-        """
-        Args:
-            text (str): Input text
-            destination_language (str): Language code for language to translate the given text to.
-        Returns:
-            translated_text (str): Translated text
-        """
-        raise NotImplementedError("Subclasses must implement this method")
-
-
-class GoogleTranslator(Translator):
-    """Class for translation using the Google Translate API."""
-
-    def __init__(self):
-        """Initializes the translate_client."""
-        self.translate_client = self.get_translate_client()
-
-    def get_translate_client(self):
-        """Creates a translation client after finding the credential path."""
-        GoogleTranslator._check_credential_exists()
-        return translate_v2.Client()
-
-    @staticmethod
-    def _check_credential_exists():
-        """Searches environment variables for the path to google application credentials.
-
-        Returns:
-            credential_path (str): Path to google application credentials.
-        """
-        try:
-            return os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-        except KeyError:
-            raise KeyError(
-                "Google credential path not found. Export 'GOOGLE_CREDENTIAL_PATH' as"
-                " an environment variable."
-            )
-
-    def detect_language(self, text):
-        """
-        Args:
-            text (str): Input text
-        Returns:
-            language_code (str): Detected Language Code
-        """
-        return self.translate_client.detect_language(text)["language"]
-
-    def translate(self, text, target_language):
-        """
-        Args:
-            text (str): Input text
-            target_language (str): Language code for language to translate the given text to.
-        Returns:
-            translated_text (str): Translated text
-        """
-        return self.translate_client.translate(text, target_language=target_language)[
-            "translatedText"
-        ]
-
-
 class MultiLingualAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
@@ -939,7 +855,7 @@ class MultiLingualAnnotator(Annotator):
                 override the config specified by the app's config.py file.
         """
         super().__init__(app_path=app_path, config=config)
-        self.language = self.config.get("language", "en")
+        self.language, self.locale = get_language_config(self.app_path)
         self.translator = self.get_translator()
         self.en_annotator = SpacyAnnotator(app_path)
 
@@ -950,55 +866,68 @@ class MultiLingualAnnotator(Annotator):
         Returns:
             translator (Translator): Translator specified in the config, None if not specified.
         """
-        if self.config.get("translator"):
-            translator_class_name = self.config.get("translator", "GoogleTranslator")
-            if translator_class_name == "GoogleTranslator":
-                return GoogleTranslator()
-            else:
-                logger.warning(
-                    "%s is not a valid translation class. Currently only ‘GoogleTranslator’"
-                    " is supported.", translator_class_name
-                )
-        logger.info(
-            "No Translator selected. MLA will detect entities based on Duckling heuristics."
-        )
 
-    def parse(self, sentence, entity_types=None, language=None, **kwargs):
+        translator_class_name = self.config.get("translator")
+        if translator_class_name is None:
+            logger.warning(
+                "No Translator selected. MLA will detect entities based on Duckling heuristics."
+            )
+            return NoOpTranslator()
+        try:
+            current_module = sys.modules[__name__]
+            translator_class = getattr(current_module, translator_class_name)
+            return translator_class()
+        except AttributeError:
+            raise ValueError(
+                f"{translator_class_name} is not a valid Translator class. Currently"
+                " only ‘GoogleTranslator’ and 'NoOpTranslator' are supported."
+            )
+
+    def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
         """
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
                     possible entity types will be parsed.
-            language (str): Language code for the language of the given sentence
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
         Returns: entities (list): List of entity dictionaries.
         """
+        locale = locale or self.locale
         language = language or self.language
-        params = {"sentence": sentence, "language": language}
-        duckling_entities = (
-            self._parse_with_translator(**params)
-            if self.translator
-            else self._parse_without_translator(**params)
-        )
+        if isinstance(self.translator, NoOpTranslator):
+            duckling_entities = self._parse_without_translator(
+                sentence, entity_types=entity_types, language=language, locale=locale
+            )
+        else:
+            duckling_entities = self._parse_with_translator(
+                sentence, entity_types=entity_types, language=language, locale=locale
+            )
         if entity_types:
             duckling_entities = [
                 e for e in duckling_entities if e["dim"] in entity_types
             ]
         return MultiLingualAnnotator.convert_duckling_candidates(duckling_entities)
 
-    def _parse_with_translator(self, sentence, language=None):
+    def _parse_with_translator(
+        self, sentence, entity_types=None, language=None, locale=None
+    ):
         """Parse helper function to be used if a translator is present.
 
         Args:
             sentence (str): Sentence to detect entities.
-            language (str): Language code for the language of the given sentence
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
+            language (str): Language code
+            locale (str): Locale code.
         Returns: entities (list): List of duckling candidates.
         """
         candidates = self.en_annotator.duckling.get_candidates_for_text(
-            sentence, language=language
+            sentence, entity_types=entity_types, language=language, locale=locale
         )
         en_sentence = self.translator.translate(sentence, target_language="en")
-        en_entities = self.en_annotator.parse(en_sentence)
-
+        en_entities = self.en_annotator.parse(en_sentence, entity_types=entity_types)
         selected_candidates = []
         for entity in en_entities:
             i = 0
@@ -1018,18 +947,26 @@ class MultiLingualAnnotator(Annotator):
                 i += 1
         return selected_candidates
 
-    def _parse_without_translator(self, sentence, language=None):
+    def _parse_without_translator(
+        self, sentence, entity_types=None, language=None, locale=None
+    ):
         """Parse helper function to be used if a translator is not present.
 
         Args:
             sentence (str): Sentence to detect entities.
-            language (str): Language code for the language of the given sentence
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
+            language (str): Language code.
+            locale (str): Locale code.
         Returns: entities (list): List of duckling candidates.
         """
         candidates = self.en_annotator.duckling.get_candidates_for_text(
-            sentence, language=language
+            sentence, entity_types=entity_types, language=language, locale=locale
         )
-        final_spans = MultiLingualAnnotator._get_final_spans(candidates, sentence)
+        spans = [(i["start"], i["end"]) for i in candidates]
+        final_spans = MultiLingualAnnotator._get_largest_non_overlapping_candidates(
+            spans
+        )
         selected_candidates = []
         for span in final_spans:
             for candidate in candidates:
@@ -1084,53 +1021,25 @@ class MultiLingualAnnotator(Annotator):
         return span_one[1] - span_two[0] > span_one[1] - span_two[0]
 
     @staticmethod
-    def _filter_mid_token_spans(spans, sentence):
-        """Removes any spans that end in-between a token.
-
-        Args:
-            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
-            sentence (str): The original sentence parsed by duckling.
-        Returns:
-            filtered_spans (list): List of spans that do not end mid-token.
-        """
-        space_indices = [i for i in range(len(sentence)) if sentence[i] == " "]
-        return [
-            span
-            for span in spans
-            if span[1] in space_indices or span[1] >= len(sentence) - 2
-        ]
-
-    @staticmethod
     def _get_largest_non_overlapping_candidates(spans):
         """Finds the set of the largest non-overlapping candidates.
 
         Args:
             spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+        Returns:
+            selected_spans (list): List of the largest non-overlapping spans.
         """
+        spans.sort(key=lambda span: span[1] - span[0], reverse=True)
         selected_spans = []
         for span in spans:
             no_overlaps = True
-            for i, selected_span in enumerate(selected_spans):
+            for selected_span in selected_spans:
                 if MultiLingualAnnotator._has_overlap(span, selected_span):
                     no_overlaps = False
-                    if MultiLingualAnnotator._is_larger(span, selected_span):
-                        selected_spans[i] = span
+                    break
             if no_overlaps:
                 selected_spans.append(span)
         return selected_spans
-
-    @staticmethod
-    def _get_final_spans(candidates, sentence):
-        """Pipeline function to filter candidate spans and find the largest non-overlapping candidates.
-        Args:
-            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
-            sentence (str): The original sentence parsed by duckling.
-        Returns:
-            final_spans (list): Largest non-overlapping spans that do not end mid-token.
-        """
-        spans = [(i["start"], i["end"]) for i in candidates]
-        spans = MultiLingualAnnotator._filter_mid_token_spans(spans, sentence)
-        return MultiLingualAnnotator._get_largest_non_overlapping_candidates(spans)
 
 
 register_annotator("SpacyAnnotator", SpacyAnnotator)
