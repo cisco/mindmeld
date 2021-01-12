@@ -137,6 +137,27 @@ def validate_locale_code_with_ref_language_code(locale: Optional[str],
     return locale
 
 
+def validate_timestamp(value: int) -> int:
+    timestamp_str = str(value)
+
+    if len(timestamp_str) > 13:
+        logger.error("Invalid timestamp %s, it should be a 13 digit UTC "
+                     "timestamp representation precise to the nearest millisecond."
+                     "Using the process timestamp instead.", timestamp_str)
+        return _get_current_timestamp_in_milliseconds()
+
+    if len(timestamp_str) <= 10:
+        # Convert a second grain unix timestamp to millisecond
+        logger.debug(
+            "Warning: Possible non-millisecond unix timestamp passed in %s. "
+            "Multiplying it by 1000 to represent the timestamp in milliseconds.",
+            timestamp_str
+        )
+        value *= 1000
+
+    return value
+
+
 class LanguageCodeField(fields.String):
 
     def _serialize(self,
@@ -233,23 +254,7 @@ class TimestampField(fields.Integer):
                      data,  # pylint: disable=unused-argument
                      **kwargs):
         try:
-            timestamp_str = str(value)
-            if len(timestamp_str) > 13:
-                logger.error("Invalid timestamp %s, it should be a 13 digit UTC "
-                             "timestamp representation precise to the nearest millisecond."
-                             "Using the process timestamp instead.", timestamp_str)
-                return _get_current_timestamp_in_milliseconds()
-
-            if len(timestamp_str) <= 10:
-                # Convert a second grain unix timestamp to millisecond
-                logger.debug(
-                    "Warning: Possible non-millisecond unix timestamp passed in %s. "
-                    "Multiplying it by 1000 to represent the timestamp in milliseconds.",
-                    timestamp_str
-                )
-                value *= 1000
-
-            return value
+            return validate_timestamp(value)
         except ValueError as error:
             logger.warning(
                 "Invalid timestamp param: %s has a wrong value that caused %s.", value, error

@@ -22,7 +22,7 @@ import requests
 
 from .components._config import (DEFAULT_DUCKLING_URL, get_system_entity_url_config,
                                  is_duckling_configured)
-from .components.request import validate_language_code, validate_locale_code
+from .components.request import validate_language_code, validate_locale_code, validate_timestamp
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import MindMeldError, SystemEntityResolutionError
 
@@ -386,7 +386,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
             data["tz"] = time_zone
 
         if timestamp:
-            data["reftime"] = timestamp
+            data["reftime"] = validate_timestamp(timestamp)
 
         # Currently we rely on Duckling for parsing numerical data but in the future we can use
         # other system entity recognizer too
