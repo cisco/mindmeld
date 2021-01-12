@@ -29,7 +29,7 @@ from .components.translators import (  # pylint: disable=W0611
 )
 from .system_entity_recognizer import (
     DucklingRecognizer,
-    convert_duckling_item_to_entity_dict,
+    duckling_item_to_entity_dict,
 )
 from .markup import load_query, dump_queries
 from .core import Entity, Span, QueryEntity
@@ -912,8 +912,7 @@ class MultiLingualAnnotator(Annotator):
                 e for e in duckling_candidates if e["dim"] in entity_types
             ]
         return [
-            convert_duckling_item_to_entity_dict(candidate)
-            for candidate in duckling_candidates
+            duckling_item_to_entity_dict(candidate) for candidate in duckling_candidates
         ]
 
     def _parse_with_translator(
@@ -967,14 +966,16 @@ class MultiLingualAnnotator(Annotator):
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
-        spans = [(i["start"], i["end"]) for i in candidates]
+        spans = [
+            Span(candidate["start"], candidate["end"] - 1) for candidate in candidates
+        ]
         final_spans = MultiLingualAnnotator._get_largest_non_overlapping_candidates(
             spans
         )
         selected_candidates = []
         for span in final_spans:
             for candidate in candidates:
-                if span == (candidate["start"], candidate["end"]):
+                if span == Span(candidate["start"], candidate["end"] - 1):
                     if not (
                         candidate["dim"] == "amount-of-money"
                         and candidate["value"]["unit"] == "unknown"
@@ -992,20 +993,6 @@ class MultiLingualAnnotator(Annotator):
         return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
 
     @staticmethod
-    def _has_overlap(span_one, span_two):
-        """Determines whether two spans overlap. Spans are two-element tuples with the format:
-        (start_index, end_index + 1).
-        """
-        return span_one[1] > span_two[0] and span_two[1] > span_one[0]
-
-    @staticmethod
-    def _is_larger(span_one, span_two):
-        """Determines whether the first spans is larger than the second. Spans are two-element
-        tuples with the format: (start_index, end_index + 1).
-        """
-        return span_one[1] - span_two[0] > span_one[1] - span_two[0]
-
-    @staticmethod
     def _get_largest_non_overlapping_candidates(spans):
         """Finds the set of the largest non-overlapping candidates.
 
@@ -1014,12 +1001,11 @@ class MultiLingualAnnotator(Annotator):
         Returns:
             selected_spans (list): List of the largest non-overlapping spans.
         """
-        spans.sort(key=lambda span: span[1] - span[0], reverse=True)
+        spans.sort(reverse=True)
         selected_spans = []
         for span in spans:
             has_overlaps = [
-                MultiLingualAnnotator._has_overlap(span, selected_span)
-                for selected_span in selected_spans
+                span.has_overlap(selected_span) for selected_span in selected_spans
             ]
             if not any(has_overlaps):
                 selected_spans.append(span)

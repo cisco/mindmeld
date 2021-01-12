@@ -122,6 +122,10 @@ class Span:
         """
         return Span(self.start + offset, self.end + offset)
 
+    def has_overlap(self, other):
+        """Determines whether two spans overlap."""
+        return self.end >= other.start and other.end >= self.start
+
     def __iter__(self):
         for index in range(self.start, self.end + 1):
             yield index
@@ -132,6 +136,26 @@ class Span:
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.start == other.start and self.end == other.end
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) > len(other)
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) >= len(other)
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) < len(other)
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) <= len(other)
         return NotImplemented
 
     def __ne__(self, other):

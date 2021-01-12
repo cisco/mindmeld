@@ -709,7 +709,7 @@ def duckling_item_to_query_entity(query, item, offset=0):
         return
 
 
-def convert_duckling_item_to_entity_dict(item):
+def duckling_item_to_entity_dict(item):
     """Converts a duckling candidate into a an entity dictionary to be used by Annotators.
     Args:
         item (dict): The duckling item
