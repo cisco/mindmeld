@@ -18,7 +18,12 @@ from abc import ABC, abstractmethod
 import logging
 import os
 
-from google.cloud import translate_v2
+try:
+    from google.cloud import translate_v2
+except ModuleNotFoundError:
+    raise ValueError(
+        "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]' to install."
+    )
 
 logger = logging.getLogger(__name__)
 

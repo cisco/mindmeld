@@ -22,7 +22,11 @@ from tqdm import tqdm
 import spacy
 
 from .resource_loader import ResourceLoader
-from .components._config import get_auto_annotator_config, get_language_config
+from .components._config import (
+    get_auto_annotator_config,
+    get_language_config,
+    ENGLISH_LANGUAGE_CODE,
+)
 from .components.translators import (  # pylint: disable=W0611
     NoOpTranslator,
     GoogleTranslator,
@@ -901,11 +905,14 @@ class MultiLingualAnnotator(Annotator):
         language = language or self.language
         if isinstance(self.translator, NoOpTranslator):
             duckling_candidates = self._parse_without_translator(
-                sentence, entity_types=entity_types, language=language, locale=locale
+                sentence,
+                language=language,
+                locale=locale,
+                entity_types=entity_types,
             )
         else:
             duckling_candidates = self._parse_with_translator(
-                sentence, entity_types=entity_types, language=language, locale=locale
+                sentence, language=language, locale=locale, entity_types=entity_types
             )
         if entity_types:
             duckling_candidates = [
@@ -916,22 +923,28 @@ class MultiLingualAnnotator(Annotator):
         ]
 
     def _parse_with_translator(
-        self, sentence, entity_types=None, language=None, locale=None
+        self,
+        sentence,
+        language,
+        locale=None,
+        entity_types=None,
     ):
         """Parse helper function to be used if a translator is present.
 
         Args:
             sentence (str): Sentence to detect entities.
-            entity_types (list): List of entity types to parse. If None, all
-                    possible entity types will be parsed.
             language (str): Language code
             locale (str): Locale code.
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
         Returns: entities (list): List of duckling candidates.
         """
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
-        en_sentence = self.translator.translate(sentence, target_language="en")
+        en_sentence = self.translator.translate(
+            sentence, target_language=ENGLISH_LANGUAGE_CODE
+        )
         en_entities = self.en_annotator.parse(en_sentence, entity_types=entity_types)
         selected_candidates = []
         for entity in en_entities:
@@ -951,16 +964,17 @@ class MultiLingualAnnotator(Annotator):
         return selected_candidates
 
     def _parse_without_translator(
-        self, sentence, entity_types=None, language=None, locale=None
+        self, sentence, language, locale=None, entity_types=None
     ):
         """Parse helper function to be used if a translator is not present.
 
         Args:
             sentence (str): Sentence to detect entities.
-            entity_types (list): List of entity types to parse. If None, all
-                    possible entity types will be parsed.
             language (str): Language code.
             locale (str): Locale code.
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
+
         Returns: entities (list): List of duckling candidates.
         """
         candidates = self.en_annotator.duckling.get_candidates_for_text(
