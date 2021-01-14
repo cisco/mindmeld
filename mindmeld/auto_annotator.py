@@ -889,7 +889,6 @@ class MultiLingualAnnotator(Annotator):
                 sentence, language=language, locale=locale, entity_types=entity_types
             )
         if entity_types:
-            print("Entity types", entity_types)
             duckling_candidates = [
                 e for e in duckling_candidates if e["entity_type"] in entity_types
             ]
