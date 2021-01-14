@@ -15,7 +15,6 @@ from copy import deepcopy
 import re
 import logging
 import os
-import sys
 import importlib
 from enum import Enum
 from tqdm import tqdm
@@ -27,10 +26,7 @@ from .components._config import (
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
-from .components.translators import (  # pylint: disable=W0611
-    NoOpTranslator,
-    GoogleTranslator,
-)
+from .components.translators import NoOpTranslator, TranslatorFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
     duckling_item_to_entity_dict,
@@ -863,32 +859,10 @@ class MultiLingualAnnotator(Annotator):
         """
         super().__init__(app_path=app_path, config=config)
         self.language, self.locale = get_language_config(self.app_path)
-        self.translator = self.get_translator()
+        self.translator = TranslatorFactory().get_translator(
+            self.config.get("translator")
+        )
         self.en_annotator = SpacyAnnotator(app_path)
-
-    def get_translator(self):
-        """Creates a Translator object based on the translator class specified in the config.
-        If a translator is not specified, Duckling heuristics will be used.
-
-        Returns:
-            translator (Translator): Translator specified in the config, None if not specified.
-        """
-
-        translator_class_name = self.config.get("translator")
-        if translator_class_name is None:
-            logger.warning(
-                "No Translator selected. MLA will detect entities based on Duckling heuristics."
-            )
-            return NoOpTranslator()
-        try:
-            current_module = sys.modules[__name__]
-            translator_class = getattr(current_module, translator_class_name)
-            return translator_class()
-        except AttributeError:
-            raise ValueError(
-                f"{translator_class_name} is not a valid Translator class. Currently"
-                " only ‘GoogleTranslator’ and 'NoOpTranslator' are supported."
-            )
 
     def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
         """
@@ -915,8 +889,9 @@ class MultiLingualAnnotator(Annotator):
                 sentence, language=language, locale=locale, entity_types=entity_types
             )
         if entity_types:
+            print("Entity types", entity_types)
             duckling_candidates = [
-                e for e in duckling_candidates if e["dim"] in entity_types
+                e for e in duckling_candidates if e["entity_type"] in entity_types
             ]
         return [
             duckling_item_to_entity_dict(candidate) for candidate in duckling_candidates
@@ -939,10 +914,11 @@ class MultiLingualAnnotator(Annotator):
                     possible entity types will be parsed.
         Returns: entities (list): List of duckling candidates.
         """
+        print("PARSING WITH TRANSLATOR")
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
-        en_sentence = self.translator.translate(
+        en_sentence = self.translator.translate(  # pylint: disable=E1128
             sentence, target_language=ENGLISH_LANGUAGE_CODE
         )
         en_entities = self.en_annotator.parse(en_sentence, entity_types=entity_types)
@@ -980,8 +956,12 @@ class MultiLingualAnnotator(Annotator):
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
+        filtered_candidates = MultiLingualAnnotator._filter_duckling_candidates(
+            candidates
+        )
         spans = [
-            Span(candidate["start"], candidate["end"] - 1) for candidate in candidates
+            Span(candidate["start"], candidate["end"] - 1)
+            for candidate in filtered_candidates
         ]
         final_spans = MultiLingualAnnotator._get_largest_non_overlapping_candidates(
             spans
@@ -990,12 +970,8 @@ class MultiLingualAnnotator(Annotator):
         for span in final_spans:
             for candidate in candidates:
                 if span == Span(candidate["start"], candidate["end"] - 1):
-                    if not (
-                        candidate["dim"] == "amount-of-money"
-                        and candidate["value"]["unit"] == "unknown"
-                    ):
-                        selected_candidates.append(candidate)
-                        break
+                    selected_candidates.append(candidate)
+                    break
         return selected_candidates
 
     @property
@@ -1024,6 +1000,34 @@ class MultiLingualAnnotator(Annotator):
             if not any(has_overlaps):
                 selected_spans.append(span)
         return selected_spans
+
+    @staticmethod
+    def _filter_duckling_candidates(candidates):
+        """Pipeline function to filter initial list of duckling candidates using heuristics.
+
+        Args:
+            candidates (list): List of duckling candidates
+        Returns:
+            filtered_candidates (list): List of filtered duckling candidates.
+        """
+        filtered_candidates = (
+            MultiLingualAnnotator._remove_unresolved_sys_amount_of_money(candidates)
+        )
+        return filtered_candidates
+
+    @staticmethod
+    def _remove_unresolved_sys_amount_of_money(candidates):
+        """Do not label candidate entities that are sys_amount-of-money but
+        do not have an "unknown" unit type.
+        """
+        return [
+            candidate
+            for candidate in candidates
+            if not (
+                candidate["dim"] == "amount-of-money"
+                and candidate["value"]["unit"] == "unknown"
+            )
+        ]
 
 
 register_annotator("SpacyAnnotator", SpacyAnnotator)

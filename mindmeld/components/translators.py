@@ -14,7 +14,7 @@
 """
 This module contains translator clients used by the MultiLingual Annotator.
 """
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 import logging
 import os
 
@@ -22,13 +22,14 @@ try:
     from google.cloud import translate_v2
 except ModuleNotFoundError:
     raise ValueError(
-        "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]' to install."
+        "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]'"
+        " to install."
     )
 
 logger = logging.getLogger(__name__)
 
 
-class Translator(ABC):
+class Translator(metaclass=ABCMeta):
     """Abstract Translator Base Class for Translators to be used by Mindmeld."""
 
     def __init__(self):
@@ -60,7 +61,7 @@ class Translator(ABC):
         """
         Args:
             text (str): Input text
-            destination_language (str): Language code for language to translate the given text to.
+            destination_language (str): Language code for target language.
         Returns:
             translated_text (str): Translated text
         """
@@ -130,3 +131,25 @@ class GoogleTranslator(Translator):
         return self.translate_client.translate(text, target_language=target_language)[
             "translatedText"
         ]
+
+
+class TranslatorFactory:
+    """Translator Factory Class"""
+
+    @staticmethod
+    def get_translator(translator):
+        """A static method to get a translator
+
+        Args:
+            translator (str): Name of the desired translator class
+        Returns:
+            (Translator): Translator Class
+        """
+        if translator == "NoOpTranslator":
+            return NoOpTranslator()
+        if translator == "GoogleTranslator":
+            return GoogleTranslator()
+        raise AssertionError(
+            "Valid 'translator' not found in AUTO_ANNOTATOR_CONFIG."
+            " Supported translators include 'NoOpTranslator' and 'GoogleTranslator'."
+        )
