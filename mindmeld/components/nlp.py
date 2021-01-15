@@ -48,7 +48,7 @@ from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from .request import validate_locale_code_with_ref_language_code
+from .request import validate_locale_code_with_ref_language_code, _validate_allowed_intents
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -643,8 +643,9 @@ class NaturalLanguageProcessor(Processor):
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
-        nlp_components = {}
+        allowed_nlp_components_list = _validate_allowed_intents(allowed_nlp_components_list, self)
 
+        nlp_components = {}
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
             entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
@@ -652,17 +653,6 @@ class NaturalLanguageProcessor(Processor):
                 nlp_entries[idx] = entry
 
             domain, intent, entity, role = nlp_entries
-
-            if not domain or domain not in self.domains:
-                raise AllowedNlpClassesKeyError(
-                    "Domain: {} is not in the NLP component hierarchy".format(domain)
-                )
-
-            if not intent or (intent != "*" and intent not in self.domains[domain].intents):
-                raise AllowedNlpClassesKeyError(
-                    "Intent: {} is not in the NLP component hierarchy".format(intent)
-                )
-
             if intent == "*":
                 for intent in self.domains[domain].intents:
                     self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)

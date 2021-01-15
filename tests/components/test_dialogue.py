@@ -16,6 +16,7 @@ from mindmeld.components import Conversation, DialogueManager, DialogueResponder
 from mindmeld.components.dialogue import DialogueStateRule
 from mindmeld.components.request import Params, Request
 from mindmeld.system_entity_recognizer import DucklingRecognizer
+from marshmallow.exceptions import ValidationError
 
 
 def create_request(domain, intent, entities=None):
@@ -323,6 +324,9 @@ def test_convo_language_and_locales(
     mock1 = mocker.patch.object(
         DucklingRecognizer, "get_response", return_value=({}, 400)
     )
-    convo.say("set alarm for 4pm tomorrow")
-    mock1.call_args_list[0][0][0].pop("text")
-    assert mock1.call_args_list[0][0][0] == expected_ser_call
+    try:
+        convo.say("set alarm for 4pm tomorrow")
+        mock1.call_args_list[0][0][0].pop("text")
+        assert mock1.call_args_list[0][0][0] == expected_ser_call
+    except ValidationError as error:
+        assert error.messages[0] == "Invalid locale_code param: %s is not a valid locale." % locale

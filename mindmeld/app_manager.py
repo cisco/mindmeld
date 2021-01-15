@@ -197,7 +197,6 @@ class ApplicationManager:
         history = history or []
         frame = frame or {}
         context = context or {}
-        dm_params = params.validate_dm_params(self.dialogue_manager.handler_map)
         processed_query = self.nlp.process(query_text=text,
                                            allowed_intents=params.allowed_intents,
                                            locale=params.locale,
@@ -216,7 +215,7 @@ class ApplicationManager:
         )
 
         dm_responder = self.dialogue_manager.apply_handler(
-            request, response, **dm_params
+            request, response, target_dialogue_state=params.target_dialogue_state
         )
         modified_dm_responder = self._post_dm(request, dm_responder)
         return modified_dm_responder
@@ -255,7 +254,6 @@ class ApplicationManager:
         context = context or {}
         history = history or []
         frame = frame or {}
-        dm_params = params.validate_dm_params(self.dialogue_manager.handler_map)
         # TODO: make an async nlp
         processed_query = self.nlp.process(query_text=text,
                                            allowed_intents=params.allowed_intents,
@@ -275,7 +273,7 @@ class ApplicationManager:
         )
 
         dm_responder = await self.dialogue_manager.apply_handler(
-            request, response, **dm_params
+            request, response, target_dialogue_state=params.target_dialogue_state
         )
         modified_dm_responder = self._post_dm(request, dm_responder)
         return modified_dm_responder

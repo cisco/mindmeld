@@ -13,7 +13,8 @@ import math
 import pytest
 
 from mindmeld.components import NaturalLanguageProcessor
-from mindmeld.exceptions import AllowedNlpClassesKeyError, ProcessorError
+from mindmeld.exceptions import ProcessorError
+from marshmallow.exceptions import ValidationError
 from mindmeld.query_factory import QueryFactory
 from mindmeld.components.domain_classifier import DomainClassifier
 
@@ -379,9 +380,9 @@ def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
 
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
-    with pytest.raises(AllowedNlpClassesKeyError):
+    with pytest.raises(ValidationError):
         kwik_e_mart_nlp.extract_allowed_nlp_components_list(["unrelated_domain.*"])
-    with pytest.raises(AllowedNlpClassesKeyError):
+    with pytest.raises(ValidationError):
         kwik_e_mart_nlp.extract_allowed_nlp_components_list(["store_info.unrelated_intent"])
 
 

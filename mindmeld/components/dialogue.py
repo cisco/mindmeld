@@ -18,11 +18,10 @@ import json
 import logging
 import random
 from functools import cmp_to_key, partial
-
 import immutables
 
 from .. import path
-from .request import FrozenParams, Params, Request, params_schema
+from .request import FrozenParams, Params, Request, ParamsSchema
 from ..core import Entity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -722,11 +721,18 @@ class AutoEntityFilling:
             app (Application): The application that initializes this flow.
         """
         self._app = app
+        self._app.lazy_init()
         self._handler = handler
         self._form = form
         self._local_entity_form = None
         self._prompt_turn = None
         self._check_attr()
+        self._params_schema = ParamsSchema(
+            context={
+                "nlp": self._app.app_manager.nlp,
+                "dialogue_handler_map": self._app.app_manager.dialogue_manager.handler_map
+            }
+        )
 
     def _check_attr(self):
         if not ("entities" in self._form and len(self._form["entities"]) > 0):
@@ -956,7 +962,7 @@ class AutoEntityFilling:
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
-                params=FrozenParams(**params_schema.dump(responder.params)),
+                params=FrozenParams(**self._params_schema.dump(responder.params)),
                 **processed_query,
             )
 
@@ -1309,6 +1315,12 @@ class Conversation:
         self.force_sync = force_sync
         self.params = FrozenParams()
         self.verbose = verbose
+        self._params_schema = ParamsSchema(
+            context={
+                "nlp": self._app_manager.nlp,
+                "dialogue_handler_map": self._app_manager.dialogue_manager.handler_map
+            }
+        )
 
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
@@ -1384,11 +1396,11 @@ class Conversation:
 
         if isinstance(params, dict):
             # Validate params
-            params = params_schema.load(params)
+            params = self._params_schema.load(params)
             params = FrozenParams(**params)
         if isinstance(internal_params, dict):
             # Validate internal params
-            internal_params = params_schema.load(internal_params)
+            internal_params = self._params_schema.load(internal_params)
             internal_params = FrozenParams(**internal_params)
 
         if params:
@@ -1406,7 +1418,7 @@ class Conversation:
         )
 
         # Validate params
-        response.param = Params(**params_schema.load(response.params.to_dict()))
+        response.param = Params(**self._params_schema.load(response.params.to_dict()))
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
@@ -1423,7 +1435,7 @@ class Conversation:
                 which may have been set.
 
         Returns:
-            (dict): The dictionary Response.
+            (DialogueResponder): The DialogueResponder Response.
         """
         if not self._app_manager.ready:
             await self._app_manager.load()
@@ -1431,7 +1443,7 @@ class Conversation:
         internal_params = copy.deepcopy(self.params)
 
         if isinstance(params, dict):
-            params = params_schema.load(params)
+            params = self._params_schema.load(params)
             params = FrozenParams(**params)
 
         if isinstance(internal_params, dict):
@@ -1451,7 +1463,7 @@ class Conversation:
             verbose=self.verbose,
         )
         # Validate params
-        response.param = Params(**params_schema.load(response.params.to_dict()))
+        response.param = Params(**self._params_schema.load(response.params.to_dict()))
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
