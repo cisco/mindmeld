@@ -792,6 +792,16 @@ class FormEntity:
         if self.custom_eval and not callable(custom_eval):
             raise TypeError("Invalid custom validation function type.")
 
+    def to_dict(self):
+        """Converts the entity into a dictionary"""
+        base = {"entity": self.entity}
+        for field in ["role", "responses", "retry_response", "value", "default_eval", "hints", "custom_eval"]:
+            value = getattr(self, field)
+            if value is not None:
+                base[field] = value
+
+        return base
+
 
 def resolve_entity_conflicts(query_entities):
     """This method takes a list containing query entities for a query, and resolves

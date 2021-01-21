@@ -762,6 +762,9 @@ class AutoEntityFilling:
             ["{}.{}".format(request.domain, request.intent)]
         )
         responder.params.target_dialogue_state = self._handler.__name__
+        self._local_form = copy.deepcopy(self._form)
+        self._local_form["entities"] = self._local_entity_form
+        responder.form = self._local_form
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -920,7 +923,7 @@ class AutoEntityFilling:
             history=request.history or [],
             frame=responder.frame or {},
             params=request.params,
-            form=None,
+            form=self._form,
         )
 
         self._exit_flow(responder)
@@ -942,7 +945,9 @@ class AutoEntityFilling:
             responder (DialogueResponder): responder object.
             nlr (str): natural language response to prompt for the missing slot.
         """
-        responder.form = self._local_entity_form
+        self._local_form = copy.deepcopy(self._form)
+        self._local_form["entities"] = self._local_entity_form
+        responder.form = self._local_form
         responder.reply(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
@@ -960,12 +965,14 @@ class AutoEntityFilling:
             processed_query = self._app.app_manager.nlp.process(query_text=request.text)
 
             # create new request object from the current responder object.
+            self._local_form = copy.deepcopy(self._form)
+            self._local_form["entities"] = self._local_entity_form
             request = self._app.app_manager.request_class(
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
                 params=FrozenParams(**responder.params.to_dict()),
-                form=self._local_entity_form,
+                form=self._local_form,
                 **processed_query,
             )
 
@@ -982,10 +989,10 @@ class AutoEntityFilling:
             responder (DialogueResponder): The responder object.
         """
 
-        # If form iteration in request object, continue using that. 
+        # If form iteration in request object, continue using that.
         # If None, set to original form.
         if request.form:
-            self._local_entity_form = request.form or None
+            self._local_entity_form = request.form["entities"] or None
 
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
@@ -1003,6 +1010,16 @@ class AutoEntityFilling:
             # Fill the form with the entities in the first query
             self._initial_fill(request)
 
+        # convert to FormEntities from json Dict response
+        for i, slot in enumerate(self._local_entity_form):
+            if not isinstance(slot, FormEntity):
+                dict_slot = slot
+                slot = FormEntity(entity=dict_slot["entity"])
+
+                for key in dict_slot:
+                    setattr(slot, key, dict_slot[key])
+
+                self._local_entity_form[i] = slot
 
         for slot in self._local_entity_form:
 
@@ -1094,7 +1111,7 @@ class DialogueResponder:
         request=None,
         dialogue_state=None,
         directives=None,
-        form=None
+        form=None,
     ):
         """
         Initializes a dialogue responder.
@@ -1116,7 +1133,7 @@ class DialogueResponder:
         self.slots = slots or {}
         self.history = history or []
         self.request = request or Request()
-        self.form = form or []
+        self.form = form or {}
 
     def reply(self, text):
         """Adds a 'reply' directive.
@@ -1244,6 +1261,8 @@ class DialogueResponder:
         """
         serialized_obj = {}
         for attribute, value in vars(instance).items():
+            if not value:
+                continue
             if isinstance(value, (Params, Request, FrozenParams)):
                 serialized_obj[attribute] = DialogueResponder.to_json(value)
             elif isinstance(value, tuple) and all(
@@ -1252,12 +1271,12 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
-            elif isinstance(value, list) and all(
-                isinstance(item, FormEntity) for item in value
-            ):
-                serialized_obj[attribute] = list(item.__dict__ for item in value)
+            elif "entities" in value:
+                if any(isinstance(i, FormEntity) for i in value["entities"]):
+                    serialized_obj[attribute] = {"entities": list(formentity.to_dict() for formentity in value["entities"])}
             else:
                 serialized_obj[attribute] = value
+
         return serialized_obj
 
     def _process_template(self, text):

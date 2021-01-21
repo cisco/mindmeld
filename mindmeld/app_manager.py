@@ -146,7 +146,7 @@ class ApplicationManager:
         # We reset the current turn's responder's params
         response = self.responder_class(
             frame=frame,
-            form=[],
+            form={},
             params=Params(),
             slots={},
             history=history,
@@ -200,7 +200,7 @@ class ApplicationManager:
         params = freeze_params(params)
         history = history or []
         frame = frame or {}
-        form = form or []
+        form = form or {}
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
@@ -223,7 +223,7 @@ class ApplicationManager:
         return modified_dm_responder
 
     async def _parse_async(
-        self, text, params=None, context=None, frame=None, history=None, verbose=False
+        self, text, params=None, context=None, frame=None, form=None, history=None, verbose=False
     ):
         """
         Args:
@@ -256,7 +256,7 @@ class ApplicationManager:
         context = context or {}
         history = history or []
         frame = frame or {}
-        form = form or []
+        form = form or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
@@ -292,11 +292,12 @@ class ApplicationManager:
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
         prev_request = DialogueResponder.to_json(dm_response)
-        prev_request.pop("history")
+        if "history" in prev_request:
+            prev_request.pop("history")
 
-        # limit length of history
-        new_history = (prev_request,) + request.history
-        dm_response.history = new_history[: self.max_history_len]
+            # limit length of history
+            new_history = (prev_request,) + request.history
+            dm_response.history = new_history[: self.max_history_len]
 
         # validate outgoing params
         dm_response.params.validate_param("allowed_intents")

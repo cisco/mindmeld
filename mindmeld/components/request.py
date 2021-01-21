@@ -352,7 +352,7 @@ class Request:
         default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
     )
     form = attr.ib(
-        default=None,
+        attr.ib(default=dict)
     )
 
     def to_dict(self):
