@@ -192,12 +192,7 @@ class Annotator(ABC):
         for key, value in kwargs.items():
             if key == "unannotate_all" and value:
                 config["unannotate"] = [
-                    {
-                        "domains": ".*",
-                        "intents": ".*",
-                        "files": ".*",
-                        "entities": ".*",
-                    }
+                    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
                 ]
                 config["unannotate_supported_entities_only"] = False
             else:
@@ -860,7 +855,7 @@ class MultiLingualAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language, self.locale = get_language_config(self.app_path)
         self.translator = TranslatorFactory().get_translator(
-            self.config.get("translator")
+            self.config.get("translator", "NoOpTranslator")
         )
         self.en_annotator = SpacyAnnotator(app_path)
 
@@ -879,10 +874,7 @@ class MultiLingualAnnotator(Annotator):
         language = language or self.language
         if isinstance(self.translator, NoOpTranslator):
             duckling_candidates = self._parse_without_translator(
-                sentence,
-                language=language,
-                locale=locale,
-                entity_types=entity_types,
+                sentence, language=language, locale=locale, entity_types=entity_types,
             )
         else:
             duckling_candidates = self._parse_with_translator(
@@ -897,11 +889,7 @@ class MultiLingualAnnotator(Annotator):
         ]
 
     def _parse_with_translator(
-        self,
-        sentence,
-        language,
-        locale=None,
-        entity_types=None,
+        self, sentence, language, locale=None, entity_types=None,
     ):
         """Parse helper function to be used if a translator is present.
 
@@ -913,7 +901,6 @@ class MultiLingualAnnotator(Annotator):
                     possible entity types will be parsed.
         Returns: entities (list): List of duckling candidates.
         """
-        print("PARSING WITH TRANSLATOR")
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
@@ -923,19 +910,24 @@ class MultiLingualAnnotator(Annotator):
         en_entities = self.en_annotator.parse(en_sentence, entity_types=entity_types)
         selected_candidates = []
         for entity in en_entities:
+            value_matched_candidates = []
             for candidate in candidates:
                 if entity["dim"] == candidate["entity_type"]:
                     if entity["value"] == candidate["value"]:
-                        selected_candidates.append(candidate)
-                        break
+                        value_matched_candidates.append(candidate)
                     if (
                         self.translator.translate(
                             entity["body"], target_language=language
                         )
                         == candidate["body"]
+                        and not value_matched_candidates
                     ):
                         selected_candidates.append(candidate)
                         break
+            if value_matched_candidates:
+                selected_candidates.append(
+                    max(value_matched_candidates, key=lambda x: len(x["body"]))
+                )
         return selected_candidates
 
     def _parse_without_translator(
@@ -1009,8 +1001,8 @@ class MultiLingualAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = (
-            MultiLingualAnnotator._remove_unresolved_sys_amount_of_money(candidates)
+        filtered_candidates = MultiLingualAnnotator._remove_unresolved_sys_amount_of_money(
+            candidates
         )
         return filtered_candidates
 
