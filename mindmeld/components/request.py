@@ -403,6 +403,21 @@ class ParamsSchema(Schema):
         unknown = EXCLUDE
 
 
+class RequestSchema(Schema):
+    text = fields.String(required=True)
+    domain = fields.String()
+    intent = fields.String()
+    entities = fields.List(fields.Dict)
+    history = fields.List(fields.Dict)
+    params = fields.Nested(ParamsSchema)
+    context = fields.Dict()
+    confidences = fields.Dict()
+    nbest_transcripts_text = fields.List(fields.String)
+    nbest_transcripts_entities = fields.List(fields.List(fields.Dict))
+    nbest_aligned_entities = fields.List(fields.List(fields.Dict))
+    request_id = fields.String()
+
+
 def tuple_elems_to_immutable_map(value):
     """Custom attrs converter. Converts a list of elements into a list of immutables.Map
     objects.
@@ -410,19 +425,11 @@ def tuple_elems_to_immutable_map(value):
     return tuple([immutables.Map(i) for i in value])
 
 
-class RequestSchema(Schema):
-    text = fields.String(required=True)
-    domain = fields.String()
-    intent = fields.String()
-    entities = fields.List(fields.String)
-    history = fields.List(fields.Dict)
-    params = fields.Nested(ParamsSchema)
-    context = fields.Dict()
-    confidences = fields.Dict()
-    nbest_transcripts_text = fields.List(fields.String)
-    nbest_transcripts_entities = fields.List(fields.Dict)
-    nbest_aligned_entities = fields.List(fields.Dict)
-    request_id = fields.String()
+def tuple_elems_to_list_of_immutable_map(values):
+    """Custom attrs converter. Converts a list of elements into a list of immutables.Map
+    objects.
+    """
+    return tuple([tuple_elems_to_immutable_map(value) for value in values])
 
 
 @attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
@@ -435,15 +442,15 @@ class Request:
     Attributes:
         domains (str): Domain of the current query.
         intent (str): Intent of the current query.
-        entities (list): A list of entities in the current query.
-        history (list): List of previous and current responder objects (de-serialized) up to the
+        entities (list of dicts): A list of entities in the current query.
+        history (list of dicts): List of previous and current responder objects (de-serialized) up to the
             current conversation.
         text (str): The query text.
         frame (): Immutables Map of stored data across multiple dialogue turns.
         params (Params): An object that modifies how MindMeld process the current turn.
-        context (): Immutables Map containing front-end client state that is passed to the
+        context (dict): Immutables Map containing front-end client state that is passed to the
             application from the client in the request.
-        confidences (): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles``
+        confidences (dict): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles``
             containing confidence probabilities across all labels for each classifier.
         nbest_transcripts_text (tuple): List of alternate n-best transcripts from an ASR system
         nbest_transcripts_entities (tuple): List of lists of extracted entities for each of the
@@ -466,13 +473,13 @@ class Request:
     context = attr.ib(default=immutables.Map(), converter=immutables.Map)
     confidences = attr.ib(default=immutables.Map(), converter=immutables.Map)
     nbest_transcripts_text = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple
     )
     nbest_transcripts_entities = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_list_of_immutable_map
     )
     nbest_aligned_entities = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=tuple_elems_to_list_of_immutable_map
     )
 
     def to_dict(self) -> Dict[str, Any]:

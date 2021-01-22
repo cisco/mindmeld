@@ -9,15 +9,18 @@ from immutables import Map
 @pytest.fixture
 def sample_request():
     dict_list = [{"key": "value"}, {"key": "value"}, {"key": "value"}]
+    dict_list_of_lists = [[{"key": "value"}, {"key": "value"}, {"key": "value"}],
+                          [{"key": "value"}, {"key": "value"}, {"key": "value"}]]
+    lists = ['key_1', 'key_2', 'key_3']
     return Request(
         domain="some_domain",
         intent="some_intent",
-        entities=(dict_list),
+        entities=dict_list,
         text="some_text",
-        history=(dict_list),
-        nbest_transcripts_text=(dict_list),
-        nbest_transcripts_entities=(dict_list),
-        nbest_aligned_entities=(dict_list),
+        history=dict_list,
+        nbest_transcripts_text=lists,
+        nbest_transcripts_entities=dict_list_of_lists,
+        nbest_aligned_entities=dict_list_of_lists,
     )
 
 
@@ -68,16 +71,16 @@ def test_nbest(sample_request):
         sample_request.confidences = {"key": "value"}
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_transcripts_text = ["some_text"]
-    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_text)
+        sample_request.nbest_transcripts_text = ["some_text", "some_text_2"]
+    assert isinstance(sample_request.nbest_transcripts_text, tuple)
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_transcripts_entities = [{"key": "value"}]
-    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
+        sample_request.nbest_transcripts_entities = [[{"key": "value"}], [{"key": "value"}]]
+    assert_tuple_of_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_aligned_entities = [{"key": "value"}]
-    assert_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
+        sample_request.nbest_aligned_entities = [[{"key": "value"}], [{"key": "value"}]]
+    assert_tuple_of_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
 
 
 def assert_tuple_of_immutable_maps(tuple_of_immutable_maps):
@@ -87,6 +90,12 @@ def assert_tuple_of_immutable_maps(tuple_of_immutable_maps):
         assert isinstance(immutable_map, Map)
         with pytest.raises(TypeError):
             immutable_map["key"] = "value"
+
+
+def assert_tuple_of_tuple_of_immutable_maps(tuple_of_tuple_of_immutable_maps):
+    assert isinstance(tuple_of_tuple_of_immutable_maps, tuple)
+    for idx_1, tuple_of_immutable_maps in enumerate(tuple_of_tuple_of_immutable_maps):
+        assert_tuple_of_immutable_maps(tuple_of_immutable_maps)
 
 
 def test_immutability_of_sample_request_and_params():
