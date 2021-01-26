@@ -993,6 +993,8 @@ class AutoEntityFilling:
         # If None, set to original form.
         if request.form:
             self._local_entity_form = request.form["entities"] or None
+        else:
+            self._local_entity_form = None
 
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
@@ -1272,8 +1274,11 @@ class DialogueResponder:
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             elif "entities" in value:
+                # Serialize slot-filling form
                 if any(isinstance(i, FormEntity) for i in value["entities"]):
-                    serialized_obj[attribute] = {"entities": list(formentity.to_dict() for formentity in value["entities"])}
+                    value = dict(value)
+                    value["entities"] = list(formentity.to_dict() for formentity in value["entities"])
+                    serialized_obj[attribute] = value
             else:
                 serialized_obj[attribute] = value
 
