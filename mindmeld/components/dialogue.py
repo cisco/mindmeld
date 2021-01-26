@@ -993,8 +993,6 @@ class AutoEntityFilling:
         # If None, set to original form.
         if request.form:
             self._local_entity_form = request.form["entities"] or None
-        else:
-            self._local_entity_form = None
 
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
@@ -1012,7 +1010,7 @@ class AutoEntityFilling:
             # Fill the form with the entities in the first query
             self._initial_fill(request)
 
-        # convert to FormEntities from json Dict response
+        # convert json response to FormEntity objects (deserialize)
         for i, slot in enumerate(self._local_entity_form):
             if not isinstance(slot, FormEntity):
                 dict_slot = slot
@@ -1023,6 +1021,7 @@ class AutoEntityFilling:
 
                 self._local_entity_form[i] = slot
 
+        # Iterate through all slots, fill in empty ones
         for slot in self._local_entity_form:
 
             if not slot.value:
@@ -1275,7 +1274,7 @@ class DialogueResponder:
                 serialized_obj[attribute] = dict(value)
             elif "entities" in value:
                 # Serialize slot-filling form
-                if any(isinstance(i, FormEntity) for i in value["entities"]):
+                if value["entities"] and any(isinstance(i, FormEntity) for i in value["entities"]):
                     value = dict(value)
                     value["entities"] = list(formentity.to_dict() for formentity in value["entities"])
                     serialized_obj[attribute] = value
