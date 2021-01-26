@@ -993,6 +993,8 @@ class AutoEntityFilling:
         # If None, set to original form.
         if request.form:
             self._local_entity_form = request.form["entities"] or None
+        else:
+            self._local_entity_form = None
 
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
