@@ -762,9 +762,7 @@ class AutoEntityFilling:
             ["{}.{}".format(request.domain, request.intent)]
         )
         responder.params.target_dialogue_state = self._handler.__name__
-        self._local_form = copy.deepcopy(self._form)
-        self._local_form["entities"] = self._local_entity_form
-        responder.form = self._local_form
+        return responder
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -955,6 +953,9 @@ class AutoEntityFilling:
     def _retry_logic(self, request, responder, nlr):
         if self._retry_attempts < self._max_retries:
             self._retry_attempts += 1
+            self._local_form = copy.deepcopy(self._form)
+            self._local_form["entities"] = self._local_entity_form
+            responder.form = self._local_form
             responder.reply(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
@@ -966,7 +967,6 @@ class AutoEntityFilling:
 
             # create new request object from the current responder object.
             self._local_form = copy.deepcopy(self._form)
-            self._local_form["entities"] = self._local_entity_form
             request = self._app.app_manager.request_class(
                 context=request.context or {},
                 history=request.history or [],
@@ -1001,7 +1001,7 @@ class AutoEntityFilling:
             self._exit_flow(responder)
             return
 
-        self._set_next_turn(request, responder)
+        responder = self._set_next_turn(request, responder)
 
         if self._prompt_turn is None or not self._local_entity_form:
             # Entering the flow
@@ -1353,6 +1353,7 @@ class Conversation:
         self.context = context or {}
         self.history = []
         self.frame = {}
+        self.form = {}
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
@@ -1446,11 +1447,13 @@ class Conversation:
             params=internal_params,
             context=self.context,
             frame=self.frame,
+            form=self.form,
             history=self.history,
             verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame
+        self.form = response.form
         self.params = response.params
         return response
 
@@ -1488,11 +1491,13 @@ class Conversation:
             params=internal_params,
             context=self.context,
             frame=self.frame,
+            form=self.form,
             history=self.history,
             verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame
+        self.form = response.form
         self.params = response.params
         return response
 
@@ -1546,4 +1551,5 @@ class Conversation:
         """Reset the history, frame and params of the Conversation object."""
         self.history = []
         self.frame = {}
+        self.form = {}
         self.params = FrozenParams()
