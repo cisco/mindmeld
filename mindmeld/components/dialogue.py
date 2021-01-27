@@ -1264,8 +1264,6 @@ class DialogueResponder:
         """
         serialized_obj = {}
         for attribute, value in vars(instance).items():
-            if not value:
-                continue
             if isinstance(value, (Params, Request, FrozenParams)):
                 serialized_obj[attribute] = DialogueResponder.to_json(value)
             elif isinstance(value, tuple) and all(
@@ -1274,7 +1272,7 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
-            elif isinstance(value, dict) and "entities" in value:
+            elif value and isinstance(value, dict) and "entities" in value:
                 # Serialize slot-filling form
                 if value["entities"] and any(isinstance(i, FormEntity) for i in value["entities"]):
                     value = dict(value)
