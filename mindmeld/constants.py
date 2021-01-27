@@ -18,6 +18,27 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
+SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]
+SPACY_ANNOTATOR_NEWS_LANGUAGES = [
+    "da",
+    "nl",
+    "fr",
+    "de",
+    "el",
+    "it",
+    "lt",
+    "ja",
+    "nb",
+    "pl",
+    "pt",
+    "ro",
+    "es",
+]
+SPACY_ANNOTATOR_SUPPORTED_LANGUAGES = (
+    SPACY_ANNOTATOR_WEB_LANGUAGES + SPACY_ANNOTATOR_NEWS_LANGUAGES
+)
+SPACY_ANNOTATOR_MODEL_SIZES = ["sm", "md", "lg"]
+
 SPACY_ANNOTATOR_SUPPORTED_ENTITIES = [
     "sys_time",
     "sys_interval",
