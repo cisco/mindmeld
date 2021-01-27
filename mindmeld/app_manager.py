@@ -295,9 +295,9 @@ class ApplicationManager:
         if "history" in prev_request:
             prev_request.pop("history")
 
-            # limit length of history
-            new_history = (prev_request,) + request.history
-            dm_response.history = new_history[: self.max_history_len]
+        # limit length of history
+        new_history = (prev_request,) + request.history
+        dm_response.history = new_history[: self.max_history_len]
 
         # validate outgoing params
         dm_response.params.validate_param("allowed_intents")
