@@ -13,6 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+import immutables
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -796,9 +797,11 @@ class FormEntity:
         """Converts the entity into a dictionary"""
         base = {"entity": self.entity}
         for field in ["role", "responses", "retry_response", "value", "default_eval", "hints", "custom_eval"]:
-            value = getattr(self, field)
-            if value is not None:
-                base[field] = value
+            val = getattr(self, field)
+            if val is not None:
+                if isinstance(val, immutables.Map):
+                    val = dict(val)
+                base[field] = val
 
         return base
 
