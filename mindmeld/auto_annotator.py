@@ -434,6 +434,10 @@ class SpacyAnnotator(Annotator):
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
                 override the config specified by the app's config.py file.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
         """
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
