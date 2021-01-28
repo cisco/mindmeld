@@ -381,7 +381,8 @@ class ParamsSchema(Schema):
     locale = LocaleCodeField(allow_none=True)
     timestamp = TimestampField()
     target_dialogue_state = fields.Method("serialize_target_dialogue_state",
-                                          deserialize="deserialize_target_dialogue_state")
+                                          deserialize="deserialize_target_dialogue_state",
+                                          allow_none=True)
 
     def serialize_allowed_intents(self, params: Params) -> List[str]:
         return _validate_allowed_intents(params.allowed_intents, self.context.get('nlp'))

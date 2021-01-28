@@ -283,6 +283,8 @@ class ApplicationManager:
         prev_request = DialogueResponder.to_json(dm_response)
         prev_request.pop("history")
 
+        import pdb; pdb.set_trace()
+
         # limit length of history
         new_history = (prev_request,) + request.history
         dm_response.history = new_history[: self.max_history_len]

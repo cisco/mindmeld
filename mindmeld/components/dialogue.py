@@ -19,9 +19,11 @@ import logging
 import random
 from functools import cmp_to_key, partial
 import immutables
+from marshmallow import Schema
+from marshmallow import fields, ValidationError
 
 from .. import path
-from .request import FrozenParams, Params, Request, ParamsSchema
+from .request import FrozenParams, Params, Request, ParamsSchema, RequestSchema
 from ..core import Entity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -1062,6 +1064,16 @@ class AutoEntityFilling:
         await self.invoke(request, responder)
 
 
+class DialogueResponderSchema(Schema):
+    frame = fields.Dict()
+    params = fields.Nested(ParamsSchema)
+    history = fields.List(fields.Dict())
+    slots = fields.Dict()
+    request = fields.Nested(RequestSchema)
+    dialogue_state = fields.String()
+    directives = fields.List(fields.Dict())
+
+
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
@@ -1099,6 +1111,13 @@ class DialogueResponder:
         """
         self.directives = directives or []
         self.frame = frame or {}
+
+        if isinstance(params, dict):
+            params = Params(**params)
+
+        if isinstance(request, dict):
+            request = Request(**request)
+
         self.params = params or Params()
         self.dialogue_state = dialogue_state
         self.slots = slots or {}
