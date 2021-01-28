@@ -762,7 +762,7 @@ class AutoEntityFilling:
             ["{}.{}".format(request.domain, request.intent)]
         )
         responder.params.target_dialogue_state = self._handler.__name__
-        return responder
+        return
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -943,9 +943,9 @@ class AutoEntityFilling:
             responder (DialogueResponder): responder object.
             nlr (str): natural language response to prompt for the missing slot.
         """
-        self._local_form = copy.deepcopy(self._form)
-        self._local_form["entities"] = self._local_entity_form
-        responder.form = self._local_form
+        response_form = copy.deepcopy(self._form)
+        response_form["entities"] = self._local_entity_form
+        responder.form = response_form
         responder.reply(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
@@ -953,9 +953,9 @@ class AutoEntityFilling:
     def _retry_logic(self, request, responder, nlr):
         if self._retry_attempts < self._max_retries:
             self._retry_attempts += 1
-            self._local_form = copy.deepcopy(self._form)
-            self._local_form["entities"] = self._local_entity_form
-            responder.form = self._local_form
+            response_form = copy.deepcopy(self._form)
+            response_form["entities"] = self._local_entity_form
+            responder.form = response_form
             responder.reply(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
@@ -966,13 +966,13 @@ class AutoEntityFilling:
             processed_query = self._app.app_manager.nlp.process(query_text=request.text)
 
             # create new request object from the current responder object.
-            self._local_form = copy.deepcopy(self._form)
+            response_form = copy.deepcopy(self._form)
             request = self._app.app_manager.request_class(
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
                 params=FrozenParams(**responder.params.to_dict()),
-                form=self._local_form,
+                form=response_form,
                 **processed_query,
             )
 
@@ -991,8 +991,8 @@ class AutoEntityFilling:
 
         # If form iteration in request object, continue using that.
         # If None, set to original form.
-        if request.form:
-            self._local_entity_form = request.form["entities"] or None
+        if request.form and request.form["entities"]:
+            self._local_entity_form = request.form["entities"]
         else:
             self._local_entity_form = None
 
@@ -1001,7 +1001,7 @@ class AutoEntityFilling:
             self._exit_flow(responder)
             return
 
-        responder = self._set_next_turn(request, responder)
+        self._set_next_turn(request, responder)
 
         if self._prompt_turn is None or not self._local_entity_form:
             # Entering the flow
@@ -1014,14 +1014,8 @@ class AutoEntityFilling:
 
         # convert json response to FormEntity objects (deserialize)
         for i, slot in enumerate(self._local_entity_form):
-            if not isinstance(slot, FormEntity):
-                dict_slot = slot
-                slot = FormEntity(entity=dict_slot["entity"])
-
-                for key in dict_slot:
-                    setattr(slot, key, dict_slot[key])
-
-                self._local_entity_form[i] = slot
+            if isinstance(slot, dict):
+                self._local_entity_form[i] = FormEntity(**slot)
 
         # Iterate through all slots, fill in empty ones
         for slot in self._local_entity_form:
@@ -1272,11 +1266,11 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
-            elif value and isinstance(value, dict) and "entities" in value:
+            elif attribute is 'form' and value:
                 # Serialize slot-filling form
                 if value["entities"] and any(isinstance(i, FormEntity) for i in value["entities"]):
                     value = dict(value)
-                    value["entities"] = list(formentity.to_dict() for formentity in value["entities"])
+                    value["entities"] = list(form_entity.to_dict() for form_entity in value["entities"])
                     serialized_obj[attribute] = value
             else:
                 serialized_obj[attribute] = value

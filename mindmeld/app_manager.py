@@ -292,8 +292,7 @@ class ApplicationManager:
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
         prev_request = DialogueResponder.to_json(dm_response)
-        if "history" in prev_request:
-            prev_request.pop("history")
+        prev_request.pop("history")
 
         # limit length of history
         new_history = (prev_request,) + request.history
