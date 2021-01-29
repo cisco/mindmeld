@@ -794,9 +794,8 @@ class FormEntity:
             self.hints = hints
             self.custom_eval = custom_eval
 
-
         if not self.entity or not isinstance(self.entity, str):
-            raise TypeError("Entity cannot be empty.")    
+            raise TypeError("Entity cannot be empty.")
         if self.custom_eval and not callable(custom_eval):
             raise TypeError("Invalid custom validation function type.")
 

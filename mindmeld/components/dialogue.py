@@ -1266,11 +1266,15 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
-            elif attribute is 'form' and value:
+            elif attribute is "form" and value:
                 # Serialize slot-filling form
-                if value["entities"] and any(isinstance(i, FormEntity) for i in value["entities"]):
+                if value["entities"] and any(
+                    isinstance(i, FormEntity) for i in value["entities"]
+                ):
                     value = dict(value)
-                    value["entities"] = list(form_entity.to_dict() for form_entity in value["entities"])
+                    value["entities"] = list(
+                        form_entity.to_dict() for form_entity in value["entities"]
+                    )
                     serialized_obj[attribute] = value
             else:
                 serialized_obj[attribute] = value
