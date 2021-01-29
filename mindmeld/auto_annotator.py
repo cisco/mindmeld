@@ -1030,9 +1030,6 @@ class TranslationDucklingAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
-        assert (
-            self.language != ENGLISH_LANGUAGE_CODE
-        ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         self.translator = TranslatorFactory().get_translator(
             self.config.get("translator")
         )
@@ -1057,7 +1054,9 @@ class TranslationDucklingAnnotator(Annotator):
         """
         locale = locale or self.locale
         language = language or self.language
-
+        assert (
+            self.language != ENGLISH_LANGUAGE_CODE
+        ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence, entity_types=entity_types, language=language, locale=locale
         )
