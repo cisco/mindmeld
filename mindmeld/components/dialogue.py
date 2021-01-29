@@ -762,7 +762,6 @@ class AutoEntityFilling:
             ["{}.{}".format(request.domain, request.intent)]
         )
         responder.params.target_dialogue_state = self._handler.__name__
-        return
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -1266,7 +1265,7 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
-            elif attribute is "form" and value:
+            elif attribute == "form" and value:
                 # Serialize slot-filling form
                 if value["entities"] and any(
                     isinstance(i, FormEntity) for i in value["entities"]
