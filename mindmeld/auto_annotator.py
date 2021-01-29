@@ -495,7 +495,11 @@ class SpacyAnnotator(Annotator):
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
-        """
+        """ This function generates a list of supported entities for the given language.
+        These entities labels are mapped to MindMeld sys_entities.
+        The "misc" spacy entity is skipped since the category too broad to be
+        helpful in an application.
+
         Returns:
             supported_entity_types (list): List of supported entity types.
         """
@@ -520,9 +524,7 @@ class SpacyAnnotator(Annotator):
     def parse(self, sentence, entity_types=None, **kwargs):
         """Extracts entities from a sentence. Detected entities should are
         represented as dictionaries with the following keys: "body", "start"
-        (start index), "end" (end index), "value", "dim" (entity type). The
-        "misc" spacy entity is skipped since the category too broad to be
-        helpful in an application.
+        (start index), "end" (end index), "value", "dim" (entity type).
 
         Args:
             sentence (str): Sentence to detect entities.
