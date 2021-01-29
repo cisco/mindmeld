@@ -23,7 +23,7 @@ import immutables
 
 from .. import path
 from .request import FrozenParams, Params, Request
-from ..core import Entity
+from ..core import Entity, FormEntity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
 
@@ -920,6 +920,7 @@ class AutoEntityFilling:
             history=request.history or [],
             frame=responder.frame or {},
             params=request.params,
+            form=self._form,
         )
 
         self._exit_flow(responder)
@@ -935,6 +936,15 @@ class AutoEntityFilling:
         return await self._handler(request, responder)
 
     def _prompt_slot(self, responder, nlr):
+        """Prompts user for missing slot.
+
+        Args:
+            responder (DialogueResponder): responder object.
+            nlr (str): natural language response to prompt for the missing slot.
+        """
+        response_form = copy.deepcopy(self._form)
+        response_form["entities"] = self._local_entity_form
+        responder.form = response_form
         responder.reply(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
@@ -942,6 +952,9 @@ class AutoEntityFilling:
     def _retry_logic(self, request, responder, nlr):
         if self._retry_attempts < self._max_retries:
             self._retry_attempts += 1
+            response_form = copy.deepcopy(self._form)
+            response_form["entities"] = self._local_entity_form
+            responder.form = response_form
             responder.reply(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
@@ -952,11 +965,13 @@ class AutoEntityFilling:
             processed_query = self._app.app_manager.nlp.process(query_text=request.text)
 
             # create new request object from the current responder object.
+            response_form = copy.deepcopy(self._form)
             request = self._app.app_manager.request_class(
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
                 params=FrozenParams(**responder.params.to_dict()),
+                form=response_form,
                 **processed_query,
             )
 
@@ -972,6 +987,14 @@ class AutoEntityFilling:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
         """
+
+        # If form iteration in request object, continue using that.
+        # If None, set to original form.
+        if request.form and request.form["entities"]:
+            self._local_entity_form = request.form["entities"]
+        else:
+            self._local_entity_form = None
+
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
             self._exit_flow(responder)
@@ -979,7 +1002,7 @@ class AutoEntityFilling:
 
         self._set_next_turn(request, responder)
 
-        if self._prompt_turn is None or self._local_entity_form is None:
+        if self._prompt_turn is None or not self._local_entity_form:
             # Entering the flow
             self._prompt_turn = True
             self._local_entity_form = copy.deepcopy(self._entity_form)
@@ -988,6 +1011,12 @@ class AutoEntityFilling:
             # Fill the form with the entities in the first query
             self._initial_fill(request)
 
+        # convert json response to FormEntity objects (deserialize)
+        for i, slot in enumerate(self._local_entity_form):
+            if isinstance(slot, dict):
+                self._local_entity_form[i] = FormEntity(**slot)
+
+        # Iterate through all slots, fill in empty ones
         for slot in self._local_entity_form:
 
             if not slot.value:
@@ -1078,6 +1107,7 @@ class DialogueResponder:
         request=None,
         dialogue_state=None,
         directives=None,
+        form=None,
     ):
         """
         Initializes a dialogue responder.
@@ -1090,6 +1120,7 @@ class DialogueResponder:
             request (Request): The request object associated with the responder.
             dialogue_state (str): The dialogue state.
             directives (list): The directives of the responder.
+            form (list): Autofill entities
         """
         self.directives = directives or []
         self.frame = frame or {}
@@ -1098,6 +1129,7 @@ class DialogueResponder:
         self.slots = slots or {}
         self.history = history or []
         self.request = request or Request()
+        self.form = form or {}
 
     def reply(self, text):
         """Adds a 'reply' directive.
@@ -1233,8 +1265,19 @@ class DialogueResponder:
                 serialized_obj[attribute] = tuple(dict(item) for item in value)
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
+            elif attribute == "form" and value:
+                # Serialize slot-filling form
+                if value["entities"] and any(
+                    isinstance(i, FormEntity) for i in value["entities"]
+                ):
+                    value = dict(value)
+                    value["entities"] = list(
+                        form_entity.to_dict() for form_entity in value["entities"]
+                    )
+                    serialized_obj[attribute] = value
             else:
                 serialized_obj[attribute] = value
+
         return serialized_obj
 
     def _process_template(self, text):
@@ -1305,6 +1348,7 @@ class Conversation:
         self.context = context or {}
         self.history = []
         self.frame = {}
+        self.form = {}
         self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
@@ -1398,11 +1442,13 @@ class Conversation:
             params=internal_params,
             context=self.context,
             frame=self.frame,
+            form=self.form,
             history=self.history,
             verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame
+        self.form = response.form
         self.params = response.params
         return response
 
@@ -1440,11 +1486,13 @@ class Conversation:
             params=internal_params,
             context=self.context,
             frame=self.frame,
+            form=self.form,
             history=self.history,
             verbose=self.verbose,
         )
         self.history = response.history
         self.frame = response.frame
+        self.form = response.form
         self.params = response.params
         return response
 
@@ -1498,4 +1546,5 @@ class Conversation:
         """Reset the history, frame and params of the Conversation object."""
         self.history = []
         self.frame = {}
+        self.form = {}
         self.params = FrozenParams()

@@ -132,12 +132,13 @@ class ApplicationManager:
         # TODO: make an async nlp
         self.nlp.load()
 
-    def _pre_dm(self, processed_query, context, params, frame, history):
+    def _pre_dm(self, processed_query, context, params, frame, form, history):
         # We pass in the previous turn's responder's params to the current request
         request = self.request_class(
             context=context,
             history=history,
             frame=frame,
+            form=form,
             params=params,
             **processed_query
         )
@@ -145,6 +146,7 @@ class ApplicationManager:
         # We reset the current turn's responder's params
         response = self.responder_class(
             frame=frame,
+            form={},
             params=Params(),
             slots={},
             history=history,
@@ -154,7 +156,7 @@ class ApplicationManager:
         return request, response
 
     def parse(
-        self, text, params=None, context=None, frame=None, history=None, verbose=False
+        self, text, params=None, context=None, frame=None, form=None, history=None, verbose=False
     ):
         """
         Args:
@@ -190,6 +192,7 @@ class ApplicationManager:
                 params=params,
                 context=context,
                 frame=frame,
+                form=form,
                 history=history,
                 verbose=verbose,
             )
@@ -197,6 +200,7 @@ class ApplicationManager:
         params = freeze_params(params)
         history = history or []
         frame = frame or {}
+        form = form or {}
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
@@ -208,6 +212,7 @@ class ApplicationManager:
             context=context,
             history=history,
             frame=frame,
+            form=form,
             params=params,
         )
 
@@ -218,7 +223,7 @@ class ApplicationManager:
         return modified_dm_responder
 
     async def _parse_async(
-        self, text, params=None, context=None, frame=None, history=None, verbose=False
+        self, text, params=None, context=None, frame=None, form=None, history=None, verbose=False
     ):
         """
         Args:
@@ -251,6 +256,7 @@ class ApplicationManager:
         context = context or {}
         history = history or []
         frame = frame or {}
+        form = form or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
@@ -262,6 +268,7 @@ class ApplicationManager:
             context=context,
             history=history,
             frame=frame,
+            form=form,
             params=params,
         )
 

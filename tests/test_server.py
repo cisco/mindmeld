@@ -36,6 +36,7 @@ def test_parse_endpoint(client):
         "version",
         "history",
         "params",
+        "form",
         "frame",
         "dialogue_state",
         "request_id",

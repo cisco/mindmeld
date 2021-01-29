@@ -140,7 +140,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
     handler_main(request, responder)
 
     # check whether the sub handler was invoked.
-    handler_sub.assert_called_once_with(request, responder)
+    handler_sub.assert_called_once()
 
     # check whether new rule has been added for sub handler.
     assert any(

@@ -13,6 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+import immutables
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -776,21 +777,39 @@ class FormEntity:
         default_eval=True,
         hints=None,
         custom_eval=None,
+        **kwargs
     ):
-        self.entity = entity
+        if kwargs:
+            self.__dict__.update(kwargs)
+
+        else:
+            self.entity = entity
+            self.role = role
+            self.responses = responses or [
+                "Please provide value for: {}".format(self.entity)
+            ]
+            self.retry_response = retry_response or self.responses
+            self.value = value
+            self.default_eval = default_eval
+            self.hints = hints
+            self.custom_eval = custom_eval
+
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
-        self.role = role
-        self.responses = responses or [
-            "Please provide value for: {}".format(self.entity)
-        ]
-        self.retry_response = retry_response or self.responses
-        self.value = value
-        self.default_eval = default_eval
-        self.hints = hints
-        self.custom_eval = custom_eval
         if self.custom_eval and not callable(custom_eval):
             raise TypeError("Invalid custom validation function type.")
+
+    def to_dict(self):
+        """Converts the entity into a dictionary"""
+        base = {}
+        for field in self.__dict__:
+            val = getattr(self, field)
+            if val is not None:
+                if isinstance(val, immutables.Map):
+                    val = dict(val)
+                base[field] = val
+
+        return base
 
 
 def resolve_entity_conflicts(query_entities):
