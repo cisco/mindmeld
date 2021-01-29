@@ -105,11 +105,11 @@ class GoogleTranslator(Translator):
         """
         try:
             return os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-        except KeyError:
+        except KeyError as error:
             raise KeyError(
                 "Google credential path not found. Export 'GOOGLE_CREDENTIAL_PATH' as"
                 " an environment variable."
-            )
+            ) from error
 
     def detect_language(self, text):
         """

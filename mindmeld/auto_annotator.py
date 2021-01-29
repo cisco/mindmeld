@@ -25,6 +25,7 @@ from .components._config import (
     get_auto_annotator_config,
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
+    ENGLISH_US_LOCALE,
 )
 from .components.translators import TranslatorFactory
 from .system_entity_recognizer import (
@@ -47,10 +48,6 @@ from .components import NaturalLanguageProcessor
 from .path import get_entity_types
 
 logger = logging.getLogger(__name__)
-
-EN_CORE_WEB_SM = "en_core_web_sm"
-EN_CORE_WEB_MD = "en_core_web_md"
-EN_CORE_WEB_LG = "en_core_web_lg"
 
 
 class AnnotatorAction(Enum):
@@ -523,7 +520,9 @@ class SpacyAnnotator(Annotator):
     def parse(self, sentence, entity_types=None, **kwargs):
         """Extracts entities from a sentence. Detected entities should are
         represented as dictionaries with the following keys: "body", "start"
-        (start index), "end" (end index), "value", "dim" (entity type).
+        (start index), "end" (end index), "value", "dim" (entity type). The
+        "misc" spacy entity is skipped since the category too broad to be
+        helpful in an application.
 
         Args:
             sentence (str): Sentence to detect entities.
@@ -898,15 +897,20 @@ class BootstrapAnnotator(Annotator):
 class NoTranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(self, app_path, config=None):
+    def __init__(self, app_path, config=None, language=None, locale=None):
         """Initializes an annotator.
 
         Args:
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
                 override the config specified by the app's config.py file.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
         """
         super().__init__(app_path=app_path, config=config)
+        self.language = language or self.language
+        self.locale = locale or self.locale
 
     def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
         """
@@ -999,7 +1003,7 @@ class NoTranslationDucklingAnnotator(Annotator):
             for candidate in candidates
             if not (
                 candidate["dim"] == "amount-of-money"
-                and candidate["value"]["unit"] == "unknown"
+                and candidate["value"].get("unit") == "unknown"
             )
         ]
 
@@ -1007,20 +1011,34 @@ class NoTranslationDucklingAnnotator(Annotator):
 class TranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(self, app_path, config=None, en_annotator=None):
+    def __init__(
+        self, app_path, config=None, language=None, locale=None, en_annotator=None
+    ):
         """Initializes an annotator.
 
         Args:
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
                 override the config specified by the app's config.py file.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            en_annotator (SpacyAnnotator): A Spacy Annotator with language set to English ("en").
         """
         super().__init__(app_path=app_path, config=config)
+        self.language = language or self.language
+        self.locale = locale or self.locale
+        assert (
+            self.language != ENGLISH_LANGUAGE_CODE
+        ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         self.translator = TranslatorFactory().get_translator(
             self.config.get("translator")
         )
         self.en_annotator = en_annotator or SpacyAnnotator(
-            self.app_path, self.config, language=ENGLISH_LANGUAGE_CODE
+            self.app_path,
+            self.config,
+            language=ENGLISH_LANGUAGE_CODE,
+            locale=ENGLISH_US_LOCALE,
         )
 
     def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
@@ -1032,7 +1050,8 @@ class TranslationDucklingAnnotator(Annotator):
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-        Returns: entities (list): List of entity dictionaries.
+        Returns:
+            entities (list): List of entity dictionaries.
         """
         locale = locale or self.locale
         language = language or self.language
@@ -1048,18 +1067,18 @@ class TranslationDucklingAnnotator(Annotator):
         for entity in en_entities:
             value_matched_candidates = []
             for candidate in candidates:
-                if entity["dim"] == candidate["entity_type"]:
-                    if entity["value"] == candidate["value"]:
-                        value_matched_candidates.append(candidate)
-                    if (
-                        self.translator.translate(
-                            entity["body"], target_language=language
-                        )
-                        == candidate["body"]
-                        and not value_matched_candidates
-                    ):
-                        final_candidates.append(candidate)
-                        break
+                if entity["dim"] != candidate["entity_type"]:
+                    continue
+                if entity["value"] == candidate["value"]:
+                    value_matched_candidates.append(candidate)
+                if value_matched_candidates:
+                    continue
+                if (
+                    self.translator.translate(entity["body"], target_language=language)
+                    == candidate["body"]
+                ):
+                    final_candidates.append(candidate)
+                    break
             if value_matched_candidates:
                 final_candidates.append(
                     max(value_matched_candidates, key=lambda x: len(x["body"]))
@@ -1091,13 +1110,18 @@ class MultiLingualAnnotator(Annotator):
             app_path (str): The location of the MindMeld app
             config (dict, optional): A config object to use. This will
                 override the config specified by the app's config.py file.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
         """
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
-
         self.en_annotator = SpacyAnnotator(
-            app_path=self.app_path, config=self.config, language=ENGLISH_LANGUAGE_CODE
+            app_path=self.app_path,
+            config=self.config,
+            language=ENGLISH_LANGUAGE_CODE,
+            locale=ENGLISH_US_LOCALE,
         )
         if self.language != ENGLISH_LANGUAGE_CODE:
             self.duckling_annotator = self._get_duckling_annotator()
@@ -1111,20 +1135,30 @@ class MultiLingualAnnotator(Annotator):
     def _get_duckling_annotator(self):
         if "translator" in self.config:
             return TranslationDucklingAnnotator(
-                self.app_path, self.config, self.en_annotator
+                app_path=self.app_path,
+                config=self.config,
+                language=self.language,
+                locale=self.locale,
+                en_annotator=self.en_annotator,
             )
-        return NoTranslationDucklingAnnotator(self.app_path, self.config)
+        return NoTranslationDucklingAnnotator(
+            app_path=self.app_path,
+            config=self.config,
+            language=self.language,
+            locale=self.locale,
+        )
 
     def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
         """
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
-                    possible entity types will be parsed.
+                possible entity types will be parsed.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-        Returns: entities (list): List of entity dictionaries.
+        Returns:
+            entities (list): List of entity dictionaries.
         """
         language = language or self.language
         locale = locale or self.locale
