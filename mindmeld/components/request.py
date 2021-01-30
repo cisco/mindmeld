@@ -312,7 +312,7 @@ class Params:
     allowed_intents = attr.ib(default=attr.Factory(tuple))
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
-    timestamp = attr.ib(default=0)
+    timestamp = attr.ib(default=None)
     language = attr.ib(default=None)
     locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
@@ -322,24 +322,10 @@ class Params:
             param and a mutable list for the allowed_intents param.
         """
         _dic = params_schema.dump(self)
-
-        # converting from immutable map to just dictionary
-        _dic["dynamic_resource"] = {
-            key: _dic["dynamic_resource"][key] for key in _dic["dynamic_resource"]
-        }
-
         # Pop out fields that are set to None
-        if _dic["allowed_intents"]:
-            _dic["allowed_intents"] = list(_dic["allowed_intents"])
-        else:
-            _dic.pop("allowed_intents")
-
-        if not _dic["target_dialogue_state"]:
-            _dic.pop("target_dialogue_state")
-
-        if not _dic["timestamp"]:
-            _dic.pop("timestamp")
-
+        for field in ['allowed_intents', 'target_dialogue_state', 'timestamp', 'time_zone']:
+            if field in _dic and not _dic[field]:
+                _dic.pop(field, None)
         return _dic
 
 
@@ -376,7 +362,8 @@ class ParamsSchema(Schema):
     allowed_intents = fields.Method("serialize_allowed_intents",
                                     deserialize="deserialize_allowed_intents")
     time_zone = TimeZoneField(allow_none=True)
-    dynamic_resource = fields.Dict()
+    dynamic_resource = fields.Method("serialize_dynamic_resource",
+                                     deserialize="deserialize_dynamic_resource")
     language = LanguageCodeField(allow_none=True)
     locale = LocaleCodeField(allow_none=True)
     timestamp = TimestampField()
@@ -385,7 +372,7 @@ class ParamsSchema(Schema):
                                           allow_none=True)
 
     def serialize_allowed_intents(self, params: Params) -> List[str]:
-        return _validate_allowed_intents(params.allowed_intents, self.context.get('nlp'))
+        return list(_validate_allowed_intents(params.allowed_intents, self.context.get('nlp')))
 
     def deserialize_allowed_intents(self, allowed_intents: List[str]) -> List[str]:
         return _validate_allowed_intents(allowed_intents, self.context.get('nlp'))
@@ -400,37 +387,42 @@ class ParamsSchema(Schema):
             target_dialogue_state,
             self.context.get('dialogue_handler_map'))
 
+    def serialize_dynamic_resource(self, params: Params):  # pylint: disable=no-self-use
+        return dict(params.dynamic_resource)
+
+    def deserialize_dynamic_resource(self, value):  # pylint: disable=no-self-use
+        return immutables.Map(value)
+
     class Meta:
         unknown = EXCLUDE
 
 
-class RequestSchema(Schema):
-    text = fields.String(required=True)
-    domain = fields.String()
-    intent = fields.String()
-    entities = fields.List(fields.Dict)
-    history = fields.List(fields.Dict)
-    params = fields.Nested(ParamsSchema)
-    context = fields.Dict()
-    confidences = fields.Dict()
-    nbest_transcripts_text = fields.List(fields.String)
-    nbest_transcripts_entities = fields.List(fields.List(fields.Dict))
-    nbest_aligned_entities = fields.List(fields.List(fields.Dict))
-    request_id = fields.String()
-
-
-def tuple_elems_to_immutable_map(value):
+def deserialize_to_list_immutable_maps(value):
     """Custom attrs converter. Converts a list of elements into a list of immutables.Map
     objects.
     """
     return tuple([immutables.Map(i) for i in value])
 
 
-def tuple_elems_to_list_of_immutable_map(values):
+def deserialize_to_lists_of_list_of_immutable_maps(values):
     """Custom attrs converter. Converts a list of elements into a list of immutables.Map
     objects.
     """
-    return tuple([tuple_elems_to_immutable_map(value) for value in values])
+    return tuple([deserialize_to_list_immutable_maps(value) for value in values])
+
+
+def serialize_to_list_of_dicts(values):
+    """Custom attrs converter. Converts a list of elements into a list of immutables.Map
+    objects.
+    """
+    return [dict(value) for value in values]
+
+
+def serialize_to_lists_of_list_of_dicts(values):
+    """Custom attrs converter. Converts a list of elements into a list of immutables.Map
+    objects.
+    """
+    return [serialize_to_list_of_dicts(value) for value in values]
 
 
 @attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
@@ -444,15 +436,16 @@ class Request:
         domains (str): Domain of the current query.
         intent (str): Intent of the current query.
         entities (list of dicts): A list of entities in the current query.
-        history (list of dicts): List of previous and current responder objects (de-serialized) up to the
-            current conversation.
+        history (list of dicts): List of previous and current responder objects
+            (de-serialized) up to the current conversation.
         text (str): The query text.
         frame (): Immutables Map of stored data across multiple dialogue turns.
         params (Params): An object that modifies how MindMeld process the current turn.
         context (dict): Immutables Map containing front-end client state that is passed to the
             application from the client in the request.
-        confidences (dict): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles``
-            containing confidence probabilities across all labels for each classifier.
+        confidences (dict): Immutables Map of keys ``domains``, ``intents``, ``entities``
+            and ``roles`` containing confidence probabilities across all labels for
+            each classifier.
         nbest_transcripts_text (tuple): List of alternate n-best transcripts from an ASR system
         nbest_transcripts_entities (tuple): List of lists of extracted entities for each of the
             n-best transcripts.
@@ -463,10 +456,10 @@ class Request:
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
     entities = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=deserialize_to_list_immutable_maps
     )
     history = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_immutable_map
+        default=attr.Factory(tuple), converter=deserialize_to_list_immutable_maps
     )
     text = attr.ib(default=None)
     frame = attr.ib(default=immutables.Map(), converter=immutables.Map)
@@ -477,21 +470,69 @@ class Request:
         default=attr.Factory(tuple), converter=tuple
     )
     nbest_transcripts_entities = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_list_of_immutable_map
+        default=attr.Factory(tuple), converter=deserialize_to_lists_of_list_of_immutable_maps
     )
     nbest_aligned_entities = attr.ib(
-        default=attr.Factory(tuple), converter=tuple_elems_to_list_of_immutable_map
+        default=attr.Factory(tuple), converter=deserialize_to_lists_of_list_of_immutable_maps
     )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
-            "text": self.text,
-            "domain": self.domain,
-            "intent": self.intent,
-            "context": dict(self.context),
-            "params": params_schema.dump(self.params),
-            "frame": dict(self.frame),
-        }
+        return request_schema.dump(self)
+
+
+class RequestSchema(Schema):
+    text = fields.String(required=True)
+    domain = fields.String()
+    intent = fields.String()
+    entities = fields.Method("serialize_entities",
+                             deserialize="deserialize_list_of_maps")
+    history = fields.Method("serialize_history",
+                            deserialize="deserialize_list_of_maps")
+    params = fields.Nested(ParamsSchema)
+    frame = fields.Method("serialize_frame",
+                          deserialize="deserialize_map")
+    context = fields.Method("serialize_context",
+                            deserialize="deserialize_map")
+    confidences = fields.Method("serialize_confidences",
+                                deserialize="deserialize_map")
+    nbest_transcripts_text = fields.List(fields.String)
+    nbest_transcripts_entities = fields.Method(
+        "serialize_nbest_transcripts_entities",
+        deserialize="deserialize_list_of_list_of_immutable_maps")
+    nbest_aligned_entities = fields.Method(
+        "serialize_nbest_aligned_entities",
+        deserialize="deserialize_list_of_list_of_immutable_maps")
+    request_id = fields.String()
+
+    def deserialize_list_of_maps(self, value):  # pylint: disable=no-self-use
+        return deserialize_to_list_immutable_maps(value)
+
+    def deserialize_list_of_list_of_immutable_maps(self, values):  # pylint: disable=no-self-use
+        return deserialize_to_lists_of_list_of_immutable_maps(values)
+
+    def serialize_history(self, request: Request):  # pylint: disable=no-self-use
+        return serialize_to_list_of_dicts(request.history)
+
+    def serialize_entities(self, request: Request):  # pylint: disable=no-self-use
+        return serialize_to_list_of_dicts(request.entities)
+
+    def serialize_nbest_transcripts_entities(self, request: Request):  # pylint: disable=no-self-use
+        return serialize_to_lists_of_list_of_dicts(request.nbest_transcripts_entities)
+
+    def serialize_nbest_aligned_entities(self, request: Request):  # pylint: disable=no-self-use
+        return serialize_to_lists_of_list_of_dicts(request.nbest_aligned_entities)
+
+    def serialize_confidences(self, request: Request):  # pylint: disable=no-self-use
+        return dict(request.confidences)
+
+    def serialize_context(self, request: Request):  # pylint: disable=no-self-use
+        return dict(request.context)
+
+    def serialize_frame(self, request: Request):  # pylint: disable=no-self-use
+        return dict(request.frame)
+
+    def deserialize_map(self, value):  # pylint: disable=no-self-use
+        return immutables.Map(value)
 
 
 params_schema = ParamsSchema()

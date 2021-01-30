@@ -20,7 +20,7 @@ import random
 from functools import cmp_to_key, partial
 import immutables
 from marshmallow import Schema
-from marshmallow import fields, ValidationError
+from marshmallow import fields
 
 from .. import path
 from .request import FrozenParams, Params, Request, ParamsSchema, RequestSchema
@@ -1251,11 +1251,11 @@ class DialogueResponder:
         serialized_obj = {}
         for attribute, value in vars(instance).items():
             if isinstance(value, (Params, Request, FrozenParams)):
-                serialized_obj[attribute] = DialogueResponder.to_json(value)
-            elif isinstance(value, tuple) and all(
+                serialized_obj[attribute] = value.to_dict()
+            elif isinstance(value, tuple) and any(
                 isinstance(item, immutables.Map) for item in value
             ):
-                serialized_obj[attribute] = tuple(dict(item) for item in value)
+                serialized_obj[attribute] = [dict(item) for item in value]
             elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             else:

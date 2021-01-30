@@ -60,3 +60,25 @@ def test_status_endpoint(client):
         "response_time",
         "version",
     }
+
+
+def test_parse_endpoint_multiple_requests(client):
+    test_request = {"text": "where is the restaurant on 12th ave"}
+    response = client.post(
+        "/parse",
+        data=json.dumps(test_request),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert response.status == "200 OK"
+    first_response = json.loads(response.data.decode("utf8"))
+    second_request = {"text": "ok thanks!", "context": {"device": "webex"}}
+    for key in ["history", "params", "frame"]:
+        second_request[key] = first_response[key]
+    response = client.post(
+        "/parse",
+        data=json.dumps(second_request),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert response.status == "200 OK"
