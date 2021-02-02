@@ -15,11 +15,12 @@
 This module contains the application manager
 """
 import logging
+import copy
 
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components._config import get_max_history_len
 from .components.dialogue import DialogueResponder
-from .components.request import FrozenParams, Params, Request
+from .components.request import FrozenParams, Params, Request, dialogue_response_schema
 from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ def freeze_params(params):
     if isinstance(params, dict):
         params = FrozenParams(**params)
     elif params.__class__ == Params:
-        params = FrozenParams(**DialogueResponder.to_json(params))
+        params = FrozenParams(**params.to_dict())
     elif not isinstance(params, FrozenParams):
         raise TypeError(
             "Invalid type for params argument. "
@@ -147,7 +148,7 @@ class ApplicationManager:
             frame=frame,
             params=Params(),
             slots={},
-            history=history,
+            history=copy.deepcopy(history),
             request=request,
             directives=[],
         )
@@ -205,7 +206,6 @@ class ApplicationManager:
                                            timestamp=params.timestamp,
                                            dynamic_resource=params.dynamic_resource,
                                            verbose=verbose)
-
         request, response = self._pre_dm(
             processed_query=processed_query,
             context=context,
@@ -280,14 +280,13 @@ class ApplicationManager:
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        prev_request = DialogueResponder.to_json(dm_response)
+        prev_request = dialogue_response_schema.dump(dm_response)
         prev_request.pop("history", None)
         prev_request["request"].pop("history", None)
 
         # limit length of history
-        new_history = (prev_request,) + request.history
+        new_history = [prev_request, ] + dm_response.history
         dm_response.history = new_history[: self.max_history_len]
-
         return dm_response
 
     def add_middleware(self, middleware):

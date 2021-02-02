@@ -19,11 +19,9 @@ import logging
 import random
 from functools import cmp_to_key, partial
 import immutables
-from marshmallow import Schema
-from marshmallow import fields
 
 from .. import path
-from .request import FrozenParams, Params, Request, ParamsSchema, RequestSchema
+from .request import FrozenParams, Params, Request, ParamsSchema, dialogue_response_schema
 from ..core import Entity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -964,7 +962,7 @@ class AutoEntityFilling:
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
-                params=FrozenParams(**self._params_schema.dump(responder.params)),
+                params=FrozenParams(**responder.params.to_dict()),
                 **processed_query,
             )
 
@@ -1064,16 +1062,6 @@ class AutoEntityFilling:
         await self.invoke(request, responder)
 
 
-class DialogueResponderSchema(Schema):
-    frame = fields.Dict()
-    params = fields.Nested(ParamsSchema)
-    history = fields.List(fields.Dict())
-    slots = fields.Dict()
-    request = fields.Nested(RequestSchema)
-    dialogue_state = fields.String()
-    directives = fields.List(fields.Dict())
-
-
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
@@ -1111,18 +1099,51 @@ class DialogueResponder:
         """
         self.directives = directives or []
         self.frame = frame or {}
-
-        if isinstance(params, dict):
-            params = Params(**params)
-
-        if isinstance(request, dict):
-            request = Request(**request)
-
-        self.params = params or Params()
+        self.params = params
         self.dialogue_state = dialogue_state
         self.slots = slots or {}
-        self.history = history or []
-        self.request = request or Request()
+        self.request = request
+        self.history = history
+
+    @property
+    def history(self):
+        return self._history
+
+    @history.setter
+    def history(self, history):
+        # If any of the elements in the history list is a map, then we validate the element
+        # as a DialogueResponder object and serialize that to make sure the dictionary complies
+        # with the attributes of a DialogueResponder object
+        if isinstance(history, (list, tuple)) and \
+                any(isinstance(item, (dict, immutables.Map)) for item in history):
+            self._history = [dialogue_response_schema.dump(
+                DialogueResponder(**item)) for item in history]
+        else:
+            self._history = history or []
+
+    @property
+    def request(self):
+        return self._request
+
+    @request.setter
+    def request(self, value):
+        if isinstance(value, dict):
+            if isinstance(value['params'], dict):
+                value['params'] = Params(**value['params'])
+            self._request = Request(**value)
+        else:
+            self._request = value or Request()
+
+    @property
+    def params(self):
+        return self._params
+
+    @params.setter
+    def params(self, value):
+        if isinstance(value, dict):
+            self._params = Params(**value)
+        else:
+            self._params = value or Params()
 
     def reply(self, text):
         """Adds a 'reply' directive.
@@ -1238,29 +1259,6 @@ class DialogueResponder:
         elif isinstance(items, set):
             result = random.choice(tuple(items))
         return result
-
-    @staticmethod
-    def to_json(instance):
-        """Convert the responder into a JSON representation.
-        Args:
-             instance (DialogueResponder): The responder object.
-
-        Returns:
-            (dict): The JSON representation.
-        """
-        serialized_obj = {}
-        for attribute, value in vars(instance).items():
-            if isinstance(value, (Params, Request, FrozenParams)):
-                serialized_obj[attribute] = value.to_dict()
-            elif isinstance(value, tuple) and any(
-                isinstance(item, immutables.Map) for item in value
-            ):
-                serialized_obj[attribute] = [dict(item) for item in value]
-            elif isinstance(value, immutables.Map):
-                serialized_obj[attribute] = dict(value)
-            else:
-                serialized_obj[attribute] = value
-        return serialized_obj
 
     def _process_template(self, text):
         return self._choose(text).format(**self.slots)

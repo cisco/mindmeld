@@ -19,17 +19,9 @@ import immutables
 import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
-from marshmallow import EXCLUDE, Schema
-from marshmallow import fields, ValidationError
+from marshmallow import EXCLUDE, Schema, fields, ValidationError
 
 logger = logging.getLogger(__name__)
-
-
-def _get_current_timestamp_in_milliseconds() -> int:
-    dt = datetime.datetime.now()
-    utc_time = dt.replace(tzinfo=dt_timezone.utc).timestamp()
-    utc_time_in_milliseconds = int(utc_time) * 1000
-    return utc_time_in_milliseconds
 
 
 def validate_language_code(value: Optional[str]) -> Optional[str]:
@@ -127,23 +119,22 @@ def validate_locale_code_with_ref_language_code(locale: Optional[str],
     return locale
 
 
-def validate_timestamp(value: int) -> int:
-    timestamp_str = str(value)
-
-    if len(timestamp_str) > 13:
-        raise ValidationError(f"Invalid timestamp {timestamp_str}, it should be a 13 digit UTC "
+def validate_timestamp(value: str) -> int:
+    result = int(value)
+    if len(value) > 13:
+        raise ValidationError(f"Invalid timestamp {value}, it should be a 13 digit UTC "
                               f"timestamp representation precise to the nearest millisecond. "
                               f"Using the process timestamp instead.")
 
-    if len(timestamp_str) <= 10:
+    if len(value) <= 10:
         # Convert a second grain unix timestamp to millisecond
         logger.debug(
             "Warning: Possible non-millisecond unix timestamp passed in %s. "
-            "Multiplying it by 1000 to represent the timestamp in milliseconds.", timestamp_str
+            "Multiplying it by 1000 to represent the timestamp in milliseconds.", value
         )
-        value *= 1000
+        result *= 1000
 
-    return value
+    return result
 
 
 def _validate_allowed_intents(list_of_allowed_intents: List[str],
@@ -352,7 +343,7 @@ class FrozenParams(Params):
     allowed_intents = attr.ib(default=attr.Factory(tuple), converter=tuple)
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
-    timestamp = attr.ib(default=0)
+    timestamp = attr.ib(default=None)
     language = attr.ib(default=None)
     locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=immutables.Map(), converter=immutables.Map)
@@ -366,7 +357,7 @@ class ParamsSchema(Schema):
                                      deserialize="deserialize_dynamic_resource")
     language = LanguageCodeField(allow_none=True)
     locale = LocaleCodeField(allow_none=True)
-    timestamp = TimestampField()
+    timestamp = TimestampField(allow_none=True)
     target_dialogue_state = fields.Method("serialize_target_dialogue_state",
                                           deserialize="deserialize_target_dialogue_state",
                                           allow_none=True)
@@ -452,7 +443,6 @@ class Request:
         nbest_aligned_entities (tuple): List of lists of aligned entities for each of the n-best
             transcripts.
     """
-
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
     entities = attr.ib(
@@ -535,5 +525,16 @@ class RequestSchema(Schema):
         return immutables.Map(value)
 
 
+class DialogueResponseSchema(Schema):
+    frame = fields.Dict()
+    params = fields.Nested(ParamsSchema)
+    history = fields.List(fields.Dict())
+    slots = fields.Dict()
+    request = fields.Nested(RequestSchema)
+    dialogue_state = fields.String()
+    directives = fields.List(fields.Dict())
+
+
+dialogue_response_schema = DialogueResponseSchema()
 params_schema = ParamsSchema()
 request_schema = RequestSchema()

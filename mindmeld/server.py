@@ -27,7 +27,7 @@ from flask_cors import CORS
 
 from ._version import current as __version__
 from .components.dialogue import DialogueResponder
-from .components.request import RequestSchema
+from .components.request import RequestSchema, dialogue_response_schema
 from .exceptions import BadMindMeldRequestError
 
 logger = logging.getLogger(__name__)
@@ -94,19 +94,20 @@ class MindMeldServer:
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
                 raise BadMindMeldRequestError(msg, status_code=415)
             try:
-                type_validated_request_json = self._request_schema.load(request_json)
-                safe_request = {}
-                for key in ["text", "params", "context", "frame", "history", "verbose"]:
-                    if key in type_validated_request_json:
-                        safe_request[key] = type_validated_request_json[key]
-
-                response = self._app_manager.parse(**safe_request)
-
+                validated_request = self._request_schema.load(request_json)
+                response = self._app_manager.parse(
+                    text=validated_request.get('text'),
+                    params=validated_request.get('params'),
+                    context=validated_request.get('context'),
+                    frame=validated_request.get('frame'),
+                    history=validated_request.get('history'),
+                    verbose=validated_request.get('verbose', False)
+                )
                 # add request id to response
                 # use the passed in id if any
-                request_id = type_validated_request_json.get("request_id", str(uuid.uuid4()))
+                request_id = validated_request.get("request_id", str(uuid.uuid4()))
                 response.request_id = request_id
-                return jsonify(DialogueResponder.to_json(response))
+                return jsonify(dialogue_response_schema.dump(response))
             except ValidationError as e:
                 err_message = "Bad request {} caused validation error {}".format(request_json, e)
                 logger.error(err_message)

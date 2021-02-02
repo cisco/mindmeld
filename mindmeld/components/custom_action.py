@@ -5,7 +5,7 @@ import aiohttp
 import requests
 
 from .dialogue import DialogueResponder
-from .request import Params
+from .request import Params, dialogue_response_schema
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class CustomAction:
 
     def get_json_payload(self, request, responder):
         request_json = request.to_dict()
-        responder_json = DialogueResponder.to_json(responder)
+        responder_json = dialogue_response_schema.dump(responder)
         return {
             "request": request_json,
             "responder": {field: responder_json[field] for field in RESPONSE_FIELDS},
