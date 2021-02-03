@@ -26,7 +26,6 @@ from flask import Flask, Request, g, jsonify, request
 from flask_cors import CORS
 
 from ._version import current as __version__
-from .components.dialogue import DialogueResponder
 from .components.request import RequestSchema, dialogue_response_schema
 from .exceptions import BadMindMeldRequestError
 
@@ -93,6 +92,7 @@ class MindMeldServer:
             if request_json is None:
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
                 raise BadMindMeldRequestError(msg, status_code=415)
+
             try:
                 validated_request = self._request_schema.load(request_json)
                 response = self._app_manager.parse(
@@ -105,9 +105,10 @@ class MindMeldServer:
                 )
                 # add request id to response
                 # use the passed in id if any
+                response = dialogue_response_schema.dump(response)
                 request_id = validated_request.get("request_id", str(uuid.uuid4()))
-                response.request_id = request_id
-                return jsonify(dialogue_response_schema.dump(response))
+                response['request_id'] = request_id
+                return jsonify(response)
             except ValidationError as e:
                 err_message = "Bad request {} caused validation error {}".format(request_json, e)
                 logger.error(err_message)

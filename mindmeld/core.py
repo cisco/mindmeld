@@ -13,6 +13,8 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+from typing import Optional, List
+import immutables
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -768,29 +770,54 @@ class FormEntity:
 
     def __init__(
         self,
-        entity=None,
-        role=None,
-        responses=None,
-        retry_response=None,
-        value=None,
-        default_eval=True,
-        hints=None,
-        custom_eval=None,
+        entity: Optional[str] = None,
+        role: Optional[str] = None,
+        responses: Optional[List[str]] = None,
+        retry_response: Optional[List[str]] = None,
+        value: Optional[str] = None,
+        default_eval: Optional[bool] = True,
+        hints: Optional[List[str]] = None,
+        custom_eval: Optional[str] = None,
+        **kwargs
     ):
-        self.entity = entity
+        if kwargs:
+            self.__dict__.update(kwargs)
+
+        else:
+            self.entity = entity
+            self.role = role
+
+            if isinstance(responses, str):
+                responses = [responses]
+            self.responses = responses or [
+                "Please provide value for: {}".format(self.entity)
+            ]
+
+            if isinstance(retry_response, str):
+                retry_response = [retry_response]
+            self.retry_response = retry_response or self.responses
+
+            self.value = value
+            self.default_eval = default_eval
+            self.hints = hints
+            self.custom_eval = custom_eval
+
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
-        self.role = role
-        self.responses = responses or [
-            "Please provide value for: {}".format(self.entity)
-        ]
-        self.retry_response = retry_response or self.responses
-        self.value = value
-        self.default_eval = default_eval
-        self.hints = hints
-        self.custom_eval = custom_eval
         if self.custom_eval and not callable(custom_eval):
             raise TypeError("Invalid custom validation function type.")
+
+    def to_dict(self):
+        """Converts the entity into a dictionary"""
+        base = {}
+        for field in self.__dict__:
+            val = getattr(self, field)
+            if val is not None:
+                if isinstance(val, immutables.Map):
+                    val = dict(val)
+                base[field] = val
+
+        return base
 
 
 def resolve_entity_conflicts(query_entities):

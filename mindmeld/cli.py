@@ -34,6 +34,7 @@ import distro
 import requests
 from tqdm import tqdm
 
+from . import auto_annotator  # noqa: F401 pylint: disable=W0611
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__

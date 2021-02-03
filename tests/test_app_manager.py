@@ -13,7 +13,7 @@ These tests apply only when async/await are supported.
 import pytest
 
 from mindmeld.app_manager import ApplicationManager, freeze_params
-from mindmeld.components.request import FrozenParams, Params
+from mindmeld.components.request import FrozenParams, Params, dialogue_response_schema
 
 
 @pytest.fixture
@@ -42,4 +42,4 @@ def test_parse(app_manager):
 
     fields = {"params", "request", "dialogue_state", "directives", "history"}
     for field in fields:
-        assert field in vars(response).keys()
+        assert field in dialogue_response_schema.dump(response).keys()

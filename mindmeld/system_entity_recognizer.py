@@ -386,7 +386,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
             data["tz"] = time_zone
 
         if timestamp:
-            data["reftime"] = validate_timestamp(timestamp)
+            data["reftime"] = validate_timestamp(str(timestamp))
 
         # Currently we rely on Duckling for parsing numerical data but in the future we can use
         # other system entity recognizer too

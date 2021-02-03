@@ -11,9 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import datetime
 from typing import Optional, Dict, Any, List
-from datetime import timezone as dt_timezone
 import attr
 import immutables
 import pycountry
@@ -465,6 +463,7 @@ class Request:
     nbest_aligned_entities = attr.ib(
         default=attr.Factory(tuple), converter=deserialize_to_lists_of_list_of_immutable_maps
     )
+    form = attr.ib(default=attr.Factory(dict))
 
     def to_dict(self) -> Dict[str, Any]:
         return request_schema.dump(self)
@@ -525,6 +524,24 @@ class RequestSchema(Schema):
         return immutables.Map(value)
 
 
+class FormEntitySchema(Schema):
+    entity = fields.String()
+    role = fields.String()
+    responses = fields.List(fields.String())
+    retry_responses = fields.List(fields.String())
+    value = fields.String()
+    default_eval = fields.Boolean(default=True)
+    hints = fields.List(fields.String())
+    custom_eval = fields.String()
+
+
+class FormSchema(Schema):
+    entities = fields.List(fields.Nested(FormEntitySchema))
+    max_retries = fields.Integer()
+    exit_msg = fields.String()
+    exit_keys = fields.List(fields.String)
+
+
 class DialogueResponseSchema(Schema):
     frame = fields.Dict()
     params = fields.Nested(ParamsSchema)
@@ -533,8 +550,10 @@ class DialogueResponseSchema(Schema):
     request = fields.Nested(RequestSchema)
     dialogue_state = fields.String()
     directives = fields.List(fields.Dict())
+    form = fields.Nested(FormSchema)
 
 
+form_schema = FormSchema()
 dialogue_response_schema = DialogueResponseSchema()
 params_schema = ParamsSchema()
 request_schema = RequestSchema()

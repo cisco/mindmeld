@@ -4,7 +4,6 @@ import ssl
 import aiohttp
 import requests
 
-from .dialogue import DialogueResponder
 from .request import Params, dialogue_response_schema
 
 
