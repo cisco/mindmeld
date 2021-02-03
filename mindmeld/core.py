@@ -770,7 +770,7 @@ class FormEntity:
 
     def __init__(
         self,
-        entity: Optional[str] = None,
+        entity: str,
         role: Optional[str] = None,
         responses: Optional[List[str]] = None,
         retry_response: Optional[List[str]] = None,
@@ -778,29 +778,23 @@ class FormEntity:
         default_eval: Optional[bool] = True,
         hints: Optional[List[str]] = None,
         custom_eval: Optional[str] = None,
-        **kwargs
     ):
-        if kwargs:
-            self.__dict__.update(kwargs)
+        self.entity = entity
+        self.role = role
 
-        else:
-            self.entity = entity
-            self.role = role
+        if isinstance(responses, str):
+            responses = [responses]
+        self.responses = responses or [
+            "Please provide value for: {}".format(self.entity)
+        ]
 
-            if isinstance(responses, str):
-                responses = [responses]
-            self.responses = responses or [
-                "Please provide value for: {}".format(self.entity)
-            ]
-
-            if isinstance(retry_response, str):
-                retry_response = [retry_response]
-            self.retry_response = retry_response or self.responses
-
-            self.value = value
-            self.default_eval = default_eval
-            self.hints = hints
-            self.custom_eval = custom_eval
+        if isinstance(retry_response, str):
+            retry_response = [retry_response]
+        self.retry_response = retry_response or self.responses
+        self.value = value
+        self.default_eval = default_eval
+        self.hints = hints
+        self.custom_eval = custom_eval
 
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")

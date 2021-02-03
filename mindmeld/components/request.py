@@ -118,6 +118,9 @@ def validate_locale_code_with_ref_language_code(locale: Optional[str],
 
 
 def validate_timestamp(value: str) -> int:
+    if isinstance(value, int):
+        value = str(value)
+
     result = int(value)
     if len(value) > 13:
         raise ValidationError(f"Invalid timestamp {value}, it should be a 13 digit UTC "
@@ -469,6 +472,24 @@ class Request:
         return request_schema.dump(self)
 
 
+class FormEntitySchema(Schema):
+    entity = fields.String(required=True)
+    role = fields.String()
+    responses = fields.List(fields.String())
+    retry_response = fields.List(fields.String())
+    value = fields.Dict()
+    default_eval = fields.Boolean(default=True)
+    hints = fields.List(fields.String())
+    custom_eval = fields.String()
+
+
+class FormSchema(Schema):
+    entities = fields.List(fields.Nested(FormEntitySchema))
+    max_retries = fields.Integer()
+    exit_msg = fields.String()
+    exit_keys = fields.List(fields.String)
+
+
 class RequestSchema(Schema):
     text = fields.String(required=True)
     domain = fields.String()
@@ -491,6 +512,7 @@ class RequestSchema(Schema):
     nbest_aligned_entities = fields.Method(
         "serialize_nbest_aligned_entities",
         deserialize="deserialize_list_of_list_of_immutable_maps")
+    form = fields.Nested(FormSchema)
     request_id = fields.String()
 
     def deserialize_list_of_maps(self, value):  # pylint: disable=no-self-use
@@ -522,24 +544,6 @@ class RequestSchema(Schema):
 
     def deserialize_map(self, value):  # pylint: disable=no-self-use
         return immutables.Map(value)
-
-
-class FormEntitySchema(Schema):
-    entity = fields.String()
-    role = fields.String()
-    responses = fields.List(fields.String())
-    retry_responses = fields.List(fields.String())
-    value = fields.String()
-    default_eval = fields.Boolean(default=True)
-    hints = fields.List(fields.String())
-    custom_eval = fields.String()
-
-
-class FormSchema(Schema):
-    entities = fields.List(fields.Nested(FormEntitySchema))
-    max_retries = fields.Integer()
-    exit_msg = fields.String()
-    exit_keys = fields.List(fields.String)
 
 
 class DialogueResponseSchema(Schema):
