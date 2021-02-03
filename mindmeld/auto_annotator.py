@@ -41,9 +41,12 @@ from .constants import (
     SPACY_ANNOTATOR_WEB_LANGUAGES,
     SPACY_ANNOTATOR_SUPPORTED_LANGUAGES,
     SPACY_ANNOTATOR_MODEL_SIZES,
+    DUCKLING_TO_SYS_ENTITY_MAPPINGS,
+    ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     CURRENCY_SYMBOLS,
+    SPACY_ENTITIES_THAT_REQUIRE_DUCKLING,
+    _no_overlap,
 )
-from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, _no_overlap
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types
 
@@ -442,15 +445,6 @@ class SpacyAnnotator(Annotator):
         self.spacy_model_size = model_size or self.config.get("spacy_model_size", "lg")
         self.model_name = self._get_spacy_model_name()
         self.nlp = SpacyAnnotator._load_model(self.model_name)
-        self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS = {
-            "money": "sys_amount-of-money",
-            "cardinal": "sys_number",
-            "ordinal": "sys_ordinal",
-            "person": "sys_person",
-            "percent": "sys_percent",
-            "distance": "sys_distance",
-            "quantity": "sys_weight",
-        }
 
     def _get_spacy_model_name(self):
         """ Get the name of a Spacy Model.
@@ -506,20 +500,37 @@ class SpacyAnnotator(Annotator):
         spacy_supported_entities = [e.lower() for e in self.nlp.get_pipe("ner").labels]
         supported_entities = set()
         for entity in spacy_supported_entities:
-            entity = "person" if entity == "per" else entity
             if entity == "misc":
                 continue
-            if entity in ["time", "date"]:
+            if entity in ["time", "date", "datetime"]:
                 supported_entities.update(["sys_time", "sys_duration", "sys_interval"])
-            elif entity in self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS:
-                supported_entities.add(
-                    self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity]
-                )
+            elif entity in ANNOTATOR_TO_SYS_ENTITY_MAPPINGS:
+                supported_entities.add(ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity])
             else:
                 supported_entities.add("sys_" + entity)
         if "sys_weight" in supported_entities:
             supported_entities.add("sys_other-quantity")
-        return list(supported_entities)
+        supported_entities = self._remove_unresolvable_entities(supported_entities)
+        return supported_entities
+
+    def _remove_unresolvable_entities(self, entities):
+        """ Remove entities that need duckling to be resolved but are not
+        supported by duckling for the given language.
+
+        Args:
+            filtered_entities (list): List of entities to filter.
+        """
+        filtered_entities = []
+        for entity in entities:
+            if entity in SPACY_ENTITIES_THAT_REQUIRE_DUCKLING:
+                if (
+                    self.language in DUCKLING_TO_SYS_ENTITY_MAPPINGS
+                    and entity in DUCKLING_TO_SYS_ENTITY_MAPPINGS[self.language]
+                ):
+                    filtered_entities.append(entity)
+            else:
+                filtered_entities.append(entity)
+        return filtered_entities
 
     def parse(self, sentence, entity_types=None, **kwargs):
         """Extracts entities from a sentence. Detected entities should are
@@ -731,7 +742,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict or None if the entity isn't resolved.
         """
-        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
+        entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(
             entity["body"], language=self.language, locale=self.locale
@@ -771,9 +782,7 @@ class SpacyAnnotator(Annotator):
                     and candidate["body"] == entity["body"]
                 ):
                     entity["value"] = candidate["value"]
-                    entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[
-                        entity_type
-                    ]
+                    entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity_type]
                     return entity
 
         if SpacyAnnotator._resolve_largest_substring(
@@ -795,7 +804,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict or None if the entity isn't resolved.
         """
-        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
+        entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity["dim"]]
 
         candidates = self.duckling.get_candidates_for_text(
             entity["body"], language=self.language, locale=self.locale
@@ -825,7 +834,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             entity (dict): A resolved entity dict.
         """
-        entity["dim"] = self.ANNOTATOR_TO_DUCKLING_ENTITY_MAPPINGS[entity["dim"]]
+        entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity["dim"]]
 
         if self.language == ENGLISH_LANGUAGE_CODE:
             if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
@@ -960,7 +969,7 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             supported_entity_types (list): List of supported entity types.
         """
-        return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+        return DUCKLING_TO_SYS_ENTITY_MAPPINGS[self.language]
 
     @staticmethod
     def _get_largest_non_overlapping_candidates(spans):
@@ -1098,7 +1107,10 @@ class TranslationDucklingAnnotator(Annotator):
         Returns:
             supported_entity_types (list): List of supported entity types.
         """
-        return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+        supported_entity_types = set(
+            self.en_annotator.supported_entity_types
+        ).intersection(DUCKLING_TO_SYS_ENTITY_MAPPINGS[self.language])
+        return list(supported_entity_types)
 
 
 class MultiLingualAnnotator(Annotator):
@@ -1183,7 +1195,12 @@ class MultiLingualAnnotator(Annotator):
         Returns:
             supported_entity_types (list): List of supported entity types.
         """
-        return SPACY_ANNOTATOR_SUPPORTED_ENTITIES
+        if self.language == ENGLISH_LANGUAGE_CODE:
+            return self.en_annotator.supported_entity_types
+        supported_entities = set(self.non_en_annotator.supported_entity_types)
+        if self.language in DUCKLING_TO_SYS_ENTITY_MAPPINGS:
+            supported_entities.update(self.duckling_annotator.supported_entity_types)
+        return supported_entities
 
     @staticmethod
     def _no_overlap_entity_dicts(entity_one, entity_two):
