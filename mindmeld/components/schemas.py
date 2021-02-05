@@ -309,10 +309,12 @@ class TimestampField(fields.Integer):
 
 class ParamsSchema(Schema):
     allowed_intents = fields.Method("serialize_allowed_intents",
-                                    deserialize="deserialize_allowed_intents")
+                                    deserialize="deserialize_allowed_intents",
+                                    allow_none=True)
     time_zone = TimeZoneField(allow_none=True)
     dynamic_resource = fields.Method("serialize_dynamic_resource",
-                                     deserialize="deserialize_dynamic_resource")
+                                     deserialize="deserialize_dynamic_resource",
+                                     allow_none=True)
     language = LanguageCodeField(allow_none=True)
     locale = LocaleCodeField(allow_none=True)
     timestamp = TimestampField(allow_none=True)
@@ -432,14 +434,14 @@ class RequestSchema(Schema):
 
 
 class DialogueResponseSchema(Schema):
-    frame = fields.Dict()
+    frame = fields.Dict(allow_none=True)
     params = fields.Nested(ParamsSchema)
     history = fields.List(fields.Dict())
-    slots = fields.Dict()
+    slots = fields.Dict(allow_none=True)
     request = fields.Nested(RequestSchema)
-    dialogue_state = fields.String()
+    dialogue_state = fields.String(allow_none=True)
     directives = fields.List(fields.Dict())
-    form = fields.Dict()
+    form = fields.Dict(allow_none=True)
 
 
 # default schema validators

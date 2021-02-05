@@ -136,41 +136,6 @@ def test_parse_endpoint_multiple_requests(client):
             "'transfer_money_handler', 'directives': [], 'form': {}, 'frame': {}, "
             "'history': [], 'params': {}, 'request': {}, 'slots': {}}]} "
             "caused error {'request': {'text': ['Missing data for required field.']}}"
-        ),
-        (
-            {
-                "text": "hello",
-                "form": {
-                    "entities": [
-                        {
-                            "custom_eval": None,
-                            "default_eval": None,
-                            "entity": "account_type",
-                            "hints": None,
-                            "responses": [
-                                "Sure. Transfer from which account - checking or savings?"
-                            ],
-                            "retry_response": [
-                                "That account is not correct. Transfer from which account?"
-                            ],
-                            "role": "origin",
-                            "value": None
-                        }
-                    ],
-                    "exit_keys": [
-                        "cancel"
-                    ],
-                    "exit_msg": "Done",
-                    "max_retries": 1
-                },
-            },
-            "Bad request {'text': 'hello', 'form': {'entities': [{'custom_eval': None, "
-            "'default_eval': None, 'entity': 'account_type', 'hints': None, 'responses': "
-            "['Sure. Transfer from which account - checking or savings?'], 'retry_response': "
-            "['That account is not correct. Transfer from which account?'], "
-            "'role': 'origin', 'value': None}], 'exit_keys': ['cancel'], "
-            "'exit_msg': 'Done', 'max_retries': 1}} caused error "
-            "{'dialogue_state': ['Field may not be null.']}"
         )
     ],
 )

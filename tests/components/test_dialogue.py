@@ -329,4 +329,13 @@ def test_convo_language_and_locales(
         mock1.call_args_list[0][0][0].pop("text")
         assert mock1.call_args_list[0][0][0] == expected_ser_call
     except ValidationError as error:
-        assert error.messages[0] == "Invalid locale_code param: %s is not a valid locale." % locale
+        if isinstance(error.messages, dict):
+            if language == 'INVALID_LANG_CODE':
+                assert 'Invalid language param: invalid_lang_code is not a valid ' \
+                       'ISO 639-1 or ISO 639-2 language code.' in str(error.messages)
+            elif locale == 'INVALID_LOCALE_CODE':
+                assert 'Invalid locale param: invalid_locale_code is not a valid ' \
+                       'ISO 639-1 or ISO 639-2 language code.' in str(error.messages)
+        else:
+            assert error.messages[0] == "Invalid locale_code param: %s is " \
+                                        "not a valid locale." % locale
