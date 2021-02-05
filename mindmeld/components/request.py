@@ -18,7 +18,6 @@ import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 from marshmallow import EXCLUDE, Schema, fields, ValidationError
-from ..core import FormEntity
 
 logger = logging.getLogger(__name__)
 

@@ -18,11 +18,12 @@ import json
 import logging
 import random
 from functools import cmp_to_key, partial
-import immutables
 from typing import List, Optional
+import immutables
 
 from .. import path
-from .request import ParamsSchema, dialogue_response_schema, FrozenParams, Params, Request, form_schema
+from .request import ParamsSchema, dialogue_response_schema, \
+    FrozenParams, Params, Request, form_schema
 from ..core import Entity, FormEntity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -992,7 +993,8 @@ class AutoEntityFilling:
         # If form iteration in request object, continue using that.
         # If None, set to original form.
         if request.form and request.form["entities"]:
-            self._local_entity_form = [FormEntity(**copy.deepcopy(elem)) for elem in request.form["entities"]]
+            self._local_entity_form = [FormEntity(**copy.deepcopy(elem))
+                                       for elem in request.form["entities"]]
         else:
             self._local_entity_form = None
 
