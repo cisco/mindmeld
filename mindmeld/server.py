@@ -110,8 +110,8 @@ class MindMeldServer:
                 request_id = validated_request.get("request_id", str(uuid.uuid4()))
                 response['request_id'] = request_id
                 return jsonify(response)
-            except ValidationError as e:
-                err_message = "Bad request {} caused validation error {}".format(request_json, e)
+            except (ValidationError, ValueError, KeyError) as e:
+                err_message = "Bad request {} caused error {}".format(request_json, e)
                 logger.error(err_message)
                 raise BadMindMeldRequestError(err_message, status_code=400) from e
 

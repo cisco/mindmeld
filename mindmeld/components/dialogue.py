@@ -707,8 +707,7 @@ class DialogueFlow(DialogueManager):
 
 
 class Form:
-    """
-    Form incapsulation
+    """This class incapsulates Form data
     """
     def __init__(self,
                  entities: Optional[List[FormEntity]] = None,
@@ -1145,7 +1144,8 @@ class DialogueResponder:
         # with the attributes of a DialogueResponder object
         if isinstance(history, (list, tuple)) and \
                 any(isinstance(item, (dict, immutables.Map)) for item in history):
-            self._history = [dict(DialogueResponder(**item)) for item in history]
+            self._history = [dict(DialogueResponder(**DEFAULT_RESPONSE_SCHEMA.load(item)))
+                             for item in history]
         else:
             self._history = history or []
 
