@@ -135,6 +135,9 @@ class ApplicationManager:
 
     def _pre_dm(self, processed_query, context, params, frame, form, history):
         # We pass in the previous turn's responder's params to the current request
+
+        # TODO: Currently, we serialize the form before passing it to the request and response
+        # since its hard to deserialize it.
         request = self.request_class(
             context=context,
             history=history,
@@ -218,7 +221,6 @@ class ApplicationManager:
             form=form,
             params=params,
         )
-
         dm_responder = self.dialogue_manager.apply_handler(
             request, response, target_dialogue_state=params.target_dialogue_state
         )

@@ -13,7 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
-from typing import Optional, List
+from typing import Optional, List, Dict
 import immutables
 
 TEXT_FORM_RAW = 0
@@ -774,7 +774,7 @@ class FormEntity:
         role: Optional[str] = None,
         responses: Optional[List[str]] = None,
         retry_response: Optional[List[str]] = None,
-        value: Optional[str] = None,
+        value: Optional[Dict] = None,
         default_eval: Optional[bool] = True,
         hints: Optional[List[str]] = None,
         custom_eval: Optional[str] = None,

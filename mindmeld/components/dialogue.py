@@ -19,9 +19,10 @@ import logging
 import random
 from functools import cmp_to_key, partial
 import immutables
+from typing import List, Optional
 
 from .. import path
-from .request import ParamsSchema, dialogue_response_schema, FrozenParams, Params, Request
+from .request import ParamsSchema, dialogue_response_schema, FrozenParams, Params, Request, form_schema
 from ..core import Entity, FormEntity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -704,6 +705,32 @@ class DialogueFlow(DialogueManager):
         return handler
 
 
+class Form:
+    """
+    Form incapsulation
+    """
+    def __init__(self,
+                 entities: Optional[List[FormEntity]] = None,
+                 exit_keys: Optional[List[str]] = None,
+                 exit_msg: Optional[str] = None,
+                 max_retries: Optional[str] = None):
+        self.entities = entities
+        self.exit_keys = list(map(str.lower, exit_keys or ["cancel", "restart", "exit", "reset"]))
+        self.exit_msg = exit_msg or "How may I help you?"
+        self.max_retries = max_retries or 1
+
+    @property
+    def entities(self):
+        return self._entities
+
+    @entities.setter
+    def entities(self, values):
+        if any(isinstance(item, (dict, immutables.Map)) for item in values):
+            self._entities = [FormEntity(**item) for item in values]
+        else:
+            self._entities = values
+
+
 class AutoEntityFilling:
     """A class to implement Automatic Entity (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
@@ -723,44 +750,16 @@ class AutoEntityFilling:
         self._app = app
         self._app.lazy_init()
         self._handler = handler
-        self._form = form
+        self._form = Form(entities=form['entities'], exit_keys=form.get('exit_keys'),
+                          exit_msg=form.get('exit_msg'), max_retries=form.get('max_retries'))
         self._local_entity_form = None
         self._prompt_turn = None
-        self._check_attr()
         self._params_schema = ParamsSchema(
             context={
                 "nlp": self._app.app_manager.nlp,
                 "dialogue_handler_map": self._app.app_manager.dialogue_manager.handler_map
             }
         )
-
-    def _check_attr(self):
-        if not ("entities" in self._form and len(self._form["entities"]) > 0):
-            raise KeyError("Entity list cannot be empty.")
-
-        self._entity_form = self._form["entities"]
-        self._max_retries = (
-            self._form["max_retries"] if "max_retries" in self._form else 1
-        )
-        self._exit_response = (
-            self._form["exit_msg"]
-            if "exit_msg" in self._form
-            else "How may I help you?"
-        )
-        self._exit_keys = (
-            self._form["exit_keys"]
-            if "exit_keys" in self._form
-            else ["cancel", "restart", "exit", "reset"]
-        )
-
-        if not isinstance(self._max_retries, int):
-            raise TypeError("'max_retries' should be of type: int.")
-        if not isinstance(self._exit_response, str):
-            raise TypeError("'exit_msg' should be of type: str.")
-        if not isinstance(self._exit_keys, list):
-            raise TypeError("'exit_keys' should be of type: list.")
-
-        self._exit_keys = list(map(str.lower, self._exit_keys))
 
     def _set_next_turn(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
@@ -906,11 +905,10 @@ class AutoEntityFilling:
         for entity in request.entities:
             entity_type = entity["type"]
             role = entity["role"]
-
             for slot in self._local_entity_form:
                 if entity_type == slot.entity:
                     if (slot.role is None) or (role == slot.role):
-                        slot.value = entity
+                        slot.value = dict(entity)
                         break
 
     def _end_slot_fill(self, request, responder, async_mode):
@@ -920,14 +918,13 @@ class AutoEntityFilling:
             text=request.text,
             domain=request.domain,
             intent=request.intent,
-            entities=[slot.value for slot in self._local_entity_form],
+            entities=tuple([slot.value for slot in self._local_entity_form]),
             context=request.context or {},
             history=request.history or [],
             frame=responder.frame or {},
             params=request.params,
-            form=self._form,
+            form=immutables.Map(form_schema.dump(self._form)),
         )
-
         self._exit_flow(responder)
 
         if async_mode:
@@ -948,18 +945,18 @@ class AutoEntityFilling:
             nlr (str): natural language response to prompt for the missing slot.
         """
         response_form = copy.deepcopy(self._form)
-        response_form["entities"] = self._local_entity_form
-        responder.form = response_form
+        response_form.entities = self._local_entity_form
+        responder.form = form_schema.dump(response_form)
         responder.reply(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
 
     def _retry_logic(self, request, responder, nlr):
-        if self._retry_attempts < self._max_retries:
+        if self._retry_attempts < self._form.max_retries:
             self._retry_attempts += 1
             response_form = copy.deepcopy(self._form)
-            response_form["entities"] = self._local_entity_form
-            responder.form = response_form
+            response_form.entities = self._local_entity_form
+            responder.form = form_schema.dump(response_form)
             responder.reply(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
@@ -976,7 +973,7 @@ class AutoEntityFilling:
                 history=request.history or [],
                 frame=responder.frame or {},
                 params=FrozenParams(**responder.params.to_dict()),
-                form=response_form,
+                form=form_schema.dump(response_form),
                 **processed_query,
             )
 
@@ -995,12 +992,12 @@ class AutoEntityFilling:
         # If form iteration in request object, continue using that.
         # If None, set to original form.
         if request.form and request.form["entities"]:
-            self._local_entity_form = request.form["entities"]
+            self._local_entity_form = [FormEntity(**copy.deepcopy(elem)) for elem in request.form["entities"]]
         else:
             self._local_entity_form = None
 
-        if request.text.lower() in self._exit_keys:
-            responder.reply(self._exit_response)
+        if request.text.lower() in self._form.exit_keys:
+            responder.reply(self._form.exit_msg)
             self._exit_flow(responder)
             return
 
@@ -1009,7 +1006,7 @@ class AutoEntityFilling:
         if self._prompt_turn is None or not self._local_entity_form:
             # Entering the flow
             self._prompt_turn = True
-            self._local_entity_form = copy.deepcopy(self._entity_form)
+            self._local_entity_form = copy.deepcopy(self._form.entities)
             self._retry_attempts = 0
 
             # Fill the form with the entities in the first query
@@ -1131,7 +1128,7 @@ class DialogueResponder:
         self.params = params
         self.dialogue_state = dialogue_state
         self.slots = slots or {}
-        self.form = form or {}
+        self.form = form
         self.request = request
         self.history = history
 

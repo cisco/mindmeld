@@ -101,6 +101,7 @@ class MindMeldServer:
                     context=validated_request.get('context'),
                     frame=validated_request.get('frame'),
                     history=validated_request.get('history'),
+                    form=validated_request.get('form'),
                     verbose=validated_request.get('verbose', False)
                 )
                 # add request id to response

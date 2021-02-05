@@ -18,6 +18,7 @@ import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 from marshmallow import EXCLUDE, Schema, fields, ValidationError
+from ..core import FormEntity
 
 logger = logging.getLogger(__name__)
 
@@ -466,7 +467,7 @@ class Request:
     nbest_aligned_entities = attr.ib(
         default=attr.Factory(tuple), converter=deserialize_to_lists_of_list_of_immutable_maps
     )
-    form = attr.ib(default=attr.Factory(dict))
+    form = attr.ib(default=attr.Factory(tuple), converter=immutables.Map)
 
     def to_dict(self) -> Dict[str, Any]:
         return request_schema.dump(self)
@@ -474,20 +475,28 @@ class Request:
 
 class FormEntitySchema(Schema):
     entity = fields.String(required=True)
-    role = fields.String()
-    responses = fields.List(fields.String())
-    retry_response = fields.List(fields.String())
-    value = fields.Dict()
+    role = fields.String(allow_none=True)
+    responses = fields.List(fields.String(), allow_none=True)
+    retry_response = fields.List(fields.String(), allow_none=True)
+    # value = fields.Method("serialize_value", deserialize="deserialize_value", allow_none=True)
+    value = fields.Dict(allow_none=True)
     default_eval = fields.Boolean(default=True)
-    hints = fields.List(fields.String())
-    custom_eval = fields.String()
+    hints = fields.List(fields.String(), allow_none=True)
+    custom_eval = fields.String(allow_none=True)
+
+    def serialize_value(self, form):  # pylint: disable=no-self-use
+        if form:
+            return form.value or dict(form.value)
+
+    def deserialize_value(self, value):  # pylint: disable=no-self-use
+        return value or immutables.Map(value)
 
 
 class FormSchema(Schema):
-    entities = fields.List(fields.Nested(FormEntitySchema))
-    max_retries = fields.Integer()
-    exit_msg = fields.String()
-    exit_keys = fields.List(fields.String)
+    entities = fields.List(fields.Nested(FormEntitySchema), required=True)
+    max_retries = fields.Integer(allow_none=True)
+    exit_msg = fields.String(allow_none=True)
+    exit_keys = fields.List(fields.String, allow_none=True)
 
 
 class RequestSchema(Schema):
@@ -512,7 +521,8 @@ class RequestSchema(Schema):
     nbest_aligned_entities = fields.Method(
         "serialize_nbest_aligned_entities",
         deserialize="deserialize_list_of_list_of_immutable_maps")
-    form = fields.Nested(FormSchema)
+    form = fields.Method("serialize_form",
+                         deserialize="deserialize_map")
     request_id = fields.String()
 
     def deserialize_list_of_maps(self, value):  # pylint: disable=no-self-use
@@ -542,6 +552,9 @@ class RequestSchema(Schema):
     def serialize_frame(self, request: Request):  # pylint: disable=no-self-use
         return dict(request.frame)
 
+    def serialize_form(self, request: Request):  # pylint: disable=no-self-use
+        return dict(request.form)
+
     def deserialize_map(self, value):  # pylint: disable=no-self-use
         return immutables.Map(value)
 
@@ -554,7 +567,7 @@ class DialogueResponseSchema(Schema):
     request = fields.Nested(RequestSchema)
     dialogue_state = fields.String()
     directives = fields.List(fields.Dict())
-    form = fields.Nested(FormSchema)
+    form = fields.Dict()
 
 
 form_schema = FormSchema()
