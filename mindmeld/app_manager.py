@@ -20,7 +20,7 @@ import copy
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components._config import get_max_history_len
 from .components.dialogue import DialogueResponder
-from .components.request import FrozenParams, Params, Request, dialogue_response_schema
+from .components.request import FrozenParams, Params, Request
 from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def freeze_params(params):
     if isinstance(params, dict):
         params = FrozenParams(**params)
     elif params.__class__ == Params:
-        params = FrozenParams(**params.to_dict())
+        params = FrozenParams(**dict(params))
     elif not isinstance(params, FrozenParams):
         raise TypeError(
             "Invalid type for params argument. "
@@ -289,7 +289,7 @@ class ApplicationManager:
 
     def _post_dm(self, dm_response):
         # Append this item to the history, but don't recursively store history
-        prev_request = dialogue_response_schema.dump(dm_response)
+        prev_request = dict(dm_response)
         prev_request.pop("history", None)
         prev_request["request"].pop("history", None)
 

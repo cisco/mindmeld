@@ -22,8 +22,8 @@ from typing import List, Optional
 import immutables
 
 from .. import path
-from .request import ParamsSchema, dialogue_response_schema, \
-    FrozenParams, Params, Request, form_schema
+from .request import FrozenParams, Params, Request
+from .schemas import DEFAULT_FORM_SCHEMA, DEFAULT_RESPONSE_SCHEMA, ParamsSchema
 from ..core import Entity, FormEntity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
@@ -924,7 +924,7 @@ class AutoEntityFilling:
             history=request.history or [],
             frame=responder.frame or {},
             params=request.params,
-            form=immutables.Map(form_schema.dump(self._form)),
+            form=immutables.Map(DEFAULT_FORM_SCHEMA.dump(self._form)),
         )
         self._exit_flow(responder)
 
@@ -947,7 +947,7 @@ class AutoEntityFilling:
         """
         response_form = copy.deepcopy(self._form)
         response_form.entities = self._local_entity_form
-        responder.form = form_schema.dump(response_form)
+        responder.form = DEFAULT_FORM_SCHEMA.dump(response_form)
         responder.reply(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
@@ -957,7 +957,7 @@ class AutoEntityFilling:
             self._retry_attempts += 1
             response_form = copy.deepcopy(self._form)
             response_form.entities = self._local_entity_form
-            responder.form = form_schema.dump(response_form)
+            responder.form = DEFAULT_FORM_SCHEMA.dump(response_form)
             responder.reply(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
@@ -973,8 +973,8 @@ class AutoEntityFilling:
                 context=request.context or {},
                 history=request.history or [],
                 frame=responder.frame or {},
-                params=FrozenParams(**responder.params.to_dict()),
-                form=form_schema.dump(response_form),
+                params=FrozenParams(**dict(responder.params)),
+                form=DEFAULT_FORM_SCHEMA.dump(response_form),
                 **processed_query,
             )
 
@@ -1145,8 +1145,7 @@ class DialogueResponder:
         # with the attributes of a DialogueResponder object
         if isinstance(history, (list, tuple)) and \
                 any(isinstance(item, (dict, immutables.Map)) for item in history):
-            self._history = [dialogue_response_schema.dump(
-                DialogueResponder(**item)) for item in history]
+            self._history = [dict(DialogueResponder(**item)) for item in history]
         else:
             self._history = history or []
 
@@ -1173,6 +1172,10 @@ class DialogueResponder:
             self._params = Params(**value)
         else:
             self._params = value or Params()
+
+    def __iter__(self):
+        for key, value in DEFAULT_RESPONSE_SCHEMA.dump(self).items():
+            yield key, value
 
     def reply(self, text):
         """Adds a 'reply' directive.
@@ -1466,7 +1469,7 @@ class Conversation:
         )
 
         # Validate params
-        response.param = Params(**self._params_schema.load(response.params.to_dict()))
+        response.param = Params(**self._params_schema.load(dict(response.params)))
         self.history = response.history
         self.frame = response.frame
         self.form = response.form
@@ -1513,7 +1516,7 @@ class Conversation:
             verbose=self.verbose,
         )
         # Validate params
-        response.param = Params(**self._params_schema.load(response.params.to_dict()))
+        response.param = Params(**self._params_schema.load(dict(response.params)))
         self.history = response.history
         self.frame = response.frame
         self.form = response.form

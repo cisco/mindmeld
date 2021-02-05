@@ -23,7 +23,8 @@ from .cli import app_cli
 from .components._config import get_custom_action_config
 from .components.custom_action import CustomActionException, CustomActionSequence
 from .components.dialogue import AutoEntityFilling, DialogueFlow, DialogueResponder
-from .components.request import Request, form_schema
+from .components.request import Request
+from .components.schemas import DEFAULT_FORM_SCHEMA
 from .server import MindMeldServer
 
 logger = logging.getLogger(__name__)
@@ -223,7 +224,7 @@ class Application:
             func_name = name or func.__name__
             if not form or not isinstance(form, dict):
                 raise TypeError("Form cannot be empty.")
-            validated_form = form_schema.dump(form)
+            validated_form = DEFAULT_FORM_SCHEMA.dump(form)
             if 'entities' not in validated_form:
                 raise KeyError("Entity list cannot be empty.")
             auto_fill = AutoEntityFilling(func, validated_form, self)

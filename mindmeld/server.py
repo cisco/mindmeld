@@ -26,7 +26,7 @@ from flask import Flask, Request, g, jsonify, request
 from flask_cors import CORS
 
 from ._version import current as __version__
-from .components.request import RequestSchema, dialogue_response_schema
+from .components.schemas import RequestSchema
 from .exceptions import BadMindMeldRequestError
 
 logger = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ class MindMeldServer:
                 )
                 # add request id to response
                 # use the passed in id if any
-                response = dialogue_response_schema.dump(response)
+                response = dict(response)
                 request_id = validated_request.get("request_id", str(uuid.uuid4()))
                 response['request_id'] = request_id
                 return jsonify(response)

@@ -149,7 +149,7 @@ def test_serialization_params(
     params.language = language
     params.locale = locale
     params.dynamic_resource = Map(dynamic_resource)
-    dict_result = params.to_dict()
+    dict_result = dict(params)
     assert allowed_intents == dict_result["allowed_intents"]
     assert target_dialogue_state == dict_result["target_dialogue_state"]
     assert time_zone == dict_result["time_zone"]
@@ -192,7 +192,7 @@ def test_serialization_frozen_params(
     params.locale = locale
     params.dynamic_resource = Map(dynamic_resource)
     frozen_params = freeze_params(params)
-    dict_result = frozen_params.to_dict()
+    dict_result = dict(frozen_params)
     assert allowed_intents == dict_result["allowed_intents"]
     assert target_dialogue_state == dict_result["target_dialogue_state"]
     assert time_zone == dict_result["time_zone"]

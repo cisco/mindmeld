@@ -48,7 +48,7 @@ from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from .request import validate_locale_code_with_ref_language_code, _validate_allowed_intents
+from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)

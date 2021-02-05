@@ -4,7 +4,7 @@ import ssl
 import aiohttp
 import requests
 
-from .request import Params, dialogue_response_schema
+from .request import Params
 
 
 logger = logging.getLogger(__name__)
@@ -33,8 +33,8 @@ class CustomAction:
         self.merge = merge
 
     def get_json_payload(self, request, responder):
-        request_json = request.to_dict()
-        responder_json = dialogue_response_schema.dump(responder)
+        request_json = dict(request)
+        responder_json = dict(responder)
         return {
             "request": request_json,
             "responder": {field: responder_json[field] for field in RESPONSE_FIELDS},
