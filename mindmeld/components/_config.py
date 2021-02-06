@@ -21,7 +21,7 @@ import os
 import warnings
 
 from .. import path
-from .request import validate_language_code, validate_locale_code
+from .schemas import validate_language_code, validate_locale_code
 from ..constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)

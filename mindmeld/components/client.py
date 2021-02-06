@@ -34,7 +34,6 @@ class ConversationClient:
     def __init__(
         self,
         url="http://localhost:7150/parse",
-        context=None,
         default_params=None,
     ):
         """
@@ -45,7 +44,7 @@ class ConversationClient:
                 defaults will be overridden by params passed for each turn.
         """
         self.url = url
-        self.context = context or {}
+        self.form = {}
         self.history = []
         self.frame = {}
         if default_params is None:
@@ -53,7 +52,7 @@ class ConversationClient:
         self.default_params = default_params
         self.params = {}
 
-    def say(self, text, params=None, frame=None, context=None):
+    def say(self, text, params=None, frame=None, form=None):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
@@ -63,18 +62,18 @@ class ConversationClient:
             params (dict): The params to use with this message,
                 overriding any defaults which may have been set.
             frame (dict): The frame to be used with this message, overriding any defaults.
-            context (dict): The context to be used with this message, overriding any defaults.
+            form (dict): A form data dictionary
 
         Returns:
             (list): A text representation of the dialogue responses.
         """
-        response = self.process(text, params=params, frame=frame, context=context)
+        response = self.process(text, params=params, frame=frame, form=form)
 
         # handle directives
         response_texts = [self._follow_directive(a) for a in response["directives"]]
         return response_texts
 
-    def process(self, text, params=None, frame=None, context=None):
+    def process(self, text, params=None, frame=None, form=None):
         """Send a message in the conversation. The message will be processed by
         the app based on the current state of the conversation and returns
         the response.
@@ -85,6 +84,7 @@ class ConversationClient:
                 which may have been set.
             frame (dict): The frame to be used with this message, overriding any defaults.
             context (dict): The context to be used with this message, overriding any defaults.
+            form (dict): A form data dictionary
 
         Returns:
             (dict): The dictionary response.
@@ -101,18 +101,18 @@ class ConversationClient:
             for k, v in frame.items():
                 internal_frame[k] = v
 
-        internal_context = copy.deepcopy(self.context)
+        internal_form = copy.deepcopy(self.form)
 
-        if context:
-            for k, v in context.items():
-                internal_context[k] = v
+        if form:
+            for k, v in form.items():
+                internal_form[k] = v
 
         response = requests.post(
             url=self.url,
             json={
                 "text": text,
                 "history": self.history,
-                "context": internal_context,
+                "form": internal_form,
                 "frame": internal_frame,
                 "params": internal_params,
             },
@@ -176,3 +176,4 @@ class ConversationClient:
         self.history = []
         self.frame = {}
         self.params = {}
+        self.form = {}

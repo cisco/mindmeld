@@ -32,7 +32,6 @@ from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
     ProcessorError,
-    MindMeldError,
 )
 from ..markup import TIME_FORMAT, process_markup
 from ..path import get_app
@@ -49,6 +48,7 @@ from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
+from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -337,21 +337,6 @@ class Processor(ABC):
                 restart_subprocesses()
         # process the list in series
         return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
-
-    def _validate_locale(self, locale=None):
-        """This function makes sure the locale is consistent with the app's language code"""
-        locale = locale or self.locale
-
-        # if the developer or app doesnt specify the locale, we just use the default locale
-        if not locale:
-            return
-
-        if locale.split("_")[0].lower() != self.language.lower():
-            raise MindMeldError(
-                "Locale %s is inconsistent with app language code %s. "
-                "Set the language code in the config.py file." % (locale, self.language)
-            )
-        return locale
 
     def create_query(
         self, query_text, locale=None, language=None, time_zone=None, timestamp=None
@@ -658,8 +643,9 @@ class NaturalLanguageProcessor(Processor):
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
-        nlp_components = {}
+        allowed_nlp_components_list = _validate_allowed_intents(allowed_nlp_components_list, self)
 
+        nlp_components = {}
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
             entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
@@ -667,17 +653,6 @@ class NaturalLanguageProcessor(Processor):
                 nlp_entries[idx] = entry
 
             domain, intent, entity, role = nlp_entries
-
-            if not domain or domain not in self.domains:
-                raise AllowedNlpClassesKeyError(
-                    "Domain: {} is not in the NLP component hierarchy".format(domain)
-                )
-
-            if not intent or (intent != "*" and intent not in self.domains[domain].intents):
-                raise AllowedNlpClassesKeyError(
-                    "Intent: {} is not in the NLP component hierarchy".format(intent)
-                )
-
             if intent == "*":
                 for intent in self.domains[domain].intents:
                     self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
@@ -785,12 +760,12 @@ class NaturalLanguageProcessor(Processor):
                 logger.error("Caught exception %s when extracting nlp components from the "
                              "allowed_intents field", e.message)
                 allowed_nlp_classes = {}
-
         return super().process(
             query_text,
             allowed_nlp_classes=allowed_nlp_classes,
             time_zone=time_zone,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language),
             timestamp=timestamp,
             dynamic_resource=dynamic_resource,
             verbose=verbose,
@@ -941,7 +916,8 @@ class DomainProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language),
         )
         processed_query = self.process_query(
             query,
@@ -1226,7 +1202,8 @@ class IntentProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language)
         )
         processed_query = self.process_query(query, dynamic_resource=dynamic_resource,
                                              allowed_nlp_classes=allowed_nlp_classes)

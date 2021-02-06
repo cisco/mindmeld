@@ -18,9 +18,9 @@ import logging
 import re
 import sre_constants
 
-from .path import ASCII_FOLDING_DICT_PATH
 from .components._config import get_tokenizer_config
 from .constants import CURRENCY_SYMBOLS
+from .path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
 

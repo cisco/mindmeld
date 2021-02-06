@@ -1,6 +1,6 @@
+import logging
 from abc import ABC, abstractmethod
 
-import logging
 import nltk
 import pycountry
 

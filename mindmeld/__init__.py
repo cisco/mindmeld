@@ -22,12 +22,7 @@ except ImportError:
 from ._util import blueprint, configure_logs
 from ._version import current
 from .app import Application
-from .components import (
-    Conversation,
-    DialogueResponder,
-    NaturalLanguageProcessor,
-    QuestionAnswerer,
-)
+from .components import Conversation, DialogueResponder, NaturalLanguageProcessor, QuestionAnswerer
 
 __all__ = [
     "blueprint",

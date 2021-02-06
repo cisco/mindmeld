@@ -20,11 +20,7 @@ import logging
 import sys
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
-from .exceptions import (
-    MarkupError,
-    SystemEntityMarkupError,
-    SystemEntityResolutionError,
-)
+from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
