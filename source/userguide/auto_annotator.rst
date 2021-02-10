@@ -40,7 +40,7 @@ Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for annotation and unannotation using the :class:`SpacyAnnotator` class.
+We will demonstrate both approaches for annotation and unannotation using the :class:`MultiLingualAnnotator` class.
 
 Annotate
 ^^^^^^^^
@@ -59,10 +59,10 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(app_path="hr_assistant")
 
-	sa.annotate(overwrite=True)
+	mla.annotate(overwrite=True)
 
 If you do not want to annotate all supported entities, you can specify annotation rules instead.
 
@@ -74,7 +74,7 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 
 	AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": True, 
 		"annotate": [
 			{ 
@@ -123,10 +123,10 @@ To unannotate all annotations, pass in the optional param :attr:`unannotate_all`
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(app_path="hr_assistant")
 
-	sa.unannotate(unannotate_all=True)
+	mla.unannotate(unannotate_all=True)
 
 If :attr:`unannotate_all` is not set to True and you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
 You can refer to the config specifications in the "Auto Annotator Configuration" section below.
@@ -144,7 +144,7 @@ To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to
 
 	AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": False, 
 		"annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*"}],
 		"unannotate_supported_entities_only": True, 
@@ -181,13 +181,16 @@ After running :attr:`unannotate` we find that instances of :attr:`sys_time` have
 	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} 1994
 
 
-Default Auto Annotator: Spacy Annotator
----------------------------------------
+Default Auto Annotator: MultiLingual Annotator
+----------------------------------------------
 The :mod:`mindmeld.auto_annotator` module contains an abstract :class:`Annotator` class.
-This class serves as a base class for any MindMeld Annotator including the :class:`SpacyAnnotator` class.
-The :class:`SpacyAnnotator` leverages `Spacy's Named Entity Recognition <https://spacy.io/usage/linguistic-features#named-entities>`_ system to detect 21 different entities.
-Some of these entities are resolvable by Duckling. 
+This class serves as a base class for any MindMeld Annotator including the :class:`MultiLingualAnnotator` class.
+The :class:`MultiLingualAnnotator` leverages `Spacy's Named Entity Recognition <https://spacy.io/usage/linguistic-features#named-entities>`_ system and duckling to detect entities.
 
+
+Supported Entities and Languages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Up to 21 entities are supported across 15 languages. The table below defines these entities and whether they are resolvable by duckling.
 
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | Supported Entities     | Resolvable by Duckling  | Examples or Definition                                                      |
@@ -235,13 +238,66 @@ Some of these entities are resolvable by Duckling.
 | "sys_other-quantity"   | No                      | "10 joules", "30 liters", "15 tons"                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 
+Supported languages include English (en), Spanish (es), French (fr), German (de), Danish (da), Greek (el), Portuguese (pt), Lithuanian (lt), Norwegian Bokmal (nb), Romanian (ro), Polish (pl), Italian (it), Japanese (ja), Chinese (zh), Dutch (nl).
+The table below identifies the supported entities for each language.
 
-To detect entities in a single sentence first create an instance of the :class:`SpacyAnnotator` class.
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+|                     | EN | ES | FR | DE | DA | EL | PT | LT | NB | RO | PL | IT | JA | ZH | NL |
++=====================+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+| sys_amount-of-money | y  | y  | y  | n  | n  | n  | y  | n  | y  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_distance        | y  | y  | y  | y  | n  | n  | y  | n  | n  | y  | n  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_duration        | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_event           | y  | n  | n  | n  | n  | y  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_fac             | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_gpe             | y  | n  | n  | n  | n  | y  | n  | y  | n  | y  | y  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_interval        | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_language        | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_law             | y  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_loc             | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_nrp             | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_number          | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_ordinal         | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_org             | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_other-quantity  | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_percent         | y  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_person          | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_product         | y  | n  | n  | n  | n  | y  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_time            | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_weight          | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_work_of_art     | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+
+
+Working with English Sentences
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To detect entities in a single sentence first create an instance of the :class:`MultiLingualAnnotator` class.
+If a language is not specified in :attr:`LANGUAGE_CONFIG` (:attr:`config.py`) then by default English will be used.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(app_path="hr_assistant")
 
 Then use the :meth:`parse` function.
 
@@ -304,21 +360,110 @@ For example, we can restrict the output of the previous example by doing the fol
 	
 	allowed_entites = ["sys_org", "sys_amount-of-money", "sys_time"]
 	sentence = "Apple stock went up $10 last monday."
-	sa.parse(sentence=sentence, entity_types=allowed_entities) 
+	sa.parse(sentence=sentence, entity_types=allowed_entities)
+
+Working with Non-English Sentences
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :class:`MultiLingualAnnotator` will use the language and locale specified in the :attr:`LANGUAGE_CONFIG` (:attr:`config.py`).
+
+.. code-block:: python
+	
+	LANGUAGE_CONFIG = {'language': 'es'}
+
+Many Spacy non-English NER models have limited entity support. To overcome this, the :class:`MultiLingualAnnotator` translates the sentence to English and detects entities
+using the English NER model. The English detected entities are compared against duckling candidates for the non-English sentence. Duckling candidates with a match between the type and value of the entity or the translated body text
+are selected. If a translation service is not available, the :class:`MultiLingualAnnotator` selects the duckling candidates with the largest non-overlapping spans. The sections below describe the steps to setup the annotator depending on whether a translation service is being used.
+
+Annotating with a Translation Service (Google)
+''''''''''''''''''''''''''''''''''''''''''''''
+The :class:`MultiLingualAnnotator` can leverage the Google Translation API to better detect entities in non-English sentences. To use this feature, export your Google application credentials.
+
+.. code-block:: console
+
+	export GOOGLE_APPLICATION_CREDENTIALS="/Users/joesmith2/Documents/google_application_credentials.json"
+
+Install the extras requirements for annotators.
+
+.. code-block:: console
+
+	pip install mindmeld[language_annotator]
+
+Finally, specify the translator in :attr:`AUTO_ANNOTATOR_CONFIG`. Set :attr:`translator` to :attr:`GoogleTranslator`.
+
+Annotating without a Translation Service
+''''''''''''''''''''''''''''''''''''''''
+We can still use the :class:`MultiLingualAnnotator` without a translation service. To do so, set :attr:`translator` to :attr:`NoOpTranslator` in :attr:`AUTO_ANNOTATOR_CONFIG`.
+
+Spanish Sentence Example
+''''''''''''''''''''''''
+Let's take a look at an example of the :class:`MultiLingualAnnotator` detecting entities in Spanish sentences.  
+To use a Spanish MindMeld application we can download the :attr:`Screening App` blueprint with the following command:
+
+.. code-block:: console
+
+	mindmeld blueprint screening_app
+
+We can now create our :class:`MultiLingualAnnotator` object and pass in the app_path. If a spanish Spacy model is not found in the environment, it will automatically be downloaded.
+
+.. code-block:: python
+
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(app_path="screening_app")
+
+Then use the :meth:`parse` function.
+
+.. code-block:: python
+	
+	sa.parse("Las acciones de Apple subieron $10 el lunes pasado.") 
+
+Three entities are automatically recognized.
+
+.. code-block:: python
+	
+	[
+		{
+			'body': 'Apple',
+			'start': 16,
+			'end': 21,
+			'value': {'value': 'Apple'},
+			'dim': 'sys_org'
+		},
+		{
+			'body': 'el lunes pasado',
+			'start': 35,
+			'end': 50,
+			'dim': 'sys_time',
+			'value': {'values': [{'value': '2021-02-08T00:00:00.000-08:00',
+				'grain': 'day',
+				'type': 'value'}],
+			'value': '2021-02-08T00:00:00.000-08:00',
+			'grain': 'day',
+			'type': 'value'}
+		},
+		{
+			'body': '$10',
+			'start': 31,
+			'end': 34,
+			'dim': 'sys_amount-of-money',
+			'value': {'value': 10, 'type': 'value', 'unit': '$'}
+		}
+	]
+
 
 Auto Annotator Configuration
 ----------------------------
 
 The :attr:`DEFAULT_AUTO_ANNOTATOR_CONFIG` shown below is the default config for an Annotator.
 A custom config can be included in :attr:`config.py` by duplicating the default config and renaming it to :attr:`AUTO_ANNOTATOR_CONFIG`.
-Alternatively, a custom config dictionary can be passed in directly to :class:`SpacyAnnotator` or any Annotator class upon instantiation.
+Alternatively, a custom config dictionary can be passed in directly to :class:`MultiLingualAnnotator` or any Annotator class upon instantiation.
 
 
 .. code-block:: python
 
 	DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": False, 
 		"annotate": [ 
 			{ 
@@ -335,7 +480,7 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`S
 Let's take a look at the allowed values for each setting in an Auto Annotator configuration.
 
 
-``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation when invoked from the command line. By default, :class:`SpacyAnnotator` is used. 
+``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation when invoked from the command line. By default, :class:`MultiLingualAnnotator` is used. 
 
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
@@ -367,8 +512,8 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 
 ``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
-``'spacy_model'`` (:class:`str`): :attr:`en_core_web_lg` is used by default for the best performance. Alternative options are :attr:`en_core_web_sm` and :attr:`en_core_web_md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator`.
-If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_. The Spacy Annotator is currently not designed to support other language but they may be used.
+``'spacy_model_size'`` (:class:`str`): :attr:`lg` is used by default for the best performance. Alternative options are :attr:`sm` and :attr:`md`. This parameter is optional and is specific to the use of the :class:`MultiLingualAnnotator`.
+The language is inferred from the :attr:`LANGUAGE_CONFIG` in :attr:`config.py`. If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `NER models <https://spacy.io/models/>`_.
 
 Using the Bootstrap Annotator
 ----------------------------
@@ -429,7 +574,7 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 Creating a Custom Annotator
 ---------------------------
-The :class:`SpacyAnnotator` is a subclass of the abstract base class :class:`Annotator`.
+The :class:`MultiLingualAnnotator` is a subclass of the abstract base class :class:`Annotator`.
 The functionality for annotating and unannotating files is contained in :class:`Annotator` itself.
 A developer simply needs to implement two methods to create a custom annotator.
 
@@ -507,6 +652,6 @@ Getting Custom Parameters from the Config
 		... 
 	}
 
-:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
+:class:`MultiLingualAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
 
 Custom parameters for custom annotators can be implemented in a similar fashion.
