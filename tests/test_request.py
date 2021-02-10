@@ -9,15 +9,18 @@ from immutables import Map
 @pytest.fixture
 def sample_request():
     dict_list = [{"key": "value"}, {"key": "value"}, {"key": "value"}]
+    dict_list_of_lists = [[{"key": "value"}, {"key": "value"}, {"key": "value"}],
+                          [{"key": "value"}, {"key": "value"}, {"key": "value"}]]
+    lists = ['key_1', 'key_2', 'key_3']
     return Request(
         domain="some_domain",
         intent="some_intent",
-        entities=(dict_list),
+        entities=dict_list,
         text="some_text",
-        history=(dict_list),
-        nbest_transcripts_text=(dict_list),
-        nbest_transcripts_entities=(dict_list),
-        nbest_aligned_entities=(dict_list),
+        history=dict_list,
+        nbest_transcripts_text=lists,
+        nbest_transcripts_entities=dict_list_of_lists,
+        nbest_aligned_entities=dict_list_of_lists,
     )
 
 
@@ -68,16 +71,16 @@ def test_nbest(sample_request):
         sample_request.confidences = {"key": "value"}
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_transcripts_text = ["some_text"]
-    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_text)
+        sample_request.nbest_transcripts_text = ["some_text", "some_text_2"]
+    assert isinstance(sample_request.nbest_transcripts_text, tuple)
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_transcripts_entities = [{"key": "value"}]
-    assert_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
+        sample_request.nbest_transcripts_entities = [[{"key": "value"}], [{"key": "value"}]]
+    assert_tuple_of_tuple_of_immutable_maps(sample_request.nbest_transcripts_entities)
 
     with pytest.raises(FrozenInstanceError):
-        sample_request.nbest_aligned_entities = [{"key": "value"}]
-    assert_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
+        sample_request.nbest_aligned_entities = [[{"key": "value"}], [{"key": "value"}]]
+    assert_tuple_of_tuple_of_immutable_maps(sample_request.nbest_aligned_entities)
 
 
 def assert_tuple_of_immutable_maps(tuple_of_immutable_maps):
@@ -87,6 +90,12 @@ def assert_tuple_of_immutable_maps(tuple_of_immutable_maps):
         assert isinstance(immutable_map, Map)
         with pytest.raises(TypeError):
             immutable_map["key"] = "value"
+
+
+def assert_tuple_of_tuple_of_immutable_maps(tuple_of_tuple_of_immutable_maps):
+    assert isinstance(tuple_of_tuple_of_immutable_maps, tuple)
+    for idx_1, tuple_of_immutable_maps in enumerate(tuple_of_tuple_of_immutable_maps):
+        assert_tuple_of_immutable_maps(tuple_of_immutable_maps)
 
 
 def test_immutability_of_sample_request_and_params():
@@ -113,10 +122,10 @@ def test_immutability_of_sample_request_and_params():
     "dynamic_resource",
     [
         (
-            ("some-intents", "some-intents-2"),
+            ["some-intents", "some-intents-2"],
             "some-state",
             "America/Los_Angeles",
-            1234,
+            "1234",
             "en",
             "en_US",
             {"resource": "dynamic"},
@@ -140,7 +149,7 @@ def test_serialization_params(
     params.language = language
     params.locale = locale
     params.dynamic_resource = Map(dynamic_resource)
-    dict_result = params.to_dict()
+    dict_result = dict(params)
     assert allowed_intents == dict_result["allowed_intents"]
     assert target_dialogue_state == dict_result["target_dialogue_state"]
     assert time_zone == dict_result["time_zone"]
@@ -155,10 +164,10 @@ def test_serialization_params(
     "dynamic_resource",
     [
         (
-            ("some-intents", "some-intents-2"),
+            ["some-intents", "some-intents-2"],
             "some-state",
             "America/Los_Angeles",
-            1234,
+            "1234",
             "en",
             "en_US",
             {"resource": "dynamic"},
@@ -183,7 +192,7 @@ def test_serialization_frozen_params(
     params.locale = locale
     params.dynamic_resource = Map(dynamic_resource)
     frozen_params = freeze_params(params)
-    dict_result = frozen_params.to_dict()
+    dict_result = dict(frozen_params)
     assert allowed_intents == dict_result["allowed_intents"]
     assert target_dialogue_state == dict_result["target_dialogue_state"]
     assert time_zone == dict_result["time_zone"]

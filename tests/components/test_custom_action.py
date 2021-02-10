@@ -57,7 +57,7 @@ def test_custom_action_merge():
         mock_object.return_value = Mock()
         mock_object.return_value.status_code = 200
         mock_object.return_value.json.return_value = {
-            "directives": ["directive3", "directive4"],
+            "directives": [{"payload": "directive3"}, {"payload": "directive4"}],
             "frame": {"k2": "v2"},
             "slots": {"s2": "v2"},
             "params": {
@@ -75,17 +75,17 @@ def test_custom_action_merge():
             text="sing a song", domain="some domain", intent="some intent"
         )
         responder = DialogueResponder()
-        responder.directives = ["directive1", "directive2"]
+        responder.directives = [{"payload": "directive1"}, {"payload": "directive2"}]
         responder.frame = {"k1": "v1"}
         responder.slots = {"s1": "v1"}
         responder.params.allowed_intents = ("intent1", "intent2")
         responder.params.dynamic_resource = {"r1": "v1"}
         assert action.invoke(request, responder)
         assert responder.directives == [
-            "directive1",
-            "directive2",
-            "directive3",
-            "directive4",
+            {"payload": "directive1"},
+            {"payload": "directive2"},
+            {"payload": "directive3"},
+            {"payload": "directive4"},
         ]
         assert responder.frame == {"k1": "v1", "k2": "v2"}
         assert responder.slots == {"s1": "v1", "s2": "v2"}
@@ -112,7 +112,7 @@ def test_custom_action_no_merge():
         mock_object.return_value = Mock()
         mock_object.return_value.status_code = 200
         mock_object.return_value.json.return_value = {
-            "directives": ["directive3", "directive4"],
+            "directives": [{"payload": "directive3"}, {"payload": "directive4"}],
             "frame": {"k2": "v2"},
             "slots": {"s2": "v2"},
             "params": {
@@ -136,10 +136,8 @@ def test_custom_action_no_merge():
         responder.params.allowed_intents = ("intent1", "intent2")
         responder.params.dynamic_resource = {"r1": "v1"}
         assert action.invoke(request, responder)
-        assert responder.directives == [
-            "directive3",
-            "directive4",
-        ]
+        assert responder.directives == [{"payload": "directive3"},
+                                        {"payload": "directive4"}]
         assert responder.frame == {"k2": "v2"}
         assert responder.slots == {"s2": "v2"}
         assert tuple(responder.params.allowed_intents) == (
@@ -235,20 +233,20 @@ def test_custom_action_handler(home_assistant_nlp):
         mock_object.return_value = Mock()
         mock_object.return_value.status_code = 200
         mock_object.return_value.json.return_value = {
-            "directives": ["set-thermostat-action"]
+            "directives": [{"payload": "set-thermostat-action"}]
         }
         # invoke set thermostat intent
         res = app.app_manager.parse("turn it to 70 degrees")
-        assert res.directives == ["set-thermostat-action"]
+        assert res.directives == [{"payload": "set-thermostat-action"}]
         assert mock_object.call_args[1]["url"] == "some-url"
         assert mock_object.call_args[1]["json"]["action"] == "set-thermostat"
 
         mock_object.return_value.json.return_value = {
-            "directives": ["time-and-dates-action"]
+            "directives": [{"payload": "time-and-dates-action"}]
         }
         # invoke time & dates intent
         res = app.app_manager.parse("change my alarm to 9")
-        assert res.directives == ["time-and-dates-action"]
+        assert res.directives == [{"payload": "time-and-dates-action"}]
         assert mock_object.call_args[1]["url"] == "some-url"
         assert mock_object.call_args[1]["json"]["action"] == "times-and-dates"
 
@@ -265,10 +263,10 @@ def test_custom_action_sequence(home_assistant_nlp):
     with patch("requests.post") as mock_object:
         mock_object.return_value = Mock()
         mock_object.return_value.status_code = 200
-        mock_object.return_value.json.return_value = {"directives": ["some-directive"]}
+        mock_object.return_value.json.return_value = {"directives": [{"payload": "some-directive"}]}
         # invoke set thermostat intent and we should expect two directives
         res = app.app_manager.parse("turn it to 70 degrees")
-        assert res.directives == ["some-directive", "some-directive"]
+        assert res.directives == [{"payload": "some-directive"}, {"payload": "some-directive"}]
         assert mock_object.call_args[1]["url"] == "some-url"
 
 
@@ -284,10 +282,10 @@ async def test_custom_action_handler_async(home_assistant_nlp):
     with patch("mindmeld.components.CustomAction.post_async") as mock_object:
 
         async def mock_coroutine():
-            return 200, {"directives": ["set-thermostat-action"]}
+            return 200, {"directives": [{"payload": "set-thermostat-action"}]}
 
         mock_object.return_value = mock_coroutine()
 
         # invoke set thermostat intent
         res = await app.app_manager.parse("turn it to 70 degrees")
-        assert res.directives == ["set-thermostat-action"]
+        assert res.directives == [{"payload": "set-thermostat-action"}]

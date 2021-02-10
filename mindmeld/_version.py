@@ -14,7 +14,7 @@
 """Defines mindmeld version information"""
 from __future__ import absolute_import, unicode_literals
 
-current = "current = '4.3.4rc2'"
+current = "4.3.4rc3"
 
 
 def get_mm_version():

@@ -26,21 +26,28 @@ import subprocess
 import sys
 import time
 import warnings
-
 from shutil import which
+
 import click
 import click_log
 import distro
 import requests
 from tqdm import tqdm
 
+# Loads augmentor and annotator registration helper methods implicitly. Unused in this file.
+from . import augmentation  # noqa: F401 pylint: disable=W0611
+from . import auto_annotator  # noqa: F401 pylint: disable=W0611
+
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
+from .components._config import get_augmentation_config, get_auto_annotator_config
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
+
+from .models.helpers import create_annotator, create_augmentor
 from .path import (
     MODEL_CACHE_PATH,
     QUERY_CACHE_PATH,
@@ -48,13 +55,6 @@ from .path import (
     get_generated_data_folder,
     get_dvc_local_remote_path,
 )
-
-from .components._config import get_augmentation_config, get_auto_annotator_config
-from .models.helpers import create_annotator, create_augmentor
-
-# Loads annotator and augmentor registration helper methods implicitly. Unused in this file.
-from . import auto_annotator  # noqa: F401 pylint: disable=W0611
-from . import augmentation  # noqa: F401 pylint: disable=W0611
 
 logger = logging.getLogger(__name__)
 

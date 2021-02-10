@@ -10,30 +10,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
-from copy import deepcopy
-import re
+import importlib
 import logging
 import os
-import importlib
+import re
+from abc import ABC, abstractmethod
+from copy import deepcopy
 from enum import Enum
-from tqdm import tqdm
+
 import spacy
+from tqdm import tqdm
 
-
-from .resource_loader import ResourceLoader
+from .components import NaturalLanguageProcessor
 from .components._config import get_auto_annotator_config
-from .system_entity_recognizer import DucklingRecognizer
-from .markup import load_query, dump_queries
-from .core import Entity, Span, QueryEntity
-from .query_factory import QueryFactory
-from .exceptions import MarkupError
-from .models.helpers import register_annotator
 from .constants import (
     SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap, _get_pattern
 )
-from .components import NaturalLanguageProcessor
+from .core import Entity, QueryEntity, Span
+from .exceptions import MarkupError
+from .markup import dump_queries, load_query
+from .models.helpers import register_annotator
 from .path import get_entity_types
+from .query_factory import QueryFactory
+from .resource_loader import ResourceLoader
+from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 

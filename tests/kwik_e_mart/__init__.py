@@ -145,9 +145,8 @@ form_store_phone = {
     "entities": [
         FormEntity(
             entity="store_name",
-            responses="Which store would you like to know about?",
-            retry_response="Sorry, I did not get you. "
-            "Which store would you like to know about?",
+            responses=["Which store would you like to know about?"],
+            retry_response=["Sorry, I did not get you. Which store would you like to know about?"],
         )
     ],
     "max_retries": 1,

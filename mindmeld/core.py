@@ -13,6 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+from typing import Optional, List, Dict
 import immutables
 
 TEXT_FORM_RAW = 0
@@ -769,30 +770,31 @@ class FormEntity:
 
     def __init__(
         self,
-        entity=None,
-        role=None,
-        responses=None,
-        retry_response=None,
-        value=None,
-        default_eval=True,
-        hints=None,
-        custom_eval=None,
-        **kwargs
+        entity: str,
+        role: Optional[str] = None,
+        responses: Optional[List[str]] = None,
+        retry_response: Optional[List[str]] = None,
+        value: Optional[Dict] = None,
+        default_eval: Optional[bool] = True,
+        hints: Optional[List[str]] = None,
+        custom_eval: Optional[str] = None,
     ):
-        if kwargs:
-            self.__dict__.update(kwargs)
+        self.entity = entity
+        self.role = role
 
-        else:
-            self.entity = entity
-            self.role = role
-            self.responses = responses or [
-                "Please provide value for: {}".format(self.entity)
-            ]
-            self.retry_response = retry_response or self.responses
-            self.value = value
-            self.default_eval = default_eval
-            self.hints = hints
-            self.custom_eval = custom_eval
+        if isinstance(responses, str):
+            responses = [responses]
+        self.responses = responses or [
+            "Please provide value for: {}".format(self.entity)
+        ]
+
+        if isinstance(retry_response, str):
+            retry_response = [retry_response]
+        self.retry_response = retry_response or self.responses
+        self.value = value
+        self.default_eval = default_eval
+        self.hints = hints
+        self.custom_eval = custom_eval
 
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
