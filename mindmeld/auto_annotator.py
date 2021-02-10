@@ -200,7 +200,12 @@ class Annotator(ABC):
         for key, value in kwargs.items():
             if key == "unannotate_all" and value:
                 config["unannotate"] = [
-                    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
+                    {
+                        "domains": ".*",
+                        "intents": ".*",
+                        "files": ".*",
+                        "entities": ".*",
+                    }
                 ]
                 config["unannotate_supported_entities_only"] = False
             else:
@@ -442,12 +447,13 @@ class SpacyAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
+        self.locale = self.locale if language == self.locale.split("_")[0] else None
         self.spacy_model_size = model_size or self.config.get("spacy_model_size", "lg")
         self.model_name = self._get_spacy_model_name()
         self.nlp = SpacyAnnotator._load_model(self.model_name)
 
     def _get_spacy_model_name(self):
-        """ Get the name of a Spacy Model.
+        """Get the name of a Spacy Model.
 
         Returns:
             spacy_model_name (str): Name of the Spacy NER model
@@ -489,7 +495,7 @@ class SpacyAnnotator(Annotator):
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
-        """ This function generates a list of supported entities for the given language.
+        """This function generates a list of supported entities for the given language.
         These entities labels are mapped to MindMeld sys_entities.
         The "misc" spacy entity is skipped since the category too broad to be
         helpful in an application.
@@ -509,12 +515,12 @@ class SpacyAnnotator(Annotator):
             else:
                 supported_entities.add("sys_" + entity)
         if "sys_weight" in supported_entities:
-            supported_entities.add("sys_other-quantity")
+            supported_entities.update(["sys_distance", "sys_other-quantity"])
         supported_entities = self._remove_unresolvable_entities(supported_entities)
         return supported_entities
 
     def _remove_unresolvable_entities(self, entities):
-        """ Remove entities that need duckling to be resolved but are not
+        """Remove entities that need duckling to be resolved but are not
         supported by duckling for the given language.
 
         Args:
@@ -560,6 +566,7 @@ class SpacyAnnotator(Annotator):
         entity_resolution_func_map = {
             "time": self._resolve_time_date,
             "date": self._resolve_time_date,
+            "datetime": self._resolve_time_date,
             "cardinal": self._resolve_cardinal,
             "money": self._resolve_money,
             "ordinal": self._resolve_ordinal,
@@ -570,13 +577,13 @@ class SpacyAnnotator(Annotator):
 
         entities = []
         for entity in spacy_entities:
-            if entity["dim"] == "per":
+            if entity["dim"] in ["per", "persName"]:
                 entity["dim"] = "person"
             elif entity["dim"] == "misc":
                 continue
             if entity["dim"] in entity_resolution_func_map:
                 params = {"entity": entity}
-                if entity["dim"] in ["time", "date"]:
+                if entity["dim"] in ["time", "date", "datetime"]:
                     params["entity_types"] = entity_types
                 elif entity["dim"] in ["money"]:
                     params["sentence"] = sentence
@@ -922,32 +929,35 @@ class NoTranslationDucklingAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
+        self.locale = self.locale if language == self.locale.split("_")[0] else None
 
-    def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
+    def parse(self, sentence, entity_types=None, **kwargs):
         """
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
                     possible entity types will be parsed.
-            language (str, optional): Language as specified using a 639-1/2 code.
-            locale (str, optional): The locale representing the ISO 639-1 language code and \
-                ISO3166 alpha 2 country code separated by an underscore character.
         Returns: entities (list): List of entity dictionaries.
         """
-        language = language or self.language
-        locale = locale or self.locale
         duckling_candidates = self.duckling.get_candidates_for_text(
-            sentence, entity_types=entity_types, language=language, locale=locale
+            sentence,
+            entity_types=entity_types,
+            language=self.language,
+            locale=self.locale,
         )
-        filtered_candidates = NoTranslationDucklingAnnotator._filter_duckling_candidates(
-            duckling_candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._filter_duckling_candidates(
+                duckling_candidates
+            )
         )
         spans = [
             Span(candidate["start"], candidate["end"] - 1)
             for candidate in filtered_candidates
         ]
-        final_spans = NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
-            spans
+        final_spans = (
+            NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
+                spans
+            )
         )
         final_candidates = []
         for span in final_spans:
@@ -999,8 +1009,10 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
-            candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
+                candidates
+            )
         )
         return filtered_candidates
 
@@ -1038,7 +1050,11 @@ class TranslationDucklingAnnotator(Annotator):
         """
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
+        assert (
+            self.language != ENGLISH_LANGUAGE_CODE
+        ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         self.locale = locale or self.locale
+        self.locale = self.locale if language == self.locale.split("_")[0] else None
         self.translator = TranslatorFactory().get_translator(
             self.config.get("translator")
         )
@@ -1049,25 +1065,20 @@ class TranslationDucklingAnnotator(Annotator):
             locale=ENGLISH_US_LOCALE,
         )
 
-    def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
+    def parse(self, sentence, entity_types=None, **kwargs):
         """
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
                     possible entity types will be parsed.
-            language (str, optional): Language as specified using a 639-1/2 code.
-            locale (str, optional): The locale representing the ISO 639-1 language code and \
-                ISO3166 alpha 2 country code separated by an underscore character.
         Returns:
             entities (list): List of entity dictionaries.
         """
-        locale = locale or self.locale
-        language = language or self.language
-        assert (
-            self.language != ENGLISH_LANGUAGE_CODE
-        ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         candidates = self.en_annotator.duckling.get_candidates_for_text(
-            sentence, entity_types=entity_types, language=language, locale=locale
+            sentence,
+            entity_types=entity_types,
+            language=self.language,
+            locale=self.locale,
         )
         en_sentence = self.translator.translate(  # pylint: disable=E1128
             sentence, target_language=ENGLISH_LANGUAGE_CODE
@@ -1084,7 +1095,9 @@ class TranslationDucklingAnnotator(Annotator):
                 if value_matched_candidates:
                     continue
                 if (
-                    self.translator.translate(entity["body"], target_language=language)
+                    self.translator.translate(
+                        entity["body"], target_language=self.language
+                    )
                     == candidate["body"]
                 ):
                     final_candidates.append(candidate)
@@ -1130,6 +1143,7 @@ class MultiLingualAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
+        self.locale = self.locale if language == self.locale.split("_")[0] else None
         self.en_annotator = SpacyAnnotator(
             app_path=self.app_path,
             config=self.config,
@@ -1161,28 +1175,23 @@ class MultiLingualAnnotator(Annotator):
             locale=self.locale,
         )
 
-    def parse(self, sentence, entity_types=None, language=None, locale=None, **kwargs):
+    def parse(self, sentence, entity_types=None, **kwargs):
         """
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
                 possible entity types will be parsed.
-            language (str, optional): Language as specified using a 639-1/2 code.
-            locale (str, optional): The locale representing the ISO 639-1 language code and \
-                ISO3166 alpha 2 country code separated by an underscore character.
         Returns:
             entities (list): List of entity dictionaries.
         """
-        language = language or self.language
-        locale = locale or self.locale
 
         if self.language == ENGLISH_LANGUAGE_CODE:
             return self.en_annotator.parse(sentence, entity_types=entity_types)
         non_en_spacy_entities = self.non_en_annotator.parse(
-            sentence, entity_types=entity_types, language=language, locale=locale
+            sentence, entity_types=entity_types
         )
         duckling_entities = self.duckling_annotator.parse(
-            sentence, entity_types=entity_types, language=language, locale=locale
+            sentence, entity_types=entity_types
         )
         merged_entities = MultiLingualAnnotator._resolve_conflicts_entity_dicts(
             non_en_spacy_entities, duckling_entities

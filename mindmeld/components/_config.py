@@ -466,7 +466,7 @@ DEFAULT_NLP_CONFIG = {
 
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
-    "annotator_class": "SpacyAnnotator",
+    "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}],
     "unannotate_supported_entities_only": True,
