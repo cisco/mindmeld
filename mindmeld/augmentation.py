@@ -15,7 +15,6 @@
 
 import logging
 import re
-import torch
 
 from abc import ABC, abstractmethod
 
@@ -24,15 +23,23 @@ from .constants import _get_pattern
 from .models.helpers import register_augmentor
 from .resource_loader import ResourceLoader
 
+logger = logging.getLogger(__name__)
+
 try:
-    from transformers import PegasusForConditionalGeneration, PegasusTokenizer
-except ModuleNotFoundError:
-    raise ValueError(
-        "Library not found: 'transformers'. Run 'pip install mindmeld[augment]'"
+    import torch
+except ImportError:
+    logger.info(
+        "Library not found: 'torch'. Run 'pip install mindmeld[augment]'"
         " to install."
     )
 
-logger = logging.getLogger(__name__)
+try:
+    from transformers import PegasusForConditionalGeneration, PegasusTokenizer
+except ImportError:
+    logger.info(
+        "Library not found: 'transformers'. Run 'pip install mindmeld[augment]'"
+        " to install."
+    )
 
 
 class Augmentor(ABC):
@@ -52,7 +59,7 @@ class Augmentor(ABC):
         self.config = config or get_augmentation_config(app_path=app_path)
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
 
-    def augment(self, config):
+    def augment(self, config, **kwargs):
         """Augments queries given initial queries in application.
 
         Args:
@@ -63,12 +70,13 @@ class Augmentor(ABC):
 
         for path in filtered_paths:
             queries = self._read_path_queries(path)
-            augmented_queries = self.augment_queries(queries)
+            augmented_queries = self.augment_queries(queries, **kwargs)
             self._write_files(path, augmented_queries)
 
     @abstractmethod
     def augment_queries(self, queries):
-        """
+        """Generates augmented data given application queries.
+
         Args:
             queries (list): List of queries.
 
@@ -179,10 +187,10 @@ class EnglishParaphraser(Augmentor):
         paraphrases = self.tokenizer.batch_decode(translated, skip_special_tokens=True)
         return paraphrases
 
-    def augment_queries(self, queries):
+    def augment_queries(self, queries, **kwargs):
         augmented_queries = []
         for query in queries:
-            augmented_queries.extend(self._get_response(query))
+            augmented_queries.extend(self._get_response(query, **kwargs))
         return augmented_queries
 
 

@@ -46,7 +46,6 @@ from .components._config import get_augmentation_config, get_auto_annotator_conf
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-
 from .models.helpers import create_annotator, create_augmentor
 from .path import (
     MODEL_CACHE_PATH,
