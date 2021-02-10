@@ -303,7 +303,7 @@ Then use the :meth:`parse` function.
 
 .. code-block:: python
 	
-	sa.parse("Apple stock went up $10 last monday.") 
+	mla.parse("Apple stock went up $10 last monday.") 
 
 Three entities are automatically recognized and a list of dictionaries is returned. Each dictionary represents a detected entity.:
 
@@ -360,7 +360,7 @@ For example, we can restrict the output of the previous example by doing the fol
 	
 	allowed_entites = ["sys_org", "sys_amount-of-money", "sys_time"]
 	sentence = "Apple stock went up $10 last monday."
-	sa.parse(sentence=sentence, entity_types=allowed_entities)
+	mla.parse(sentence=sentence, entity_types=allowed_entities)
 
 Working with Non-English Sentences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -415,7 +415,7 @@ Then use the :meth:`parse` function.
 
 .. code-block:: python
 	
-	sa.parse("Las acciones de Apple subieron $10 el lunes pasado.") 
+	mla.parse("Las acciones de Apple subieron $10 el lunes pasado.") 
 
 Three entities are automatically recognized.
 
@@ -512,11 +512,13 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 
 ``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
-``'spacy_model_size'`` (:class:`str`): :attr:`lg` is used by default for the best performance. Alternative options are :attr:`sm` and :attr:`md`. This parameter is optional and is specific to the use of the :class:`MultiLingualAnnotator`.
+``'spacy_model_size'`` (:class:`str`): :attr:`lg` is used by default for the best performance. Alternative options are :attr:`sm` and :attr:`md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator` and :class:`MultiLingualAnnotator`.
 The language is inferred from the :attr:`LANGUAGE_CONFIG` in :attr:`config.py`. If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `NER models <https://spacy.io/models/>`_.
 
+``'translator'`` (:class:`str`): This parameter is used by the :class:`MultiLingualAnnotator`. If Google application credentials are available and have been exported, set this parameter to :attr:`GoogleTranslator`. Otherwise, set this paramter to :attr:`NoOpTranslator`.
+
 Using the Bootstrap Annotator
-----------------------------
+-----------------------------
 The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is trained on the existing labeled data.
 The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the trained entity recognizer for each given intent.
 

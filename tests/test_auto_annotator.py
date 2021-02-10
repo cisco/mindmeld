@@ -13,18 +13,34 @@ from mindmeld.auto_annotator import MultiLingualAnnotator
 
 
 @pytest.fixture(scope="module")
-def en_mla_annotator(kwik_e_mart_app_path):
+def en_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(kwik_e_mart_app_path)
 
 
 @pytest.fixture(scope="module")
-def es_mla_annotator(kwik_e_mart_app_path):
+def es_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(kwik_e_mart_app_path, language="es")
 
 
 @pytest.fixture(scope="module")
-def fr_mla_annotator(kwik_e_mart_app_path):
+def fr_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(kwik_e_mart_app_path, language="fr")
+
+
+def _check_match(
+    annotator, query, entity_type, body=None, value=None, unit=None, grain=None
+):
+    response = annotator.parse(query, entity_types=[entity_type])[0]
+    if body:
+        assert body == response["body"]
+    if unit:
+        assert unit == response["value"]["unit"]
+    if value:
+        assert value == response["value"]["value"]
+    if grain:
+        assert grain == response["value"]["grain"]
+    if entity_type:
+        assert response["dim"] == entity_type
 
 
 # English Tests
@@ -38,11 +54,8 @@ def fr_mla_annotator(kwik_e_mart_app_path):
         ("5th", "5th", 5),
     ],
 )
-def en_test_ordinal_parse(en_mla_annotator, query, body, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_ordinal"
+def test_en_ordinal_parse(en_mla, query, body, value):
+    _check_match(en_mla, query, "sys_ordinal", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -57,11 +70,8 @@ def en_test_ordinal_parse(en_mla_annotator, query, body, value):
         ("nine thousand and eight stories", "nine thousand and eight", 9008),
     ],
 )
-def en_test_cardinal_parse(en_mla_annotator, query, body, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_number"
+def test_en_cardinal_parse(en_mla, query, body, value):
+    _check_match(en_mla, query, "sys_number", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -76,10 +86,8 @@ def en_test_cardinal_parse(en_mla_annotator, query, body, value):
         ("thirty percent", 0.3),
     ],
 )
-def en_test_percent_parse(en_mla_annotator, query, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_percent"
+def test_en_percent_parse(en_mla, query, value):
+    _check_match(en_mla, query, "sys_percent", None, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -94,11 +102,8 @@ def en_test_percent_parse(en_mla_annotator, query, value):
         ("47.5 inches", "inch", 47.5),
     ],
 )
-def en_test_distance_parse(en_mla_annotator, query, unit, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_distance"
+def test_en_distance_parse(en_mla, query, unit, value):
+    _check_match(en_mla, query, "sys_distance", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -113,11 +118,8 @@ def en_test_distance_parse(en_mla_annotator, query, unit, value):
         ("47.5 mg", "gram", 0.0475),
     ],
 )
-def en_test_weight_parse(en_mla_annotator, query, unit, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_weight"
+def test_en_weight_parse(en_mla, query, unit, value):
+    _check_match(en_mla, query, "sys_weight", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -129,10 +131,8 @@ def en_test_weight_parse(en_mla_annotator, query, unit, value):
         ("Vickie Parilla", "Vickie Parilla"),
     ],
 )
-def en_test_person_parse(en_mla_annotator, query, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_person"
+def test_en_person_parse(en_mla, query, value):
+    _check_match(en_mla, query, "sys_person", None, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -148,11 +148,8 @@ def en_test_person_parse(en_mla_annotator, query, value):
         ("$70k", "$", 70000),
     ],
 )
-def en_test_money_parse(en_mla_annotator, query, unit, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_amount-of-money"
+def test_en_money_parse(en_mla, query, unit, value):
+    _check_match(en_mla, query, "sys_amount-of-money", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -168,11 +165,8 @@ def en_test_money_parse(en_mla_annotator, query, unit, value):
         ("3 weeks", "week", 3),
     ],
 )
-def en_test_duration_parse(en_mla_annotator, query, unit, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_duration"
+def test_en_duration_parse(en_mla, query, unit, value):
+    _check_match(en_mla, query, "sys_duration", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -183,11 +177,8 @@ def en_test_duration_parse(en_mla_annotator, query, unit, value):
         ("first thursday of 2015", "day", "2015-01-01T00:00:00.000-08:00"),
     ],
 )
-def en_test_time_parse(en_mla_annotator, query, grain, value):
-    spacy_response = en_mla_annotator.parse(query)[0]
-    assert grain == spacy_response["value"]["grain"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_time"
+def test_en_time_parse(en_mla, query, grain, value):
+    _check_match(en_mla, query, "sys_time", None, value, None, grain)
 
 
 # Spanish Tests
@@ -202,22 +193,16 @@ def en_test_time_parse(en_mla_annotator, query, grain, value):
         ("$ 100000", "$", 100000),
     ],
 )
-def es_test_money_parse(es_mla_annotator, query, unit, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_amount-of-money"
+def test_es_money_parse(es_mla, query, unit, value):
+    _check_match(es_mla, query, "sys_amount-of-money", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
     "query, unit, value",
     [("2 horas", "hour", 2), ("15 minutos", "minute", 15), ("3 días", "day", 3)],
 )
-def es_test_duration_parse(es_mla_annotator, query, unit, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_duration"
+def test_es_duration_parse(es_mla, query, unit, value):
+    _check_match(es_mla, query, "sys_duration", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -225,18 +210,15 @@ def es_test_duration_parse(es_mla_annotator, query, unit, value):
     [
         ("Tengo 32 reuniones", "32", 32),
         ("diez piedras", "diez", 10),
-        ("James Bond tiene 58,67 frutos", "58,67", 58.67),
+        ("Yo tengo 58,67 frutos", "58,67", 58.67),
         ("treinta y ocho pájaros", "treinta y ocho", 38),
         ("1/4 manzana", "1/4", 0.25),
         ("1.394.345,45 ladrillos", "1.394.345,45", 1394345.45),
         ("nueve mil ocho mujeres", "nueve", 9),
     ],
 )
-def es_test_cardinal_parse(es_mla_annotator, query, body, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_number"
+def test_es_cardinal_parse(es_mla, query, body, value):
+    _check_match(es_mla, query, "sys_number", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -248,11 +230,8 @@ def es_test_cardinal_parse(es_mla_annotator, query, body, value):
         ("¿Quién es el primero en nacer?", "primero", 1),
     ],
 )
-def es_test_ordinal_parse(es_mla_annotator, query, body, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_ordinal"
+def test_es_ordinal_parse(es_mla, query, body, value):
+    _check_match(es_mla, query, "sys_ordinal", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -260,15 +239,13 @@ def es_test_ordinal_parse(es_mla_annotator, query, body, value):
     [
         ("Hagamos que Jason se una a la reunión", "Jason"),
         ("Llama a Sarah ahora", "Sarah"),
-        ("¿Dónde está Robert?", "Robert"),
+        ("¿Quien es Robert?", "Robert"),
         ("¿Samantha está enferma hoy?", "Samantha"),
         ("Richard, necesito tu ayuda", "Richard"),
     ],
 )
-def es_test_person_parse(es_mla_annotator, query, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_person"
+def test_es_person_parse(es_mla, query, value):
+    _check_match(es_mla, query, "sys_person", None, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -279,11 +256,8 @@ def es_test_person_parse(es_mla_annotator, query, value):
         ("primer jueves de 2015", "day", "2015-01-01T00:00:00.000-08:00"),
     ],
 )
-def es_test_time_parse(es_mla_annotator, query, grain, value):
-    spacy_response = es_mla_annotator.parse(query)[0]
-    assert grain == spacy_response["value"]["grain"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_time"
+def test_es_time_parse(es_mla, query, grain, value):
+    _check_match(es_mla, query, "sys_time", None, value, None, grain)
 
 
 # French Tests
@@ -298,22 +272,16 @@ def es_test_time_parse(es_mla_annotator, query, grain, value):
         ("100 000 $", "$", 100000),
     ],
 )
-def fr_test_money_parse(fr_mla_annotator, query, unit, value):
-    spacy_response = fr_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_amount-of-money"
+def test_fr_money_parse(fr_mla, query, unit, value):
+    _check_match(fr_mla, query, "sys_amount-of-money", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
     "query, unit, value",
     [("2 heures", "hour", 2), ("15 minutes", "minute", 15), ("3 jours", "day", 3)],
 )
-def fr_test_duration_parse(fr_mla_annotator, query, unit, value):
-    spacy_response = fr_mla_annotator.parse(query)[0]
-    assert unit == spacy_response["value"]["unit"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_duration"
+def test_fr_duration_parse(fr_mla, query, unit, value):
+    _check_match(fr_mla, query, "sys_duration", None, value, unit, None)
 
 
 @pytest.mark.parametrize(
@@ -328,11 +296,8 @@ def fr_test_duration_parse(fr_mla_annotator, query, unit, value):
         ("neuf mille huit femmes", "neuf mille huit", 9008),
     ],
 )
-def fr_test_cardinal_parse(fr_mla_annotator, query, body, value):
-    spacy_response = fr_mla_annotator.parse(query)[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_number"
+def test_fr_cardinal_parse(fr_mla, query, body, value):
+    _check_match(fr_mla, query, "sys_number", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -345,11 +310,8 @@ def fr_test_cardinal_parse(fr_mla_annotator, query, body, value):
         ("Qui est le premier né?", "premier", 1),
     ],
 )
-def fr_test_ordinal_parse(fr_mla_annotator, query, body, value):
-    spacy_response = fr_mla_annotator.parse(query, entity_types=["sys_ordinal"])[0]
-    assert body == spacy_response["body"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_ordinal"
+def test_fr_ordinal_parse(fr_mla, query, body, value):
+    _check_match(fr_mla, query, "sys_ordinal", body, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -361,10 +323,8 @@ def fr_test_ordinal_parse(fr_mla_annotator, query, body, value):
         ("Richard, j'ai besoin de ton aide", "Richard"),
     ],
 )
-def fr_test_person_parse(fr_mla_annotator, query, value):
-    spacy_response = fr_mla_annotator.parse(query)[0]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_person"
+def test_fr_person_parse(fr_mla, query, value):
+    _check_match(fr_mla, query, "sys_person", None, value, None, None)
 
 
 @pytest.mark.parametrize(
@@ -375,11 +335,8 @@ def fr_test_person_parse(fr_mla_annotator, query, value):
         ("premier jeudi de 2015", "day", "2015-01-01T00:00:00.000-08:00"),
     ],
 )
-def fr_test_time_parse(fr_mla_annotator, query, grain, value):
-    spacy_response = fr_mla_annotator.parse(query)[0]
-    assert grain == spacy_response["value"]["grain"]
-    assert value == spacy_response["value"]["value"]
-    assert spacy_response["dim"] == "sys_time"
+def test_fr_time_parse(fr_mla, query, grain, value):
+    _check_match(fr_mla, query, "sys_time", None, value, None, grain)
 
 
 @pytest.mark.parametrize(
@@ -431,5 +388,5 @@ def fr_test_time_parse(fr_mla_annotator, query, grain, value):
         ),
     ],
 )
-def test_rule_to_regex_pattern_parser(en_mla_annotator, rule, pattern):
-    assert pattern == en_mla_annotator._get_pattern(rule)
+def test_rule_to_regex_pattern_parser(en_mla, rule, pattern):
+    assert pattern == en_mla._get_pattern(rule)
