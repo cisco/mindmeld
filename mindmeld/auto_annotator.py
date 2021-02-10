@@ -29,7 +29,9 @@ from .core import Entity, Span, QueryEntity
 from .query_factory import QueryFactory
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
-from .constants import SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap
+from .constants import (
+    SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap, _get_pattern
+)
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types
 
@@ -85,7 +87,7 @@ class Annotator(ABC):
             rules = config[AnnotatorAction.UNANNOTATE.value]
 
         for rule in rules:
-            pattern = Annotator._get_pattern(rule)
+            pattern = _get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
                 compiled_pattern=compiled_pattern, file_paths=all_file_paths
@@ -94,20 +96,6 @@ class Annotator(ABC):
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
         return file_entities_map
-
-    @staticmethod
-    def _get_pattern(rule):
-        """ Convert a rule represented as a dictionary with the keys "domains", "intents",
-        "entities" into a regex pattern.
-
-        Args:
-            rule (dict): Annotation/Unannotation rule.
-
-        Returns:
-            pattern (str): Regex pattern specifying allowed file paths.
-        """
-        pattern = [rule[x] for x in ["domains", "intents", "files"]]
-        return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
         """ Process the entities specified in a rule dictionary. Check if they are valid

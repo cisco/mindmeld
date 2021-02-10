@@ -49,9 +49,12 @@ from .path import (
     get_dvc_local_remote_path,
 )
 
-from .components._config import get_auto_annotator_config
-from .models.helpers import create_annotator
+from .components._config import get_augmentation_config, get_auto_annotator_config
+from .models.helpers import create_annotator, create_augmentor
+
+# Loads annotator and augmentor registration helper methods implicitly. Unused in this file.
 from . import auto_annotator  # noqa: F401 pylint: disable=W0611
+from . import augmentation  # noqa: F401 pylint: disable=W0611
 
 logger = logging.getLogger(__name__)
 
@@ -624,7 +627,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace, index_name, data_file, es_host, app_path=app_path,
+            app_namespace,
+            index_name,
+            data_file,
+            es_host,
+            app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
@@ -731,7 +738,9 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--overwrite", is_flag=True, default=False, help="Overwrite existing annotations."
@@ -746,7 +755,9 @@ def annotate(app_path, overwrite):
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--unannotate_all",
@@ -760,6 +771,20 @@ def unannotate(app_path, unannotate_all):
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.unannotate(unannotate_all=unannotate_all)
     logger.info("Annotation Removal Complete.")
+
+
+@shared_cli.command("augment", context_settings=CONTEXT_SETTINGS)
+@click.option(
+    "--app-path",
+    required=True,
+    help="The application's path.",
+)
+def augment(app_path):
+    """Runs the data augmentation command."""
+    config = get_augmentation_config(app_path=app_path)
+    augmentor = create_augmentor(app_path=app_path, config=config)
+    augmentor.augment(config=config)
+    logger.info("Augmentation Complete.")
 
 
 #

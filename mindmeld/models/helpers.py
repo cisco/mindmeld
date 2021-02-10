@@ -24,6 +24,7 @@ MODEL_MAP = {}
 LABEL_MAP = {}
 EMBEDDER_MAP = {}
 ANNOTATOR_MAP = {}
+AUGMENTATION_MAP = {}
 
 # Example types
 QUERY_EXAMPLE_TYPE = "query"
@@ -100,6 +101,31 @@ def create_annotator(app_path, config):
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config["annotator_class"])) from e
+
+
+def create_augmentor(app_path, config):
+    """Creates an augmentor instance using the provided configuration
+
+    Args:
+        config (dict): A model configuration
+
+    Returns:
+        Augmentor: An Augmentor class
+
+    Raises:
+        ValueError: When model configuration is invalid or required key is missing
+    """
+    if "augmentor_class" not in config:
+        raise KeyError(
+            "Missing required argument in AUGMENTATION_CONFIG: 'augmentor_class'"
+        )
+    try:
+        return AUGMENTATION_MAP[config["augmentor_class"]](
+            app_path=app_path, config=config
+        )
+    except KeyError as e:
+        msg = "Invalid model configuration: Unknown model type {!r}"
+        raise ValueError(msg.format(config["augmentor_class"])) from e
 
 
 def get_feature_extractor(example_type, name):
@@ -188,6 +214,16 @@ def register_annotator(annotator_class_name, annotator_class):
         model_class (class): The annotator class to register
     """
     ANNOTATOR_MAP[annotator_class_name] = annotator_class
+
+
+def register_augmentor(augmentor_name, augmentor_class):
+    """Registers an Annotator class for use with `create_annotator()`
+
+    Args:
+        annotator_class_name (str): The annotator class name as specified in the config
+        model_class (class): The annotator class to register
+    """
+    AUGMENTATION_MAP[augmentor_name] = augmentor_class
 
 
 def register_feature(feature_type, feature_name):
