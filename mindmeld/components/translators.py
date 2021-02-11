@@ -19,7 +19,7 @@ import logging
 import os
 
 try:
-    from google.cloud import translate_v2
+    from google.cloud import translate_v2  # pylint: disable=E0401
 except ModuleNotFoundError as error:
     raise ValueError(
         "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]'"
