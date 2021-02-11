@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#     http://www.apache.org/licenses/LICENSE-2.0
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """
 This module contains the entity resolver component of the MindMeld natural language processor.
 """
@@ -43,39 +30,46 @@ from ._elasticsearch_helpers import (
     resolve_es_config_for_version,
 )
 
+from abc import ABC, abstractmethod
+
+ENTITY_RESOLVER_MODEL_MAPPINGS = {
+    "exact_match": EntityResolverUsingExactSearch,
+    "text_relevance": EntityResolverUsingElasticSearch,
+}
+ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
+
 logger = logging.getLogger(__name__)
 
 
 class EntityResolver:
-    """An entity resolver is used to resolve entities in a given query to their canonical values
-    (usually linked to specific entries in a knowledge base).
-    """
 
-    # prefix for Elasticsearch indices used to store synonyms for entity resolution
-    ES_SYNONYM_INDEX_PREFIX = "synonym"
-    """The prefix of the ES index."""
+    @classmethod
+    def validate_resolver_name(name):
+        if not name in ENTITY_RESOLVER_MODEL_TYPES:
+            msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {}"
+            raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
 
-    def __init__(
-        self, app_path, resource_loader, entity_type, es_host=None, es_client=None
-    ):
-        """Initializes an entity resolver
+    def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
+        er_config = get_classifier_config("entity_resolution", app_path=app_path)
+        name = er_config.get("model_type", None)
+        cls.validate_resolver_name(name)
+        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(name)(
+            app_path, resource_loader, entity_type, er_config, **kwargs
+        )
 
-        Args:
-            app_path (str): The application path
-            resource_loader (ResourceLoader): An object which can load resources for the resolver
-            entity_type: The entity type associated with this entity resolver
-            es_host (str): The Elasticsearch host server
-        """
+
+class EntityResolverBase(ABC):
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         self._app_namespace = get_app_namespace(app_path)
         self._resource_loader = resource_loader
-        self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
         self._is_system_entity = Entity.is_system_entity(self.type)
-        self._exact_match_mapping = None
-        self._er_config = get_classifier_config("entity_resolution", app_path=app_path)
-        self._es_host = es_host
-        self._es_config = {"client": es_client, "pid": os.getpid()}
+        self._er_config = er_config
+        self.name = self._er_config.get("model_type")
         self.ready = False
+        # TODO: save model when dirty is true
+        self.dirty = False  # bool -- Whether the classifier has unsaved changes to its model.
 
         if self._is_system_entity:
             canonical_entities = []
@@ -83,19 +77,80 @@ class EntityResolver:
             canonical_entities = self._resource_loader.get_entity_map(self.type).get(
                 "entities", []
             )
+            self.__validate_resolver_name(self.name)
         self._no_canonical_entity_map = len(canonical_entities) == 0
-
-    @property
-    def _es_index_name(self):
-        return EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + self.type
-
-    @property
-    def _use_text_rel(self):
-        return self._er_config["model_type"] == "text_relevance"
 
     @property
     def _use_double_metaphone(self):
         return "double_metaphone" in self._er_config.get("phonetic_match_types", [])
+
+    @abstractmethod
+    def _fit(self):
+        raise NotImplementedError
+
+    def fit(self, clean=False):
+
+        if self.ready:
+            return
+
+        if self._no_canonical_entity_map:
+            return
+
+        self._fit(clean)
+        self.ready = True
+
+    @abstractmethod
+    def _predict(self):
+        raise NotImplementedError
+
+    def predict(self, entity):
+
+        if isinstance(entity, (list, tuple)):
+            top_entity = entity[0]
+            entity = tuple(entity)
+        else:
+            top_entity = entity
+            entity = tuple([entity])
+
+        if self._is_system_entity:
+            # system entities are already resolved
+            return [top_entity.value]
+
+        if self._no_canonical_entity_map:
+            return []
+
+        return self._predict(entity)
+
+    @abstractmethod
+    def _load(self):
+        raise NotImplementedError
+
+    def load(self):
+        self._load()
+
+    # TODO: make this an abstractmethod and
+    #   add dump functionalities in derived classes
+    def _dump(self):
+        raise NotImplementedError
+
+    def __repr__(self):
+        msg = "<{} {!r} ready: {!r}, dirty: {!r}>"
+        return msg.format(self.__class__.__name__, self.name, self.ready, self.dirty)
+
+
+class EntityResolverUsingElasticSearch(EntityResolverBase):
+
+    # prefix for Elasticsearch indices used to store synonyms for entity resolution
+    ES_SYNONYM_INDEX_PREFIX = "synonym"
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader, entity_type, **kwargs)
+        self._es_host = kwargs.get(es_host, None)
+        self._es_config = {"client": kwargs.get(es_client, None), "pid": os.getpid()}
+
+    @property
+    def _es_index_name(self):
+        return EntityResolverUsingElasticSearch.ES_SYNONYM_INDEX_PREFIX + "_" + self.type
 
     @property
     def _es_client(self):
@@ -192,27 +247,7 @@ class EntityResolver:
             es_client,
         )
 
-    def fit(self, clean=False):
-        """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
-
-        In addition, the synonyms in entity mapping are imported to knowledge base indexes if the
-        corresponding knowledge base object index and field name are specified for the entity type.
-        The synonym info is then used by Question Answerer for text relevance matches.
-
-        Args:
-            clean (bool): If ``True``, deletes and recreates the index from scratch instead of
-                          updating the existing index with synonyms in the mapping.json.
-        """
-        if self.ready:
-            return
-
-        if self._no_canonical_entity_map:
-            return
-
-        if not self._use_text_rel:
-            self._fit_exact_match()
-            return
-
+    def _fit(self, clean):
         if clean:
             delete_index(
                 self._app_namespace, self._es_index_name, self._es_host, self._es_client
@@ -224,7 +259,7 @@ class EntityResolver:
 
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '%s'", self._es_index_name)
-        EntityResolver.ingest_synonym(
+        EntityResolverUsingElasticSearch.ingest_synonym(
             app_namespace=self._app_namespace,
             index_name=self._es_index_name,
             data=entities,
@@ -264,7 +299,7 @@ class EntityResolver:
                     "without ID."
                 )
             logger.info("Importing synonym data to knowledge base index '%s'", kb_index)
-            EntityResolver.ingest_synonym(
+            EntityResolverUsingElasticSearch.ingest_synonym(
                 app_namespace=self._app_namespace,
                 index_name=kb_index,
                 index_type="kb",
@@ -275,82 +310,9 @@ class EntityResolver:
                 use_double_metaphone=self._use_double_metaphone,
             )
 
-        self.ready = True
+    def _predict(self, entity):
 
-    @staticmethod
-    def _process_entity_map(entity_type, entity_map, normalizer):
-        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
-        synonym_map for exact match entity resolution when Elasticsearch is unavailable
-
-        Args:
-            entity_type: The entity type associated with this entity resolver
-            entity_map: The loaded mapping.json file for the given entity type
-            normalizer: The normalizer to use
-        """
-        item_map = {}
-        syn_map = {}
-        seen_ids = []
-        for item in entity_map.get("entities"):
-            cname = item["cname"]
-            item_id = item.get("id")
-            if cname in item_map:
-                msg = "Canonical name %s specified in %s entity map multiple times"
-                logger.debug(msg, cname, entity_type)
-            if item_id:
-                if item_id in seen_ids:
-                    msg = "Item id {!r} specified in {!r} entity map multiple times"
-                    raise ValueError(msg.format(item_id, entity_type))
-                seen_ids.append(item_id)
-
-            aliases = [cname] + item.pop("whitelist", [])
-            items_for_cname = item_map.get(cname, [])
-            items_for_cname.append(item)
-            item_map[cname] = items_for_cname
-            for alias in aliases:
-                norm_alias = normalizer(alias)
-                if norm_alias in syn_map:
-                    msg = "Synonym %s specified in %s entity map multiple times"
-                    logger.debug(msg, cname, entity_type)
-                cnames_for_syn = syn_map.get(norm_alias, [])
-                cnames_for_syn.append(cname)
-                syn_map[norm_alias] = list(set(cnames_for_syn))
-
-        return {"items": item_map, "synonyms": syn_map}
-
-    def _fit_exact_match(self):
-        """Fits a simple exact match entity resolution model when Elasticsearch is not available."""
-        entity_map = self._resource_loader.get_entity_map(self.type)
-        self._exact_match_mapping = self._process_entity_map(
-            self.type, entity_map, self._normalizer
-        )
-
-    def predict(self, entity):
-        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
-        trained entity resolution model.
-
-        Args:
-            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
-                objects.
-
-        Returns:
-            (list): The top 20 resolved values for the provided entity.
-        """
-        if isinstance(entity, (list, tuple)):
-            top_entity = entity[0]
-            entity = tuple(entity)
-        else:
-            top_entity = entity
-            entity = tuple([entity])
-
-        if self._is_system_entity:
-            # system entities are already resolved
-            return [top_entity.value]
-
-        if self._no_canonical_entity_map:
-            return []
-
-        if not self._use_text_rel:
-            return self._predict_exact_match(top_entity)
+        top_entity = entity[0]
 
         weight_factors = [1 - float(i) / len(entity) for i in range(len(entity))]
 
@@ -538,12 +500,95 @@ class EntityResolver:
 
             return results[0:20]
 
-    def _predict_exact_match(self, entity):
-        """Predicts the resolved value(s) for the given entity using the loaded entity map.
+    def _load(self):
+        """Loads the trained entity resolution model from disk."""
+        try:
+            scoped_index_name = get_scoped_index_name(
+                self._app_namespace, self._es_index_name
+            )
+            if not self._es_client.indices.exists(index=scoped_index_name):
+                self.fit()
+
+        except EsConnectionError as e:
+            logger.error(
+                "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+            )
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
+        except TransportError as e:
+            logger.error(
+                "Unexpected error occurred when sending requests to Elasticsearch: %s "
+                "Status code: %s details: %s",
+                e.error,
+                e.status_code,
+                e.info,
+            )
+            raise EntityResolverError from e
+        except ElasticsearchException as e:
+            raise EntityResolverError from e
+
+
+class EntityResolverUsingExactSearch(EntityResolverBase):
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        super(EntityResolverUsingExactSearch, self).__init__(app_path, resource_loader, entity_type, **kwargs)
+        self._normalizer = self._resource_loader.query_factory.normalize
+        self._exact_match_mapping = None
+
+    @staticmethod
+    def _process_entity_map(entity_type, entity_map, normalizer):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
 
         Args:
-            entity (Entity): An entity found in an input query
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+            normalizer: The normalizer to use
         """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map.get("entities"):
+            cname = item["cname"]
+            item_id = item.get("id")
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, entity_type)
+            if item_id:
+                if item_id in seen_ids:
+                    msg = "Item id {!r} specified in {!r} entity map multiple times"
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for alias in aliases:
+                norm_alias = normalizer(alias)
+                if norm_alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, entity_type)
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        return {"items": item_map, "synonyms": syn_map}
+
+    def _fit(self, clean):
+
+        # list of canonical entities and their synonyms
+        entities = entity_map.get("entities", [])
+
+        """Fits a simple exact match entity resolution model when Elasticsearch is not available."""
+        entity_map = self._resource_loader.get_entity_map(self.type)
+        self._exact_match_mapping = self._process_entity_map(
+            self.type, entity_map, self._normalizer
+        )
+
+    def _predict(self, entity):
+
+        entity = entity[0]  # top_entity
+
         normed = self._normalizer(entity.text)
         try:
             cnames = self._exact_match_mapping["synonyms"][normed]
@@ -569,31 +614,5 @@ class EntityResolver:
 
         return values
 
-    def load(self):
-        """Loads the trained entity resolution model from disk."""
-        try:
-            if self._use_text_rel:
-                scoped_index_name = get_scoped_index_name(
-                    self._app_namespace, self._es_index_name
-                )
-                if not self._es_client.indices.exists(index=scoped_index_name):
-                    self.fit()
-            else:
-                self.fit()
-
-        except EsConnectionError as e:
-            logger.error(
-                "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
-            )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
-        except TransportError as e:
-            logger.error(
-                "Unexpected error occurred when sending requests to Elasticsearch: %s "
-                "Status code: %s details: %s",
-                e.error,
-                e.status_code,
-                e.info,
-            )
-            raise EntityResolverError from e
-        except ElasticsearchException as e:
-            raise EntityResolverError from e
+    def _load(self):
+        self.fit()
