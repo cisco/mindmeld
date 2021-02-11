@@ -17,8 +17,9 @@ import logging
 import re
 
 from abc import ABC, abstractmethod
+from tqdm import tqdm
 
-from .components._config import get_augmentation_config
+from .components._config import get_augmentation_config, get_language_config
 from .constants import _get_pattern
 from .models.helpers import register_augmentor
 from .resource_loader import ResourceLoader
@@ -29,17 +30,19 @@ try:
     import torch
 except ImportError:
     logger.info(
-        "Library not found: 'torch'. Run 'pip install mindmeld[augment]'"
-        " to install."
+        "Library not found: 'torch'. Run 'pip install mindmeld[augment]'" " to install."
     )
 
 try:
     from transformers import PegasusForConditionalGeneration, PegasusTokenizer
+    from transformers import MarianMTModel, MarianTokenizer
 except ImportError:
     logger.info(
         "Library not found: 'transformers'. Run 'pip install mindmeld[augment]'"
         " to install."
     )
+
+# pylint: disable=R0201
 
 
 class Augmentor(ABC):
@@ -68,7 +71,7 @@ class Augmentor(ABC):
         config = config or self.config
         filtered_paths = self._get_files(config)
 
-        for path in filtered_paths:
+        for path in tqdm(filtered_paths):
             queries = self._read_path_queries(path)
             augmented_queries = self.augment_queries(queries, **kwargs)
             self._write_files(path, augmented_queries)
@@ -156,6 +159,7 @@ class EnglishParaphraser(Augmentor):
                 override the config specified by the app's config.py file.
         """
         super().__init__(app_path=app_path, config=config)
+
         model_name = "tuner007/pegasus_paraphrase"
         torch_device = "cuda" if torch.cuda.is_available() else "cpu"
         self.tokenizer = PegasusTokenizer.from_pretrained(model_name)
@@ -182,7 +186,7 @@ class EnglishParaphraser(Augmentor):
             max_length=60,
             num_beams=num_beams,
             num_return_sequences=num_return_sequences,
-            temperature=1.5
+            temperature=1.5,
         )
         paraphrases = self.tokenizer.batch_decode(translated, skip_special_tokens=True)
         return paraphrases
@@ -208,7 +212,75 @@ class MultiLingualParaphraser(Augmentor):
                 override the config specified by the app's config.py file.
         """
         super().__init__(app_path=app_path, config=config)
-        pass
+
+        self.torch_device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.language, _ = get_language_config(app_path=app_path)
+
+        en_model_name = "Helsinki-NLP/opus-mt-ROMANCE-en"
+        self.en_tokenizer = MarianTokenizer.from_pretrained(en_model_name)
+        self.en_model = MarianMTModel.from_pretrained(en_model_name)
+        self.en_model.to(self.torch_device)
+
+        target_model_name = "Helsinki-NLP/opus-mt-en-ROMANCE"
+        self.target_tokenizer = MarianTokenizer.from_pretrained(target_model_name)
+        self.target_model = MarianMTModel.from_pretrained(target_model_name).to(
+            self.torch_device
+        )
+
+    def _translate(self, **kwargs):
+        """The core translation step for forward and back translation.
+
+        Args:
+            template (lambda func): Structure input text to model.
+            queries (list(str)): List of input queries.
+            model: Machine translation model (en-ROMANCE or ROMANCE-en).
+            tokenizer: Language tokenizer for input query text.
+            num_return_sequences (int): Number of translations generated.
+        """
+        template = kwargs.pop("template")
+        queries = kwargs.pop("queries")
+        model = kwargs.pop("model")
+        tokenizer = kwargs.pop("tokenizer")
+
+        queries = [template(query) for query in queries]
+        encoded = tokenizer.prepare_seq2seq_batch(queries, return_tensors="pt")
+        for key in encoded:
+            encoded[key] = encoded[key].to(self.torch_device)
+
+        translated = model.generate(**encoded, **kwargs)
+        translated_queries = tokenizer.batch_decode(
+            translated, skip_special_tokens=True
+        )
+        return translated_queries
+
+    def augment_queries(self, queries):
+        translated_queries = self._translate(
+            template=lambda text: f"{text}",
+            queries=queries,
+            model=self.en_model,
+            tokenizer=self.en_tokenizer,
+            num_beams=5,
+            num_return_sequences=5,
+            top_k=0,
+            temperature=1.0,
+        )
+        translated_queries = list(set(translated_queries))
+
+        back_translated_queries = self._translate(
+            template=lambda text: f">>{self.language}<< {text}",
+            queries=translated_queries,
+            model=self.target_model,
+            tokenizer=self.target_tokenizer,
+            do_sample=True,
+            num_beams=3,
+            num_return_sequences=3,
+            top_k=50,
+            top_p=0.95,
+        )
+        augmented_queries = list(set(p.lower() for p in back_translated_queries))
+
+        return augmented_queries
 
 
 register_augmentor("EnglishParaphraser", EnglishParaphraser)
+register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)
