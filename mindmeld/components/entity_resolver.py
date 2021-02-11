@@ -75,6 +75,7 @@ class EntityResolver:
         self._er_config = get_classifier_config("entity_resolution", app_path=app_path)
         self._es_host = es_host
         self._es_config = {"client": es_client, "pid": os.getpid()}
+        self.ready = False
 
         if self._is_system_entity:
             canonical_entities = []
@@ -202,6 +203,9 @@ class EntityResolver:
             clean (bool): If ``True``, deletes and recreates the index from scratch instead of
                           updating the existing index with synonyms in the mapping.json.
         """
+        if self.ready:
+            return
+
         if self._no_canonical_entity_map:
             return
 
@@ -270,6 +274,8 @@ class EntityResolver:
                 es_client=self._es_client,
                 use_double_metaphone=self._use_double_metaphone,
             )
+
+        self.ready = True
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer):
@@ -487,7 +493,7 @@ class EntityResolver:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", ex.error, ex.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from ex
         except TransportError as ex:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -500,9 +506,9 @@ class EntityResolver:
                 "Unexpected error occurred when sending requests to "
                 "Elasticsearch: {} Status code: {} details: "
                 "{}".format(ex.error, ex.status_code, ex.info)
-            )
-        except ElasticsearchException:
-            raise EntityResolverError
+            ) from ex
+        except ElasticsearchException as ex:
+            raise EntityResolverError from ex
         else:
             hits = response["hits"]["hits"]
 
@@ -579,7 +585,7 @@ class EntityResolver:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
         except TransportError as e:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
@@ -588,6 +594,6 @@ class EntityResolver:
                 e.status_code,
                 e.info,
             )
-            raise EntityResolverError
-        except ElasticsearchException:
-            raise EntityResolverError
+            raise EntityResolverError from e
+        except ElasticsearchException as e:
+            raise EntityResolverError from e

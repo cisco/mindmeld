@@ -432,9 +432,9 @@ class Classifier(ABC):
         """
         try:
             self._model = joblib.load(model_path)
-        except (OSError, IOError):
+        except (OSError, IOError) as e:
             msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (

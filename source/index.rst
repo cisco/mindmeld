@@ -96,6 +96,7 @@ Contents
    blueprints/home_assistant
    blueprints/hr_assistant
    blueprints/banking
+   blueprints/screening_app
 
 .. toctree::
    :maxdepth: 2

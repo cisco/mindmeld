@@ -21,11 +21,12 @@ import sys
 import time
 import uuid
 
+from marshmallow.exceptions import ValidationError
 from flask import Flask, Request, g, jsonify, request
 from flask_cors import CORS
 
 from ._version import current as __version__
-from .components.dialogue import DialogueResponder
+from .components.schemas import RequestSchema
 from .exceptions import BadMindMeldRequestError
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,12 @@ class MindMeldServer:
 
     def __init__(self, app_manager):
         self._app_manager = app_manager
+        self._request_schema = RequestSchema(
+            context={
+                "nlp": self._app_manager.nlp,
+                "dialogue_handler_map": self._app_manager.dialogue_manager.handler_map
+            }
+        )
         self._request_logger = logger.getChild("requests")
 
         server = Flask("mindmeld")
@@ -86,16 +93,27 @@ class MindMeldServer:
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
                 raise BadMindMeldRequestError(msg, status_code=415)
 
-            safe_request = {}
-            for key in ["text", "params", "context", "frame", "history", "verbose"]:
-                if key in request_json:
-                    safe_request[key] = request_json[key]
-            response = self._app_manager.parse(**safe_request)
-            # add request id to response
-            # use the passed in id if any
-            request_id = request_json.get("request_id", str(uuid.uuid4()))
-            response.request_id = request_id
-            return jsonify(DialogueResponder.to_json(response))
+            try:
+                validated_request = self._request_schema.load(request_json)
+                response = self._app_manager.parse(
+                    text=validated_request.get('text'),
+                    params=validated_request.get('params'),
+                    context=validated_request.get('context'),
+                    frame=validated_request.get('frame'),
+                    history=validated_request.get('history'),
+                    form=validated_request.get('form'),
+                    verbose=validated_request.get('verbose', False)
+                )
+                # add request id to response
+                # use the passed in id if any
+                response = dict(response)
+                request_id = validated_request.get("request_id", str(uuid.uuid4()))
+                response['request_id'] = request_id
+                return jsonify(response)
+            except (ValidationError, ValueError, KeyError) as e:
+                err_message = "Bad request {} caused error {}".format(request_json, e)
+                logger.error(err_message)
+                raise BadMindMeldRequestError(err_message, status_code=400) from e
 
         @server.before_request
         def _before_request():

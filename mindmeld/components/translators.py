@@ -20,11 +20,11 @@ import os
 
 try:
     from google.cloud import translate_v2
-except ModuleNotFoundError:
+except ModuleNotFoundError as error:
     raise ValueError(
         "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]'"
         " to install."
-    )
+    ) from error
 
 logger = logging.getLogger(__name__)
 

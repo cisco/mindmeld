@@ -72,9 +72,9 @@ def create_model(config):
     """
     try:
         return MODEL_MAP[config.model_type](config)
-    except KeyError:
+    except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config.model_type))
+        raise ValueError(msg.format(config.model_type)) from e
 
 
 def create_annotator(app_path, config):
@@ -136,14 +136,16 @@ def create_embedder_model(app_path, config):
         return None
     try:
         embedder_type = embedder_config["embedder_type"]
-    except KeyError:
-        raise ValueError("Invalid model configuration: No provided embedder type.")
+    except KeyError as e:
+        raise ValueError(
+            "Invalid model configuration: No provided embedder type."
+        ) from e
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
-    except KeyError:
+    except KeyError as e:
         msg = "Invalid model configuration: Unknown embedder type {!r}"
-        raise ValueError(msg.format(embedder_type))
+        raise ValueError(msg.format(embedder_type)) from e
 
 
 def register_model(model_type, model_class):

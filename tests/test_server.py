@@ -36,6 +36,7 @@ def test_parse_endpoint(client):
         "version",
         "history",
         "params",
+        "form",
         "frame",
         "dialogue_state",
         "request_id",
@@ -60,3 +61,91 @@ def test_status_endpoint(client):
         "response_time",
         "version",
     }
+
+
+def test_parse_endpoint_multiple_requests(client):
+    test_request = {"text": "where is the restaurant on 12th ave"}
+    response = client.post(
+        "/parse",
+        data=json.dumps(test_request),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert response.status == "200 OK"
+    first_response = json.loads(response.data.decode("utf8"))
+    second_request = {"text": "ok thanks!", "context": {"device": "webex"}}
+    for key in ["history", "params", "frame"]:
+        second_request[key] = first_response[key]
+    response = client.post(
+        "/parse",
+        data=json.dumps(second_request),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert response.status == "200 OK"
+
+
+@pytest.mark.parametrize(
+    "request_body,error_message",
+    [
+        (
+            {
+                "text": "hello",
+                "random_key": {}
+            },
+            "Bad request {'text': 'hello', 'random_key': {}} "
+            "caused error {'random_key': ['Unknown field.']}"
+        ),
+        (
+            {
+                "text": "hello",
+                "params": {
+                    "allowed_intents": [],
+                    "dynamic_resource": {},
+                    "language": "en",
+                    "locale": "en_US",
+                    "target_dialogue_state": "transfer_money_handler",
+                    "time_zone": '',
+                    "timestamp": 0
+                },
+            },
+            "Bad request {'text': 'hello', "
+            "'params': {'allowed_intents': [], 'dynamic_resource': {}, "
+            "'language': 'en', 'locale': 'en_US', 'target_dialogue_state': "
+            "'transfer_money_handler', 'time_zone': '', 'timestamp': 0}} caused "
+            "error {'params': {'time_zone': ['Invalid time_zone param:  "
+            "is not a valid time zone.']}}"
+        ),
+        (
+            {
+                "text": "hello",
+                "history": [
+                    {
+                        "dialogue_state": "transfer_money_handler",
+                        "directives": [],
+                        "form": {},
+                        "frame": {},
+                        "history": [],
+                        "params": {},
+                        "request": {},
+                        "slots": {}
+                    }
+                ],
+            },
+            "Bad request {'text': 'hello', 'history': [{'dialogue_state': "
+            "'transfer_money_handler', 'directives': [], 'form': {}, 'frame': {}, "
+            "'history': [], 'params': {}, 'request': {}, 'slots': {}}]} "
+            "caused error {'request': {'text': ['Missing data for required field.']}}"
+        )
+    ],
+)
+def test_invalid_requests(client, request_body, error_message):
+    response = client.post(
+        "/parse",
+        data=json.dumps(request_body),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert response.status == "400 BAD REQUEST"
+    assert response.status_code == 400
+    assert json.loads(response.get_data(as_text=True))['error'] == error_message

@@ -13,6 +13,8 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+from typing import Optional, List, Dict
+import immutables
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -76,8 +78,8 @@ class Bunch(dict):
     def __getattr__(self, key):
         try:
             return self[key]
-        except KeyError:
-            raise AttributeError(key)
+        except KeyError as e:
+            raise AttributeError(key) from e
 
     def __setstate__(self, state):
         pass
@@ -355,8 +357,8 @@ class Query:
         # None for mapping means 1-1 mapping
         try:
             return mapping[index] if mapping else index
-        except KeyError:
-            raise ValueError("Invalid index {}".format(index))
+        except KeyError as e:
+            raise ValueError("Invalid index {}".format(index)) from e
 
     def _unprocess_index(self, index, form_in):
         if form_in == TEXT_FORM_RAW:
@@ -370,8 +372,8 @@ class Query:
         # None for mapping means 1-1 mapping
         try:
             return mapping[index] if mapping else index
-        except KeyError:
-            raise ValueError("Invalid index {}".format(index))
+        except KeyError as e:
+            raise ValueError("Invalid index {}".format(index)) from e
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -792,29 +794,48 @@ class FormEntity:
 
     def __init__(
         self,
-        entity=None,
-        role=None,
-        responses=None,
-        retry_response=None,
-        value=None,
-        default_eval=True,
-        hints=None,
-        custom_eval=None,
+        entity: str,
+        role: Optional[str] = None,
+        responses: Optional[List[str]] = None,
+        retry_response: Optional[List[str]] = None,
+        value: Optional[Dict] = None,
+        default_eval: Optional[bool] = True,
+        hints: Optional[List[str]] = None,
+        custom_eval: Optional[str] = None,
     ):
         self.entity = entity
-        if not self.entity or not isinstance(self.entity, str):
-            raise TypeError("Entity cannot be empty.")
         self.role = role
+
+        if isinstance(responses, str):
+            responses = [responses]
         self.responses = responses or [
             "Please provide value for: {}".format(self.entity)
         ]
+
+        if isinstance(retry_response, str):
+            retry_response = [retry_response]
         self.retry_response = retry_response or self.responses
         self.value = value
         self.default_eval = default_eval
         self.hints = hints
         self.custom_eval = custom_eval
+
+        if not self.entity or not isinstance(self.entity, str):
+            raise TypeError("Entity cannot be empty.")
         if self.custom_eval and not callable(custom_eval):
             raise TypeError("Invalid custom validation function type.")
+
+    def to_dict(self):
+        """Converts the entity into a dictionary"""
+        base = {}
+        for field in self.__dict__:
+            val = getattr(self, field)
+            if val is not None:
+                if isinstance(val, immutables.Map):
+                    val = dict(val)
+                base[field] = val
+
+        return base
 
 
 def resolve_entity_conflicts(query_entities):

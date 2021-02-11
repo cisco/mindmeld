@@ -22,6 +22,7 @@ import re
 import time
 from collections import Counter
 from copy import deepcopy
+
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
@@ -30,17 +31,9 @@ from .constants import DEFAULT_TRAIN_SET_REGEX
 from .core import Entity
 from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
-from .models.helpers import (
-    CHAR_NGRAM_FREQ_RSC,
-    ENABLE_STEMMING,
-    GAZETTEER_RSC,
-    QUERY_FREQ_RSC,
-    SYS_TYPES_RSC,
-    WORD_FREQ_RSC,
-    WORD_NGRAM_FREQ_RSC,
-    SENTIMENT_ANALYZER,
-    mask_numerics,
-)
+from .models.helpers import (CHAR_NGRAM_FREQ_RSC, ENABLE_STEMMING, GAZETTEER_RSC, QUERY_FREQ_RSC,
+                             SENTIMENT_ANALYZER, SYS_TYPES_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                             mask_numerics)
 from .path import MODEL_CACHE_PATH
 from .query_cache import QueryCache
 from .query_factory import QueryFactory
@@ -267,10 +260,10 @@ class ResourceLoader:
             try:
                 with open(file_path, "r") as json_file:
                     json_data = json.load(json_file)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 raise MindMeldError(
                     "Could not load entity map (Invalid JSON): {!r}".format(file_path)
-                )
+                ) from e
 
         self._entity_files[entity_type]["mapping"]["data"] = json_data
         self._entity_files[entity_type]["mapping"]["loaded"] = time.time()

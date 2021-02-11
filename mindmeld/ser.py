@@ -13,6 +13,7 @@
 
 """This module contains the system entity recognizer."""
 import logging
+
 from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ def get_candidates(
     logger.warning(
         "get_candidates is deprecated in favor of DucklingRecognizer.get_candidates."
     )
-    DucklingRecognizer.get_instance().get_candidates(
+    return DucklingRecognizer.get_instance().get_candidates(
         query,
         entity_types=entity_types,
         locale=locale,
@@ -66,7 +67,7 @@ def get_candidates_for_text(text, entity_types=None, language=None, locale=None)
         "get_candiates_for_text is deprecated in favor of"
         " DucklingRecognizer.get_candidates_for_text."
     )
-    DucklingRecognizer.get_instance().get_candidates_for_text(
+    return DucklingRecognizer.get_instance().get_candidates_for_text(
         text, entity_types=entity_types, language=language, locale=locale
     )
 
@@ -104,7 +105,7 @@ def parse_numerics(
             - response_code (int): http status code.
     """
     logger.warning("parse_numerics is deprecated in favor of DucklingRecognizer.parse.")
-    DucklingRecognizer.get_instance().parse(
+    return DucklingRecognizer.get_instance().parse(
         sentence,
         dimensions=dimensions,
         language=language,
@@ -131,4 +132,4 @@ def resolve_system_entity(query, entity_type, span):
     logger.warning(
         "resolve_system_entity is deprecated in favor of DucklingRecognizer.resolve_system_entity."
     )
-    DucklingRecognizer.get_instance().resolve_system_entity(query, entity_type, span)
+    return DucklingRecognizer.get_instance().resolve_system_entity(query, entity_type, span)

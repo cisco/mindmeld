@@ -340,9 +340,9 @@ class TaggerModel(Model):
                 CRF_TYPE: ConditionalRandomFields,
                 LSTM_TYPE: LstmModel,
             }[classifier_type]
-        except KeyError:
+        except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def dump(self, path, config):
         """

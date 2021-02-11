@@ -8,7 +8,6 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-
     'dataclasses<0.8,>=0.7; python_version >= "3.6" and python_version < "3.7"',
     "aiohttp>=3.6.2",
     "attrs>=18.2",  # attrs has a stable API and does not use semver
@@ -19,7 +18,7 @@ requirements = [
     "elasticsearch>=5.0",
     "Flask~=1.0",
     "Flask-Cors~=3.0",
-    "future~=0.16.0",
+    "future~=0.17",
     "pycountry",  # uses calendar versioning
     "nltk~=3.2",
     "numpy~=1.15",
@@ -37,15 +36,16 @@ requirements = [
     "sklearn-crfsuite>=0.3.6,<1.0",
     "immutables~=0.9",
     "pyyaml>=5.1.1",
-    "spacy==2.3.0",
+    "spacy~=2.3.1",
     "mypy>=0.782",
+    "marshmallow~=3.7.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
 
 test_requirements = [
     "flake8==3.5.0",
-    "pylint~=2.5.3",
+    "pylint~=2.6.0",
     "pytest==3.8.0",
     "pytest-cov==2.4.0",
     "pytest-asyncio==0.8.0",
@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.3",
+    version="4.3.4rc3",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",

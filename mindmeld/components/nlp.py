@@ -32,7 +32,6 @@ from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
     ProcessorError,
-    MindMeldError,
 )
 from ..markup import TIME_FORMAT, process_markup
 from ..path import get_app
@@ -49,6 +48,7 @@ from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
+from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -338,21 +338,6 @@ class Processor(ABC):
         # process the list in series
         return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
 
-    def _validate_locale(self, locale=None):
-        """This function makes sure the locale is consistent with the app's language code"""
-        locale = locale or self.locale
-
-        # if the developer or app doesnt specify the locale, we just use the default locale
-        if not locale:
-            return
-
-        if locale.split("_")[0].lower() != self.language.lower():
-            raise MindMeldError(
-                "Locale %s is inconsistent with app language code %s. "
-                "Set the language code in the config.py file." % (locale, self.language)
-            )
-        return locale
-
     def create_query(
         self, query_text, locale=None, language=None, time_zone=None, timestamp=None
     ):
@@ -427,6 +412,10 @@ class NaturalLanguageProcessor(Processor):
         self.progress_bar = progress_bar
 
         for domain in path.get_domains(self._app_path):
+
+            if domain in self._children:
+                continue
+
             self._children[domain] = DomainProcessor(
                 app_path, domain, self.resource_loader, self.progress_bar
             )
@@ -435,9 +424,16 @@ class NaturalLanguageProcessor(Processor):
             "resolve_entities_using_nbest_transcripts", {}
         )
         if len(nbest_transcripts_nlp_classes) > 0:
-            nbest_transcripts_nlp_classes = self.extract_allowed_nlp_components_list(
-                nbest_transcripts_nlp_classes
-            )
+            try:
+                nbest_transcripts_nlp_classes = self.extract_allowed_nlp_components_list(
+                    nbest_transcripts_nlp_classes
+                )
+            except AllowedNlpClassesKeyError as e:
+                # We catch and fail open here since this uncaught exception can fail the API call
+                logger.error("Caught exception %s when extracting nlp "
+                             "components from the resolve_entities_using_nbest_transcripts "
+                             "field", e.message)
+                nbest_transcripts_nlp_classes = {}
 
             for domain in nbest_transcripts_nlp_classes:
                 for intent in nbest_transcripts_nlp_classes[domain]:
@@ -640,32 +636,23 @@ class NaturalLanguageProcessor(Processor):
         the validation of list of allowed nlp components has passed.
 
         Args:
-            allowed_nlp_components_list (list): A list of allowable intents in the format "domain.intent". \
-                If all intents need to be included, the syntax is "domain.*".
+            allowed_nlp_components_list (list): A list of allowable intents in the
+                format "domain.intent". If all intents need to be included, the
+                syntax is "domain.*".
 
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
-        nlp_components = {}
+        allowed_nlp_components_list = _validate_allowed_intents(allowed_nlp_components_list, self)
 
+        nlp_components = {}
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
-            entries = allowed_nlp_component.split(".")
+            entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
             for idx, entry in enumerate(entries):
                 nlp_entries[idx] = entry
 
             domain, intent, entity, role = nlp_entries
-
-            if not domain or domain not in self.domains:
-                raise AllowedNlpClassesKeyError(
-                    "Domain: {} is not in the NLP component hierarchy".format(domain)
-                )
-
-            if not intent or (intent != "*" and intent not in self.domains[domain].intents):
-                raise AllowedNlpClassesKeyError(
-                    "Intent: {} is not in the NLP component hierarchy".format(intent)
-                )
-
             if intent == "*":
                 for intent in self.domains[domain].intents:
                     self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
@@ -766,13 +753,19 @@ class NaturalLanguageProcessor(Processor):
                 "'allowed_intents' and 'allowed_nlp_classes' cannot be used together"
             )
         if allowed_intents:
-            allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
-
+            try:
+                allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
+            except AllowedNlpClassesKeyError as e:
+                # We catch and fail open here since this uncaught exception can fail the API call
+                logger.error("Caught exception %s when extracting nlp components from the "
+                             "allowed_intents field", e.message)
+                allowed_nlp_classes = {}
         return super().process(
             query_text,
             allowed_nlp_classes=allowed_nlp_classes,
             time_zone=time_zone,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language),
             timestamp=timestamp,
             dynamic_resource=dynamic_resource,
             verbose=verbose,
@@ -815,6 +808,10 @@ class DomainProcessor(Processor):
             self.progress_bar.total += 1
 
         for intent in intents:
+
+            if intent in self._children:
+                continue
+
             self._children[intent] = IntentProcessor(
                 app_path, domain, intent, self.resource_loader, progress_bar
             )
@@ -919,7 +916,8 @@ class DomainProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language),
         )
         processed_query = self.process_query(
             query,
@@ -1100,6 +1098,10 @@ class IntentProcessor(Processor):
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
+
+            if entity_type in self._children:
+                return
+
             processor = EntityProcessor(
                 self._app_path,
                 self.domain,
@@ -1130,6 +1132,10 @@ class IntentProcessor(Processor):
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
+
+            if entity_type in self._children:
+                continue
+
             processor = EntityProcessor(
                 self._app_path,
                 self.domain,
@@ -1196,7 +1202,8 @@ class IntentProcessor(Processor):
             time_zone=time_zone,
             timestamp=timestamp,
             language=self.language,
-            locale=self._validate_locale(locale),
+            locale=validate_locale_code_with_ref_language_code(
+                locale or self.locale, self.language)
         )
         processed_query = self.process_query(query, dynamic_resource=dynamic_resource,
                                              allowed_nlp_classes=allowed_nlp_classes)

@@ -172,7 +172,7 @@ Docker onboarding:
 
 .. code-block:: shell
 
-  sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+  sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0 && sudo docker run -ti -d -p 0.0.0.0:9200:9200 -p 0.0.0.0:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
 
 
 Ubuntu:
@@ -285,7 +285,7 @@ numerical parser using Docker as shown below.
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/duckling:master && docker run -p 0.0.0.0:7151:7151 mindmeldworkbench/duckling:master -ti -d
+   docker pull mindmeldworkbench/duckling:master && docker run -ti -d -p 0.0.0.0:7151:7151 mindmeldworkbench/duckling:master
 
 
 .. note::
@@ -390,7 +390,7 @@ Using the Python shell
 The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using MindMeld.
 
 
-Upgrade Mindmeld
+Upgrade MindMeld
 ----------------
 
 To upgrade to the latest version of MindMeld, run ``pip install mindmeld --upgrade``

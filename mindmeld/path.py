@@ -632,9 +632,9 @@ def get_app(app_path):
         # try to load 'app.py'
         loader = SourceFileLoader(package_name, get_app_module_path(app_path))
         return loader.load_module(package_name).app  # pylint: disable=deprecated-method
-    except (FileNotFoundError, AttributeError):
+    except (FileNotFoundError, AttributeError) as e:
         msg = (
             "Could not import application at {!r}. Create a __init__.py or app.py file"
             " containing the application.".format(app_path)
         )
-        raise MindMeldImportError(msg)
+        raise MindMeldImportError(msg) from e
