@@ -271,11 +271,10 @@ class MultiLingualParaphraser(Augmentor):
             queries=translated_queries,
             model=self.target_model,
             tokenizer=self.target_tokenizer,
-            do_sample=True,
-            num_beams=3,
-            num_return_sequences=3,
-            top_k=50,
-            top_p=0.95,
+            num_beams=5,
+            num_return_sequences=5,
+            top_k=0,
+            temperature=1.0,
         )
         augmented_queries = list(set(p.lower() for p in back_translated_queries))
 

@@ -18,6 +18,7 @@ def english_paraphraser(kwik_e_mart_app_path):
     return EnglishParaphraser(kwik_e_mart_app_path)
 
 
+@pytest.mark.extras
 @pytest.mark.parametrize(
     "query, num_paraphrases",
     [
