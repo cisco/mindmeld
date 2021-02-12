@@ -31,12 +31,9 @@ from ._elasticsearch_helpers import (
 )
 
 from abc import ABC, abstractmethod
-
-ENTITY_RESOLVER_MODEL_MAPPINGS = {
-    "exact_match": EntityResolverUsingExactSearch,
-    "text_relevance": EntityResolverUsingElasticSearch,
-}
-ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
+from sentence_transformers import SentenceTransformer
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +41,7 @@ logger = logging.getLogger(__name__)
 class EntityResolver:
 
     @classmethod
-    def validate_resolver_name(name):
+    def validate_resolver_name(cls, name):
         if not name in ENTITY_RESOLVER_MODEL_TYPES:
             msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
@@ -77,12 +74,21 @@ class EntityResolverBase(ABC):
             canonical_entities = self._resource_loader.get_entity_map(self.type).get(
                 "entities", []
             )
-            self.__validate_resolver_name(self.name)
         self._no_canonical_entity_map = len(canonical_entities) == 0
+
+        if self._use_double_metaphone:
+            self._invoke_double_metaphone_usage()
 
     @property
     def _use_double_metaphone(self):
         return "double_metaphone" in self._er_config.get("phonetic_match_types", [])
+
+    def _invoke_double_metaphone_usage(self):
+        logger.warning(
+            "{!r} not configured to use double_metaphone",
+            self.name
+        )
+        raise NotImplementedError
 
     @abstractmethod
     def _fit(self):
@@ -144,9 +150,12 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
     ES_SYNONYM_INDEX_PREFIX = "synonym"
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader, entity_type, **kwargs)
-        self._es_host = kwargs.get(es_host, None)
-        self._es_config = {"client": kwargs.get(es_client, None), "pid": os.getpid()}
+        super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        self._es_host = kwargs.get("es_host", None)
+        self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
+
+    def _invoke_double_metaphone_usage(self):
+        pass
 
     @property
     def _es_index_name(self):
@@ -252,6 +261,7 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
             delete_index(
                 self._app_namespace, self._es_index_name, self._es_host, self._es_client
             )
+
         entity_map = self._resource_loader.get_entity_map(self.type)
 
         # list of canonical entities and their synonyms
@@ -527,10 +537,10 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
             raise EntityResolverError from e
 
 
-class EntityResolverUsingExactSearch(EntityResolverBase):
+class EntityResolverUsingExactMatch(EntityResolverBase):
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super(EntityResolverUsingExactSearch, self).__init__(app_path, resource_loader, entity_type, **kwargs)
+        super(EntityResolverUsingExactMatch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
         self._normalizer = self._resource_loader.query_factory.normalize
         self._exact_match_mapping = None
 
@@ -576,8 +586,10 @@ class EntityResolverUsingExactSearch(EntityResolverBase):
 
     def _fit(self, clean):
 
-        # list of canonical entities and their synonyms
-        entities = entity_map.get("entities", [])
+        if clean:
+            logger.warning(
+                "clean=True ignored while fitting exact_match algo for entity resolution"
+            )
 
         """Fits a simple exact match entity resolution model when Elasticsearch is not available."""
         entity_map = self._resource_loader.get_entity_map(self.type)
@@ -616,3 +628,156 @@ class EntityResolverUsingExactSearch(EntityResolverBase):
 
     def _load(self):
         self.fit()
+
+
+class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        super(EntityResolverUsingSentenceBertEmbedder, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        self._normalizer = self._resource_loader.query_factory.normalize
+        self._exact_match_mapping = None
+
+        self._sbert_model_name = "bert-base-nli-mean-tokens"
+        self._sbert_model = SentenceTransformer(self._sbert_model_name)
+
+        self._preload_embs = True
+        self._preloaded_embs = None
+        # TODO: implement having choice to select or unselect preloading
+        # self._preload_embs = kwargs.get("preload_embs", False)  # if True, embeddings are preloaded at the time of ._fit()
+        # if self._preload_embs:
+        #     logger.warning(
+        #         "pre-loading sbert embeddings for faster retrieval when the model is fitted, "
+        #         "can possibly consume more memory footprint"
+        #     )
+
+    def _encode(self, phrases):
+
+        if not phrases:
+            return []
+
+        if isinstance(phrases, str):
+            phrases = [phrases]
+        elif isinstance(phrases, list):
+            phrases = phrases
+        else:
+            raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
+
+        return self._sbert_model.encode(phrases, batch_size=8, is_pretokenized=False,
+                                        convert_to_numpy=True, convert_to_tensor=False)
+
+    def _sort_using_cosine_dist(self, syn_embs, entity_emb):
+
+        entity_emb = entity_emb.reshape(1, -1)
+        synonyms, synonyms_encodings = zip(*[(k,v) for k,v in syn_embs.items()])
+        similarity_scores = cosine_similarity(np.array(synonyms_encodings), entity_emb).reshape(-1)
+
+        return sorted([(syn, sim_score) for syn, sim_score in zip(synonyms, similarity_scores)],
+                      key = lambda x: x[1], reverse=True  # results in descending scores
+        )
+
+    @staticmethod
+    def _process_entity_map(entity_type, entity_map, normalizer):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+            normalizer: The normalizer to use
+        """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map.get("entities"):
+            cname = item["cname"]
+            item_id = item.get("id")
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, entity_type)
+            if item_id:
+                if item_id in seen_ids:
+                    msg = "Item id {!r} specified in {!r} entity map multiple times"
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for alias in aliases:
+                norm_alias = normalizer(alias)
+                if norm_alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, entity_type)
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        return {"items": item_map, "synonyms": syn_map}
+
+    def _fit(self, clean):
+
+        if clean:
+            logger.warning(
+                "clean=True ignored while fitting sbert_cosine_similarity algo for entity resolution"
+            )
+
+        logger.info(
+            "Using {!r} model from sentence-transformers; see https://github.com/UKPLab/sentence-transformers for details",
+            self._sbert_model_name
+        )
+
+        entity_map = self._resource_loader.get_entity_map(self.type)
+        self._exact_match_mapping = self._process_entity_map(
+            self.type, entity_map, self._normalizer
+        )
+
+        if self._preload_embs:
+            synonyms = [*self._exact_match_mapping["synonyms"]]
+            synonyms_encodings = self._encode(synonyms)
+            self._preloaded_embs = {k: v for k, v in zip(synonyms, synonyms_encodings)}
+
+    def _predict(self, entity):
+
+        syn_embs = self._preloaded_embs
+        if not self._preload_embs:
+            synonyms = [*self._exact_match_mapping["synonyms"]]
+            synonyms_encodings = self._encode(synonyms)
+            syn_embs = {k: v for k, v in zip(synonyms, synonyms_encodings)}
+
+        entity = entity[0]  # top_entity
+        normed = self._normalizer(entity.text)
+        entity_emb = self._encode(normed)[0]
+
+        try:
+            sorted_items = self._sort_using_cosine_dist(syn_embs, entity_emb)
+            values = []
+            for synonym, score in sorted_items:
+                cnames = self._exact_match_mapping["synonyms"][synonym]
+                for cname in cnames:
+                    for item in self._exact_match_mapping["items"][cname]:
+                        item_value = copy.copy(item)
+                        item_value.pop("whitelist", None)
+                        item_value.update({"similarity": score})
+                        values.append(item_value)
+        except (KeyError, TypeError):
+            logger.warning(
+                "Failed to resolve entity %r for type %r", entity.text, entity.type
+            )
+            return None
+
+        return values
+
+    def _load(self):
+        self.fit()
+
+
+ENTITY_RESOLVER_MODEL_MAPPINGS = {
+    "exact_match": EntityResolverUsingExactMatch,
+    # TODO: deprecated usage, instead use 'elastic_search' as the key
+    "text_relevance": EntityResolverUsingElasticSearch,
+    "elastic_search": EntityResolverUsingElasticSearch,
+    # TODO: implement these modules
+    "sbert_cosine_similarity": EntityResolverUsingSentenceBertEmbedder,
+}
+ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]

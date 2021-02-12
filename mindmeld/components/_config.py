@@ -104,7 +104,10 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
     },
 }
 
-DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
+DEFAULT_ENTITY_RESOLVER_CONFIG = {
+    "model_type": "text_relevance",
+    'phonetic_match_types': []
+}
 
 DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
 
