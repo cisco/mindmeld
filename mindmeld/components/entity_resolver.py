@@ -31,9 +31,13 @@ from ._elasticsearch_helpers import (
 )
 
 from abc import ABC, abstractmethod
-from sentence_transformers import SentenceTransformer
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sentence_transformers import SentenceTransformer
+    sbert_available = True
+except ImportError:
+    sbert_available = False
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +47,10 @@ class EntityResolver:
     @classmethod
     def validate_resolver_name(cls, name):
         if not name in ENTITY_RESOLVER_MODEL_TYPES:
-            msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {}"
+            msg = "Expected 'model_type' of ENTITY_RESOLVER_CONFIG among {}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
+        if not sbert_available and name=="sbert_cosine_similarity":
+            raise ImportError("Must install the extra [bert] to use the built in embbedder for entity resolution.")
 
     def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
         er_config = get_classifier_config("entity_resolution", app_path=app_path)
@@ -662,8 +668,9 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         else:
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        return self._sbert_model.encode(phrases, batch_size=8, is_pretokenized=False,
-                                        convert_to_numpy=True, convert_to_tensor=False)
+        return self._sbert_model.encode(phrases, batch_size=16, is_pretokenized=False,
+                                        convert_to_numpy=True, convert_to_tensor=False,
+                                        show_progress_bar=True)
 
     def _sort_using_cosine_dist(self, syn_embs, entity_emb):
 
@@ -766,7 +773,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             )
             return None
 
-        return values
+        return values[0:20]
 
     def _load(self):
         self.fit()
