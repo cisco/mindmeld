@@ -66,7 +66,13 @@ SPACY_ENTITIES_THAT_REQUIRE_DUCKLING = [
     "sys_ordinal",
     "sys_distance",
     "sys_quantity",
+    "sys_amount-of-money",
 ]
+
+SPACY_SYS_ENTITIES_NOT_IN_DUCKLING = [
+    "sys_event", "sys_fac", "sys_gpe", "sys_language", "sys_law", "sys_loc",
+    "sys_nrp", "sys_org", "sys_other-quantity", "sys_person", "sys_product",
+    "sys_weight", "sys_work_of_art"]
 
 # TODO: Create a script to retreive these automatically
 DUCKLING_TO_SYS_ENTITY_MAPPINGS = {

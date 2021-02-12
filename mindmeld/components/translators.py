@@ -15,16 +15,10 @@
 This module contains translator clients used by the MultiLingual Annotator.
 """
 from abc import ABCMeta, abstractmethod
+import importlib
 import logging
 import os
 
-try:
-    from google.cloud import translate_v2  # pylint: disable=E0401
-except ModuleNotFoundError as error:
-    raise ValueError(
-        "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]'"
-        " to install."
-    ) from error
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +86,24 @@ class GoogleTranslator(Translator):
         self.translate_client = self.get_translate_client()
 
     def get_translate_client(self):
-        """Creates a translation client after finding the credential path."""
+        """Creates a translation client after finding the credential path. Attempts to import the
+        Google Cloud Translation library.
+
+        Return:
+            translate_client (translate_v2.Client): Google Translation Client
+
+        Raises:
+            ModuleNotFoundError
+        """
         GoogleTranslator._check_credential_exists()
-        return translate_v2.Client()
+        try:
+            translate_v2 = importlib.import_module("google.cloud.translate_v2")
+            return translate_v2.Client()
+        except ModuleNotFoundError as error:
+            raise ModuleNotFoundError(
+                "Library not found: 'google-cloud'. Run 'pip install mindmeld[language_annotator]'"
+                " to install."
+            ) from error
 
     @staticmethod
     def _check_credential_exists():

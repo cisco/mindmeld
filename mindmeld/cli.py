@@ -34,7 +34,7 @@ import distro
 import requests
 from tqdm import tqdm
 
-from . import auto_annotator  # noqa: F401 pylint: disable=W0611
+from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
@@ -48,7 +48,6 @@ from .path import (MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH,
                    get_dvc_local_remote_path, get_generated_data_folder)
 
 logger = logging.getLogger(__name__)
-
 click.disable_unicode_literals_warning = True
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "auto_envvar_prefix": "MM"}
@@ -732,6 +731,7 @@ def _get_duckling_pid():
 )
 def annotate(app_path, overwrite):
     """Runs the annotation command of the Auto Annotator."""
+    register_all_annotators()
     config = get_auto_annotator_config(app_path=app_path)
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.annotate(overwrite=overwrite)
@@ -750,6 +750,7 @@ def annotate(app_path, overwrite):
 )
 def unannotate(app_path, unannotate_all):
     """Runs the unannotation command of the Auto Annotator."""
+    register_all_annotators()
     config = get_auto_annotator_config(app_path=app_path)
     annotator = create_annotator(app_path=app_path, config=config)
     annotator.unannotate(unannotate_all=unannotate_all)

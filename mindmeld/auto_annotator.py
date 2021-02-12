@@ -446,7 +446,8 @@ class SpacyAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
-        self.locale = self.locale if language == self.locale.split("_")[0] else None
+        if self.locale and language != self.locale.split("_")[0]:
+            self.locale = None
         self.spacy_model_size = model_size or self.config.get("spacy_model_size", "lg")
         self.model_name = self._get_spacy_model_name()
         self.nlp = SpacyAnnotator._load_model(self.model_name)
@@ -928,7 +929,8 @@ class NoTranslationDucklingAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
-        self.locale = self.locale if language == self.locale.split("_")[0] else None
+        if self.locale and language != self.locale.split("_")[0]:
+            self.locale = None
 
     def parse(self, sentence, entity_types=None, **kwargs):
         """
@@ -1053,7 +1055,8 @@ class TranslationDucklingAnnotator(Annotator):
             self.language != ENGLISH_LANGUAGE_CODE
         ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         self.locale = locale or self.locale
-        self.locale = self.locale if language == self.locale.split("_")[0] else None
+        if self.locale and language != self.locale.split("_")[0]:
+            self.locale = None
         self.translator = TranslatorFactory().get_translator(
             self.config.get("translator")
         )
@@ -1142,7 +1145,8 @@ class MultiLingualAnnotator(Annotator):
         super().__init__(app_path=app_path, config=config)
         self.language = language or self.language
         self.locale = locale or self.locale
-        self.locale = self.locale if language == self.locale.split("_")[0] else None
+        if self.locale and language != self.locale.split("_")[0]:
+            self.locale = None
         self.en_annotator = SpacyAnnotator(
             app_path=self.app_path,
             config=self.config,
@@ -1231,6 +1235,7 @@ class MultiLingualAnnotator(Annotator):
         return base_entities
 
 
-register_annotator("SpacyAnnotator", SpacyAnnotator)
-register_annotator("BootstrapAnnotator", BootstrapAnnotator)
-register_annotator("MultiLingualAnnotator", MultiLingualAnnotator)
+def register_all_annotators():
+    register_annotator("SpacyAnnotator", SpacyAnnotator)
+    register_annotator("BootstrapAnnotator", BootstrapAnnotator)
+    register_annotator("MultiLingualAnnotator", MultiLingualAnnotator)
