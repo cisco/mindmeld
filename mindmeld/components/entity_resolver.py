@@ -30,7 +30,9 @@ from ._elasticsearch_helpers import (
     resolve_es_config_for_version,
 )
 
+from .. import path
 from abc import ABC, abstractmethod
+import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 try:
@@ -47,7 +49,7 @@ class EntityResolver:
     @classmethod
     def validate_resolver_name(cls, name):
         if not name in ENTITY_RESOLVER_MODEL_TYPES:
-            msg = "Expected 'model_type' of ENTITY_RESOLVER_CONFIG among {}"
+            msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
         if not sbert_available and name=="sbert_cosine_similarity":
             raise ImportError("Must install the extra [bert] to use the built in embbedder for entity resolution.")
@@ -64,15 +66,19 @@ class EntityResolver:
 class EntityResolverBase(ABC):
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        self._app_namespace = get_app_namespace(app_path)
+        self._app_path = app_path
         self._resource_loader = resource_loader
         self.type = entity_type
-        self._is_system_entity = Entity.is_system_entity(self.type)
         self._er_config = er_config
+
+        self._app_namespace = get_app_namespace(self._app_path)
+        self._is_system_entity = Entity.is_system_entity(self.type)
         self.name = self._er_config.get("model_type")
-        self.ready = False
-        # TODO: save model when dirty is true
-        self.dirty = False  # bool -- Whether the classifier has unsaved changes to its model.
+        self.cache_path = path.get_entity_resolver_cache_file_path(
+            self._app_path, self.type, self.name
+        )
+        self.dirty = False  # bool, if there exists any unsaved generated data that can be saved
+        self.ready = False  # bool, checks if the model is fit already
 
         if self._is_system_entity:
             canonical_entities = []
@@ -524,7 +530,6 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
             )
             if not self._es_client.indices.exists(index=scoped_index_name):
                 self.fit()
-
         except EsConnectionError as e:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
@@ -642,19 +647,15 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         super(EntityResolverUsingSentenceBertEmbedder, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
         self._normalizer = self._resource_loader.query_factory.normalize
         self._exact_match_mapping = None
-
-        self._sbert_model_name = "bert-base-nli-mean-tokens"
-        self._sbert_model = SentenceTransformer(self._sbert_model_name)
-
-        self._preload_embs = True
-        self._preloaded_embs = None
-        # TODO: implement having choice to select or unselect preloading
-        # self._preload_embs = kwargs.get("preload_embs", False)  # if True, embeddings are preloaded at the time of ._fit()
-        # if self._preload_embs:
-        #     logger.warning(
-        #         "pre-loading sbert embeddings for faster retrieval when the model is fitted, "
-        #         "can possibly consume more memory footprint"
-        #     )
+        self._sbert_model = None
+        self._preloaded_mappings_embs = {}
+        # TODO: _lazy_resolution is set to a default value, can be modified to be a input
+        self._lazy_resolution = False
+        if not self._lazy_resolution:
+            logger.warning(
+                "sentence-bert embeddings are cached for entity_type: {!r} for fast entity resolution; "
+                "can possibly consume more disk-memory footprint".format(self.type)
+            )
 
     def _encode(self, phrases):
 
@@ -724,34 +725,38 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
 
     def _fit(self, clean):
 
-        if clean:
-            logger.warning(
-                "clean=True ignored while fitting sbert_cosine_similarity algo for entity resolution"
-            )
-
+        # load model
+        self._sbert_model_name = "bert-base-nli-mean-tokens"
         logger.info(
             "Using {!r} model from sentence-transformers; see https://github.com/UKPLab/sentence-transformers for details",
             self._sbert_model_name
         )
+        self._sbert_model = SentenceTransformer(self._sbert_model_name)
 
+        # load mappings.json data
         entity_map = self._resource_loader.get_entity_map(self.type)
         self._exact_match_mapping = self._process_entity_map(
             self.type, entity_map, self._normalizer
         )
 
-        if self._preload_embs:
+        # load embeddings for this data
+        if clean and os.path.exists(self.cache_path):
+            os.remove(self.cache_path)
+        if not self._lazy_resolution and os.path.exists(self.cache_path):
+            self._load()
+            self.dirty = False
+        else:
             synonyms = [*self._exact_match_mapping["synonyms"]]
             synonyms_encodings = self._encode(synonyms)
-            self._preloaded_embs = {k: v for k, v in zip(synonyms, synonyms_encodings)}
+            self._preloaded_mappings_embs = {k: v for k, v in zip(synonyms, synonyms_encodings)}
+            self.dirty = True
+
+        if self.dirty and not self._lazy_resolution:
+            self._dump()
 
     def _predict(self, entity):
 
-        syn_embs = self._preloaded_embs
-        if not self._preload_embs:
-            synonyms = [*self._exact_match_mapping["synonyms"]]
-            synonyms_encodings = self._encode(synonyms)
-            syn_embs = {k: v for k, v in zip(synonyms, synonyms_encodings)}
-
+        syn_embs = self._preloaded_mappings_embs
         entity = entity[0]  # top_entity
         normed = self._normalizer(entity.text)
         entity_emb = self._encode(normed)[0]
@@ -767,7 +772,14 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                         item_value.pop("whitelist", None)
                         item_value.update({"similarity": score})
                         values.append(item_value)
-        except (KeyError, TypeError):
+        except KeyError:
+            logger.warning(
+                "Failed to resolve entity %r for type %r; "
+                "set 'clean=True' for computing embeddings of newly added items in mappings.json",
+                entity.text, entity.type
+            )
+            return None
+        except TypeError:
             logger.warning(
                 "Failed to resolve entity %r for type %r", entity.text, entity.type
             )
@@ -776,15 +788,21 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         return values[0:20]
 
     def _load(self):
-        self.fit()
+        with open(self.cache_path, "rb") as fp:
+            self._preloaded_mappings_embs = pickle.load(fp)
+
+    def _dump(self):
+        if self.dirty:
+            folder = os.path.split(self.cache_path)[0]
+            if folder and not os.path.exists(folder):
+                os.makedirs(folder)
+            with open(self.cache_path, "wb") as fp:
+                pickle.dump(self._preloaded_mappings_embs, fp)
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "exact_match": EntityResolverUsingExactMatch,
-    # TODO: deprecated usage, instead use 'elastic_search' as the key
     "text_relevance": EntityResolverUsingElasticSearch,
-    "elastic_search": EntityResolverUsingElasticSearch,
-    # TODO: implement these modules
     "sbert_cosine_similarity": EntityResolverUsingSentenceBertEmbedder,
 }
 ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
