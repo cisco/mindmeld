@@ -26,6 +26,9 @@ from mindmeld.converter.converter import Converter
 
 logger = logging.getLogger(__name__)
 
+RASA_ENTITY_REGEX = re.compile(r"(\[(.*?)\]\((.*?)\))")
+MINDMELD_ENTITY_REGEX = re.compile(r"\{.*?\}")
+
 
 class RasaConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
@@ -77,18 +80,12 @@ class RasaConverter(Converter):
 
     @staticmethod
     def _does_intent_ex_contain_entity(intent_example):
-        return len(re.findall(r"\[.*\]\(.*\)", intent_example)) > 0
+        return len(RASA_ENTITY_REGEX.findall(intent_example)) > 0
 
-    def _write_intent_with_entinty(self, intent_f, intent_example):
+    def _write_intent_with_entity(self, intent_f, intent_example):
         mindmend_intent_example = intent_example
-        pattern = re.compile(r"\[.*\]\(.*\)")
-        for match in pattern.findall(intent_example):
-            mindmeld_entity = (
-                match.replace("[", "{")
-                .replace("]", "|")
-                .replace("(", "")
-                .replace(")", "}")
-            ).lower()
+        for match, entity, entity_type in RASA_ENTITY_REGEX.findall(intent_example):
+            mindmeld_entity = f"{{{entity}|{entity_type}}}".lower()
             mindmend_intent_example = mindmend_intent_example.replace(
                 match, mindmeld_entity
             )
@@ -113,7 +110,7 @@ class RasaConverter(Converter):
                 RasaConverter._remove_comments_from_line(intent_example) + "\n"
             )
             if RasaConverter._does_intent_ex_contain_entity(intent_example):
-                self._write_intent_with_entinty(intent_f, intent_example)
+                self._write_intent_with_entity(intent_f, intent_example)
             else:
                 intent_f.write(intent_example)
 
@@ -218,7 +215,7 @@ class RasaConverter(Converter):
 
     @staticmethod
     def _does_intent_have_entity(stories_line):
-        return len(re.findall(r"\{.*\}", stories_line)) > 0
+        return len(MINDMELD_ENTITY_REGEX.findall(stories_line)) > 0
 
     @staticmethod
     def _clean_up_entities_list(entities_with_values):
@@ -233,7 +230,7 @@ class RasaConverter(Converter):
 
     def _get_intent_with_entity(self, stories_line):
         if RasaConverter._does_intent_have_entity(stories_line):
-            entities_with_values = re.search(r"\{.*\}", stories_line)
+            entities_with_values = MINDMELD_ENTITY_REGEX.search(stories_line)
             entities_with_values = entities_with_values.group(0)
             entities_list = self._clean_up_entities_list(entities_with_values)
             start_of_entity = stories_line.find(entities_with_values)
@@ -414,7 +411,7 @@ __all__ = ['app']
         prompts_list = []
         # check if prompts contain any entities
         for prompt in prompts:
-            entities = re.findall(r"\{.*\}", prompt)
+            entities = MINDMELD_ENTITY_REGEX.findall(prompt)
 
             # If we have entities, we do string format with entities; otherwise
             # just simple string prompts
