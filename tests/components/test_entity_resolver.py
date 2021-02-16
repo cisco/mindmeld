@@ -28,6 +28,20 @@ def es_client():
 
 
 @pytest.fixture
+def resolver_exact_match(resource_loader, es_client):
+    """An entity resolver for 'location' on the Kwik-E-Mart app"""
+    er_config = {
+            'model_type': 'exact_match',
+        }
+    resolver = EntityResolver(
+        APP_PATH, resource_loader, ENTITY_TYPE,
+        es_client=es_client, er_config=er_config
+    )
+    resolver.fit()
+    return resolver
+
+
+@pytest.fixture
 def resolver_elastic_search(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
     er_config = {
@@ -58,6 +72,14 @@ def resolver_sbert(resource_loader):
     )
     resolver.fit()
     return resolver
+
+
+def test_canonical_exact_match(resolver_exact_match):
+    """Tests that entity resolution works for a canonical entity in the map"""
+    expected = {"id": "2", "cname": "Pine and Market"}
+    predicted = resolver_exact_match.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
+    assert predicted["id"] == expected["id"]
+    assert predicted["cname"] == expected["cname"]
 
 
 def test_canonical_elastic_search(resolver_elastic_search):
