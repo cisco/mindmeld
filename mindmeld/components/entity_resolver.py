@@ -38,6 +38,7 @@ from ._elasticsearch_helpers import (
 
 try:
     from sentence_transformers import SentenceTransformer
+
     sbert_available = True
 except ImportError:
     sbert_available = False
@@ -52,11 +53,12 @@ class EntityResolver:
 
     @classmethod
     def validate_resolver_name(cls, name):
-        if not name in ENTITY_RESOLVER_MODEL_TYPES:
+        if name not in ENTITY_RESOLVER_MODEL_TYPES:
             msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
-        if not sbert_available and name=="sbert_cosine_similarity":
-            raise ImportError("Must install the extra [bert] to use the built in embbedder for entity resolution.")
+        if not sbert_available and name == "sbert_cosine_similarity":
+            raise ImportError(
+                "Must install the extra [bert] to use the built in embbedder for entity resolution.")
 
     def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
         """Identifies appropriate entity resolver based on input config and
@@ -121,7 +123,7 @@ class EntityResolverBase(ABC):
         If supported, override this method definition in the derived class (eg. see EntityResolverUsingElasticSearch)
         """
         logger.warning(
-            "{!r} not configured to use double_metaphone",
+            "%r not configured to use double_metaphone",
             self.name
         )
         raise NotImplementedError
@@ -205,7 +207,9 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
     """The prefix of the ES index."""
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader,
+                                                               entity_type, er_config,
+                                                               **kwargs)
         self._es_host = kwargs.get("es_host", None)
         self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
 
@@ -617,7 +621,8 @@ class EntityResolverUsingExactMatch(EntityResolverBase):
     """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super(EntityResolverUsingExactMatch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        super(EntityResolverUsingExactMatch, self).__init__(app_path, resource_loader, entity_type,
+                                                            er_config, **kwargs)
         self._normalizer = self._resource_loader.query_factory.normalize
         self._exact_match_mapping = None
 
@@ -665,7 +670,7 @@ class EntityResolverUsingExactMatch(EntityResolverBase):
         """Loads an entity mapping file to resolve entities using exact match.
         """
         if clean:
-            logger.warning(
+            logger.info(
                 "clean=True ignored while fitting exact_match algo for entity resolution"
             )
 
@@ -715,8 +720,9 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
     """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super(EntityResolverUsingSentenceBertEmbedder, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
-        self._normalizer = self._resource_loader.query_factory.normalize
+        super(EntityResolverUsingSentenceBertEmbedder, self).__init__(app_path, resource_loader,
+                                                                      entity_type, er_config,
+                                                                      **kwargs)
         self._exact_match_mapping = None
         self._sbert_model = None
         self._preloaded_mappings_embs = {}
@@ -724,9 +730,9 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
         if not self._lazy_resolution:
-            logger.warning(
-                "sentence-bert embeddings are cached for entity_type: {!r} for fast entity resolution; "
-                "can possibly consume more disk-memory footprint".format(self.type)
+            logger.info(
+                f"sentence-bert embeddings are cached for entity_type: {self.type} for fast entity resolution; "
+                "can possibly consume more disk-memory footprint"
             )
 
     def _encode(self, phrases):
@@ -755,10 +761,10 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             self._er_config.get("model_settings", {})
                 .get("batch_size", 16)
         )
-
+        show_progress = len(phrases) > 1
         return self._sbert_model.encode(phrases, batch_size=_batch_size,
                                         is_pretokenized=False, convert_to_numpy=True,
-                                        convert_to_tensor=False, show_progress_bar=True)
+                                        convert_to_tensor=False, show_progress_bar=show_progress)
 
     def _sort_using_cosine_dist(self, syn_embs, entity_emb):
         """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
@@ -772,22 +778,21 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         """
 
         entity_emb = entity_emb.reshape(1, -1)
-        synonyms, synonyms_encodings = zip(*[(k,v) for k,v in syn_embs.items()])
+        synonyms, synonyms_encodings = zip(*[(k, v) for k, v in syn_embs.items()])
         similarity_scores = cosine_similarity(np.array(synonyms_encodings), entity_emb).reshape(-1)
 
         return sorted([(syn, sim_score) for syn, sim_score in zip(synonyms, similarity_scores)],
-                      key = lambda x: x[1], reverse=True  # results in descending scores
-        )
+                      key=lambda x: x[1], reverse=True  # results in descending scores
+                      )
 
     @staticmethod
-    def _process_entity_map(entity_type, entity_map, normalizer):
+    def _process_entity_map(entity_type, entity_map):
         """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
         synonym_map for exact match entity resolution when Elasticsearch is unavailable
 
         Args:
             entity_type: The entity type associated with this entity resolver
             entity_map: The loaded mapping.json file for the given entity type
-            normalizer: The normalizer to use
         """
         item_map = {}
         syn_map = {}
@@ -808,8 +813,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             items_for_cname = item_map.get(cname, [])
             items_for_cname.append(item)
             item_map[cname] = items_for_cname
-            for alias in aliases:
-                norm_alias = normalizer(alias)
+            for norm_alias in aliases:
                 if norm_alias in syn_map:
                     msg = "Synonym %s specified in %s entity map multiple times"
                     logger.debug(msg, cname, entity_type)
@@ -838,7 +842,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         # load mappings.json data
         entity_map = self._resource_loader.get_entity_map(self.type)
         self._exact_match_mapping = self._process_entity_map(
-            self.type, entity_map, self._normalizer
+            self.type, entity_map
         )
 
         # load embeddings for this data
@@ -869,8 +873,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
 
         syn_embs = self._preloaded_mappings_embs
         entity = entity[0]  # top_entity
-        normed = self._normalizer(entity.text)
-        entity_emb = self._encode(normed)[0]
+        entity_emb = self._encode(entity.text)[0]
 
         try:
             sorted_items = self._sort_using_cosine_dist(syn_embs, entity_emb)
