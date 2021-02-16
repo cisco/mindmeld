@@ -45,6 +45,9 @@ logger = logging.getLogger(__name__)
 
 
 class EntityResolver:
+    """An entity resolver is used to resolve entities in a given query to their canonical values
+    (usually linked to specific entries in a knowledge base).
+    """
 
     @classmethod
     def validate_resolver_name(cls, name):
@@ -55,6 +58,16 @@ class EntityResolver:
             raise ImportError("Must install the extra [bert] to use the built in embbedder for entity resolution.")
 
     def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
+        """Identifies appropriate entity resolver based on input config and
+        initializes it.
+
+        Args:
+            app_path (str): The application path.
+            resource_loader (ResourceLoader): An object which can load resources for the resolver.
+            entity_type (str): The entity type associated with this entity resolver.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+        """
         er_config = get_classifier_config("entity_resolution", app_path=app_path)
         name = er_config.get("model_type", None)
         cls.validate_resolver_name(name)
@@ -64,8 +77,12 @@ class EntityResolver:
 
 
 class EntityResolverBase(ABC):
+    """
+    Base class for Entity Resolvers
+    """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        """Initializes an entity resolver"""
         self._app_path = app_path
         self._resource_loader = resource_loader
         self.type = entity_type
@@ -77,8 +94,8 @@ class EntityResolverBase(ABC):
         self.cache_path = path.get_entity_resolver_cache_file_path(
             self._app_path, self.type, self.name
         )
-        self.dirty = False  # bool, if there exists any unsaved generated data that can be saved
-        self.ready = False  # bool, checks if the model is fit already
+        self.dirty = False  # bool, True if there exists any unsaved generated data that can be saved
+        self.ready = False  # bool, True if the model is fit by calling .fit()
 
         if self._is_system_entity:
             canonical_entities = []
@@ -96,6 +113,10 @@ class EntityResolverBase(ABC):
         return "double_metaphone" in self._er_config.get("phonetic_match_types", [])
 
     def _invoke_double_metaphone_usage(self):
+        """
+        By default, resolvers are assumed to not support double metaphone usage
+        If supported, override this method definition in the derived class (eg. see EntityResolverUsingElasticSearch)
+        """
         logger.warning(
             "{!r} not configured to use double_metaphone",
             self.name
@@ -107,6 +128,12 @@ class EntityResolverBase(ABC):
         raise NotImplementedError
 
     def fit(self, clean=False):
+        """Fits the resolver model, if required
+
+        Args:
+            clean (bool, optional): If ``True``, deletes and recreates the index from scratch
+                                    with synonyms in the mapping.json.
+        """
 
         if self.ready:
             return
@@ -122,7 +149,16 @@ class EntityResolverBase(ABC):
         raise NotImplementedError
 
     def predict(self, entity):
+        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
+        trained entity resolution model.
 
+        Args:
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
+
+        Returns:
+            (list): The top 20 resolved values for the provided entity.
+        """
         if isinstance(entity, (list, tuple)):
             top_entity = entity[0]
             entity = tuple(entity)
@@ -144,10 +180,10 @@ class EntityResolverBase(ABC):
         raise NotImplementedError
 
     def load(self):
+        """If available, loads embeddings of synonyms that are previously dumped
+        """
         self._load()
 
-    # TODO: make this an abstractmethod and
-    #   add dump functionalities in derived classes
     def _dump(self):
         raise NotImplementedError
 
@@ -157,9 +193,13 @@ class EntityResolverBase(ABC):
 
 
 class EntityResolverUsingElasticSearch(EntityResolverBase):
+    """
+    Resolver class based on Elastic Search
+    """
 
     # prefix for Elasticsearch indices used to store synonyms for entity resolution
     ES_SYNONYM_INDEX_PREFIX = "synonym"
+    """The prefix of the ES index."""
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super(EntityResolverUsingElasticSearch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
@@ -269,6 +309,16 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
         )
 
     def _fit(self, clean):
+        """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
+
+        In addition, the synonyms in entity mapping are imported to knowledge base indexes if the
+        corresponding knowledge base object index and field name are specified for the entity type.
+        The synonym info is then used by Question Answerer for text relevance matches.
+
+        Args:
+            clean (bool): If ``True``, deletes and recreates the index from scratch instead of
+                          updating the existing index with synonyms in the mapping.json.
+        """
         if clean:
             delete_index(
                 self._app_namespace, self._es_index_name, self._es_host, self._es_client
@@ -333,6 +383,16 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
             )
 
     def _predict(self, entity):
+        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
+        trained entity resolution model.
+
+        Args:
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
+
+        Returns:
+            (list): The top 20 resolved values for the provided entity.
+        """
 
         top_entity = entity[0]
 
@@ -549,6 +609,9 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
 
 
 class EntityResolverUsingExactMatch(EntityResolverBase):
+    """
+    Resolver class based on exact matching
+    """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super(EntityResolverUsingExactMatch, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
@@ -596,19 +659,21 @@ class EntityResolverUsingExactMatch(EntityResolverBase):
         return {"items": item_map, "synonyms": syn_map}
 
     def _fit(self, clean):
-
+        """Loads an entity mapping file to resolve entities using exact match.
+        """
         if clean:
             logger.warning(
                 "clean=True ignored while fitting exact_match algo for entity resolution"
             )
 
-        """Fits a simple exact match entity resolution model when Elasticsearch is not available."""
         entity_map = self._resource_loader.get_entity_map(self.type)
         self._exact_match_mapping = self._process_entity_map(
             self.type, entity_map, self._normalizer
         )
 
     def _predict(self, entity):
+        """Looks for exact name in the synonyms data
+        """
 
         entity = entity[0]  # top_entity
 
@@ -642,6 +707,9 @@ class EntityResolverUsingExactMatch(EntityResolverBase):
 
 
 class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
+    """
+    Resolver class for bert models as described here: https://github.com/UKPLab/sentence-transformers
+    """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super(EntityResolverUsingSentenceBertEmbedder, self).__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
@@ -649,7 +717,12 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         self._exact_match_mapping = None
         self._sbert_model = None
         self._preloaded_mappings_embs = {}
-        # TODO: _lazy_resolution is set to a default value, can be modified to be a input
+        # batch_size (int): The maximum size of each batch while encoding using on a deep embedder like BERT
+        self._batch_size = (
+            self._er_config.get("model_settings", {})
+                .get("batch_size", 16)
+        )
+        # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
         if not self._lazy_resolution:
             logger.warning(
@@ -658,6 +731,15 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             )
 
     def _encode(self, phrases):
+        """Encodes input text(s) into embeddings, one vector for each phrase
+
+        Args:
+            phrases (str, list[str]): textual inputs that are to be encoded using sentence transformers' model
+
+        Returns:
+            list[np.array]: one numpy array of embeddings for each phrase,
+                            if ``phrases`` is ``str``, a list of one numpy aray is returned
+        """
 
         if not phrases:
             return []
@@ -669,11 +751,20 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         else:
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        return self._sbert_model.encode(phrases, batch_size=16, is_pretokenized=False,
-                                        convert_to_numpy=True, convert_to_tensor=False,
-                                        show_progress_bar=True)
+        return self._sbert_model.encode(phrases, batch_size=self._batch_size,
+                                        is_pretokenized=False, convert_to_numpy=True,
+                                        convert_to_tensor=False, show_progress_bar=True)
 
     def _sort_using_cosine_dist(self, syn_embs, entity_emb):
+        """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
+            for entity resolution
+
+        Args:
+            syn_embs (list[np.array]): a list of synonym embeddings
+            entity_emb: (np.array): embedding of input entity
+        Returns:
+            list[tuple]: a list of sorted synonym names, paired with their similarity scores (descending)
+        """
 
         entity_emb = entity_emb.reshape(1, -1)
         synonyms, synonyms_encodings = zip(*[(k,v) for k,v in syn_embs.items()])
@@ -724,6 +815,12 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         return {"items": item_map, "synonyms": syn_map}
 
     def _fit(self, clean):
+        """
+        Fits the resolver model
+
+        Args:
+            clean (bool): If ``True``, deletes existing dump of synonym embeddings file
+        """
 
         # load model
         self._sbert_model_name = "bert-base-nli-mean-tokens"
@@ -755,6 +852,15 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             self._dump()
 
     def _predict(self, entity):
+        """Predicts the resolved value(s) for the given entity using cosine similarity.
+
+        Args:
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
+
+        Returns:
+            (list): The top 20 resolved values for the provided entity.
+        """
 
         syn_embs = self._preloaded_mappings_embs
         entity = entity[0]  # top_entity
@@ -788,10 +894,14 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         return values[0:20]
 
     def _load(self):
+        """Loads embeddings for all synonyms, previously dumped into a .pkl file
+        """
         with open(self.cache_path, "rb") as fp:
             self._preloaded_mappings_embs = pickle.load(fp)
 
     def _dump(self):
+        """Dumps embeddings of synonyms into a .pkl file when the .fit() method is called
+        """
         if self.dirty:
             folder = os.path.split(self.cache_path)[0]
             if folder and not os.path.exists(folder):
