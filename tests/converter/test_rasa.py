@@ -7,7 +7,7 @@ from mindmeld import NaturalLanguageProcessor
 
 
 @pytest.fixture
-def rasa_nlp(mindmeld_rasa_converter_app_path):
+def rasa_nlp(rasa_converter, mindmeld_rasa_converter_app_path):
     nlp = NaturalLanguageProcessor(mindmeld_rasa_converter_app_path)
     nlp.build()
     return nlp
@@ -46,8 +46,8 @@ def test_nlp_lastname(rasa_nlp):
 convert_test_data = [
     (
         "XyZ date for [21.1(5)L&](product_version0) ?",
-        "XyZ date for {21.1(5)l&|product_version0} ?",
-        {'{21.1(5)l&|product_version0}'}
+        "XyZ date for {21.1(5)L&|product_version0} ?",
+        {'{21.1(5)L&|product_version0}'}
     ),
     (
         "what are your abilities?",
@@ -56,13 +56,13 @@ convert_test_data = [
     ),
     (
         "What is the End of Life Product Restart Time for [XYZ2990-ESPN19-N](PID) ?",
-        "What is the End of Life Product Restart Time for {xyz2990-espn19-n|pid} ?",
-        {'{xyz2990-espn19-n|pid}'}
+        "What is the End of Life Product Restart Time for {XYZ2990-ESPN19-N|pid} ?",
+        {'{XYZ2990-ESPN19-N|pid}'}
     ),
     (
         "XyZ date for [21.1(5)L&](proDucT_version1) - XyZ date for [21.1(5)L&](product_version2)",
-        "XyZ date for {21.1(5)l&|product_version1} - XyZ date for {21.1(5)l&|product_version2}",
-        {'{21.1(5)l&|product_version1}', '{21.1(5)l&|product_version2}'}
+        "XyZ date for {21.1(5)L&|product_version1} - XyZ date for {21.1(5)L&|product_version2}",
+        {'{21.1(5)L&|product_version1}', '{21.1(5)L&|product_version2}'}
     ),
 ]
 

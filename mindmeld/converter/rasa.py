@@ -92,7 +92,7 @@ class RasaConverter(Converter):
     def _translate_rasa_entry_to_mindmeld_entry(self, rasa_entry: str) -> str:
         mindmeld_entry = rasa_entry
         for match, entity, entity_type in RASA_ENTITY_REGEX.findall(rasa_entry):
-            mindmeld_entity = f"{{{entity}|{entity_type}}}".lower()
+            mindmeld_entity = f"{{{entity}|{entity_type.lower()}}}"
             mindmeld_entry = mindmeld_entry.replace(match, mindmeld_entity)
             self.all_entities.add(mindmeld_entity)
         return mindmeld_entry
