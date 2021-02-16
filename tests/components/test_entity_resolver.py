@@ -28,57 +28,65 @@ def es_client():
 
 
 @pytest.fixture
-def resolver(resource_loader, es_client):
+def resolver_elastic_search(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
+    er_config = {
+        'model_type': 'text_relevance',
+        'phonetic_match_types': [
+            # "double_metaphone"
+        ],
+    }
     resolver = EntityResolver(
-        APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client
+        APP_PATH, resource_loader, ENTITY_TYPE,
+        es_client=es_client, er_config=er_config
     )
     resolver.fit()
     return resolver
 
 
 @pytest.fixture
-def resolver_text_rel(resource_loader, es_client):
+def resolver_sbert(resource_loader):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
+    er_config = {
+        'model_type': 'sbert_cosine_similarity',
+        'model_settings': {
+            "batch_size": 16,
+        }
+    }
     resolver = EntityResolver(
-        APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client
+        APP_PATH, resource_loader, ENTITY_TYPE, er_config=er_config
     )
-    with mock.patch(
-        "mindmeld.components.entity_resolver.EntityResolver._use_text_rel",
-        new_callable=PropertyMock,
-    ) as _use_text_rel:
-        _use_text_rel.return_value = False
-        resolver.fit()
-        return resolver
+    resolver.fit()
+    return resolver
 
 
-def test_canonical(resolver):
+def test_canonical_elastic_search(resolver_elastic_search):
     """Tests that entity resolution works for a canonical entity in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
-    predicted = resolver.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
+    predicted = resolver_elastic_search.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
     assert predicted["id"] == expected["id"]
     assert predicted["cname"] == expected["cname"]
 
 
-def test_synonym(resolver):
-    """Tests that entity resolution works for an entity synonym in the map"""
-    expected = {"id": "2", "cname": "Pine and Market"}
-    predicted = resolver.predict(Entity("Pine St", ENTITY_TYPE))[0]
-    assert predicted["id"] == expected["id"]
-    assert predicted["cname"] == expected["cname"]
-
-
-def test_canonical_text_rel(resolver_text_rel):
+def test_canonical_sbert(resolver_sbert):
     """Tests that entity resolution works for a canonical entity in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
-    predicted = resolver_text_rel.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
+    predicted = resolver_sbert.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
     assert predicted["id"] == expected["id"]
     assert predicted["cname"] == expected["cname"]
 
 
-def test_synonym_text_rel(resolver_text_rel):
+def test_synonym_elastic_search(resolver_elastic_search):
     """Tests that entity resolution works for an entity synonym in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
-    predicted = resolver_text_rel.predict(Entity("Pine St", ENTITY_TYPE))[0]
+    predicted = resolver_elastic_search.predict(Entity("Pine St", ENTITY_TYPE))[0]
+    assert predicted["id"] == expected["id"]
+    assert predicted["cname"] == expected["cname"]
+
+
+def test_synonym_sbert(resolver_sbert):
+    """Tests that entity resolution works for an entity synonym in the map"""
+    expected = {"id": "2", "cname": "Pine and Market"}
+    predicted = resolver_sbert.predict(Entity("Pine St", ENTITY_TYPE))[0]
     assert predicted["id"] == expected["id"]
     assert predicted["cname"] == expected["cname"]

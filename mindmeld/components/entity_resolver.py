@@ -5,10 +5,16 @@ import copy
 import hashlib
 import logging
 import os
+import pickle
+from abc import ABC, abstractmethod
 
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
 
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+from .. import path
 from ..core import Entity
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ._config import (
@@ -30,11 +36,6 @@ from ._elasticsearch_helpers import (
     resolve_es_config_for_version,
 )
 
-from .. import path
-from abc import ABC, abstractmethod
-import pickle
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 try:
     from sentence_transformers import SentenceTransformer
     sbert_available = True
@@ -65,10 +66,12 @@ class EntityResolver:
             app_path (str): The application path.
             resource_loader (ResourceLoader): An object which can load resources for the resolver.
             entity_type (str): The entity type associated with this entity resolver.
+            er_config (dict): A classifier config
             es_host (str): The Elasticsearch host server.
             es_client (Elasticsearch): The Elasticsearch client.
         """
-        er_config = get_classifier_config("entity_resolution", app_path=app_path)
+        er_config = kwargs.pop("er_config", None) or \
+                    get_classifier_config("entity_resolution", app_path=app_path)
         name = er_config.get("model_type", None)
         cls.validate_resolver_name(name)
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(name)(
@@ -717,11 +720,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         self._exact_match_mapping = None
         self._sbert_model = None
         self._preloaded_mappings_embs = {}
-        # batch_size (int): The maximum size of each batch while encoding using on a deep embedder like BERT
-        self._batch_size = (
-            self._er_config.get("model_settings", {})
-                .get("batch_size", 16)
-        )
+
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
         if not self._lazy_resolution:
@@ -751,7 +750,13 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         else:
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        return self._sbert_model.encode(phrases, batch_size=self._batch_size,
+        # batch_size (int): The maximum size of each batch while encoding using on a deep embedder like BERT
+        _batch_size = (
+            self._er_config.get("model_settings", {})
+                .get("batch_size", 16)
+        )
+
+        return self._sbert_model.encode(phrases, batch_size=_batch_size,
                                         is_pretokenized=False, convert_to_numpy=True,
                                         convert_to_tensor=False, show_progress_bar=True)
 
