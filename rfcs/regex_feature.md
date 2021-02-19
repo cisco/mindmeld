@@ -75,7 +75,7 @@ er.view_extracted_features("look up 123-456")
 each regex pattern for every entity type.
 - The training time will also increase for the similar reason
 - The feature could cast a wide net on every token, for example `.*` would match against all tokens. However since the 
-classifier would able to learn from this high noise signal, it would reduce it's dependence on it to make a classification.
+classifier would be able to learn from this high noise signal, it would reduce it's dependence on it to make a classification.
 - There could be overlaps with regex patterns from different entity types, but the classifier would be able to learn from
 those patterns.
 - This approach locks-in the one-language one-mindmeld application idea since these regex patterns will not translate
@@ -87,4 +87,3 @@ across languages.
 logic in the same folder location.
 - Not have this feature since it could be abused and developers will be confused. Moreover, the performance costs could 
 add up to an already slow platform.
-
