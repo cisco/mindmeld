@@ -78,6 +78,8 @@ each regex pattern for every entity type.
 classifier would able to learn from this high noise signal, it would reduce it's dependence on it to make a classification.
 - There could be overlaps with regex patterns from different entity types, but the classifier would be able to learn from
 those patterns.
+- This approach locks-in the one-language one-mindmeld application idea since these regex patterns will not translate
+across languages.
 
 ## Alternative ideas
 
