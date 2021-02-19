@@ -6,7 +6,7 @@ A feature based on regex pattern matching that MindMeld's NER models can use to 
 without providing surrounding sentence context to the classifier. This is more relevant in services that
 just use MindMeld for NLP while doing their own dialog management. 
 - Developers also want granular distinctions between entities that occur in the same context, 
-for example, `look up {SKU120|sku}` and `look up {123-ABC-12|pid}`. Currently, we ask developers to differ
+for example, `look up {SKU120|sku}` and `look up {123-ABC-12|pid}`. Currently, we ask developers to defer
 these types of distinction to the business logic in the dialogue manager.
 - DialogFlow, NLTK and other similar platforms have the regex matching feature. Moreover, we already have an 
 orthographic matching feature in MindMeld. This feature would augment that.
@@ -87,5 +87,4 @@ across languages.
 logic in the same folder location.
 - Not have this feature since it could be abused and developers will be confused. Moreover, the performance costs could 
 add up to an already slow platform.
-
 
