@@ -123,7 +123,6 @@ class EntityResolverBase(ABC):
         self._app_namespace = get_app_namespace(self.app_path)
         self._is_system_entity = Entity.is_system_entity(self.type)
         self.name = self.er_config.get("model_type")
-        self._cache_name = self.name
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
 
@@ -154,10 +153,10 @@ class EntityResolverBase(ABC):
         )
         raise NotImplementedError
 
-    @property
-    def cache_path(self):
+    def cache_path(self, tail_name=""):
+        name = self.name + "_" + tail_name if tail_name else self.name
         return path.get_entity_resolver_cache_file_path(
-            self.app_path, self.type, self._cache_name
+            self.app_path, self.type, name
         )
 
     @abstractmethod
@@ -758,7 +757,6 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                 .get("pretrained_name_or_abspath", "bert-base-nli-mean-tokens")
         )
         self._sbert_model = None
-        self._cache_name = self.name + "_" + self.pretrained_name
 
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
@@ -897,9 +895,10 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         )
 
         # load embeddings for this data
-        if clean and os.path.exists(self.cache_path):
-            os.remove(self.cache_path)
-        if not self._lazy_resolution and os.path.exists(self.cache_path):
+        cache_path = self.cache_path(self.pretrained_name)
+        if clean and os.path.exists(cache_path):
+            os.remove(cache_path)
+        if not self._lazy_resolution and os.path.exists(cache_path):
             self._load()
             self.dirty = False
         else:
@@ -955,17 +954,19 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
     def _load(self):
         """Loads embeddings for all synonyms, previously dumped into a .pkl file
         """
-        with open(self.cache_path, "rb") as fp:
+        cache_path = self.cache_path(self.pretrained_name)
+        with open(cache_path, "rb") as fp:
             self._preloaded_mappings_embs = pickle.load(fp)
 
     def _dump(self):
         """Dumps embeddings of synonyms into a .pkl file when the .fit() method is called
         """
+        cache_path = self.cache_path(self.pretrained_name)
         if self.dirty:
-            folder = os.path.split(self.cache_path)[0]
+            folder = os.path.split(cache_path)[0]
             if folder and not os.path.exists(folder):
                 os.makedirs(folder)
-            with open(self.cache_path, "wb") as fp:
+            with open(cache_path, "wb") as fp:
                 pickle.dump(self._preloaded_mappings_embs, fp)
 
 
