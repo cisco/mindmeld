@@ -58,6 +58,7 @@ def resolver_elastic_search(resource_loader, es_client):
     return resolver
 
 
+@pytest.mark.bert
 @pytest.fixture
 def resolver_sbert(resource_loader):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
