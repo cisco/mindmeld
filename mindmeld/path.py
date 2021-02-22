@@ -539,6 +539,7 @@ def get_embedder_cache_file_path(app_path, embedder_type, model_name):
         model_name=model_name,
     )
 
+
 @safe_path
 def get_entity_resolver_cache_file_path(app_path, entity_type, model_type):
     """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.

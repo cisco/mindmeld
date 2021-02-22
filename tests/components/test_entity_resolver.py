@@ -7,11 +7,11 @@ test_entity_resolver
 
 Tests for `entity_resolver` module.
 """
-import mock
+# import mock
 
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
-from mock import PropertyMock
+# from mock import PropertyMock
 
 from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.components.entity_resolver import EntityResolver
@@ -31,8 +31,8 @@ def es_client():
 def resolver_exact_match(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
     er_config = {
-            'model_type': 'exact_match',
-        }
+        'model_type': 'exact_match'
+    }
     resolver = EntityResolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
