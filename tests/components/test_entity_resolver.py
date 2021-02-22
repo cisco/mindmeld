@@ -58,6 +58,7 @@ def resolver_elastic_search(resource_loader, es_client):
     return resolver
 
 
+@pytest.mark.extras
 @pytest.mark.bert
 @pytest.fixture
 def resolver_sbert(resource_loader):
