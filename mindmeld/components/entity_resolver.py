@@ -797,9 +797,10 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                 .get("batch_size", 16)
         )
         show_progress = len(phrases) > 1
-        return self._sbert_model.encode(phrases, batch_size=_batch_size,
-                                        is_pretokenized=False, convert_to_numpy=True,
-                                        convert_to_tensor=False, show_progress_bar=show_progress)
+        return self._sbert_model.encode(phrases,
+                                        batch_size=_batch_size,
+                                        convert_to_numpy=True,
+                                        show_progress_bar=show_progress)
 
     @staticmethod
     def _sort_using_cosine_dist(syn_embs, entity_emb):
