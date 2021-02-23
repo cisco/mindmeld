@@ -58,8 +58,6 @@ def resolver_elastic_search(resource_loader, es_client):
     return resolver
 
 
-@pytest.mark.extras
-@pytest.mark.bert
 @pytest.fixture
 def resolver_sbert(resource_loader):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
@@ -92,6 +90,8 @@ def test_canonical_elastic_search(resolver_elastic_search):
     assert predicted["cname"] == expected["cname"]
 
 
+@pytest.mark.extras
+@pytest.mark.bert
 def test_canonical_sbert(resolver_sbert):
     """Tests that entity resolution works for a canonical entity in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
@@ -108,6 +108,8 @@ def test_synonym_elastic_search(resolver_elastic_search):
     assert predicted["cname"] == expected["cname"]
 
 
+@pytest.mark.extras
+@pytest.mark.bert
 def test_synonym_sbert(resolver_sbert):
     """Tests that entity resolution works for an entity synonym in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
