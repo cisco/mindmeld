@@ -62,27 +62,32 @@ class Annotator(ABC):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         language=ENGLISH_LANGUAGE_CODE,
         locale=ENGLISH_US_LOCALE,
         overwrite=False,
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
         """Initializes an annotator.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
         """
         self.app_path = app_path
         self.language = language
         self.locale = locale
         self.overwrite = overwrite
-        self.annotation_rules = annotation_rules
+        self.annotation_rules = annotation_rules or []
         self.unannotate_supported_entities_only = unannotate_supported_entities_only
-        self.unannotation_rules = unannotation_rules
+        self.unannotation_rules = unannotation_rules or []
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
         self.duckling = DucklingRecognizer.get_instance()
 
@@ -330,7 +335,6 @@ class Annotator(ABC):
         Args:
             current_entities (list): List of existing query entities.
             annotated_entities (list): List of new query entities.
-            config (dict): Config to use instead of the class config.
 
         Returns:
             final_entities (list): List of resolved query entities.
@@ -353,7 +357,7 @@ class Annotator(ABC):
         """Removes specified entities in a processed query. If all entities are being
         removed, this function will not remove entities that the annotator does not support
         unless it is explicitly specified to do so in the config with the param
-        "unannotate_supported_entities_only" (boolean).
+        "unannotate_supported_entities_only" (bool).
 
         Args:
             processed_query (ProcessedQuery): A processed query.
@@ -397,24 +401,26 @@ class SpacyAnnotator(Annotator):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         language=None,
         locale=None,
         overwrite=False,
         spacy_model_size="lg",
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
-        """Initializes an annotator.
+        """Initializes a SpacyAnnotator.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            spacy_model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(
             app_path,
@@ -500,7 +506,9 @@ class SpacyAnnotator(Annotator):
         supported by duckling for the given language.
 
         Args:
-            filtered_entities (list): List of entities to filter.
+            entities (list): List of entities to filter.
+        Returns:
+            filtered_entities (list): Filtered entities.
         """
         filtered_entities = []
         for entity in entities:
@@ -833,14 +841,27 @@ class BootstrapAnnotator(Annotator):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         confidence_threshold=0,
         language=None,
         locale=None,
         overwrite=False,
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
+        """Initializes a BootstrapAnnotator.
+
+        Args:
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
+            confidence_threshold (float): The minimum confidence value to accept a detected entity.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
+        """
         super().__init__(
             app_path,
             annotation_rules=annotation_rules,
@@ -858,10 +879,14 @@ class BootstrapAnnotator(Annotator):
     def parse(self, sentence, entity_types, domain: str, intent: str, **kwargs):
         """
         Args:
-                sentence (str): Sentence to detect entities.
-                entity_types (list): List of entity types to parse. If None, all
-                        possible entity types will be parsed.
-        Returns: entities (list): List of entity dictionaries.
+            sentence (str): Sentence to detect entities.
+            entity_types (list): List of entity types to parse. If None, all
+                    possible entity types will be parsed.
+            domain (str): Allowed domain.
+            intent (str): Allowed intent.
+
+        Returns:
+            entities (list): List of entity dictionaries.
         """
         response = self.nlp.process(
             sentence, allowed_nlp_classes={domain: {intent: {}}}, verbose=True
@@ -912,22 +937,24 @@ class NoTranslationDucklingAnnotator(Annotator):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         language=None,
         locale=None,
         overwrite=False,
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
-        """Initializes an annotator.
+        """Initializes a NoTranslationDucklingAnnotator.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(
             app_path,
@@ -1045,25 +1072,28 @@ class TranslationDucklingAnnotator(Annotator):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         en_annotator=None,
         translator=None,
         language=None,
         locale=None,
         overwrite=False,
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
-        """Initializes an annotator.
+        """Initializes a TranslationDucklingAnnotator.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
+            en_annotator (SpacyAnnotator): A Spacy Annotator with language set to English ("en").
+            translator (str): A translator to use such as 'GoogleTranslator' or 'NoOpTranslator'.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            en_annotator (SpacyAnnotator): A Spacy Annotator with language set to English ("en").
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(
             app_path,
@@ -1151,21 +1181,27 @@ class MultiLingualAnnotator(Annotator):
     def __init__(
         self,
         app_path,
-        annotation_rules=[],
+        annotation_rules=None,
         translator=None,
         language=None,
         locale=None,
         overwrite=False,
         unannotate_supported_entities_only=True,
-        unannotation_rules=[],
+        unannotation_rules=None,
     ):
-        """Initializes an annotator.
+        """Initializes a TranslationDucklingAnnotator.
 
         Args:
-            app_path (str): The location of the MindMeld app
+            app_path (str): The location of the MindMeld app.
+            annotation_rules (list): List of Annotation rules.
+            en_annotator (SpacyAnnotator): A Spacy Annotator with language set to English ("en").
+            translator (str): A translator to use such as 'GoogleTranslator' or 'NoOpTranslator'.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
+            overwrite (bool): Whether to overwrite existing annotations with conflicting spans.
+            unannotate_supported_entities_only (bool): Only allow removal of supported entities.
+            unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(
             app_path,

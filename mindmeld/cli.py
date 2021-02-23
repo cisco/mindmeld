@@ -743,7 +743,7 @@ def _get_duckling_pid():
 def annotate(app_path, overwrite):
     """Runs the annotation command of the Auto Annotator."""
     register_all_annotators()
-    config = _get_auto_annotator_config(app_path=app_path)
+    config = _get_auto_annotator_config(app_path=app_path, overwrite=overwrite)
     annotator = create_annotator(config)
     annotator.annotate()
     logger.info("Annotation Complete.")
@@ -772,10 +772,13 @@ def unannotate(app_path, unannotate_all):
     logger.info("Annotation Removal Complete.")
 
 
-def _get_auto_annotator_config(app_path, unannotate_all=False):
+def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
+    """ Gets the Annotator config from config.py. Overwrites params as needed."""
     config = get_auto_annotator_config(app_path=app_path)
     config["app_path"] = app_path
     config["language"], config["locale"] = get_language_config(app_path)
+    if overwrite:
+        config["overwrite"] = True
     if unannotate_all:
         config["unannotation_rule"] = UNANNOTATE_ALL_RULE
         config["unannotate_supported_entities_only"] = False
