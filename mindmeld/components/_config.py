@@ -468,9 +468,16 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
-    "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}],
+    "annotation_rules": [
+        {
+            "domains": ".*",
+            "intents": ".*",
+            "files": ".*",
+            "entities": ".*",
+        }
+    ],
     "unannotate_supported_entities_only": True,
-    "unannotate": None,
+    "unannotation_rules": None,
 }
 
 DEFAULT_TOKENIZER_CONFIG = {
@@ -1049,7 +1056,9 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     Returns:
         dict: The tokenizer configuration.
     """
-    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(exclude_from_norm)
+    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(
+        exclude_from_norm
+    )
 
     if not app_path:
         return DEFAULT_TOKENIZER_CONFIG

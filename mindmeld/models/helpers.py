@@ -77,7 +77,7 @@ def create_model(config):
         raise ValueError(msg.format(config.model_type)) from e
 
 
-def create_annotator(app_path, config):
+def create_annotator(config):
     """Creates an annotator instance using the provided configuration
 
     Args:
@@ -94,9 +94,7 @@ def create_annotator(app_path, config):
             "Missing required argument in AUTO_ANNOTATOR_CONFIG: 'annotator_class'"
         )
     if config["annotator_class"] in ANNOTATOR_MAP:
-        return ANNOTATOR_MAP[config["annotator_class"]](
-            app_path=app_path, config=config
-        )
+        return ANNOTATOR_MAP[config.pop("annotator_class")](**config)
     else:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise KeyError(msg.format(config["annotator_class"]))

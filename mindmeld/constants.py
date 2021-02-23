@@ -39,6 +39,15 @@ SPACY_ANNOTATOR_SUPPORTED_LANGUAGES = (
 )
 SPACY_ANNOTATOR_MODEL_SIZES = ["sm", "md", "lg"]
 
+UNANNOTATE_ALL_RULE = [
+    {
+        "domains": ".*",
+        "intents": ".*",
+        "files": ".*",
+        "entities": ".*",
+    }
+]
+
 ANNOTATOR_TO_SYS_ENTITY_MAPPINGS = {
     "money": "sys_amount-of-money",
     "cardinal": "sys_number",
@@ -61,7 +70,6 @@ SPACY_ENTITIES_THAT_REQUIRE_DUCKLING = [
     "sys_time",
     "sys_date",
     "sys_interval",
-    "sys_money",
     "sys_number",
     "sys_ordinal",
     "sys_distance",
@@ -70,9 +78,20 @@ SPACY_ENTITIES_THAT_REQUIRE_DUCKLING = [
 ]
 
 SPACY_SYS_ENTITIES_NOT_IN_DUCKLING = [
-    "sys_event", "sys_fac", "sys_gpe", "sys_language", "sys_law", "sys_loc",
-    "sys_nrp", "sys_org", "sys_other-quantity", "sys_person", "sys_product",
-    "sys_weight", "sys_work_of_art"]
+    "sys_event",
+    "sys_fac",
+    "sys_gpe",
+    "sys_language",
+    "sys_law",
+    "sys_loc",
+    "sys_nrp",
+    "sys_org",
+    "sys_other-quantity",
+    "sys_person",
+    "sys_product",
+    "sys_weight",
+    "sys_work_of_art",
+]
 
 # TODO: Create a script to retreive these automatically
 DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
@@ -282,7 +301,7 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 
 
 def _no_overlap(entity_one, entity_two):
-    """ Returns True if two query entities do not overlap.
+    """Returns True if two query entities do not overlap.
     Args:
         entity_one (QueryEntity): First entity.
         entity_two (QueryEntity): Second Entity.

@@ -465,7 +465,7 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`M
 
 		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": False, 
-		"annotate": [ 
+		"annotation_rules": [ 
 			{ 
 				"domains": ".*", 
 				"intents": ".*", 
@@ -474,7 +474,7 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`M
 			} 
 		], 
 		"unannotate_supported_entities_only": True, 
-		"unannotate": None, 
+		"unannotation_rules": None, 
 	}
 
 Let's take a look at the allowed values for each setting in an Auto Annotator configuration.

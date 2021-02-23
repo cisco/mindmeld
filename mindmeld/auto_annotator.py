@@ -15,14 +15,11 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from enum import Enum
 import spacy
 from tqdm import tqdm
 from .resource_loader import ResourceLoader
 from .components._config import (
-    get_auto_annotator_config,
-    get_language_config,
     ENGLISH_LANGUAGE_CODE,
     ENGLISH_US_LOCALE,
 )
@@ -62,7 +59,16 @@ class Annotator(ABC):
     Abstract Annotator class that can be used to build a custom Annotation class.
     """
 
-    def __init__(self, app_path, config=None):
+    def __init__(
+        self,
+        app_path,
+        annotation_rules=[],
+        language=ENGLISH_LANGUAGE_CODE,
+        locale=ENGLISH_US_LOCALE,
+        overwrite=False,
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
+    ):
         """Initializes an annotator.
 
         Args:
@@ -71,32 +77,34 @@ class Annotator(ABC):
                 override the config specified by the app's config.py file.
         """
         self.app_path = app_path
-        self.config = config or get_auto_annotator_config(app_path=app_path)
+        self.language = language
+        self.locale = locale
+        self.overwrite = overwrite
+        self.annotation_rules = annotation_rules
+        self.unannotate_supported_entities_only = unannotate_supported_entities_only
+        self.unannotation_rules = unannotation_rules
         self._resource_loader = ResourceLoader.create_resource_loader(app_path)
-        self.language, self.locale = get_language_config(self.app_path)
         self.duckling = DucklingRecognizer.get_instance()
 
-    def _get_file_entities_map(self, action: AnnotatorAction, config):
+    def _get_file_entities_map(self, action: AnnotatorAction):
         """Creates a dictionary that maps file paths to entities given
         regex rules defined in the config.
 
         Args:
             action (AnnotatorAction): Can be "annotate" or "unannotate". Used as a key
                 to access a list of regex rules in the config dictionary.
-            config (dict): Config to use instead of the class config.
 
         Returns:
             file_entities_map (dict): A dictionary that maps file paths in an
                 App to a list of entities.
         """
-        config = config or self.config
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
 
         if action == AnnotatorAction.ANNOTATE:
-            rules = config[AnnotatorAction.ANNOTATE.value]
+            rules = self.annotation_rules
         elif action == AnnotatorAction.UNANNOTATE:
-            rules = config[AnnotatorAction.UNANNOTATE.value]
+            rules = self.unannotation_rules
 
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
@@ -166,71 +174,37 @@ class Annotator(ABC):
         entity = entity.lower().strip()
         return entity in self.supported_entity_types
 
-    def annotate(self, **kwargs):
-        """Annotate data based on configurations in the config.py file.
-
-        Args:
-            kwargs (dict, optional): Configuration overrides can be passed in as arguments.
-        """
-        config = deepcopy(self.config)
-        for key, value in kwargs.items():
-            config[key] = value
-        if not config["annotate"]:
+    def annotate(self):
+        """Annotate data."""
+        if not self.annotation_rules:
             logger.warning(
                 """'annotate' field is not configured or misconfigured in the `config.py`.
                  We can't find any file to annotate."""
             )
             return
-        file_entities_map = self._get_file_entities_map(
-            action=AnnotatorAction.ANNOTATE, config=config
-        )
-        self._modify_queries(
-            file_entities_map, action=AnnotatorAction.ANNOTATE, config=config
-        )
+        file_entities_map = self._get_file_entities_map(action=AnnotatorAction.ANNOTATE)
+        self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
 
-    def unannotate(self, **kwargs):
-        """Unannotate data based on configurations in the config.py file.
-
-        Args:
-            kwargs (dict, optional): Configuration overrides can be passed in as arguments.
-            unannotate_all (bool): Unannotate all entities.
-        """
-        config = deepcopy(self.config)
-        for key, value in kwargs.items():
-            if key == "unannotate_all" and value:
-                config["unannotate"] = [
-                    {
-                        "domains": ".*",
-                        "intents": ".*",
-                        "files": ".*",
-                        "entities": ".*",
-                    }
-                ]
-                config["unannotate_supported_entities_only"] = False
-            else:
-                config[key] = value
-
-        if not config["unannotate"]:
+    def unannotate(self):
+        """Unannotate data."""
+        if not self.unannotate:
             logger.warning(
                 """'unannotate' field is not configured or misconfigured in the `config.py`.
                  We can't find any file to unannotate."""
             )
             return
         file_entities_map = self._get_file_entities_map(
-            action=AnnotatorAction.UNANNOTATE, config=config
+            action=AnnotatorAction.UNANNOTATE
         )
-        self._modify_queries(
-            file_entities_map, action=AnnotatorAction.UNANNOTATE, config=config
-        )
+        self._modify_queries(file_entities_map, action=AnnotatorAction.UNANNOTATE)
 
-    def _modify_queries(self, file_entities_map, action: AnnotatorAction, config):
+    def _modify_queries(self, file_entities_map, action: AnnotatorAction):
         """Iterates through App files and annotates or unannotates queries.
 
         Args:
             file_entities_map (dict): A dictionary that maps a file paths
                 in an App to a list of entities.
             action (AnnotatorAction): Can be "annotate" or "unannotate".
-            config (dict): Config to use instead of the class config.
         """
         query_factory = QueryFactory.create_query_factory(self.app_path)
         path_list = [p for p in file_entities_map if file_entities_map[p]]
@@ -245,13 +219,11 @@ class Annotator(ABC):
                     self._annotate_query(
                         processed_query=processed_query,
                         entity_types=entity_types,
-                        config=config,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
                         processed_query=processed_query,
                         remove_entities=entity_types,
-                        config=config,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -286,14 +258,13 @@ class Annotator(ABC):
                 logger.warning("Skipping query. Error in processing: %s", query)
         return processed_queries
 
-    def _annotate_query(self, processed_query, entity_types, config):
+    def _annotate_query(self, processed_query, entity_types):
         """Updates the entities of a processed query with newly
         annotated entities.
 
         Args:
             processed_query (ProcessedQuery): The processed query to update.
             entity_types (list): List of entities allowed for annotation.
-            config (dict): Config to use instead of the class config.
         """
         current_entities = list(processed_query.entities)
         annotated_entities = self._get_annotated_entities(
@@ -302,7 +273,6 @@ class Annotator(ABC):
         final_entities = self._resolve_conflicts(
             current_entities=current_entities,
             annotated_entities=annotated_entities,
-            config=config,
         )
         processed_query.entities = tuple(final_entities)
 
@@ -354,7 +324,7 @@ class Annotator(ABC):
         )
         return query_entity
 
-    def _resolve_conflicts(self, current_entities, annotated_entities, config):
+    def _resolve_conflicts(self, current_entities, annotated_entities):
         """Resolve overlaps between existing entities and newly annotad entities.
 
         Args:
@@ -365,10 +335,8 @@ class Annotator(ABC):
         Returns:
             final_entities (list): List of resolved query entities.
         """
-        config = config or self.config
-        overwrite = config["overwrite"]
-        base_entities = annotated_entities if overwrite else current_entities
-        other_entities = current_entities if overwrite else annotated_entities
+        base_entities = annotated_entities if self.overwrite else current_entities
+        other_entities = current_entities if self.overwrite else annotated_entities
 
         additional_entities = []
         for o_entity in other_entities:
@@ -381,7 +349,7 @@ class Annotator(ABC):
         return base_entities
 
     # pylint: disable=R0201
-    def _unannotate_query(self, processed_query, remove_entities, config):
+    def _unannotate_query(self, processed_query, remove_entities):
         """Removes specified entities in a processed query. If all entities are being
         removed, this function will not remove entities that the annotator does not support
         unless it is explicitly specified to do so in the config with the param
@@ -390,15 +358,12 @@ class Annotator(ABC):
         Args:
             processed_query (ProcessedQuery): A processed query.
             remove_entities (list): List of entities to remove.
-            config (dict): Config to use instead of the class config.
         """
-        config = config or self.config
-        remove_supported_only = config["unannotate_supported_entities_only"]
         keep_entities = []
         for query_entity in processed_query.entities:
             if remove_entities == ["*"]:
                 is_supported_entity = self.valid_entity_check(query_entity.entity.type)
-                if remove_supported_only and not is_supported_entity:
+                if self.unannotate_supported_entities_only and not is_supported_entity:
                     keep_entities.append(query_entity)
             elif query_entity.entity.type not in remove_entities:
                 keep_entities.append(query_entity)
@@ -430,7 +395,15 @@ class SpacyAnnotator(Annotator):
     """
 
     def __init__(
-        self, app_path, config=None, language=None, locale=None, model_size=None
+        self,
+        app_path,
+        annotation_rules=[],
+        language=None,
+        locale=None,
+        overwrite=False,
+        spacy_model_size="lg",
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
     ):
         """Initializes an annotator.
 
@@ -443,14 +416,17 @@ class SpacyAnnotator(Annotator):
                 ISO3166 alpha 2 country code separated by an underscore character.
             model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
         """
-        super().__init__(app_path=app_path, config=config)
-        self.language = language or self.language
-        self.locale = locale or self.locale
-        if self.locale and language != self.locale.split("_")[0]:
-            self.locale = None
-        self.spacy_model_size = model_size or self.config.get("spacy_model_size", "lg")
-        self.model_name = self._get_spacy_model_name()
-        self.nlp = SpacyAnnotator._load_model(self.model_name)
+        super().__init__(
+            app_path,
+            annotation_rules=annotation_rules,
+            language=language,
+            locale=locale,
+            overwrite=overwrite,
+            unannotate_supported_entities_only=unannotate_supported_entities_only,
+            unannotation_rules=unannotation_rules,
+        )
+        self.spacy_model_size = spacy_model_size
+        self.nlp = self._load_model()
 
     def _get_spacy_model_name(self):
         """Get the name of a Spacy Model.
@@ -471,8 +447,7 @@ class SpacyAnnotator(Annotator):
         model_type = "web" if self.language in SPACY_ANNOTATOR_WEB_LANGUAGES else "news"
         return "_".join([self.language, "core", model_type, self.spacy_model_size])
 
-    @staticmethod
-    def _load_model(model):
+    def _load_model(self):
         """Load Spacy English model. Download if needed.
 
         Args:
@@ -481,6 +456,7 @@ class SpacyAnnotator(Annotator):
         Returns:
             nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
         """
+        model = self._get_spacy_model_name()
         logger.info("Loading Spacy model %s.", model)
         try:
             return spacy.load(model)
@@ -854,9 +830,27 @@ class SpacyAnnotator(Annotator):
 class BootstrapAnnotator(Annotator):
     """Bootstrap Annotator class used to generate annotations based on existing annotations."""
 
-    def __init__(self, app_path, config=None):
-        super().__init__(app_path=app_path, config=config)
-        self.confidence_threshold = float(self.config.get("confidence_threshold", 0))
+    def __init__(
+        self,
+        app_path,
+        annotation_rules=[],
+        confidence_threshold=0,
+        language=None,
+        locale=None,
+        overwrite=False,
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
+    ):
+        super().__init__(
+            app_path,
+            annotation_rules=annotation_rules,
+            language=language,
+            locale=locale,
+            overwrite=overwrite,
+            unannotate_supported_entities_only=unannotate_supported_entities_only,
+            unannotation_rules=unannotation_rules,
+        )
+        self.confidence_threshold = confidence_threshold
         logger.info("BootstrapAnnotator is loading %s.", self.app_path)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.nlp.build()
@@ -915,7 +909,16 @@ class BootstrapAnnotator(Annotator):
 class NoTranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(self, app_path, config=None, language=None, locale=None):
+    def __init__(
+        self,
+        app_path,
+        annotation_rules=[],
+        language=None,
+        locale=None,
+        overwrite=False,
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
+    ):
         """Initializes an annotator.
 
         Args:
@@ -926,11 +929,15 @@ class NoTranslationDucklingAnnotator(Annotator):
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
         """
-        super().__init__(app_path=app_path, config=config)
-        self.language = language or self.language
-        self.locale = locale or self.locale
-        if self.locale and language != self.locale.split("_")[0]:
-            self.locale = None
+        super().__init__(
+            app_path,
+            annotation_rules=annotation_rules,
+            language=language,
+            locale=locale,
+            overwrite=overwrite,
+            unannotate_supported_entities_only=unannotate_supported_entities_only,
+            unannotation_rules=unannotation_rules,
+        )
 
     def parse(self, sentence, entity_types=None, **kwargs):
         """
@@ -1036,7 +1043,16 @@ class TranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
     def __init__(
-        self, app_path, config=None, language=None, locale=None, en_annotator=None
+        self,
+        app_path,
+        annotation_rules=[],
+        en_annotator=None,
+        translator=None,
+        language=None,
+        locale=None,
+        overwrite=False,
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
     ):
         """Initializes an annotator.
 
@@ -1049,20 +1065,21 @@ class TranslationDucklingAnnotator(Annotator):
                 ISO3166 alpha 2 country code separated by an underscore character.
             en_annotator (SpacyAnnotator): A Spacy Annotator with language set to English ("en").
         """
-        super().__init__(app_path=app_path, config=config)
-        self.language = language or self.language
+        super().__init__(
+            app_path,
+            annotation_rules=annotation_rules,
+            language=language,
+            locale=locale,
+            overwrite=overwrite,
+            unannotate_supported_entities_only=unannotate_supported_entities_only,
+            unannotation_rules=unannotation_rules,
+        )
         assert (
             self.language != ENGLISH_LANGUAGE_CODE
         ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
-        self.locale = locale or self.locale
-        if self.locale and language != self.locale.split("_")[0]:
-            self.locale = None
-        self.translator = TranslatorFactory().get_translator(
-            self.config.get("translator")
-        )
+        self.translator = TranslatorFactory().get_translator(translator)
         self.en_annotator = en_annotator or SpacyAnnotator(
-            self.app_path,
-            self.config,
+            app_path=self.app_path,
             language=ENGLISH_LANGUAGE_CODE,
             locale=ENGLISH_US_LOCALE,
         )
@@ -1131,25 +1148,37 @@ class TranslationDucklingAnnotator(Annotator):
 class MultiLingualAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(self, app_path, config=None, language=None, locale=None):
+    def __init__(
+        self,
+        app_path,
+        annotation_rules=[],
+        translator=None,
+        language=None,
+        locale=None,
+        overwrite=False,
+        unannotate_supported_entities_only=True,
+        unannotation_rules=[],
+    ):
         """Initializes an annotator.
 
         Args:
             app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
             language (str, optional): Language as specified using a 639-1/2 code.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
         """
-        super().__init__(app_path=app_path, config=config)
-        self.language = language or self.language
-        self.locale = locale or self.locale
-        if self.locale and language != self.locale.split("_")[0]:
-            self.locale = None
+        super().__init__(
+            app_path,
+            annotation_rules=annotation_rules,
+            language=language,
+            locale=locale,
+            overwrite=overwrite,
+            unannotate_supported_entities_only=unannotate_supported_entities_only,
+            unannotation_rules=unannotation_rules,
+        )
+        self.translator = translator
         self.en_annotator = SpacyAnnotator(
             app_path=self.app_path,
-            config=self.config,
             language=ENGLISH_LANGUAGE_CODE,
             locale=ENGLISH_US_LOCALE,
         )
@@ -1157,23 +1186,21 @@ class MultiLingualAnnotator(Annotator):
             self.duckling_annotator = self._get_duckling_annotator()
             self.non_en_annotator = SpacyAnnotator(
                 app_path=self.app_path,
-                config=self.config,
                 language=self.language,
                 locale=self.locale,
             )
 
     def _get_duckling_annotator(self):
-        if "translator" in self.config:
+        if self.translator:
             return TranslationDucklingAnnotator(
                 app_path=self.app_path,
-                config=self.config,
                 language=self.language,
                 locale=self.locale,
                 en_annotator=self.en_annotator,
+                translator=self.translator,
             )
         return NoTranslationDucklingAnnotator(
             app_path=self.app_path,
-            config=self.config,
             language=self.language,
             locale=self.locale,
         )
