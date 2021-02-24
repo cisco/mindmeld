@@ -97,7 +97,7 @@ class EntityResolver:
             app_path, resource_loader, entity_type, er_config, **kwargs
         )
 
-    def fit(self):
+    def fit(self, clean):
         raise NotImplementedError
 
     def load(self):
@@ -757,6 +757,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                 .get("pretrained_name_or_abspath", "bert-base-nli-mean-tokens")
         )
         self._sbert_model = None
+        self._augment_lower_case = False
 
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
@@ -803,16 +804,17 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                                         show_progress_bar=show_progress)
 
     @staticmethod
-    def _sort_using_cosine_dist(syn_embs, entity_emb):
+    def _compute_cosine_similarity(syn_embs, entity_emb, return_as_dict=False):
         """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
             for entity resolution
 
         Args:
-            syn_embs (list[np.array]): a list of synonym embeddings
-            entity_emb: (np.array): embedding of input entity
+            syn_embs (dict): a dict of synonym and its corresponding embedding from bert
+            entity_emb (np.array): embedding of the input entity text, an array of size 1
         Returns:
-            list[tuple]: a list of sorted synonym names, paired with their similarity scores \
-                        (descending)
+            Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of synonyms and their
+                                        scores, else a list of sorted synonym names, paired with
+                                        their similarity scores (descending)
         """
 
         entity_emb = entity_emb.reshape(1, -1)
@@ -820,11 +822,13 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         similarity_scores = cosine_similarity(np.array(synonyms_encodings), entity_emb).reshape(-1)
         similarity_scores = np.around(similarity_scores, decimals=2)
 
+        if return_as_dict:
+            return dict(zip(synonyms, similarity_scores))
+
         # results in descending scores
         return sorted(list(zip(synonyms, similarity_scores)), key=lambda x: x[1], reverse=True)
 
-    @staticmethod
-    def _process_entity_map(entity_type, entity_map):
+    def _process_entity_map(self, entity_type, entity_map):
         """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
         synonym_map for exact match entity resolution when Elasticsearch is unavailable
 
@@ -859,6 +863,21 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                 cnames_for_syn.append(cname)
                 syn_map[norm_alias] = list(set(cnames_for_syn))
 
+        # extend synonyms map by adding keys which are lowercases of the existing keys
+        if self._augment_lower_case:
+            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
+            logger.info(msg)
+            initial_num_syns = len(syn_map)
+            aug_syn_map = {}
+            for alias, alias_map in syn_map.items():
+                alias_lower = alias.lower()
+                if alias_lower not in syn_map:
+                    aug_syn_map.update({alias_lower: alias_map})
+            syn_map.update(aug_syn_map)
+            final_num_syns = len(syn_map)
+            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
+            logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
+
         return {"items": item_map, "synonyms": syn_map}
 
     def _fit(self, clean):
@@ -869,25 +888,41 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             clean (bool): If ``True``, deletes existing dump of synonym embeddings file
         """
 
+        _bert_output_type = (
+            self.er_config.get("model_settings", {})
+                .get("bert_output_type", "mean")
+        )
+
         # load model
         try:
-            _encoding_type = (
-                self.er_config.get("model_settings", {})
-                    .get("encoding_type", "mean")
-            )
             transformer_model = Transformer(self._sbert_model_pretrained_name_or_abspath)
             pooling_model = Pooling(transformer_model.get_word_embedding_dimension(),
-                                    pooling_mode_cls_token=_encoding_type == "cls",
+                                    pooling_mode_cls_token=_bert_output_type == "cls",
                                     pooling_mode_max_tokens=False,
-                                    pooling_mode_mean_tokens=_encoding_type == "mean",
+                                    pooling_mode_mean_tokens=_bert_output_type == "mean",
                                     pooling_mode_mean_sqrt_len_tokens=False)
             modules = [transformer_model, pooling_model]
             self._sbert_model = SentenceTransformer(modules=modules)
         except OSError:
             logger.error("Could not initialize the model name through huggingface models; "
-                         "Resorting to model names in sbert.net. "
-                         "Input 'encoding_type', if provided is thus ignored")
-            self._sbert_model = SentenceTransformer(self._sbert_model_pretrained_name_or_abspath)
+                         "Checking an alternate name - %s - in huggingface models",
+                         "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath)
+            try:
+                _sbert_model_pretrained_name_or_abspath = \
+                    "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
+                transformer_model = Transformer(_sbert_model_pretrained_name_or_abspath)
+                pooling_model = Pooling(transformer_model.get_word_embedding_dimension(),
+                                        pooling_mode_cls_token=_bert_output_type == "cls",
+                                        pooling_mode_max_tokens=False,
+                                        pooling_mode_mean_tokens=_bert_output_type == "mean",
+                                        pooling_mode_mean_sqrt_len_tokens=False)
+                modules = [transformer_model, pooling_model]
+                self._sbert_model = SentenceTransformer(modules=modules)
+            except OSError:
+                logger.error("Could not initialize the model name through huggingface models; "
+                             "Resorting to model names in sbert.net. "
+                             "Input 'bert_output_type', if provided is thus ignored")
+                self._sbert_model = SentenceTransformer(self._sbert_model_pretrained_name_or_abspath)
 
         # load mappings.json data
         entity_map = self.resource_loader.get_entity_map(self.type)
@@ -927,7 +962,7 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         entity_emb = self._encode(entity.text)[0]
 
         try:
-            sorted_items = self._sort_using_cosine_dist(syn_embs, entity_emb)
+            sorted_items = self._compute_cosine_similarity(syn_embs, entity_emb)
             values = []
             for synonym, score in sorted_items:
                 cnames = self._exact_match_mapping["synonyms"][synonym]
@@ -949,6 +984,74 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
                 "Failed to resolve entity %r for type %r", entity.text, entity.type
             )
             return None
+
+        # combine_scores_type = (
+        #     self.er_config.get("model_settings", {}).get(
+        #         "combine_scores_type", "none")
+        # )
+        # try:
+        #     if combine_scores_type == "none":
+        #         sorted_items = self._compute_cosine_similarity(syn_embs, entity_emb)
+        #         values = []
+        #         for synonym, score in sorted_items:
+        #             cnames = self._exact_match_mapping["synonyms"][synonym]
+        #             for cname in cnames:
+        #                 for item in self._exact_match_mapping["items"][cname]:
+        #                     item_value = copy.copy(item)
+        #                     item_value.pop("whitelist", None)
+        #                     item_value.update({"score": score})
+        #                     values.append(item_value)
+        #     else:
+        #         scored_items = self._compute_cosine_similarity(syn_embs, entity_emb,
+        #                                                        return_as_dict=True)
+        #         # TODO: `self.resource_loader.get_entity_map` is loaded multiple times throughout
+        #         cname_groups = self.resource_loader.get_entity_map(self.type).get("entities")
+        #         values = []
+        #         for group in cname_groups:
+        #             group_syms = group.get("whitelist", []) + [group["cname"]]
+        #             scores = [scored_items[sym] for sym in group_syms]
+        #             group_clone = copy.copy(group)
+        #             group_clone.pop("whitelist", None)
+        #             if combine_scores_type == "mean":
+        #                 group_clone.update({"score": float(sum(scores)) / len(scores)})
+        #             elif combine_scores_type == "max":
+        #                 group_clone.update({"score": max(scores)})
+        #             values.append(group_clone)
+        #         values = sorted(values, key=lambda x: x["score"], reverse=True)
+        # except KeyError:
+        #     logger.warning(
+        #         "Failed to resolve entity %r for type %r; "
+        #         "set 'clean=True' for computing embeddings of newly added items in mappings.json",
+        #         entity.text, entity.type
+        #     )
+        #     return None
+        # except TypeError:
+        #     logger.warning(
+        #         "Failed to resolve entity %r for type %r", entity.text, entity.type
+        #     )
+        #     return None
+
+        # pool_syn_embs = (
+        #     self.er_config.get("model_settings", {}).get(
+        #         "pool_syn_embs", "none")
+        # )
+        # assert pool_syn_embs != "none"
+        # cname_groups = self.resource_loader.get_entity_map(self.type).get("entities")
+        # new_syn_embs = {}
+        # for group in cname_groups:
+        #     group_syms = group.get("whitelist", []) + [group["cname"]]
+        #     group_emb = getattr(np, pool_syn_embs)([syn_embs[sym] for sym in group_syms], axis=0)
+        #     new_syn_embs.update({group["cname"]: group_emb})
+        # sorted_items = self._compute_cosine_similarity(new_syn_embs, entity_emb)
+        # values = []
+        # for synonym, score in sorted_items:
+        #     cnames = self._exact_match_mapping["synonyms"][synonym]
+        #     for cname in cnames:
+        #         for item in self._exact_match_mapping["items"][cname]:
+        #             item_value = copy.copy(item)
+        #             item_value.pop("whitelist", None)
+        #             item_value.update({"score": score})
+        #             values.append(item_value)
 
         return values[0:20]
 
