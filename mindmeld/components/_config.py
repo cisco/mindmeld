@@ -478,6 +478,7 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
+    "translator": "NoOpTranslator",
 }
 
 DEFAULT_TOKENIZER_CONFIG = {

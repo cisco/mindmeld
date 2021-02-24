@@ -59,10 +59,21 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import MultiLingualAnnotator 
-	mla = MultiLingualAnnotator(app_path="hr_assistant")
-
-	mla.annotate(overwrite=True)
+	from mindmeld.auto_annotator import MultiLingualAnnotator
+	annotation_rules = [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*",
+			"entities": ".*",
+		}
+	]
+	mla = MultiLingualAnnotator(
+		app_path="hr_assistant",
+		annotation_rules=annotation_rules,
+		overwrite=True
+	)
+	mla.annotate()
 
 If you do not want to annotate all supported entities, you can specify annotation rules instead.
 
@@ -76,7 +87,7 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 
 		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": True, 
-		"annotate": [
+		"annotation_rules": [
 			{ 
 				"domains": "hierarchy", 
 				"intents": "get_hierarchy_up", 
@@ -85,7 +96,7 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 			}
 		],
 		"unannotate_supported_entities_only": True, 
-		"unannotate": None
+		"unannotation_rules": None
 	}
 
 Before running the annotation, let's take a look at the first four queries in the train.txt file for the :attr:`get_hierarchy_up` intent: 
@@ -119,16 +130,27 @@ You can :attr:`unannotate` using the command-line. To unannotate all entities, p
 	mindmeld unannotate --app-path "hr_assistant" --unannotate_all
 
 To unannotate by creating an instance of the :class:`Annotator` class, run the Python code below.
-To unannotate all annotations, pass in the optional param :attr:`unannotate_all`.
+To unannotate all annotations, use the the :attr:`unannotation_rules` shown below and set :attr:`unannotate_supported_entities_only` to False.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import MultiLingualAnnotator 
-	mla = MultiLingualAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator
+	unannotation_rules = [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*",
+			"entities": ".*",
+		}
+	]
+	mla = MultiLingualAnnotator(
+		app_path="hr_assistant",
+		unannotation_rules=unannotation_rules,
+		unannotate_supported_entities_only=False
+	)
+	mla.unannotate()
 
-	mla.unannotate(unannotate_all=True)
-
-If :attr:`unannotate_all` is not set to True and you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
+If you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
 You can refer to the config specifications in the "Auto Annotator Configuration" section below.
 
 .. code-block:: console
@@ -365,7 +387,7 @@ For example, we can restrict the output of the previous example by doing the fol
 Working with Non-English Sentences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :class:`MultiLingualAnnotator` will use the language and locale specified in the :attr:`LANGUAGE_CONFIG` (:attr:`config.py`).
+The :class:`MultiLingualAnnotator` will use the language and locale specified in the :attr:`LANGUAGE_CONFIG` (:attr:`config.py`) if it used through the command-line.
 
 .. code-block:: python
 	
@@ -409,7 +431,10 @@ We can now create our :class:`MultiLingualAnnotator` object and pass in the app_
 .. code-block:: python
 
 	from mindmeld.auto_annotator import MultiLingualAnnotator 
-	mla = MultiLingualAnnotator(app_path="screening_app")
+	mla = MultiLingualAnnotator(
+		app_path="screening_app",
+		language="es"
+	)
 
 Then use the :meth:`parse` function.
 
@@ -484,7 +509,7 @@ Let's take a look at the allowed values for each setting in an Auto Annotator co
 
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
-``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
+``'annotation_rules'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
 Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`'.*'` can be used if all possibilities in a section are to be selected, while possibilities within
 a section are expressed with the usual Regex special characters, such as :attr:`'.'` for any single character and :attr:`'|'` to represent "or". 
 
@@ -508,12 +533,16 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 .. warning::
 	By default, all files in all intents across all domains will be annotated with all supported entities. Before annotating consider including custom annotation rules in :attr:`config.py`. 
 
+``'language'`` (:class:`str`): Language as specified using a 639-1/2 code.
+
+``'locale'`` (:class:`str`): The locale representing the ISO 639-1 language code and ISO3166 alpha 2 country code separated by an underscore character.
+
 ``'unannotate_supported_entities_only'`` (:class:`boolean`): By default, when the unannotate command is used only entities that the Annotator can annotate will be eligible for removal. 
 
-``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
+``'unannotation_rules'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
 ``'spacy_model_size'`` (:class:`str`): :attr:`lg` is used by default for the best performance. Alternative options are :attr:`sm` and :attr:`md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator` and :class:`MultiLingualAnnotator`.
-The language is inferred from the :attr:`LANGUAGE_CONFIG` in :attr:`config.py`. If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `NER models <https://spacy.io/models/>`_.
+If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `NER models <https://spacy.io/models/>`_.
 
 ``'translator'`` (:class:`str`): This parameter is used by the :class:`MultiLingualAnnotator`. If Google application credentials are available and have been exported, set this parameter to :attr:`GoogleTranslator`. Otherwise, set this paramter to :attr:`NoOpTranslator`.
 
@@ -533,7 +562,7 @@ You can optionally set the :attr:`confidence_threshold` for labeling in the conf
 		"annotator_class": "BootstrapAnnotator",
 		"confidence_threshold": 0.95,
 		...
-		"annotate": [
+		"annotation_rules": [
 			{
 				"domains": ".*",
 				"intents": ".*",
@@ -564,10 +593,21 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import BootstrapAnnotator 
-	ba = BootstrapAnnotator(app_path="hr_assistant")
-
-	ba.annotate(overwrite=True)
+	from mindmeld.auto_annotator import BootstrapAnnotator
+	annotation_rules: [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*bootstrap.*\.txt",
+			"entities": ".*",
+		}
+	]
+	ba = BootstrapAnnotator(
+		app_path="hr_assistant",
+        annotation_rules=annotation_rules,
+        confidence_threshold=0.95,
+	)
+	ba.annotate()
 
 .. note::
 
@@ -592,10 +632,28 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 		""" Custom Annotator class used to generate annotations.
 		"""
 
-		def __init__(self, app_path, config=None):
-			super().__init__(app_path=app_path, config=config)
-			
-			# Add additional attributes if needed
+		def __init__(
+			self,
+			app_path,
+			annotation_rules=None,
+			language=None,
+			locale=None,
+			overwrite=False,
+			unannotate_supported_entities_only=True,
+			unannotation_rules=None,
+			custom_param=None,
+		):
+			super().__init__(
+				app_path,
+				annotation_rules=annotation_rules,
+				language=language,
+				locale=locale,
+				overwrite=overwrite,
+				unannotate_supported_entities_only=unannotate_supported_entities_only,
+				unannotation_rules=unannotation_rules,
+			)
+			self.custom_param = custom_param
+			# Add additional params to init if needed
 
 		def parse(self, sentence, entity_types=None, **kwargs):
 			""" 
@@ -623,7 +681,18 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 			return supported_entities
 	
 	if __name__ == "__main__":
-		custom_annotator = CustomAnnotator(app_path="hr_assistant")
+		annotation_rules: [
+			{
+				"domains": ".*",
+				"intents": ".*",
+				"files": ".*",
+				"entities": ".*",
+			}
+		]
+		custom_annotator = CustomAnnotator(
+			app_path="hr_assistant",
+			annotation_rules=annotation_rules,
+		)
 		custom_annotator.annotate()
 
 Entities returned by :attr:`parse()` must have the following format:
@@ -644,7 +713,7 @@ To run unannotation with your custom Annotator, change the last line in your scr
 Getting Custom Parameters from the Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:attr:`spacy_model` is an example of an optional parameter in the config that is relevant only for a specific :class:`Annotator` class.
+:attr:`spacy_model_size` is an example of an optional parameter in the config that is relevant only for a specific :class:`Annotator` class.
 
 .. code-block:: python
 
@@ -654,6 +723,6 @@ Getting Custom Parameters from the Config
 		... 
 	}
 
-:class:`MultiLingualAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
+If a :class:`SpacyAnnotator` is created using the command-line with will use the value for :attr:`spacy_model_size` that exists in the config during instantiation.
 
-Custom parameters for custom annotators can be implemented in a similar fashion.
+A similar approach can be taken for custom Annotators.

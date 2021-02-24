@@ -14,17 +14,23 @@ from mindmeld.auto_annotator import MultiLingualAnnotator
 
 @pytest.fixture(scope="module")
 def en_mla(kwik_e_mart_app_path):
-    return MultiLingualAnnotator(kwik_e_mart_app_path)
+    return MultiLingualAnnotator(
+        app_path=kwik_e_mart_app_path, language="en", translator="NoOpTranslator"
+    )
 
 
 @pytest.fixture(scope="module")
 def es_mla(kwik_e_mart_app_path):
-    return MultiLingualAnnotator(kwik_e_mart_app_path, language="es")
+    return MultiLingualAnnotator(
+        app_path=kwik_e_mart_app_path, language="es", translator="NoOpTranslator"
+    )
 
 
 @pytest.fixture(scope="module")
 def fr_mla(kwik_e_mart_app_path):
-    return MultiLingualAnnotator(kwik_e_mart_app_path, language="fr")
+    return MultiLingualAnnotator(
+        app_path=kwik_e_mart_app_path, language="fr", translator="NoOpTranslator"
+    )
 
 
 def _check_match(

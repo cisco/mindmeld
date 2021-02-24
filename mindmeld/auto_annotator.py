@@ -974,6 +974,7 @@ class NoTranslationDucklingAnnotator(Annotator):
                     possible entity types will be parsed.
         Returns: entities (list): List of entity dictionaries.
         """
+        print("NO TRANSLATION SENTENCE ", sentence)
         duckling_candidates = self.duckling.get_candidates_for_text(
             sentence,
             entity_types=entity_types,
@@ -1123,6 +1124,7 @@ class TranslationDucklingAnnotator(Annotator):
         Returns:
             entities (list): List of entity dictionaries.
         """
+        print("TRANSLATION SENTENCE ", sentence)
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence,
             entity_types=entity_types,
@@ -1182,7 +1184,7 @@ class MultiLingualAnnotator(Annotator):
         self,
         app_path,
         annotation_rules=None,
-        translator=None,
+        translator="NoOpTranslator",
         language=None,
         locale=None,
         overwrite=False,
@@ -1227,7 +1229,7 @@ class MultiLingualAnnotator(Annotator):
             )
 
     def _get_duckling_annotator(self):
-        if self.translator:
+        if self.translator != "NoOpTranslator":
             return TranslationDucklingAnnotator(
                 app_path=self.app_path,
                 language=self.language,
@@ -1250,12 +1252,13 @@ class MultiLingualAnnotator(Annotator):
         Returns:
             entities (list): List of entity dictionaries.
         """
-
+        print("SENTENCE ", sentence)
         if self.language == ENGLISH_LANGUAGE_CODE:
             return self.en_annotator.parse(sentence, entity_types=entity_types)
         non_en_spacy_entities = self.non_en_annotator.parse(
             sentence, entity_types=entity_types
         )
+        print("SENTENCE ", sentence)
         duckling_entities = self.duckling_annotator.parse(
             sentence, entity_types=entity_types
         )
