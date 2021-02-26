@@ -20,6 +20,7 @@ import logging
 import os
 import pickle
 from abc import ABC, abstractmethod
+from tqdm.autonotebook import trange
 
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
@@ -52,9 +53,8 @@ from ._elasticsearch_helpers import (
 try:
     from sentence_transformers import SentenceTransformer
     from sentence_transformers.models import Transformer, Pooling
-    import torch
     from sentence_transformers.util import batch_to_device
-    from tqdm.autonotebook import tqdm, trange
+    import torch
 
     sbert_available = True
 except ImportError:
@@ -745,7 +745,7 @@ class EntityResolverUsingExactMatch(EntityResolverBase):
         self.fit()
 
 
-class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
+class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
     """
     Resolver class for bert models as described here:
     https://github.com/UKPLab/sentence-transformers
@@ -794,29 +794,143 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
         if not isinstance(phrases, (str, list)):
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        # batch_size (int):
-        #   The maximum size of each batch while encoding using on a deep embedder like BERT
-        _batch_size = (
+        batch_size = (
             self.er_config.get("model_settings", {})
                 .get("batch_size", 16)
+        )
+        concat_last_n_layers = (
+            self.er_config.get("model_settings", {})
+                .get("concat_last_n_layers", 1)
+        )
+        normalize_token_embs = (
+            self.er_config.get("model_settings", {})
+                .get("normalize_token_embs", False)
         )
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
-        normalize_embs = False
-        if normalize_embs:
-            encode_func = self._encode_normalized
+        if concat_last_n_layers != 1 or normalize_token_embs:
+            results = self._encode_custom(phrases, batch_size=batch_size,
+                                          convert_to_numpy=convert_to_numpy,
+                                          show_progress_bar=show_progress,
+                                          concat_last_n_layers=concat_last_n_layers,
+                                          normalize_token_embs=normalize_token_embs)
         else:
-            encode_func = self._sbert_model.encode
+            results = self._sbert_model.encode(phrases, batch_size=batch_size,
+                                               convert_to_numpy=convert_to_numpy,
+                                               show_progress_bar=show_progress)
 
-        concat_embs = True
-        if concat_embs:
-            encode_func = self._encode_concatenated
-        else:
-            encode_func = self._sbert_model.encode
+        return results
 
-        return encode_func(phrases, batch_size=_batch_size, convert_to_numpy=convert_to_numpy,
-                           show_progress_bar=show_progress)
+    def _encode_custom(self, sentences,
+                       batch_size: int = 32,
+                       show_progress_bar: bool = None,
+                       output_value: str = 'sentence_embedding',
+                       convert_to_numpy: bool = True,
+                       convert_to_tensor: bool = False,
+                       device: str = None,
+                       concat_last_n_layers: int = 1,
+                       normalize_token_embs: bool = False):
+        """
+        Computes sentence embeddings (Note: Method largely derived from Sentence Transformers
+            library to improve flexibility in encoding and pooling. Notably, `is_pretokenized` and
+            `num_workers` are ignored due to deprecation in their library, retrieved 23-Feb-2021)
+
+        Args:
+            sentences (list[str]): the sentences to embed
+            batch_size (int): the batch size used for the computation
+            show_progress_bar (bool): Output a progress bar when encode sentences
+            output_value (str): Default sentence_embedding, to get sentence embeddings.
+                Can be set to token_embeddings to get wordpiece token embeddings.
+            convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it is a
+                list of pytorch tensors.
+            convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites any
+                setting from convert_to_numpy
+            device: Which torch.device to use for the computation
+            concat_last_n_layers (int): number of hidden outputs to concat starting from last layer
+            normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
+
+        Returns:
+            (Union[List[Tensor], ndarray, Tensor]): By default, a list of tensors is returned.
+                If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy
+                matrix is returned.
+        """
+
+        if concat_last_n_layers != 1:
+            assert 1 <= concat_last_n_layers <= len(
+                self.transformer_model.auto_model.transformer.layer)
+            assert self.transformer_model.get_config_dict("output_hidden_states") == True
+
+        self.transformer_model.eval()
+        if show_progress_bar is None:
+            show_progress_bar = (
+                logger.getEffectiveLevel() == logging.INFO or logger.getEffectiveLevel() == logging.DEBUG)
+
+        if convert_to_tensor:
+            convert_to_numpy = False
+
+        input_was_string = False
+        if isinstance(sentences, str):  # Cast an individual sentence to a list with length 1
+            sentences = [sentences]
+            input_was_string = True
+
+        if device is None:
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.transformer_model.to(device)
+        self.pooling_model.to(device)
+
+        all_embeddings = []
+        length_sorted_idx = np.argsort([self._text_length(sen) for sen in sentences])
+        sentences_sorted = [sentences[idx] for idx in length_sorted_idx]
+
+        for start_index in trange(0, len(sentences), batch_size, desc="Batches",
+                                  disable=not show_progress_bar):
+            sentences_batch = sentences_sorted[start_index:start_index + batch_size]
+            features = self.transformer_model.tokenize(sentences_batch)
+            features = batch_to_device(features, device)
+
+            with torch.no_grad():
+                out_features_transformer = self.transformer_model.forward(features)
+                token_embeddings = out_features_transformer["token_embeddings"]
+                if concat_last_n_layers > 1:
+                    _all_layer_embeddings = out_features_transformer["all_layer_embeddings"]
+                    token_embeddings = torch.cat(_all_layer_embeddings[-concat_last_n_layers:],
+                                                 dim=-1)
+                if normalize_token_embs:
+                    _norm_token_embeddings = torch.linalg.norm(token_embeddings, dim=2,
+                                                               keepdim=True)
+                    token_embeddings = token_embeddings.div(_norm_token_embeddings)
+                out_features_transformer.update({"token_embeddings": token_embeddings})
+                out_features = self.pooling_model.forward(out_features_transformer)
+
+                embeddings = out_features[output_value]
+
+                if output_value == 'token_embeddings':
+                    # Set token embeddings to 0 for padding tokens
+                    input_mask = out_features['attention_mask']
+                    input_mask_expanded = input_mask.unsqueeze(-1).expand(embeddings.size()).float()
+                    embeddings = embeddings * input_mask_expanded
+
+                embeddings = embeddings.detach()
+
+                # fixes for #522 and #487 to avoid oom problems on gpu with large datasets
+                if convert_to_numpy:
+                    embeddings = embeddings.cpu()
+
+                all_embeddings.extend(embeddings)
+
+        all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
+
+        if convert_to_tensor:
+            all_embeddings = torch.stack(all_embeddings)
+        elif convert_to_numpy:
+            all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
+
+        if input_was_string:
+            all_embeddings = all_embeddings[0]
+
+        return all_embeddings
 
     @staticmethod
     def _text_length(text):
@@ -833,191 +947,6 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             return len(text)
         else:
             return sum([len(t) for t in text])
-
-    def _encode_concatenated(self, sentences,
-                             batch_size: int = 32,
-                             show_progress_bar: bool = None,
-                             output_value: str = 'sentence_embedding',
-                             convert_to_numpy: bool = True,
-                             convert_to_tensor: bool = False,
-                             is_pretokenized: bool = False,
-                             device: str = None,
-                             num_workers: int = 0):
-        """
-        Computes sentence embeddings
-
-        :param sentences: the sentences to embed
-        :param batch_size: the batch size used for the computation
-        :param show_progress_bar: Output a progress bar when encode sentences
-        :param output_value:  Default sentence_embedding, to get sentence embeddings. Can be set to token_embeddings to get wordpiece token embeddings.
-        :param convert_to_numpy: If true, the output is a list of numpy vectors. Else, it is a list of pytorch tensors.
-        :param convert_to_tensor: If true, you get one large tensor as return. Overwrites any setting from convert_to_numpy
-        :param is_pretokenized: DEPRECATED - No longer used, will be removed in the future
-        :param device: Which torch.device to use for the computation
-        :param num_workers: DEPRECATED - No longer used, will be removed in the future
-
-        :return: (Union[List[Tensor], ndarray, Tensor])
-           By default, a list of tensors is returned. If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy matrix is returned.
-        """
-
-        """
-        in sentence-transformers, in Transformers.py
-            added ```config.output_hidden_states = True```
-        """
-
-        self.transformer_model.eval()
-        if show_progress_bar is None:
-            show_progress_bar = (logger.getEffectiveLevel()==logging.INFO or logger.getEffectiveLevel()==logging.DEBUG)
-
-        if convert_to_tensor:
-            convert_to_numpy = False
-
-        input_was_string = False
-        if isinstance(sentences, str): #Cast an individual sentence to a list with length 1
-            sentences = [sentences]
-            input_was_string = True
-
-        if device is None:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.transformer_model.to(device)
-        self.pooling_model.to(device)
-
-        all_embeddings = []
-        length_sorted_idx = np.argsort([self._text_length(sen) for sen in sentences])
-        sentences_sorted = [sentences[idx] for idx in length_sorted_idx]
-
-        for start_index in trange(0, len(sentences), batch_size, desc="Batches", disable=not show_progress_bar):
-            sentences_batch = sentences_sorted[start_index:start_index+batch_size]
-            features = self.transformer_model.tokenize(sentences_batch)
-            features = batch_to_device(features, device)
-
-            with torch.no_grad():
-                _out_features_transformer = self.transformer_model.forward(features)  # from transformer model
-                _all_layer_embeddings = _out_features_transformer["all_layer_embeddings"]
-                _token_embeddings = torch.cat(_all_layer_embeddings[-4:], dim=-1)
-                # _token_embeddings = _out_features_transformer["token_embeddings"]
-                # _norm_token_embeddings = torch.linalg.norm(_token_embeddings, dim=2, keepdim=True)
-                # _token_embeddings = _token_embeddings.div(_norm_token_embeddings)
-                _out_features_transformer.update({"token_embeddings": _token_embeddings})
-                out_features = self.pooling_model.forward(_out_features_transformer)
-
-                embeddings = out_features[output_value]
-
-                if output_value == 'token_embeddings':
-                    #Set token embeddings to 0 for padding tokens
-                    input_mask = out_features['attention_mask']
-                    input_mask_expanded = input_mask.unsqueeze(-1).expand(embeddings.size()).float()
-                    embeddings = embeddings * input_mask_expanded
-
-                embeddings = embeddings.detach()
-
-                # fixes for #522 and #487 to avoid oom problems on gpu with large datasets
-                if convert_to_numpy:
-                    embeddings = embeddings.cpu()
-
-                all_embeddings.extend(embeddings)
-
-        all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
-
-        if convert_to_tensor:
-            all_embeddings = torch.stack(all_embeddings)
-        elif convert_to_numpy:
-            all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
-
-        if input_was_string:
-            all_embeddings = all_embeddings[0]
-
-        return all_embeddings
-
-    def _encode_normalized(self, sentences,
-                           batch_size: int = 32,
-                           show_progress_bar: bool = None,
-                           output_value: str = 'sentence_embedding',
-                           convert_to_numpy: bool = True,
-                           convert_to_tensor: bool = False,
-                           is_pretokenized: bool = False,
-                           device: str = None,
-                           num_workers: int = 0):
-        """
-        Computes sentence embeddings
-
-        :param sentences: the sentences to embed
-        :param batch_size: the batch size used for the computation
-        :param show_progress_bar: Output a progress bar when encode sentences
-        :param output_value:  Default sentence_embedding, to get sentence embeddings. Can be set to token_embeddings to get wordpiece token embeddings.
-        :param convert_to_numpy: If true, the output is a list of numpy vectors. Else, it is a list of pytorch tensors.
-        :param convert_to_tensor: If true, you get one large tensor as return. Overwrites any setting from convert_to_numpy
-        :param is_pretokenized: DEPRECATED - No longer used, will be removed in the future
-        :param device: Which torch.device to use for the computation
-        :param num_workers: DEPRECATED - No longer used, will be removed in the future
-
-        :return: (Union[List[Tensor], ndarray, Tensor])
-           By default, a list of tensors is returned. If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy matrix is returned.
-        """
-
-        self.transformer_model.eval()
-        if show_progress_bar is None:
-            show_progress_bar = (logger.getEffectiveLevel()==logging.INFO or logger.getEffectiveLevel()==logging.DEBUG)
-
-        if convert_to_tensor:
-            convert_to_numpy = False
-
-        input_was_string = False
-        if isinstance(sentences, str): #Cast an individual sentence to a list with length 1
-            sentences = [sentences]
-            input_was_string = True
-
-        if device is None:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.transformer_model.to(device)
-        self.pooling_model.to(device)
-
-        all_embeddings = []
-        length_sorted_idx = np.argsort([self._text_length(sen) for sen in sentences])
-        sentences_sorted = [sentences[idx] for idx in length_sorted_idx]
-
-        for start_index in trange(0, len(sentences), batch_size, desc="Batches", disable=not show_progress_bar):
-            sentences_batch = sentences_sorted[start_index:start_index+batch_size]
-            features = self.transformer_model.tokenize(sentences_batch)
-            features = batch_to_device(features, device)
-
-            with torch.no_grad():
-                _out_features_transformer = self.transformer_model.forward(features)  # from transformer model
-                _token_embeddings = _out_features_transformer["token_embeddings"]
-                _norm_token_embeddings = torch.linalg.norm(_token_embeddings, dim=2, keepdim=True)
-                _token_embeddings = _token_embeddings.div(_norm_token_embeddings)
-                _out_features_transformer.update({"token_embeddings": _token_embeddings})
-                out_features = self.pooling_model.forward(_out_features_transformer)
-
-                embeddings = out_features[output_value]
-
-                if output_value == 'token_embeddings':
-                    #Set token embeddings to 0 for padding tokens
-                    input_mask = out_features['attention_mask']
-                    input_mask_expanded = input_mask.unsqueeze(-1).expand(embeddings.size()).float()
-                    embeddings = embeddings * input_mask_expanded
-
-                embeddings = embeddings.detach()
-
-                # fixes for #522 and #487 to avoid oom problems on gpu with large datasets
-                if convert_to_numpy:
-                    embeddings = embeddings.cpu()
-
-                all_embeddings.extend(embeddings)
-
-        all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
-
-        if convert_to_tensor:
-            all_embeddings = torch.stack(all_embeddings)
-        elif convert_to_numpy:
-            all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
-
-        if input_was_string:
-            all_embeddings = all_embeddings[0]
-
-        return all_embeddings
 
     @staticmethod
     def _compute_cosine_similarity(syn_embs, entity_emb, return_as_dict=False):
@@ -1111,12 +1040,13 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
 
         # load model
         try:
-            self.transformer_model = Transformer(self._sbert_model_pretrained_name_or_abspath)
+            self.transformer_model = Transformer(self._sbert_model_pretrained_name_or_abspath,
+                                                 model_args={"output_hidden_states": True})
             self.pooling_model = Pooling(self.transformer_model.get_word_embedding_dimension(),
-                                    pooling_mode_cls_token=_bert_output_type == "cls",
-                                    pooling_mode_max_tokens=False,
-                                    pooling_mode_mean_tokens=_bert_output_type == "mean",
-                                    pooling_mode_mean_sqrt_len_tokens=False)
+                                         pooling_mode_cls_token=_bert_output_type == "cls",
+                                         pooling_mode_max_tokens=False,
+                                         pooling_mode_mean_tokens=_bert_output_type == "mean",
+                                         pooling_mode_mean_sqrt_len_tokens=False)
             modules = [self.transformer_model, self.pooling_model]
             self._sbert_model = SentenceTransformer(modules=modules)
         except OSError:
@@ -1126,19 +1056,23 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
             try:
                 _sbert_model_pretrained_name_or_abspath = \
                     "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
-                self.transformer_model = Transformer(_sbert_model_pretrained_name_or_abspath)
+                self.transformer_model = Transformer(_sbert_model_pretrained_name_or_abspath,
+                                                     model_args={"output_hidden_states": True})
                 self.pooling_model = Pooling(self.transformer_model.get_word_embedding_dimension(),
-                                        pooling_mode_cls_token=_bert_output_type == "cls",
-                                        pooling_mode_max_tokens=False,
-                                        pooling_mode_mean_tokens=_bert_output_type == "mean",
-                                        pooling_mode_mean_sqrt_len_tokens=False)
+                                             pooling_mode_cls_token=_bert_output_type == "cls",
+                                             pooling_mode_max_tokens=False,
+                                             pooling_mode_mean_tokens=_bert_output_type == "mean",
+                                             pooling_mode_mean_sqrt_len_tokens=False)
                 modules = [self.transformer_model, self.pooling_model]
                 self._sbert_model = SentenceTransformer(modules=modules)
             except OSError:
+                # logger.error("Could not initialize the model name through huggingface models; "
+                #              "Resorting to model names in sbert.net. "
+                #              "Input 'bert_output_type', if provided is thus ignored")
+                # self._sbert_model = SentenceTransformer(
+                #     self._sbert_model_pretrained_name_or_abspath)
                 logger.error("Could not initialize the model name through huggingface models; "
-                             "Resorting to model names in sbert.net. "
-                             "Input 'bert_output_type', if provided is thus ignored")
-                self._sbert_model = SentenceTransformer(self._sbert_model_pretrained_name_or_abspath)
+                             "Not resorting to model names in sbert.net due to limited exposing")
 
         # load mappings.json data
         entity_map = self.resource_loader.get_entity_map(self.type)
@@ -1293,6 +1227,6 @@ class EntityResolverUsingSentenceBertEmbedder(EntityResolverBase):
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "exact_match": EntityResolverUsingExactMatch,
     "text_relevance": EntityResolverUsingElasticSearch,
-    "sbert_cosine_similarity": EntityResolverUsingSentenceBertEmbedder
+    "sbert_cosine_similarity": EntityResolverUsingSentenceBertCossim
 }
 ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
