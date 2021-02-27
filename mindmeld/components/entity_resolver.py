@@ -20,17 +20,13 @@ import logging
 import os
 import pickle
 from abc import ABC, abstractmethod
-from tqdm.autonotebook import trange
-
-from elasticsearch.exceptions import ConnectionError as EsConnectionError
-from elasticsearch.exceptions import ElasticsearchException, TransportError
 
 import numpy as np
+from elasticsearch.exceptions import ConnectionError as EsConnectionError
+from elasticsearch.exceptions import ElasticsearchException, TransportError
 from sklearn.metrics.pairwise import cosine_similarity
+from tqdm.autonotebook import trange
 
-from .. import path
-from ..core import Entity
-from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ._config import (
     DEFAULT_ES_SYNONYM_MAPPING,
     PHONETIC_ES_SYNONYM_MAPPING,
@@ -49,6 +45,9 @@ from ._elasticsearch_helpers import (
     load_index,
     resolve_es_config_for_version,
 )
+from .. import path
+from ..core import Entity
+from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -59,6 +58,16 @@ try:
     sbert_available = True
 except ImportError:
     sbert_available = False
+
+try:
+    import bert_score
+    from collections import defaultdict
+    import torch
+    from torch.nn.utils.rnn import pad_sequence
+
+    bertscore_available = True
+except ImportError:
+    bertscore_available = False
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +84,11 @@ class EntityResolver:
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
         if name == "sbert_cosine_similarity" and not sbert_available:
             raise ImportError(
+                "Must install the extra [bert] to use the built in embbedder for entity "
+                "resolution. See https://www.mindmeld.com/docs/userguide/getting_started.html")
+        if name == "sbert_bertscore_similarity" and not bertscore_available:
+            raise ImportError(
+                "TODO: Add bertscore to extra [bert].\n"
                 "Must install the extra [bert] to use the built in embbedder for entity "
                 "resolution. See https://www.mindmeld.com/docs/userguide/getting_started.html")
 
@@ -100,7 +114,7 @@ class EntityResolver:
             app_path, resource_loader, entity_type, er_config, **kwargs
         )
 
-    def fit(self, clean):
+    def fit(self):
         raise NotImplementedError
 
     def load(self):
@@ -757,7 +771,7 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
         self._preloaded_mappings_embs = {}
         self._sbert_model_pretrained_name_or_abspath = (
             self.er_config.get("model_settings", {})
-                .get("pretrained_name_or_abspath", "bert-base-nli-mean-tokens")
+                .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
         )
         self._sbert_model = None
         self._augment_lower_case = False
@@ -806,7 +820,7 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
             self.er_config.get("model_settings", {})
                 .get("normalize_token_embs", False)
         )
-        show_progress = len(phrases) > 1
+        show_progress = False  # len(phrases) > 1
         convert_to_numpy = True
 
         if concat_last_n_layers != 1 or normalize_token_embs:
@@ -859,12 +873,13 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
         if concat_last_n_layers != 1:
             assert 1 <= concat_last_n_layers <= len(
                 self.transformer_model.auto_model.transformer.layer)
-            assert self.transformer_model.get_config_dict("output_hidden_states") == True
 
         self.transformer_model.eval()
         if show_progress_bar is None:
             show_progress_bar = (
-                logger.getEffectiveLevel() == logging.INFO or logger.getEffectiveLevel() == logging.DEBUG)
+                logger.getEffectiveLevel() == logging.INFO or
+                logger.getEffectiveLevel() == logging.DEBUG
+            )
 
         if convert_to_tensor:
             convert_to_numpy = False
@@ -875,7 +890,7 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
             input_was_string = True
 
         if device is None:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.transformer_model.to(device)
         self.pooling_model.to(device)
@@ -1033,46 +1048,42 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
             clean (bool): If ``True``, deletes existing dump of synonym embeddings file
         """
 
-        _bert_output_type = (
+        _output_combination = (
             self.er_config.get("model_settings", {})
-                .get("bert_output_type", "mean")
+                .get("bert_output_combination", "mean")
         )
 
         # load model
         try:
-            self.transformer_model = Transformer(self._sbert_model_pretrained_name_or_abspath,
+            _sbert_model_pretrained_name_or_abspath = \
+                "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
+            self.transformer_model = Transformer(_sbert_model_pretrained_name_or_abspath,
                                                  model_args={"output_hidden_states": True})
             self.pooling_model = Pooling(self.transformer_model.get_word_embedding_dimension(),
-                                         pooling_mode_cls_token=_bert_output_type == "cls",
+                                         pooling_mode_cls_token=_output_combination == "cls",
                                          pooling_mode_max_tokens=False,
-                                         pooling_mode_mean_tokens=_bert_output_type == "mean",
+                                         pooling_mode_mean_tokens=_output_combination == "mean",
                                          pooling_mode_mean_sqrt_len_tokens=False)
             modules = [self.transformer_model, self.pooling_model]
             self._sbert_model = SentenceTransformer(modules=modules)
         except OSError:
-            logger.error("Could not initialize the model name through huggingface models; "
-                         "Checking an alternate name - %s - in huggingface models",
-                         "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath)
+            logger.error(
+                "Could not initialize the model name through sentence-transformers models in "
+                "huggingface; Checking - %s - model directly in huggingface models",
+                self._sbert_model_pretrained_name_or_abspath)
             try:
-                _sbert_model_pretrained_name_or_abspath = \
-                    "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
-                self.transformer_model = Transformer(_sbert_model_pretrained_name_or_abspath,
+                self.transformer_model = Transformer(self._sbert_model_pretrained_name_or_abspath,
                                                      model_args={"output_hidden_states": True})
                 self.pooling_model = Pooling(self.transformer_model.get_word_embedding_dimension(),
-                                             pooling_mode_cls_token=_bert_output_type == "cls",
+                                             pooling_mode_cls_token=_output_combination == "cls",
                                              pooling_mode_max_tokens=False,
-                                             pooling_mode_mean_tokens=_bert_output_type == "mean",
+                                             pooling_mode_mean_tokens=_output_combination == "mean",
                                              pooling_mode_mean_sqrt_len_tokens=False)
                 modules = [self.transformer_model, self.pooling_model]
                 self._sbert_model = SentenceTransformer(modules=modules)
             except OSError:
-                # logger.error("Could not initialize the model name through huggingface models; "
-                #              "Resorting to model names in sbert.net. "
-                #              "Input 'bert_output_type', if provided is thus ignored")
-                # self._sbert_model = SentenceTransformer(
-                #     self._sbert_model_pretrained_name_or_abspath)
-                logger.error("Could not initialize the model name through huggingface models; "
-                             "Not resorting to model names in sbert.net due to limited exposing")
+                logger.error("Could not initialize the model name through huggingface models; Not r"
+                             "esorting to model names in sbert.net due to limited exposed features")
 
         # load mappings.json data
         entity_map = self.resource_loader.get_entity_map(self.type)
@@ -1121,6 +1132,7 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
                         item_value = copy.copy(item)
                         item_value.pop("whitelist", None)
                         item_value.update({"score": score})
+                        item_value.update({"top_synonym": synonym})
                         values.append(item_value)
         except KeyError:
             logger.warning(
@@ -1135,73 +1147,630 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
             )
             return None
 
-        # combine_scores_type = (
-        #     self.er_config.get("model_settings", {}).get(
-        #         "combine_scores_type", "none")
-        # )
-        # try:
-        #     if combine_scores_type == "none":
-        #         sorted_items = self._compute_cosine_similarity(syn_embs, entity_emb)
-        #         values = []
-        #         for synonym, score in sorted_items:
-        #             cnames = self._exact_match_mapping["synonyms"][synonym]
-        #             for cname in cnames:
-        #                 for item in self._exact_match_mapping["items"][cname]:
-        #                     item_value = copy.copy(item)
-        #                     item_value.pop("whitelist", None)
-        #                     item_value.update({"score": score})
-        #                     values.append(item_value)
-        #     else:
-        #         scored_items = self._compute_cosine_similarity(syn_embs, entity_emb,
-        #                                                        return_as_dict=True)
-        #         # TODO: `self.resource_loader.get_entity_map` is loaded multiple times throughout
-        #         cname_groups = self.resource_loader.get_entity_map(self.type).get("entities")
-        #         values = []
-        #         for group in cname_groups:
-        #             group_syms = group.get("whitelist", []) + [group["cname"]]
-        #             scores = [scored_items[sym] for sym in group_syms]
-        #             group_clone = copy.copy(group)
-        #             group_clone.pop("whitelist", None)
-        #             if combine_scores_type == "mean":
-        #                 group_clone.update({"score": float(sum(scores)) / len(scores)})
-        #             elif combine_scores_type == "max":
-        #                 group_clone.update({"score": max(scores)})
-        #             values.append(group_clone)
-        #         values = sorted(values, key=lambda x: x["score"], reverse=True)
-        # except KeyError:
-        #     logger.warning(
-        #         "Failed to resolve entity %r for type %r; "
-        #         "set 'clean=True' for computing embeddings of newly added items in mappings.json",
-        #         entity.text, entity.type
-        #     )
-        #     return None
-        # except TypeError:
-        #     logger.warning(
-        #         "Failed to resolve entity %r for type %r", entity.text, entity.type
-        #     )
-        #     return None
+        return values[0:20]
 
-        # pool_syn_embs = (
-        #     self.er_config.get("model_settings", {}).get(
-        #         "pool_syn_embs", "none")
-        # )
-        # assert pool_syn_embs != "none"
-        # cname_groups = self.resource_loader.get_entity_map(self.type).get("entities")
-        # new_syn_embs = {}
-        # for group in cname_groups:
-        #     group_syms = group.get("whitelist", []) + [group["cname"]]
-        #     group_emb = getattr(np, pool_syn_embs)([syn_embs[sym] for sym in group_syms], axis=0)
-        #     new_syn_embs.update({group["cname"]: group_emb})
-        # sorted_items = self._compute_cosine_similarity(new_syn_embs, entity_emb)
-        # values = []
-        # for synonym, score in sorted_items:
-        #     cnames = self._exact_match_mapping["synonyms"][synonym]
-        #     for cname in cnames:
-        #         for item in self._exact_match_mapping["items"][cname]:
-        #             item_value = copy.copy(item)
-        #             item_value.pop("whitelist", None)
-        #             item_value.update({"score": score})
-        #             values.append(item_value)
+    def _load(self):
+        """Loads embeddings for all synonyms, previously dumped into a .pkl file
+        """
+        cache_path = self.cache_path(self.pretrained_name)
+        with open(cache_path, "rb") as fp:
+            self._preloaded_mappings_embs = pickle.load(fp)
+
+    def _dump(self):
+        """Dumps embeddings of synonyms into a .pkl file when the .fit() method is called
+        """
+        cache_path = self.cache_path(self.pretrained_name)
+        if self.dirty:
+            folder = os.path.split(cache_path)[0]
+            if folder and not os.path.exists(folder):
+                os.makedirs(folder)
+            with open(cache_path, "wb") as fp:
+                pickle.dump(self._preloaded_mappings_embs, fp)
+
+
+class EntityResolverUsingSentenceBertBertscore_vSlow(EntityResolverBase):
+    """
+    Resolver class based on exact matching
+    """
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        self._exact_match_mapping = None
+        self._sbert_model_pretrained_name_or_abspath = (
+            self.er_config.get("model_settings", {})
+                .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
+        )
+        self.scorer = None
+        self._augment_lower_case = False
+
+    @property
+    def pretrained_name(self):
+        return os.path.split(self._sbert_model_pretrained_name_or_abspath)[-1]
+
+    def _process_entity_map(self, entity_type, entity_map):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+        """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map.get("entities"):
+            cname = item["cname"]
+            item_id = item.get("id")
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, entity_type)
+            if item_id:
+                if item_id in seen_ids:
+                    msg = "Item id {!r} specified in {!r} entity map multiple times"
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for norm_alias in aliases:
+                if norm_alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, entity_type)
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        # extend synonyms map by adding keys which are lowercases of the existing keys
+        if self._augment_lower_case:
+            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
+            logger.info(msg)
+            initial_num_syns = len(syn_map)
+            aug_syn_map = {}
+            for alias, alias_map in syn_map.items():
+                alias_lower = alias.lower()
+                if alias_lower not in syn_map:
+                    aug_syn_map.update({alias_lower: alias_map})
+            syn_map.update(aug_syn_map)
+            final_num_syns = len(syn_map)
+            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
+            logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
+
+        return {"items": item_map, "synonyms": syn_map}
+
+    def _fit(self, clean):
+        """
+        Loads an entity mapping file to resolve entities using bert embeddings through bert score
+        """
+        if clean:
+            logger.info(
+                "clean=True ignored while fitting sbert_bertscore_similarity algo for "
+                "entity resolution"
+            )
+
+        entity_map = self.resource_loader.get_entity_map(self.type)
+        self._exact_match_mapping = self._process_entity_map(
+            self.type, entity_map
+        )
+
+        model2layer = {
+            "distilbert-base-nli-stsb-mean-tokens": 6,
+            "bert-base-uncased": 12
+        }
+        num_layers = None
+        for model_name, n_layers in model2layer.items():
+            if model_name in self._sbert_model_pretrained_name_or_abspath:
+                num_layers = n_layers
+        if not num_layers:
+            msg = "model name {!r} not found in implemented model names {!r}"
+            raise NotImplementedError(
+                msg.format(self._sbert_model_pretrained_name_or_abspath, [*model2layer.keys()]))
+        batch_size = (
+            self.er_config.get("model_settings", {})
+                .get("batch_size", 16)
+        )
+        device = None
+        if not device:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # load model and find bert scores
+        try:
+            _sbert_model_pretrained_name_or_abspath = \
+                "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
+            self.scorer = BERTScorer(model_type=_sbert_model_pretrained_name_or_abspath,
+                                     num_layers=num_layers, idf=False, device=device,
+                                     batch_size=batch_size,
+                                     all_layers=False)
+        except OSError:
+            logger.error(
+                "Could not initialize the model name through sentence-transformers models in "
+                "huggingface; Checking - %s - model directly in huggingface models",
+                self._sbert_model_pretrained_name_or_abspath)
+            try:
+                self.scorer = BERTScorer(model_type=self._sbert_model_pretrained_name_or_abspath,
+                                         num_layers=num_layers, idf=False, device=device,
+                                         batch_size=batch_size,
+                                         all_layers=False)
+            except Exception as error:
+                logger.error(error)
+
+    def _predict(self, entity):
+        """
+        Finds closest match based on bert-score metric
+        See: https://github.com/Tiiiger/bert_score and https://arxiv.org/abs/1904.09675
+        """
+
+        entity = entity[0]  # top_entity
+
+        synonyms = [*self._exact_match_mapping["synonyms"].keys()]
+        refs = synonyms
+        cands = [entity.text] * len(refs)
+
+        # compute bert scores
+        try:
+            P, R, F1 = self.scorer.score(refs, cands, verbose=True)
+            F1 = F1.numpy().reshape(-1)
+            sorted_items = sorted(list(zip(synonyms, F1)), key=lambda x: x[1], reverse=True)
+            values = []
+            for synonym, score in sorted_items:
+                cnames = self._exact_match_mapping["synonyms"][synonym]
+                for cname in cnames:
+                    for item in self._exact_match_mapping["items"][cname]:
+                        item_value = copy.copy(item)
+                        item_value.pop("whitelist", None)
+                        item_value.update({"score": score})
+                        item_value.update({"top_synonym": synonym})
+                        values.append(item_value)
+        except (KeyError, TypeError):
+            logger.warning(
+                "Failed to resolve entity %r for type %r",
+                entity.text, entity.type
+            )
+            return None
+
+        return values[0:20]
+
+    def _load(self):
+        self.fit()
+
+
+class EntityResolverUsingSentenceBertBertscore(EntityResolverBase):
+    """
+    Resolver class for bert models as described here:
+    https://github.com/UKPLab/sentence-transformers
+    """
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+        super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+        self._exact_match_mapping = None
+        self._preloaded_mappings_embs = {}
+        self._bert_model_pretrained_name_or_abspath = (
+            self.er_config.get("model_settings", {})
+                .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
+        )
+        self._bert_model = None
+        self._bert_tokenizer = None
+        self._augment_lower_case = False
+
+        # TODO: _lazy_resolution is set to a default value, can be modified to be an input
+        self._lazy_resolution = False
+        if not self._lazy_resolution:
+            msg = "sentence-bert embeddings are cached for entity_type: {%s} " \
+                  "for fast entity resolution; can possibly consume more disk space"
+            logger.warning(msg, self.type)
+
+    @property
+    def pretrained_name(self):
+        return os.path.split(self._bert_model_pretrained_name_or_abspath)[-1]
+
+    def _process_entity_map(self, entity_type, entity_map):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+        """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map.get("entities"):
+            cname = item["cname"]
+            item_id = item.get("id")
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, entity_type)
+            if item_id:
+                if item_id in seen_ids:
+                    msg = "Item id {!r} specified in {!r} entity map multiple times"
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for norm_alias in aliases:
+                if norm_alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, entity_type)
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        # extend synonyms map by adding keys which are lowercases of the existing keys
+        if self._augment_lower_case:
+            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
+            logger.info(msg)
+            initial_num_syns = len(syn_map)
+            aug_syn_map = {}
+            for alias, alias_map in syn_map.items():
+                alias_lower = alias.lower()
+                if alias_lower not in syn_map:
+                    aug_syn_map.update({alias_lower: alias_map})
+            syn_map.update(aug_syn_map)
+            final_num_syns = len(syn_map)
+            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
+            logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
+
+        return {"items": item_map, "synonyms": syn_map}
+
+    @staticmethod
+    def _get_bert_embedding(all_sens, model, tokenizer, idf_dict, batch_size=-1, device="cuda:0",
+                            all_layers=False):
+        """
+        Compute BERT embedding in batches. (Note: Largely copied from bert scorer module but made
+            changes to offer more flexibility to obtain different layers' outputs)
+
+        Args:
+            all_sens (list of str) : sentences to encode.
+            model : a BERT model from `pytorch_pretrained_bert`.
+            tokenizer : a BERT tokenizer corresponds to `model`.
+            idf_dict : mapping a word piece index to its
+                                   inverse document frequency
+            device (str): device to use, e.g. 'cpu' or 'cuda'
+        """
+
+        if batch_size == -1:
+            batch_size = len(all_sens)
+
+        def padding(arr, pad_token, dtype=torch.long):
+            lens = torch.LongTensor([len(a) for a in arr])
+            max_len = lens.max().item()
+            padded = torch.ones(len(arr), max_len, dtype=dtype) * pad_token
+            mask = torch.zeros(len(arr), max_len, dtype=torch.long)
+            for i, a in enumerate(arr):
+                padded[i, : lens[i]] = torch.tensor(a, dtype=dtype)
+                mask[i, : lens[i]] = 1
+            return padded, lens, mask
+
+        def collate_idf(arr, tokenizer, idf_dict, device="cuda:0"):
+            """
+            Helper function that pads a list of sentences to hvae the same length and
+                loads idf score for words in the sentences. (Note: Copied from bert scorer module
+                as the method was not accessible through library)
+
+            Args:
+                - :param: `arr` (list of str): sentences to process.
+                - :param: `tokenize` : a function that takes a string and return list
+                          of tokens.
+                - :param: `numericalize` : a function that takes a list of tokens and
+                          return list of token indexes.
+                - :param: `idf_dict` (dict): mapping a word piece index to its
+                                       inverse document frequency
+                - :param: `pad` (str): the padding token.
+                - :param: `device` (str): device to use, e.g. 'cpu' or 'cuda'
+            """
+            arr = [bert_score.sent_encode(tokenizer, a) for a in arr]
+
+            idf_weights = [[idf_dict[i] for i in a] for a in arr]
+
+            pad_token = tokenizer.pad_token_id
+
+            padded, lens, mask = padding(arr, pad_token, dtype=torch.long)
+            padded_idf, _, _ = padding(idf_weights, 0, dtype=torch.float)
+
+            padded = padded.to(device=device)
+            mask = mask.to(device=device)
+            lens = lens.to(device=device)
+            return padded, padded_idf, lens, mask
+
+        padded_sens, padded_idf, lens, mask = collate_idf(all_sens, tokenizer, idf_dict,
+                                                          device=device)
+
+        model.eval()
+        embeddings = []
+        with torch.no_grad():
+            for i in range(0, len(all_sens), batch_size):
+                batch_padded_sens = padded_sens[i: i + batch_size]
+                batch_padded_attn = mask[i: i + batch_size]
+                baseModelOutput = model(
+                    batch_padded_sens,
+                    attention_mask=batch_padded_attn
+                )
+                # hidden_states = baseModelOutput.hidden_states
+                embeddings.append(baseModelOutput.last_hidden_state)
+                del baseModelOutput
+
+        total_embedding = torch.cat(embeddings, dim=0)
+
+        return total_embedding, mask, padded_idf
+
+    def _encode(self, phrases):
+        """Encodes input text(s) into embeddings, one vector for each phrase
+
+        Args:
+            phrases (str, list[str]): textual inputs that are to be encoded using sentence \
+                                        transformers' model
+
+        Returns:
+            dict: a dictionary of phrases mapped to a tuple consisting of a (numpy array) embeddings
+                    for that phrase and idf
+        """
+
+        def dedup_and_sort(l):
+            return sorted(list(set(l)), key=lambda x: len(x.split(" ")), reverse=True)
+
+        if not phrases:
+            return []
+
+        if isinstance(phrases, str):
+            phrases = [phrases]
+
+        if not isinstance(phrases, (str, list)):
+            raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
+
+        batch_size = (
+            self.er_config.get("model_settings", {})
+                .get("batch_size", 16)
+        )
+        show_progress = len(phrases) > 1
+        # convert_to_numpy = True
+
+        idf_dict = None
+        if not idf_dict:
+            idf_dict = defaultdict(lambda: 1.0)
+            # set idf for [SEP] and [CLS] to 0
+            idf_dict[self._bert_tokenizer.sep_token_id] = 0
+            idf_dict[self._bert_tokenizer.cls_token_id] = 0
+
+        sentences = dedup_and_sort(phrases)
+        iter_range = range(0, len(sentences), batch_size)
+        stats_dict = dict()
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._bert_model.to(device)
+        for batch_start in trange(0, len(sentences), batch_size, desc="Batches for Bert Embs",
+                                  disable=not show_progress):
+            sen_batch = sentences[batch_start: batch_start + batch_size]
+            embs, masks, padded_idf = self._get_bert_embedding(
+                sen_batch, self._bert_model, self._bert_tokenizer, idf_dict, device=device
+            )
+            embs = embs.cpu()
+            masks = masks.cpu()
+            padded_idf = padded_idf.cpu()
+            for i, sen in enumerate(sen_batch):
+                sequence_len = masks[i].sum().item()
+                emb = embs[i, :sequence_len]
+                idf = padded_idf[i, :sequence_len]
+                stats_dict[sen] = (emb, idf)
+
+        return stats_dict
+
+    def _fit(self, clean):
+        """
+        Fits the resolver model
+
+        Args:
+            clean (bool): If ``True``, deletes existing dump of synonym embeddings file
+        """
+
+        # load model
+        try:
+            self._bert_tokenizer = bert_score.get_tokenizer(
+                self._bert_model_pretrained_name_or_abspath)
+            # setting `all_layers=True` will discard `num_layers` and its value
+            self._bert_model = bert_score.get_model(self._bert_model_pretrained_name_or_abspath,
+                                                    num_layers=-1, all_layers=True)
+        except:
+            logger.error("Could not initialize the model name through huggingface models; Check "
+                         "the provided model path %s ",
+                         self._bert_model_pretrained_name_or_abspath)
+
+        # load mappings.json data
+        entity_map = self.resource_loader.get_entity_map(self.type)
+        self._exact_match_mapping = self._process_entity_map(
+            self.type, entity_map
+        )
+
+        # load embeddings for this data
+        cache_path = self.cache_path(self.pretrained_name)
+        if clean and os.path.exists(cache_path):
+            os.remove(cache_path)
+        if not self._lazy_resolution and os.path.exists(cache_path):
+            self._load()
+            self.dirty = False
+        else:
+            synonyms = [*self._exact_match_mapping["synonyms"]]
+            self._preloaded_mappings_embs = self._encode(synonyms)
+            self.dirty = True
+
+        if self.dirty and not self._lazy_resolution:
+            self._dump()
+
+    def _predict(self, entity):
+        """Predicts the resolved value(s) for the given entity using cosine similarity.
+
+        Args:
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
+
+        Returns:
+            (list): The top 20 resolved values for the provided entity.
+        """
+
+        stats_dict = self._preloaded_mappings_embs  # a dict of (emb, idf) w/ keys as synonyms
+        refs = [*stats_dict.keys()]
+        entity = entity[0]  # top_entity
+        hyps = [entity.text] * len(refs)
+        if entity.text in stats_dict:
+            _added_to_dict = False
+        else:
+            entity_dict = self._encode(entity.text)  # a dict of (emb, idf)
+            stats_dict.update(entity_dict)
+            _added_to_dict = True
+
+        def greedy_cos_idf(ref_embedding, ref_masks, ref_idf, hyp_embedding, hyp_masks, hyp_idf,
+                           all_layers=False):
+            """
+            Compute greedy matching based on cosine similarity.
+
+            Args:
+                - :param: `ref_embedding` (torch.Tensor):
+                           embeddings of reference sentences, BxKxd,
+                           B: batch size, K: longest length, d: bert dimenison
+                - :param: `ref_lens` (list of int): list of reference sentence length.
+                - :param: `ref_masks` (torch.LongTensor): BxKxK, BERT attention mask for
+                           reference sentences.
+                - :param: `ref_idf` (torch.Tensor): BxK, idf score of each word
+                           piece in the reference setence
+                - :param: `hyp_embedding` (torch.Tensor):
+                           embeddings of candidate sentences, BxKxd,
+                           B: batch size, K: longest length, d: bert dimenison
+                - :param: `hyp_lens` (list of int): list of candidate sentence length.
+                - :param: `hyp_masks` (torch.LongTensor): BxKxK, BERT attention mask for
+                           candidate sentences.
+                - :param: `hyp_idf` (torch.Tensor): BxK, idf score of each word
+                           piece in the candidate setence
+            """
+            ref_embedding.div_(torch.norm(ref_embedding, dim=-1).unsqueeze(-1))
+            hyp_embedding.div_(torch.norm(hyp_embedding, dim=-1).unsqueeze(-1))
+
+            if all_layers:
+                B, _, L, D = hyp_embedding.size()
+                hyp_embedding = hyp_embedding.transpose(1, 2).transpose(0, 1).contiguous().view(
+                    L * B, hyp_embedding.size(1), D)
+                ref_embedding = ref_embedding.transpose(1, 2).transpose(0, 1).contiguous().view(
+                    L * B, ref_embedding.size(1), D)
+            batch_size = ref_embedding.size(0)
+            sim = torch.bmm(hyp_embedding, ref_embedding.transpose(1, 2))
+            masks = torch.bmm(hyp_masks.unsqueeze(2).float(), ref_masks.unsqueeze(1).float())
+            if all_layers:
+                masks = masks.unsqueeze(0).expand(L, -1, -1, -1).contiguous().view_as(sim)
+            else:
+                masks = masks.expand(batch_size, -1, -1).contiguous().view_as(sim)
+
+            masks = masks.float().to(sim.device)
+            sim = sim * masks
+
+            word_precision = sim.max(dim=2)[0]
+            word_recall = sim.max(dim=1)[0]
+
+            hyp_idf.div_(hyp_idf.sum(dim=1, keepdim=True))
+            ref_idf.div_(ref_idf.sum(dim=1, keepdim=True))
+            precision_scale = hyp_idf.to(word_precision.device)
+            recall_scale = ref_idf.to(word_recall.device)
+            if all_layers:
+                precision_scale = precision_scale.unsqueeze(0).expand(L, B,
+                                                                      -1).contiguous().view_as(
+                    word_precision)
+                recall_scale = recall_scale.unsqueeze(0).expand(L, B, -1).contiguous().view_as(
+                    word_recall)
+            P = (word_precision * precision_scale).sum(dim=1)
+            R = (word_recall * recall_scale).sum(dim=1)
+            F = 2 * P * R / (P + R)
+
+            hyp_zero_mask = hyp_masks.sum(dim=1).eq(2)
+            ref_zero_mask = ref_masks.sum(dim=1).eq(2)
+
+            if all_layers:
+                P = P.view(L, B)
+                R = R.view(L, B)
+                F = F.view(L, B)
+
+            if torch.any(hyp_zero_mask):
+                print("Warning: Empty candidate sentence detected; setting precision to be 0.",
+                      file=sys.stderr)
+                P = P.masked_fill(hyp_zero_mask, 0.0)
+
+            if torch.any(ref_zero_mask):
+                print("Warning: Empty reference sentence detected; setting recall to be 0.",
+                      file=sys.stderr)
+                R = R.masked_fill(ref_zero_mask, 0.0)
+
+            F = F.masked_fill(torch.isnan(F), 0.0)
+
+            return P, R, F
+
+        def pad_batch_stats(sen_batch, stats_dict, device):
+            stats = [stats_dict[s] for s in sen_batch]
+            emb, idf = zip(*stats)
+            emb = [e.to(device) for e in emb]
+            idf = [i.to(device) for i in idf]
+            lens = [e.size(0) for e in emb]
+            emb_pad = pad_sequence(emb, batch_first=True, padding_value=2.0)
+            idf_pad = pad_sequence(idf, batch_first=True)
+
+            def length_to_mask(lens):
+                lens = torch.tensor(lens, dtype=torch.long)
+                max_len = max(lens)
+                base = torch.arange(max_len, dtype=torch.long).expand(len(lens), max_len)
+                return base < lens.unsqueeze(1)
+
+            pad_mask = length_to_mask(lens).to(device)
+            return emb_pad, pad_mask, idf_pad
+
+        batch_size = (
+            self.er_config.get("model_settings", {})
+                .get("batch_size", 16)
+        )
+        show_progress = False
+        device = next(self._bert_model.parameters()).device
+        all_layers = False
+        preds = []
+        with torch.no_grad():
+            for batch_start in trange(0, len(refs), batch_size, desc="Batches for BertScore",
+                                      disable=not show_progress):
+                batch_refs = refs[batch_start: batch_start + batch_size]
+                batch_hyps = hyps[batch_start: batch_start + batch_size]
+                ref_stats = pad_batch_stats(batch_refs, stats_dict, device)
+                hyp_stats = pad_batch_stats(batch_hyps, stats_dict, device)
+
+                P, R, F1 = greedy_cos_idf(*ref_stats, *hyp_stats, all_layers)
+                preds.append(torch.stack((P, R, F1), dim=-1).cpu())
+        preds = torch.cat(preds, dim=1 if all_layers else 0)
+
+        all_preds = preds.cpu()
+        P, R, F1 = all_preds[..., 0], all_preds[..., 1], all_preds[..., 2]  # P, R, F1
+        F1 = F1.numpy()
+
+        if _added_to_dict:
+            stats_dict.pop(entity.text)
+
+        try:
+            sorted_items = sorted(list(zip(refs, F1)), key=lambda x: x[1], reverse=True)
+            values = []
+            for synonym, score in sorted_items:
+                cnames = self._exact_match_mapping["synonyms"][synonym]
+                for cname in cnames:
+                    for item in self._exact_match_mapping["items"][cname]:
+                        item_value = copy.copy(item)
+                        item_value.pop("whitelist", None)
+                        item_value.update({"score": score})
+                        item_value.update({"top_synonym": synonym})
+                        values.append(item_value)
+        except KeyError:
+            logger.warning(
+                "Failed to resolve entity %r for type %r; "
+                "set 'clean=True' for computing embeddings of newly added items in mappings.json",
+                entity.text, entity.type
+            )
+            return None
+        except TypeError:
+            logger.warning(
+                "Failed to resolve entity %r for type %r", entity.text, entity.type
+            )
+            return None
 
         return values[0:20]
 
@@ -1227,6 +1796,7 @@ class EntityResolverUsingSentenceBertCossim(EntityResolverBase):
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "exact_match": EntityResolverUsingExactMatch,
     "text_relevance": EntityResolverUsingElasticSearch,
-    "sbert_cosine_similarity": EntityResolverUsingSentenceBertCossim
+    "sbert_cosine_similarity": EntityResolverUsingSentenceBertCossim,
+    "sbert_bertscore_similarity": EntityResolverUsingSentenceBertBertscore
 }
 ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
