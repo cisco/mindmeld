@@ -152,13 +152,13 @@ class EntityResolverBase(ABC):
         self._no_canonical_entity_map = len(canonical_entities) == 0
 
         if self._use_double_metaphone:
-            self._invoke_double_metaphone_usage()
+            self._enable_double_metaphone()
 
     @property
     def _use_double_metaphone(self):
         return "double_metaphone" in self.er_config.get("phonetic_match_types", [])
 
-    def _invoke_double_metaphone_usage(self):
+    def _enable_double_metaphone(self):
         """
         By default, resolvers are assumed to not support double metaphone usage
         If supported, override this method definition in the derived class
@@ -259,7 +259,7 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
         self._es_host = self.kwargs.get("es_host", None)
         self._es_config = {"client": self.kwargs.get("es_client", None), "pid": os.getpid()}
 
-    def _invoke_double_metaphone_usage(self):
+    def _enable_double_metaphone(self):
         pass
 
     @property
@@ -372,10 +372,14 @@ class EntityResolverUsingElasticSearch(EntityResolverBase):
             clean (bool): If ``True``, deletes and recreates the index from scratch instead of
                           updating the existing index with synonyms in the mapping.json.
         """
-        if clean:
-            delete_index(
-                self._app_namespace, self._es_index_name, self._es_host, self._es_client
-            )
+        try:
+            if clean:
+                delete_index(
+                    self._app_namespace, self._es_index_name, self._es_host, self._es_client
+                )
+        except ValueError as e:  # when `clean = True` but no index to delete
+            logger.info(e)
+
 
         entity_map = self.resource_loader.get_entity_map(self.type)
 
