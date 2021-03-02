@@ -947,7 +947,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
                                   disable=not show_progress_bar):
             sentences_batch = sentences_sorted[start_index:start_index + batch_size]
             features = self.transformer_model.tokenize(sentences_batch)
-            features = _get_module_or_attr("sentence_transformers", "util").batch_to_device(
+            features = _get_module_or_attr("sentence_transformers.util").batch_to_device(
                 features, device)
 
             with torch.no_grad():
@@ -1051,11 +1051,11 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             _sbert_model_pretrained_name_or_abspath = \
                 "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
 
-            self.transformer_model = _get_module_or_attr("sentence_transformers",
-                                                         "models").Transformer(
+            self.transformer_model = _get_module_or_attr(
+                "sentence_transformers.models").Transformer(
                 _sbert_model_pretrained_name_or_abspath,
                 model_args={"output_hidden_states": True})
-            self.pooling_model = _get_module_or_attr("sentence_transformers", "models").Pooling(
+            self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
                 self.transformer_model.get_word_embedding_dimension(),
                 pooling_mode_cls_token=_output_type == "cls",
                 pooling_mode_max_tokens=False,
@@ -1071,11 +1071,11 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
                 "huggingface; Checking - %s - model directly in huggingface models",
                 self._sbert_model_pretrained_name_or_abspath)
             try:
-                self.transformer_model = _get_module_or_attr("sentence_transformers",
-                                                             "models").Transformer(
+                self.transformer_model = _get_module_or_attr(
+                    "sentence_transformers.models").Transformer(
                     self._sbert_model_pretrained_name_or_abspath,
                     model_args={"output_hidden_states": True})
-                self.pooling_model = _get_module_or_attr("sentence_transformers", "models").Pooling(
+                self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
                     self.transformer_model.get_word_embedding_dimension(),
                     pooling_mode_cls_token=_output_type == "cls",
                     pooling_mode_max_tokens=False,
