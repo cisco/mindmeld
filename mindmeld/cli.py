@@ -780,7 +780,7 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     if overwrite:
         config["overwrite"] = True
     if unannotate_all:
-        config["unannotation_rule"] = UNANNOTATE_ALL_RULE
+        config["unannotation_rules"] = UNANNOTATE_ALL_RULE
         config["unannotate_supported_entities_only"] = False
     return config
 

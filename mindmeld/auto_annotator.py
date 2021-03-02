@@ -106,10 +106,11 @@ class Annotator(ABC):
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
 
-        if action == AnnotatorAction.ANNOTATE:
-            rules = self.annotation_rules
-        elif action == AnnotatorAction.UNANNOTATE:
-            rules = self.unannotation_rules
+        rules = (
+            self.annotation_rules
+            if action == AnnotatorAction.ANNOTATE
+            else self.unannotation_rules
+        )
 
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
@@ -827,11 +828,14 @@ class SpacyAnnotator(Annotator):
         """
         entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity["dim"]]
 
-        if self.language == ENGLISH_LANGUAGE_CODE:
-            if len(entity["body"]) >= 2 and entity["body"][-2:] == "'s":
-                entity["value"] = {"value": entity["body"][:-2]}
-                entity["body"] = entity["body"][:-2]
-                entity["end"] -= 2
+        if (
+            self.language == ENGLISH_LANGUAGE_CODE
+            and len(entity["body"]) >= 2
+            and entity["body"][-2:] == "'s"
+        ):
+            entity["value"] = {"value": entity["body"][:-2]}
+            entity["body"] = entity["body"][:-2]
+            entity["end"] -= 2
         return entity
 
 
@@ -981,7 +985,7 @@ class NoTranslationDucklingAnnotator(Annotator):
             locale=self.locale,
         )
         filtered_candidates = (
-            NoTranslationDucklingAnnotator._filter_duckling_candidates(
+            NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
                 duckling_candidates
             )
         )
@@ -1036,7 +1040,7 @@ class NoTranslationDucklingAnnotator(Annotator):
         return selected_spans
 
     @staticmethod
-    def _filter_duckling_candidates(candidates):
+    def _filter_out_bad_duckling_candidates(candidates):
         """Pipeline function to filter initial list of duckling candidates using heuristics.
 
         Args:
