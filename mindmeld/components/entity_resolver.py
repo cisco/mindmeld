@@ -66,7 +66,7 @@ def _is_module_available(module_name: str):
     return bool(importlib.util.find_spec(module_name) is not None)
 
 
-def _load_module_or_attr(module_name: str, func_name: str = None):
+def _get_module_or_attr(module_name: str, func_name: str = None):
     """
     Loads an attribute from a module or a module itself
     (check if the module exists before calling this function)
@@ -81,8 +81,8 @@ def _load_module_or_attr(module_name: str, func_name: str = None):
 
 SBERT_AVAILABLE = _is_module_available("sentence_transformers")
 if SBERT_AVAILABLE:
-    sentence_transformers = _load_module_or_attr("sentence_transformers")
-    torch = _load_module_or_attr("torch")
+    sentence_transformers = _get_module_or_attr("sentence_transformers")
+    torch = _get_module_or_attr("torch")
 
 
 class EntityResolver:
@@ -947,7 +947,8 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
                                   disable=not show_progress_bar):
             sentences_batch = sentences_sorted[start_index:start_index + batch_size]
             features = self.transformer_model.tokenize(sentences_batch)
-            features = sentence_transformers.util.batch_to_device(features, device)
+            features = _get_module_or_attr("sentence_transformers", "util").batch_to_device(
+                features, device)
 
             with torch.no_grad():
                 out_features_transformer = self.transformer_model.forward(features)
@@ -1049,34 +1050,40 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         try:
             _sbert_model_pretrained_name_or_abspath = \
                 "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
-            self.transformer_model = sentence_transformers.models.Transformer(
+
+            self.transformer_model = _get_module_or_attr("sentence_transformers",
+                                                         "models").Transformer(
                 _sbert_model_pretrained_name_or_abspath,
                 model_args={"output_hidden_states": True})
-            self.pooling_model = sentence_transformers.models.Pooling(
+            self.pooling_model = _get_module_or_attr("sentence_transformers", "models").Pooling(
                 self.transformer_model.get_word_embedding_dimension(),
                 pooling_mode_cls_token=_output_type == "cls",
                 pooling_mode_max_tokens=False,
                 pooling_mode_mean_tokens=_output_type == "mean",
                 pooling_mode_mean_sqrt_len_tokens=False)
             modules = [self.transformer_model, self.pooling_model]
-            self._sbert_model = sentence_transformers.SentenceTransformer(modules=modules)
+
+            self._sbert_model = _get_module_or_attr("sentence_transformers", "SentenceTransformer")(
+                modules=modules)
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
                 "huggingface; Checking - %s - model directly in huggingface models",
                 self._sbert_model_pretrained_name_or_abspath)
             try:
-                self.transformer_model = sentence_transformers.models.Transformer(
+                self.transformer_model = _get_module_or_attr("sentence_transformers",
+                                                             "models").Transformer(
                     self._sbert_model_pretrained_name_or_abspath,
                     model_args={"output_hidden_states": True})
-                self.pooling_model = sentence_transformers.models.Pooling(
+                self.pooling_model = _get_module_or_attr("sentence_transformers", "models").Pooling(
                     self.transformer_model.get_word_embedding_dimension(),
                     pooling_mode_cls_token=_output_type == "cls",
                     pooling_mode_max_tokens=False,
                     pooling_mode_mean_tokens=_output_type == "mean",
                     pooling_mode_mean_sqrt_len_tokens=False)
                 modules = [self.transformer_model, self.pooling_model]
-                self._sbert_model = sentence_transformers.SentenceTransformer(modules=modules)
+                self._sbert_model = _get_module_or_attr("sentence_transformers",
+                                                        "SentenceTransformer")(modules=modules)
             except OSError:
                 logger.error("Could not initialize the model name through huggingface models; Not r"
                              "esorting to model names in sbert.net due to limited exposed features")
