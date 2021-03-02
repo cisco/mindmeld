@@ -63,7 +63,7 @@ def _is_module_available(module_name: str):
     Returns:
         bool, if or not the given module exists
     """
-    return True if importlib.util.find_spec(module_name) else False
+    return bool(importlib.util.find_spec(module_name) is not None)
 
 
 def _load_module_or_attr(module_name: str, func_name: str = None):
@@ -140,7 +140,6 @@ class EntityResolverBase(ABC):
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         """Initializes an entity resolver"""
         self.app_path = app_path
-        self.resource_loader = resource_loader
         self.type = entity_type
         self.er_config = er_config
         self.kwargs = kwargs
@@ -148,18 +147,14 @@ class EntityResolverBase(ABC):
         self._app_namespace = get_app_namespace(self.app_path)
         self._is_system_entity = Entity.is_system_entity(self.type)
         self.name = self.er_config.get("model_type")
-        self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
-        self.ready = False  # bool, True if the model is fit by calling .fit()
-
-        self.entity_map = self.resource_loader.get_entity_map(self.type)
-        if self._is_system_entity:
-            canonical_entities = []
-        else:
-            canonical_entities = self.entity_map.get("entities", [])
-        self._no_canonical_entity_map = len(canonical_entities) == 0
+        self.entity_map = resource_loader.get_entity_map(self.type)
+        self.normalizer = resource_loader.query_factory.normalize
 
         if self._use_double_metaphone:
             self._enable_double_metaphone()
+
+        self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
+        self.ready = False  # bool, True if the model is fit by calling .fit()
 
     @property
     def _use_double_metaphone(self):
@@ -198,23 +193,24 @@ class EntityResolverBase(ABC):
         if self.ready:
             return
 
-        if self._no_canonical_entity_map:
+        if self._is_system_entity or not self.entity_map.get("entities", []):
             return
 
         self._fit(clean)
         self.ready = True
 
     @abstractmethod
-    def _predict(self, entity):
+    def _predict(self, nbest_entities, top_n):
         raise NotImplementedError
 
-    def predict(self, entity):
+    def predict(self, entity, top_n: int = 20):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
         Args:
             entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
                 objects.
+            top_n (int): maximum number of results to populate
 
         Returns:
             (list): The top 20 resolved values for the provided entity.
@@ -230,10 +226,10 @@ class EntityResolverBase(ABC):
             # system entities are already resolved
             return [top_entity.value]
 
-        if self._no_canonical_entity_map:
+        if not self.entity_map.get("entities", []):
             return []
 
-        return self._predict(nbest_entities)
+        return self._predict(nbest_entities, top_n)
 
     @abstractmethod
     def _load(self):
@@ -246,6 +242,62 @@ class EntityResolverBase(ABC):
 
     def dump(self):
         raise NotImplementedError
+
+    @staticmethod
+    def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+            normalizer: The normalizer to use
+            augment_lower_case: If to extend the synonyms list with their lower-cased values
+        """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map.get("entities", []):
+            cname = item["cname"]
+            item_id = item.get("id")
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, entity_type)
+            if item_id:
+                if item_id in seen_ids:
+                    msg = "Item id {!r} specified in {!r} entity map multiple times"
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for alias in aliases:
+                norm_alias = normalizer(alias) if normalizer else alias
+                if norm_alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, entity_type)
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        # extend synonyms map by adding keys which are lowercases of the existing keys
+        if augment_lower_case:
+            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
+            logger.info(msg)
+            initial_num_syns = len(syn_map)
+            aug_syn_map = {}
+            for alias, alias_map in syn_map.items():
+                alias_lower = alias.lower()
+                if alias_lower not in syn_map:
+                    aug_syn_map.update({alias_lower: alias_map})
+            syn_map.update(aug_syn_map)
+            final_num_syns = len(syn_map)
+            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
+            logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
+
+        return {"items": item_map, "synonyms": syn_map}
 
     def __repr__(self):
         msg = "<{} {!r} ready: {!r}, dirty: {!r}>"
@@ -445,21 +497,22 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 use_double_metaphone=self._use_double_metaphone,
             )
 
-    def _predict(self, entity):
+    def _predict(self, nbest_entities, top_n):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
         Args:
-            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
-                objects.
+            nbest_entities (tuple): List of one entity object found in an input query, or a list  \
+                of n-best entity objects.
+            top_n (int): maximum number of results to populate
 
         Returns:
             (list): The top 20 resolved values for the provided entity.
         """
 
-        top_entity = entity[0]
+        top_entity = nbest_entities[0]
 
-        weight_factors = [1 - float(i) / len(entity) for i in range(len(entity))]
+        weight_factors = [1 - float(i) / len(nbest_entities) for i in range(len(nbest_entities))]
 
         def _construct_match_query(entity, weight=1):
             return [
@@ -574,7 +627,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
 
         match_query = []
         top_transcript = True
-        for e, weight in zip(entity, weight_factors):
+        for e, weight in zip(nbest_entities, weight_factors):
             if top_transcript:
                 match_query.extend(_construct_match_query(e, weight))
                 top_transcript = False
@@ -621,8 +674,8 @@ class ElasticsearchEntityResolver(EntityResolverBase):
 
             results = []
             for hit in hits:
-                if self._use_double_metaphone and len(entity) > 1:
-                    if hit["_score"] < 0.5 * len(entity):
+                if self._use_double_metaphone and len(nbest_entities) > 1:
+                    if hit["_score"] < 0.5 * len(nbest_entities):
                         continue
 
                 top_synonym = None
@@ -643,7 +696,14 @@ class ElasticsearchEntityResolver(EntityResolverBase):
 
                 results.append(result)
 
-            return results[0:20]
+            if len(results) < top_n:
+                logger.info(
+                    "Retrieved only %d entity resolutions instead of asked number %d for "
+                    "entity %r for type %r",
+                    len(results), top_n, top_entity.text, top_entity.type,
+                )
+
+            return results[:top_n]
 
     def _load(self):
         """Loads the trained entity resolution model from disk."""
@@ -681,48 +741,7 @@ class ExactmatchEntityResolver(EntityResolverBase):
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
-        self._normalizer = self.resource_loader.query_factory.normalize
         self._exact_match_mapping = None
-
-    @staticmethod
-    def _process_entity_map(entity_type, entity_map, normalizer):
-        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
-        synonym_map for exact match entity resolution when Elasticsearch is unavailable
-
-        Args:
-            entity_type: The entity type associated with this entity resolver
-            entity_map: The loaded mapping.json file for the given entity type
-            normalizer: The normalizer to use
-        """
-        item_map = {}
-        syn_map = {}
-        seen_ids = []
-        for item in entity_map.get("entities", []):
-            cname = item["cname"]
-            item_id = item.get("id")
-            if cname in item_map:
-                msg = "Canonical name %s specified in %s entity map multiple times"
-                logger.debug(msg, cname, entity_type)
-            if item_id:
-                if item_id in seen_ids:
-                    msg = "Item id {!r} specified in {!r} entity map multiple times"
-                    raise ValueError(msg.format(item_id, entity_type))
-                seen_ids.append(item_id)
-
-            aliases = [cname] + item.pop("whitelist", [])
-            items_for_cname = item_map.get(cname, [])
-            items_for_cname.append(item)
-            item_map[cname] = items_for_cname
-            for alias in aliases:
-                norm_alias = normalizer(alias)
-                if norm_alias in syn_map:
-                    msg = "Synonym %s specified in %s entity map multiple times"
-                    logger.debug(msg, cname, entity_type)
-                cnames_for_syn = syn_map.get(norm_alias, [])
-                cnames_for_syn.append(cname)
-                syn_map[norm_alias] = list(set(cnames_for_syn))
-
-        return {"items": item_map, "synonyms": syn_map}
 
     def _fit(self, clean):
         """Loads an entity mapping file to resolve entities using exact match.
@@ -733,17 +752,22 @@ class ExactmatchEntityResolver(EntityResolverBase):
             )
 
         entity_map = self.entity_map
-        self._exact_match_mapping = self._process_entity_map(
-            self.type, entity_map, self._normalizer
+        augment_lower_case = (
+            self.er_config.get("model_settings", {})
+                .get("augment_lower_case", False)
+        )
+        self._exact_match_mapping = self.process_entity_map(
+            self.type, entity_map, normalizer=self.normalizer,
+            augment_lower_case=augment_lower_case
         )
 
-    def _predict(self, entity):
+    def _predict(self, nbest_entities, top_n):
         """Looks for exact name in the synonyms data
         """
 
-        entity = entity[0]  # top_entity
+        entity = nbest_entities[0]  # top_entity
 
-        normed = self._normalizer(entity.text)
+        normed = self.normalizer(entity.text)
         try:
             cnames = self._exact_match_mapping["synonyms"][normed]
         except (KeyError, TypeError):
@@ -766,13 +790,17 @@ class ExactmatchEntityResolver(EntityResolverBase):
                 item_value.pop("whitelist", None)
                 values.append(item_value)
 
-        return values
+        if len(values) < top_n:
+            logger.info(
+                "Retrieved only %d entity resolutions instead of asked number %d for "
+                "entity %r for type %r",
+                len(values), top_n, entity.text, entity.type,
+            )
+
+        return values[:top_n]
 
     def _load(self):
         self.fit()
-
-    def dump(self):
-        pass
 
 
 class SentencebertCossimEntityResolver(EntityResolverBase):
@@ -790,10 +818,6 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
                 .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
         )
         self._sbert_model = None
-        self._augment_lower_case = (
-            self.er_config.get("model_settings", {})
-                .get("augment_lower_case", False)
-        )
 
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
@@ -1008,58 +1032,6 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         # results in descending scores
         return sorted(list(zip(synonyms, similarity_scores)), key=lambda x: x[1], reverse=True)
 
-    def _process_entity_map(self, entity_type, entity_map):
-        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
-        synonym_map for exact match entity resolution when Elasticsearch is unavailable
-
-        Args:
-            entity_type: The entity type associated with this entity resolver
-            entity_map: The loaded mapping.json file for the given entity type
-        """
-        item_map = {}
-        syn_map = {}
-        seen_ids = []
-        for item in entity_map.get("entities", []):
-            cname = item["cname"]
-            item_id = item.get("id")
-            if cname in item_map:
-                msg = "Canonical name %s specified in %s entity map multiple times"
-                logger.debug(msg, cname, entity_type)
-            if item_id:
-                if item_id in seen_ids:
-                    msg = "Item id {!r} specified in {!r} entity map multiple times"
-                    raise ValueError(msg.format(item_id, entity_type))
-                seen_ids.append(item_id)
-
-            aliases = [cname] + item.pop("whitelist", [])
-            items_for_cname = item_map.get(cname, [])
-            items_for_cname.append(item)
-            item_map[cname] = items_for_cname
-            for norm_alias in aliases:
-                if norm_alias in syn_map:
-                    msg = "Synonym %s specified in %s entity map multiple times"
-                    logger.debug(msg, cname, entity_type)
-                cnames_for_syn = syn_map.get(norm_alias, [])
-                cnames_for_syn.append(cname)
-                syn_map[norm_alias] = list(set(cnames_for_syn))
-
-        # extend synonyms map by adding keys which are lowercases of the existing keys
-        if self._augment_lower_case:
-            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
-            logger.info(msg)
-            initial_num_syns = len(syn_map)
-            aug_syn_map = {}
-            for alias, alias_map in syn_map.items():
-                alias_lower = alias.lower()
-                if alias_lower not in syn_map:
-                    aug_syn_map.update({alias_lower: alias_map})
-            syn_map.update(aug_syn_map)
-            final_num_syns = len(syn_map)
-            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
-            logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
-
-        return {"items": item_map, "synonyms": syn_map}
-
     def _fit(self, clean):
         """
         Fits the resolver model
@@ -1111,8 +1083,12 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
 
         # load mappings.json data
         entity_map = self.entity_map
-        self._exact_match_mapping = self._process_entity_map(
-            self.type, entity_map
+        augment_lower_case = (
+            self.er_config.get("model_settings", {})
+                .get("augment_lower_case", False)
+        )
+        self._exact_match_mapping = self.process_entity_map(
+            self.type, entity_map, augment_lower_case=augment_lower_case
         )
 
         # load embeddings for this data
@@ -1131,23 +1107,25 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         if self.dirty and not self._lazy_resolution:
             self.dump()
 
-    def _predict(self, entity):
+    def _predict(self, nbest_entities, top_n):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
 
         Args:
-            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
-                objects.
+            nbest_entities (tuple): List of one entity object found in an input query, or a list  \
+                of n-best entity objects.
+            top_n (int): maximum number of results to populate
 
         Returns:
             (list): The top 20 resolved values for the provided entity.
         """
 
         syn_embs = self._preloaded_mappings_embs
-        entity = entity[0]  # top_entity
-        entity_emb = self._encode(entity.text)[0]
+        # TODO: Use all provided entities like elastic search
+        top_entity = nbest_entities[0]  # top_entity
+        top_entity_emb = self._encode(top_entity.text)[0]
 
         try:
-            sorted_items = self._compute_cosine_similarity(syn_embs, entity_emb)
+            sorted_items = self._compute_cosine_similarity(syn_embs, top_entity_emb)
             values = []
             for synonym, score in sorted_items:
                 cnames = self._exact_match_mapping["synonyms"][synonym]
@@ -1162,16 +1140,23 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             logger.warning(
                 "Failed to resolve entity %r for type %r; "
                 "set 'clean=True' for computing embeddings of newly added items in mappings.json",
-                entity.text, entity.type
+                top_entity.text, top_entity.type
             )
             return None
         except TypeError:
             logger.warning(
-                "Failed to resolve entity %r for type %r", entity.text, entity.type
+                "Failed to resolve entity %r for type %r", top_entity.text, top_entity.type
             )
             return None
 
-        return values[0:20]
+        if len(values) < top_n:
+            logger.info(
+                "Retrieved only %d entity resolutions instead of asked number %d for "
+                "entity %r for type %r",
+                len(values), top_n, top_entity.text, top_entity.type,
+            )
+
+        return values[:top_n]
 
     def _load(self):
         """Loads embeddings for all synonyms, previously dumped into a .pkl file
