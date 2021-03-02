@@ -487,6 +487,11 @@ Troubleshooting
 |               |                                             | increase memory to 4GB from                   |
 |               |                                             | *Preferences | Advanced*.                     |
 +---------------+---------------------------------------------+-----------------------------------------------+
+| Elasticsearch | ``KnowledgeBaseConnectionError``            | If the error is due to maximum                |
+|               |                                             | shards open, then run                         |
+|               |                                             | ``curl -X DELETE 'http://localhost:9200/_all'``|
+|               |                                             | to clear all shards                           |
++---------------+---------------------------------------------+-----------------------------------------------+
 | Numerical     | ``OS is incompatible with duckling binary`` | Run the numerical parser via                  |
 | Parser        |                                             | Docker.                                       |
 |               |                                             | :ref:`More details <duckling>`.               |
