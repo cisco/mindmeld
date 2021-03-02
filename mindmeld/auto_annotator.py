@@ -188,8 +188,7 @@ class Annotator(ABC):
                  We can't find any file to annotate."""
             )
             return
-        file_entities_map = self._get_file_entities_map(action=AnnotatorAction.ANNOTATE)
-        self._modify_queries(file_entities_map, action=AnnotatorAction.ANNOTATE)
+        self._modify_queries(action=AnnotatorAction.ANNOTATE)
 
     def unannotate(self):
         """Unannotate data."""
@@ -199,19 +198,15 @@ class Annotator(ABC):
                  We can't find any file to unannotate."""
             )
             return
-        file_entities_map = self._get_file_entities_map(
-            action=AnnotatorAction.UNANNOTATE
-        )
-        self._modify_queries(file_entities_map, action=AnnotatorAction.UNANNOTATE)
+        self._modify_queries(action=AnnotatorAction.UNANNOTATE)
 
-    def _modify_queries(self, file_entities_map, action: AnnotatorAction):
+    def _modify_queries(self, action: AnnotatorAction):
         """Iterates through App files and annotates or unannotates queries.
 
         Args:
-            file_entities_map (dict): A dictionary that maps a file paths
-                in an App to a list of entities.
             action (AnnotatorAction): Can be "annotate" or "unannotate".
         """
+        file_entities_map = self._get_file_entities_map(action=action)
         query_factory = QueryFactory.create_query_factory(self.app_path)
         path_list = [p for p in file_entities_map if file_entities_map[p]]
         for path in path_list:

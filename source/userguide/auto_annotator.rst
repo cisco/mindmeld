@@ -286,7 +286,7 @@ The table below identifies the supported entities for each language.
 +---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
 | sys_loc             | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  |
 +---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
-| sys_nrp             | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
+| sys_norp            | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
 +---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
 | sys_number          | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | y  | y  | y  |
 +---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
@@ -393,7 +393,7 @@ The :class:`MultiLingualAnnotator` will use the language and locale specified in
 	
 	LANGUAGE_CONFIG = {'language': 'es'}
 
-Many Spacy non-English NER models have limited entity support. To overcome this, the :class:`MultiLingualAnnotator` translates the sentence to English and detects entities
+Many Spacy non-English NER models have limited entity support. To overcome this, in addition to the entities detected by non-English NER models, the :class:`MultiLingualAnnotator` translates the sentence to English and detects entities
 using the English NER model. The English detected entities are compared against duckling candidates for the non-English sentence. Duckling candidates with a match between the type and value of the entity or the translated body text
 are selected. If a translation service is not available, the :class:`MultiLingualAnnotator` selects the duckling candidates with the largest non-overlapping spans. The sections below describe the steps to setup the annotator depending on whether a translation service is being used.
 
@@ -723,6 +723,6 @@ Getting Custom Parameters from the Config
 		... 
 	}
 
-If a :class:`SpacyAnnotator` is created using the command-line with will use the value for :attr:`spacy_model_size` that exists in the config during instantiation.
+If a :class:`SpacyAnnotator` is created using the command-line, it will use the value for :attr:`spacy_model_size` that exists in the config during instantiation.
 
 A similar approach can be taken for custom Annotators.
