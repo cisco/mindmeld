@@ -38,8 +38,8 @@ from .constants import (
     SPACY_ANNOTATOR_MODEL_SIZES,
     DUCKLING_TO_SYS_ENTITY_MAPPINGS,
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
+    SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
     CURRENCY_SYMBOLS,
-    SPACY_ENTITIES_THAT_REQUIRE_DUCKLING,
     _no_overlap,
 )
 from .components import NaturalLanguageProcessor
@@ -58,7 +58,7 @@ class Annotator(ABC):
     """
     Abstract Annotator class that can be used to build a custom Annotation class.
     """
-
+    # pylint: disable=W0613
     def __init__(
         self,
         app_path,
@@ -68,6 +68,7 @@ class Annotator(ABC):
         overwrite=False,
         unannotate_supported_entities_only=True,
         unannotation_rules=None,
+        **kwargs,
     ):
         """Initializes an annotator.
 
@@ -394,17 +395,7 @@ class SpacyAnnotator(Annotator):
     For more information on the supported entities for the Spacy Annotator check the MindMeld docs.
     """
 
-    def __init__(
-        self,
-        app_path,
-        annotation_rules=None,
-        language=None,
-        locale=None,
-        overwrite=False,
-        spacy_model_size="lg",
-        unannotate_supported_entities_only=True,
-        unannotation_rules=None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initializes a SpacyAnnotator.
 
         Args:
@@ -418,16 +409,18 @@ class SpacyAnnotator(Annotator):
             unannotate_supported_entities_only (bool): Only allow removal of supported entities.
             unannotation_rules (list): List of Annotation rules.
         """
-        super().__init__(
-            app_path,
-            annotation_rules=annotation_rules,
-            language=language,
-            locale=locale,
-            overwrite=overwrite,
-            unannotate_supported_entities_only=unannotate_supported_entities_only,
-            unannotation_rules=unannotation_rules,
-        )
-        self.spacy_model_size = spacy_model_size
+        super().__init__(*args, **kwargs)
+        if self.language not in SPACY_ANNOTATOR_SUPPORTED_LANGUAGES:
+            raise ValueError(
+                "Spacy does not currently support: {!r}.".format(self.language)
+            )
+        self.spacy_model_size = kwargs.get("spacy_model_size", "lg")
+        if self.spacy_model_size not in SPACY_ANNOTATOR_MODEL_SIZES:
+            raise ValueError(
+                "{!r} is not a valid model size. Select from: {!r}.".format(
+                    self.language, " ".join(SPACY_ANNOTATOR_MODEL_SIZES)
+                )
+            )
         self.nlp = self._load_model()
 
     def _get_spacy_model_name(self):
@@ -436,16 +429,6 @@ class SpacyAnnotator(Annotator):
         Returns:
             spacy_model_name (str): Name of the Spacy NER model
         """
-        if self.language not in SPACY_ANNOTATOR_SUPPORTED_LANGUAGES:
-            raise ValueError(
-                "Spacy does not currently support: {!r}.".format(self.language)
-            )
-        if self.spacy_model_size not in SPACY_ANNOTATOR_MODEL_SIZES:
-            raise ValueError(
-                "{!r} is not a valid model size. Select from: {!r}.".format(
-                    self.language, " ".join(SPACY_ANNOTATOR_MODEL_SIZES)
-                )
-            )
         model_type = "web" if self.language in SPACY_ANNOTATOR_WEB_LANGUAGES else "news"
         return "_".join([self.language, "core", model_type, self.spacy_model_size])
 
@@ -508,7 +491,7 @@ class SpacyAnnotator(Annotator):
         """
         filtered_entities = []
         for entity in entities:
-            if entity in SPACY_ENTITIES_THAT_REQUIRE_DUCKLING:
+            if entity not in SPACY_SYS_ENTITIES_NOT_IN_DUCKLING:
                 if (
                     self.language in DUCKLING_TO_SYS_ENTITY_MAPPINGS
                     and entity in DUCKLING_TO_SYS_ENTITY_MAPPINGS[self.language]
@@ -837,17 +820,7 @@ class SpacyAnnotator(Annotator):
 class BootstrapAnnotator(Annotator):
     """Bootstrap Annotator class used to generate annotations based on existing annotations."""
 
-    def __init__(
-        self,
-        app_path,
-        annotation_rules=None,
-        confidence_threshold=0,
-        language=None,
-        locale=None,
-        overwrite=False,
-        unannotate_supported_entities_only=True,
-        unannotation_rules=None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initializes a BootstrapAnnotator.
 
         Args:
@@ -861,16 +834,14 @@ class BootstrapAnnotator(Annotator):
             unannotate_supported_entities_only (bool): Only allow removal of supported entities.
             unannotation_rules (list): List of Annotation rules.
         """
-        super().__init__(
-            app_path,
-            annotation_rules=annotation_rules,
-            language=language,
-            locale=locale,
-            overwrite=overwrite,
-            unannotate_supported_entities_only=unannotate_supported_entities_only,
-            unannotation_rules=unannotation_rules,
-        )
-        self.confidence_threshold = confidence_threshold
+        super().__init__(*args, **kwargs)
+        self.confidence_threshold = kwargs.get("confidence_threshold", 0)
+        if self.confidence_threshold < 0 or self.confidence_threshold > 1:
+            raise ValueError(
+                "{!r} is not a valid confidence threshold. Select a value between 0 and 1.".format(
+                    self.confidence_threshold
+                )
+            )
         logger.info("BootstrapAnnotator is loading %s.", self.app_path)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.nlp.build()
@@ -933,16 +904,7 @@ class BootstrapAnnotator(Annotator):
 class NoTranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(
-        self,
-        app_path,
-        annotation_rules=None,
-        language=None,
-        locale=None,
-        overwrite=False,
-        unannotate_supported_entities_only=True,
-        unannotation_rules=None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initializes a NoTranslationDucklingAnnotator.
 
         Args:
@@ -955,15 +917,7 @@ class NoTranslationDucklingAnnotator(Annotator):
             unannotate_supported_entities_only (bool): Only allow removal of supported entities.
             unannotation_rules (list): List of Annotation rules.
         """
-        super().__init__(
-            app_path,
-            annotation_rules=annotation_rules,
-            language=language,
-            locale=locale,
-            overwrite=overwrite,
-            unannotate_supported_entities_only=unannotate_supported_entities_only,
-            unannotation_rules=unannotation_rules,
-        )
+        super().__init__(*args, **kwargs)
 
     def parse(self, sentence, entity_types=None, **kwargs):
         """
@@ -1068,18 +1022,7 @@ class NoTranslationDucklingAnnotator(Annotator):
 class TranslationDucklingAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(
-        self,
-        app_path,
-        annotation_rules=None,
-        en_annotator=None,
-        translator=None,
-        language=None,
-        locale=None,
-        overwrite=False,
-        unannotate_supported_entities_only=True,
-        unannotation_rules=None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initializes a TranslationDucklingAnnotator.
 
         Args:
@@ -1094,20 +1037,13 @@ class TranslationDucklingAnnotator(Annotator):
             unannotate_supported_entities_only (bool): Only allow removal of supported entities.
             unannotation_rules (list): List of Annotation rules.
         """
-        super().__init__(
-            app_path,
-            annotation_rules=annotation_rules,
-            language=language,
-            locale=locale,
-            overwrite=overwrite,
-            unannotate_supported_entities_only=unannotate_supported_entities_only,
-            unannotation_rules=unannotation_rules,
-        )
+        super().__init__(*args, **kwargs)
         assert (
             self.language != ENGLISH_LANGUAGE_CODE
         ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
+        translator = kwargs.get("translator")
         self.translator = TranslatorFactory().get_translator(translator)
-        self.en_annotator = en_annotator or SpacyAnnotator(
+        self.en_annotator = kwargs.get("en_annotator") or SpacyAnnotator(
             app_path=self.app_path,
             language=ENGLISH_LANGUAGE_CODE,
             locale=ENGLISH_US_LOCALE,
@@ -1177,17 +1113,7 @@ class TranslationDucklingAnnotator(Annotator):
 class MultiLingualAnnotator(Annotator):
     """Custom Annotator class used to generate annotations."""
 
-    def __init__(
-        self,
-        app_path,
-        annotation_rules=None,
-        translator="NoOpTranslator",
-        language=None,
-        locale=None,
-        overwrite=False,
-        unannotate_supported_entities_only=True,
-        unannotation_rules=None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initializes a TranslationDucklingAnnotator.
 
         Args:
@@ -1202,16 +1128,8 @@ class MultiLingualAnnotator(Annotator):
             unannotate_supported_entities_only (bool): Only allow removal of supported entities.
             unannotation_rules (list): List of Annotation rules.
         """
-        super().__init__(
-            app_path,
-            annotation_rules=annotation_rules,
-            language=language,
-            locale=locale,
-            overwrite=overwrite,
-            unannotate_supported_entities_only=unannotate_supported_entities_only,
-            unannotation_rules=unannotation_rules,
-        )
-        self.translator = translator
+        super().__init__(*args, **kwargs)
+        self.translator = kwargs.get("translator", "NoOpTranslator")
         self.en_annotator = SpacyAnnotator(
             app_path=self.app_path,
             language=ENGLISH_LANGUAGE_CODE,

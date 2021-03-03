@@ -22,14 +22,14 @@ def en_mla(kwik_e_mart_app_path):
 @pytest.fixture(scope="module")
 def es_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(
-        app_path=kwik_e_mart_app_path, language="es", translator="NoOpTranslator"
+        app_path=kwik_e_mart_app_path, language="es", locale=None, translator="NoOpTranslator"
     )
 
 
 @pytest.fixture(scope="module")
 def fr_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(
-        app_path=kwik_e_mart_app_path, language="fr", translator="NoOpTranslator"
+        app_path=kwik_e_mart_app_path, language="fr", locale=None, translator="NoOpTranslator"
     )
 
 

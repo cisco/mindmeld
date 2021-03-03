@@ -66,17 +66,6 @@ ANNOTATOR_TO_SYS_ENTITY_MAPPINGS = {
     "facility": "sys_fac",
 }
 
-SPACY_ENTITIES_THAT_REQUIRE_DUCKLING = [
-    "sys_time",
-    "sys_date",
-    "sys_interval",
-    "sys_number",
-    "sys_ordinal",
-    "sys_distance",
-    "sys_quantity",
-    "sys_amount-of-money",
-]
-
 SPACY_SYS_ENTITIES_NOT_IN_DUCKLING = [
     "sys_event",
     "sys_fac",
@@ -84,7 +73,7 @@ SPACY_SYS_ENTITIES_NOT_IN_DUCKLING = [
     "sys_language",
     "sys_law",
     "sys_loc",
-    "sys_nrp",
+    "sys_norp",
     "sys_org",
     "sys_other-quantity",
     "sys_person",
