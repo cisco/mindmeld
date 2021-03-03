@@ -16,7 +16,6 @@ This module contains the entity resolver component of the MindMeld natural langu
 """
 import copy
 import hashlib
-import importlib
 import logging
 import os
 import pickle
@@ -46,43 +45,12 @@ from ._elasticsearch_helpers import (
     load_index,
     resolve_es_config_for_version,
 )
+from ._util import _is_module_available, _get_module_or_attr
 from .. import path
 from ..core import Entity
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
-
-
-def _is_module_available(module_name: str):
-    """
-    checks if a module is available or not (eg. _is_module_available("sentence_transformers"))
-
-    Args:
-        module_name (str): name of the model to check
-
-    Returns:
-        bool, if or not the given module exists
-    """
-    return bool(importlib.util.find_spec(module_name) is not None)
-
-
-def _get_module_or_attr(module_name: str, func_name: str = None):
-    """
-    Loads an attribute from a module or a module itself
-    (check if the module exists before calling this function)
-    """
-    m = importlib.import_module(module_name)
-    if not func_name:
-        return m
-    if func_name not in dir(m):
-        raise ImportError(f"Cannot import {func_name} from {module_name}")
-    return getattr(m, func_name)
-
-
-SBERT_AVAILABLE = _is_module_available("sentence_transformers")
-if SBERT_AVAILABLE:
-    sentence_transformers = _get_module_or_attr("sentence_transformers")
-    torch = _get_module_or_attr("torch")
 
 
 class EntityResolver:
@@ -95,7 +63,7 @@ class EntityResolver:
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
             msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
-        if name == "sbert_cosine_similarity" and not SBERT_AVAILABLE:
+        if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
                 "Must install the extra [bert] to use the built in embbedder for entity "
                 "resolution. See https://www.mindmeld.com/docs/userguide/getting_started.html")
@@ -245,8 +213,9 @@ class EntityResolverBase(ABC):
 
     @staticmethod
     def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False):
-        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
-        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+        """
+        Loads in the mapping.json file and stores the synonym mappings in a item_map
+            and a synonym_map
 
         Args:
             entity_type: The entity type associated with this entity resolver
@@ -332,9 +301,8 @@ class ElasticsearchEntityResolver(EntityResolverBase):
             self._es_config = {"pid": os.getpid(), "client": create_es_client()}
         return self._es_config["client"]
 
-    @classmethod
+    @staticmethod
     def ingest_synonym(
-        cls,
         app_namespace,
         index_name,
         index_type=INDEX_TYPE_SYNONYM,
@@ -446,7 +414,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
 
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '%s'", self._es_index_name)
-        ElasticsearchEntityResolver.ingest_synonym(
+        self.ingest_synonym(
             app_namespace=self._app_namespace,
             index_name=self._es_index_name,
             data=entities,
@@ -734,14 +702,14 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         pass
 
 
-class ExactmatchEntityResolver(EntityResolverBase):
+class ExactMatchEntityResolver(EntityResolverBase):
     """
     Resolver class based on exact matching
     """
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
-        self._exact_match_mapping = None
+        self._entity_mapping = None
 
     def _fit(self, clean):
         """Loads an entity mapping file to resolve entities using exact match.
@@ -756,7 +724,7 @@ class ExactmatchEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {})
                 .get("augment_lower_case", False)
         )
-        self._exact_match_mapping = self.process_entity_map(
+        self._entity_mapping = self.process_entity_map(
             self.type, entity_map, normalizer=self.normalizer,
             augment_lower_case=augment_lower_case
         )
@@ -769,7 +737,7 @@ class ExactmatchEntityResolver(EntityResolverBase):
 
         normed = self.normalizer(entity.text)
         try:
-            cnames = self._exact_match_mapping["synonyms"][normed]
+            cnames = self._entity_mapping["synonyms"][normed]
         except (KeyError, TypeError):
             logger.warning(
                 "Failed to resolve entity %r for type %r", entity.text, entity.type
@@ -785,7 +753,7 @@ class ExactmatchEntityResolver(EntityResolverBase):
 
         values = []
         for cname in cnames:
-            for item in self._exact_match_mapping["items"][cname]:
+            for item in self._entity_mapping["items"][cname]:
                 item_value = copy.copy(item)
                 item_value.pop("whitelist", None)
                 values.append(item_value)
@@ -803,7 +771,7 @@ class ExactmatchEntityResolver(EntityResolverBase):
         self.fit()
 
 
-class SentencebertCossimEntityResolver(EntityResolverBase):
+class SentenceBertCosSimEntityResolver(EntityResolverBase):
     """
     Resolver class for bert models as described here:
     https://github.com/UKPLab/sentence-transformers
@@ -811,7 +779,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
-        self._exact_match_mapping = None
+        self._entity_mapping = None
         self._preloaded_mappings_embs = {}
         self._sbert_model_pretrained_name_or_abspath = (
             self.er_config.get("model_settings", {})
@@ -863,7 +831,6 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {})
                 .get("normalize_token_embs", False)
         )
-        # show_progress = False  # len(phrases) > 1
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
@@ -915,8 +882,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         """
 
         if concat_last_n_layers != 1:
-            assert 1 <= concat_last_n_layers <= len(
-                self.transformer_model.auto_model.transformer.layer)
+            assert 1 <= concat_last_n_layers <= self._num_layers(self.transformer_model.auto_model)
 
         self.transformer_model.eval()
         if show_progress_bar is None:
@@ -934,7 +900,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             input_was_string = True
 
         if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            device = "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
 
         self.transformer_model.to(device)
         self.pooling_model.to(device)
@@ -950,16 +916,18 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             features = _get_module_or_attr("sentence_transformers.util").batch_to_device(
                 features, device)
 
-            with torch.no_grad():
+            with _get_module_or_attr("torch", "no_grad")():
                 out_features_transformer = self.transformer_model.forward(features)
                 token_embeddings = out_features_transformer["token_embeddings"]
                 if concat_last_n_layers > 1:
                     _all_layer_embeddings = out_features_transformer["all_layer_embeddings"]
-                    token_embeddings = torch.cat(_all_layer_embeddings[-concat_last_n_layers:],
-                                                 dim=-1)
+                    token_embeddings = _get_module_or_attr("torch", "cat")(
+                        _all_layer_embeddings[-concat_last_n_layers:],
+                        dim=-1)
                 if normalize_token_embs:
-                    _norm_token_embeddings = torch.linalg.norm(token_embeddings, dim=2,
-                                                               keepdim=True)
+                    _norm_token_embeddings = _get_module_or_attr("torch.linalg", "norm")(
+                        token_embeddings, dim=2,
+                        keepdim=True)
                     token_embeddings = token_embeddings.div(_norm_token_embeddings)
                 out_features_transformer.update({"token_embeddings": token_embeddings})
                 out_features = self.pooling_model.forward(out_features_transformer)
@@ -983,7 +951,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
 
         if convert_to_tensor:
-            all_embeddings = torch.stack(all_embeddings)
+            all_embeddings = _get_module_or_attr("torch", "stack")(all_embeddings)
         elif convert_to_numpy:
             all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
 
@@ -991,6 +959,25 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             all_embeddings = all_embeddings[0]
 
         return all_embeddings
+
+    @staticmethod
+    def _num_layers(model):
+        """
+        Finds the number of layers in a given transformers model
+        """
+
+        if hasattr(model, "n_layers"):  # eg. xlm
+            num_layers = model.n_layers
+        elif hasattr(model, "layer"):  # eg. xlnet
+            num_layers = len(model.layer)
+        elif hasattr(model, "encoder"):  # eg. bert
+            num_layers = len(model.encoder.layer)
+        elif hasattr(model, "transformer"):  # eg. sentence_transformers models
+            num_layers = len(model.transformer.layer)
+        else:
+            raise ValueError(f"Not supported model {model} to obtain number of layers")
+
+        return num_layers
 
     @staticmethod
     def _text_length(text):
@@ -1068,7 +1055,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
-                "huggingface; Checking - %s - model directly in huggingface models",
+                "huggingface; Checking `%s` model directly in huggingface models",
                 self._sbert_model_pretrained_name_or_abspath)
             try:
                 self.transformer_model = _get_module_or_attr(
@@ -1085,8 +1072,8 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
                 self._sbert_model = _get_module_or_attr("sentence_transformers",
                                                         "SentenceTransformer")(modules=modules)
             except OSError:
-                logger.error("Could not initialize the model name through huggingface models; Not r"
-                             "esorting to model names in sbert.net due to limited exposed features")
+                logger.error("Could not initialize the model name through huggingface models. "
+                             "Please check the model name and retry.")
 
         # load mappings.json data
         entity_map = self.entity_map
@@ -1094,7 +1081,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {})
                 .get("augment_lower_case", False)
         )
-        self._exact_match_mapping = self.process_entity_map(
+        self._entity_mapping = self.process_entity_map(
             self.type, entity_map, augment_lower_case=augment_lower_case
         )
 
@@ -1106,7 +1093,7 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             self._load()
             self.dirty = False
         else:
-            synonyms = [*self._exact_match_mapping["synonyms"]]
+            synonyms = [*self._entity_mapping["synonyms"]]
             synonyms_encodings = self._encode(synonyms)
             self._preloaded_mappings_embs = dict(zip(synonyms, synonyms_encodings))
             self.dirty = True
@@ -1135,9 +1122,9 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
             sorted_items = self._compute_cosine_similarity(syn_embs, top_entity_emb)
             values = []
             for synonym, score in sorted_items:
-                cnames = self._exact_match_mapping["synonyms"][synonym]
+                cnames = self._entity_mapping["synonyms"][synonym]
                 for cname in cnames:
-                    for item in self._exact_match_mapping["items"][cname]:
+                    for item in self._entity_mapping["items"][cname]:
                         item_value = copy.copy(item)
                         item_value.pop("whitelist", None)
                         item_value.update({"score": score})
@@ -1185,8 +1172,8 @@ class SentencebertCossimEntityResolver(EntityResolverBase):
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
-    "exact_match": ExactmatchEntityResolver,
+    "exact_match": ExactMatchEntityResolver,
     "text_relevance": ElasticsearchEntityResolver,
-    "sbert_cosine_similarity": SentencebertCossimEntityResolver
+    "sbert_cosine_similarity": SentenceBertCosSimEntityResolver
 }
 ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
