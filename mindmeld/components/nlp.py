@@ -1461,9 +1461,8 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(
             self.resource_loader, domain, intent, entity_type
         )
-        self.entity_resolver = EntityResolver(
-            app_path, self.resource_loader, entity_type
-        )
+        self.entity_resolver = EntityResolver().get_resolver(app_path, self.resource_loader,
+                                                             entity_type)
 
         self.progress_bar = progress_bar
         if isinstance(self.progress_bar, tqdm):

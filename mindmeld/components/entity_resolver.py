@@ -16,6 +16,7 @@ This module contains the entity resolver component of the MindMeld natural langu
 """
 import copy
 import hashlib
+import json
 import logging
 import os
 import pickle
@@ -54,12 +55,9 @@ logger = logging.getLogger(__name__)
 
 
 class EntityResolver:
-    """An entity resolver is used to resolve entities in a given query to their canonical values
-    (usually linked to specific entries in a knowledge base).
-    """
 
-    @classmethod
-    def validate_resolver_name(cls, name):
+    @staticmethod
+    def validate_resolver_name(name):
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
             msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
@@ -68,9 +66,10 @@ class EntityResolver:
                 "Must install the extra [bert] to use the built in embbedder for entity "
                 "resolution. See https://www.mindmeld.com/docs/userguide/getting_started.html")
 
-    def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
-        """Identifies appropriate entity resolver based on input config and
-        initializes it.
+    def get_resolver(self, app_path, resource_loader, entity_type, **kwargs):
+        """
+        Identifies appropriate entity resolver based on input config and
+            returns it.
 
         Args:
             app_path (str): The application path.
@@ -84,20 +83,11 @@ class EntityResolver:
             kwargs.pop("er_config", None) or
             get_classifier_config("entity_resolution", app_path=app_path)
         )
-        name = er_config.get("model_type", None)
-        cls.validate_resolver_name(name)
-        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(name)(
+        resolver_name = er_config.get("model_type", None)
+        self.validate_resolver_name(resolver_name)
+        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_name)(
             app_path, resource_loader, entity_type, er_config, **kwargs
         )
-
-    def fit(self):
-        raise NotImplementedError
-
-    def load(self):
-        raise NotImplementedError
-
-    def predict(self, entity):
-        raise NotImplementedError
 
 
 class EntityResolverBase(ABC):
@@ -105,21 +95,17 @@ class EntityResolverBase(ABC):
     Base class for Entity Resolvers
     """
 
-    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
+    def __init__(self, app_path, resource_loader, entity_type, er_config):
         """Initializes an entity resolver"""
         self.app_path = app_path
         self.type = entity_type
         self.er_config = er_config
-        self.kwargs = kwargs
 
         self._app_namespace = get_app_namespace(self.app_path)
         self._is_system_entity = Entity.is_system_entity(self.type)
         self.name = self.er_config.get("model_type")
         self.entity_map = resource_loader.get_entity_map(self.type)
         self.normalizer = resource_loader.query_factory.normalize
-
-        if self._use_double_metaphone:
-            self._enable_double_metaphone()
 
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
@@ -128,88 +114,18 @@ class EntityResolverBase(ABC):
     def _use_double_metaphone(self):
         return "double_metaphone" in self.er_config.get("phonetic_match_types", [])
 
-    def _enable_double_metaphone(self):
-        """
-        By default, resolvers are assumed to not support double metaphone usage
-        If supported, override this method definition in the derived class
-        (eg. see ElasticsearchEntityResolver)
-        """
-        logger.warning(
-            "%r not configured to use double_metaphone",
-            self.name
-        )
-        raise NotImplementedError
+    def _cache_path(self, tail_name="", hash_json=None):
 
-    def cache_path(self, tail_name=""):
-        name = f"{self.name}_{tail_name}" if tail_name else self.name
+        entity_type = self.type
+        if hash_json:
+            hashid = hashlib.sha1(json.dumps(hash_json, sort_keys=True).encode()).hexdigest()
+            entity_type = f"{hashid}_{entity_type}"
+
+        model_type = f"{self.name}_{tail_name}" if tail_name else self.name
+
         return path.get_entity_resolver_cache_file_path(
-            self.app_path, self.type, name
+            self.app_path, entity_type, model_type
         )
-
-    @abstractmethod
-    def _fit(self, clean):
-        raise NotImplementedError
-
-    def fit(self, clean=False):
-        """Fits the resolver model, if required
-
-        Args:
-            clean (bool, optional): If ``True``, deletes and recreates the index from scratch
-                                    with synonyms in the mapping.json.
-        """
-
-        if self.ready:
-            return
-
-        if self._is_system_entity or not self.entity_map.get("entities", []):
-            return
-
-        self._fit(clean)
-        self.ready = True
-
-    @abstractmethod
-    def _predict(self, nbest_entities, top_n):
-        raise NotImplementedError
-
-    def predict(self, entity, top_n: int = 20):
-        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
-        trained entity resolution model.
-
-        Args:
-            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
-                objects.
-            top_n (int): maximum number of results to populate
-
-        Returns:
-            (list): The top 20 resolved values for the provided entity.
-        """
-        if isinstance(entity, (list, tuple)):
-            top_entity = entity[0]
-            nbest_entities = tuple(entity)
-        else:
-            top_entity = entity
-            nbest_entities = tuple([entity])
-
-        if self._is_system_entity:
-            # system entities are already resolved
-            return [top_entity.value]
-
-        if not self.entity_map.get("entities", []):
-            return []
-
-        return self._predict(nbest_entities, top_n)
-
-    @abstractmethod
-    def _load(self):
-        raise NotImplementedError
-
-    def load(self):
-        """If available, loads embeddings of synonyms that are previously dumped
-        """
-        self._load()
-
-    def dump(self):
-        raise NotImplementedError
 
     @staticmethod
     def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False):
@@ -268,6 +184,82 @@ class EntityResolverBase(ABC):
 
         return {"items": item_map, "synonyms": syn_map}
 
+    @abstractmethod
+    def _fit(self, clean):
+        raise NotImplementedError
+
+    def fit(self, clean=False):
+        """Fits the resolver model, if required
+
+        Args:
+            clean (bool, optional): If ``True``, deletes and recreates the index from scratch
+                                    with synonyms in the mapping.json.
+        """
+
+        if self.ready:
+            return
+
+        if self._is_system_entity or not self.entity_map.get("entities", []):
+            return
+
+        self._fit(clean)
+        self.ready = True
+
+    @abstractmethod
+    def _predict(self, nbest_entities):
+        raise NotImplementedError
+
+    def predict(self, entity, top_n):
+        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
+        trained entity resolution model.
+
+        Args:
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
+            top_n (int): maximum number of results to populate
+
+        Returns:
+            (list): The top 20 resolved values for the provided entity.
+        """
+        if isinstance(entity, (list, tuple)):
+            top_entity = entity[0]
+            nbest_entities = tuple(entity)
+        else:
+            top_entity = entity
+            nbest_entities = tuple([entity])
+
+        if self._is_system_entity:
+            # system entities are already resolved
+            return [top_entity.value]
+
+        if not self.entity_map.get("entities", []):
+            return []
+
+        results = self._predict(nbest_entities)
+
+        if results:
+            if len(results) < top_n:
+                logger.info(
+                    "Retrieved only %d entity resolutions instead of asked number %d for "
+                    "entity %r of type %r",
+                    len(results), top_n, nbest_entities[0].text, self.type,
+                )
+            return results[:top_n]
+
+        return results
+
+    @abstractmethod
+    def _load(self):
+        raise NotImplementedError
+
+    def load(self):
+        """If available, loads embeddings of synonyms that are previously dumped
+        """
+        self._load()
+
+    def dump(self):
+        raise NotImplementedError
+
     def __repr__(self):
         msg = "<{} {!r} ready: {!r}, dirty: {!r}>"
         return msg.format(self.__class__.__name__, self.name, self.ready, self.dirty)
@@ -283,12 +275,9 @@ class ElasticsearchEntityResolver(EntityResolverBase):
     """The prefix of the ES index."""
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
-        self._es_host = self.kwargs.get("es_host", None)
-        self._es_config = {"client": self.kwargs.get("es_client", None), "pid": os.getpid()}
-
-    def _enable_double_metaphone(self):
-        pass
+        super().__init__(app_path, resource_loader, entity_type, er_config)
+        self._es_host = kwargs.get("es_host", None)
+        self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
 
     @property
     def _es_index_name(self):
@@ -465,14 +454,13 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 use_double_metaphone=self._use_double_metaphone,
             )
 
-    def _predict(self, nbest_entities, top_n):
+    def _predict(self, nbest_entities):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
         Args:
             nbest_entities (tuple): List of one entity object found in an input query, or a list  \
                 of n-best entity objects.
-            top_n (int): maximum number of results to populate
 
         Returns:
             (list): The top 20 resolved values for the provided entity.
@@ -664,14 +652,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
 
                 results.append(result)
 
-            if len(results) < top_n:
-                logger.info(
-                    "Retrieved only %d entity resolutions instead of asked number %d for "
-                    "entity %r for type %r",
-                    len(results), top_n, top_entity.text, top_entity.type,
-                )
-
-            return results[:top_n]
+            return results
 
     def _load(self):
         """Loads the trained entity resolution model from disk."""
@@ -707,8 +688,8 @@ class ExactMatchEntityResolver(EntityResolverBase):
     Resolver class based on exact matching
     """
 
-    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **_kwargs):
+        super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
 
     def _fit(self, clean):
@@ -729,7 +710,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
             augment_lower_case=augment_lower_case
         )
 
-    def _predict(self, nbest_entities, top_n):
+    def _predict(self, nbest_entities):
         """Looks for exact name in the synonyms data
         """
 
@@ -758,14 +739,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
                 item_value.pop("whitelist", None)
                 values.append(item_value)
 
-        if len(values) < top_n:
-            logger.info(
-                "Retrieved only %d entity resolutions instead of asked number %d for "
-                "entity %r for type %r",
-                len(values), top_n, entity.text, entity.type,
-            )
-
-        return values[:top_n]
+        return values
 
     def _load(self):
         self.fit()
@@ -777,15 +751,17 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
-        super().__init__(app_path, resource_loader, entity_type, er_config, **kwargs)
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **_kwargs):
+        super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
-        self._preloaded_mappings_embs = {}
-        self._sbert_model_pretrained_name_or_abspath = (
+        self._cached_embs = {}
+        self._model_pretrained_name_or_abspath = (
             self.er_config.get("model_settings", {})
                 .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
         )
-        self._sbert_model = None
+        self.quantize_model = (
+            self.er_config.get("model_settings", {}).get("quantize_model", False)
+        )
 
         # TODO: _lazy_resolution is set to a default value, can be modified to be an input
         self._lazy_resolution = False
@@ -796,7 +772,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
 
     @property
     def pretrained_name(self):
-        return os.path.split(self._sbert_model_pretrained_name_or_abspath)[-1]
+        return os.path.split(self._model_pretrained_name_or_abspath)[-1]
 
     def _encode(self, phrases):
         """Encodes input text(s) into embeddings, one vector for each phrase
@@ -834,16 +810,11 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
-        if concat_last_n_layers != 1 or normalize_token_embs:
-            results = self._encode_custom(phrases, batch_size=batch_size,
-                                          convert_to_numpy=convert_to_numpy,
-                                          show_progress_bar=show_progress,
-                                          concat_last_n_layers=concat_last_n_layers,
-                                          normalize_token_embs=normalize_token_embs)
-        else:
-            results = self._sbert_model.encode(phrases, batch_size=batch_size,
-                                               convert_to_numpy=convert_to_numpy,
-                                               show_progress_bar=show_progress)
+        results = self._encode_custom(phrases, batch_size=batch_size,
+                                      convert_to_numpy=convert_to_numpy,
+                                      show_progress_bar=show_progress,
+                                      concat_last_n_layers=concat_last_n_layers,
+                                      normalize_token_embs=normalize_token_embs)
 
         return results
 
@@ -1035,12 +1006,12 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
 
         # load model
         try:
-            _sbert_model_pretrained_name_or_abspath = \
-                "sentence-transformers/" + self._sbert_model_pretrained_name_or_abspath
+            _model_pretrained_name_or_abspath = \
+                "sentence-transformers/" + self._model_pretrained_name_or_abspath
 
             self.transformer_model = _get_module_or_attr(
                 "sentence_transformers.models").Transformer(
-                _sbert_model_pretrained_name_or_abspath,
+                _model_pretrained_name_or_abspath,
                 model_args={"output_hidden_states": True})
             self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
                 self.transformer_model.get_word_embedding_dimension(),
@@ -1048,19 +1019,15 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                 pooling_mode_max_tokens=False,
                 pooling_mode_mean_tokens=_output_type == "mean",
                 pooling_mode_mean_sqrt_len_tokens=False)
-            modules = [self.transformer_model, self.pooling_model]
-
-            self._sbert_model = _get_module_or_attr("sentence_transformers", "SentenceTransformer")(
-                modules=modules)
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
                 "huggingface; Checking `%s` model directly in huggingface models",
-                self._sbert_model_pretrained_name_or_abspath)
+                self._model_pretrained_name_or_abspath)
             try:
                 self.transformer_model = _get_module_or_attr(
                     "sentence_transformers.models").Transformer(
-                    self._sbert_model_pretrained_name_or_abspath,
+                    self._model_pretrained_name_or_abspath,
                     model_args={"output_hidden_states": True})
                 self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
                     self.transformer_model.get_word_embedding_dimension(),
@@ -1068,12 +1035,23 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                     pooling_mode_max_tokens=False,
                     pooling_mode_mean_tokens=_output_type == "mean",
                     pooling_mode_mean_sqrt_len_tokens=False)
-                modules = [self.transformer_model, self.pooling_model]
-                self._sbert_model = _get_module_or_attr("sentence_transformers",
-                                                        "SentenceTransformer")(modules=modules)
             except OSError:
                 logger.error("Could not initialize the model name through huggingface models. "
                              "Please check the model name and retry.")
+
+        # quantize_model
+        if self.quantize_model:
+            if not _is_module_available("torch"):
+                raise ImportError("`torch` library required to quantize model")
+
+            torch_qint8 = _get_module_or_attr("torch", "qint8")
+            torch_nn_linear = _get_module_or_attr("torch.nn", "Linear")
+            self.transformer_model = _get_module_or_attr("torch.quantization", "quantize_dynamic")(
+                self.transformer_model, {torch_nn_linear}, dtype=torch_qint8
+            )
+            self.pooling_model = _get_module_or_attr("torch.quantization", "quantize_dynamic")(
+                self.pooling_model, {torch_nn_linear}, dtype=torch_qint8
+            )
 
         # load mappings.json data
         entity_map = self.entity_map
@@ -1086,34 +1064,33 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         )
 
         # load embeddings for this data
-        cache_path = self.cache_path(self.pretrained_name)
-        if clean and os.path.exists(cache_path):
-            os.remove(cache_path)
-        if not self._lazy_resolution and os.path.exists(cache_path):
+        _cache_path = self._cache_path(hash_json=self.er_config)
+        if clean and os.path.exists(_cache_path):
+            os.remove(_cache_path)
+        if not self._lazy_resolution and os.path.exists(_cache_path):
             self._load()
             self.dirty = False
         else:
             synonyms = [*self._entity_mapping["synonyms"]]
             synonyms_encodings = self._encode(synonyms)
-            self._preloaded_mappings_embs = dict(zip(synonyms, synonyms_encodings))
+            self._cached_embs = dict(zip(synonyms, synonyms_encodings))
             self.dirty = True
 
         if self.dirty and not self._lazy_resolution:
             self.dump()
 
-    def _predict(self, nbest_entities, top_n):
+    def _predict(self, nbest_entities):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
 
         Args:
             nbest_entities (tuple): List of one entity object found in an input query, or a list  \
                 of n-best entity objects.
-            top_n (int): maximum number of results to populate
 
         Returns:
             (list): The top 20 resolved values for the provided entity.
         """
 
-        syn_embs = self._preloaded_mappings_embs
+        syn_embs = self._cached_embs
         # TODO: Use all provided entities like elastic search
         top_entity = nbest_entities[0]  # top_entity
         top_entity_emb = self._encode(top_entity.text)[0]
@@ -1143,32 +1120,25 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             )
             return None
 
-        if len(values) < top_n:
-            logger.info(
-                "Retrieved only %d entity resolutions instead of asked number %d for "
-                "entity %r for type %r",
-                len(values), top_n, top_entity.text, top_entity.type,
-            )
-
-        return values[:top_n]
+        return values
 
     def _load(self):
         """Loads embeddings for all synonyms, previously dumped into a .pkl file
         """
-        cache_path = self.cache_path(self.pretrained_name)
-        with open(cache_path, "rb") as fp:
-            self._preloaded_mappings_embs = pickle.load(fp)
+        _cache_path = self._cache_path(hash_json=self.er_config)
+        with open(_cache_path, "rb") as fp:
+            self._cached_embs = pickle.load(fp)
 
     def dump(self):
         """Dumps embeddings of synonyms into a .pkl file when the .fit() method is called
         """
-        cache_path = self.cache_path(self.pretrained_name)
+        _cache_path = self._cache_path(hash_json=self.er_config)
         if self.dirty:
-            folder = os.path.split(cache_path)[0]
+            folder = os.path.split(_cache_path)[0]
             if folder and not os.path.exists(folder):
                 os.makedirs(folder)
-            with open(cache_path, "wb") as fp:
-                pickle.dump(self._preloaded_mappings_embs, fp)
+            with open(_cache_path, "wb") as fp:
+                pickle.dump(self._cached_embs, fp)
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
