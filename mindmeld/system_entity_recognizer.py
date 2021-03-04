@@ -269,7 +269,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
         """
         try:
             response = requests.request(
-                "POST", self.url, data=data, timeout=float(2) #SYS_ENTITY_REQUEST_TIMEOUT
+                "POST", self.url, data=data, timeout=float(3)  # SYS_ENTITY_REQUEST_TIMEOUT
             )
 
             if response.status_code == requests.codes["ok"]:
