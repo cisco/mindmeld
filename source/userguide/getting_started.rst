@@ -487,10 +487,13 @@ Troubleshooting
 |               |                                             | increase memory to 4GB from                   |
 |               |                                             | *Preferences | Advanced*.                     |
 +---------------+---------------------------------------------+-----------------------------------------------+
-| Elasticsearch | ``KnowledgeBaseConnectionError``            | If the error is due to maximum                |
+| Elasticsearch | ``KnowledgeBaseError``                      | If the error is due to maximum                |
 |               |                                             | shards open, then run                         |
-|               |                                             | ``curl -X DELETE 'http://localhost:9200/_all'``|
-|               |                                             | to clear all shards                           |
+|               |                                             | `curl -X DELETE 'http://localhost:9200/_all'` |
+|               |                                             | to delete all existing shards. Alternatively, |
+|               |                                             | to delete a templated set of indices run      |
+|               |                                             | `curl -XDELETE localhost:9200/.xxx*` wherein  |
+|               |                                             | `xxx` could be the matching template name    |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Numerical     | ``OS is incompatible with duckling binary`` | Run the numerical parser via                  |
 | Parser        |                                             | Docker.                                       |
