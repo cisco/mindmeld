@@ -114,7 +114,7 @@ class EntityResolverBase(ABC):
     def _use_double_metaphone(self):
         return "double_metaphone" in self.er_config.get("phonetic_match_types", [])
 
-    def _cache_path(self, tail_name="", hash_json=None):
+    def cache_path(self, tail_name="", hash_json=None):
 
         entity_type = self.type
         if hash_json:
@@ -209,7 +209,7 @@ class EntityResolverBase(ABC):
     def _predict(self, nbest_entities):
         raise NotImplementedError
 
-    def predict(self, entity, top_n):
+    def predict(self, entity, top_n: int = 20):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
@@ -256,9 +256,6 @@ class EntityResolverBase(ABC):
         """If available, loads embeddings of synonyms that are previously dumped
         """
         self._load()
-
-    def dump(self):
-        raise NotImplementedError
 
     def __repr__(self):
         msg = "<{} {!r} ready: {!r}, dirty: {!r}>"
@@ -679,9 +676,6 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         except ElasticsearchException as e:
             raise EntityResolverError from e
 
-    def dump(self):
-        pass
-
 
 class ExactMatchEntityResolver(EntityResolverBase):
     """
@@ -763,12 +757,9 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {}).get("quantize_model", False)
         )
 
-        # TODO: _lazy_resolution is set to a default value, can be modified to be an input
-        self._lazy_resolution = False
-        if not self._lazy_resolution:
-            msg = "sentence-bert embeddings are cached for entity_type: `%s` " \
-                  "for fast entity resolution; can possibly consume more disk space"
-            logger.info(msg, self.type)
+        msg = "bert embeddings are cached for entity_type: `%s` " \
+              "for quicker entity resolution; consumes some disk space"
+        logger.info(msg, self.type)
 
     @property
     def pretrained_name(self):
@@ -999,15 +990,19 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             clean (bool): If ``True``, deletes existing dump of synonym embeddings file
         """
 
+        cache_path = self.cache_path(hash_json=self.er_config)
+
+        if clean and os.path.exists(cache_path):
+            os.remove(cache_path)
+
+        # load model
         _output_type = (
             self.er_config.get("model_settings", {})
                 .get("bert_output_type", "mean")
         )
-
-        # load model
         try:
             _model_pretrained_name_or_abspath = \
-                "sentence-transformers/" + self._model_pretrained_name_or_abspath
+                f"sentence-transformers/{self._model_pretrained_name_or_abspath}"
 
             self.transformer_model = _get_module_or_attr(
                 "sentence_transformers.models").Transformer(
@@ -1038,11 +1033,12 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             except OSError:
                 logger.error("Could not initialize the model name through huggingface models. "
                              "Please check the model name and retry.")
+                raise ValueError from None
 
         # quantize_model
         if self.quantize_model:
             if not _is_module_available("torch"):
-                raise ImportError("`torch` library required to quantize model")
+                raise ImportError("`torch` library required to quantize model") from None
 
             torch_qint8 = _get_module_or_attr("torch", "qint8")
             torch_nn_linear = _get_module_or_attr("torch.nn", "Linear")
@@ -1063,21 +1059,22 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             self.type, entity_map, augment_lower_case=augment_lower_case
         )
 
-        # load embeddings for this data
-        _cache_path = self._cache_path(hash_json=self.er_config)
-        if clean and os.path.exists(_cache_path):
-            os.remove(_cache_path)
-        if not self._lazy_resolution and os.path.exists(_cache_path):
-            self._load()
-            self.dirty = False
-        else:
-            synonyms = [*self._entity_mapping["synonyms"]]
-            synonyms_encodings = self._encode(synonyms)
-            self._cached_embs = dict(zip(synonyms, synonyms_encodings))
-            self.dirty = True
+        # load embeddings cache if exists
+        loaded_cache_embs = {}
+        if os.path.exists(cache_path):
+            loaded_cache_embs = self._load_embeddings(cache_path)
 
-        if self.dirty and not self._lazy_resolution:
-            self.dump()
+        # identify what synonyms do not have embeddings and encode only them
+        synonyms = [*self._entity_mapping["synonyms"]]
+        synonyms_to_encode = [syn for syn in synonyms if syn not in loaded_cache_embs]
+        synonyms_encodings = self._encode(synonyms_to_encode)
+        loaded_cache_embs.update(dict(zip(synonyms_to_encode, synonyms_encodings)))
+        self._cached_embs = loaded_cache_embs
+
+        # dump embeddings if required
+        if synonyms_to_encode or not os.path.exists(cache_path):
+            self._dump_embeddings(cache_path, self._cached_embs)
+        self.dirty = False  # never True with the current logic
 
     def _predict(self, nbest_entities):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
@@ -1091,9 +1088,14 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         """
 
         syn_embs = self._cached_embs
-        # TODO: Use all provided entities like elastic search
+
+        # encode input entity
+        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
-        top_entity_emb = self._encode(top_entity.text)[0]
+        if top_entity.text in self._cached_embs:
+            top_entity_emb = self._cached_embs[top_entity.text]
+        else:
+            top_entity_emb = self._encode(top_entity.text)[0]
 
         try:
             sorted_items = self._compute_cosine_similarity(syn_embs, top_entity_emb)
@@ -1123,22 +1125,25 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         return values
 
     def _load(self):
+        self.fit()
+
+    @staticmethod
+    def _load_embeddings(cache_path):
         """Loads embeddings for all synonyms, previously dumped into a .pkl file
         """
-        _cache_path = self._cache_path(hash_json=self.er_config)
-        with open(_cache_path, "rb") as fp:
-            self._cached_embs = pickle.load(fp)
+        with open(cache_path, "rb") as fp:
+            _cached_embs = pickle.load(fp)
+        return _cached_embs
 
-    def dump(self):
+    @staticmethod
+    def _dump_embeddings(cache_path, data):
         """Dumps embeddings of synonyms into a .pkl file when the .fit() method is called
         """
-        _cache_path = self._cache_path(hash_json=self.er_config)
-        if self.dirty:
-            folder = os.path.split(_cache_path)[0]
-            if folder and not os.path.exists(folder):
-                os.makedirs(folder)
-            with open(_cache_path, "wb") as fp:
-                pickle.dump(self._cached_embs, fp)
+        folder = os.path.split(cache_path)[0]
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder)
+        with open(cache_path, "wb") as fp:
+            pickle.dump(data, fp)
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {

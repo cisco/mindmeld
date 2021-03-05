@@ -33,7 +33,7 @@ def resolver_exact_match(resource_loader, es_client):
     er_config = {
         'model_type': 'exact_match'
     }
-    resolver = EntityResolver(
+    resolver = EntityResolver().get_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
     )
@@ -50,7 +50,7 @@ def resolver_elastic_search(resource_loader, es_client):
             # "double_metaphone"
         ],
     }
-    resolver = EntityResolver(
+    resolver = EntityResolver().get_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
     )
@@ -64,10 +64,16 @@ def resolver_sbert(resource_loader):
     er_config = {
         'model_type': 'sbert_cosine_similarity',
         'model_settings': {
+            "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
             "batch_size": 16,
+            "concat_last_n_layers": 4,
+            "normalize_token_embs": True,
+            "bert_output_type": "mean",
+            "augment_lower_case": False,
+            "quantize_model": True,
         }
     }
-    resolver = EntityResolver(
+    resolver = EntityResolver().get_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE, er_config=er_config
     )
     resolver.fit()
