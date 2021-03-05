@@ -403,7 +403,7 @@ The :class:`MultiLingualAnnotator` can leverage the Google Translation API to be
 
 .. code-block:: console
 
-	export GOOGLE_APPLICATION_CREDENTIALS="/Users/joesmith2/Documents/google_application_credentials.json"
+	export GOOGLE_APPLICATION_CREDENTIALS="/<YOUR_PATH>/google_application_credentials.json"
 
 Install the extras requirements for annotators.
 

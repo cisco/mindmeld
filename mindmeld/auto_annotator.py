@@ -23,7 +23,7 @@ from .components._config import (
     ENGLISH_LANGUAGE_CODE,
     ENGLISH_US_LOCALE,
 )
-from .components.translators import TranslatorFactory
+from .components.translators import NoOpTranslator, TranslatorFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
     duckling_item_to_entity_dict,
@@ -58,6 +58,7 @@ class Annotator(ABC):
     """
     Abstract Annotator class that can be used to build a custom Annotation class.
     """
+
     # pylint: disable=W0613
     def __init__(
         self,
@@ -219,13 +220,11 @@ class Annotator(ABC):
                 entity_types = file_entities_map[path]
                 if action == AnnotatorAction.ANNOTATE:
                     self._annotate_query(
-                        processed_query=processed_query,
-                        entity_types=entity_types,
+                        processed_query=processed_query, entity_types=entity_types,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
-                        processed_query=processed_query,
-                        remove_entities=entity_types,
+                        processed_query=processed_query, remove_entities=entity_types,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -273,8 +272,7 @@ class Annotator(ABC):
             processed_query=processed_query, entity_types=entity_types
         )
         final_entities = self._resolve_conflicts(
-            current_entities=current_entities,
-            annotated_entities=annotated_entities,
+            current_entities=current_entities, annotated_entities=annotated_entities,
         )
         processed_query.entities = tuple(final_entities)
 
@@ -474,7 +472,7 @@ class SpacyAnnotator(Annotator):
             elif entity in ANNOTATOR_TO_SYS_ENTITY_MAPPINGS:
                 supported_entities.add(ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity])
             else:
-                supported_entities.add("sys_" + entity)
+                supported_entities.add(f"sys_{entity}")
         if "sys_weight" in supported_entities:
             supported_entities.update(["sys_distance", "sys_other-quantity"])
         supported_entities = self._remove_unresolvable_entities(supported_entities)
@@ -806,15 +804,26 @@ class SpacyAnnotator(Annotator):
         """
         entity["dim"] = ANNOTATOR_TO_SYS_ENTITY_MAPPINGS[entity["dim"]]
 
-        if (
-            self.language == ENGLISH_LANGUAGE_CODE
-            and len(entity["body"]) >= 2
-            and entity["body"][-2:] == "'s"
-        ):
+        if self._is_plural_entity(entity):
             entity["value"] = {"value": entity["body"][:-2]}
             entity["body"] = entity["body"][:-2]
             entity["end"] -= 2
         return entity
+
+    def _is_plural_entity(self, entity):
+        """Check if an entity is plural.
+
+        Args:
+            entity (dict): A dictionary representing an entity.
+
+        Returns:
+            is_plural (bool): Whether the entity is plural.
+        """
+        return (
+            self.language == ENGLISH_LANGUAGE_CODE
+            and len(entity["body"]) >= 2
+            and entity["body"][-2:] == "'s"
+        )
 
 
 class BootstrapAnnotator(Annotator):
@@ -902,7 +911,12 @@ class BootstrapAnnotator(Annotator):
 
 
 class NoTranslationDucklingAnnotator(Annotator):
-    """Custom Annotator class used to generate annotations."""
+    """The NoTranslationDucklingAnnotator detects entities by filtering non-English candidates
+    from Duckling to a set containing the largest non-overlapping spans.
+
+    Unlike the TranslationDucklingAnnotator, this annotator does not use a translation service.
+    Unlike the MultiLingualAnnotator, this annotator does not use non-English Spacy NER models.
+    """
 
     def __init__(self, *args, **kwargs):
         """Initializes a NoTranslationDucklingAnnotator.
@@ -933,19 +947,15 @@ class NoTranslationDucklingAnnotator(Annotator):
             language=self.language,
             locale=self.locale,
         )
-        filtered_candidates = (
-            NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
-                duckling_candidates
-            )
+        filtered_candidates = NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
+            duckling_candidates
         )
         spans = [
             Span(candidate["start"], candidate["end"] - 1)
             for candidate in filtered_candidates
         ]
-        final_spans = (
-            NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
-                spans
-            )
+        final_spans = NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
+            spans
         )
         final_candidates = []
         for span in final_spans:
@@ -997,10 +1007,8 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = (
-            NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
-                candidates
-            )
+        filtered_candidates = NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
+            candidates
         )
         return filtered_candidates
 
@@ -1020,7 +1028,17 @@ class NoTranslationDucklingAnnotator(Annotator):
 
 
 class TranslationDucklingAnnotator(Annotator):
-    """Custom Annotator class used to generate annotations."""
+    """ The TranslationDucklingAnnotator detects entities in non-English sentences using
+    a translation service and Duckling by following these steps:
+        1. The non-English sentence is translated to English.
+        2. Spacy detects entities in the translated English sentence.
+        3. Duckling detects non-English entities in the non-English sentence.
+        4. A heuristic in parse() is used to match and filer the non-English entities
+        against the English entities.
+        5. The final set of filtered non-English entities are returned.
+    Unlike the NoTranslationDucklingAnnotator, this annotator uses a translation service.
+    Unlike the MultiLingualAnnotator, this annotator does not use non-English Spacy NER models.
+    """
 
     def __init__(self, *args, **kwargs):
         """Initializes a TranslationDucklingAnnotator.
@@ -1042,6 +1060,13 @@ class TranslationDucklingAnnotator(Annotator):
             self.language != ENGLISH_LANGUAGE_CODE
         ), "The 'language' for a TranslationDucklingAnnotator cannot be set to English."
         translator = kwargs.get("translator")
+        if not translator:
+            raise AssertionError("'translator' cannot be None.")
+        elif translator == NoOpTranslator.__name__:
+            raise AssertionError(
+                "The 'translator' for a TranslationDucklingAnnotator cannot "
+                f"be set to {NoOpTranslator.__name__}."
+            )
         self.translator = TranslatorFactory().get_translator(translator)
         self.en_annotator = kwargs.get("en_annotator") or SpacyAnnotator(
             app_path=self.app_path,
@@ -1050,7 +1075,10 @@ class TranslationDucklingAnnotator(Annotator):
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):
-        """
+        """ Implements a heuristic to match English entities detected by Spacy on the
+        translated non-English sentence against the non-English entities detected by
+        Duckling on the non-English sentence.
+
         Args:
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
@@ -1072,12 +1100,16 @@ class TranslationDucklingAnnotator(Annotator):
         for entity in en_entities:
             value_matched_candidates = []
             for candidate in candidates:
+                # Skip the candidate if the type does not match
                 if entity["dim"] != candidate["entity_type"]:
                     continue
+                # Store the candidate if there is a value match
                 if entity["value"] == candidate["value"]:
                     value_matched_candidates.append(candidate)
+                # Skip the the translation-match check if value-match candidates exist
                 if value_matched_candidates:
                     continue
+                # Check if the translated entity text matches candidate entity text
                 if (
                     self.translator.translate(
                         entity["body"], target_language=self.language
@@ -1086,6 +1118,7 @@ class TranslationDucklingAnnotator(Annotator):
                 ):
                     final_candidates.append(candidate)
                     break
+            # Select the largest of the candidates with a value match
             if value_matched_candidates:
                 final_candidates.append(
                     max(value_matched_candidates, key=lambda x: len(x["body"]))
@@ -1111,7 +1144,19 @@ class TranslationDucklingAnnotator(Annotator):
 
 
 class MultiLingualAnnotator(Annotator):
-    """Custom Annotator class used to generate annotations."""
+    """ The MultiLingualAnnotator detects entities in English and non-English sentences.
+
+    1. If the 'language' is English, this annotator solely uses the Spacy's English NER model to
+        detect entities.
+    2. If the 'language' is not English, this annotator will detect entities using both Spacy
+        non-English NER models and a Duckling-based Annotator.
+        A. The TranslationDucklingAnnotator will be used if a 'translator' service is available
+        (E.g. "GoogleTranslator"). Non-English duckling candidates are matched to English
+        entities detected by Spacy's English NER model.
+        B. The NoTranslationDucklingAnnotator will be used if a 'translator' service is not
+        available. The set of Non-English duckling candidates with the largest non-overlapping
+        spans is selected.
+    """
 
     def __init__(self, *args, **kwargs):
         """Initializes a TranslationDucklingAnnotator.
@@ -1129,7 +1174,7 @@ class MultiLingualAnnotator(Annotator):
             unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(*args, **kwargs)
-        self.translator = kwargs.get("translator", "NoOpTranslator")
+        self.translator = kwargs.get("translator", NoOpTranslator.__name__)
         self.en_annotator = SpacyAnnotator(
             app_path=self.app_path,
             language=ENGLISH_LANGUAGE_CODE,
@@ -1138,13 +1183,11 @@ class MultiLingualAnnotator(Annotator):
         if self.language != ENGLISH_LANGUAGE_CODE:
             self.duckling_annotator = self._get_duckling_annotator()
             self.non_en_annotator = SpacyAnnotator(
-                app_path=self.app_path,
-                language=self.language,
-                locale=self.locale,
+                app_path=self.app_path, language=self.language, locale=self.locale,
             )
 
     def _get_duckling_annotator(self):
-        if self.translator != "NoOpTranslator":
+        if self.translator != NoOpTranslator.__name__:
             return TranslationDucklingAnnotator(
                 app_path=self.app_path,
                 language=self.language,
@@ -1153,9 +1196,7 @@ class MultiLingualAnnotator(Annotator):
                 translator=self.translator,
             )
         return NoTranslationDucklingAnnotator(
-            app_path=self.app_path,
-            language=self.language,
-            locale=self.locale,
+            app_path=self.app_path, language=self.language, locale=self.locale,
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):

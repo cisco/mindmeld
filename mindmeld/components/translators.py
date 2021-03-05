@@ -75,7 +75,7 @@ class NoOpTranslator(Translator):
         return
 
     def translate(self, text, target_language):
-        return
+        return text
 
 
 class GoogleTranslator(Translator):
@@ -154,11 +154,11 @@ class TranslatorFactory:
         Returns:
             (Translator): Translator Class
         """
-        if translator == "NoOpTranslator":
+        if translator == NoOpTranslator.__name__:
             return NoOpTranslator()
-        if translator == "GoogleTranslator":
+        if translator == GoogleTranslator.__name__:
             return GoogleTranslator()
         raise AssertionError(
-            "Valid 'translator' not found in AUTO_ANNOTATOR_CONFIG."
+            f" {translator} is not a valid 'translator'."
             " Supported translators include 'NoOpTranslator' and 'GoogleTranslator'."
         )
