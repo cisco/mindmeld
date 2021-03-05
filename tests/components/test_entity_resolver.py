@@ -70,7 +70,7 @@ def resolver_sbert(resource_loader):
             "normalize_token_embs": True,
             "bert_output_type": "mean",
             "augment_lower_case": False,
-            "quantize_model": True,
+            "quantize_model": False,
         }
     }
     resolver = EntityResolver().get_resolver(
