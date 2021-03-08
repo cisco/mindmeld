@@ -1059,22 +1059,22 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             self.type, entity_map, augment_lower_case=augment_lower_case
         )
 
-        # load embeddings cache if exists
-        loaded_cache_embs = {}
+        # load embeddings from cache if exists, encode any other synonyms if required
+        #   and dump embeddings if required
+        cached_embs = {}
         if os.path.exists(cache_path):
-            loaded_cache_embs = self._load_embeddings(cache_path)
-
-        # identify what synonyms do not have embeddings and encode only them
-        synonyms = [*self._entity_mapping["synonyms"]]
-        synonyms_to_encode = [syn for syn in synonyms if syn not in loaded_cache_embs]
-        synonyms_encodings = self._encode(synonyms_to_encode)
-        loaded_cache_embs.update(dict(zip(synonyms_to_encode, synonyms_encodings)))
-        self._cached_embs = loaded_cache_embs
-
-        # dump embeddings if required
-        if synonyms_to_encode or not os.path.exists(cache_path):
+            logger.info("Cached embs exists for entity %s. Loading existing data from: %s",
+                        self.type, cache_path)
+            cached_embs = self._load_embeddings(cache_path)
+        new_synonyms_to_encode = [syn for syn in self._entity_mapping["synonyms"] if
+                                  syn not in cached_embs]
+        if new_synonyms_to_encode:
+            synonyms_encodings = self._encode(new_synonyms_to_encode)
+            cached_embs.update(dict(zip(new_synonyms_to_encode, synonyms_encodings)))
+        self._cached_embs = cached_embs
+        if new_synonyms_to_encode or not os.path.exists(cache_path):
             self._dump_embeddings(cache_path, self._cached_embs)
-        self.dirty = False  # never True with the current logic
+        self.dirty = False  # never True with the current logic, kept for consistency purpose
 
     def _predict(self, nbest_entities):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
