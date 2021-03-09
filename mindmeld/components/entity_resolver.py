@@ -20,7 +20,6 @@ import json
 import logging
 import os
 import pickle
-import sys
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -761,7 +760,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         self.transformer_model = None
         self.pooling_model = None
         self.sbert_model = None
-        self.__sys_version = sys.version_info
+        self.__use_sbert_model = False
 
         msg = "bert embeddings are cached for entity_type: `%s` " \
               "for quicker entity resolution; consumes some disk space"
@@ -807,21 +806,26 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
-        if self.sbert_model:
-            if concat_last_n_layers != 1 or normalize_token_embs:
-                msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
-                      f"{'normalize_token_embs' if normalize_token_embs else ''} " \
-                      f"ignored due to python version <3.7"
-                logger.warning(msg)
+        if not self.__use_sbert_model:  # at init time, this is False
+            try:
+                results = self._encode_custom(phrases, batch_size=batch_size,
+                                              convert_to_numpy=convert_to_numpy,
+                                              show_progress_bar=show_progress,
+                                              concat_last_n_layers=concat_last_n_layers,
+                                              normalize_token_embs=normalize_token_embs)
+            except TypeError as e:
+                self.__use_sbert_model = True
+                logger.error(e)
+                if concat_last_n_layers != 1 or normalize_token_embs:
+                    msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
+                          f"{'normalize_token_embs' if normalize_token_embs else ''} " \
+                          f"ignored as resorting to using encode methods from sentence-transformers"
+                    logger.warning(msg)
+
+        if self.__use_sbert_model:
             results = self.sbert_model.encode(phrases, batch_size=batch_size,
                                               convert_to_numpy=convert_to_numpy,
                                               show_progress_bar=show_progress)
-        else:
-            results = self._encode_custom(phrases, batch_size=batch_size,
-                                          convert_to_numpy=convert_to_numpy,
-                                          show_progress_bar=show_progress,
-                                          concat_last_n_layers=concat_last_n_layers,
-                                          normalize_token_embs=normalize_token_embs)
 
         return results
 
@@ -1027,7 +1031,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                 .get("bert_output_type", "mean")
         )
 
-        def _load_model_and_pooler(name_or_path, output_type, return_sbert=False):
+        def _load_model_and_pooler(name_or_path, output_type):
             transformer_model = _get_module_or_attr(
                 "sentence_transformers.models").Transformer(
                 name_or_path,
@@ -1040,17 +1044,14 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                 pooling_mode_mean_sqrt_len_tokens=False)
             modules = [transformer_model, pooling_model]
 
-            if return_sbert:
-                sbert_model = _get_module_or_attr("sentence_transformers", "SentenceTransformer")(
-                    modules=modules)
-                return (None, None, sbert_model)
+            sbert_model = _get_module_or_attr("sentence_transformers", "SentenceTransformer")(
+                modules=modules)
 
-            return (transformer_model, pooling_model, None)
+            return (transformer_model, pooling_model, sbert_model)
 
         try:
             self.transformer_model, self.pooling_model, self.sbert_model = _load_model_and_pooler(
-                f"sentence-transformers/{self._model_pretrained_name_or_abspath}", _output_type,
-                return_sbert=(self.__sys_version.major == 3 and self.__sys_version.minor < 7))
+                f"sentence-transformers/{self._model_pretrained_name_or_abspath}", _output_type)
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
@@ -1059,9 +1060,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             try:
                 self.transformer_model, self.pooling_model, self.sbert_model = \
                     _load_model_and_pooler(
-                        self._model_pretrained_name_or_abspath, _output_type,
-                        return_sbert=(
-                                self.__sys_version.major == 3 and self.__sys_version.minor < 7))
+                        self._model_pretrained_name_or_abspath, _output_type)
             except OSError as e:
                 logger.error("Could not initialize the model name through huggingface models. "
                              "Please check the model name and retry.")
