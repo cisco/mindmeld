@@ -1396,6 +1396,31 @@ class IntentProcessor(Processor):
             query, dynamic_resource=dynamic_resource, verbose=verbose
         )
 
+        if allowed_nlp_classes and all(entity == () for entity in entities):
+
+            if any(n_best_query.text in self.resource_loader.get_gazetteer("account_type") for n_best_query in query):
+                pass
+
+            import pdb; pdb.set_trace()
+            pass
+
+
+        if allowed_nlp_classes:
+            if all(entity == () for entity in entities):
+                pass
+
+            entity_contained_in_allowed_nlp_classes = False
+            for transcript_result in entities:
+                for entity in transcript_result:
+                    if entity.entity.type in allowed_nlp_classes:
+                        entity_contained_in_allowed_nlp_classes = True
+
+            if entity_contained_in_allowed_nlp_classes:
+                pass
+            else:
+                pass
+
+
         aligned_entities = self._align_entities(entities)
         processed_entities, role_confidence = self._process_entities(
             query, entities, aligned_entities, allowed_nlp_classes, verbose
