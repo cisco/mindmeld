@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import pickle
+import sys
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -757,6 +758,11 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {}).get("quantize_model", False)
         )
 
+        self.transformer_model = None
+        self.pooling_model = None
+        self.sbert_model = None
+        self.__sys_version = sys.version_info
+
         msg = "bert embeddings are cached for entity_type: `%s` " \
               "for quicker entity resolution; consumes some disk space"
         logger.info(msg, self.type)
@@ -801,11 +807,21 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
-        results = self._encode_custom(phrases, batch_size=batch_size,
-                                      convert_to_numpy=convert_to_numpy,
-                                      show_progress_bar=show_progress,
-                                      concat_last_n_layers=concat_last_n_layers,
-                                      normalize_token_embs=normalize_token_embs)
+        if self.sbert_model:
+            if concat_last_n_layers != 1 or normalize_token_embs:
+                msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
+                      f"{'normalize_token_embs' if normalize_token_embs else ''} " \
+                      f"ignored due to python version <3.7"
+                logger.warning(msg)
+            results = self.sbert_model.encode(phrases, batch_size=batch_size,
+                                              convert_to_numpy=convert_to_numpy,
+                                              show_progress_bar=show_progress)
+        else:
+            results = self._encode_custom(phrases, batch_size=batch_size,
+                                          convert_to_numpy=convert_to_numpy,
+                                          show_progress_bar=show_progress,
+                                          concat_last_n_layers=concat_last_n_layers,
+                                          normalize_token_embs=normalize_token_embs)
 
         return results
 
@@ -875,8 +891,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                                   disable=not show_progress_bar):
             sentences_batch = sentences_sorted[start_index:start_index + batch_size]
             features = self.transformer_model.tokenize(sentences_batch)
-            features = _get_module_or_attr("sentence_transformers.util").batch_to_device(
-                features, device)
+            features = self._batch_to_device(features, device)
 
             with _get_module_or_attr("torch", "no_grad")():
                 out_features_transformer = self.transformer_model.forward(features)
@@ -958,6 +973,17 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             return sum([len(t) for t in text])
 
     @staticmethod
+    def _batch_to_device(batch, target_device):
+        """
+        send a pytorch batch to a device (CPU/GPU)
+        """
+        tensor = _get_module_or_attr("torch", "Tensor")
+        for key in batch:
+            if isinstance(batch[key], tensor):
+                batch[key] = batch[key].to(target_device)
+        return batch
+
+    @staticmethod
     def _compute_cosine_similarity(syn_embs, entity_emb, return_as_dict=False):
         """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
             for entity resolution
@@ -1000,40 +1026,46 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             self.er_config.get("model_settings", {})
                 .get("bert_output_type", "mean")
         )
-        try:
-            _model_pretrained_name_or_abspath = \
-                f"sentence-transformers/{self._model_pretrained_name_or_abspath}"
 
-            self.transformer_model = _get_module_or_attr(
+        def _load_model_and_pooler(name_or_path, output_type, return_sbert=False):
+            transformer_model = _get_module_or_attr(
                 "sentence_transformers.models").Transformer(
-                _model_pretrained_name_or_abspath,
+                name_or_path,
                 model_args={"output_hidden_states": True})
-            self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
-                self.transformer_model.get_word_embedding_dimension(),
-                pooling_mode_cls_token=_output_type == "cls",
+            pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
+                transformer_model.get_word_embedding_dimension(),
+                pooling_mode_cls_token=output_type == "cls",
                 pooling_mode_max_tokens=False,
-                pooling_mode_mean_tokens=_output_type == "mean",
+                pooling_mode_mean_tokens=output_type == "mean",
                 pooling_mode_mean_sqrt_len_tokens=False)
+            modules = [transformer_model, pooling_model]
+
+            if return_sbert:
+                sbert_model = _get_module_or_attr("sentence_transformers", "SentenceTransformer")(
+                    modules=modules)
+                return (None, None, sbert_model)
+
+            return (transformer_model, pooling_model, None)
+
+        try:
+            self.transformer_model, self.pooling_model, self.sbert_model = _load_model_and_pooler(
+                f"sentence-transformers/{self._model_pretrained_name_or_abspath}", _output_type,
+                return_sbert=(self.__sys_version.major == 3 and self.__sys_version.minor < 7))
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
                 "huggingface; Checking `%s` model directly in huggingface models",
                 self._model_pretrained_name_or_abspath)
             try:
-                self.transformer_model = _get_module_or_attr(
-                    "sentence_transformers.models").Transformer(
-                    self._model_pretrained_name_or_abspath,
-                    model_args={"output_hidden_states": True})
-                self.pooling_model = _get_module_or_attr("sentence_transformers.models").Pooling(
-                    self.transformer_model.get_word_embedding_dimension(),
-                    pooling_mode_cls_token=_output_type == "cls",
-                    pooling_mode_max_tokens=False,
-                    pooling_mode_mean_tokens=_output_type == "mean",
-                    pooling_mode_mean_sqrt_len_tokens=False)
-            except OSError:
+                self.transformer_model, self.pooling_model, self.sbert_model = \
+                    _load_model_and_pooler(
+                        self._model_pretrained_name_or_abspath, _output_type,
+                        return_sbert=(
+                                self.__sys_version.major == 3 and self.__sys_version.minor < 7))
+            except OSError as e:
                 logger.error("Could not initialize the model name through huggingface models. "
                              "Please check the model name and retry.")
-                raise ValueError from None
+                raise ValueError from e
 
         # quantize_model
         if self.quantize_model:
@@ -1044,10 +1076,13 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             torch_nn_linear = _get_module_or_attr("torch.nn", "Linear")
             self.transformer_model = _get_module_or_attr("torch.quantization", "quantize_dynamic")(
                 self.transformer_model, {torch_nn_linear}, dtype=torch_qint8
-            )
+            ) if self.transformer_model else None
             self.pooling_model = _get_module_or_attr("torch.quantization", "quantize_dynamic")(
                 self.pooling_model, {torch_nn_linear}, dtype=torch_qint8
-            )
+            ) if self.pooling_model else None
+            self.sbert_model = _get_module_or_attr("torch.quantization", "quantize_dynamic")(
+                self.sbert_model, {torch_nn_linear}, dtype=torch_qint8
+            ) if self.sbert_model else None
 
         # load mappings.json data
         entity_map = self.entity_map
