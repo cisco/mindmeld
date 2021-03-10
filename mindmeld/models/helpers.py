@@ -103,11 +103,12 @@ def create_annotator(app_path, config):
         raise ValueError(msg.format(config["annotator_class"])) from e
 
 
-def create_augmentor(app_path, config):
+def create_augmentor(lang, config, resource_loader):
     """Creates an augmentor instance using the provided configuration
 
     Args:
         config (dict): A model configuration
+        resource_loader (object): Resource Loader object for the application.
 
     Returns:
         Augmentor: An Augmentor class
@@ -120,8 +121,16 @@ def create_augmentor(app_path, config):
             "Missing required argument in AUGMENTATION_CONFIG: 'augmentor_class'"
         )
     try:
+        # Validate configuration input
+        paths = config.get("paths", [])
+        path_suffix = config.get("path_suffix", ".augmented.txt")
+        params = config.get("params", {})
         return AUGMENTATION_MAP[config["augmentor_class"]](
-            app_path=app_path, config=config
+            lang=lang,
+            paths=paths,
+            path_suffix=path_suffix,
+            params=params,
+            resource_loader=resource_loader,
         )
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"

@@ -473,6 +473,8 @@ DEFAULT_AUGMENTATION_CONFIG = {
             "files": ".*",
         }
     ],
+    "params": {},
+    "path_suffix": ".augmented.txt"
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {

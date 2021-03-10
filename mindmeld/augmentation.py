@@ -19,27 +19,20 @@ import re
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 
-from .components._config import get_augmentation_config, get_language_config
-from .constants import _get_pattern
+from .components._util import _is_module_available, _get_module_or_attr
+from .constants import get_pattern
 from .models.helpers import register_augmentor
-from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
 
-try:
-    import torch
-except ImportError:
-    logger.info(
-        "Library not found: 'torch'. Run 'pip install mindmeld[augment]'" " to install."
+if not _is_module_available("torch"):
+    raise ModuleNotFoundError(
+        "Library not found: 'torch'. Run 'pip install mindmeld[augment]' to install."
     )
 
-try:
-    from transformers import PegasusForConditionalGeneration, PegasusTokenizer
-    from transformers import MarianMTModel, MarianTokenizer
-except ImportError:
-    logger.info(
-        "Library not found: 'transformers'. Run 'pip install mindmeld[augment]'"
-        " to install."
+if not _is_module_available("transformers"):
+    raise ModuleNotFoundError(
+        "Library not found: 'transformers'. Run 'pip install mindmeld[augment]' to install."
     )
 
 # pylint: disable=R0201
@@ -50,31 +43,28 @@ class Augmentor(ABC):
     Abstract Augmentor class.
     """
 
-    def __init__(self, app_path, config=None):
+    def __init__(self, lang, paths, path_suffix, resource_loader):
         """Initializes an augmentor.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            lang (str): The lang code for paraphrasing
+            paths (list): Path rules for fetching relevant files to Paraphrase.
+            path_suffix (str): Suffix to be added to new augmented files.
+            resource_loader (object): Resource Loader object for the application.
         """
-        self.app_path = app_path
-        self.config = config or get_augmentation_config(app_path=app_path)
-        self._resource_loader = ResourceLoader.create_resource_loader(app_path)
+        self.lang = lang
+        self.paths = paths
+        self.path_suffix = path_suffix
+        self._resource_loader = resource_loader
 
-    def augment(self, config, **kwargs):
-        """Augments queries given initial queries in application.
-
-        Args:
-            config (dict, optional): App config to use instead of class config.
-        """
-        config = config or self.config
-        filtered_paths = self._get_files(config)
+    def augment(self, **kwargs):
+        """Augments queries given initial queries in application."""
+        filtered_paths = self._get_files(paths=self.paths)
 
         for path in tqdm(filtered_paths):
             queries = self._read_path_queries(path)
             augmented_queries = self.augment_queries(queries, **kwargs)
-            self._write_files(path, augmented_queries)
+            self._write_files(path, augmented_queries, suffix=self.path_suffix)
 
     @abstractmethod
     def augment_queries(self, queries):
@@ -88,30 +78,30 @@ class Augmentor(ABC):
         """
         raise NotImplementedError("Subclasses must implement this method")
 
-    def _get_files(self, config):
+    def _get_files(self, paths=None):
         """Fetches relevant files given the path rules specified in the config.
 
         Args:
-            config (dict): Application config.
+            paths (list): Path rules for fetching relevant files.
 
         Return:
             filtered_paths (list): List of file paths to be augmeted.
         """
         all_file_paths = self._resource_loader.get_all_file_paths()
 
-        if not config["paths"]:
+        if not paths:
             logger.warning(
                 """'paths' field is not configured or misconfigured in the `config.py`.
                  Can't find files to augment."""
             )
-            return
+            return []
 
-        rules = config["paths"]
+        rules = paths
 
         filtered_paths = []
 
         for rule in rules:
-            pattern = _get_pattern(rule)
+            pattern = get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths.extend(
                 self._resource_loader.filter_file_paths(
@@ -133,14 +123,14 @@ class Augmentor(ABC):
             queries = f.readlines()
         return queries
 
-    def _write_files(self, path, augmented_queries):
+    def _write_files(self, path, augmented_queries, suffix):
         """Writes augmented queries to a new file in the path.
 
         Args:
             path (str): File path to the original file.
             augmented_queries (list): List of augmented queries returned by class.
         """
-        write_path = path.strip(".txt") + ".augmented.txt"
+        write_path = path.strip(".txt") + suffix
 
         with open(write_path, "w") as outfile:
             for query in augmented_queries:
@@ -150,30 +140,50 @@ class Augmentor(ABC):
 class EnglishParaphraser(Augmentor):
     """Paraphraser class for generating English paraphrases."""
 
-    def __init__(self, app_path, config=None):
+    def __init__(self, lang, paths, path_suffix, params, resource_loader):
         """Initializes an English paraphraser.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            lang (str): The lang code for paraphrasing
+            paths (list): Path rules for fetching relevant files to Paraphrase.
+            path_suffix (str): Suffix to be added to new augmented files.
+            params (dict): Model params.
+            resource_loader (object): Resource Loader object for the application.
         """
-        super().__init__(app_path=app_path, config=config)
+        super().__init__(
+            lang=lang,
+            paths=paths,
+            path_suffix=path_suffix,
+            resource_loader=resource_loader,
+        )
+
+        PegasusTokenizer = _get_module_or_attr("transformers", "PegasusTokenizer")
+        PegasusForConditionalGeneration = _get_module_or_attr(
+            "transformers", "PegasusForConditionalGeneration"
+        )
 
         model_name = "tuner007/pegasus_paraphrase"
-        torch_device = "cuda" if torch.cuda.is_available() else "cpu"
+        torch_device = (
+            "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
+        )
         self.tokenizer = PegasusTokenizer.from_pretrained(model_name)
         self.model = PegasusForConditionalGeneration.from_pretrained(
             model_name, force_download=False
         ).to(torch_device)
 
-    def _get_response(self, query, num_return_sequences=10, num_beams=10):
+        # Use default model params if not customized for app
+        self.params = params or {
+            "max_length": 60,
+            "num_beams": 10,
+            "num_return_sequences": 10,
+            "temperature": 1.5,
+        }
+
+    def _get_response(self, query):
         """Generates paraphrase responses for given query.
 
         Args:
             query (str): An application query.
-            num_return_sequences (int, optional): Maximum number of paraphrases to be generated.
-            num_beams (int, optional):
 
         Return:
             paraphrases (list(str)): List of paraphrased queries.
@@ -183,10 +193,7 @@ class EnglishParaphraser(Augmentor):
         )
         translated = self.model.generate(
             **batch,
-            max_length=60,
-            num_beams=num_beams,
-            num_return_sequences=num_return_sequences,
-            temperature=1.5,
+            **self.params,
         )
         paraphrases = self.tokenizer.batch_decode(translated, skip_special_tokens=True)
         return paraphrases
@@ -200,21 +207,32 @@ class EnglishParaphraser(Augmentor):
 
 class MultiLingualParaphraser(Augmentor):
     """Paraphraser class for generating paraphrases based on language code of the app
-    (for languages other than English).
+    (currently supports: French, Italian, Spanish, Portuguese, and Romanian).
     """
 
-    def __init__(self, app_path, config=None):
+    def __init__(self, lang, paths, path_suffix, params, resource_loader):
         """Initializes a multi-lingual paraphraser.
 
         Args:
-            app_path (str): The location of the MindMeld app
-            config (dict, optional): A config object to use. This will
-                override the config specified by the app's config.py file.
+            lang (str): The lang code for paraphrasing
+            paths (list): Path rules for fetching relevant files to Paraphrase.
+            path_suffix (str): Suffix to be added to new augmented files.
+            params (dict): Model params.
+            resource_loader (object): Resource Loader object for the application.
         """
-        super().__init__(app_path=app_path, config=config)
+        super().__init__(
+            lang=lang,
+            paths=paths,
+            path_suffix=path_suffix,
+            resource_loader=resource_loader,
+        )
 
-        self.torch_device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.language, _ = get_language_config(app_path=app_path)
+        self.torch_device = (
+            "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
+        )
+
+        MarianTokenizer = _get_module_or_attr("transformers", "MarianTokenizer")
+        MarianMTModel = _get_module_or_attr("transformers", "MarianMTModel")
 
         en_model_name = "Helsinki-NLP/opus-mt-ROMANCE-en"
         self.en_tokenizer = MarianTokenizer.from_pretrained(en_model_name)
@@ -227,7 +245,15 @@ class MultiLingualParaphraser(Augmentor):
             self.torch_device
         )
 
-    def _translate(self, **kwargs):
+        # Use default model params if not customized for app
+        self.params = params or {
+            "num_beams": 3,
+            "num_return_sequences": 3,
+            "top_k": 0,
+            "temperature": 1.0,
+        }
+
+    def _translate(self, *, template, queries, model, tokenizer, **kwargs):
         """The core translation step for forward and back translation.
 
         Args:
@@ -235,13 +261,7 @@ class MultiLingualParaphraser(Augmentor):
             queries (list(str)): List of input queries.
             model: Machine translation model (en-ROMANCE or ROMANCE-en).
             tokenizer: Language tokenizer for input query text.
-            num_return_sequences (int): Number of translations generated.
         """
-        template = kwargs.pop("template")
-        queries = kwargs.pop("queries")
-        model = kwargs.pop("model")
-        tokenizer = kwargs.pop("tokenizer")
-
         queries = [template(query) for query in queries]
         encoded = tokenizer.prepare_seq2seq_batch(queries, return_tensors="pt")
         for key in encoded:
@@ -259,22 +279,16 @@ class MultiLingualParaphraser(Augmentor):
             queries=queries,
             model=self.en_model,
             tokenizer=self.en_tokenizer,
-            num_beams=5,
-            num_return_sequences=5,
-            top_k=0,
-            temperature=1.0,
+            **self.params,
         )
         translated_queries = list(set(translated_queries))
 
         back_translated_queries = self._translate(
-            template=lambda text: f">>{self.language}<< {text}",
+            template=lambda text: f">>{self.lang}<< {text}",
             queries=translated_queries,
             model=self.target_model,
             tokenizer=self.target_tokenizer,
-            num_beams=5,
-            num_return_sequences=5,
-            top_k=0,
-            temperature=1.0,
+            **self.params,
         )
         augmented_queries = list(set(p.lower() for p in back_translated_queries))
 

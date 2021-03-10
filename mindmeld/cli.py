@@ -42,7 +42,11 @@ from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
-from .components._config import get_augmentation_config, get_auto_annotator_config
+from .components._config import (
+    get_augmentation_config,
+    get_auto_annotator_config,
+    get_language_config,
+)
 from .constants import BINARIES_URL, DUCKLING_VERSION
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
@@ -54,6 +58,8 @@ from .path import (
     get_generated_data_folder,
     get_dvc_local_remote_path,
 )
+from .resource_loader import ResourceLoader
+
 
 logger = logging.getLogger(__name__)
 
@@ -778,11 +784,19 @@ def unannotate(app_path, unannotate_all):
     required=True,
     help="The application's path.",
 )
-def augment(app_path):
+@click.option(
+    "--lang",
+    help="Augmentation language.",
+)
+def augment(app_path, lang):
     """Runs the data augmentation command."""
     config = get_augmentation_config(app_path=app_path)
-    augmentor = create_augmentor(app_path=app_path, config=config)
-    augmentor.augment(config=config)
+    lang = lang or get_language_config(app_path=app_path)[0]
+    resource_loader = ResourceLoader.create_resource_loader(app_path)
+    augmentor = create_augmentor(
+        lang=lang, config=config, resource_loader=resource_loader
+    )
+    augmentor.augment()
     logger.info("Augmentation Complete.")
 
 

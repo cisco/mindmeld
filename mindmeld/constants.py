@@ -66,7 +66,7 @@ CURRENCY_SYMBOLS = u"".join(
 )
 
 
-def _get_pattern(rule):
+def get_pattern(rule):
     """Convert a rule represented as a dictionary with the keys "domains", "intents",
     "files" into a regex pattern.
 

@@ -24,7 +24,7 @@ from tqdm import tqdm
 from .components import NaturalLanguageProcessor
 from .components._config import get_auto_annotator_config
 from .constants import (
-    SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap, _get_pattern
+    SPACY_ANNOTATOR_SUPPORTED_ENTITIES, CURRENCY_SYMBOLS, _no_overlap, get_pattern
 )
 from .core import Entity, QueryEntity, Span
 from .exceptions import MarkupError
@@ -87,7 +87,7 @@ class Annotator(ABC):
             rules = config[AnnotatorAction.UNANNOTATE.value]
 
         for rule in rules:
-            pattern = _get_pattern(rule)
+            pattern = get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
                 compiled_pattern=compiled_pattern, file_paths=all_file_paths
