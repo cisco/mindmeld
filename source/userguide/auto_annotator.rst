@@ -9,6 +9,7 @@ The Auto Annotator
 .. note::
 
    The examples in this section require the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``.
+   Examples related to the MultiLingualAnnotator require the :doc:`Health Screening <../blueprints/screening_app>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``
 
 .. warning::
 
@@ -327,52 +328,18 @@ Then use the :meth:`parse` function.
 	
 	mla.parse("Apple stock went up $10 last monday.") 
 
-Three entities are automatically recognized and a list of dictionaries is returned. Each dictionary represents a detected entity.:
+Three entities are automatically recognized and a list of QueryEntity objects is returned. Each QueryEntity represents a detected entity.:
 
 .. code-block:: python
 	
 	[
-		{
-			'body': 'Apple',
-			'start': 0,
-			'end': 5,
-			'value': {'value': 'Apple'},
-			'dim': 'sys_org'
-		},
-		{
-			'body': '$10',
-			'start': 20,
-			'end': 23,
-			'value': {'value': 10, 'type': 'value', 'unit': '$'},
-			'dim': 'sys_amount-of-money'
-		},
-		{
-			'body': 'last monday',
-			'start': 24,
-			'end': 35,
-			'value': {'value': '2020-09-21T00:00:00.000-07:00',
-			'grain': 'day',
-			'type': 'value'},
-			'dim': 'sys_time'
-		}
+		<QueryEntity 'Apple' ('sys_org') char: [0-4], tok: [0-0]>,
+		<QueryEntity '$10' ('sys_amount-of-money') char: [20-22], tok: [4-4]>,
+		<QueryEntity 'last monday' ('sys_time') char: [24-34], tok: [5-6]>
 	]
 
 The Auto Annotator detected "Apple" as :attr:`sys_org`. Moreover, it recognized "$10" as :attr:`sys_amount-of-money` and resolved its :attr:`value` as 10 and :attr:`unit` as "$".
 Lastly, it recognized "last monday" as :attr:`sys_time` and resolved its :attr:`value` to be a timestamp representing the last monday from the current date.
-
-In general, detected entities will be represented in the following format:
-
-.. code-block:: python
-
-	entity = {
-
-		"body": (substring of sentence), 
-		"start": (start index), 
-		"end": (end index + 1), 
-		"dim": (entity type), 
-		"value": (resolved value, if it exists), 
-
-	}
 
 To restrict the types of entities returned from the :attr:`parse()` method use the :attr:`entity_types` parameter and pass in a list of entities to restrict parsing to. By default, all entities are allowed.
 For example, we can restrict the output of the previous example by doing the following:
@@ -433,7 +400,8 @@ We can now create our :class:`MultiLingualAnnotator` object and pass in the app_
 	from mindmeld.auto_annotator import MultiLingualAnnotator 
 	mla = MultiLingualAnnotator(
 		app_path="screening_app",
-		language="es"
+		language="es",
+		locale=None,
 	)
 
 Then use the :meth:`parse` function.
@@ -447,32 +415,9 @@ Three entities are automatically recognized.
 .. code-block:: python
 	
 	[
-		{
-			'body': 'Apple',
-			'start': 16,
-			'end': 21,
-			'value': {'value': 'Apple'},
-			'dim': 'sys_org'
-		},
-		{
-			'body': 'el lunes pasado',
-			'start': 35,
-			'end': 50,
-			'dim': 'sys_time',
-			'value': {'values': [{'value': '2021-02-08T00:00:00.000-08:00',
-				'grain': 'day',
-				'type': 'value'}],
-			'value': '2021-02-08T00:00:00.000-08:00',
-			'grain': 'day',
-			'type': 'value'}
-		},
-		{
-			'body': '$10',
-			'start': 31,
-			'end': 34,
-			'dim': 'sys_amount-of-money',
-			'value': {'value': 10, 'type': 'value', 'unit': '$'}
-		}
+		<QueryEntity 'Apple' ('sys_org') char: [16-20], tok: [3-3]>,
+		<QueryEntity 'el lunes pasado' ('sys_time') char: [35-49], tok: [6-8]>,
+		<QueryEntity '$10' ('sys_amount-of-money') char: [31-33], tok: [5-5]>
 	]
 
 
@@ -661,12 +606,13 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 				sentence (str): Sentence to detect entities.
 				entity_types (list): List of entity types to parse. If None, all
 					possible entity types will be parsed.
-			Returns: entities (list): List of entity dictionaries.
+			Returns:
+				query_entities (list[QueryEntity]): List of QueryEntity objects.
 			"""
 
 			# TODO: Add custom parse logic
 
-			return entities
+			return query_entities
 
 		@property
 		def supported_entity_types(self):
@@ -695,17 +641,6 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 		)
 		custom_annotator.annotate()
 
-Entities returned by :attr:`parse()` must have the following format:
-
-.. code-block:: python
-
-	entity = { 
-		"body": (substring of sentence), 
-		"start": (start index), 
-		"end": (end index + 1), 
-		"dim": (entity type), 
-		"value": (resolved value, if it exists), 
-	}
 
 To run your custom Annotator, simply run in the command line: :attr:`python custom_annotator.py`.
 To run unannotation with your custom Annotator, change the last line in your script to :attr:`custom_annotator.unannotate()`.
