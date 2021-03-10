@@ -298,6 +298,23 @@ def test_nlp_hierarchy_using_dynamic_gazetteer(
         assert expected_entity in [entity["text"] for entity in response["entities"]]
 
 
+def test_allowed_entities(kwik_e_mart_nlp):
+    res = kwik_e_mart_nlp.process("peanut",
+                                  allowed_intents=["store_info.get_store_number.store_name"])
+    assert res['entities'][0]['type'] == 'store_name'
+    assert res['entities'][0]['text'] == 'peanut'
+
+    res = kwik_e_mart_nlp.process("xyz",
+                                  allowed_intents=["store_info.get_store_number.store_name"])
+    assert res['entities'] == []
+
+    res = kwik_e_mart_nlp.process("xyz",
+                                  allowed_intents=["store_info.get_store_number.store_name"],
+                                  dynamic_resource={'gazetteers': {'store_name': {'xyz': 1.0}}})
+    assert res['entities'][0]['type'] == 'store_name'
+    assert res['entities'][0]['text'] == 'xyz'
+
+
 test_data_3 = [
     "what mythical scottish town appears for one day every 100 years",
     "lets run 818m",

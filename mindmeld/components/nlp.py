@@ -27,7 +27,7 @@ from multiprocessing import cpu_count
 from tqdm import tqdm
 
 from .. import path
-from ..core import Bunch, ProcessedQuery
+from ..core import Bunch, ProcessedQuery, QueryEntity, Span, Entity
 from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
@@ -49,6 +49,7 @@ from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
+from ..models.helpers import GAZETTEER_RSC
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -1396,30 +1397,28 @@ class IntentProcessor(Processor):
             query, dynamic_resource=dynamic_resource, verbose=verbose
         )
 
+        # This code block implements allowed entities described here:
+        # https://github.com/cisco/mindmeld/pull/280
         if allowed_nlp_classes and all(entity == () for entity in entities):
-
-            if any(n_best_query.text in self.resource_loader.get_gazetteer("account_type") for n_best_query in query):
-                pass
-
-            import pdb; pdb.set_trace()
-            pass
-
-
-        if allowed_nlp_classes:
-            if all(entity == () for entity in entities):
-                pass
-
-            entity_contained_in_allowed_nlp_classes = False
-            for transcript_result in entities:
-                for entity in transcript_result:
-                    if entity.entity.type in allowed_nlp_classes:
-                        entity_contained_in_allowed_nlp_classes = True
-
-            if entity_contained_in_allowed_nlp_classes:
-                pass
-            else:
-                pass
-
+            dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
+            entities = []
+            for n_best_query in query:
+                n_best_entities = []
+                for entity in allowed_nlp_classes:
+                    if n_best_query.text in {
+                        **self.resource_loader.get_gazetteer(entity)['pop_dict'],
+                        **dynamic_gazetteer.get(entity, {})
+                    }:
+                        span = Span(0, len(n_best_query.text) - 1)
+                        entity = Entity(
+                            text=n_best_query.text,
+                            entity_type=entity
+                        )
+                        query_entity = QueryEntity.from_query(
+                            query=n_best_query, span=span, entity=entity
+                        )
+                        n_best_entities.append(query_entity)
+                entities.append(tuple(n_best_entities))
 
         aligned_entities = self._align_entities(entities)
         processed_entities, role_confidence = self._process_entities(
