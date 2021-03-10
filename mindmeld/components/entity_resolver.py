@@ -20,7 +20,9 @@ import json
 import logging
 import os
 import pickle
+import re
 from abc import ABC, abstractmethod
+from string import punctuation
 
 import numpy as np
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
@@ -53,6 +55,39 @@ from ..core import Entity
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS = {
+    "exact_match": {
+        'model_type': 'exact_match',
+        "model_settings": {
+            "augment_lower_case": False
+        }
+    },
+    "text_relevance": {
+        'model_type': 'text_relevance',
+        # 'phonetic_match_types': ["double_metaphone"],
+    },
+    "sbert_cosine_similarity": {
+        'model_type': 'sbert_cosine_similarity',
+        "model_settings": {
+            "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
+            "batch_size": 16,
+            "concat_last_n_layers": 4,
+            "normalize_token_embs": True,
+            "bert_output_type": "mean",
+            "augment_lower_case": False,
+            "quantize_model": True,
+        }
+    },
+    "tfidf_cosine_similarity": {
+        'model_type': 'tfidf_cosine_similarity',
+        "model_settings": {
+            "augment_lower_case": True,
+            "augment_normalized": False,
+            "augment_title_case": False
+        }
+    },
+}
 
 
 class EntityResolver:
@@ -91,7 +126,7 @@ class EntityResolver:
         )
 
 
-class EntityResolverBase(ABC):
+class EntityResolverModelBase(ABC):
     """
     Base class for Entity Resolvers
     """
@@ -100,13 +135,17 @@ class EntityResolverBase(ABC):
         """Initializes an entity resolver"""
         self.app_path = app_path
         self.type = entity_type
-        self.er_config = er_config
-
-        self._app_namespace = get_app_namespace(self.app_path)
         self._is_system_entity = Entity.is_system_entity(self.type)
-        self.name = self.er_config.get("model_type")
+        self.app_namespace = get_app_namespace(self.app_path)
+        self.name = er_config.get("model_type")
         self.entity_map = resource_loader.get_entity_map(self.type)
         self.normalizer = resource_loader.query_factory.normalize
+
+        # default configs useful for obtaining model cache path
+        default_er_config = DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS[self.name]
+        for key, value in er_config.get("model_settings", {}):
+            default_er_config["model_settings"][key] = value
+        self.er_config = default_er_config
 
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
@@ -129,20 +168,34 @@ class EntityResolverBase(ABC):
         )
 
     @staticmethod
-    def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False):
+    def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False,
+                           augment_title_case=False, augment_normalized=False):
         """
         Loads in the mapping.json file and stores the synonym mappings in a item_map
             and a synonym_map
 
         Args:
-            entity_type: The entity type associated with this entity resolver
-            entity_map: The loaded mapping.json file for the given entity type
-            normalizer: The normalizer to use
-            augment_lower_case: If to extend the synonyms list with their lower-cased values
+            entity_type (str): The entity type associated with this entity resolver
+            entity_map (dict): The loaded mapping.json file for the given entity type
+            normalizer (callable): The normalizer to use, if provided, used to normalize synonyms
+            augment_lower_case (bool): If to extend the synonyms list with their lower-cased values
+            augment_title_case (bool): If to extend the synonyms list with their title-cased values
+            augment_normalized (bool): If to extend the synonyms list with their normalized values,
+                                        uses the provided normalizer
         """
 
-        def _form_explorer(string):
-            return [string.lower()]
+        if augment_lower_case or augment_title_case or augment_normalized:
+            def _form_explorer(string):
+                _forms = []
+                if augment_lower_case:
+                    _forms.append(string.lower())
+                if augment_title_case:
+                    _forms.append(string.title())
+                if augment_normalized and normalizer:
+                    _forms.append(normalizer(string))
+                return _forms
+        else:
+            _form_explorer = None
 
         item_map = {}
         syn_map = {}
@@ -172,9 +225,9 @@ class EntityResolverBase(ABC):
                 cnames_for_syn.append(cname)
                 syn_map[norm_alias] = list(set(cnames_for_syn))
 
-        # extend synonyms map by adding keys which are lowercases of the existing keys
-        if augment_lower_case:
-            msg = "Adding lowercased whitelist and cnames to list of possible synonyms"
+        # extend synonyms map by adding keys which are lowercases or titlecase of the existing keys
+        if _form_explorer:
+            msg = "Adding additional form of the whitelist and cnames to list of possible synonyms"
             logger.info(msg)
             initial_num_syns = len(syn_map)
             aug_syn_map = {}
@@ -182,7 +235,7 @@ class EntityResolverBase(ABC):
                 other_aliases = _form_explorer(alias)
                 for other_alias in other_aliases:
                     if other_alias not in syn_map:
-                        aug_syn_map.update({alias_lower: alias_map})
+                        aug_syn_map.update({other_alias: alias_map})
             syn_map.update(aug_syn_map)
             final_num_syns = len(syn_map)
             msg = "Added %d additional synonyms by lower-casing. Synonyms increased from %d to %d"
@@ -268,7 +321,7 @@ class EntityResolverBase(ABC):
         return msg.format(self.__class__.__name__, self.name, self.ready, self.dirty)
 
 
-class ElasticsearchEntityResolver(EntityResolverBase):
+class ElasticsearchEntityResolver(EntityResolverModelBase):
     """
     Resolver class based on Elastic Search
     """
@@ -394,7 +447,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         try:
             if clean:
                 delete_index(
-                    self._app_namespace, self._es_index_name, self._es_host, self._es_client
+                    self.app_namespace, self._es_index_name, self._es_host, self._es_client
                 )
         except ValueError as e:  # when `clean = True` but no index to delete
             logger.info(e)
@@ -407,7 +460,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '%s'", self._es_index_name)
         self.ingest_synonym(
-            app_namespace=self._app_namespace,
+            app_namespace=self.app_namespace,
             index_name=self._es_index_name,
             data=entities,
             es_host=self._es_host,
@@ -427,14 +480,14 @@ class ElasticsearchEntityResolver(EntityResolverBase):
             # validate the KB index and field are valid.
             # TODO: this validation can probably be in some other places like resource loader.
             if not does_index_exist(
-                self._app_namespace, kb_index, self._es_host, self._es_client
+                self.app_namespace, kb_index, self._es_host, self._es_client
             ):
                 raise ValueError(
                     "Cannot import synonym data to knowledge base. The knowledge base "
                     "index name '{}' is not valid.".format(kb_index)
                 )
             if kb_field not in get_field_names(
-                self._app_namespace, kb_index, self._es_host, self._es_client
+                self.app_namespace, kb_index, self._es_host, self._es_client
             ):
                 raise ValueError(
                     "Cannot import synonym data to knowledge base. The knowledge base "
@@ -447,7 +500,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 )
             logger.info("Importing synonym data to knowledge base index '%s'", kb_index)
             ElasticsearchEntityResolver.ingest_synonym(
-                app_namespace=self._app_namespace,
+                app_namespace=self.app_namespace,
                 index_name=kb_index,
                 index_type="kb",
                 field_name=kb_field,
@@ -606,7 +659,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         ].append(whitelist_query)
 
         try:
-            index = get_scoped_index_name(self._app_namespace, self._es_index_name)
+            index = get_scoped_index_name(self.app_namespace, self._es_index_name)
             response = self._es_client.search(index=index, body=text_relevance_query)
         except EsConnectionError as ex:
             logger.error(
@@ -661,7 +714,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         """Loads the trained entity resolution model from disk."""
         try:
             scoped_index_name = get_scoped_index_name(
-                self._app_namespace, self._es_index_name
+                self.app_namespace, self._es_index_name
             )
             if not self._es_client.indices.exists(index=scoped_index_name):
                 self.fit()
@@ -683,7 +736,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
             raise EntityResolverError from e
 
 
-class ExactMatchEntityResolver(EntityResolverBase):
+class ExactMatchEntityResolver(EntityResolverModelBase):
     """
     Resolver class based on exact matching
     """
@@ -701,10 +754,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
             )
 
         entity_map = self.entity_map
-        augment_lower_case = (
-            self.er_config.get("model_settings", {})
-                .get("augment_lower_case", False)
-        )
+        augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
         self._entity_mapping = self.process_entity_map(
             self.type, entity_map, normalizer=self.normalizer,
             augment_lower_case=augment_lower_case
@@ -745,7 +795,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
         self.fit()
 
 
-class SentenceBertCosSimEntityResolver(EntityResolverBase):
+class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
     """
     Resolver class for bert models as described here:
     https://github.com/UKPLab/sentence-transformers
@@ -755,13 +805,9 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
         self._cached_embs = {}
-        self._model_pretrained_name_or_abspath = (
-            self.er_config.get("model_settings", {})
-                .get("pretrained_name_or_abspath", "distilbert-base-nli-stsb-mean-tokens")
-        )
-        self.quantize_model = (
-            self.er_config.get("model_settings", {}).get("quantize_model", False)
-        )
+        self._model_pretrained_name_or_abspath = self.er_config["model_settings"][
+            "pretrained_name_or_abspath"]
+        self.quantize_model = self.er_config["model_settings"]["quantize_model"]
 
         self.transformer_model = None
         self.pooling_model = None
@@ -797,18 +843,9 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         if not isinstance(phrases, (str, list)):
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        batch_size = (
-            self.er_config.get("model_settings", {})
-                .get("batch_size", 16)
-        )
-        concat_last_n_layers = (
-            self.er_config.get("model_settings", {})
-                .get("concat_last_n_layers", 1)
-        )
-        normalize_token_embs = (
-            self.er_config.get("model_settings", {})
-                .get("normalize_token_embs", False)
-        )
+        batch_size = self.er_config["model_settings"]["batch_size"]
+        concat_last_n_layers = self.er_config["model_settings"]["concat_last_n_layers"]
+        normalize_token_embs = self.er_config["model_settings"]["normalize_token_embs"]
         show_progress = len(phrases) > 1
         convert_to_numpy = True
 
@@ -1042,10 +1079,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             os.remove(cache_path)
 
         # load model
-        _output_type = (
-            self.er_config.get("model_settings", {})
-                .get("bert_output_type", "mean")
-        )
+        _output_type = self.er_config["model_settings"]["bert_output_type"]
 
         def _load_model_and_pooler(name_or_path, output_type):
             transformer_model = _get_module_or_attr(
@@ -1101,10 +1135,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
 
         # load mappings.json data
         entity_map = self.entity_map
-        augment_lower_case = (
-            self.er_config.get("model_settings", {})
-                .get("augment_lower_case", False)
-        )
+        augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
         self._entity_mapping = self.process_entity_map(
             self.type, entity_map, augment_lower_case=augment_lower_case
         )
@@ -1273,7 +1304,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         return results_list
 
 
-class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
+class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
     """
     a tf-idf based entity resolver using sparse matrices. ref:
     scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
@@ -1283,14 +1314,36 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
         self._n = 5  # max number of ngrams to consider
-        self._vectorizer = TfidfVectorizer(analyzer=self._custom_analyzer)
+        self._vectorizer = TfidfVectorizer(analyzer=self._char_ngram_and_word_analyzer,
+                                           lowercase=False)
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
 
-    def _custom_analyzer(self, string):
+    def _char_ngram_and_word_analyzer(self, string):
         results = []
+        # give more importance to starting and ending characters of a word
+        string = f" {string.strip()} "
         for n in range(self._n + 1):
             results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
+        results = list(set(results))
+        results.remove(' ')
+        # adding lowercased single characters might add more noise
+        results = [r for r in results if not (len(r) == 1 and r.islower())]
+        # add words
+        words = re.split(r'[\s{}]+'.format(re.escape(punctuation)), string.strip())
+        results.extend(words)
+        return results
+
+    def _char_ngram_analyzer(self, string):
+        results = []
+        # give more importance to starting and ending characters of a word
+        string = f" {string.strip()} "
+        for n in range(self._n + 1):
+            results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
+        results = list(set(results))
+        results.remove(' ')
+        # adding lowercased single characters might add more noise
+        results = [r for r in results if not (len(r) == 1 and r.islower())]
         return results
 
     def _fit(self, clean):
@@ -1303,12 +1356,12 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
 
         # load mappings.json data
         entity_map = self.entity_map
-        augment_lower_case = (
-            self.er_config.get("model_settings", {})
-                .get("augment_lower_case", True)
-        )
+        augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
+        augment_title_case = self.er_config["model_settings"]["augment_title_case"]
+        augment_normalized = self.er_config["model_settings"]["augment_normalized"]
         self._entity_mapping = self.process_entity_map(
-            self.type, entity_map, augment_lower_case=augment_lower_case
+            self.type, entity_map, augment_lower_case=augment_lower_case,
+            augment_title_case=augment_title_case, augment_normalized=augment_normalized
         )
         self._unique_synonyms = set(self._entity_mapping["synonyms"])
 
@@ -1347,7 +1400,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
                         item_value.update({"score": score})
                         item_value.update({"top_synonym": synonym})
                         values.append(item_value)
-        except (TypeError, KeyError) as e:
+        except (TypeError, KeyError):
             logger.warning(
                 "Failed to resolve entity %r for type %r", top_entity.text, top_entity.type
             )

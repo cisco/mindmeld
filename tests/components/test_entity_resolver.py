@@ -7,11 +7,9 @@ test_entity_resolver
 
 Tests for `entity_resolver` module.
 """
-# import mock
 
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
-# from mock import PropertyMock
 
 from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.components.entity_resolver import EntityResolver
@@ -46,9 +44,6 @@ def resolver_elastic_search(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
     er_config = {
         'model_type': 'text_relevance',
-        'phonetic_match_types': [
-            # "double_metaphone"
-        ],
     }
     resolver = EntityResolver().get_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
@@ -70,11 +65,25 @@ def resolver_sbert(resource_loader):
             "normalize_token_embs": True,
             "bert_output_type": "mean",
             "augment_lower_case": False,
-            "quantize_model": False,
+            "quantize_model": True,
         }
     }
     resolver = EntityResolver().get_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE, er_config=er_config
+    )
+    resolver.fit()
+    return resolver
+
+
+@pytest.fixture
+def resolver_tfidf(resource_loader, es_client):
+    """An entity resolver for 'location' on the Kwik-E-Mart app"""
+    er_config = {
+        'model_type': 'tfidf_cosine_similarity',
+    }
+    resolver = EntityResolver().get_resolver(
+        APP_PATH, resource_loader, ENTITY_TYPE,
+        es_client=es_client, er_config=er_config
     )
     resolver.fit()
     return resolver
@@ -106,6 +115,14 @@ def test_canonical_sbert(resolver_sbert):
     assert predicted["cname"] == expected["cname"]
 
 
+def test_canonical_tfidf(resolver_tfidf):
+    """Tests that entity resolution works for a canonical entity in the map"""
+    expected = {"id": "2", "cname": "Pine and Market"}
+    predicted = resolver_tfidf.predict(Entity("Pine and Market", ENTITY_TYPE))[0]
+    assert predicted["id"] == expected["id"]
+    assert predicted["cname"] == expected["cname"]
+
+
 def test_synonym_elastic_search(resolver_elastic_search):
     """Tests that entity resolution works for an entity synonym in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
@@ -120,5 +137,13 @@ def test_synonym_sbert(resolver_sbert):
     """Tests that entity resolution works for an entity synonym in the map"""
     expected = {"id": "2", "cname": "Pine and Market"}
     predicted = resolver_sbert.predict(Entity("Pine St", ENTITY_TYPE))[0]
+    assert predicted["id"] == expected["id"]
+    assert predicted["cname"] == expected["cname"]
+
+
+def test_synonym_tfidf(resolver_tfidf):
+    """Tests that entity resolution works for an entity synonym in the map"""
+    expected = {"id": "2", "cname": "Pine and Market"}
+    predicted = resolver_tfidf.predict(Entity("Pine St", ENTITY_TYPE))[0]
     assert predicted["id"] == expected["id"]
     assert predicted["cname"] == expected["cname"]
