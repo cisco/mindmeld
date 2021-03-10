@@ -143,7 +143,7 @@ class EntityResolverModelBase(ABC):
 
         # default configs useful for obtaining model cache path
         default_er_config = DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS[self.name]
-        for key, value in er_config.get("model_settings", {}):
+        for key, value in er_config.get("model_settings", {}).items():
             default_er_config["model_settings"][key] = value
         self.er_config = default_er_config
 
