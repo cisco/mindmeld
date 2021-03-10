@@ -27,6 +27,12 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=R0201
 
+SUPPORTED_LANG_CODES = ['en', 'es', 'fr', 'pt', 'it']
+
+
+class UnsupportedLanguageError(Exception):
+    pass
+
 
 class Augmentor(ABC):
     """
@@ -47,6 +53,7 @@ class Augmentor(ABC):
         self.path_suffix = path_suffix
         self._resource_loader = resource_loader
         self._check_dependencies()
+        self._check_lang_support()
 
     def _check_dependencies(self):
         if not _is_module_available("torch"):
@@ -57,6 +64,13 @@ class Augmentor(ABC):
         if not _is_module_available("transformers"):
             raise ModuleNotFoundError(
                 "Library not found: 'transformers'. Run 'pip install mindmeld[augment]' to install."
+            )
+
+    def _check_lang_support(self):
+        if self.lang not in SUPPORTED_LANG_CODES:
+            raise UnsupportedLanguageError(
+                f"'{self.lang}' is not supported yet. "
+                "English, Spanish, French, Portuguese and Italian are currently supported."
             )
 
     def augment(self, **kwargs):
