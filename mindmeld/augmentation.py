@@ -25,16 +25,6 @@ from .models.helpers import register_augmentor
 
 logger = logging.getLogger(__name__)
 
-if not _is_module_available("torch"):
-    raise ModuleNotFoundError(
-        "Library not found: 'torch'. Run 'pip install mindmeld[augment]' to install."
-    )
-
-if not _is_module_available("transformers"):
-    raise ModuleNotFoundError(
-        "Library not found: 'transformers'. Run 'pip install mindmeld[augment]' to install."
-    )
-
 # pylint: disable=R0201
 
 
@@ -56,6 +46,18 @@ class Augmentor(ABC):
         self.paths = paths
         self.path_suffix = path_suffix
         self._resource_loader = resource_loader
+        self._check_dependencies()
+
+    def _check_dependencies(self):
+        if not _is_module_available("torch"):
+            raise ModuleNotFoundError(
+                "Library not found: 'torch'. Run 'pip install mindmeld[augment]' to install."
+            )
+
+        if not _is_module_available("transformers"):
+            raise ModuleNotFoundError(
+                "Library not found: 'transformers'. Run 'pip install mindmeld[augment]' to install."
+            )
 
     def augment(self, **kwargs):
         """Augments queries given initial queries in application."""
