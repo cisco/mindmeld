@@ -931,7 +931,11 @@ def _is_same_span(target, other):
 
 
 def _is_overlapping(target, other):
+    overlap = _get_overlap(target, other)
+    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+
+
+def _get_overlap(target, other):
     target_range = range(target.start, target.end + 1)
     predicted_range = range(other.start, other.end + 1)
-    overlap = set(target_range).intersection(predicted_range)
-    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+    return set(target_range).intersection(predicted_range)

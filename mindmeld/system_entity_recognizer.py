@@ -705,23 +705,6 @@ def duckling_item_to_query_entity(query, item, offset=0):
         return
 
 
-def duckling_item_to_entity_dict(item):
-    """Converts a duckling candidate into a an entity dictionary to be used by Annotators.
-    Args:
-        item (dict): The duckling item
-
-    Returns:
-        entity (dict): Converted entity
-    """
-    return {
-        "body": item["body"],
-        "start": item["start"],
-        "end": item["end"],
-        "dim": item["entity_type"],
-        "value": item["value"],
-    }
-
-
 def dimensions_from_entity_types(entity_types):
     """
     Args:

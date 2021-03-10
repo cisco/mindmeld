@@ -22,31 +22,37 @@ def en_mla(kwik_e_mart_app_path):
 @pytest.fixture(scope="module")
 def es_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(
-        app_path=kwik_e_mart_app_path, language="es", locale=None, translator="NoOpTranslator"
+        app_path=kwik_e_mart_app_path,
+        language="es",
+        locale=None,
+        translator="NoOpTranslator",
     )
 
 
 @pytest.fixture(scope="module")
 def fr_mla(kwik_e_mart_app_path):
     return MultiLingualAnnotator(
-        app_path=kwik_e_mart_app_path, language="fr", locale=None, translator="NoOpTranslator"
+        app_path=kwik_e_mart_app_path,
+        language="fr",
+        locale=None,
+        translator="NoOpTranslator",
     )
 
 
 def _check_match(
     annotator, query, entity_type, body=None, value=None, unit=None, grain=None
 ):
-    response = annotator.parse(query, entity_types=[entity_type])[0]
+    query_entity = annotator.parse(query, entity_types=[entity_type])[0]
     if body:
-        assert body == response["body"]
+        assert body == query_entity.entity.text
     if unit:
-        assert unit == response["value"]["unit"]
+        assert unit == query_entity.entity.value["unit"]
     if value:
-        assert value == response["value"]["value"]
+        assert value == query_entity.entity.value["value"]
     if grain:
-        assert grain == response["value"]["grain"]
+        assert grain == query_entity.entity.value["grain"]
     if entity_type:
-        assert response["dim"] == entity_type
+        assert query_entity.entity.type == entity_type
 
 
 # English Tests
@@ -396,3 +402,6 @@ def test_fr_time_parse(fr_mla, query, grain, value):
 )
 def test_rule_to_regex_pattern_parser(en_mla, rule, pattern):
     assert pattern == en_mla._get_pattern(rule)
+
+
+# TODO: Add Tests with a Mocker to test GoogleTranslator

@@ -289,21 +289,6 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 }
 
 
-def _no_overlap(entity_one, entity_two):
-    """Returns True if two query entities do not overlap.
-    Args:
-        entity_one (QueryEntity): First entity.
-        entity_two (QueryEntity): Second Entity.
-
-    Returns:
-        no_overlap (bool): True if no overlap.
-    """
-    return (
-        entity_one.span.start > entity_two.span.end
-        or entity_two.span.start > entity_one.span.end
-    )
-
-
 # fetches all currency symbols in unicode by iterating through the character set and
 # selecting the currency symbols based on the unicode currency category 'Sc'
 CURRENCY_SYMBOLS = u"".join(

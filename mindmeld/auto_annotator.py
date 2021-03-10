@@ -26,10 +26,10 @@ from .components._config import (
 from .components.translators import NoOpTranslator, TranslatorFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
-    duckling_item_to_entity_dict,
+    duckling_item_to_query_entity,
 )
 from .markup import load_query, dump_queries
-from .core import Entity, Span, QueryEntity
+from .core import Entity, Span, QueryEntity, _get_overlap
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
 from .constants import (
@@ -40,7 +40,6 @@ from .constants import (
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
     CURRENCY_SYMBOLS,
-    _no_overlap,
 )
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types
@@ -271,8 +270,9 @@ class Annotator(ABC):
         annotated_entities = self._get_annotated_entities(
             processed_query=processed_query, entity_types=entity_types
         )
-        final_entities = self._resolve_conflicts(
-            current_entities=current_entities, annotated_entities=annotated_entities,
+        final_entities = Annotator._resolve_conflicts(
+            target_entities=annotated_entities if self.overwrite else current_entities,
+            other_entities=current_entities if self.overwrite else annotated_entities,
         )
         processed_query.entities = tuple(final_entities)
 
@@ -290,16 +290,12 @@ class Annotator(ABC):
         if len(entity_types) == 0:
             return []
         entity_types = None if entity_types == ["*"] else entity_types
-        items = self.parse(
+        return self.parse(
             sentence=processed_query.query.text,
             entity_types=entity_types,
             domain=processed_query.domain,
             intent=processed_query.intent,
         )
-        query_entities = [
-            Annotator._item_to_query_entity(item, processed_query) for item in items
-        ]
-        return query_entities if len(query_entities) > 0 else []
 
     @staticmethod
     def _item_to_query_entity(item, processed_query):
@@ -324,28 +320,27 @@ class Annotator(ABC):
         )
         return query_entity
 
-    def _resolve_conflicts(self, current_entities, annotated_entities):
+    @staticmethod
+    def _resolve_conflicts(target_entities, other_entities):
         """Resolve overlaps between existing entities and newly annotad entities.
 
         Args:
-            current_entities (list): List of existing query entities.
-            annotated_entities (list): List of new query entities.
+            target_entities (list): List of existing query entities.
+            other_entities (list): List of new query entities.
 
         Returns:
             final_entities (list): List of resolved query entities.
         """
-        base_entities = annotated_entities if self.overwrite else current_entities
-        other_entities = current_entities if self.overwrite else annotated_entities
-
         additional_entities = []
         for o_entity in other_entities:
             no_overlaps = [
-                _no_overlap(o_entity, b_entity) for b_entity in base_entities
+                not _get_overlap(o_entity.span, t_entity.span)
+                for t_entity in target_entities
             ]
             if all(no_overlaps):
                 additional_entities.append(o_entity)
-        base_entities.extend(additional_entities)
-        return base_entities
+        target_entities.extend(additional_entities)
+        return target_entities
 
     # pylint: disable=R0201
     def _unannotate_query(self, processed_query, remove_entities):
@@ -378,7 +373,7 @@ class Annotator(ABC):
             sentence (str): Sentence to detect entities.
 
         Returns:
-            entities (list): List of entity dictionaries.
+            query_entities (list): List of QueryEntity objects.
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -510,7 +505,7 @@ class SpacyAnnotator(Annotator):
                 possible entity types will be annotated.
 
         Returns:
-            entities (list): List of entity dictionaries.
+            query_entities (list): List of QueryEntity objects.
         """
         doc = self.nlp(sentence)
         spacy_entities = [
@@ -558,7 +553,16 @@ class SpacyAnnotator(Annotator):
         if entity_types:
             entities = [e for e in entities if e["dim"] in entity_types]
 
-        return entities
+        processed_query = load_query(
+            sentence,
+            query_factory=self._resource_loader.query_factory,
+            domain=kwargs.get("domain"),
+            intent=kwargs.get("intent"),
+        )
+        return [
+            Annotator._item_to_query_entity(entity, processed_query)
+            for entity in entities
+        ]
 
     def _resolve_time_date(self, entity, entity_types=None):
         """Resolves a time related entity. First, an exact match is searched for. If
@@ -865,7 +869,7 @@ class BootstrapAnnotator(Annotator):
             intent (str): Allowed intent.
 
         Returns:
-            entities (list): List of entity dictionaries.
+            query_entities (list): List of QueryEntity objects.
         """
         response = self.nlp.process(
             sentence, allowed_nlp_classes={domain: {intent: {}}}, verbose=True
@@ -887,7 +891,16 @@ class BootstrapAnnotator(Annotator):
                             "role": entity["role"],
                         }
                     )
-        return entities
+        processed_query = load_query(
+            sentence,
+            query_factory=self._resource_loader.query_factory,
+            domain=kwargs.get("domain"),
+            intent=kwargs.get("intent"),
+        )
+        return [
+            Annotator._item_to_query_entity(entity, processed_query)
+            for entity in entities
+        ]
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
@@ -939,7 +952,8 @@ class NoTranslationDucklingAnnotator(Annotator):
             sentence (str): Sentence to detect entities.
             entity_types (list): List of entity types to parse. If None, all
                     possible entity types will be parsed.
-        Returns: entities (list): List of entity dictionaries.
+        Returns:
+            query_entities (list): List of QueryEntity objects.
         """
         duckling_candidates = self.duckling.get_candidates_for_text(
             sentence,
@@ -967,8 +981,10 @@ class NoTranslationDucklingAnnotator(Annotator):
             final_candidates = [
                 e for e in final_candidates if e["entity_type"] in entity_types
             ]
+        query = self._resource_loader.query_factory.create_query(sentence)
         return [
-            duckling_item_to_entity_dict(candidate) for candidate in final_candidates
+            duckling_item_to_query_entity(query, candidate)
+            for candidate in final_candidates
         ]
 
     @property
@@ -1084,7 +1100,7 @@ class TranslationDucklingAnnotator(Annotator):
             entity_types (list): List of entity types to parse. If None, all
                     possible entity types will be parsed.
         Returns:
-            entities (list): List of entity dictionaries.
+            query_entities (list): List of QueryEntity objects.
         """
         candidates = self.en_annotator.duckling.get_candidates_for_text(
             sentence,
@@ -1101,10 +1117,10 @@ class TranslationDucklingAnnotator(Annotator):
             value_matched_candidates = []
             for candidate in candidates:
                 # Skip the candidate if the type does not match
-                if entity["dim"] != candidate["entity_type"]:
+                if entity.entity.type != candidate["entity_type"]:
                     continue
                 # Store the candidate if there is a value match
-                if entity["value"] == candidate["value"]:
+                if entity.entity.value == candidate["value"]:
                     value_matched_candidates.append(candidate)
                 # Skip the the translation-match check if value-match candidates exist
                 if value_matched_candidates:
@@ -1112,7 +1128,7 @@ class TranslationDucklingAnnotator(Annotator):
                 # Check if the translated entity text matches candidate entity text
                 if (
                     self.translator.translate(
-                        entity["body"], target_language=self.language
+                        entity.entity.text, target_language=self.language
                     )
                     == candidate["body"]
                 ):
@@ -1127,8 +1143,10 @@ class TranslationDucklingAnnotator(Annotator):
             final_candidates = [
                 e for e in final_candidates if e["entity_type"] in entity_types
             ]
+        query = self._resource_loader.query_factory.create_query(sentence)
         return [
-            duckling_item_to_entity_dict(candidate) for candidate in final_candidates
+            duckling_item_to_query_entity(query, candidate)
+            for candidate in final_candidates
         ]
 
     @property
@@ -1206,7 +1224,7 @@ class MultiLingualAnnotator(Annotator):
             entity_types (list): List of entity types to parse. If None, all
                 possible entity types will be parsed.
         Returns:
-            entities (list): List of entity dictionaries.
+            query_entities (list): List of QueryEntity objects.
         """
         if self.language == ENGLISH_LANGUAGE_CODE:
             return self.en_annotator.parse(sentence, entity_types=entity_types)
@@ -1216,7 +1234,7 @@ class MultiLingualAnnotator(Annotator):
         duckling_entities = self.duckling_annotator.parse(
             sentence, entity_types=entity_types
         )
-        merged_entities = MultiLingualAnnotator._resolve_conflicts_entity_dicts(
+        merged_entities = Annotator._resolve_conflicts(
             non_en_spacy_entities, duckling_entities
         )
         return merged_entities
@@ -1233,26 +1251,6 @@ class MultiLingualAnnotator(Annotator):
         if self.language in DUCKLING_TO_SYS_ENTITY_MAPPINGS:
             supported_entities.update(self.duckling_annotator.supported_entity_types)
         return supported_entities
-
-    @staticmethod
-    def _no_overlap_entity_dicts(entity_one, entity_two):
-        return (
-            entity_one["start"] > entity_two["end"]
-            or entity_two["start"] > entity_one["end"]
-        )
-
-    @staticmethod
-    def _resolve_conflicts_entity_dicts(base_entities, other_entities):
-        non_overlapping_other_entities = []
-        for o_entity in other_entities:
-            no_overlaps = [
-                MultiLingualAnnotator._no_overlap_entity_dicts(o_entity, b_entity)
-                for b_entity in base_entities
-            ]
-            if all(no_overlaps):
-                non_overlapping_other_entities.append(o_entity)
-        base_entities.extend(non_overlapping_other_entities)
-        return base_entities
 
 
 def register_all_annotators():

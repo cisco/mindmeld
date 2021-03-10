@@ -28,17 +28,7 @@ class Translator(metaclass=ABCMeta):
 
     def __init__(self):
         """Creates a translation client after finding the credential path."""
-        self.translate_client = None
-
-    @abstractmethod
-    def get_translate_client(self):
-        """
-        Args:
-            text (str): Input text
-        Returns:
-            language_code (str): Detected Language Code
-        """
-        raise NotImplementedError("Subclasses must implement this method")
+        pass
 
     @abstractmethod
     def detect_language(self, text):
@@ -68,9 +58,6 @@ class NoOpTranslator(Translator):
     def __init__(self):
         pass
 
-    def get_translate_client(self):
-        return
-
     def detect_language(self, text):
         return
 
@@ -83,9 +70,10 @@ class GoogleTranslator(Translator):
 
     def __init__(self):
         """Initializes the translate_client."""
-        self.translate_client = self.get_translate_client()
+        self.translate_client = GoogleTranslator.get_translate_client()
 
-    def get_translate_client(self):
+    @staticmethod
+    def get_translate_client():
         """Creates a translation client after finding the credential path. Attempts to import the
         Google Cloud Translation library.
 
