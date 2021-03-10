@@ -25,6 +25,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.autonotebook import trange
 
@@ -139,6 +140,10 @@ class EntityResolverBase(ABC):
             normalizer: The normalizer to use
             augment_lower_case: If to extend the synonyms list with their lower-cased values
         """
+
+        def _form_explorer(string):
+            return [string.lower()]
+
         item_map = {}
         syn_map = {}
         seen_ids = []
@@ -174,12 +179,13 @@ class EntityResolverBase(ABC):
             initial_num_syns = len(syn_map)
             aug_syn_map = {}
             for alias, alias_map in syn_map.items():
-                alias_lower = alias.lower()
-                if alias_lower not in syn_map:
-                    aug_syn_map.update({alias_lower: alias_map})
+                other_aliases = _form_explorer(alias)
+                for other_alias in other_aliases:
+                    if other_alias not in syn_map:
+                        aug_syn_map.update({alias_lower: alias_map})
             syn_map.update(aug_syn_map)
             final_num_syns = len(syn_map)
-            msg = "Added %d additional synonyms by lower-casing. Upped from %d to %d"
+            msg = "Added %d additional synonyms by lower-casing. Synonyms increased from %d to %d"
             logger.info(msg, final_num_syns - initial_num_syns, initial_num_syns, final_num_syns)
 
         return {"items": item_map, "synonyms": syn_map}
@@ -219,7 +225,7 @@ class EntityResolverBase(ABC):
             top_n (int): maximum number of results to populate
 
         Returns:
-            (list): The top 20 resolved values for the provided entity.
+            (list): The top n resolved values for the provided entity.
         """
         if isinstance(entity, (list, tuple)):
             top_entity = entity[0]
@@ -460,7 +466,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 of n-best entity objects.
 
         Returns:
-            (list): The top 20 resolved values for the provided entity.
+            (list): The resolved values for the provided entity.
         """
 
         top_entity = nbest_entities[0]
@@ -1001,16 +1007,26 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                                         their similarity scores (descending)
         """
 
-        entity_emb = entity_emb.reshape(1, -1)
         synonyms, synonyms_encodings = zip(*syn_embs.items())
-        similarity_scores = cosine_similarity(np.array(synonyms_encodings), entity_emb).reshape(-1)
-        similarity_scores = np.around(similarity_scores, decimals=2)
+        similarity_scores_2d = cosine_similarity(entity_emb, np.array(synonyms_encodings))
+        similarity_scores_2d = np.around(similarity_scores_2d, decimals=2)
 
-        if return_as_dict:
-            return dict(zip(synonyms, similarity_scores))
+        results = []
 
-        # results in descending scores
-        return sorted(list(zip(synonyms, similarity_scores)), key=lambda x: x[1], reverse=True)
+        for similarity_scores in similarity_scores_2d:
+            similarity_scores = similarity_scores.reshape(-1)
+
+            if return_as_dict:
+                results.append(dict(zip(synonyms, similarity_scores)))
+            else:
+                # results in descending scores
+                results.append(sorted(list(zip(synonyms, similarity_scores)), key=lambda x: x[1],
+                                      reverse=True))
+
+        if len(entity_emb) == 1:
+            return results[0]
+
+        return results
 
     def _fit(self, clean):
         """
@@ -1118,7 +1134,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
                 of n-best entity objects.
 
         Returns:
-            (list): The top 20 resolved values for the provided entity.
+            (list): The resolved values for the provided entity.
         """
 
         syn_embs = self._cached_embs
@@ -1132,6 +1148,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
             top_entity_emb = self._encode(top_entity.text)[0]
 
         try:
+            top_entity_emb = top_entity_emb.reshape(1, -1)
             sorted_items = self._compute_cosine_similarity(syn_embs, top_entity_emb)
             values = []
             for synonym, score in sorted_items:
@@ -1179,10 +1196,173 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase):
         with open(cache_path, "wb") as fp:
             pickle.dump(data, fp)
 
+    def _predict_batch(self, nbest_entities_list):
+
+        syn_embs = self._cached_embs
+
+        # encode input entity
+        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
+        top_entity_list = [i[0] for i in nbest_entities_list]  # top_entity
+        top_entity_emb_list = self._encode([top_entity.text for top_entity in top_entity_list])
+
+        try:
+            # w/o batch,  [ nsyms x 768*4 ] x [ 1 x 768*4 ] --> [ nsyms x 1 ]
+            # w/  batch,  [ nsyms x 768*4 ] x [ k x 768*4 ] --> [ nsyms x k ]
+            sorted_items_list = self._compute_cosine_similarity(syn_embs, top_entity_emb_list)
+            values_list = []
+
+            # due to way compute similarity returns
+            if len(top_entity_emb_list) == 1:
+                sorted_items_list = [sorted_items_list]
+
+            for sorted_items in sorted_items_list:
+                values = []
+                for synonym, score in sorted_items:
+                    cnames = self._entity_mapping["synonyms"][synonym]
+                    for cname in cnames:
+                        for item in self._entity_mapping["items"][cname]:
+                            item_value = copy.copy(item)
+                            item_value.pop("whitelist", None)
+                            item_value.update({"score": score})
+                            item_value.update({"top_synonym": synonym})
+                            values.append(item_value)
+                values_list.append(values)
+        except (KeyError, TypeError) as e:
+            logger.error(e)
+            return None
+
+        return values_list
+
+    def predict_batch(self, entity_list, top_n: int = 20):
+
+        if not self.entity_map.get("entities", []):
+            return [[] for _ in entity_list]
+
+        nbest_entities_list = []
+        results_list = []
+        for entity in entity_list:
+
+            if isinstance(entity, (list, tuple)):
+                top_entity = entity[0]
+                nbest_entities = tuple(entity)
+            else:
+                top_entity = entity
+                nbest_entities = tuple([entity])
+
+            nbest_entities_list.append(nbest_entities)
+
+            if self._is_system_entity:
+                # system entities are already resolved
+                results_list.append(top_entity.value)
+
+        if self._is_system_entity:
+            return results_list
+
+        results_list = self._predict_batch(nbest_entities_list)
+
+        for i, results in enumerate(results_list):
+            if results:
+                # if len(results) < top_n:
+                #     logger.info(
+                #         "Retrieved only %d entity resolutions instead of asked number %d for "
+                #         "entity %r of type %r",
+                #         len(results), top_n, nbest_entities[0].text, self.type,
+                #     )
+                results_list[i] = results[:top_n]
+
+        return results_list
+
+
+class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
+    """
+    a tf-idf based entity resolver using sparse matrices. ref:
+    scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
+    """
+
+    def __init__(self, app_path, resource_loader, entity_type, er_config, **_kwargs):
+        super().__init__(app_path, resource_loader, entity_type, er_config)
+        self._entity_mapping = None
+        self._n = 5  # max number of ngrams to consider
+        self._vectorizer = TfidfVectorizer(analyzer=self._custom_analyzer)
+        self._syn_tfidf_matrix = None
+        self._unique_synonyms = []
+
+    def _custom_analyzer(self, string):
+        results = []
+        for n in range(self._n + 1):
+            results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
+        return results
+
+    def _fit(self, clean):
+        """Loads an entity mapping file to resolve entities using tf-idf.
+        """
+        if clean:
+            logger.info(
+                "clean=True ignored while fitting tf-idf algo for entity resolution"
+            )
+
+        # load mappings.json data
+        entity_map = self.entity_map
+        augment_lower_case = (
+            self.er_config.get("model_settings", {})
+                .get("augment_lower_case", True)
+        )
+        self._entity_mapping = self.process_entity_map(
+            self.type, entity_map, augment_lower_case=augment_lower_case
+        )
+        self._unique_synonyms = set(self._entity_mapping["synonyms"])
+
+        # returns a sparse matrix
+        self._syn_tfidf_matrix = self._vectorizer.fit_transform(self._unique_synonyms)
+
+    def _predict(self, nbest_entities):
+        """Predicts the resolved value(s) for the given entity using cosine similarity.
+
+        Args:
+            nbest_entities (tuple): List of one entity object found in an input query, or a list  \
+                of n-best entity objects.
+
+        Returns:
+            (list): The resolved values for the provided entity.
+        """
+
+        # encode input entity
+        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
+        top_entity = nbest_entities[0]  # top_entity
+        top_entity_vector = self._vectorizer.transform([top_entity.text])
+
+        similarity_scores = self._syn_tfidf_matrix.dot(top_entity_vector.T).toarray().reshape(-1)
+        similarity_scores = np.around(similarity_scores, decimals=4)
+        sorted_items = sorted(list(zip(self._unique_synonyms, similarity_scores)),
+                              key=lambda x: x[1], reverse=True)
+
+        try:
+            values = []
+            for synonym, score in sorted_items:
+                cnames = self._entity_mapping["synonyms"][synonym]
+                for cname in cnames:
+                    for item in self._entity_mapping["items"][cname]:
+                        item_value = copy.copy(item)
+                        item_value.pop("whitelist", None)
+                        item_value.update({"score": score})
+                        item_value.update({"top_synonym": synonym})
+                        values.append(item_value)
+        except (TypeError, KeyError) as e:
+            logger.warning(
+                "Failed to resolve entity %r for type %r", top_entity.text, top_entity.type
+            )
+            return None
+
+        return values
+
+    def _load(self):
+        self.fit()
+
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "exact_match": ExactMatchEntityResolver,
     "text_relevance": ElasticsearchEntityResolver,
-    "sbert_cosine_similarity": SentenceBertCosSimEntityResolver
+    "sbert_cosine_similarity": SentenceBertCosSimEntityResolver,
+    "tfidf_cosine_similarity": TfIdfSparseCosSimEntityResolver,
 }
 ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]
