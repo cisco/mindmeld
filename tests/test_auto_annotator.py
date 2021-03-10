@@ -10,7 +10,7 @@ Tests for `auto_annotator` module
 import pytest
 
 from mindmeld.auto_annotator import SpacyAnnotator
-from mindmeld.constants import _get_pattern
+from mindmeld.constants import get_pattern
 
 
 @pytest.fixture(scope="module")
@@ -225,4 +225,4 @@ def test_time_parse(spacy_annotator, query, grain, value):
     ],
 )
 def test_rule_to_regex_pattern_parser(spacy_annotator, rule, pattern):
-    assert pattern == _get_pattern(rule)
+    assert pattern == get_pattern(rule)
