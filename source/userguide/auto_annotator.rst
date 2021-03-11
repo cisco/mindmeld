@@ -9,7 +9,7 @@ The Auto Annotator
 .. note::
 
    The examples in this section require the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``.
-   Examples related to the MultiLingualAnnotator require the :doc:`Health Screening <../blueprints/screening_app>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``
+   Examples related to the MultiLingualAnnotator requires the :doc:`Health Screening <../blueprints/screening_app>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``
 
 .. warning::
 
