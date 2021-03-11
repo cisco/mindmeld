@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=R0201
 
-SUPPORTED_LANG_CODES = ['en', 'es', 'fr', 'pt', 'it']
+SUPPORTED_LANG_CODES = ['en', 'es', 'fr', 'it', 'pt', 'ro']
 
 
 class UnsupportedLanguageError(Exception):
@@ -70,7 +70,8 @@ class Augmentor(ABC):
         if self.lang not in SUPPORTED_LANG_CODES:
             raise UnsupportedLanguageError(
                 f"'{self.lang}' is not supported yet. "
-                "English, Spanish, French, Portuguese and Italian are currently supported."
+                "English (en), French (fr), and Italian (it), Portuguese (pt), Romanian (ro) "
+                " and Spanish (es) are currently supported."
             )
 
     def augment(self, **kwargs):
@@ -187,13 +188,16 @@ class EnglishParaphraser(Augmentor):
             model_name, force_download=False
         ).to(torch_device)
 
-        # Use default model params if not customized for app
-        self.params = params or {
+        # Update default params with user model config
+        self.params = {
             "max_length": 60,
             "num_beams": 10,
             "num_return_sequences": 10,
             "temperature": 1.5,
         }
+
+        if params:
+            self.params.update(params)
 
     def _get_response(self, query):
         """Generates paraphrase responses for given query.
@@ -223,7 +227,7 @@ class EnglishParaphraser(Augmentor):
 
 class MultiLingualParaphraser(Augmentor):
     """Paraphraser class for generating paraphrases based on language code of the app
-    (currently supports: French, Italian, Spanish, Portuguese, and Romanian).
+    (currently supports: French, Italian, Portuguese, Romanian and Spanish).
     """
 
     def __init__(self, lang, paths, path_suffix, params, resource_loader):
@@ -261,16 +265,19 @@ class MultiLingualParaphraser(Augmentor):
             self.torch_device
         )
 
-        # Use default model params if not customized for app
-        self.params = params or {
+        # Update default params with user model config
+        self.params = {
             "num_beams": 3,
             "num_return_sequences": 3,
             "top_k": 0,
             "temperature": 1.0,
         }
 
-    def _translate(self, *, template, queries, model, tokenizer, **kwargs):
-        """The core translation step for forward and back translation.
+        if params:
+            self.params.update(params)
+
+    def _translate(self, *, queries, model, tokenizer, **kwargs):
+        """The core translation step for forward and reverse translation.
 
         Args:
             template (lambda func): Structure input text to model.
@@ -278,7 +285,6 @@ class MultiLingualParaphraser(Augmentor):
             model: Machine translation model (en-ROMANCE or ROMANCE-en).
             tokenizer: Language tokenizer for input query text.
         """
-        queries = [template(query) for query in queries]
         encoded = tokenizer.prepare_seq2seq_batch(queries, return_tensors="pt")
         for key in encoded:
             encoded[key] = encoded[key].to(self.torch_device)
@@ -290,23 +296,26 @@ class MultiLingualParaphraser(Augmentor):
         return translated_queries
 
     def augment_queries(self, queries):
+        template = lambda text: f"{text}"
+        queries = [template(query) for query in queries]
+
         translated_queries = self._translate(
-            template=lambda text: f"{text}",
             queries=queries,
             model=self.en_model,
             tokenizer=self.en_tokenizer,
             **self.params,
         )
-        translated_queries = list(set(translated_queries))
 
-        back_translated_queries = self._translate(
-            template=lambda text: f">>{self.lang}<< {text}",
+        template = lambda text: f">>{self.lang}<< {text}"
+        translated_queries = [template(query) for query in set(translated_queries)]
+
+        reverse_translated_queries = self._translate(
             queries=translated_queries,
             model=self.target_model,
             tokenizer=self.target_tokenizer,
             **self.params,
         )
-        augmented_queries = list(set(p.lower() for p in back_translated_queries))
+        augmented_queries = list(set(p.lower() for p in reverse_translated_queries))
 
         return augmented_queries
 
