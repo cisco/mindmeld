@@ -13,6 +13,7 @@
 
 """This module contains the data augmentation processes for MindMeld."""
 
+import copy
 import logging
 import re
 
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=R0201
 
-SUPPORTED_LANG_CODES = ['en', 'es', 'fr', 'it', 'pt', 'ro']
+SUPPORTED_LANG_CODES = ["en", "es", "fr", "it", "pt", "ro"]
 
 
 class UnsupportedLanguageError(Exception):
@@ -196,32 +197,40 @@ class EnglishParaphraser(Augmentor):
             "temperature": 1.5,
         }
 
-        if params:
-            self.params.update(params)
+        if params and "fwd_params" in params:
+            self.params.update(params["fwd_params"])
 
-    def _get_response(self, query):
+        self.batch_size = params.get("batch_size", 8)
+
+    def _get_response(self, queries):
         """Generates paraphrase responses for given query.
 
         Args:
-            query (str): An application query.
+            queries (list(str)): List of application queries.
 
         Return:
             paraphrases (list(str)): List of paraphrased queries.
         """
-        batch = self.tokenizer.prepare_seq2seq_batch(
-            [query], truncation=True, padding="longest", max_length=60
-        )
-        translated = self.model.generate(
-            **batch,
-            **self.params,
-        )
-        paraphrases = self.tokenizer.batch_decode(translated, skip_special_tokens=True)
-        return paraphrases
+        all_generated_queries = []
+        for pos in range(0, len(queries), self.batch_size):
+            batch = self.tokenizer.prepare_seq2seq_batch(
+                queries[pos : pos + self.batch_size],
+                truncation=True,
+                padding="longest",
+                max_length=60,
+            )
+            generated = self.model.generate(
+                **batch,
+                **self.params,
+            )
+            all_generated_queries.extend(
+                self.tokenizer.batch_decode(generated, skip_special_tokens=True)
+            )
+        return all_generated_queries
 
     def augment_queries(self, queries, **kwargs):
         augmented_queries = []
-        for query in queries:
-            augmented_queries.extend(self._get_response(query, **kwargs))
+        augmented_queries = self._get_response(queries, **kwargs)
         return augmented_queries
 
 
@@ -266,15 +275,18 @@ class MultiLingualParaphraser(Augmentor):
         )
 
         # Update default params with user model config
-        self.params = {
+        self.fwd_params = {
             "num_beams": 3,
             "num_return_sequences": 3,
             "top_k": 0,
             "temperature": 1.0,
         }
 
-        if params:
-            self.params.update(params)
+        self.reverse_params = copy.deepcopy(self.fwd_params)
+
+        self.fwd_params.update(params.get("fwd_params", {}))
+        self.reverse_params.update(params.get("reverse_params", {}))
+        self.batch_size = params.get("batch_size", 8)
 
     def _translate(self, *, queries, model, tokenizer, **kwargs):
         """The core translation step for forward and reverse translation.
@@ -285,15 +297,21 @@ class MultiLingualParaphraser(Augmentor):
             model: Machine translation model (en-ROMANCE or ROMANCE-en).
             tokenizer: Language tokenizer for input query text.
         """
-        encoded = tokenizer.prepare_seq2seq_batch(queries, return_tensors="pt")
-        for key in encoded:
-            encoded[key] = encoded[key].to(self.torch_device)
+        all_translated_queries = []
+        for pos in range(0, len(queries), self.batch_size):
+            print(pos)
+            encoded = tokenizer.prepare_seq2seq_batch(
+                queries[pos : pos + self.batch_size], return_tensors="pt"
+            )
+            for key in encoded:
+                encoded[key] = encoded[key].to(self.torch_device)
 
-        translated = model.generate(**encoded, **kwargs)
-        translated_queries = tokenizer.batch_decode(
-            translated, skip_special_tokens=True
-        )
-        return translated_queries
+            translated = model.generate(**encoded, **kwargs)
+            translated_queries = tokenizer.batch_decode(
+                translated, skip_special_tokens=True
+            )
+            all_translated_queries.extend(translated_queries)
+        return all_translated_queries
 
     def augment_queries(self, queries):
         template = lambda text: f"{text}"
@@ -303,7 +321,7 @@ class MultiLingualParaphraser(Augmentor):
             queries=queries,
             model=self.en_model,
             tokenizer=self.en_tokenizer,
-            **self.params,
+            **self.fwd_params,
         )
 
         template = lambda text: f">>{self.lang}<< {text}"
@@ -313,7 +331,7 @@ class MultiLingualParaphraser(Augmentor):
             queries=translated_queries,
             model=self.target_model,
             tokenizer=self.target_tokenizer,
-            **self.params,
+            **self.reverse_params,
         )
         augmented_queries = list(set(p.lower() for p in reverse_translated_queries))
 
