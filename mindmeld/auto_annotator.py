@@ -107,11 +107,12 @@ class Annotator(ABC):
         all_file_paths = self._resource_loader.get_all_file_paths()
         file_entities_map = {path: [] for path in all_file_paths}
 
-        rules = (
-            self.annotation_rules
-            if action == AnnotatorAction.ANNOTATE
-            else self.unannotation_rules
-        )
+        if action == AnnotatorAction.ANNOTATE:
+            rules = self.annotation_rules
+        elif action == AnnotatorAction.UNANNOTATE:
+            rules = self.unannotation_rules
+        else:
+            raise AssertionError(f"{action} is an invalid Annotator action.")
 
         for rule in rules:
             pattern = Annotator._get_pattern(rule)
@@ -423,7 +424,7 @@ class SpacyAnnotator(Annotator):
             spacy_model_name (str): Name of the Spacy NER model
         """
         model_type = "web" if self.language in SPACY_ANNOTATOR_WEB_LANGUAGES else "news"
-        return "_".join([self.language, "core", model_type, self.spacy_model_size])
+        return f"{self.language}_core_{model_type}_{self.spacy_model_size}"
 
     def _load_model(self):
         """Load Spacy English model. Download if needed.
