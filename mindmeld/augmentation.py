@@ -57,7 +57,7 @@ class Augmentor(ABC):
         self._check_lang_support()
 
     def _check_dependencies(self):
-        """ Checks module dependencies."""
+        """Checks module dependencies."""
         if not _is_module_available("torch"):
             raise ModuleNotFoundError(
                 "Library not found: 'torch'. Run 'pip install mindmeld[augment]' to install."
@@ -69,7 +69,7 @@ class Augmentor(ABC):
             )
 
     def _check_lang_support(self):
-        """ Checks if language is currently supported for augmentaion."""
+        """Checks if language is currently supported for augmentation."""
         if self.lang not in SUPPORTED_LANG_CODES:
             raise UnsupportedLanguageError(
                 f"'{self.lang}' is not supported yet. "
