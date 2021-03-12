@@ -57,6 +57,7 @@ class Augmentor(ABC):
         self._check_lang_support()
 
     def _check_dependencies(self):
+        """ Checks module dependencies."""
         if not _is_module_available("torch"):
             raise ModuleNotFoundError(
                 "Library not found: 'torch'. Run 'pip install mindmeld[augment]' to install."
@@ -68,6 +69,7 @@ class Augmentor(ABC):
             )
 
     def _check_lang_support(self):
+        """ Checks if language is currently supported for augmentaion."""
         if self.lang not in SUPPORTED_LANG_CODES:
             raise UnsupportedLanguageError(
                 f"'{self.lang}' is not supported yet. "
@@ -152,7 +154,7 @@ class Augmentor(ABC):
 
         with open(write_path, "w") as outfile:
             for query in augmented_queries:
-                outfile.write(query.strip("\n") + "\n")
+                outfile.write(query.rstrip() + "\n")
 
 
 class EnglishParaphraser(Augmentor):
@@ -299,7 +301,6 @@ class MultiLingualParaphraser(Augmentor):
         """
         all_translated_queries = []
         for pos in range(0, len(queries), self.batch_size):
-            print(pos)
             encoded = tokenizer.prepare_seq2seq_batch(
                 queries[pos : pos + self.batch_size], return_tensors="pt"
             )
@@ -314,9 +315,6 @@ class MultiLingualParaphraser(Augmentor):
         return all_translated_queries
 
     def augment_queries(self, queries):
-        template = lambda text: f"{text}"
-        queries = [template(query) for query in queries]
-
         translated_queries = self._translate(
             queries=queries,
             model=self.en_model,
