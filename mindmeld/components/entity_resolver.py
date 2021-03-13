@@ -27,13 +27,14 @@ from string import punctuation
 import numpy as np
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
+from scipy.spatial.distance import cdist as cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.autonotebook import trange
 
 from ._config import (
     DEFAULT_ES_SYNONYM_MAPPING,
     PHONETIC_ES_SYNONYM_MAPPING,
+    DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS,
     get_app_namespace,
     get_classifier_config,
 )
@@ -56,51 +57,19 @@ from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS = {
-    "exact_match": {
-        'model_type': 'exact_match',
-        "model_settings": {
-            "augment_lower_case": False
-        }
-    },
-    "text_relevance": {
-        'model_type': 'text_relevance',
-        # 'phonetic_match_types': ["double_metaphone"],
-    },
-    "sbert_cosine_similarity": {
-        'model_type': 'sbert_cosine_similarity',
-        "model_settings": {
-            "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
-            "batch_size": 16,
-            "concat_last_n_layers": 4,
-            "normalize_token_embs": True,
-            "bert_output_type": "mean",
-            "augment_lower_case": False,
-            "quantize_model": True,
-        }
-    },
-    "tfidf_cosine_similarity": {
-        'model_type': 'tfidf_cosine_similarity',
-        "model_settings": {
-            "augment_lower_case": True,
-            "augment_normalized": False,
-            "augment_title_case": False
-        }
-    },
-}
-
 
 class EntityResolver:
 
     @staticmethod
-    def validate_resolver_name(name):
+    def _validate_resolver_name(name):
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
             msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
             raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
         if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
-                "Must install the extra [bert] to use the built in embbedder for entity "
-                "resolution. See https://www.mindmeld.com/docs/userguide/getting_started.html")
+                "Must install the extra [bert] by running `pip install mindmeld[bert]`"
+                "to use the built in embbedder for entity resolution. See "
+                "https://www.mindmeld.com/docs/userguide/getting_started.html")
 
     def get_resolver(self, app_path, resource_loader, entity_type, **kwargs):
         """
@@ -120,7 +89,7 @@ class EntityResolver:
             get_classifier_config("entity_resolution", app_path=app_path)
         )
         resolver_name = er_config.get("model_type", None)
-        self.validate_resolver_name(resolver_name)
+        self._validate_resolver_name(resolver_name)
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_name)(
             app_path, resource_loader, entity_type, er_config, **kwargs
         )

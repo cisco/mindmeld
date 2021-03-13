@@ -115,7 +115,6 @@ DEFAULT_LANGUAGE_CONFIG = {
     "locale": ENGLISH_US_LOCALE,
 }
 
-
 # ElasticSearch mapping to define text analysis settings for text fields.
 # It defines specific index configuration for synonym indices. The common index configuration
 # is in default index template.
@@ -405,7 +404,6 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
 }
 
-
 # Elasticsearch mapping to define knowledge base index specific configuration:
 # - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
 # - location field
@@ -464,11 +462,10 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
-
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "SpacyAnnotator",
     "overwrite": False,
-    "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}],
+    "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*", }],
     "unannotate_supported_entities_only": True,
     "unannotate": None,
 }
@@ -476,6 +473,39 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
 DEFAULT_TOKENIZER_CONFIG = {
     # populated in the `get_tokenizer_config` func
     "allowed_patterns": [],
+}
+
+DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS = {
+    "exact_match": {
+        'model_type': 'exact_match',
+        "model_settings": {
+            "augment_lower_case": False
+        }
+    },
+    "text_relevance": {
+        'model_type': 'text_relevance',
+        # 'phonetic_match_types': ["double_metaphone"],
+    },
+    "sbert_cosine_similarity": {
+        'model_type': 'sbert_cosine_similarity',
+        "model_settings": {
+            "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
+            "batch_size": 16,
+            "concat_last_n_layers": 4,
+            "normalize_token_embs": True,
+            "bert_output_type": "mean",
+            "augment_lower_case": False,
+            "quantize_model": True,
+        }
+    },
+    "tfidf_cosine_similarity": {
+        'model_type': 'tfidf_cosine_similarity',
+        "model_settings": {
+            "augment_lower_case": True,
+            "augment_normalized": False,
+            "augment_title_case": False
+        }
+    },
 }
 
 
