@@ -34,21 +34,25 @@ import distro
 import requests
 from tqdm import tqdm
 
-from . import auto_annotator  # noqa: F401 pylint: disable=W0611
+from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
-from .components._config import get_auto_annotator_config
-from .constants import BINARIES_URL, DUCKLING_VERSION
+from .components._config import get_auto_annotator_config, get_language_config
+from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .models.helpers import create_annotator
-from .path import (MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH,
-                   get_dvc_local_remote_path, get_generated_data_folder)
+from .path import (
+    MODEL_CACHE_PATH,
+    QUERY_CACHE_PATH,
+    QUERY_CACHE_TMP_PATH,
+    get_dvc_local_remote_path,
+    get_generated_data_folder,
+)
 
 logger = logging.getLogger(__name__)
-
 click.disable_unicode_literals_warning = True
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "auto_envvar_prefix": "MM"}
@@ -618,7 +622,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace, index_name, data_file, es_host, app_path=app_path,
+            app_namespace,
+            index_name,
+            data_file,
+            es_host,
+            app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
@@ -725,22 +733,27 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--overwrite", is_flag=True, default=False, help="Overwrite existing annotations."
 )
 def annotate(app_path, overwrite):
     """Runs the annotation command of the Auto Annotator."""
-    config = get_auto_annotator_config(app_path=app_path)
-    annotator = create_annotator(app_path=app_path, config=config)
-    annotator.annotate(overwrite=overwrite)
+    register_all_annotators()
+    config = _get_auto_annotator_config(app_path=app_path, overwrite=overwrite)
+    annotator = create_annotator(config)
+    annotator.annotate()
     logger.info("Annotation Complete.")
 
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--unannotate_all",
@@ -750,10 +763,26 @@ def annotate(app_path, overwrite):
 )
 def unannotate(app_path, unannotate_all):
     """Runs the unannotation command of the Auto Annotator."""
-    config = get_auto_annotator_config(app_path=app_path)
-    annotator = create_annotator(app_path=app_path, config=config)
-    annotator.unannotate(unannotate_all=unannotate_all)
+    register_all_annotators()
+    config = _get_auto_annotator_config(
+        app_path=app_path, unannotate_all=unannotate_all
+    )
+    annotator = create_annotator(config)
+    annotator.unannotate()
     logger.info("Annotation Removal Complete.")
+
+
+def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
+    """ Gets the Annotator config from config.py. Overwrites params as needed."""
+    config = get_auto_annotator_config(app_path=app_path)
+    config["app_path"] = app_path
+    config["language"], config["locale"] = get_language_config(app_path)
+    if overwrite:
+        config["overwrite"] = True
+    if unannotate_all:
+        config["unannotation_rules"] = UNANNOTATE_ALL_RULE
+        config["unannotate_supported_entities_only"] = False
+    return config
 
 
 #

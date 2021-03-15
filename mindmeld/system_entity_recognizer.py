@@ -20,14 +20,21 @@ from enum import Enum
 import pycountry
 import requests
 
-from .components._config import (DEFAULT_DUCKLING_URL, get_system_entity_url_config,
-                                 is_duckling_configured)
-from .components.schemas import validate_language_code, validate_locale_code, validate_timestamp
+from .components._config import (
+    DEFAULT_DUCKLING_URL,
+    get_system_entity_url_config,
+    is_duckling_configured,
+)
+from .components.schemas import (
+    validate_language_code,
+    validate_locale_code,
+    validate_timestamp,
+)
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import MindMeldError, SystemEntityResolutionError
 
 SUCCESSFUL_HTTP_CODE = 200
-SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 1.0)
+SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 3.0)
 try:
     if float(SYS_ENTITY_REQUEST_TIMEOUT) <= 0.0:
         raise MindMeldError(
@@ -97,8 +104,8 @@ class SystemEntityRecognizer(ABC):
         ):
             SystemEntityRecognizer._instance = system_entity_recognizer
         elif app_path:
-            SystemEntityRecognizer._instance = (
-                SystemEntityRecognizer.load_from_app_path(app_path)
+            SystemEntityRecognizer._instance = SystemEntityRecognizer.load_from_app_path(
+                app_path
             )
         else:
             raise SystemEntityError(
