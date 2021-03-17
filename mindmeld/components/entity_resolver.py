@@ -22,12 +22,12 @@ import os
 import pickle
 import re
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from string import punctuation
 
 import numpy as np
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
-from scipy.spatial.distance import cdist as cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm.autonotebook import trange
 
@@ -118,6 +118,7 @@ class EntityResolverModelBase(ABC):
 
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
+        self.top_n = 20
 
     @property
     def _use_double_metaphone(self):
@@ -262,6 +263,8 @@ class EntityResolverModelBase(ABC):
 
         if not self.entity_map.get("entities", []):
             return []
+
+        self.top_n = max(self.top_n, top_n)
 
         results = self._predict(nbest_entities)
 
@@ -773,30 +776,36 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
     def __init__(self, app_path, resource_loader, entity_type, er_config, **_kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
-        self._cached_embs = {}
+        self._synonyms = OrderedDict()
+        self._synonyms_embs = np.empty(0)
         self._model_pretrained_name_or_abspath = self.er_config["model_settings"][
             "pretrained_name_or_abspath"]
         self.quantize_model = self.er_config["model_settings"]["quantize_model"]
 
+        self._use_sbert_model = False
         self.transformer_model = None
         self.pooling_model = None
         self.sbert_model = None
-        self.__use_sbert_model = False
 
         msg = "bert embeddings are cached for entity_type: `%s` " \
               "for quicker entity resolution; consumes some disk space"
         logger.info(msg, self.type)
 
     @property
+    def device(self):
+        return "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
+
+    @property
     def pretrained_name(self):
         return os.path.split(self._model_pretrained_name_or_abspath)[-1]
 
-    def _encode(self, phrases):
+    def _encode(self, phrases, show_progress_bar=True):
         """Encodes input text(s) into embeddings, one vector for each phrase
 
         Args:
             phrases (str, list[str]): textual inputs that are to be encoded using sentence \
                                         transformers' model
+            show_progress_bar (bool): if the progress bar is to be shown or not
 
         Returns:
             list[np.array]: one numpy array of embeddings for each phrase,
@@ -815,18 +824,19 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         batch_size = self.er_config["model_settings"]["batch_size"]
         concat_last_n_layers = self.er_config["model_settings"]["concat_last_n_layers"]
         normalize_token_embs = self.er_config["model_settings"]["normalize_token_embs"]
-        show_progress = len(phrases) > 1
+        show_progress = show_progress_bar and len(phrases) > 1
         convert_to_numpy = True
 
-        if not self.__use_sbert_model:  # at init time, this is False
+        if not self._use_sbert_model:  # at init time, this is False
             try:
                 results = self._encode_custom(phrases, batch_size=batch_size,
                                               convert_to_numpy=convert_to_numpy,
                                               show_progress_bar=show_progress,
                                               concat_last_n_layers=concat_last_n_layers,
-                                              normalize_token_embs=normalize_token_embs)
+                                              normalize_token_embs=normalize_token_embs,
+                                              device=self.device)
             except TypeError as e:
-                self.__use_sbert_model = True
+                self._use_sbert_model = True
                 logger.error(e)
                 if concat_last_n_layers != 1 or normalize_token_embs:
                     msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
@@ -834,10 +844,11 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
                           f"ignored as resorting to using encode methods from sentence-transformers"
                     logger.warning(msg)
 
-        if self.__use_sbert_model:
+        if self._use_sbert_model:
             results = self.sbert_model.encode(phrases, batch_size=batch_size,
                                               convert_to_numpy=convert_to_numpy,
-                                              show_progress_bar=show_progress)
+                                              show_progress_bar=show_progress,
+                                              device=self.device)
 
         return results
 
@@ -893,8 +904,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             sentences = [sentences]
             input_was_string = True
 
-        if device is None:
-            device = "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
+        device = device or self.device
 
         self.transformer_model.to(device)
         self.pooling_model.to(device)
@@ -935,7 +945,6 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
 
                 embeddings = embeddings.detach()
 
-                # fixes for #522 and #487 to avoid oom problems on gpu with large datasets
                 if convert_to_numpy:
                     embeddings = embeddings.cpu()
 
@@ -1000,36 +1009,62 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         return batch
 
     @staticmethod
-    def _compute_cosine_similarity(syn_embs, entity_emb, return_as_dict=False):
+    def _compute_cosine_similarity(synonyms, synonyms_encodings, entity_emb, top_n,
+                                   return_as_dict=False):
         """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
             for entity resolution
 
         Args:
-            syn_embs (dict): a dict of synonym and its corresponding embedding from bert
-            entity_emb (np.array): embedding of the input entity text, an array of size 1
+            synonyms (dict): a dict of synonym and its corresponding embedding's row index
+                                in synonyms_encodings
+            synonyms_encodings (np.array): a 2d array of embedding of the synonyms; an array of
+                                            size equal to number of synonyms
+            top_n (int): maximum number of results to populate
+            entity_emb (np.array): a 2d array of embedding of the input entity text(s)
         Returns:
             Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of synonyms and their
                                         scores, else a list of sorted synonym names, paired with
                                         their similarity scores (descending)
         """
 
-        synonyms, synonyms_encodings = zip(*syn_embs.items())
-        similarity_scores_2d = cosine_similarity(entity_emb, np.array(synonyms_encodings))
-        similarity_scores_2d = np.around(similarity_scores_2d, decimals=2)
+        n_entities = len(entity_emb)
+
+        is_single = n_entities == 1
+        as_tensor = _get_module_or_attr("torch", "as_tensor")
+        cosine_similarity = _get_module_or_attr("torch", "cosine_similarity")
+
+        # [n_syns, emd_dim] -> [n_entities, n_syns, emd_dim]
+        t_syn_enc = as_tensor(synonyms_encodings)
+        t_syn_enc = t_syn_enc.expand([n_entities, *t_syn_enc.shape])
+
+        # [n_entities, emd_dim] -> [n_entities, n_syns, emd_dim]
+        t_entity_emb = as_tensor(entity_emb)
+        t_entity_emb = t_entity_emb.unsqueeze(dim=1).expand_as(t_syn_enc)
+
+        # returns -> [n_entities, n_syns]
+        similarity_scores_2d = cosine_similarity(t_syn_enc, t_entity_emb, dim=-1).numpy()
 
         results = []
-
         for similarity_scores in similarity_scores_2d:
             similarity_scores = similarity_scores.reshape(-1)
+            similarity_scores = np.around(similarity_scores, decimals=2)
 
             if return_as_dict:
-                results.append(dict(zip(synonyms, similarity_scores)))
+                results.append(dict(zip(synonyms.keys(), similarity_scores)))
             else:
                 # results in descending scores
-                results.append(sorted(list(zip(synonyms, similarity_scores)), key=lambda x: x[1],
-                                      reverse=True))
+                n_scores = len(similarity_scores)
+                if n_scores > top_n:
+                    top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
+                    result = sorted(
+                        zip(np.asarray([*synonyms.keys()])[top_inds], similarity_scores[top_inds]),
+                        key=lambda x: x[1], reverse=True)
+                else:
+                    result = sorted(zip(synonyms.keys(), similarity_scores), key=lambda x: x[1],
+                                    reverse=True)
+                results.append(result)
 
-        if len(entity_emb) == 1:
+        if is_single:
             return results[0]
 
         return results
@@ -1047,8 +1082,8 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         if clean and os.path.exists(cache_path):
             os.remove(cache_path)
 
-        # load model
-        _output_type = self.er_config["model_settings"]["bert_output_type"]
+        # load model and quantize if required
+        output_type = self.er_config["model_settings"]["bert_output_type"]
 
         def _load_model_and_pooler(name_or_path, output_type):
             transformer_model = _get_module_or_attr(
@@ -1070,7 +1105,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
 
         try:
             self.transformer_model, self.pooling_model, self.sbert_model = _load_model_and_pooler(
-                f"sentence-transformers/{self._model_pretrained_name_or_abspath}", _output_type)
+                f"sentence-transformers/{self._model_pretrained_name_or_abspath}", output_type)
         except OSError:
             logger.error(
                 "Could not initialize the model name through sentence-transformers models in "
@@ -1079,13 +1114,12 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             try:
                 self.transformer_model, self.pooling_model, self.sbert_model = \
                     _load_model_and_pooler(
-                        self._model_pretrained_name_or_abspath, _output_type)
+                        self._model_pretrained_name_or_abspath, output_type)
             except OSError as e:
                 logger.error("Could not initialize the model name through huggingface models. "
                              "Please check the model name and retry.")
                 raise ValueError from e
 
-        # quantize_model
         if self.quantize_model:
             if not _is_module_available("torch"):
                 raise ImportError("`torch` library required to quantize model") from None
@@ -1102,7 +1136,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
                 self.sbert_model, {torch_nn_linear}, dtype=torch_qint8
             ) if self.sbert_model else None
 
-        # load mappings.json data
+        # load mapping.json data and process it
         entity_map = self.entity_map
         augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
         self._entity_mapping = self.process_entity_map(
@@ -1111,19 +1145,29 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
 
         # load embeddings from cache if exists, encode any other synonyms if required
         #   and dump embeddings if required
-        cached_embs = {}
+        synonyms, synonyms_embs = OrderedDict(), np.empty(0)
         if os.path.exists(cache_path):
-            logger.info("Cached embs exists for entity %s. Loading existing data from: %s",
+            logger.info("Cached embs exists for entity %s. "
+                        "Loading existing data from: %s",
                         self.type, cache_path)
-            cached_embs = self._load_embeddings(cache_path)
+            data_dump = self._load_embeddings(cache_path)
+            synonyms, synonyms_embs = data_dump["synonyms"], data_dump["synonyms_embs"]
         new_synonyms_to_encode = [syn for syn in self._entity_mapping["synonyms"] if
-                                  syn not in cached_embs]
+                                  syn not in synonyms]
         if new_synonyms_to_encode:
-            synonyms_encodings = self._encode(new_synonyms_to_encode)
-            cached_embs.update(dict(zip(new_synonyms_to_encode, synonyms_encodings)))
-        self._cached_embs = cached_embs
+            new_synonyms_encodings = self._encode(new_synonyms_to_encode)
+            synonyms_embs = new_synonyms_encodings if not synonyms else np.concatenate(
+                [synonyms_embs, new_synonyms_encodings])
+            synonyms.update(
+                OrderedDict(zip(
+                    new_synonyms_to_encode,
+                    np.arange(len(synonyms), len(synonyms) + len(new_synonyms_encodings)))
+                )
+            )
+        self._synonyms, self._synonyms_embs = synonyms, synonyms_embs
         if new_synonyms_to_encode or not os.path.exists(cache_path):
-            self._dump_embeddings(cache_path, self._cached_embs)
+            data_dump = {"synonyms": self._synonyms, "synonyms_embs": self._synonyms_embs}
+            self._dump_embeddings(cache_path, data_dump)
         self.dirty = False  # never True with the current logic, kept for consistency purpose
 
     def _predict(self, nbest_entities):
@@ -1137,19 +1181,20 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             (list): The resolved values for the provided entity.
         """
 
-        syn_embs = self._cached_embs
+        synonyms, synonyms_encodings = self._synonyms, self._synonyms_embs
 
         # encode input entity
         # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
-        if top_entity.text in self._cached_embs:
-            top_entity_emb = self._cached_embs[top_entity.text]
+        if top_entity.text in synonyms:
+            top_entity_emb = synonyms_encodings[synonyms[top_entity.text], :]
         else:
             top_entity_emb = self._encode(top_entity.text)[0]
+        top_entity_emb = top_entity_emb.reshape(1, -1)
 
         try:
-            top_entity_emb = top_entity_emb.reshape(1, -1)
-            sorted_items = self._compute_cosine_similarity(syn_embs, top_entity_emb)
+            sorted_items = self._compute_cosine_similarity(synonyms, synonyms_encodings,
+                                                           top_entity_emb, self.top_n)
             values = []
             for synonym, score in sorted_items:
                 cnames = self._entity_mapping["synonyms"][synonym]
@@ -1196,24 +1241,33 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         with open(cache_path, "wb") as fp:
             pickle.dump(data, fp)
 
-    def _predict_batch(self, nbest_entities_list):
+    def _predict_batch(self, nbest_entities_list, batch_size):
 
-        syn_embs = self._cached_embs
+        synonyms, synonyms_encodings = self._synonyms, self._synonyms_embs
 
         # encode input entity
-        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity_list = [i[0] for i in nbest_entities_list]  # top_entity
-        top_entity_emb_list = self._encode([top_entity.text for top_entity in top_entity_list])
+        # called a list but observed as a list
+        top_entity_emb_list = []
+        for st_idx in trange(0, len(top_entity_list), batch_size, disable=False):
+            batch = [top_entity.text for top_entity in top_entity_list[st_idx:st_idx + batch_size]]
+            top_entity_emb_list.append(self._encode(batch, show_progress_bar=False))
+        top_entity_emb_list = np.vstack(top_entity_emb_list)
 
         try:
             # w/o batch,  [ nsyms x 768*4 ] x [ 1 x 768*4 ] --> [ nsyms x 1 ]
             # w/  batch,  [ nsyms x 768*4 ] x [ k x 768*4 ] --> [ nsyms x k ]
-            sorted_items_list = self._compute_cosine_similarity(syn_embs, top_entity_emb_list)
-            values_list = []
+            sorted_items_list = []
+            for st_idx in trange(0, len(top_entity_emb_list), batch_size, disable=False):
+                batch = top_entity_emb_list[st_idx:st_idx + batch_size]
+                result = self._compute_cosine_similarity(synonyms, synonyms_encodings, batch,
+                                                         self.top_n)
+                # due to way compute similarity returns
+                if len(batch) == 1:
+                    result = [result]
+                sorted_items_list.extend(result)
 
-            # due to way compute similarity returns
-            if len(top_entity_emb_list) == 1:
-                sorted_items_list = [sorted_items_list]
+            values_list = []
 
             for sorted_items in sorted_items_list:
                 values = []
@@ -1233,10 +1287,12 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
 
         return values_list
 
-    def predict_batch(self, entity_list, top_n: int = 20):
+    def predict_batch(self, entity_list, top_n: int = 20, batch_size: int = 16):
 
         if not self.entity_map.get("entities", []):
             return [[] for _ in entity_list]
+
+        self.top_n = max(self.top_n, top_n)
 
         nbest_entities_list = []
         results_list = []
@@ -1258,16 +1314,10 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         if self._is_system_entity:
             return results_list
 
-        results_list = self._predict_batch(nbest_entities_list)
+        results_list = self._predict_batch(nbest_entities_list, batch_size)
 
         for i, results in enumerate(results_list):
             if results:
-                # if len(results) < top_n:
-                #     logger.info(
-                #         "Retrieved only %d entity resolutions instead of asked number %d for "
-                #         "entity %r of type %r",
-                #         len(results), top_n, nbest_entities[0].text, self.type,
-                #     )
                 results_list[i] = results[:top_n]
 
         return results_list
