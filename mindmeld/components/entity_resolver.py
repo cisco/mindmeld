@@ -776,8 +776,8 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
     def __init__(self, app_path, resource_loader, entity_type, er_config, **_kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
-        self._synonyms = OrderedDict()
-        self._synonyms_embs = np.empty(0)
+        self._synonyms = None
+        self._synonyms_embs = None
         self._model_pretrained_name_or_abspath = self.er_config["model_settings"][
             "pretrained_name_or_abspath"]
         self.quantize_model = self.er_config["model_settings"]["quantize_model"]
@@ -847,8 +847,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         if self._use_sbert_model:
             results = self.sbert_model.encode(phrases, batch_size=batch_size,
                                               convert_to_numpy=convert_to_numpy,
-                                              show_progress_bar=show_progress,
-                                              device=self.device)
+                                              show_progress_bar=show_progress)
 
         return results
 
@@ -1150,8 +1149,8 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             logger.info("Cached embs exists for entity %s. "
                         "Loading existing data from: %s",
                         self.type, cache_path)
-            data_dump = self._load_embeddings(cache_path)
-            synonyms, synonyms_embs = data_dump["synonyms"], data_dump["synonyms_embs"]
+            cached_data = self._load_embeddings(cache_path)
+            synonyms, synonyms_embs = cached_data["synonyms"], cached_data["synonyms_embs"]
         new_synonyms_to_encode = [syn for syn in self._entity_mapping["synonyms"] if
                                   syn not in synonyms]
         if new_synonyms_to_encode:
@@ -1161,7 +1160,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             synonyms.update(
                 OrderedDict(zip(
                     new_synonyms_to_encode,
-                    np.arange(len(synonyms), len(synonyms) + len(new_synonyms_encodings)))
+                    np.arange(len(synonyms), len(synonyms) + len(new_synonyms_to_encode)))
                 )
             )
         self._synonyms, self._synonyms_embs = synonyms, synonyms_embs
@@ -1186,8 +1185,9 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         # encode input entity
         # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
-        if top_entity.text in synonyms:
-            top_entity_emb = synonyms_encodings[synonyms[top_entity.text], :]
+        existing_index = synonyms.get(top_entity.text, None)
+        if existing_index:
+            top_entity_emb = synonyms_encodings[existing_index]
         else:
             top_entity_emb = self._encode(top_entity.text)[0]
         top_entity_emb = top_entity_emb.reshape(1, -1)
