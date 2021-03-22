@@ -7,9 +7,8 @@ from .data_loading import DataBucketFactory
 from .output_manager import OutputManager, get_log_selected_queries_json_path
 from .plot_manager import PlotManager
 from .classifiers import MindMeld
-from ..constants import STRATEGY_ABRIDGED
 from .heuristics import HeuristicsFactory
-
+from ..constants import STRATEGY_ABRIDGED
 
 logger = logging.getLogger(__name__)
 
