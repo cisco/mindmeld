@@ -103,11 +103,13 @@ def create_annotator(app_path, config):
         raise ValueError(msg.format(config["annotator_class"])) from e
 
 
-def create_augmentor(lang, config, resource_loader):
+def create_augmentor(config, lang, num_augmentations, resource_loader):
     """Creates an augmentor instance using the provided configuration
 
     Args:
-        config (dict): A model configuration
+        config (dict): A model configuration.
+        lang (str): Language for data augmentation.
+        num_augmentations (int): Number of augmentations to be generated per query.
         resource_loader (object): Resource Loader object for the application.
 
     Returns:
@@ -122,14 +124,24 @@ def create_augmentor(lang, config, resource_loader):
         )
     try:
         # Validate configuration input
-        paths = config.get("paths", [])
+        paths = config.get(
+            "paths",
+            [
+                {
+                    "domains": ".*",
+                    "intents": ".*",
+                    "files": ".*",
+                }
+            ],
+        )
         path_suffix = config.get("path_suffix", ".augmented.txt")
         params = config.get("params", {})
         return AUGMENTATION_MAP[config["augmentor_class"]](
             lang=lang,
+            num_augmentations=num_augmentations,
+            params=params,
             paths=paths,
             path_suffix=path_suffix,
-            params=params,
             resource_loader=resource_loader,
         )
     except KeyError as e:
@@ -172,7 +184,9 @@ def create_embedder_model(app_path, config):
     try:
         embedder_type = embedder_config["embedder_type"]
     except KeyError as e:
-        raise ValueError("Invalid model configuration: No provided embedder type.") from e
+        raise ValueError(
+            "Invalid model configuration: No provided embedder type."
+        ) from e
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)

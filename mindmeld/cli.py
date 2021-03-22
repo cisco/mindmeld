@@ -788,13 +788,21 @@ def unannotate(app_path, unannotate_all):
     "--lang",
     help="Augmentation language.",
 )
-def augment(app_path, lang):
+@click.option(
+    "--num-augmentations",
+    default=10,
+    help="Number of augmented queries to be generated per given query.",
+)
+def augment(app_path, lang, num_augmentations):
     """Runs the data augmentation command."""
     config = get_augmentation_config(app_path=app_path)
     lang = lang or get_language_config(app_path=app_path)[0]
     resource_loader = ResourceLoader.create_resource_loader(app_path)
     augmentor = create_augmentor(
-        lang=lang, config=config, resource_loader=resource_loader
+        config=config,
+        lang=lang,
+        num_augmentations=num_augmentations,
+        resource_loader=resource_loader,
     )
     augmentor.augment()
     logger.info("Augmentation Complete.")
