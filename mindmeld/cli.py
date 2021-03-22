@@ -34,12 +34,15 @@ import distro
 import requests
 from tqdm import tqdm
 
+from .active_learning.alp import ActiveLearningPipeline, flatten_active_learning_config
+from .active_learning.plot_manager import PlotManager
+
 from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
-from .components._config import get_auto_annotator_config, get_language_config
+from .components._config import get_auto_annotator_config, get_language_config, get_active_learning_config
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
@@ -784,6 +787,66 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
         config["unannotate_supported_entities_only"] = False
     return config
 
+
+@shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
+@click.option('--app_path', type=str, help='Path to the MindMeld application')
+@click.option('--batch_size', type=int, help='Number of queries to select each iteration.')
+@click.option('--init_train_seed_pct', type=float, help='Percentage of training data to use as the initial seed.')
+@click.option('--n_epochs', type=int, help='Number of epochs.')
+@click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
+@click.option('--strategy', type=str, help='Select a single strategy instead of the strategies listed in the config.')
+def active_learning_train(app_path, batch_size, init_train_seed_pct, n_epochs, no_plot, strategy):
+    """Command to run active learning training."""
+    config = get_active_learning_config(app_path=app_path)
+    config = flatten_active_learning_config(config)
+    if app_path:
+        config["app_path"] = app_path
+    if batch_size:
+        config["batch_size"] = batch_size
+    if init_train_seed_pct:
+        config["init_train_seed_pct"] = init_train_seed_pct
+    if n_epochs:
+        config["n_epochs"] = n_epochs
+    if strategy:
+        config["training_strategies"] = [strategy]
+    alp = ActiveLearningPipeline(**config)
+    alp.train()
+    if not no_plot:
+        alp.plot()
+
+
+@shared_cli.command("active_learning_select", context_settings=CONTEXT_SETTINGS)
+@click.option('--app_path', type=str, help='Path to the MindMeld application')
+@click.option('--batch_size', type=int, help='Number of queries to select each iteration.')
+@click.option('--unlabeled_logs_path', type=str, help='Path to the log folder to select queries from.')
+@click.option('--log_usage_pct', type=float, help='Percent of logs to use for selection.')
+@click.option('--labeled_logs_pattern', type=str, help='Pattern for labeled logs. Will override an unlabeled logs path.')
+@click.option('--strategy', type=str, help='Select a single strategy instead of the strategies listed in the config.')
+def active_learning_select(app_path, batch_size, unlabeled_logs_path, log_usage_pct, labeled_logs_pattern, strategy):
+    """Select the next set of queries for training from a set of log data."""
+    config = get_active_learning_config(app_path=app_path)
+    config = flatten_active_learning_config(config)
+    if app_path:
+        config["app_path"] = app_path
+    if batch_size:
+        config["batch_size"] = batch_size
+    if unlabeled_logs_path:
+        config["unlabeled_logs_path"] = unlabeled_logs_path
+    if log_usage_pct:
+        config["log_usage_pct"] = log_usage_pct
+    if labeled_logs_pattern:
+        config["labeled_logs_pattern"] = labeled_logs_pattern
+    if strategy:
+        config["log_selection_strategy"] = strategy
+    alp = ActiveLearningPipeline(**config)
+    alp.select_queries_to_label()
+
+
+@shared_cli.command("active_learning_plot", context_settings=CONTEXT_SETTINGS)
+@click.option('--experiment_dir_path', type=str, required=True, help='Path of experiment folder.')
+def active_learning_plot(experiment_dir_path):
+    """Generate plots for an active learning experiment given the folder directory."""
+    PlotManager(experiment_dir_path).generate_plots()
 
 #
 # Module only Commands

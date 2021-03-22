@@ -903,6 +903,32 @@ class BootstrapAnnotator(Annotator):
             for entity in entities
         ]
 
+    def convert_text_queries_to_processed(self, text_queries):
+        """Converts text queries into processed queries using the JBA.
+
+        Args:
+            text_queries (list): List of raw text queries.
+        Returns:
+            processed_queries (list): List of processed queries.
+        """
+        processed_queries = []
+        for text_query in text_queries:
+            processed_output = self.nlp.process(text_query)
+            processed_query = load_query(
+                text_query,
+                query_factory=self.nlp.resource_loader.query_factory,
+                domain=processed_output["domain"],
+                intent=processed_output["intent"],
+            )
+            processed_query.entities = self.parse(
+                sentence=text_query,
+                entity_types=None,
+                domain=processed_query.domain,
+                intent=processed_query.intent,
+            )
+            processed_queries.append(processed_query)
+        return processed_queries
+
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
         """

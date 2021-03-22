@@ -487,6 +487,42 @@ DEFAULT_TOKENIZER_CONFIG = {
 }
 
 
+DEFAULT_ACTIVE_LEARNING_CONFIG = {
+    "pre_training": {
+        "train_pattern": ".*train.*.txt",
+        "test_pattern":  ".*test.*.txt",
+        "load": False,
+        "save": True,
+        "init_train_seed_pct": 0.20,
+    },
+    "training": {
+        "n_classifiers": 3,
+        "n_epochs": 1,
+        "batch_size": 1000,
+        "training_strategies": [
+            "LeastConfidenceSampling",
+            "MarginSampling",
+            "EntropySampling",
+            "RandomSampling",
+            "DisagreementSampling",
+            "EnsembleSampling",
+            "KLDivergenceSampling",
+        ],
+    },
+    "training_output": {
+        "save_accuracy_results": True,
+        "save_sampled_queries": True,
+        "early_stopping_window": 0,
+    },
+    "select_queries": {
+        "log_selection_strategy": "EntropySampling",
+        "log_usage_pct": 1.00,
+        "labeled_logs_pattern": None,
+        "unlabeled_logs_path": "/Users/kunshar2/Documents/active_learning/refactor/active-learning/logs_txt/logs.txt",
+    },
+}
+
+
 class NlpConfigError(Exception):
     pass
 
@@ -1071,3 +1107,25 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
         return DEFAULT_TOKENIZER_CONFIG
+
+
+def get_active_learning_config(app_path=None):
+    """Gets the active learning configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The active learning configuration.
+    """
+
+    if not app_path:
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+    try:
+        active_learning_config = getattr(
+            _get_config_module(app_path), "ACTIVE_LEARNING_CONFIG", DEFAULT_ACTIVE_LEARNING_CONFIG
+        )
+        return active_learning_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
