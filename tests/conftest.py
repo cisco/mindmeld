@@ -23,6 +23,8 @@ from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
 from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.tokenizer import Tokenizer
+from mindmeld.converter.rasa import RasaConverter
+from mindmeld.converter.dialogflow import DialogflowConverter
 
 
 warnings.filterwarnings(
@@ -40,8 +42,13 @@ HOME_ASSISTANT_APP_PATH = os.path.join(
 )
 AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
-
 STORE_DATA_FILE_PATH = os.path.join(APP_PATH, "data/stores.json")
+
+CONVERTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter')
+RASA_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'rasa_sample_project')
+DIALOG_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'dialogflow_sample_project')
+MINDMELD_RASA_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'mm_rasa_converted_project')
+MINDMELD_DIALOG_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'mm_df_converted_project')
 
 
 @pytest.fixture
@@ -137,6 +144,25 @@ def qa_kwik_e_mart(kwik_e_mart_app_path, es_client):
     )
     qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
+
+
+@pytest.fixture(scope="session")
+def rasa_converter():
+    converter = RasaConverter(RASA_CONVERTER_PROJECT_PATH,
+                              MINDMELD_RASA_CONVERTER_PROJECT_PATH)
+    converter.convert_project()
+    return converter
+
+
+@pytest.fixture(scope="session")
+def mindmeld_rasa_converter_app_path():
+    return MINDMELD_RASA_CONVERTER_PROJECT_PATH
+
+
+@pytest.fixture(scope="session")
+def dialogflow_converter():
+    return DialogflowConverter(DIALOG_CONVERTER_PROJECT_PATH,
+                               MINDMELD_DIALOG_CONVERTER_PROJECT_PATH)
 
 
 class GhostPreprocessor(Preprocessor):

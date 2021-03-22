@@ -482,9 +482,9 @@ DEFAULT_AUGMENTATION_CONFIG = {
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
-    "annotator_class": "SpacyAnnotator",
+    "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
-    "annotate": [
+    "annotation_rules": [
         {
             "domains": ".*",
             "intents": ".*",
@@ -493,7 +493,8 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
         }
     ],
     "unannotate_supported_entities_only": True,
-    "unannotate": None,
+    "unannotation_rules": None,
+    "translator": "NoOpTranslator",
 }
 
 DEFAULT_TOKENIZER_CONFIG = {
