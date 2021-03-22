@@ -92,7 +92,7 @@ class OutputManager:
     def create_generated_dir(self):
         """Creates the generated folder and its subfolders if they do not already exist."""
         create_sub_dirs_if_absent(
-            base_path="generated", sub_dirs=["saved_data_loaders", "experiments"]
+            base_path="generated", sub_dirs=["saved_queries", "experiments"]
         )
 
     def create_current_experiment_dir(self):
