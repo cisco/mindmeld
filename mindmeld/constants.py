@@ -18,10 +18,9 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
-
 # ACTIVE LEARNING CONSTANTS
 ENTROPY_LOG_BASE = 2
-RANDOM_SEED = 2020
+ACTIVE_LEARNING_RANDOM_SEED = 2020
 
 STRATEGY_ABRIDGED = {
     "LeastConfidenceSampling": "lcs",
@@ -34,7 +33,6 @@ STRATEGY_ABRIDGED = {
 }
 
 SAVED_QUERIES_PATH = "generated/saved_queries/"
-
 
 # AUTO ANNOTATOR CONSTANTS
 SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]

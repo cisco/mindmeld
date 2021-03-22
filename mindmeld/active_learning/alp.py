@@ -14,10 +14,10 @@ from .heuristics import HeuristicsFactory
 logger = logging.getLogger(__name__)
 
 
-class ActiveLearningPipeline:
+class ActiveLearningPipeline:  # pylint: disable=R0902
     """Class that executes the training and selection process for the Active Learning Pipeline"""
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913
         self,
         app_path: str,
         train_pattern: str,
@@ -54,7 +54,7 @@ class ActiveLearningPipeline:
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
             early_stopping_window (int): If the drops for n iterations, terminate training early
             log_usage_pct (float): Percentage of the log data to use for selection
-            labeled_logs_pattern (str): Pattern to obtain logs already labeled and dispersed within the MindMeld app
+            labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
         """
         self.app_path = app_path
@@ -112,12 +112,10 @@ class ActiveLearningPipeline:
             self._train_strategy(strategy)
 
     def _train_strategy(
-        self,
-        strategy: str,
-        selection_mode: bool = None,
+        self, strategy: str, selection_mode: bool = None,
     ):
         """Helper function to traing a single strategy.
-        
+
         Args:
             strategy (str): Single strategy to train
             selection_mode (bool): If in selection mode, accuracies will not be recorded
@@ -213,7 +211,7 @@ class ActiveLearningPipeline:
 # TODO: This function is temporary. Replace with better data validation
 def flatten_active_learning_config(original_config):
     """ Create a flattened config to use as params.
-    
+
     Args:
         original_config (dict): The original input config dictionary
 

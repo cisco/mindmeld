@@ -1,9 +1,9 @@
 import os
 import json
+from collections import Counter
 from typing import Dict, List
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import Counter
 
 from .output_manager import (
     create_dir_if_absent,
@@ -71,7 +71,7 @@ class PlotManager:
             plot_function = getattr(PlotManager, plot_function)
             self.plotting_wrapper(plot_function)
         if self.queries_json_data_has_data():
-            print(f"Plotting: plot_stacked_bar")
+            print("Plotting: plot_stacked_bar")
             self.plot_stacked_bar()
 
     def plotting_wrapper(
@@ -80,7 +80,6 @@ class PlotManager:
         plot_domain: bool = True,
         plot_intents: bool = True,
         plot_entities: bool = False,
-        **kwargs,
     ):
         """Plotting wrapper functions for plots that use data from accuracies.json
         Args:
@@ -91,20 +90,20 @@ class PlotManager:
         """
         if plot_domain:
             y_keys = ["overall"]
-            function(self, y_keys=y_keys, **kwargs)
+            function(self, y_keys=y_keys)
             for domain in self.get_domain_list():
                 y_keys = [domain, "overall"]
-                function(self, y_keys=y_keys, **kwargs)
+                function(self, y_keys=y_keys)
                 if plot_intents:
                     for intent in self.get_intent_list(domain):
                         y_keys = [domain, intent, "overall"]
-                        function(self, y_keys=y_keys, **kwargs)
+                        function(self, y_keys=y_keys)
                         if plot_entities:
                             y_keys = [domain, intent, "entities", "overall"]
-                            function(self, y_keys=y_keys, **kwargs)
+                            function(self, y_keys=y_keys)
                             for entity in self.get_entity_list(domain, intent):
                                 y_keys = [domain, intent, "entities", entity]
-                                function(self, y_keys=y_keys, **kwargs)
+                                function(self, y_keys=y_keys)
 
     # Helper Methods
     @staticmethod
@@ -125,7 +124,7 @@ class PlotManager:
     def get_across_iterations(epoch_dict: Dict, keys: List):
         """Gets data across all iterations in a single epoch as specified by a series of keys.
         Args:
-            epoch_dict (dict): Dictionary containing accuracies across iterations for a single epoch.
+            epoch_dict (dict): Dict containing accuracies across iterations for a single epoch.
             keys (list): List of keys used to index the given dictionary.
         Return:
             data (list): List of the selected data across iterations.
@@ -204,7 +203,7 @@ class PlotManager:
         path_list = [self.experiment_dir_path, "plots"] + y_keys + [f"{file_name}.png"]
         return os.path.join(*path_list)
 
-    ## ACCURACIES.JSON
+    # ACCURACIES.JSON
     # Plotting Functions
     def plot_single_epoch(
         self,
@@ -212,7 +211,6 @@ class PlotManager:
         epoch: int = 0,
         display: bool = False,
         save: bool = True,
-        **kwargs,
     ):
         """Plot accuracies across a single epoch for each strategy.
         Args:
@@ -243,10 +241,9 @@ class PlotManager:
         if save:
             fig.savefig(self.get_img_path(y_keys, title))
             plt.clf()
-        return
 
     def plot_avg_across_epochs(
-        self, y_keys: List, display: bool = False, save: bool = True, **kwargs
+        self, y_keys: List, display: bool = False, save: bool = True
     ):
         """Plot average accuracies across all epochs for each strategy.
         Args:
@@ -268,12 +265,12 @@ class PlotManager:
                 )
                 all_y_values.append(y_values)
             max_len = max([len(i) for i in all_y_values])
-            for i in range(len(all_y_values)):
-                all_y_values[i] = np.pad(
-                    all_y_values[i],
-                    (0, max_len - len(all_y_values[i])),
+            for y_values in all_y_values:
+                y_values = np.pad(
+                    y_values,
+                    (0, max_len - len(y_values)),
                     "constant",
-                    constant_values=(0, all_y_values[i][-1]),
+                    constant_values=(0, y_values[-1]),
                 )
             y_avg_values = np.array(all_y_values).mean(axis=0)
             plt.plot(x_values, y_avg_values)
@@ -291,10 +288,9 @@ class PlotManager:
         if save:
             fig.savefig(self.get_img_path(y_keys, title))
             plt.clf()
-        return
 
     def plot_all_epochs(
-        self, y_keys: List, display: bool = False, save: bool = True, **kwargs
+        self, y_keys: List, display: bool = False, save: bool = True
     ):
         """Plot all epochs. Creates a plot for each strategy.
         Args:
@@ -317,12 +313,12 @@ class PlotManager:
                 plt.plot(x_values, y_values)
                 all_y_values.append(y_values)
             max_len = max([len(i) for i in all_y_values])
-            for i in range(len(all_y_values)):
-                all_y_values[i] = np.pad(
-                    all_y_values[i],
-                    (0, max_len - len(all_y_values[i])),
+            for y_values in all_y_values:
+                y_values = np.pad(
+                    y_values,
+                    (0, max_len - len(y_values)),
                     "constant",
-                    constant_values=(0, all_y_values[i][-1]),
+                    constant_values=(0, y_values[-1]),
                 )
             y_avg_values = np.array(all_y_values).mean(axis=0)
             plt.plot(x_values, y_avg_values)
@@ -343,9 +339,8 @@ class PlotManager:
             if save:
                 fig.savefig(self.get_img_path(y_keys, title))
                 plt.clf()
-        return
 
-    ## QUERIES.JSON
+    # QUERIES.JSON
     @staticmethod
     def get_counter(labels: List):
         """Makes a counter with counts from a given set of labels.
@@ -363,7 +358,7 @@ class PlotManager:
     def get_unique_labels(all_counters: List) -> List:
         """
         Args:
-            all_counters (list): List of Counter objects, each counter represents a single iteration.
+            all_counters (list): List of Counters, each counter represents a single iteration.
         Returns:
             unique_labels (list): A List of unique and sorted keys across all_counters.
         """
@@ -378,7 +373,7 @@ class PlotManager:
     def get_label_set_counter(all_counters: List, unique_labels: List) -> Dict:
         """
         Args:
-            all_counters (list): List of Counter objects, each counter represents a single iteration.
+            all_counters (list): List of Counters, each counter represents a single iteration.
             unique_labels (list): A List of unique and sorted keys across all_counters.
         Returns:
             label_set_counter (dict): Each unique label is mapped to a list, the value at each
@@ -394,10 +389,9 @@ class PlotManager:
         self,
         epoch: int = 0,
         plot_domains: bool = True,
-        plot_intents: bool = True,
-        **kwargs,
+        plot_intents: bool = True
     ):
-        """Plots a stacked bar graph of selection distributions across iterations for a given epoch.
+        """Plots a stacked bar graph of selection distributions across iterations for an epoch.
         Args:
             epoch (int): The epoch to plot.
             plot_domain (bool): Whether to generate plots at the domain level.
@@ -427,8 +421,7 @@ class PlotManager:
                         num_iters=len(all_counters),
                         label_set_counter=label_set_counter,
                         strategy=strategy,
-                        intent_level=(level == "intent"),
-                        **kwargs,
+                        intent_level=(level == "intent")
                     )
 
     def _plot_stacked_bar(
@@ -438,13 +431,12 @@ class PlotManager:
         strategy: str,
         intent_level: bool,
         display: bool = False,
-        save: bool = True,
-        **kwargs,
+        save: bool = True
     ):
         """Helper function to plot a stacked bar graph.
         Args:
             num_iters (int): Number of iterations in the given epoch.
-            label_set_counter (dict): Each unique label is mapped to a list, the value at each
+            label_set_counter (dict): Each unique label is mapped to a list, the value at the
                 index in the list corresponds to the count of the label in that iteration.
             strategy (str): Selection strategy.
             intent_level (bool): Whether the plot is for intent or domain level distributions.
@@ -478,4 +470,3 @@ class PlotManager:
             img_path = os.path.join(img_dir_path, f"{title}.png")
             fig.savefig(img_path, bbox_inches="tight")
             plt.clf()
-        return

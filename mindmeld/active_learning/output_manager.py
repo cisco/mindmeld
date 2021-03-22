@@ -7,6 +7,7 @@ from mindmeld.markup import dump_query
 
 from ..constants import STRATEGY_ABRIDGED
 
+
 # File Creation Methods
 def create_dir_if_absent(base_path: str):
     """Create a directory if one doesn't already exist at the given path.
@@ -61,7 +62,8 @@ def get_log_selected_queries_json_path(experiment_dir_path) -> str:
 
 
 class OutputManager:
-    """Handles the initialization of generated folder and its contents. Keeps record of experiment results."""
+    """Handles the initialization of generated folder and its contents. Keeps record of experiment
+        results."""
 
     def __init__(
         self,
@@ -77,7 +79,8 @@ class OutputManager:
             selection_strategies (list): List of strategies used for the experiment.
             save_accuracy_results (bool): Whether to save accuracy metrics.
             save_sampled_queries (bool): Whether to save queries sampled at every batch.
-            early_stopping_window (int): Number of iterations to stop after if accuracy keeps decreasing.
+            early_stopping_window (int): Number of iterations to stop after if accuracy keeps
+                decreasing.
         """
         self.active_learning_params = active_learning_params
         self.selection_strategies = selection_strategies
@@ -85,11 +88,12 @@ class OutputManager:
         self.save_sampled_queries = save_sampled_queries
         self.early_stopping_window = early_stopping_window
         self.experiment_dir_path = self._get_experiment_dir_path()
-        self.create_generated_dir()
+        OutputManager.create_generated_dir()
         self.create_current_experiment_dir()
 
     # Directory Initialization
-    def create_generated_dir(self):
+    @staticmethod
+    def create_generated_dir():
         """Creates the generated folder and its subfolders if they do not already exist."""
         create_sub_dirs_if_absent(
             base_path="generated", sub_dirs=["saved_queries", "experiments"]
@@ -113,8 +117,11 @@ class OutputManager:
                 outfile.close()
 
     def create_saved_config_json(self):
-        """Creates a config.json to store in the experiment folder. config.json contains configuration parameters."""
-        config_path = os.path.join(self.experiment_dir_path, "active_learning_params.json")
+        """Creates a config.json to store in the experiment folder. config.json contains
+        configuration parameters."""
+        config_path = os.path.join(
+            self.experiment_dir_path, "active_learning_params.json"
+        )
         with open(config_path, "w") as outfile:
             json.dump(self.active_learning_params, outfile, indent=4)
             outfile.close()
@@ -132,7 +139,8 @@ class OutputManager:
     def _get_experiment_dir_name(self) -> str:
         """
         Returns:
-            experiment_dir_name (str): Creates the name of the current experiment folder based on current timestamp.
+            experiment_dir_name (str): Creates the name of the current experiment folder
+                based on the current timestamp.
         """
         strategies = "_".join(self._get_strategies_abridged())
         now = datetime.datetime.now()
@@ -265,7 +273,7 @@ class OutputManager:
                 )
                 if ref_score > highest_score:
                     print(
-                        f"""Early stopping. Early stopping window {self.early_stopping_window}. 
+                        f"""Early stopping. Early stopping window {self.early_stopping_window}.
                     Reference score at the window start: {ref_score} is greater than the highest
                     after window start: {highest_score}."""
                     )
@@ -279,7 +287,8 @@ class OutputManager:
         Args:
             queries (List): List of ProcessedQuery objects
         Returns:
-            dict_queries (List): List of queries represented as a dict with the keys "text", "domain", "intent"
+            dict_queries (List): List of queries represented as a dict with the keys
+                "text", "domain", and "intent".
         """
         return [
             {"text": dump_query(query), "domain": query.domain, "intent": query.intent}

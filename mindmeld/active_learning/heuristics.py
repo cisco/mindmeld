@@ -1,11 +1,11 @@
-
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from collections import Counter
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
 
-from ..constants import ENTROPY_LOG_BASE, RANDOM_SEED
+from ..constants import ENTROPY_LOG_BASE, ACTIVE_LEARNING_RANDOM_SEED
+
 
 def custom_reordering(confidences, do_rank: bool = False, sampling_size: int = None):
     """
@@ -55,8 +55,10 @@ class Heuristic(ABC):
         Args:
             sampled (list, optional): List of sampled queries
             unsampled (list, optional): List of unsampled queries
-            do_rank (bool, optional): if True, returns a ranked list of the indices for confidence-sorting of data samples
-            return_dict (bool, optional): if True, return a dict with sampled, unsampled, and ranked indicies.
+            do_rank (bool, optional): if True, returns a ranked list of the indices for
+                confidence-sorting of data samples
+            return_dict (bool, optional): if True, return a dict with sampled, unsampled, and
+                ranked indicies.
         """
         sampled, unsampled, do_rank = (
             kwargs.get("sampled", []),
@@ -94,16 +96,15 @@ class StrategicRandomSampling(Heuristic):
         Args:
             class_labels (list): list of labels for classification task
         """
-        class_labels = self._get_class_labels(
+        class_labels = StrategicRandomSampling._get_class_labels(
             label_type=label_type, unsampled=unsampled
         )
         unique_labels = np.unique(class_labels)
-        indices_per_label = self._get_indices_per_label(
+        indices_per_label = StrategicRandomSampling._get_indices_per_label(
             unique_labels=unique_labels, class_labels=class_labels
         )
         if not min_per_label:
             min_per_label = min([len(v) for k, v in indices_per_label.items()])
-            # min_per_label = self.sampling_size // len(unique_labels)
             print(
                 f"{len(unique_labels)} unique labels. Using min_per_label value of {min_per_label}"
             )
@@ -121,12 +122,13 @@ class StrategicRandomSampling(Heuristic):
                         [len(indices_per_label[label]) for label in unique_labels]
                     )
                     raise ValueError(
-                        f"{label} Count = {len(indices)} and min_per_label = {min_per_label}. The lowest label count is {min_count}."
+                        f"{label} Count = {len(indices)} and min_per_label = {min_per_label}. "
+                        f"The lowest label count is {min_count}."
                     )
             else:
                 evenly_sampled.extend(indices[:min_per_label])
                 outstanding_sampled.extend(indices[min_per_label:])
-        np.random.seed(RANDOM_SEED)
+        np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
         if len(evenly_sampled) > self.sampling_size:
             np.random.shuffle(evenly_sampled)
             sampled_indices = evenly_sampled[: self.sampling_size]
@@ -146,7 +148,8 @@ class StrategicRandomSampling(Heuristic):
         ranked_indices = None
         return sampled_indices, unsampled_indices, ranked_indices
 
-    def _get_class_labels(self, label_type: str, unsampled: List):
+    @staticmethod
+    def _get_class_labels(label_type: str, unsampled: List):
         if label_type == "domain":
             return [f"{q.domain}" for q in unsampled]
         elif label_type == "intent":
@@ -156,13 +159,14 @@ class StrategicRandomSampling(Heuristic):
                 f"Invalid label_type {label_type}. Must be 'domain' or 'intent'"
             )
 
-    def _get_indices_per_label(self, unique_labels: List, class_labels: List):
+    @staticmethod
+    def _get_indices_per_label(unique_labels: List, class_labels: List):
         indices_per_label = {}
         for label in unique_labels:
             indices_per_label[label] = [
                 i for i in range(len(class_labels)) if class_labels[i] == label
             ]
-            np.random.seed(RANDOM_SEED)
+            np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
             np.random.shuffle(indices_per_label[label])
         return indices_per_label
 
@@ -174,7 +178,8 @@ class RandomSampling(Heuristic):
     def _extractor(self, preds_single: List[List[float]] = None, **kwargs):
         """
         Args:
-            preds_single: is a list[list[float]] and contains probability scores for each data point for each class
+            preds_single: is a list[list[float]] and contains probability scores for each data
+                point for each class.
         """
         num_indicies = (
             len(preds_single) if preds_single else len(kwargs.get("unsampled"))
@@ -198,8 +203,10 @@ class LeastConfidenceSampling(Heuristic):
     ):
         """
         Args:
-            preds_single: is a list[list[float]] and contains probability scores for each data point for each class
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data samples
+            preds_single: is a list[list[float]] and contains probability scores for each data
+                point for each class.
+            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
+                samples.
         """
         confidences = np.max(preds_single, axis=1)
         idxs = custom_reordering(
@@ -222,8 +229,10 @@ class MarginSampling(Heuristic):
     ):
         """
         Args:
-            preds_single: is a list[list[float]] and contains probability scores for each data point for each class
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data samples
+            preds_single: is a list[list[float]] and contains probability scores for each data
+                point for each class.
+            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
+                samples.
         """
         # partition along last axis by default
         partition_ = np.partition(preds_single, len(preds_single[0]) - 2)
@@ -249,8 +258,10 @@ class EntropySampling(Heuristic):
     ):
         """
         Args:
-            preds_single: is a list[list[float]] and contains probability scores for each data point for each class
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data samples
+            preds_single: is a list[list[float]] and contains probability scores for each data
+                point for each class.
+            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
+                samples.
         """
         entropies = scipy_entropy(np.array(preds_single), axis=1, base=ENTROPY_LOG_BASE)
         confidences = -entropies
@@ -274,8 +285,10 @@ class DisagreementSampling(Heuristic):
     ):
         """
         Args:
-            preds_multi: is a list of list[list[float]] and contains probability scores for each data point for each class
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data samples
+            preds_multi: is a list of list[list[float]] and contains probability scores for each
+                data point for each class.
+            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
+                samples.
         """
         choices = []
         for pred in preds_multi:
@@ -315,10 +328,10 @@ class EnsembleSampling(Heuristic):
     ):
         """
         Args:
-            preds_single: is a list[list[float]] and contains probability scores for each data point for each class
-                will be used to sample with lcs, es and ms
-            preds_multi: is a list of list[list[float]] and contains probability scores for each data point for each class
-                will be used to sample with ds
+            preds_single: is a list[list[float]] and contains probability scores for each data
+                point for each class will be used to sample with lcs, es and ms.
+            preds_multi: is a list of list[list[float]] and contains probability scores for each
+                data point for each class will be used to sample with ds.
         """
         assert len(preds_single) != 0, print(f"{len(preds_single)}")
         if preds_multi:
@@ -390,8 +403,10 @@ class KLDivergenceSampling(Heuristic):
     ):
         """
         Args:
-            preds: is a list of list[list[float]] and contains probability scores for each data point for each class
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data samples
+            preds: is a list of list[list[float]] and contains probability scores for each data
+                point for each class.
+            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
+                samples.
         """
         # Calculate average prediction values.
         avg_preds = None
@@ -404,9 +419,9 @@ class KLDivergenceSampling(Heuristic):
         # Estimate divergence.
         divergences = None
         if not domain_indices:
-            divergences = self.get_divergence_all_domains(preds_multi, avg_preds)
+            divergences = KLDivergenceSampling.get_divergence_all_domains(preds_multi, avg_preds)
         else:
-            divergences = self.get_divergences_within_domain(
+            divergences = KLDivergenceSampling.get_divergences_within_domain(
                 preds_multi, avg_preds, domain_indices
             )
         # after transpose: row -> data point, column -> model
@@ -422,7 +437,8 @@ class KLDivergenceSampling(Heuristic):
         )
         return sampled_indices, unsampled_indices, ranked_indices
 
-    def get_divergence_all_domains(self, preds_multi, avg_preds):
+    @staticmethod
+    def get_divergence_all_domains(preds_multi, avg_preds):
         divergences = []
         for pred in preds_multi:
             kldivergences = scipy_entropy(
@@ -431,18 +447,19 @@ class KLDivergenceSampling(Heuristic):
             divergences.append(kldivergences.tolist())
         return divergences
 
-    def get_divergences_within_domain(self, preds_multi, avg_preds, domain_indices):
+    @staticmethod
+    def get_divergences_within_domain(preds_multi, avg_preds, domain_indices):
         divergences = []
         # Calculate q_d
         q_d = {d: [] for d in domain_indices}
         for row in avg_preds:
-            domain = self.get_domain(domain_indices, row)
+            domain = KLDivergenceSampling.get_domain(domain_indices, row)
             q_d[domain].append(row)
         for pred in preds_multi:
             # Calculate p_d
             p_d = {d: [] for d in domain_indices}
             for row in pred:
-                domain = self.get_domain(domain_indices, row)
+                domain = KLDivergenceSampling.get_domain(domain_indices, row)
                 p_d[domain].append(row)
             # Calculate Divergence Scores by Domain
             divergence_scores_by_domain = {d: [] for d in domain_indices}
@@ -460,7 +477,7 @@ class KLDivergenceSampling(Heuristic):
             single_pred_divergence_scores = []
             domain_counter = {d: 0 for d in domain_indices}
             for row in pred:
-                domain = self.get_domain(domain_indices, row)
+                domain = KLDivergenceSampling.get_domain(domain_indices, row)
                 single_pred_divergence_scores.append(
                     divergence_scores_by_domain[domain][domain_counter[domain]]
                 )
@@ -468,7 +485,8 @@ class KLDivergenceSampling(Heuristic):
             divergences.append(single_pred_divergence_scores)
         return divergences
 
-    def get_domain(self, domain_indices, row):
+    @staticmethod
+    def get_domain(domain_indices, row):
         if np.sum(row) == 0:
             row = [1 / len(row)] * len(row)
         for domain in domain_indices:

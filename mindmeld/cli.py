@@ -42,7 +42,11 @@ from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
-from .components._config import get_auto_annotator_config, get_language_config, get_active_learning_config
+from .components._config import (
+    get_auto_annotator_config,
+    get_language_config,
+    get_active_learning_config,
+)
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
@@ -625,11 +629,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace,
-            index_name,
-            data_file,
-            es_host,
-            app_path=app_path,
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
@@ -736,9 +736,7 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
-    required=True,
-    help="The application's path.",
+    "--app-path", required=True, help="The application's path.",
 )
 @click.option(
     "--overwrite", is_flag=True, default=False, help="Overwrite existing annotations."
@@ -754,9 +752,7 @@ def annotate(app_path, overwrite):
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
-    required=True,
-    help="The application's path.",
+    "--app-path", required=True, help="The application's path.",
 )
 @click.option(
     "--unannotate_all",
@@ -789,13 +785,25 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
 
 
 @shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
-@click.option('--app_path', type=str, help='Path to the MindMeld application')
-@click.option('--batch_size', type=int, help='Number of queries to select each iteration.')
-@click.option('--init_train_seed_pct', type=float, help='Percentage of training data to use as the initial seed.')
-@click.option('--n_epochs', type=int, help='Number of epochs.')
+@click.option("--app_path", type=str, help="Path to the MindMeld application")
+@click.option(
+    "--batch_size", type=int, help="Number of queries to select each iteration."
+)
+@click.option(
+    "--init_train_seed_pct",
+    type=float,
+    help="Percentage of training data to use as the initial seed.",
+)
+@click.option("--n_epochs", type=int, help="Number of epochs.")
 @click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
-@click.option('--strategy', type=str, help='Select a single strategy instead of the strategies listed in the config.')
-def active_learning_train(app_path, batch_size, init_train_seed_pct, n_epochs, no_plot, strategy):
+@click.option(
+    "--strategy",
+    type=str,
+    help="Select a single strategy instead of the strategies listed in the config.",
+)
+def active_learning_train(
+    app_path, batch_size, init_train_seed_pct, n_epochs, no_plot, strategy
+):
     """Command to run active learning training."""
     config = get_active_learning_config(app_path=app_path)
     config = flatten_active_learning_config(config)
@@ -816,13 +824,36 @@ def active_learning_train(app_path, batch_size, init_train_seed_pct, n_epochs, n
 
 
 @shared_cli.command("active_learning_select", context_settings=CONTEXT_SETTINGS)
-@click.option('--app_path', type=str, help='Path to the MindMeld application')
-@click.option('--batch_size', type=int, help='Number of queries to select each iteration.')
-@click.option('--unlabeled_logs_path', type=str, help='Path to the log folder to select queries from.')
-@click.option('--log_usage_pct', type=float, help='Percent of logs to use for selection.')
-@click.option('--labeled_logs_pattern', type=str, help='Pattern for labeled logs. Will override an unlabeled logs path.')
-@click.option('--strategy', type=str, help='Select a single strategy instead of the strategies listed in the config.')
-def active_learning_select(app_path, batch_size, unlabeled_logs_path, log_usage_pct, labeled_logs_pattern, strategy):
+@click.option("--app_path", type=str, help="Path to the MindMeld application")
+@click.option(
+    "--batch_size", type=int, help="Number of queries to select each iteration."
+)
+@click.option(
+    "--unlabeled_logs_path",
+    type=str,
+    help="Path to the log folder to select queries from.",
+)
+@click.option(
+    "--log_usage_pct", type=float, help="Percent of logs to use for selection."
+)
+@click.option(
+    "--labeled_logs_pattern",
+    type=str,
+    help="Pattern for labeled logs. Will override an unlabeled logs path.",
+)
+@click.option(
+    "--strategy",
+    type=str,
+    help="Select a single strategy instead of the strategies listed in the config.",
+)
+def active_learning_select(
+    app_path,
+    batch_size,
+    unlabeled_logs_path,
+    log_usage_pct,
+    labeled_logs_pattern,
+    strategy,
+):
     """Select the next set of queries for training from a set of log data."""
     config = get_active_learning_config(app_path=app_path)
     config = flatten_active_learning_config(config)
@@ -843,10 +874,13 @@ def active_learning_select(app_path, batch_size, unlabeled_logs_path, log_usage_
 
 
 @shared_cli.command("active_learning_plot", context_settings=CONTEXT_SETTINGS)
-@click.option('--experiment_dir_path', type=str, required=True, help='Path of experiment folder.')
+@click.option(
+    "--experiment_dir_path", type=str, required=True, help="Path of experiment folder."
+)
 def active_learning_plot(experiment_dir_path):
     """Generate plots for an active learning experiment given the folder directory."""
     PlotManager(experiment_dir_path).generate_plots()
+
 
 #
 # Module only Commands

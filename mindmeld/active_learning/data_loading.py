@@ -22,19 +22,22 @@ class LabelMap:
     def __init__(self, query_tree: Dict):
         """
         Args:
-            query_tree (list): query_tree (dict): Nested Dictionary {"domain":{"intent":[Query List]}}
+            query_tree (list): query_tree (dict): Nested Dictionary containing queries.
+                Has the format: {"domain":{"intent":[Query List]}}.
         """
-        domain_to_intents = self.get_domain_to_intents(query_tree)
+        domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
 
-        self.domain2id = self._get_domain_mappings(domain_to_intents)
+        self.domain2id = LabelMap._get_domain_mappings(domain_to_intents)
         self.id2domain = LabelMap._reverse_dict(self.domain2id)
-        self.intent2id = self._get_intent_mappings(domain_to_intents)
+        self.intent2id = LabelMap._get_intent_mappings(domain_to_intents)
         self.id2intent = LabelMap._reverse_nested_dict(self.intent2id)
 
-    def get_domain_to_intents(self, query_tree: Dict) -> Dict:
+    @staticmethod
+    def get_domain_to_intents(query_tree: Dict) -> Dict:
         """
         Args:
-            query_tree (list): query_tree (dict): Nested Dictionary {"domain":{"intent":[Query List]}}
+            query_tree (list): query_tree (dict): Nested Dictionary containing queries.
+                Has the format: {"domain":{"intent":[Query List]}}
 
         Returns:
             domain_to_intents (dict): Dict mapping domains to a list of intents.
@@ -44,7 +47,8 @@ class LabelMap:
             domain_to_intents[domain] = list(query_tree[domain].keys())
         return domain_to_intents
 
-    def _get_domain_mappings(self, domain_to_intents: Dict) -> Dict:
+    @staticmethod
+    def _get_domain_mappings(domain_to_intents: Dict) -> Dict:
         """Creates a dictionary that maps domains to encoded ids.
 
         Args:
@@ -59,7 +63,8 @@ class LabelMap:
             domain2id[domain] = index
         return domain2id
 
-    def _get_intent_mappings(self, domain_to_intents: Dict) -> Dict:
+    @staticmethod
+    def _get_intent_mappings(domain_to_intents: Dict) -> Dict:
         """Creates a dictionary that maps intents to encoded ids.
 
         Args:
@@ -103,8 +108,8 @@ class LabelMap:
 
         Args:
             app_path (str): Path to MindMeld application
-            file_pattern (str): Regex pattern to match text files. For example, ".*train.*.txt"
-        
+            file_pattern (str): Regex pattern to match text files. (".*train.*.txt")
+
         Returns:
             label_map (LabelMap): A label map.
         """
@@ -119,7 +124,7 @@ class QueryLoader:
         """
         Args:
             app_path (str): Path to MindMeld application
-            file_pattern (str): Regex pattern to match text files. For example, ".*train.*.txt"
+            file_pattern (str): Regex pattern to match text files. (".*train.*.txt")
             load (bool): Whether to load the list of queries
             save (bool): Whether to save the list of queries
         """
@@ -134,7 +139,7 @@ class QueryLoader:
 
         Args:
             app_path (str): Path to MindMeld application
-            file_pattern (str): Regex pattern to match text files. For example, ".*train.*.txt"
+            file_pattern (str): Regex pattern to match text files. (".*train.*.txt")
 
         Returns:
             query_tree (dict): Nested Dictionary {"domain":{"intent":[Query List]}}
@@ -214,8 +219,9 @@ class QueryLoader:
 
 
 class DataBucketFactory:
-    """Class to generate the initial data for experimentation. (Seed Queries, Remaining Queries, and Test Queries)
-    Loads/Saves data loaders, handles initial sampling and data split based on configuation details.
+    """Class to generate the initial data for experimentation. (Seed Queries, Remaining Queries,
+    and Test Queries). Loads/Saves data loaders, handles initial sampling and data split based
+    on configuation details.
     """
 
     @staticmethod
@@ -223,19 +229,18 @@ class DataBucketFactory:
         app_path, load, save, train_pattern, test_pattern, init_train_seed_pct
     ):
         """ Creates a DataBucket to be used for training.
-        
+
         Args:
             app_path (str): Path to MindMeld application
             load (bool): Whether to load pickled queries from a local folder
             save (bool): Whether to save queries as a local pickle file
-            train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
-            test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
+            train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
+            test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
             init_train_seed_pct (float): Percentage of training data to use as the initial seed
-        
+
         Returns:
             train_data_bucket (DataBucket): DataBucket for training
         """
-
         train_queries = QueryLoader(app_path, train_pattern, load, save).queries
         sample_size = int(init_train_seed_pct * len(train_queries))
         (
@@ -265,7 +270,7 @@ class DataBucketFactory:
         log_usage_pct=1.0,
     ):
         """ Creates a DataBucket to be used for log selection.
-        
+
         Args:
             app_path (str): Path to MindMeld application
             load (bool): Whether to load pickled queries from a local folder
@@ -273,7 +278,7 @@ class DataBucketFactory:
             train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
-            labeled_logs_pattern (str): Pattern to obtain logs already labeled and dispersed within the MindMeld app
+            labeled_logs_pattern (str): Pattern to obtain logs already labeled within a MindMeld app
             log_usage_pct (float): Percentage of the log data to use for selection
 
         Returns:
@@ -389,12 +394,13 @@ class LogQueriesLoader:
         """
         return open(self.log_file_path, "r").read().split("\n")
 
-    def filter_raw_text_queries(self, text_queries):
+    @staticmethod
+    def filter_raw_text_queries(text_queries):
         """ Removes duplicates in the text queries.
 
         Args:
             text_queries (List[str]): a List of text queries.
-        
+
         Returns:
             filtered_text_queries (List[str]): a List of filtered text queries.
         """
@@ -402,13 +408,13 @@ class LogQueriesLoader:
 
     def convert_text_queries_to_processed(self, text_queries):
         """ Converts text queries to processed queries using an annotator.
-        
+
         Args:
             text_queries (List[str]): a List of text queries.
-        
+
         Returns:
             queries (List[ProcessedQuery]): List of processed queries.
-        """ 
+        """
         print("Loading an Annotator")
         annotator_params = DEFAULT_AUTO_ANNOTATOR_CONFIG
         annotator_params["app_path"] = self.app_path
@@ -420,5 +426,5 @@ class LogQueriesLoader:
     @property
     def queries(self):
         raw_text_queries = self.get_raw_text_queries()
-        filtered_text_queries = self.filter_raw_text_queries(raw_text_queries)
+        filtered_text_queries = LogQueriesLoader.filter_raw_text_queries(raw_text_queries)
         return self.convert_text_queries_to_processed(filtered_text_queries)

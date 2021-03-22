@@ -44,9 +44,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {
-        "classifier_type": "logreg",
-    },
+    "model_settings": {"classifier_type": "logreg",},
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -184,10 +182,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {
-                        "type": "text",
-                        "analyzer": "char_ngram_analyzer",
-                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -273,10 +268,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {
-                                "type": "text",
-                                "analyzer": "english",
-                            },
+                            "processed_text": {"type": "text", "analyzer": "english",},
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -469,12 +461,7 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotation_rules": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-            "entities": ".*",
-        }
+        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
@@ -490,7 +477,7 @@ DEFAULT_TOKENIZER_CONFIG = {
 DEFAULT_ACTIVE_LEARNING_CONFIG = {
     "pre_training": {
         "train_pattern": ".*train.*.txt",
-        "test_pattern":  ".*test.*.txt",
+        "test_pattern": ".*test.*.txt",
         "load": False,
         "save": True,
         "init_train_seed_pct": 0.20,
@@ -518,7 +505,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "log_selection_strategy": "EntropySampling",
         "log_usage_pct": 1.00,
         "labeled_logs_pattern": None,
-        "unlabeled_logs_path": "/Users/kunshar2/Documents/active_learning/refactor/active-learning/logs_txt/logs.txt",
+        "unlabeled_logs_path": "logs.txt",
     },
 }
 
@@ -1123,7 +1110,9 @@ def get_active_learning_config(app_path=None):
         return DEFAULT_ACTIVE_LEARNING_CONFIG
     try:
         active_learning_config = getattr(
-            _get_config_module(app_path), "ACTIVE_LEARNING_CONFIG", DEFAULT_ACTIVE_LEARNING_CONFIG
+            _get_config_module(app_path),
+            "ACTIVE_LEARNING_CONFIG",
+            DEFAULT_ACTIVE_LEARNING_CONFIG,
         )
         return active_learning_config
     except (OSError, IOError, AttributeError):

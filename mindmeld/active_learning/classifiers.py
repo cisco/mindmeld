@@ -6,7 +6,7 @@ from sklearn.model_selection import StratifiedKFold
 from .data_loading import DataBucket
 
 from ..components.nlp import NaturalLanguageProcessor
-from ..constants import RANDOM_SEED
+from ..constants import ACTIVE_LEARNING_RANDOM_SEED
 
 
 class Classifier(ABC):
@@ -51,13 +51,15 @@ class MindMeld(Classifier):
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.n_classifiers = n_classifiers
 
-    def _get_probs(self, classifier, queries, class_id_map):
+    @staticmethod
+    def _get_probs(classifier, queries, class_id_map):
         """Get the probability distribution for for a query across domains or intents.
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
             queries (List of ProcessedQuery): List of MindMeld queries
-            class_id_map (Dict): Dictionary mapping domain or intent names to vector index positions.
+            class_id_map (Dict): Dictionary mapping domain or intent names to vector index
+                positions.
 
         Returns:
             prob_vector (List[List]]): Probability distribution vectors for given queries.
@@ -81,8 +83,9 @@ class MindMeld(Classifier):
             intents (List): List intents in the order that corresponds with the intent
                 probabities for the queries. Intents are in the form "domain|intent".
         Returns:
-            padded_ic_queries_prob_vectors (List[List]]): 2D Array containing the probability distribution
-                for a single query across all intents (including out-of-domain intents)
+            padded_ic_queries_prob_vectors (List[List]]): 2D Array containing the probability
+                distribution for a single query across all intents (including out-of-domain
+                intents).
         """
         padded_ic_queries_prob_vectors = []
         for unordered_ic_query_prob_vector in ic_queries_prob_vectors:
@@ -98,13 +101,14 @@ class MindMeld(Classifier):
         """ Main training function.
 
         Args:
-            data_bucket (DataBucket): Databucket for current iteration
-            return_preds_multi (bool): 
-        
+            data_bucket (DataBucket): DataBucket for current iteration
+            return_preds_multi (bool): Whether to return a 3d array with probability vectors
+
         Returns:
-            eval_stats (Dict): Contains recorded evaluation metrics to be included in accuracies.json
+            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
             preds_single (List[List]): 2D array with probability vectors for unsampled queries
-            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled queries from multiple classifiers
+            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+                queries from multiple classifiers
             domain_indices (Dict): Maps domains to a tuple containing the start and
                 ending indexes of intents with the given domain.
         """
@@ -119,7 +123,7 @@ class MindMeld(Classifier):
         """
         Args:
             data_bucket (DataBucket): Databucket for current iteration
-            eval_stats (Dict): Contains recorded evaluation metrics to be included in accuracies.json
+            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
         Returns:
             preds_single (List): 2D array with probability vectors for unsampled queries
         """
@@ -147,7 +151,7 @@ class MindMeld(Classifier):
             domain2id=label_map.domain2id,
         )
         if eval_stats:
-            self._update_eval_stats_domain_level(eval_stats, dc_eval_test)
+            MindMeld._update_eval_stats_domain_level(eval_stats, dc_eval_test)
         preds_single = dc_queries_prob_vectors
 
         # Intent_Level
@@ -163,7 +167,7 @@ class MindMeld(Classifier):
                 intent2id=label_map.intent2id,
             )
             if eval_stats:
-                self._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
+                MindMeld._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
             preds_single = ic_queries_prob_vectors
 
         return preds_single
@@ -173,7 +177,8 @@ class MindMeld(Classifier):
         Args:
             data_bucket (DataBucket): Databucket for current iteration
         Returns:
-            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled queries from multiple classifiers
+            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+                queries from multiple classifiers
         """
         return self._train_multi(
             sampled_queries=data_bucket.sampled_queries,
@@ -183,14 +188,16 @@ class MindMeld(Classifier):
         )
 
     def _train_multi(self, sampled_queries, unsampled_queries, test_queries, label_map):
-        skf = StratifiedKFold(n_splits=self.n_classifiers, random_state=RANDOM_SEED)
+        skf = StratifiedKFold(
+            n_splits=self.n_classifiers, random_state=ACTIVE_LEARNING_RANDOM_SEED
+        )
         y = [f"{query.domain}|{query.intent}" for query in sampled_queries]
         fold_sampled_queries = [
             [sampled_queries[i] for i in fold]
             for _, fold in skf.split(sampled_queries, y)
         ]
         preds_multi = []
-        for i, fold_i_queries in enumerate(fold_sampled_queries):
+        for fold_i_queries in fold_sampled_queries:
             preds_multi.append(
                 self._train_single(
                     fold_i_queries, unsampled_queries, test_queries, label_map
@@ -216,15 +223,16 @@ class MindMeld(Classifier):
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
         dc_eval_test = dc.evaluate(queries=test_queries)
-        dc_queries_prob_vectors = self._get_probs(dc, unsampled_queries, domain2id)
+        dc_queries_prob_vectors = MindMeld._get_probs(dc, unsampled_queries, domain2id)
         return dc_queries_prob_vectors, dc_eval_test
 
-    def _update_eval_stats_domain_level(self, eval_stats, dc_eval_test):
+    @staticmethod
+    def _update_eval_stats_domain_level(eval_stats, dc_eval_test):
         """Update the eval_stats dictionary with evaluation metrics from the domain
         classifier.
 
         Args:
-            eval_stats (Dict): Contains recorded evaluation metrics to be included in accuracies.json
+            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
             dc_eval_test (): Mindmeld evaluation object for the domain classifier
         """
         eval_stats["accuracies"]["overall"] = dc_eval_test.get_stats()["stats_overall"][
@@ -274,7 +282,7 @@ class MindMeld(Classifier):
                 continue
             ic_eval_test_dict[domain] = ic_eval_test
             # Get Probability Vectors
-            ic_queries_prob_vectors = self._get_probs(
+            ic_queries_prob_vectors = MindMeld._get_probs(
                 classifier=ic,
                 queries=filtered_unsampled_queries,
                 class_id_map=intent2id[domain],
@@ -300,16 +308,18 @@ class MindMeld(Classifier):
     def _get_zero_prob_vector(self):
         """
         Returns:
-            zero_prob_vector (List): Array of zeroes with a length equal to the total number of intents.
+            zero_prob_vector (List): Array of zeroes with a length equal to the total number of
+                intents.
         """
         return [0] * len(self.intent2idx)
 
-    def _update_eval_stats_intent_level(self, eval_stats, ic_eval_test_dict):
+    @staticmethod
+    def _update_eval_stats_intent_level(eval_stats, ic_eval_test_dict):
         """Update the eval_stats dictionary with evaluation metrics from intent
         classifiers.
 
         Args:
-            eval_stats (Dict): Contains recorded evaluation metrics to be included in accuracies.json
+            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
             ic_eval_test_dict (Dict): Dictionary mapping a domain (str) to the
                 associated ic_eval_test object.
         """

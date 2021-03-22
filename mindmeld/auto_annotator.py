@@ -904,7 +904,7 @@ class BootstrapAnnotator(Annotator):
         ]
 
     def convert_text_queries_to_processed(self, text_queries):
-        """Converts text queries into processed queries using the JBA.
+        """Converts text queries into processed queries.
 
         Args:
             text_queries (list): List of raw text queries.
