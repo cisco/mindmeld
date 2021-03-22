@@ -234,7 +234,7 @@ class EnglishParaphraser(Augmentor):
 
     def augment_queries(self, queries, **kwargs):
         augmented_queries = []
-        augmented_queries = self._get_response(queries, **kwargs)
+        augmented_queries = list(set(self._get_response(queries, **kwargs)))
         return augmented_queries
 
 

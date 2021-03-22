@@ -478,7 +478,7 @@ DEFAULT_AUGMENTATION_CONFIG = {
         "reverse_params": {},
         "batch_size": 8,
     },
-    "path_suffix": ".augmented.txt"
+    "path_suffix": "-augment.txt"
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
