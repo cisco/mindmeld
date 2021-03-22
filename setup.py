@@ -102,6 +102,7 @@ setup(
             'torch~=1.7.0; python_version>="3.6"',
             'transformers~=3.5.1; python_version>="3.6"',
             'sentencepiece==0.1.91'
+        ],
         "language_annotator": [
             "google-cloud-translate>=3.0.1",
         ],
