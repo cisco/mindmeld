@@ -278,16 +278,15 @@ class MultiLingualParaphraser(Augmentor):
 
         self.fwd_params = {
             "max_length": 60,
-            "num_beams": 5,
-            "num_return_sequences": 5,
+            "num_beams": 3,
+            "num_return_sequences": 3,
             "temperature": 1.0,
             "top_k": 0,
         }
 
         self.reverse_params = {
-            "max_length": 60,
-            "num_beams": 3,
-            "num_return_sequences": 3,
+            "num_beams": 5,
+            "num_return_sequences": 5,
             "temperature": 1.0,
             "top_k": 0,
         }
@@ -327,7 +326,7 @@ class MultiLingualParaphraser(Augmentor):
         )
 
         template = lambda text: f">>{self.lang}<< {text}"
-        translated_queries = [template(query) for query in set(translated_queries)]
+        translated_queries = [template(query.lower()) for query in set(translated_queries)]
 
         reverse_translated_queries = self._translate(
             queries=translated_queries,

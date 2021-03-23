@@ -21,7 +21,6 @@ NUM_PARAPHRASES = 10
 @pytest.fixture(scope="module")
 def english_paraphraser(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
-    config["params"]["fwd_params"]["num_return_sequences"] = NUM_PARAPHRASES
     lang = "en"
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
     augmentor = create_augmentor(
@@ -49,7 +48,6 @@ def test_num_paraphrases(english_paraphraser, query):
 @pytest.mark.extras
 def test_unsupported_language(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
-    config["params"]["fwd_params"]["num_return_sequences"] = NUM_PARAPHRASES
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
 
     with pytest.raises(UnsupportedLanguageError):
@@ -58,3 +56,28 @@ def test_unsupported_language(kwik_e_mart_app_path):
             lang="de",
             resource_loader=resource_loader,
         )
+
+
+@pytest.fixture(scope="module")
+def multilingual_paraphraser(kwik_e_mart_app_path):
+    config = get_augmentation_config(app_path=kwik_e_mart_app_path)
+    lang = "es"
+    resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
+    augmentor = create_augmentor(
+        config=config,
+        lang=lang,
+        resource_loader=resource_loader,
+    )
+    return augmentor
+
+
+@pytest.mark.extras
+@pytest.mark.parametrize(
+    "query",
+    [
+        ("aumenta el volumen"),
+    ],
+)
+def test_spanish_paraphrases(multilingual_paraphraser, query):
+    paraphrases = multilingual_paraphraser.augment_queries([query])
+    assert "Aumentar el volumen." in paraphrases
