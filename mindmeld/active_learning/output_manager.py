@@ -1,12 +1,13 @@
 import os
 import json
 import datetime
+import logging
 from typing import Dict, List
 
 from mindmeld.markup import dump_query
-
 from ..constants import STRATEGY_ABRIDGED
 
+logger = logging.getLogger(__name__)
 
 # File Creation Methods
 def create_dir_if_absent(base_path: str):
@@ -63,13 +64,12 @@ def get_log_selected_queries_json_path(experiment_dir_path) -> str:
 
 class OutputManager:
     """Handles the initialization of generated folder and its contents. Keeps record of experiment
-        results."""
+    results."""
 
     def __init__(
         self,
         active_learning_params: Dict,
         selection_strategies: List[str],
-        save_accuracy_results=True,
         save_sampled_queries=False,
         early_stopping_window: int = None,
     ):
@@ -77,14 +77,12 @@ class OutputManager:
         Args:
             config_dict (Dict): Dictionary representation of the config to store.
             selection_strategies (list): List of strategies used for the experiment.
-            save_accuracy_results (bool): Whether to save accuracy metrics.
             save_sampled_queries (bool): Whether to save queries sampled at every batch.
             early_stopping_window (int): Number of iterations to stop after if accuracy keeps
                 decreasing.
         """
         self.active_learning_params = active_learning_params
         self.selection_strategies = selection_strategies
-        self.save_accuracy_results = save_accuracy_results
         self.save_sampled_queries = save_sampled_queries
         self.early_stopping_window = early_stopping_window
         self.experiment_dir_path = self._get_experiment_dir_path()
@@ -159,7 +157,11 @@ class OutputManager:
 
     # JSON Update Methods
     def write_log_selected_queries(
-        self, strategy: str, epoch: int, iteration: int, sampled_queries_batch: List,
+        self,
+        strategy: str,
+        epoch: int,
+        iteration: int,
+        sampled_queries_batch: List,
     ):
         """Update accuracies.json and queries.json if specified to do so in the config.
         Args:
@@ -209,21 +211,20 @@ class OutputManager:
                 iteration=iteration,
                 data=OutputManager.queries_to_dict(sampled_queries_batch),
             )
-        if self.save_accuracy_results:
-            OutputManager._update_json(
+        OutputManager._update_json(
+            json_path=get_accuracies_json_path(self.experiment_dir_path),
+            strategy=strategy,
+            epoch=epoch,
+            iteration=iteration,
+            data=classifier_output,
+        )
+        if self.early_stopping_window:
+            return self._check_early_stopping(
                 json_path=get_accuracies_json_path(self.experiment_dir_path),
                 strategy=strategy,
                 epoch=epoch,
                 iteration=iteration,
-                data=classifier_output,
             )
-            if self.early_stopping_window:
-                return self._check_early_stopping(
-                    json_path=get_accuracies_json_path(self.experiment_dir_path),
-                    strategy=strategy,
-                    epoch=epoch,
-                    iteration=iteration,
-                )
 
     @staticmethod
     def _update_json(json_path: str, strategy: str, epoch: int, iteration: int, data):
@@ -272,10 +273,12 @@ class OutputManager:
                     iteration_scores[-(self.early_stopping_window + 1) :]
                 )
                 if ref_score > highest_score:
-                    print(
-                        f"""Early stopping. Early stopping window {self.early_stopping_window}.
-                    Reference score at the window start: {ref_score} is greater than the highest
-                    after window start: {highest_score}."""
+                    logger.info(
+                        """Early stopping. Early stopping window %s. Reference score at the
+                        window start: %s is greater than the highest after window start: %s.""",
+                        self.early_stopping_window,
+                        ref_score,
+                        highest_score,
                     )
                     return True
         return False

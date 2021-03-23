@@ -27,8 +27,8 @@ def custom_reordering(confidences, do_rank: bool = False, sampling_size: int = N
             print(
                 f"not using the value of sampling_size={sampling_size} since do_rank={do_rank}"
             )
-        # ascending order sort
-        idxs = np.argsort(confidences)
+
+        idxs = np.argsort(confidences)  # ascending order sort
     return idxs
 
 
@@ -377,8 +377,7 @@ class EnsembleSampling(Heuristic):
             num_strategies_used += 1
         qid2rank = [(k, v / num_strategies_used) for k, v in qid2rank.items()]
         all_qids, all_ranks = list(zip(*qid2rank))
-        # a higher rank now indicates higher confidence
-        # do_rank can also be True here!
+
         reordered = custom_reordering(
             all_ranks, do_rank=False, sampling_size=self.sampling_size
         )
@@ -419,7 +418,9 @@ class KLDivergenceSampling(Heuristic):
         # Estimate divergence.
         divergences = None
         if not domain_indices:
-            divergences = KLDivergenceSampling.get_divergence_all_domains(preds_multi, avg_preds)
+            divergences = KLDivergenceSampling.get_divergence_all_domains(
+                preds_multi, avg_preds
+            )
         else:
             divergences = KLDivergenceSampling.get_divergences_within_domain(
                 preds_multi, avg_preds, domain_indices

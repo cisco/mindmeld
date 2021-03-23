@@ -480,7 +480,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "test_pattern": ".*test.*.txt",
         "load": False,
         "save": True,
-        "init_train_seed_pct": 0.20,
+        "train_seed_pct": 0.20,
     },
     "training": {
         "n_classifiers": 3,
@@ -497,7 +497,6 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         ],
     },
     "training_output": {
-        "save_accuracy_results": True,
         "save_sampled_queries": True,
         "early_stopping_window": 0,
     },

@@ -629,7 +629,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace, index_name, data_file, es_host, app_path=app_path,
+            app_namespace,
+            index_name,
+            data_file,
+            es_host,
+            app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
@@ -736,7 +740,9 @@ def _get_duckling_pid():
 
 @shared_cli.command("annotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--overwrite", is_flag=True, default=False, help="Overwrite existing annotations."
@@ -752,7 +758,9 @@ def annotate(app_path, overwrite):
 
 @shared_cli.command("unannotate", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path", required=True, help="The application's path.",
+    "--app-path",
+    required=True,
+    help="The application's path.",
 )
 @click.option(
     "--unannotate_all",
@@ -785,12 +793,12 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
 
 
 @shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
-@click.option("--app_path", type=str, help="Path to the MindMeld application")
+@click.option("--app-path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
 @click.option(
-    "--init_train_seed_pct",
+    "--train_seed_pct",
     type=float,
     help="Percentage of training data to use as the initial seed.",
 )
@@ -802,7 +810,7 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     help="Select a single strategy instead of the strategies listed in the config.",
 )
 def active_learning_train(
-    app_path, batch_size, init_train_seed_pct, n_epochs, no_plot, strategy
+    app_path, batch_size, train_seed_pct, n_epochs, no_plot, strategy
 ):
     """Command to run active learning training."""
     config = get_active_learning_config(app_path=app_path)
@@ -811,8 +819,8 @@ def active_learning_train(
         config["app_path"] = app_path
     if batch_size:
         config["batch_size"] = batch_size
-    if init_train_seed_pct:
-        config["init_train_seed_pct"] = init_train_seed_pct
+    if train_seed_pct:
+        config["train_seed_pct"] = train_seed_pct
     if n_epochs:
         config["n_epochs"] = n_epochs
     if strategy:
@@ -824,7 +832,7 @@ def active_learning_train(
 
 
 @shared_cli.command("active_learning_select", context_settings=CONTEXT_SETTINGS)
-@click.option("--app_path", type=str, help="Path to the MindMeld application")
+@click.option("--app-path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
@@ -873,6 +881,7 @@ def active_learning_select(
     alp.select_queries_to_label()
 
 
+# TODO: Remove this function, it is temporary for debugging purposes
 @shared_cli.command("active_learning_plot", context_settings=CONTEXT_SETTINGS)
 @click.option(
     "--experiment_dir_path", type=str, required=True, help="Path of experiment folder."

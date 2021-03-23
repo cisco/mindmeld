@@ -1,4 +1,5 @@
 import os
+import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from sklearn.model_selection import StratifiedKFold
@@ -7,6 +8,8 @@ from .data_loading import DataBucket
 
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import ACTIVE_LEARNING_RANDOM_SEED
+
+logger = logging.getLogger(__name__)
 
 
 class Classifier(ABC):
@@ -45,7 +48,7 @@ class Classifier(ABC):
         )
 
 
-class MindMeld(Classifier):
+class MindMeldClassifier(Classifier):
     def __init__(self, app_path, training_level, n_classifiers):
         super().__init__(app_path=app_path, training_level=training_level)
         self.nlp = NaturalLanguageProcessor(self.app_path)
@@ -98,14 +101,14 @@ class MindMeld(Classifier):
         return padded_ic_queries_prob_vectors
 
     def train(self, data_bucket, return_preds_multi=False):
-        """ Main training function.
+        """Main training function.
 
         Args:
             data_bucket (DataBucket): DataBucket for current iteration
             return_preds_multi (bool): Whether to return a 3d array with probability vectors
 
         Returns:
-            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
+            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
             preds_single (List[List]): 2D array with probability vectors for unsampled queries
             preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
@@ -123,7 +126,7 @@ class MindMeld(Classifier):
         """
         Args:
             data_bucket (DataBucket): Databucket for current iteration
-            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
+            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
         Returns:
             preds_single (List): 2D array with probability vectors for unsampled queries
         """
@@ -151,7 +154,7 @@ class MindMeld(Classifier):
             domain2id=label_map.domain2id,
         )
         if eval_stats:
-            MindMeld._update_eval_stats_domain_level(eval_stats, dc_eval_test)
+            MindMeldClassifier._update_eval_stats_domain_level(eval_stats, dc_eval_test)
         preds_single = dc_queries_prob_vectors
 
         # Intent_Level
@@ -167,7 +170,9 @@ class MindMeld(Classifier):
                 intent2id=label_map.intent2id,
             )
             if eval_stats:
-                MindMeld._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
+                MindMeldClassifier._update_eval_stats_intent_level(
+                    eval_stats, ic_eval_test_dict
+                )
             preds_single = ic_queries_prob_vectors
 
         return preds_single
@@ -223,7 +228,9 @@ class MindMeld(Classifier):
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
         dc_eval_test = dc.evaluate(queries=test_queries)
-        dc_queries_prob_vectors = MindMeld._get_probs(dc, unsampled_queries, domain2id)
+        dc_queries_prob_vectors = MindMeldClassifier._get_probs(
+            dc, unsampled_queries, domain2id
+        )
         return dc_queries_prob_vectors, dc_eval_test
 
     @staticmethod
@@ -238,7 +245,9 @@ class MindMeld(Classifier):
         eval_stats["accuracies"]["overall"] = dc_eval_test.get_stats()["stats_overall"][
             "accuracy"
         ]
-        print("Overall Domain-level Accuracy: ", eval_stats["accuracies"]["overall"])
+        logger.info(
+            "Overall Domain-level Accuracy: %s", eval_stats["accuracies"]["overall"]
+        )
 
     def intent_classifiers_fit_eval(
         self, sampled_queries, unsampled_queries, test_queries, domain2id, intent2id
@@ -282,7 +291,7 @@ class MindMeld(Classifier):
                 continue
             ic_eval_test_dict[domain] = ic_eval_test
             # Get Probability Vectors
-            ic_queries_prob_vectors = MindMeld._get_probs(
+            ic_queries_prob_vectors = MindMeldClassifier._get_probs(
                 classifier=ic,
                 queries=filtered_unsampled_queries,
                 class_id_map=intent2id[domain],
@@ -319,7 +328,7 @@ class MindMeld(Classifier):
         classifiers.
 
         Args:
-            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
+            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
             ic_eval_test_dict (Dict): Dictionary mapping a domain (str) to the
                 associated ic_eval_test object.
         """

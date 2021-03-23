@@ -6,7 +6,7 @@ import math
 from .data_loading import DataBucketFactory
 from .output_manager import OutputManager, get_log_selected_queries_json_path
 from .plot_manager import PlotManager
-from .classifiers import MindMeld
+from .classifiers import MindMeldClassifier
 from .heuristics import HeuristicsFactory
 from ..constants import STRATEGY_ABRIDGED
 
@@ -23,13 +23,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         test_pattern: str,
         load: bool,
         save: bool,
-        init_train_seed_pct: float,
+        train_seed_pct: float,
         n_classifiers: int,
         n_epochs: int,
         batch_size: int,
         training_strategies: list,
         log_selection_strategy: str,
-        save_accuracy_results: bool,
         save_sampled_queries: bool,
         early_stopping_window: int,
         log_usage_pct: float,
@@ -43,13 +42,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             load (bool): Whether to load pickled queries from a local folder
             save (bool): Whether to save queries as a local pickle file
-            init_train_seed_pct (float): Percentage of training data to use as the initial seed
+            train_seed_pct (float): Percentage of training data to use as the initial seed
             n_classifiers (int): Number of classifiers to be used by a subset of heuristics
             n_epochs (int): Number of epochs to run training
             batch_size (int): Number of queries to select at each iteration
             training_strategies (List[str]): List of strategies to use for training
             log_selection_strategy (str): Single strategy to use for log selection
-            save_accuracy_results (bool): Whether to save accuracy data across iterations
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
             early_stopping_window (int): If the drops for n iterations, terminate training early
             log_usage_pct (float): Percentage of the log data to use for selection
@@ -61,13 +59,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.test_pattern = test_pattern
         self.load = load
         self.save = save
-        self.init_train_seed_pct = init_train_seed_pct
+        self.train_seed_pct = train_seed_pct
         self.n_classifiers = n_classifiers
         self.n_epochs = n_epochs
         self.batch_size = batch_size
         self.training_strategies = training_strategies
         self.log_selection_strategy = log_selection_strategy
-        self.save_accuracy_results = save_accuracy_results
         self.save_sampled_queries = save_sampled_queries
         self.early_stopping_window = early_stopping_window
         self.log_usage_pct = log_usage_pct
@@ -83,13 +80,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         return OutputManager(
             active_learning_params=self.__dict__,
             selection_strategies=self.training_strategies,
-            save_accuracy_results=self.save_accuracy_results,
             save_sampled_queries=self.save_sampled_queries,
             early_stopping_window=self.early_stopping_window,
         )
 
     def get_classifier(self):
-        return MindMeld(
+        return MindMeldClassifier(
             app_path=self.app_path,
             training_level="intent",
             n_classifiers=self.n_classifiers,
@@ -97,21 +93,23 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     def train(self):
         """Loads the initial data bucket and then trains on every strategy."""
-        print("Creating Training Data Bucket")
+        logger.info("Creating Training Data Bucket")
         self.init_data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
             self.load,
             self.save,
             self.train_pattern,
             self.test_pattern,
-            self.init_train_seed_pct,
+            self.train_seed_pct,
         )
-        print("Starting Training")
+        logger.info("Starting Training")
         for strategy in self.training_strategies:
             self._train_strategy(strategy)
 
     def _train_strategy(
-        self, strategy: str, selection_mode: bool = None,
+        self,
+        strategy: str,
+        selection_mode: bool = None,
     ):
         """Helper function to traing a single strategy.
 
@@ -129,9 +127,15 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             )
             iteration = 0
             while iteration <= num_iterations:
-                print(f"Strategy: {strategy}. Epoch: {epoch}. Iteration: {iteration}.")
-                print(f"Sampled Queries: {len(self.data_bucket.sampled_queries)}")
-                print(f"Unsampled Queries: {len(self.data_bucket.unsampled_queries)}")
+                logger.info(
+                    "Strategy: %s. Epoch: %s. Iteration %s.", strategy, epoch, iteration
+                )
+                logger.info(
+                    "Sampled Queries: %s", len(self.data_bucket.sampled_queries)
+                )
+                logger.info(
+                    "Remaining Queries: %s", len(self.data_bucket.unsampled_queries)
+                )
                 (
                     eval_stats,
                     preds_single,
@@ -175,9 +179,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 iteration += 1
 
     def select_queries_to_label(self):
-        """ Selects the next batch of queries to label from a set of log queries.
-        """
-        print("Creating Selection Data Bucket")
+        """Selects the next batch of queries to label from a set of log queries."""
+        logger.info("Loading Queries for Active Learning.")
         self.init_data_bucket = DataBucketFactory.get_data_bucket_for_selection(
             self.app_path,
             self.load,
@@ -188,7 +191,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.labeled_logs_pattern,
             self.log_usage_pct,
         )
-        print("Starting Selection")
+        logger.info("Starting Selection.")
         self._train_strategy(strategy=self.log_selection_strategy, selection_mode=True)
         self.output_manager.write_log_selected_queries(
             strategy=self.log_selection_strategy,
@@ -199,7 +202,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         log_selected_queries_json_path = get_log_selected_queries_json_path(
             self.output_manager.experiment_dir_path
         )
-        print(f"Selected Log Queries saved at: {log_selected_queries_json_path}")
+        logger.info("Selected Log Queries saved at: %s", log_selected_queries_json_path)
 
     def plot(self):
         """Creates the generated folder and its subfolders if they do not already exist."""
@@ -209,7 +212,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
 # TODO: This function is temporary. Replace with better data validation
 def flatten_active_learning_config(original_config):
-    """ Create a flattened config to use as params.
+    """Create a flattened config to use as params.
 
     Args:
         original_config (dict): The original input config dictionary

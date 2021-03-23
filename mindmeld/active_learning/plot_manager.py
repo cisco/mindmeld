@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from collections import Counter
 from typing import Dict, List
 import numpy as np
@@ -10,6 +11,8 @@ from .output_manager import (
     get_accuracies_json_path,
     get_queries_json_path,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class PlotManager:
@@ -60,18 +63,18 @@ class PlotManager:
     # Plotting Meta Functions
     def generate_plots(self):
         """Entry point for generating plots as per the specifications provided in the config."""
-        print("Starting to generate plots")
+        logger.info("Starting to generate plots")
         plot_functions = [
             "plot_single_epoch",
             "plot_avg_across_epochs",
             "plot_all_epochs",
         ]
         for plot_function in plot_functions:
-            print(f"Plotting: {plot_function}")
+            logger.info("Plotting: %s", plot_function)
             plot_function = getattr(PlotManager, plot_function)
             self.plotting_wrapper(plot_function)
         if self.queries_json_data_has_data():
-            print("Plotting: plot_stacked_bar")
+            logger.info("Plotting: plot_stacked_bar")
             self.plot_stacked_bar()
 
     def plotting_wrapper(
@@ -289,9 +292,7 @@ class PlotManager:
             fig.savefig(self.get_img_path(y_keys, title))
             plt.clf()
 
-    def plot_all_epochs(
-        self, y_keys: List, display: bool = False, save: bool = True
-    ):
+    def plot_all_epochs(self, y_keys: List, display: bool = False, save: bool = True):
         """Plot all epochs. Creates a plot for each strategy.
         Args:
             y_keys (list): Keys to access the data from a epoch to be used as y values for plotting.
@@ -386,10 +387,7 @@ class PlotManager:
         return label_set_counter
 
     def plot_stacked_bar(
-        self,
-        epoch: int = 0,
-        plot_domains: bool = True,
-        plot_intents: bool = True
+        self, epoch: int = 0, plot_domains: bool = True, plot_intents: bool = True
     ):
         """Plots a stacked bar graph of selection distributions across iterations for an epoch.
         Args:
@@ -421,7 +419,7 @@ class PlotManager:
                         num_iters=len(all_counters),
                         label_set_counter=label_set_counter,
                         strategy=strategy,
-                        intent_level=(level == "intent")
+                        intent_level=(level == "intent"),
                     )
 
     def _plot_stacked_bar(
@@ -431,7 +429,7 @@ class PlotManager:
         strategy: str,
         intent_level: bool,
         display: bool = False,
-        save: bool = True
+        save: bool = True,
     ):
         """Helper function to plot a stacked bar graph.
         Args:

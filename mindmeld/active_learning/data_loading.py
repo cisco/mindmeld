@@ -189,7 +189,7 @@ class QueryLoader:
 
     def load_queries(self):
         """ Loads a list of queries from a pickle file. """
-        print(f"Loading queries with the file pattern {self.file_pattern}.")
+        logger.info("Loading queries with the file pattern: %s", self.file_pattern)
         try:
             with open(self.save_file_path, "rb") as handle:
                 query_list = pickle.load(handle)
@@ -203,7 +203,7 @@ class QueryLoader:
 
     def save_queries(self, queries):
         """ Saves a list of queries to a pickle file. """
-        print(f"Saving queries with the file pattern {self.file_pattern}.")
+        logger.info("Saving queries with the file pattern: %s", self.file_pattern)
         with open(self.save_file_path, "wb") as handle:
             pickle.dump(queries, handle, protocol=pickle.HIGHEST_PROTOCOL)
             handle.close()
@@ -226,9 +226,9 @@ class DataBucketFactory:
 
     @staticmethod
     def get_data_bucket_for_training(
-        app_path, load, save, train_pattern, test_pattern, init_train_seed_pct
+        app_path, load, save, train_pattern, test_pattern, train_seed_pct
     ):
-        """ Creates a DataBucket to be used for training.
+        """Creates a DataBucket to be used for training.
 
         Args:
             app_path (str): Path to MindMeld application
@@ -236,13 +236,13 @@ class DataBucketFactory:
             save (bool): Whether to save queries as a local pickle file
             train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
             test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
-            init_train_seed_pct (float): Percentage of training data to use as the initial seed
+            train_seed_pct (float): Percentage of training data to use as the initial seed
 
         Returns:
             train_data_bucket (DataBucket): DataBucket for training
         """
         train_queries = QueryLoader(app_path, train_pattern, load, save).queries
-        sample_size = int(init_train_seed_pct * len(train_queries))
+        sample_size = int(train_seed_pct * len(train_queries))
         (
             newly_sampled_queries,
             sampled_queries,
@@ -269,7 +269,7 @@ class DataBucketFactory:
         labeled_logs_pattern=None,
         log_usage_pct=1.0,
     ):
-        """ Creates a DataBucket to be used for log selection.
+        """Creates a DataBucket to be used for log selection.
 
         Args:
             app_path (str): Path to MindMeld application
@@ -382,12 +382,13 @@ class LogQueriesLoader:
             app_path (str): Path to the MindMeld application.
             log_file_path (str): Path to the log file with log queries.
         """
-        assert os.path.isfile(log_file_path), f"{log_file_path} is not a valid file"
+        if not os.path.isfile(log_file_path):
+            raise FileNotFoundError(f"{log_file_path} is not a valid file")
         self.log_file_path = log_file_path
         self.app_path = app_path
 
     def get_raw_text_queries(self):
-        """ Reads in the data from the log file.
+        """Reads in the data from the log file.
 
         Returns:
             text_queries (List[str]): a List of text queries.
@@ -396,7 +397,7 @@ class LogQueriesLoader:
 
     @staticmethod
     def filter_raw_text_queries(text_queries):
-        """ Removes duplicates in the text queries.
+        """Removes duplicates in the text queries.
 
         Args:
             text_queries (List[str]): a List of text queries.
@@ -407,7 +408,7 @@ class LogQueriesLoader:
         return list(set(text_queries))
 
     def convert_text_queries_to_processed(self, text_queries):
-        """ Converts text queries to processed queries using an annotator.
+        """Converts text queries to processed queries using an annotator.
 
         Args:
             text_queries (List[str]): a List of text queries.
@@ -415,7 +416,7 @@ class LogQueriesLoader:
         Returns:
             queries (List[ProcessedQuery]): List of processed queries.
         """
-        print("Loading an Annotator")
+        logger.info("Loading a Bootstrap Annotator to process log queries.")
         annotator_params = DEFAULT_AUTO_ANNOTATOR_CONFIG
         annotator_params["app_path"] = self.app_path
         bootstrap_annotator = BootstrapAnnotator(**annotator_params)
@@ -426,5 +427,7 @@ class LogQueriesLoader:
     @property
     def queries(self):
         raw_text_queries = self.get_raw_text_queries()
-        filtered_text_queries = LogQueriesLoader.filter_raw_text_queries(raw_text_queries)
+        filtered_text_queries = LogQueriesLoader.filter_raw_text_queries(
+            raw_text_queries
+        )
         return self.convert_text_queries_to_processed(filtered_text_queries)
