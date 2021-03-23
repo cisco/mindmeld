@@ -160,14 +160,12 @@ class EnglishParaphraser(Augmentor):
     """Paraphraser class for generating English paraphrases."""
 
     def __init__(
-        self, lang, num_augmentations, params, paths, path_suffix, resource_loader
+        self, lang, paths, path_suffix, resource_loader
     ):
         """Initializes an English paraphraser.
 
         Args:
             lang (str): The lang code for paraphrasing.
-            num_augmentations (int): Number of augmentations to be generated per query.
-            params (dict): Model params.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
@@ -197,14 +195,11 @@ class EnglishParaphraser(Augmentor):
         self.params = {
             "max_length": 60,
             "num_beams": 10,
-            "num_return_sequences": num_augmentations,
+            "num_return_sequences": 10,
             "temperature": 1.5,
         }
 
-        if params and "fwd_params" in params:
-            self.params.update(params["fwd_params"])
-
-        self.batch_size = params.get("batch_size", 8)
+        self.batch_size = 8
 
     def _get_response(self, queries):
         """Generates paraphrase responses for given query.
@@ -244,14 +239,12 @@ class MultiLingualParaphraser(Augmentor):
     """
 
     def __init__(
-        self, lang, num_augmentations, params, paths, path_suffix, resource_loader
+        self, lang, paths, path_suffix, resource_loader
     ):
         """Initializes a multi-lingual paraphraser.
 
         Args:
             lang (str): The lang code for paraphrasing.
-            num_augmentations (int): Number of augmentations to be generated per query.
-            params (dict): Model params.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
@@ -282,6 +275,15 @@ class MultiLingualParaphraser(Augmentor):
         )
 
         # Update default params with user model config
+
+        self.fwd_params = {
+            "max_length": 60,
+            "num_beams": 5,
+            "num_return_sequences": 5,
+            "temperature": 1.0,
+            "top_k": 0,
+        }
+
         self.reverse_params = {
             "max_length": 60,
             "num_beams": 3,
@@ -289,20 +291,8 @@ class MultiLingualParaphraser(Augmentor):
             "temperature": 1.0,
             "top_k": 0,
         }
-        self.reverse_params.update(params.get("reverse_params", {}))
 
-        self.fwd_params = {
-            "max_length": 60,
-            "num_beams": num_augmentations // self.reverse_params["num_beams"],
-            "num_return_sequences": (
-                num_augmentations // self.reverse_params["num_return_sequences"]
-            ),
-            "temperature": 1.0,
-            "top_k": 0,
-        }
-        self.fwd_params.update(params.get("fwd_params", {}))
-
-        self.batch_size = params.get("batch_size", 8)
+        self.batch_size = 8
 
     def _translate(self, *, queries, model, tokenizer, **kwargs):
         """The core translation step for forward and reverse translation.

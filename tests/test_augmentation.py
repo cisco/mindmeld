@@ -23,12 +23,10 @@ def english_paraphraser(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
     config["params"]["fwd_params"]["num_return_sequences"] = NUM_PARAPHRASES
     lang = "en"
-    num_augmentations = 10
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
     augmentor = create_augmentor(
         config=config,
         lang=lang,
-        num_augmentations=num_augmentations,
         resource_loader=resource_loader,
     )
     return augmentor
@@ -58,6 +56,5 @@ def test_unsupported_language(kwik_e_mart_app_path):
         create_augmentor(
             config=config,
             lang="de",
-            num_augmentations=10,
             resource_loader=resource_loader,
         )

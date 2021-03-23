@@ -473,11 +473,6 @@ DEFAULT_AUGMENTATION_CONFIG = {
             "files": ".*",
         }
     ],
-    "params": {
-        "fwd_params": {},
-        "reverse_params": {},
-        "batch_size": 8,
-    },
     "path_suffix": "-augment.txt"
 }
 

@@ -802,12 +802,7 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     "--lang",
     help="Augmentation language.",
 )
-@click.option(
-    "--num-augmentations",
-    default=10,
-    help="Number of augmented queries to be generated per given query.",
-)
-def augment(app_path, lang, num_augmentations):
+def augment(app_path, lang):
     """Runs the data augmentation command."""
     config = get_augmentation_config(app_path=app_path)
     lang = lang or get_language_config(app_path=app_path)[0]
@@ -815,7 +810,6 @@ def augment(app_path, lang, num_augmentations):
     augmentor = create_augmentor(
         config=config,
         lang=lang,
-        num_augmentations=num_augmentations,
         resource_loader=resource_loader,
     )
     augmentor.augment()
