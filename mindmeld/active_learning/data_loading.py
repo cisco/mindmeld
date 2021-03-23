@@ -382,8 +382,6 @@ class LogQueriesLoader:
             app_path (str): Path to the MindMeld application.
             log_file_path (str): Path to the log file with log queries.
         """
-        if not os.path.isfile(log_file_path):
-            raise FileNotFoundError(f"{log_file_path} is not a valid file")
         self.log_file_path = log_file_path
         self.app_path = app_path
 

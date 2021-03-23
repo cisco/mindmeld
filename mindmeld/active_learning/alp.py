@@ -134,7 +134,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     "Sampled Queries: %s", len(self.data_bucket.sampled_queries)
                 )
                 logger.info(
-                    "Remaining Queries: %s", len(self.data_bucket.unsampled_queries)
+                    "Remaining (Unsampled) Queries: %s", len(self.data_bucket.unsampled_queries)
                 )
                 (
                     eval_stats,

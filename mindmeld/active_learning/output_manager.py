@@ -291,9 +291,9 @@ class OutputManager:
             queries (List): List of ProcessedQuery objects
         Returns:
             dict_queries (List): List of queries represented as a dict with the keys
-                "text", "domain", and "intent".
+                "text", "predicted_domain", and "predicted_intent".
         """
         return [
-            {"text": dump_query(query), "domain": query.domain, "intent": query.intent}
+            {"text": dump_query(query), "predicted_domain": query.domain, "predicted_intent": query.intent}
             for query in queries
         ]

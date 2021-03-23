@@ -884,12 +884,12 @@ class BootstrapAnnotator(Annotator):
                 if entity_confidence >= self.confidence_threshold:
                     entities.append(
                         {
-                            "body": entity["text"],
-                            "start": entity["span"]["start"],
-                            "end": entity["span"]["end"] + 1,
-                            "dim": entity["type"],
-                            "value": entity["value"],
-                            "role": entity["role"],
+                            "body": entity.get("text"),
+                            "start": entity.get("span").get("start"),
+                            "end": entity.get("span").get("end") + 1,
+                            "dim": entity.get("type"),
+                            "value": entity.get("value"),
+                            "role": entity.get("role"),
                         }
                     )
         processed_query = load_query(
