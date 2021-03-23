@@ -13,7 +13,7 @@ Command-line:
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang <lang_code> --num-augmentations <int>
+    mindmeld augment --app-path <app_path> --lang <lang_code>
 
 The following section explains this in more detail.
 
@@ -59,14 +59,14 @@ The following values can be updated in the config to customize it:
 English Paraphraser
 -------------------
 
-The English paraphraser uses a state-of-the-art text summarization model PEGASUS for generating paraphrases.
+The English paraphraser uses a state-of-the-art text summarization model `PEGASUS <https://ai.googleblog.com/2020/06/pegasus-state-of-art-model-for.html>`_ for generating paraphrases. This model has been fine-tuned for the task of paraphrasing. 
 
 Usage
 ^^^^^
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "en" --num-augmentations "10"
+    mindmeld augment --app-path <app_path> --lang "en"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`EnglishParaphraser`.
 
@@ -98,6 +98,6 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "code" --num-augmentations "10"
+    mindmeld augment --app-path <app_path> --lang "code"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`MultiLingualParaphraser`.
