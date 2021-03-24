@@ -33,18 +33,18 @@ def english_paraphraser(kwik_e_mart_app_path):
     return augmentor
 
 
-# @pytest.mark.extras
+@pytest.mark.extras
 @pytest.mark.parametrize(
-    "query",
+    "query, value",
     [
-        ("some text"),
-        ("another text"),
-        ("yet another text"),
+        ("some text", 10),
+        ("another text", 8),
+        ("yet another text", 10),
     ],
 )
-def test_num_paraphrases(english_paraphraser, query):
+def test_num_paraphrases(english_paraphraser, query, value):
     paraphrases = english_paraphraser.augment_queries([query])
-    assert len(paraphrases) == 10
+    assert len(paraphrases) == value
 
 
 @pytest.mark.extras
