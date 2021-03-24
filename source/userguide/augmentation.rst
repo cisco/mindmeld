@@ -1,7 +1,7 @@
 Data Augmentation in MindMeld
 =============================
 
-MindMeld provides the ability to augment data to collect more diverse queries and make the applications more robust.
+When starting out to build a new conversational application in a custom domain, it is often the case that we have very limited training data to train models. In such scenarios, one way of bootstrapping your models is by using data augmentation techniques to increase the size of our training set. MindMeld now provides the ability to augment data via automatic paraphrasing in English and other languages to help make the applications more robust.
 
 Quick Start
 -----------
@@ -38,6 +38,7 @@ A custom config can be included in :attr:`config.py` by duplicating the default 
 
     DEFAULT_AUGMENTATION_CONFIG = {
         "augmentor_class": "EnglishParaphraser",
+        "batch_size": 8,
         "paths": [
             {
                 "domains": ".*",
@@ -51,6 +52,8 @@ A custom config can be included in :attr:`config.py` by duplicating the default 
 The following values can be updated in the config to customize it:
 
 ``'augmentor_class'`` (:class:`str`, default: :class:`EnglishParaphraser`): The augmentor class that can specified for deciding on the augmentation tool to be used. Currently, we recommend using :class:`EnglishParaphraser` for English language applications and :class:`MultiLingualParaphraser` for all other supported languages.
+
+``'batch_size'`` (:class:`int`, default: 8): The number of queries to be batched and processed together by the augmentation models. This size can be modified according to system memory constraints.
 
 ``'paths'`` (:class:`list`): List of regex based path rules to select files to be augmented. These files become the baseline for the augmentors and are used to generate new data. By default, all training and testing files are augmented.
 
@@ -66,7 +69,7 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "en"
+    mindmeld augment --app-path <app_path> --lang "en" --batch_size 8
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`EnglishParaphraser`.
 
@@ -74,7 +77,7 @@ In the config for this paraphraser class, the ``'augmentor_class'`` should be se
 Multi-Lingual Paraphraser
 -------------------------
 
-The multi-lingual paraphraser in MindMeld uses back-translation as the underlying concept to generate paraphrases. Given an application in one of the supported languages, the forward model translates the current set of queries to English, generating a number of English translations. Next, the reverse model translates each of the English translations into one or more queries in the original language. This results in a paraphrased set of queries in the original language.
+The multi-lingual paraphraser in MindMeld uses machine-translation as the underlying concept to generate paraphrases. Given an application in one of the supported languages, the forward model translates the current set of queries to English, generating a number of English translations. Next, the reverse model translates each of the English translations into one or more queries in the original language. This results in a paraphrased set of queries in the original language.
 
 Currently, we support the following languages:
 
@@ -98,6 +101,6 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "code"
+    mindmeld augment --app-path <app_path> --lang "code" --batch_size 8
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`MultiLingualParaphraser`.

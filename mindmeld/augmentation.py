@@ -48,8 +48,8 @@ class Augmentor(ABC):
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
-        self.lang = lang
-        self.paths = paths
+        self.language_code = lang
+        self.files_to_augment = paths
         self.path_suffix = path_suffix
         self._resource_loader = resource_loader
         self._check_dependencies()
@@ -69,21 +69,23 @@ class Augmentor(ABC):
 
     def _check_lang_support(self):
         """Checks if language is currently supported for augmentation."""
-        if self.lang not in SUPPORTED_LANG_CODES:
+        if self.language_code not in SUPPORTED_LANG_CODES:
             raise UnsupportedLanguageError(
-                f"'{self.lang}' is not supported yet. "
+                f"'{self.language_code}' is not supported yet. "
                 "English (en), French (fr), and Italian (it), Portuguese (pt), Romanian (ro) "
                 " and Spanish (es) are currently supported."
             )
 
     def augment(self, **kwargs):
         """Augments queries given initial queries in application."""
-        filtered_paths = self._get_files(paths=self.paths)
+        filtered_paths = self._get_files(path_rules=self.files_to_augment)
 
         for path in tqdm(filtered_paths):
-            queries = self._read_path_queries(path)
+            with open(path, "r") as f:
+                queries = f.readlines()
+            # To-Do: Use generator to write files incrementally.
             augmented_queries = self.augment_queries(queries, **kwargs)
-            self._write_files(path, augmented_queries, suffix=self.path_suffix)
+            self._write_to_file(path, augmented_queries, suffix=self.path_suffix)
 
     @abstractmethod
     def augment_queries(self, queries):
@@ -97,29 +99,27 @@ class Augmentor(ABC):
         """
         raise NotImplementedError("Subclasses must implement this method")
 
-    def _get_files(self, paths=None):
+    def _get_files(self, path_rules=None):
         """Fetches relevant files given the path rules specified in the config.
 
         Args:
-            paths (list): Path rules for fetching relevant files.
+            path_rules (list): Path rules for fetching relevant files.
 
         Return:
             filtered_paths (list): List of file paths to be augmeted.
         """
         all_file_paths = self._resource_loader.get_all_file_paths()
 
-        if not paths:
+        if not path_rules:
             logger.warning(
                 """'paths' field is not configured or misconfigured in the `config.py`.
                  Can't find files to augment."""
             )
             return []
 
-        rules = paths
-
         filtered_paths = []
 
-        for rule in rules:
+        for rule in path_rules:
             pattern = get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths.extend(
@@ -129,20 +129,7 @@ class Augmentor(ABC):
             )
         return filtered_paths
 
-    def _read_path_queries(self, path):
-        """Returns all queries in a specified file path.
-
-        Args:
-            path (str): File path.
-
-        Return:
-            queries (list): List of queries in the file path.
-        """
-        with open(path, "r") as f:
-            queries = f.readlines()
-        return queries
-
-    def _write_files(self, path, augmented_queries, suffix):
+    def _write_to_file(self, path, augmented_queries, suffix):
         """Writes augmented queries to a new file in the path.
 
         Args:
@@ -195,7 +182,7 @@ class EnglishParaphraser(Augmentor):
         # Update default params with user model config
         self.batch_size = batch_size
 
-        self.params = {
+        self.default_paraphraser_model_params = {
             "max_length": 60,
             "num_beams": 10,
             "num_return_sequences": 10,
@@ -217,11 +204,11 @@ class EnglishParaphraser(Augmentor):
                 queries[pos : pos + self.batch_size],
                 truncation=True,
                 padding="longest",
-                max_length=self.params["max_length"],
+                max_length=self.default_paraphraser_model_params["max_length"],
             )
             generated = self.model.generate(
                 **batch,
-                **self.params,
+                **self.default_paraphraser_model_params,
             )
             all_generated_queries.extend(
                 self.tokenizer.batch_decode(generated, skip_special_tokens=True)
@@ -230,7 +217,7 @@ class EnglishParaphraser(Augmentor):
 
     def augment_queries(self, queries, **kwargs):
         augmented_queries = []
-        augmented_queries = list(set(self._get_response(queries, **kwargs)))
+        augmented_queries = list(set(p.lower() for p in self._get_response(queries, **kwargs)))
         return augmented_queries
 
 
@@ -279,18 +266,18 @@ class MultiLingualParaphraser(Augmentor):
         # Update default params with user model config
         self.batch_size = batch_size
 
-        self.fwd_params = {
+        self.default_forward_params = {
             "max_length": 60,
-            "num_beams": 3,
-            "num_return_sequences": 3,
+            "num_beams": 5,
+            "num_return_sequences": 5,
             "temperature": 1.0,
             "top_k": 0,
         }
 
-        self.reverse_params = {
+        self.default_reverse_params = {
             "max_length": 60,
-            "num_beams": 5,
-            "num_return_sequences": 5,
+            "num_beams": 3,
+            "num_return_sequences": 3,
             "temperature": 1.0,
             "top_k": 0,
         }
@@ -324,17 +311,17 @@ class MultiLingualParaphraser(Augmentor):
             queries=queries,
             model=self.en_model,
             tokenizer=self.en_tokenizer,
-            **self.fwd_params,
+            **self.default_forward_params,
         )
 
-        template = lambda text: f">>{self.lang}<< {text}"
+        template = lambda text: f">>{self.language_code}<< {text}"
         translated_queries = [template(query) for query in set(translated_queries)]
 
         reverse_translated_queries = self._translate(
             queries=translated_queries,
             model=self.target_model,
             tokenizer=self.target_tokenizer,
-            **self.reverse_params,
+            **self.default_reverse_params,
         )
         augmented_queries = list(set(p.lower() for p in reverse_translated_queries))
 

@@ -64,6 +64,7 @@ def test_unsupported_language(kwik_e_mart_app_path):
 @pytest.fixture(scope="module")
 def multilingual_paraphraser(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
+    config["augmentor_class"] = "MultiLingualParaphraser"
     lang = "es"
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
     augmentor = create_augmentor(
@@ -84,4 +85,4 @@ def multilingual_paraphraser(kwik_e_mart_app_path):
 )
 def test_spanish_paraphrases(multilingual_paraphraser, query):
     paraphrases = multilingual_paraphraser.augment_queries([query])
-    assert "Aumentar el volumen." in paraphrases
+    assert "aumentar el volumen" in paraphrases
