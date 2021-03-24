@@ -68,11 +68,12 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "en" --batch_size 8
+    mindmeld augment --app-path <app_path> --lang "en"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`EnglishParaphraser`.
 
 .. note::
+
     We use the Pegasus model fine-tuned for the paraphrasing task from `Hugging Face <https://huggingface.co/tuner007/pegasus_paraphrase>`_.
 
 Multi-Lingual Paraphraser
@@ -102,9 +103,10 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "code" --batch_size 8
+    mindmeld augment --app-path <app_path> --lang "code"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`MultiLingualParaphraser`.
 
 .. note::
+
     We use both `forward <https://huggingface.co/Helsinki-NLP/opus-mt-ROMANCE-en>`_ and `reverse <https://huggingface.co/Helsinki-NLP/opus-mt-en-ROMANCE>`_ machine-translation models from Hugging Face.
