@@ -16,18 +16,16 @@ from mindmeld.models.helpers import create_augmentor
 from mindmeld.resource_loader import ResourceLoader
 
 NUM_PARAPHRASES = 10
-BATCH_SIZE = 1
 
 
 @pytest.fixture(scope="module")
 def english_paraphraser(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
-    lang = "en"
+    language = "en"
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
     augmentor = create_augmentor(
-        batch_size=BATCH_SIZE,
         config=config,
-        lang=lang,
+        language=language,
         resource_loader=resource_loader,
     )
     return augmentor
@@ -54,9 +52,8 @@ def test_unsupported_language(kwik_e_mart_app_path):
 
     with pytest.raises(UnsupportedLanguageError):
         create_augmentor(
-            batch_size=BATCH_SIZE,
             config=config,
-            lang="de",
+            language="de",
             resource_loader=resource_loader,
         )
 
@@ -65,12 +62,11 @@ def test_unsupported_language(kwik_e_mart_app_path):
 def multilingual_paraphraser(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
     config["augmentor_class"] = "MultiLingualParaphraser"
-    lang = "es"
+    language = "es"
     resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
     augmentor = create_augmentor(
-        batch_size=BATCH_SIZE,
         config=config,
-        lang=lang,
+        language=language,
         resource_loader=resource_loader,
     )
     return augmentor

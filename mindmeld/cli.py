@@ -799,23 +799,17 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     help="The application's path.",
 )
 @click.option(
-    "--lang",
-    help="Augmentation language.",
+    "--language",
+    help="Augmentation language code. Follows ISO 639-1 format.",
 )
-@click.option(
-    "--batch_size",
-    help="Augmentation language.",
-)
-def augment(app_path, lang, batch_size):
+def augment(app_path, language):
     """Runs the data augmentation command."""
     config = get_augmentation_config(app_path=app_path)
-    batch_size = config.get("batch_size", 8)
-    lang = lang or get_language_config(app_path=app_path)[0]
+    language = language or get_language_config(app_path=app_path)[0]
     resource_loader = ResourceLoader.create_resource_loader(app_path)
     augmentor = create_augmentor(
-        batch_size=batch_size,
         config=config,
-        lang=lang,
+        language=language,
         resource_loader=resource_loader,
     )
     augmentor.augment()

@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import spacy
 from tqdm import tqdm
+from ._util import get_pattern
 from .resource_loader import ResourceLoader
 from .components._config import (
     ENGLISH_LANGUAGE_CODE,
@@ -40,7 +41,6 @@ from .constants import (
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
     CURRENCY_SYMBOLS,
-    get_pattern,
 )
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types

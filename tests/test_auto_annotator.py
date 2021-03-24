@@ -10,7 +10,7 @@ Tests for `auto_annotator` module
 import pytest
 
 from mindmeld.auto_annotator import MultiLingualAnnotator
-from mindmeld.constants import get_pattern
+from mindmeld._util import get_pattern
 
 
 @pytest.fixture(scope="module")

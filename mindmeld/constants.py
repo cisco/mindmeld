@@ -294,17 +294,3 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 CURRENCY_SYMBOLS = u"".join(
     chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
 )
-
-
-def get_pattern(rule):
-    """Convert a rule represented as a dictionary with the keys "domains", "intents",
-    "files" into a regex pattern.
-
-    Args:
-        rule (dict): An annotation or augmentation rule.
-
-    Returns:
-        pattern (str): Regex pattern specifying allowed file paths.
-    """
-    pattern = [rule[x] for x in ["domains", "intents", "files"]]
-    return ".*/" + "/".join(pattern)

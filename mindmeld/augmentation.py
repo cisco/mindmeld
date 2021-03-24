@@ -19,15 +19,15 @@ import re
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 
+from ._util import get_pattern, read_path_queries, write_to_file
 from .components._util import _is_module_available, _get_module_or_attr
-from .constants import get_pattern
 from .models.helpers import register_augmentor
 
 logger = logging.getLogger(__name__)
 
 # pylint: disable=R0201
 
-SUPPORTED_LANG_CODES = ["en", "es", "fr", "it", "pt", "ro"]
+SUPPORTED_LANGUAGE_CODES = ["en", "es", "fr", "it", "pt", "ro"]
 
 
 class UnsupportedLanguageError(Exception):
@@ -39,21 +39,21 @@ class Augmentor(ABC):
     Abstract Augmentor class.
     """
 
-    def __init__(self, lang, paths, path_suffix, resource_loader):
+    def __init__(self, language, paths, path_suffix, resource_loader):
         """Initializes an augmentor.
 
         Args:
-            lang (str): The lang code for paraphrasing
+            language (str): The language code for paraphrasing
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
-        self.language_code = lang
+        self.language_code = language
         self.files_to_augment = paths
         self.path_suffix = path_suffix
         self._resource_loader = resource_loader
         self._check_dependencies()
-        self._check_lang_support()
+        self._check_language_support()
 
     def _check_dependencies(self):
         """Checks module dependencies."""
@@ -67,9 +67,9 @@ class Augmentor(ABC):
                 "Library not found: 'transformers'. Run 'pip install mindmeld[augment]' to install."
             )
 
-    def _check_lang_support(self):
+    def _check_language_support(self):
         """Checks if language is currently supported for augmentation."""
-        if self.language_code not in SUPPORTED_LANG_CODES:
+        if self.language_code not in SUPPORTED_LANGUAGE_CODES:
             raise UnsupportedLanguageError(
                 f"'{self.language_code}' is not supported yet. "
                 "English (en), French (fr), and Italian (it), Portuguese (pt), Romanian (ro) "
@@ -81,11 +81,10 @@ class Augmentor(ABC):
         filtered_paths = self._get_files(path_rules=self.files_to_augment)
 
         for path in tqdm(filtered_paths):
-            with open(path, "r") as f:
-                queries = f.readlines()
+            queries = read_path_queries(path)
             # To-Do: Use generator to write files incrementally.
             augmented_queries = self.augment_queries(queries, **kwargs)
-            self._write_to_file(path, augmented_queries, suffix=self.path_suffix)
+            write_to_file(path, augmented_queries, suffix=self.path_suffix)
 
     @abstractmethod
     def augment_queries(self, queries):
@@ -98,6 +97,17 @@ class Augmentor(ABC):
             augmented_queries (list): List of augmented queries.
         """
         raise NotImplementedError("Subclasses must implement this method")
+
+    def _validate_generated_query(self, query):
+        """Validates whether augmented query has atleast one alphanumeric character
+
+        Args:
+            query (str): Generated query to be validated.
+        """
+        pattern = re.compile("^.*[a-zA-Z0-9].*$")
+        if pattern.search(query):
+            return True
+        return False
 
     def _get_files(self, path_rules=None):
         """Fetches relevant files given the path rules specified in the config.
@@ -129,37 +139,22 @@ class Augmentor(ABC):
             )
         return filtered_paths
 
-    def _write_to_file(self, path, augmented_queries, suffix):
-        """Writes augmented queries to a new file in the path.
-
-        Args:
-            path (str): File path to the original file.
-            augmented_queries (list): List of augmented queries returned by class.
-        """
-        write_path = path.strip(".txt") + suffix
-
-        with open(write_path, "w") as outfile:
-            for query in augmented_queries:
-                outfile.write(query.rstrip() + "\n")
-
 
 class EnglishParaphraser(Augmentor):
     """Paraphraser class for generating English paraphrases."""
 
-    def __init__(
-        self, batch_size, lang, paths, path_suffix, resource_loader
-    ):
+    def __init__(self, batch_size, language, paths, path_suffix, resource_loader):
         """Initializes an English paraphraser.
 
         Args:
             batch_size (int): Batch size for batch processing.
-            lang (str): The lang code for paraphrasing.
+            language (str): The language code for paraphrasing.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
         super().__init__(
-            lang=lang,
+            language=language,
             paths=paths,
             path_suffix=path_suffix,
             resource_loader=resource_loader,
@@ -189,7 +184,13 @@ class EnglishParaphraser(Augmentor):
             "temperature": 1.5,
         }
 
-    def _get_response(self, queries):
+        self.default_tokenizer_params = {
+            "truncation": True,
+            "padding": "longest",
+            "max_length": 60,
+        }
+
+    def _generate_paraphrases(self, queries):
         """Generates paraphrase responses for given query.
 
         Args:
@@ -202,9 +203,7 @@ class EnglishParaphraser(Augmentor):
         for pos in range(0, len(queries), self.batch_size):
             batch = self.tokenizer.prepare_seq2seq_batch(
                 queries[pos : pos + self.batch_size],
-                truncation=True,
-                padding="longest",
-                max_length=self.default_paraphraser_model_params["max_length"],
+                **self.default_tokenizer_params,
             )
             generated = self.model.generate(
                 **batch,
@@ -216,8 +215,13 @@ class EnglishParaphraser(Augmentor):
         return all_generated_queries
 
     def augment_queries(self, queries, **kwargs):
-        augmented_queries = []
-        augmented_queries = list(set(p.lower() for p in self._get_response(queries, **kwargs)))
+        augmented_queries = list(
+            set(
+                p.lower()
+                for p in self._generate_paraphrases(queries, **kwargs)
+                if self._validate_generated_query(p)
+            )
+        )
         return augmented_queries
 
 
@@ -226,20 +230,18 @@ class MultiLingualParaphraser(Augmentor):
     (currently supports: French, Italian, Portuguese, Romanian and Spanish).
     """
 
-    def __init__(
-        self, batch_size, lang, paths, path_suffix, resource_loader
-    ):
+    def __init__(self, batch_size, language, paths, path_suffix, resource_loader):
         """Initializes a multi-lingual paraphraser.
 
         Args:
             batch_size (int): Batch size for batch processing.
-            lang (str): The lang code for paraphrasing.
+            language (str): The language code for paraphrasing.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
         super().__init__(
-            lang=lang,
+            language=language,
             paths=paths,
             path_suffix=path_suffix,
             resource_loader=resource_loader,
@@ -323,7 +325,13 @@ class MultiLingualParaphraser(Augmentor):
             tokenizer=self.target_tokenizer,
             **self.default_reverse_params,
         )
-        augmented_queries = list(set(p.lower() for p in reverse_translated_queries))
+        augmented_queries = list(
+            set(
+                p.lower()
+                for p in reverse_translated_queries
+                if self._validate_generated_query(p)
+            )
+        )
 
         return augmented_queries
 
