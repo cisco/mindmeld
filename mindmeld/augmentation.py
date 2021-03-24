@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 from ._util import get_pattern, read_path_queries, write_to_file
 from .components._util import _is_module_available, _get_module_or_attr
-from .models.helpers import register_augmentor
+from .models.helpers import register_augmentor, AUGMENTATION_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,58 @@ SUPPORTED_LANGUAGE_CODES = ["en", "es", "fr", "it", "pt", "ro"]
 
 class UnsupportedLanguageError(Exception):
     pass
+
+
+class AugmentorFactory:
+    """Creates an Augmentor object.
+
+    Attributes:
+        config (dict): A model configuration.
+        language (str): Language for data augmentation.
+        resource_loader (object): Resource Loader object for the application.
+    """
+    def __init__(self, config, language, resource_loader):
+        self.config = config
+        self.language = language
+        self.resource_loader = resource_loader
+
+    def create_augmentor(self):
+        """Creates an augmentor instance using the provided configuration
+
+        Returns:
+            Augmentor: An Augmentor class
+
+        Raises:
+            ValueError: When model configuration is invalid or required key is missing
+        """
+        if "augmentor_class" not in self.config:
+            raise KeyError(
+                "Missing required argument in AUGMENTATION_CONFIG: 'augmentor_class'"
+            )
+        try:
+            # Validate configuration input
+            batch_size = self.config.get("batch_size", 8)
+            paths = self.config.get(
+                "paths",
+                [
+                    {
+                        "domains": ".*",
+                        "intents": ".*",
+                        "files": ".*",
+                    }
+                ],
+            )
+            path_suffix = self.config.get("path_suffix", "-augment.txt")
+            return AUGMENTATION_MAP[self.config["augmentor_class"]](
+                batch_size=batch_size,
+                language=self.language,
+                paths=paths,
+                path_suffix=path_suffix,
+                resource_loader=self.resource_loader,
+            )
+        except KeyError as e:
+            msg = "Invalid model configuration: Unknown model type {!r}"
+            raise ValueError(msg.format(config["augmentor_class"])) from e
 
 
 class Augmentor(ABC):
@@ -105,9 +157,7 @@ class Augmentor(ABC):
             query (str): Generated query to be validated.
         """
         pattern = re.compile("^.*[a-zA-Z0-9].*$")
-        if pattern.search(query):
-            return True
-        return False
+        return pattern.search(query) and True
 
     def _get_files(self, path_rules=None):
         """Fetches relevant files given the path rules specified in the config.

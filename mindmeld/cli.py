@@ -36,6 +36,7 @@ from tqdm import tqdm
 
 # Loads augmentor and annotator registration helper methods implicitly. Unused in this file.
 from . import augmentation  # noqa: F401 pylint: disable=W0611
+from .augmentation import AugmentorFactory
 from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
@@ -49,7 +50,7 @@ from .components._config import (
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
 from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-from .models.helpers import create_annotator, create_augmentor
+from .models.helpers import create_annotator
 from .path import (
     MODEL_CACHE_PATH,
     QUERY_CACHE_PATH,
@@ -807,11 +808,11 @@ def augment(app_path, language):
     config = get_augmentation_config(app_path=app_path)
     language = language or get_language_config(app_path=app_path)[0]
     resource_loader = ResourceLoader.create_resource_loader(app_path)
-    augmentor = create_augmentor(
+    augmentor = AugmentorFactory(
         config=config,
         language=language,
         resource_loader=resource_loader,
-    )
+    ).create_augmentor()
     augmentor.augment()
     logger.info("Augmentation Complete.")
 

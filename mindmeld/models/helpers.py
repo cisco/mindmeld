@@ -101,50 +101,6 @@ def create_annotator(config):
         raise KeyError(msg.format(config["annotator_class"]))
 
 
-def create_augmentor(config, language, resource_loader):
-    """Creates an augmentor instance using the provided configuration
-
-    Args:
-        config (dict): A model configuration.
-        language (str): Language for data augmentation.
-        resource_loader (object): Resource Loader object for the application.
-
-    Returns:
-        Augmentor: An Augmentor class
-
-    Raises:
-        ValueError: When model configuration is invalid or required key is missing
-    """
-    if "augmentor_class" not in config:
-        raise KeyError(
-            "Missing required argument in AUGMENTATION_CONFIG: 'augmentor_class'"
-        )
-    try:
-        # Validate configuration input
-        batch_size = config.get("batch_size", 8)
-        paths = config.get(
-            "paths",
-            [
-                {
-                    "domains": ".*",
-                    "intents": ".*",
-                    "files": ".*",
-                }
-            ],
-        )
-        path_suffix = config.get("path_suffix", "-augment.txt")
-        return AUGMENTATION_MAP[config["augmentor_class"]](
-            batch_size=batch_size,
-            language=language,
-            paths=paths,
-            path_suffix=path_suffix,
-            resource_loader=resource_loader,
-        )
-    except KeyError as e:
-        msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config["augmentor_class"])) from e
-
-
 def get_feature_extractor(example_type, name):
     """Gets a feature extractor given the example type and name
 
