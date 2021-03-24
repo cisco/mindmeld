@@ -83,7 +83,7 @@ class AugmentorFactory:
             )
         except KeyError as e:
             msg = "Invalid model configuration: Unknown model type {!r}"
-            raise ValueError(msg.format(config["augmentor_class"])) from e
+            raise ValueError(msg.format(self.config["augmentor_class"])) from e
 
 
 class Augmentor(ABC):
