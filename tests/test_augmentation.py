@@ -33,7 +33,7 @@ def english_paraphraser(kwik_e_mart_app_path):
     return augmentor
 
 
-@pytest.mark.extras
+# @pytest.mark.extras
 @pytest.mark.parametrize(
     "query",
     [
