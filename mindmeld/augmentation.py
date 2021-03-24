@@ -160,11 +160,12 @@ class EnglishParaphraser(Augmentor):
     """Paraphraser class for generating English paraphrases."""
 
     def __init__(
-        self, lang, paths, path_suffix, resource_loader
+        self, batch_size, lang, paths, path_suffix, resource_loader
     ):
         """Initializes an English paraphraser.
 
         Args:
+            batch_size (int): Batch size for batch processing.
             lang (str): The lang code for paraphrasing.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
@@ -192,14 +193,14 @@ class EnglishParaphraser(Augmentor):
         ).to(torch_device)
 
         # Update default params with user model config
+        self.batch_size = batch_size
+
         self.params = {
             "max_length": 60,
             "num_beams": 10,
             "num_return_sequences": 10,
             "temperature": 1.5,
         }
-
-        self.batch_size = 8
 
     def _get_response(self, queries):
         """Generates paraphrase responses for given query.
@@ -239,11 +240,12 @@ class MultiLingualParaphraser(Augmentor):
     """
 
     def __init__(
-        self, lang, paths, path_suffix, resource_loader
+        self, batch_size, lang, paths, path_suffix, resource_loader
     ):
         """Initializes a multi-lingual paraphraser.
 
         Args:
+            batch_size (int): Batch size for batch processing.
             lang (str): The lang code for paraphrasing.
             paths (list): Path rules for fetching relevant files to Paraphrase.
             path_suffix (str): Suffix to be added to new augmented files.
@@ -275,6 +277,7 @@ class MultiLingualParaphraser(Augmentor):
         )
 
         # Update default params with user model config
+        self.batch_size = batch_size
 
         self.fwd_params = {
             "max_length": 60,
@@ -285,13 +288,12 @@ class MultiLingualParaphraser(Augmentor):
         }
 
         self.reverse_params = {
+            "max_length": 60,
             "num_beams": 5,
             "num_return_sequences": 5,
             "temperature": 1.0,
             "top_k": 0,
         }
-
-        self.batch_size = 8
 
     def _translate(self, *, queries, model, tokenizer, **kwargs):
         """The core translation step for forward and reverse translation.
@@ -326,7 +328,7 @@ class MultiLingualParaphraser(Augmentor):
         )
 
         template = lambda text: f">>{self.lang}<< {text}"
-        translated_queries = [template(query.lower()) for query in set(translated_queries)]
+        translated_queries = [template(query) for query in set(translated_queries)]
 
         reverse_translated_queries = self._translate(
             queries=translated_queries,

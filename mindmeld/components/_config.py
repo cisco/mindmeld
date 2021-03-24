@@ -466,6 +466,7 @@ DEFAULT_NLP_CONFIG = {
 
 DEFAULT_AUGMENTATION_CONFIG = {
     "augmentor_class": "EnglishParaphraser",
+    "batch_size": 8,
     "paths": [
         {
             "domains": ".*",

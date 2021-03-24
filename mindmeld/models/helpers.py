@@ -101,10 +101,11 @@ def create_annotator(config):
         raise KeyError(msg.format(config["annotator_class"]))
 
 
-def create_augmentor(config, lang, resource_loader):
+def create_augmentor(batch_size, config, lang, resource_loader):
     """Creates an augmentor instance using the provided configuration
 
     Args:
+        batch_size (int): Batch size for batch processing in augmentation models.
         config (dict): A model configuration.
         lang (str): Language for data augmentation.
         resource_loader (object): Resource Loader object for the application.
@@ -131,8 +132,9 @@ def create_augmentor(config, lang, resource_loader):
                 }
             ],
         )
-        path_suffix = config.get("path_suffix", ".augmented.txt")
+        path_suffix = config.get("path_suffix", "-augment.txt")
         return AUGMENTATION_MAP[config["augmentor_class"]](
+            batch_size=batch_size,
             lang=lang,
             paths=paths,
             path_suffix=path_suffix,

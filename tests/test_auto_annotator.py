@@ -401,7 +401,6 @@ def test_fr_time_parse(fr_mla, query, grain, value):
         ),
     ],
 )
-
 def test_rule_to_regex_pattern_parser(en_mla, rule, pattern):
     assert pattern == get_pattern(rule)
 
