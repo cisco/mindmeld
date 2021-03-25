@@ -35,7 +35,6 @@ import requests
 from tqdm import tqdm
 
 from .active_learning.alp import ActiveLearningPipeline, flatten_active_learning_config
-from .active_learning.plot_manager import PlotManager
 
 from .auto_annotator import register_all_annotators
 from . import markup, path
@@ -879,17 +878,6 @@ def active_learning_select(
         config["log_selection_strategy"] = strategy
     alp = ActiveLearningPipeline(**config)
     alp.select_queries_to_label()
-
-
-# TODO: Remove this function, it is temporary for debugging purposes
-@shared_cli.command("active_learning_plot", context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "--experiment_dir_path", type=str, required=True, help="Path of experiment folder."
-)
-def active_learning_plot(experiment_dir_path):
-    """Generate plots for an active learning experiment given the folder directory."""
-    PlotManager(experiment_dir_path).generate_plots()
-
 
 #
 # Module only Commands

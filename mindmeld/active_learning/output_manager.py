@@ -9,6 +9,7 @@ from ..constants import STRATEGY_ABRIDGED
 
 logger = logging.getLogger(__name__)
 
+
 # File Creation Methods
 def create_dir_if_absent(base_path: str):
     """Create a directory if one doesn't already exist at the given path.
@@ -291,9 +292,9 @@ class OutputManager:
             queries (List): List of ProcessedQuery objects
         Returns:
             dict_queries (List): List of queries represented as a dict with the keys
-                "text", "predicted_domain", and "predicted_intent".
+                "text", "domain", and "intent".
         """
         return [
-            {"text": dump_query(query), "predicted_domain": query.domain, "predicted_intent": query.intent}
+            {"text": dump_query(query), "domain": query.domain, "intent": query.intent}
             for query in queries
         ]
