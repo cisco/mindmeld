@@ -36,15 +36,17 @@ from tqdm import tqdm
 
 from .active_learning.alp import ActiveLearningPipeline, flatten_active_learning_config
 
+from .augmentation import AugmentorFactory, register_all_augmentors
 from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
 from .components._config import (
+    get_active_learning_config,
+    get_augmentation_config,
     get_auto_annotator_config,
     get_language_config,
-    get_active_learning_config,
 )
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
@@ -54,9 +56,10 @@ from .path import (
     MODEL_CACHE_PATH,
     QUERY_CACHE_PATH,
     QUERY_CACHE_TMP_PATH,
-    get_dvc_local_remote_path,
     get_generated_data_folder,
+    get_dvc_local_remote_path,
 )
+from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
 click.disable_unicode_literals_warning = True
@@ -791,6 +794,31 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     return config
 
 
+@shared_cli.command("augment", context_settings=CONTEXT_SETTINGS)
+@click.option(
+    "--app-path",
+    required=True,
+    help="The application's path.",
+)
+@click.option(
+    "--language",
+    help="Augmentation language code. Follows ISO 639-1 format.",
+)
+def augment(app_path, language):
+    """Runs the data augmentation command."""
+    register_all_augmentors()
+    config = get_augmentation_config(app_path=app_path)
+    language = language or get_language_config(app_path=app_path)[0]
+    resource_loader = ResourceLoader.create_resource_loader(app_path)
+    augmentor = AugmentorFactory(
+        config=config,
+        language=language,
+        resource_loader=resource_loader,
+    ).create_augmentor()
+    augmentor.augment()
+    logger.info("Augmentation Complete.")
+
+
 @shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
 @click.option("--app-path", type=str, help="Path to the MindMeld application")
 @click.option(
@@ -878,6 +906,7 @@ def active_learning_select(
         config["log_selection_strategy"] = strategy
     alp = ActiveLearningPipeline(**config)
     alp.select_queries_to_label()
+
 
 #
 # Module only Commands

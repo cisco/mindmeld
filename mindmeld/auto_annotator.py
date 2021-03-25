@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import spacy
 from tqdm import tqdm
+from ._util import get_pattern
 from .resource_loader import ResourceLoader
 from .components._config import (
     ENGLISH_LANGUAGE_CODE,
@@ -115,7 +116,7 @@ class Annotator(ABC):
             raise AssertionError(f"{action} is an invalid Annotator action.")
 
         for rule in rules:
-            pattern = Annotator._get_pattern(rule)
+            pattern = get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
                 compiled_pattern=compiled_pattern, file_paths=all_file_paths
@@ -124,20 +125,6 @@ class Annotator(ABC):
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
         return file_entities_map
-
-    @staticmethod
-    def _get_pattern(rule):
-        """Convert a rule represented as a dictionary with the keys "domains", "intents",
-        "entities" into a regex pattern.
-
-        Args:
-            rule (dict): Annotation/Unannotation rule.
-
-        Returns:
-            pattern (str): Regex pattern specifying allowed file paths.
-        """
-        pattern = [rule[x] for x in ["domains", "intents", "files"]]
-        return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
         """Process the entities specified in a rule dictionary. Check if they are valid

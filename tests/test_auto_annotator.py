@@ -10,6 +10,7 @@ Tests for `auto_annotator` module
 import pytest
 
 from mindmeld.auto_annotator import MultiLingualAnnotator
+from mindmeld._util import get_pattern
 
 
 @pytest.fixture(scope="module")
@@ -401,7 +402,7 @@ def test_fr_time_parse(fr_mla, query, grain, value):
     ],
 )
 def test_rule_to_regex_pattern_parser(en_mla, rule, pattern):
-    assert pattern == en_mla._get_pattern(rule)
+    assert pattern == get_pattern(rule)
 
 
 # TODO: Add Tests with a Mocker to test GoogleTranslator
