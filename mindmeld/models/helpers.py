@@ -24,6 +24,7 @@ MODEL_MAP = {}
 LABEL_MAP = {}
 EMBEDDER_MAP = {}
 ANNOTATOR_MAP = {}
+AUGMENTATION_MAP = {}
 
 # Example types
 QUERY_EXAMPLE_TYPE = "query"
@@ -188,6 +189,16 @@ def register_annotator(annotator_class_name, annotator_class):
         model_class (class): The annotator class to register
     """
     ANNOTATOR_MAP[annotator_class_name] = annotator_class
+
+
+def register_augmentor(augmentor_name, augmentor_class):
+    """Registers an Annotator class for use with `create_annotator()`
+
+    Args:
+        annotator_class_name (str): The annotator class name as specified in the config
+        model_class (class): The annotator class to register
+    """
+    AUGMENTATION_MAP[augmentor_name] = augmentor_class
 
 
 def register_feature(feature_type, feature_name):
