@@ -1405,6 +1405,7 @@ class IntentProcessor(Processor):
             for n_best_query in query:
                 n_best_entities = []
                 for entity in allowed_nlp_classes:
+                    # check if entity is in the gazetteers
                     if n_best_query.text in {
                         **self.resource_loader.get_gazetteer(entity)['pop_dict'],
                         **dynamic_gazetteer.get(entity, {})
@@ -1418,6 +1419,14 @@ class IntentProcessor(Processor):
                             query=n_best_query, span=span, entity=entity
                         )
                         n_best_entities.append(query_entity)
+
+                    # check if entity is a system entity
+                    if entity.startswith('sys_'):
+                        for sys_entity in n_best_query.system_entity_candidates:
+                            if sys_entity.entity.type == entity:
+                                n_best_entities.append(sys_entity)
+                                break
+
                 entities.append(tuple(n_best_entities))
 
         aligned_entities = self._align_entities(entities)
