@@ -829,6 +829,11 @@ def augment(app_path, language):
     type=float,
     help="Percentage of training data to use as the initial seed.",
 )
+@click.option(
+    "--training_level",
+    type=str,
+    help="The hierarchy level to train ('domain' or 'intent').",
+)
 @click.option("--n_epochs", type=int, help="Number of epochs.")
 @click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
 @click.option(
@@ -837,7 +842,7 @@ def augment(app_path, language):
     help="Select a single strategy instead of the strategies listed in the config.",
 )
 def active_learning_train(
-    app_path, batch_size, train_seed_pct, n_epochs, no_plot, strategy
+    app_path, batch_size, train_seed_pct, training_level, n_epochs, no_plot, strategy
 ):
     """Command to run active learning training."""
     config = get_active_learning_config(app_path=app_path)
@@ -848,6 +853,8 @@ def active_learning_train(
         config["batch_size"] = batch_size
     if train_seed_pct:
         config["train_seed_pct"] = train_seed_pct
+    if training_level:
+        config["training_level"] = training_level
     if n_epochs:
         config["n_epochs"] = n_epochs
     if strategy:
@@ -862,6 +869,11 @@ def active_learning_train(
 @click.option("--app-path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
+)
+@click.option(
+    "--training_level",
+    type=str,
+    help="The hierarchy level to train ('domain' or 'intent').",
 )
 @click.option(
     "--unlabeled_logs_path",
@@ -884,6 +896,7 @@ def active_learning_train(
 def active_learning_select(
     app_path,
     batch_size,
+    training_level,
     unlabeled_logs_path,
     log_usage_pct,
     labeled_logs_pattern,
@@ -896,6 +909,8 @@ def active_learning_select(
         config["app_path"] = app_path
     if batch_size:
         config["batch_size"] = batch_size
+    if training_level:
+        config["training_level"] = training_level
     if unlabeled_logs_path:
         config["unlabeled_logs_path"] = unlabeled_logs_path
     if log_usage_pct:

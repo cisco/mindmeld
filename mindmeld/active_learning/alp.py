@@ -28,6 +28,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         n_epochs: int,
         batch_size: int,
         training_strategies: list,
+        training_level: str,
         log_selection_strategy: str,
         save_sampled_queries: bool,
         early_stopping_window: int,
@@ -46,6 +47,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             n_classifiers (int): Number of classifiers to be used by a subset of heuristics
             n_epochs (int): Number of epochs to run training
             batch_size (int): Number of queries to select at each iteration
+            training_level (str): The hierarchy level to train ("domain" or "intent")
             training_strategies (List[str]): List of strategies to use for training
             log_selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
@@ -63,6 +65,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.n_classifiers = n_classifiers
         self.n_epochs = n_epochs
         self.batch_size = batch_size
+        self.training_level = training_level
         self.training_strategies = training_strategies
         self.log_selection_strategy = log_selection_strategy
         self.save_sampled_queries = save_sampled_queries
@@ -87,7 +90,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def get_classifier(self):
         return MindMeldClassifier(
             app_path=self.app_path,
-            training_level="intent",
+            training_level=self.training_level,
             n_classifiers=self.n_classifiers,
         )
 

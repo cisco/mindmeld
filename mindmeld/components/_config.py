@@ -498,6 +498,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "n_classifiers": 3,
         "n_epochs": 1,
         "batch_size": 1000,
+        "training_level": "intent",
         "training_strategies": [
             "LeastConfidenceSampling",
             "MarginSampling",
