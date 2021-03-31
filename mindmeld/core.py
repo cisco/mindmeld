@@ -530,6 +530,16 @@ class NestedEntity:
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
             tok_start = len(full_text[: span_out.start].split())
+            #tok_start = tok_start if tok_start > 1 else 0
+            tok_start = 0
+            prev_char = ''
+            for idx, char in enumerate(full_text):
+                if idx == span_out.start:
+                    break
+                if char == ' ':
+                    if prev_char != ' ':
+                        tok_start += 1
+                prev_char = char
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
 
             # convert span from query's indexing to parent's indexing

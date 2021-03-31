@@ -18,6 +18,8 @@ from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
 from ..tokenizer import Tokenizer
+from ..core import _is_subset, _is_same_span
+from typing import List
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -452,3 +454,44 @@ def requires(resource):
         return func
 
     return add_resource
+
+
+def get_non_overlapping_system_entities(system_entities):
+    """
+    This function filters out system entities who spans are strictly subsets of other
+    system entities of the same type in the list. eg: For the query "$5",
+    we have the following system entities:
+
+    [<QueryEntity '$5' ('sys_amount-of-money') char: [0-1], tok: [0-0]>,
+    <QueryEntity '5' ('sys_amount-of-money') char: [1-1], tok: [1-1]>]
+
+    The filtered list would be:
+    [<QueryEntity '$5' ('sys_amount-of-money') char: [0-1], tok: [0-0]>]
+
+    Since it strictly engulfs the char '5'.
+
+    This filtering matters since MindMeld's entity recognizers work at the token level,
+    so its strictly better to find the overlapping entity of the same type than to also
+    include the subset entity since not doing this adds noise to the model.
+
+    Args:
+        system_entities (List of QueryEntity): A list of system entities
+
+    Returns:
+        (list): A filtered list of non-overlapping QueryEntity objects
+    """
+    # We filter out entities that are not subsets of system entities of the same type
+    entity_type_to_valid_entities = {}
+
+    for system_entity in system_entities:
+        type_of_entity = system_entity.entity.type
+        if type_of_entity not in entity_type_to_valid_entities:
+            entity_type_to_valid_entities[type_of_entity] = [system_entity]
+        else:
+            if not all(
+                _is_subset(system_entity.span, allowed_entity.span) and
+                _is_same_span(system_entity.normalized_token_span, allowed_entity.normalized_token_span)
+                    for allowed_entity in entity_type_to_valid_entities[type_of_entity]):
+                entity_type_to_valid_entities[type_of_entity].append(system_entity)
+
+    return [item for sublist in entity_type_to_valid_entities.values() for item in sublist]
