@@ -528,6 +528,7 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
+        #import pdb; pdb.set_trace()
         for entity in system_entities:
             for i in entity.normalized_token_span:
                 for j in start_positions:

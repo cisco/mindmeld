@@ -15,6 +15,7 @@
 import logging
 from typing import Optional, List, Dict
 import immutables
+import re
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -36,6 +37,8 @@ TIME_GRAIN_TO_ORDER = {
     "second": 1,
     "milliseconds": 0,
 }
+
+MATCH_WHITESPACE = re.compile('\s')
 
 
 def _sort_by_lowest_time_grain(system_entities):
@@ -529,7 +532,12 @@ class NestedEntity:
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_start = len(full_text[: span_out.start].split())
+            tok_start = 0
+            for idx, char in enumerate(full_text):
+                if idx == span_out.start:
+                    break
+                if idx != 0 and MATCH_WHITESPACE.findall(char) and not MATCH_WHITESPACE.findall(full_text[idx - 1]):
+                    tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
 
             # convert span from query's indexing to parent's indexing
