@@ -4,7 +4,7 @@ import logging
 
 import math
 from .data_loading import DataBucketFactory
-from .output_manager import OutputManager, get_log_selected_queries_json_path
+from .output_manager import OutputManager
 from .plot_manager import PlotManager
 from .classifiers import MindMeldClassifier
 from .heuristics import HeuristicsFactory
@@ -35,6 +35,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         log_usage_pct: float,
         labeled_logs_pattern: str,
         unlabeled_logs_path: str,
+        output_folder: str,
     ):
         """
         Args:
@@ -74,17 +75,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.labeled_logs_pattern = labeled_logs_pattern
         self.unlabeled_logs_path = unlabeled_logs_path
 
-        self.output_manager = self.get_output_manager()
+        self.output_manager = self.get_output_manager(output_folder)
         self.mindmeld_classifier = self.get_classifier()
         self.init_data_bucket = None
         self.data_bucket = None
 
-    def get_output_manager(self):
+    def get_output_manager(self, output_folder):
         return OutputManager(
-            active_learning_params=self.__dict__,
-            selection_strategies=self.training_strategies,
-            save_sampled_queries=self.save_sampled_queries,
-            early_stopping_window=self.early_stopping_window,
+            active_learning_params=deepcopy(self.__dict__), output_folder=output_folder
         )
 
     def get_classifier(self):
@@ -97,6 +95,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def train(self):
         """Loads the initial data bucket and then trains on every strategy."""
         logger.info("Creating Training Data Bucket")
+        self.output_manager.create_experiment_folder(self.training_strategies)
         self.init_data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
             self.load,
@@ -121,7 +120,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             selection_mode (bool): If in selection mode, accuracies will not be recorded
                 and the run will terminate after the first iteration
         """
-
+        early_stop = False
         for epoch in range(self.n_epochs):
             del self.data_bucket
             self.data_bucket = deepcopy(self.init_data_bucket)
@@ -137,7 +136,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     "Sampled Queries: %s", len(self.data_bucket.sampled_queries)
                 )
                 logger.info(
-                    "Remaining (Unsampled) Queries: %s", len(self.data_bucket.unsampled_queries)
+                    "Remaining (Unsampled) Queries: %s",
+                    len(self.data_bucket.unsampled_queries),
                 )
                 (
                     eval_stats,
@@ -150,13 +150,20 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     in ["ds", "ens", "kld"],
                 )
                 if not selection_mode:
-                    early_stop = self.output_manager.update(
-                        strategy=strategy,
-                        epoch=epoch,
-                        iteration=iteration,
-                        classifier_output=eval_stats,
-                        sampled_queries_batch=self.data_bucket.newly_sampled_queries,
+                    self.output_manager.update_accuracies_json(
+                        strategy, epoch, iteration, eval_stats
                     )
+                    if self.save_sampled_queries:
+                        self.output_manager.update_selected_queries_json(
+                            strategy,
+                            epoch,
+                            iteration,
+                            self.data_bucket.newly_sampled_queries,
+                        )
+                    if self.early_stopping_window > 0:
+                        early_stop = self.output_manager.check_early_stopping(
+                            strategy, self.early_stopping_window
+                        )
                 num_unsampled = len(self.data_bucket.unsampled_queries)
                 if num_unsampled > 0:
                     sampling_size = (
@@ -196,20 +203,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         )
         logger.info("Starting Selection.")
         self._train_strategy(strategy=self.log_selection_strategy, selection_mode=True)
-        self.output_manager.write_log_selected_queries(
+        self.output_manager.write_log_selected_queries_json(
             strategy=self.log_selection_strategy,
-            epoch=0,
-            iteration=0,
-            sampled_queries_batch=self.data_bucket.newly_sampled_queries,
+            queries=self.data_bucket.newly_sampled_queries,
         )
-        log_selected_queries_json_path = get_log_selected_queries_json_path(
-            self.output_manager.experiment_dir_path
-        )
-        logger.info("Selected Log Queries saved at: %s", log_selected_queries_json_path)
 
     def plot(self):
         """Creates the generated folder and its subfolders if they do not already exist."""
-        plot_manager = PlotManager(self.output_manager.experiment_dir_path)
+        plot_manager = PlotManager(self.output_manager.experiment_folder)
         plot_manager.generate_plots()
 
 

@@ -32,8 +32,6 @@ STRATEGY_ABRIDGED = {
     "KLDivergenceSampling": "kld",
 }
 
-SAVED_QUERIES_PATH = "generated/saved_queries/"
-
 # AUTO ANNOTATOR CONSTANTS
 SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]
 SPACY_ANNOTATOR_NEWS_LANGUAGES = [

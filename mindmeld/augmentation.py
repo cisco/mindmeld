@@ -386,6 +386,7 @@ class MultiLingualParaphraser(Augmentor):
 
         return augmented_queries
 
+
 def register_all_augmentors():
     register_augmentor("EnglishParaphraser", EnglishParaphraser)
     register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)

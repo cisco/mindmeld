@@ -5,12 +5,18 @@ import logging
 from typing import Dict, List
 
 from mindmeld.markup import dump_query
+from ..path import (
+    AL_PARAMS_PATH,
+    AL_RESULTS_FOLDER,
+    AL_PLOTS_FOLDER,
+    AL_ACCURACIES_PATH,
+    AL_SELECTED_QUERIES_PATH,
+)
 from ..constants import STRATEGY_ABRIDGED
 
 logger = logging.getLogger(__name__)
 
 
-# File Creation Methods
 def create_dir_if_absent(base_path: str):
     """Create a directory if one doesn't already exist at the given path.
     Args:
@@ -21,48 +27,6 @@ def create_dir_if_absent(base_path: str):
         pass
 
 
-def create_sub_dirs_if_absent(base_path: str, sub_dirs: List):
-    """Create a subdirectories if they don't already exist at the given path.
-    Args:
-        base_path (str): Root directory of the give sub directories.
-        sub_dirs (List): List of subdirectories from the base path.
-    """
-    for sub_dir in sub_dirs:
-        sub_dir_path = os.path.join(base_path, sub_dir)
-        create_dir_if_absent(sub_dir_path)
-
-
-# Get JSON File paths
-def get_accuracies_json_path(experiment_dir_path) -> str:
-    """
-    Args:
-        experiment_dir_path (str): Path to the experiment's directory.
-    Returns:
-        accuracies_json_path (str): Path to the experiment's queries.json file.
-    """
-    return os.path.join(*[experiment_dir_path, "results", "accuracies.json"])
-
-
-def get_queries_json_path(experiment_dir_path) -> str:
-    """
-    Args:
-        experiment_dir_path (str): Path to the experiment's directory.
-    Returns:
-        queries_json_path (str): Path to the experiment's queries.json file.
-    """
-    return os.path.join(*[experiment_dir_path, "results", "queries.json"])
-
-
-def get_log_selected_queries_json_path(experiment_dir_path) -> str:
-    """
-    Args:
-        experiment_dir_path (str): Path to the experiment's directory.
-    Returns:
-        queries_json_path (str): Path to the experiment's queries.json file.
-    """
-    return os.path.join(*[experiment_dir_path, "results", "log_selected_queries.json"])
-
-
 class OutputManager:
     """Handles the initialization of generated folder and its contents. Keeps record of experiment
     results."""
@@ -70,228 +34,199 @@ class OutputManager:
     def __init__(
         self,
         active_learning_params: Dict,
-        selection_strategies: List[str],
-        save_sampled_queries=False,
-        early_stopping_window: int = None,
+        output_folder: str,
     ):
         """
         Args:
-            config_dict (Dict): Dictionary representation of the config to store.
-            selection_strategies (list): List of strategies used for the experiment.
-            save_sampled_queries (bool): Whether to save queries sampled at every batch.
-            early_stopping_window (int): Number of iterations to stop after if accuracy keeps
-                decreasing.
+            active_learning_params (Dict): Dictionary representation of the params to store.
+            output_folder (str): Directory to create an experiment folder or save log queries.
         """
         self.active_learning_params = active_learning_params
-        self.selection_strategies = selection_strategies
-        self.save_sampled_queries = save_sampled_queries
-        self.early_stopping_window = early_stopping_window
-        self.experiment_dir_path = self._get_experiment_dir_path()
-        OutputManager.create_generated_dir()
-        self.create_current_experiment_dir()
+        self.output_folder = output_folder
+        self.experiment_folder_name = None
 
-    # Directory Initialization
-    @staticmethod
-    def create_generated_dir():
-        """Creates the generated folder and its subfolders if they do not already exist."""
-        create_sub_dirs_if_absent(
-            base_path="generated", sub_dirs=["saved_queries", "experiments"]
-        )
-
-    def create_current_experiment_dir(self):
-        """Creates the current experiment folder."""
-        create_sub_dirs_if_absent(
-            base_path=self.experiment_dir_path, sub_dirs=["results", "plots"]
-        )
-        self.create_json_files()
-        self.create_saved_config_json()
-
-    def create_json_files(self):
-        """Creates accuracies.json and queries.json in the current experiment folder."""
-        accuracies_json_path = get_accuracies_json_path(self.experiment_dir_path)
-        queries_json_path = get_queries_json_path(self.experiment_dir_path)
-        for json_path in [accuracies_json_path, queries_json_path]:
-            with open(json_path, "w") as outfile:
-                json.dump({}, outfile)
-                outfile.close()
-
-    def create_saved_config_json(self):
-        """Creates a config.json to store in the experiment folder. config.json contains
-        configuration parameters."""
-        config_path = os.path.join(
-            self.experiment_dir_path, "active_learning_params.json"
-        )
-        with open(config_path, "w") as outfile:
-            json.dump(self.active_learning_params, outfile, indent=4)
-            outfile.close()
-
-    # Getters
-    def _get_experiment_dir_path(self) -> str:
+    def set_experiment_folder_name(self, selection_strategies) -> str:
         """
+        Args:
+            selection_strategies (list): List of strategies used for the experiment.
         Returns:
-            experiment_dir_path (str): Creates the path of the current experiment folder.
-        """
-        return os.path.join(
-            *["generated", "experiments", self._get_experiment_dir_name()]
-        )
-
-    def _get_experiment_dir_name(self) -> str:
-        """
-        Returns:
-            experiment_dir_name (str): Creates the name of the current experiment folder
+            experiment_folder_name (str): Creates the name of the current experiment folder
                 based on the current timestamp.
         """
-        strategies = "_".join(self._get_strategies_abridged())
+        strategies = "_".join(
+            STRATEGY_ABRIDGED[s] for s in selection_strategies if s in STRATEGY_ABRIDGED
+        )
         now = datetime.datetime.now()
-        return f"{now.month}-{now.day}_{now.hour}:{now.minute}_{strategies}"
+        self.experiment_folder_name = (
+            f"{now.month}-{now.day}_{now.hour}:{now.minute}_{strategies}"
+        )
 
-    def _get_strategies_abridged(self) -> List:
+    @property
+    def experiment_folder(self):
         """
         Returns:
-            strategies (list): Sorted list of strategies in abridged form.
+            experiment_folder (str): Path to the Active Learning experiment folder.
         """
-        strategies = [
-            STRATEGY_ABRIDGED[strategy] for strategy in self.selection_strategies
-        ]
-        strategies.sort()
-        return strategies
+        return os.path.join(self.output_folder, self.experiment_folder_name)
 
-    # JSON Update Methods
-    def write_log_selected_queries(
-        self,
-        strategy: str,
-        epoch: int,
-        iteration: int,
-        sampled_queries_batch: List,
-    ):
-        """Update accuracies.json and queries.json if specified to do so in the config.
+    def create_experiment_folder(self, selection_strategies: List):
+        """Creates the active learning experiment folder.
         Args:
-            strategy (str): Current training strategy.
-            epoch (int): Current epoch.
-            iteration (int): Current iteration.
-            sampled_queries_batch (List): List of queries sampled for the current iteration.
+            selection_strategies (list): List of strategies used for the experiment.
         """
-        self.create_log_selected_queries_json()
-        OutputManager._update_json(
-            json_path=get_log_selected_queries_json_path(self.experiment_dir_path),
-            strategy=strategy,
-            epoch=epoch,
-            iteration=iteration,
-            data=OutputManager.queries_to_dict(sampled_queries_batch),
-        )
+        self.set_experiment_folder_name(selection_strategies)
+        create_dir_if_absent(self.experiment_folder)
+        self.dump_json(AL_PARAMS_PATH, self.active_learning_params)
+        self.create_folder(AL_RESULTS_FOLDER)
+        self.create_folder(AL_PLOTS_FOLDER)
 
-    def create_log_selected_queries_json(self):
-        log_selected_queries_json_path = get_log_selected_queries_json_path(
-            self.experiment_dir_path
+    def create_folder(self, unformatted_path):
+        """ Creates a folder given an unformatted path.
+        Args:
+            unformatted_path (str): Unformatted path to JSON file.
+        """
+        os.makedirs(self.format_path(unformatted_path))
+
+    def format_path(self, unformatted_path):
+        """
+        Args:
+            unformatted_path (str): Unformatted path to JSON file.
+        Returns:
+            formatted_path (str): Path formatted with the experiment folder.
+        """
+        return unformatted_path.format(experiment_folder=self.experiment_folder)
+
+    def load_json(self, unformatted_path: str):
+        """Load JSON data from file. If the JSON file doesn't exist, an empty json file is created.
+        Args:
+            unformatted_path (str): Unformatted path to JSON file.
+        Returns:
+            json_data (Dict): Loaded JSON data.
+        """
+        formatted_path = unformatted_path.format(
+            experiment_folder=self.experiment_folder
         )
-        with open(log_selected_queries_json_path, "w") as outfile:
-            json.dump({}, outfile)
+        if not os.path.isfile(formatted_path):
+            self.dump_json(formatted_path, data={})
+        with open(formatted_path, "r") as infile:
+            json_data = json.load(infile)
+            infile.close()
+        return json_data
+
+    def dump_json(self, unformatted_path: str, data: Dict):
+        """ Dump data to a JSON file.
+        Args:
+            unformatted_path (str): Unformatted path to JSON file.
+            data (Dict): Data to dump.
+        """
+        formatted_path = self.format_path(unformatted_path)
+        with open(formatted_path, "w") as outfile:
+            json.dump(data, outfile, indent=4)
             outfile.close()
 
-    def update(
-        self,
-        strategy: str,
-        epoch: int,
-        iteration: int,
-        classifier_output: Dict,
-        sampled_queries_batch: List,
+    def update_json(
+        self, unformatted_path: str, strategy: str, epoch: int, iteration: int, data
     ):
-        """Update accuracies.json and queries.json if specified to do so in the config.
-        Args:
-            strategy (str): Current training strategy.
-            epoch (int): Current epoch.
-            iteration (int): Current iteration.
-            classifier_output (Dict): Accuracy data to save to accuracies.json.
-            sampled_queries_batch (List): List of queries sampled for the current iteration.
-        """
-        if self.save_sampled_queries:
-            OutputManager._update_json(
-                json_path=get_queries_json_path(self.experiment_dir_path),
-                strategy=strategy,
-                epoch=epoch,
-                iteration=iteration,
-                data=OutputManager.queries_to_dict(sampled_queries_batch),
-            )
-        OutputManager._update_json(
-            json_path=get_accuracies_json_path(self.experiment_dir_path),
-            strategy=strategy,
-            epoch=epoch,
-            iteration=iteration,
-            data=classifier_output,
-        )
-        if self.early_stopping_window:
-            return self._check_early_stopping(
-                json_path=get_accuracies_json_path(self.experiment_dir_path),
-                strategy=strategy,
-                epoch=epoch,
-                iteration=iteration,
-            )
-
-    @staticmethod
-    def _update_json(json_path: str, strategy: str, epoch: int, iteration: int, data):
         """Helper method to update json files.
         Args:
+            unformatted_path (str): Unformatted path to JSON file.
             strategy (str): Current training strategy.
             epoch (int): Current epoch.
             iteration (int): Current iteration.
             data (Dict or List): Data to store for current strategy, epoch, and iteration.
         """
-        with open(json_path, "r") as infile:
-            json_data = json.load(infile)
-            infile.close()
+        json_data = self.load_json(unformatted_path)
         if strategy not in json_data:
             json_data[strategy] = {}
         if str(epoch) not in json_data[strategy]:
             json_data[strategy][str(epoch)] = {}
         json_data[strategy][str(epoch)][str(iteration)] = data
-        with open(json_path, "w") as outfile:
-            json.dump(json_data, outfile, indent=4)
-            outfile.close()
+        self.dump_json(unformatted_path, json_data)
 
-    def _check_early_stopping(
-        self, json_path: str, strategy: str, epoch: int, iteration: int
+    def update_accuracies_json(
+        self, strategy: str, epoch: int, iteration: int, eval_stats
+    ):
+        """Update accuracies.json with iteration metrics"""
+        self.update_json(AL_ACCURACIES_PATH, strategy, epoch, iteration, eval_stats)
+
+    def update_selected_queries_json(
+        self, strategy: str, epoch: int, iteration: int, queries
+    ):
+        """Update accuracies.json with iteration metrics"""
+        query_dicts = OutputManager.queries_to_dict(queries)
+        self.update_json(
+            AL_SELECTED_QUERIES_PATH, strategy, epoch, iteration, query_dicts
+        )
+
+    def write_log_selected_queries_json(self, strategy: str, queries):
+        """Update accuracies.json with iteration metrics"""
+        query_dicts = OutputManager.queries_to_dict(queries)
+        log_selected_queries_path = os.path.join(
+            self.output_folder, "log_selected_queries.json"
+        )
+        data = {"strategy": strategy, "selected_queries": query_dicts}
+        with open(log_selected_queries_path, "w") as outfile:
+            json.dump(data, outfile, indent=4)
+            outfile.close()
+        logger.info("Selected Log Queries saved at: %s", log_selected_queries_path)
+
+    def check_early_stopping(
+        self,
+        strategy: str,
+        early_stopping_window: int,
     ):
         """Helper method to update json files.
         Args:
             strategy (str): Current training strategy.
-            epoch (int): Current epoch.
-            iteration (int): Current iteration.
+        Returns:
+            accuracies (List[float]): Accuracies accross the latest epoch
         """
-        with open(json_path, "r") as infile:
-            json_data = json.load(infile)
-            infile.close()
-        if strategy in json_data and str(epoch) in json_data[strategy]:
-            iteration_scores = [
-                json_data[strategy][str(epoch)][str(i)]["accuracies"]["overall"]
-                for i in range(int(iteration) + 1)
-            ]
-            if (
-                len(iteration_scores) >= self.early_stopping_window
-                and self.early_stopping_window > 0
-            ):
-                ref_score = iteration_scores[-1 * self.early_stopping_window]
-                highest_score = max(
-                    iteration_scores[-(self.early_stopping_window + 1) :]
-                )
-                if ref_score > highest_score:
-                    logger.info(
-                        """Early stopping. Early stopping window %s. Reference score at the
-                        window start: %s is greater than the highest after window start: %s.""",
-                        self.early_stopping_window,
-                        ref_score,
-                        highest_score,
-                    )
-                    return True
+        accuracy_data = self.load_json(AL_ACCURACIES_PATH)
+        epoch = max(int(e) for e in accuracy_data[strategy])
+        iteration = max(int(i) for i in accuracy_data[strategy][str(epoch)])
+        assert strategy in STRATEGY_ABRIDGED, f"Invalid Strategy: {strategy}."
+        accuracies = [
+            accuracy_data[strategy][str(epoch)][str(i)]["accuracies"]["overall"]
+            for i in range(iteration + 1)
+        ]
+        return OutputManager._check_early_stopping(accuracies, early_stopping_window)
+
+    @staticmethod
+    def _check_early_stopping(accuracies: List[float], early_stopping_window: int):
+        """
+        If the accuracy value just before the window is less than the highest accuracy
+        within the window then early stop.
+
+        Args:
+            accuracies (List[float]): Accuracies accross the latest epoch
+        Returns:
+            early_stop (bool): Whether to early stop
+        """
+        if len(accuracies) < early_stopping_window + 1:
+            return False
+        assert (
+            early_stopping_window == 0
+        ), "Early stopping window must be greater than 0"
+        pre_window_score = accuracies[-1 * early_stopping_window - 1]
+        max_in_window = max(accuracies[-1 * early_stopping_window :])
+        if pre_window_score > max_in_window:
+            logger.info(
+                """Early stopping. Accuracy before window start (%s) is greater than the
+                next %s accuracies (Max in window: %s).""",
+                pre_window_score,
+                early_stopping_window,
+                max_in_window,
+            )
+            return True
         return False
 
-    # Utility Method
     @staticmethod
     def queries_to_dict(queries: List) -> List:
         """Convert a list of ProcessedQueries into a list dictionaries.
         Args:
             queries (List): List of ProcessedQuery objects
         Returns:
-            dict_queries (List): List of queries represented as a dict with the keys
+            query_dicts (List): List of queries represented as a dict with the keys
                 "text", "domain", and "intent".
         """
         return [

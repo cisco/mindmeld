@@ -6,10 +6,10 @@ from typing import Dict, List
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .output_manager import (
-    create_dir_if_absent,
-    get_accuracies_json_path,
-    get_queries_json_path,
+from .output_manager import create_dir_if_absent
+from ..path import (
+    AL_ACCURACIES_PATH,
+    AL_SELECTED_QUERIES_PATH,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,10 @@ class PlotManager:
         Returns:
             data (dict): Data loaded from accuracies.json.
         """
-        json_path = get_accuracies_json_path(self.experiment_dir_path)
-        with open(json_path, "r") as infile:
+        accuracies_json_path = AL_ACCURACIES_PATH.format(
+            experiment_folder=self.experiment_dir_path
+        )
+        with open(accuracies_json_path, "r") as infile:
             return json.load(infile)
 
     def get_queries_json_data(self) -> Dict:
@@ -49,8 +51,10 @@ class PlotManager:
         Returns:
             data (dict): Data loaded from queries.json.
         """
-        json_path = get_queries_json_path(self.experiment_dir_path)
-        with open(json_path, "r") as infile:
+        selected_queries_json_path = AL_SELECTED_QUERIES_PATH.format(
+            experiment_folder=self.experiment_dir_path
+        )
+        with open(selected_queries_json_path, "r") as infile:
             return json.load(infile)
 
     def queries_json_data_has_data(self) -> Dict:

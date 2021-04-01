@@ -1,13 +1,12 @@
 from typing import Dict, List
 import pickle
 import logging
-import os
 from os.path import normpath, basename
 from copy import deepcopy
 
 from .heuristics import StrategicRandomSampling
 
-from ..constants import SAVED_QUERIES_PATH
+from ..path import AL_QUERIES_CACHE_PATH
 from ..auto_annotator import BootstrapAnnotator
 from ..resource_loader import ResourceLoader
 from ..query_factory import QueryFactory
@@ -178,20 +177,20 @@ class QueryLoader:
         return basename(normpath(self.app_path))
 
     @property
-    def save_file_path(self):
+    def cache_file_path(self):
         """
         Returns:
             save_file_path (str): Path to save/load a query list pickle file
         """
-        return os.path.join(
-            SAVED_QUERIES_PATH, f"{self.app_name}_{self.file_pattern}.pickle"
+        return AL_QUERIES_CACHE_PATH.format(
+            app_path=self.app_path, file_name=f"al_cache_{self.file_pattern}.pickle"
         )
 
     def load_queries(self):
         """ Loads a list of queries from a pickle file. """
         logger.info("Loading queries with the file pattern: %s", self.file_pattern)
         try:
-            with open(self.save_file_path, "rb") as handle:
+            with open(self.cache_file_path, "rb") as handle:
                 query_list = pickle.load(handle)
                 handle.close()
             return query_list
@@ -204,7 +203,7 @@ class QueryLoader:
     def save_queries(self, queries):
         """ Saves a list of queries to a pickle file. """
         logger.info("Saving queries with the file pattern: %s", self.file_pattern)
-        with open(self.save_file_path, "wb") as handle:
+        with open(self.cache_file_path, "wb") as handle:
             pickle.dump(queries, handle, protocol=pickle.HIGHEST_PROTOCOL)
             handle.close()
 

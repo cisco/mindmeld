@@ -796,7 +796,7 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
 
 @shared_cli.command("augment", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
+    "--app_path",
     required=True,
     help="The application's path.",
 )
@@ -820,7 +820,7 @@ def augment(app_path, language):
 
 
 @shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
-@click.option("--app-path", type=str, help="Path to the MindMeld application")
+@click.option("--app_path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
@@ -841,8 +841,20 @@ def augment(app_path, language):
     type=str,
     help="Select a single strategy instead of the strategies listed in the config.",
 )
+@click.option(
+    "--output_folder",
+    type=str,
+    help="Folder to store output.",
+)
 def active_learning_train(
-    app_path, batch_size, train_seed_pct, training_level, n_epochs, no_plot, strategy
+    app_path,
+    batch_size,
+    train_seed_pct,
+    training_level,
+    n_epochs,
+    no_plot,
+    strategy,
+    output_folder,
 ):
     """Command to run active learning training."""
     config = get_active_learning_config(app_path=app_path)
@@ -859,6 +871,8 @@ def active_learning_train(
         config["n_epochs"] = n_epochs
     if strategy:
         config["training_strategies"] = [strategy]
+    if output_folder:
+        config["output_folder"] = output_folder
     alp = ActiveLearningPipeline(**config)
     alp.train()
     if not no_plot:
@@ -866,7 +880,7 @@ def active_learning_train(
 
 
 @shared_cli.command("active_learning_select", context_settings=CONTEXT_SETTINGS)
-@click.option("--app-path", type=str, help="Path to the MindMeld application")
+@click.option("--app_path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
@@ -893,6 +907,11 @@ def active_learning_train(
     type=str,
     help="Select a single strategy instead of the strategies listed in the config.",
 )
+@click.option(
+    "--output_folder",
+    type=str,
+    help="Folder to store output.",
+)
 def active_learning_select(
     app_path,
     batch_size,
@@ -901,6 +920,7 @@ def active_learning_select(
     log_usage_pct,
     labeled_logs_pattern,
     strategy,
+    output_folder,
 ):
     """Select the next set of queries for training from a set of log data."""
     config = get_active_learning_config(app_path=app_path)
@@ -919,6 +939,8 @@ def active_learning_select(
         config["labeled_logs_pattern"] = labeled_logs_pattern
     if strategy:
         config["log_selection_strategy"] = strategy
+    if output_folder:
+        config["output_folder"] = output_folder
     alp = ActiveLearningPipeline(**config)
     alp.select_queries_to_label()
 
