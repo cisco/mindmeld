@@ -1,6 +1,7 @@
 import math
 
 import pytest
+from mindmeld.query_factory import QueryFactory
 
 EXACT_QUERY_MATCH_SCALING_FACTOR = 10
 EPSILON = math.pow(10, -5)
@@ -202,74 +203,64 @@ def test_sentiment_query_feature(
     "query, feature_keys, expected_feature_values, index",
     [
         # Test for extract_in_gaz_ngram_features
-        # (
-        #     "change alarm from 8am to 9am",
-        #     [
-        #         "in_gaz|type:duration|ngram|length:1|pos:0|class_prob",
-        #         "in_gaz|type:duration|ngram|length:1|pos:0|idf",
-        #         "in_gaz|type:duration|ngram|length:1|pos:0|output_prob",
-        #         "in_gaz|type:duration|ngram|length:1|pos:0|pmi",
-        #         "in_gaz|type:location|ngram|length:1|pos:0|class_prob",
-        #         "in_gaz|type:location|ngram|length:1|pos:0|idf",
-        #         "in_gaz|type:location|ngram|length:1|pos:0|output_prob",
-        #         "in_gaz|type:location|ngram|length:1|pos:0|pmi",
-        #     ],
-        #     [
-        #         math.log(9 + 1) / 2,
-        #         0,
-        #         math.log(9 + 1) / 2 - math.log(1 + 1),
-        #         math.log(9 + 1) / 2 - math.log(1 + 1),
-        #         math.log(9 + 1) / 2,
-        #         0,
-        #         math.log(9 + 1) / 2 - math.log(7 + 1),
-        #         math.log(9 + 1) / 2 - math.log(7 + 1),
-        #     ],
-        #     0,
-        # ),
-        # # Test for extract_bag_of_words_features
-        # (
-        #     "change alarm from 8am to 9am",
-        #     [
-        #         "bag_of_words|length:1|word_pos:0",
-        #         "bag_of_words|length:1|word_pos:1",
-        #         "bag_of_words|length:2|word_pos:0",
-        #     ],
-        #     ["change", "alarm", "change alarm"],
-        #     0,
-        # ),
-        # # Test for extract_char_ngrams_features
-        # (
-        #     "change alarm from 8am to 9am",
-        #     [
-        #         "char_ngrams|length:1|word_pos:0|char_pos:0",
-        #         "char_ngrams|length:2|word_pos:0|char_pos:0",
-        #     ],
-        #     ["c", "ch"],
-        #     0,
-        # ),
-        # # Test for extract_sys_candidates
-        # (
-        #     "change alarm from 8am to 9am",
-        #     [
-        #         "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
-        #         "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
-        #     ],
-        #     [math.log(10), math.log(3)],
-        #     -1,
-        # ),
-        # # Test for sys_candidate features for normalized text
-        # (
-        #     "change alarm...from 8am to 9am",
-        #     [
-        #         "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
-        #         "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
-        #     ],
-        #     [math.log(10), math.log(3)],
-        #     -1,
-        # ),
-        # test stuff
         (
-            "$2",
+            "change alarm from 8am to 9am",
+            [
+                "in_gaz|type:duration|ngram|length:1|pos:0|class_prob",
+                "in_gaz|type:duration|ngram|length:1|pos:0|idf",
+                "in_gaz|type:duration|ngram|length:1|pos:0|output_prob",
+                "in_gaz|type:duration|ngram|length:1|pos:0|pmi",
+                "in_gaz|type:location|ngram|length:1|pos:0|class_prob",
+                "in_gaz|type:location|ngram|length:1|pos:0|idf",
+                "in_gaz|type:location|ngram|length:1|pos:0|output_prob",
+                "in_gaz|type:location|ngram|length:1|pos:0|pmi",
+            ],
+            [
+                math.log(9 + 1) / 2,
+                0,
+                math.log(9 + 1) / 2 - math.log(1 + 1),
+                math.log(9 + 1) / 2 - math.log(1 + 1),
+                math.log(9 + 1) / 2,
+                0,
+                math.log(9 + 1) / 2 - math.log(7 + 1),
+                math.log(9 + 1) / 2 - math.log(7 + 1),
+            ],
+            0,
+        ),
+        # Test for extract_bag_of_words_features
+        (
+            "change alarm from 8am to 9am",
+            [
+                "bag_of_words|length:1|word_pos:0",
+                "bag_of_words|length:1|word_pos:1",
+                "bag_of_words|length:2|word_pos:0",
+            ],
+            ["change", "alarm", "change alarm"],
+            0,
+        ),
+        # Test for extract_char_ngrams_features
+        (
+            "change alarm from 8am to 9am",
+            [
+                "char_ngrams|length:1|word_pos:0|char_pos:0",
+                "char_ngrams|length:2|word_pos:0|char_pos:0",
+            ],
+            ["c", "ch"],
+            0,
+        ),
+        # Test for extract_sys_candidates
+        (
+            "change alarm from 8am to 9am",
+            [
+                "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
+                "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
+            ],
+            [math.log(10), math.log(3)],
+            -1,
+        ),
+        # Test for sys_candidate features for normalized text
+        (
+            "change alarm...from 8am to 9am",
             [
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
@@ -324,7 +315,6 @@ def test_entity_query_features(
 
     extracted_features = entity_recognizer.view_extracted_features(query)[index]
 
-    import pdb; pdb.set_trace()
     for feature_key, expected_value in zip(feature_keys, expected_feature_values):
 
         if isinstance(expected_value, float):
@@ -534,3 +524,38 @@ def test_entity_no_context_detection(
     entities = entity_recognizer.predict(query)
     assert len(entities) > 0
     assert entities[0].entity.type == expected_entity_type
+
+
+def test_stuff(kwik_e_mart_nlp):
+    feature_name = "'sys_candidate|type:sys_amount-of-money|granularity:None|pos"
+    er = kwik_e_mart_nlp.domains['banking'].intents['transfer_money'].entity_recognizer
+
+    output_features = er.view_extracted_features('$2')
+    expected_features = [
+        f'{feature_name}:0|log_len',
+        f'{feature_name}:0'
+    ]
+    unexpected_features = [
+        f'{feature_name}:1|log_len',
+        f'{feature_name}:1'
+    ]
+
+    for feat in expected_features:
+        assert feat in output_features[0]
+
+    for feat in unexpected_features:
+        assert feat not in output_features[0]
+
+    assert output_features[0][expected_features[1]] == 1
+    assert output_features[0][expected_features[0]] == math.log(len('$2'))
+
+    output_features = er.view_extracted_features('$20 5')
+    assert output_features[0][f'{feature_name}:0'] == 1
+    assert output_features[0][f'{feature_name}:0|log_len'] == math.log(len('$20'))
+    assert output_features[0][f'{feature_name}:1'] == 1
+    assert output_features[0][f'{feature_name}:1|log_len'] == math.log(len('5'))
+
+    assert output_features[0][f'{feature_name}:-1'] == 1
+    assert output_features[0][f'{feature_name}:-1|log_len'] == math.log(len('$20'))
+    assert output_features[0][f'{feature_name}:0'] == 1
+    assert output_features[0][f'{feature_name}:0|log_len'] == math.log(len('5'))

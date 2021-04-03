@@ -31,6 +31,7 @@ from .helpers import (
     mask_numerics,
     register_query_feature,
     requires,
+    get_non_overlapping_system_entities
 )
 
 
@@ -528,8 +529,9 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
-        #import pdb; pdb.set_trace()
-        for entity in system_entities:
+        filtered_system_entities = get_non_overlapping_system_entities(system_entities)
+        import pdb; pdb.set_trace()
+        for entity in filtered_system_entities:
             for i in entity.normalized_token_span:
                 for j in start_positions:
                     if 0 <= i - j < len(feat_seq):
