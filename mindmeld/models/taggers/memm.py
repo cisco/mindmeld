@@ -123,8 +123,7 @@ class MemmModel(Tagger):
         predicted_tags = []
         prev_tag = START_TAG
         for features in features_by_segment:
-            if len(example.normalized_tokens) > 1:
-                features["prev_tag"] = prev_tag
+            features["prev_tag"] = prev_tag
             X, _ = self._preprocess_data([features])
             prediction = self.predict(X)
             predicted_tag = self.class_encoder.inverse_transform(prediction)[0]

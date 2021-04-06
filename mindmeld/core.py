@@ -14,7 +14,6 @@
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
 from typing import Optional, List, Dict
-import re
 import immutables
 
 TEXT_FORM_RAW = 0
@@ -38,7 +37,7 @@ TIME_GRAIN_TO_ORDER = {
     "milliseconds": 0,
 }
 
-MATCH_WHITESPACE = re.compile('\s')
+WHITESPACE_CHAR = ' '
 
 
 def _sort_by_lowest_time_grain(system_entities):
@@ -533,14 +532,14 @@ class NestedEntity:
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
             tok_start = 0
-            for idx, char in enumerate(full_text):
-                if idx == span_out.start:
-                    break
-                if idx != 0 and MATCH_WHITESPACE.findall(char) and not \
-                        MATCH_WHITESPACE.findall(full_text[idx - 1]):
+            # The span range is till the span_out or max to the second last char
+            span_range = min(span_out.start, len(full_text) - 1)
+            for idx, current_char in enumerate(full_text[:span_range]):
+                # Increment the counter only if a whitespace follows a non-whitespace
+                next_char = full_text[idx + 1]
+                if current_char != WHITESPACE_CHAR and next_char == WHITESPACE_CHAR:
                     tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
-
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
