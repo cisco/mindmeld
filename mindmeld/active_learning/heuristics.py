@@ -7,7 +7,7 @@ import numpy as np
 from ..constants import ENTROPY_LOG_BASE, ACTIVE_LEARNING_RANDOM_SEED
 
 
-def custom_reordering(confidences, do_rank: bool = False, sampling_size: int = None):
+def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = None):
     """
     Args:
         confidences: List of confidence scores from heuristic.
@@ -23,11 +23,6 @@ def custom_reordering(confidences, do_rank: bool = False, sampling_size: int = N
         # samples at indices {0,...,sampling_size-1}<={sampling_size}<={sampling_size+1,...}
         idxs = np.argpartition(confidences, sampling_size)
     else:
-        if sampling_size is not None:
-            print(
-                f"not using the value of sampling_size={sampling_size} since do_rank={do_rank}"
-            )
-
         idxs = np.argsort(confidences)  # ascending order sort
     return idxs
 
@@ -199,7 +194,7 @@ class LeastConfidenceSampling(Heuristic):
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = False, **kwargs
+        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
     ):
         """
         Args:
@@ -225,7 +220,7 @@ class MarginSampling(Heuristic):
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = False, **kwargs
+        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
     ):
         """
         Args:
@@ -254,7 +249,7 @@ class EntropySampling(Heuristic):
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = False, **kwargs
+        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
     ):
         """
         Args:
@@ -281,7 +276,7 @@ class DisagreementSampling(Heuristic):
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
-        self, preds_multi: List[List[List[float]]], do_rank: bool = False, **kwargs
+        self, preds_multi: List[List[List[float]]], do_rank: bool = True, **kwargs
     ):
         """
         Args:
@@ -396,7 +391,7 @@ class KLDivergenceSampling(Heuristic):
     def _extractor(
         self,
         preds_multi: List[List[List[float]]],
-        do_rank: bool = False,
+        do_rank: bool = True,
         domain_indices: Dict = None,
         **kwargs,
     ):

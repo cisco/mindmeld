@@ -81,7 +81,7 @@ class OutputManager:
         self.create_folder(AL_PLOTS_FOLDER)
 
     def create_folder(self, unformatted_path):
-        """ Creates a folder given an unformatted path.
+        """Creates a folder given an unformatted path.
         Args:
             unformatted_path (str): Unformatted path to JSON file.
         """
@@ -114,7 +114,7 @@ class OutputManager:
         return json_data
 
     def dump_json(self, unformatted_path: str, data: Dict):
-        """ Dump data to a JSON file.
+        """Dump data to a JSON file.
         Args:
             unformatted_path (str): Unformatted path to JSON file.
             data (Dict): Data to dump.

@@ -56,6 +56,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             log_usage_pct (float): Percentage of the log data to use for selection
             labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
+            output_folder (str):
         """
         self.app_path = app_path
         self.train_pattern = train_pattern

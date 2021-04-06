@@ -6,11 +6,14 @@ from copy import deepcopy
 
 from .heuristics import StrategicRandomSampling
 
-from ..path import AL_QUERIES_CACHE_PATH
+
 from ..auto_annotator import BootstrapAnnotator
-from ..resource_loader import ResourceLoader
-from ..query_factory import QueryFactory
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
+from ..markup import read_query_file
+from ..path import AL_QUERIES_CACHE_PATH
+from ..query_factory import QueryFactory
+from ..resource_loader import ResourceLoader
+
 
 logger = logging.getLogger(__name__)
 
@@ -384,25 +387,17 @@ class LogQueriesLoader:
         self.log_file_path = log_file_path
         self.app_path = app_path
 
-    def get_raw_text_queries(self):
-        """Reads in the data from the log file.
-
-        Returns:
-            text_queries (List[str]): a List of text queries.
-        """
-        return open(self.log_file_path, "r").read().split("\n")
-
     @staticmethod
-    def filter_raw_text_queries(text_queries):
+    def filter_raw_text_queries(log_queries_iter):
         """Removes duplicates in the text queries.
 
         Args:
-            text_queries (List[str]): a List of text queries.
+            log_queries_iter (generator): Log queries generator.
 
         Returns:
             filtered_text_queries (List[str]): a List of filtered text queries.
         """
-        return list(set(text_queries))
+        return list(set(q for q in log_queries_iter))
 
     def convert_text_queries_to_processed(self, text_queries):
         """Converts text queries to processed queries using an annotator.
@@ -423,8 +418,8 @@ class LogQueriesLoader:
 
     @property
     def queries(self):
-        raw_text_queries = self.get_raw_text_queries()
+        log_queries_iter = read_query_file(self.log_file_path)
         filtered_text_queries = LogQueriesLoader.filter_raw_text_queries(
-            raw_text_queries
+            log_queries_iter
         )
         return self.convert_text_queries_to_processed(filtered_text_queries)
