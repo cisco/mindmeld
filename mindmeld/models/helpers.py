@@ -18,7 +18,6 @@ from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
 from ..tokenizer import Tokenizer
-from ..core import _is_subset, _is_same_span
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -453,47 +452,3 @@ def requires(resource):
         return func
 
     return add_resource
-
-
-def get_non_overlapping_system_entities(system_entities):
-    """
-    This function filters out system entities who spans are strictly subsets of other
-    system entities of the same type in the list. eg: For the query "$5",
-    we have the following system entities:
-
-    [<QueryEntity '$5' ('sys_amount-of-money') char: [0-1], tok: [0-0]>,
-    <QueryEntity '5' ('sys_amount-of-money') char: [1-1], tok: [1-1]>]
-
-    The filtered list would be:
-    [<QueryEntity '$5' ('sys_amount-of-money') char: [0-1], tok: [0-0]>]
-
-    Since it strictly engulfs the char '5'.
-
-    This filtering matters since MindMeld's entity recognizers work at the token level,
-    so its strictly better to find the overlapping entity of the same type than to also
-    include the subset entity since not doing this adds noise to the model.
-
-    Args:
-        system_entities (List of QueryEntity): A list of system entities
-
-    Returns:
-        (list): A filtered list of non-overlapping QueryEntity objects
-    """
-    # We filter out entities that are not subsets of system entities of the same type
-    entity_repr_to_valid_entities = {}
-
-    for system_entity in system_entities:
-        type_of_entity = system_entity.entity.type
-        span_index = system_entity.normalized_token_span
-        key = f'{type_of_entity}-{span_index}'
-
-        if key not in entity_repr_to_valid_entities:
-            entity_repr_to_valid_entities[key] = system_entity
-        else:
-            # We filter out entities with subset spans but similar normalized token spans
-            current_repr = entity_repr_to_valid_entities[key]
-            if _is_subset(current_repr.span, system_entity.span) and \
-                    _is_same_span(system_entity.normalized_token_span, current_repr.normalized_token_span):
-                entity_repr_to_valid_entities[key] = system_entity
-
-    return list(entity_repr_to_valid_entities.values())

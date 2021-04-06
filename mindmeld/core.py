@@ -14,8 +14,8 @@
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
 from typing import Optional, List, Dict
-import immutables
 import re
+import immutables
 
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
@@ -536,7 +536,8 @@ class NestedEntity:
             for idx, char in enumerate(full_text):
                 if idx == span_out.start:
                     break
-                if idx != 0 and MATCH_WHITESPACE.findall(char) and not MATCH_WHITESPACE.findall(full_text[idx - 1]):
+                if idx != 0 and MATCH_WHITESPACE.findall(char) and not \
+                        MATCH_WHITESPACE.findall(full_text[idx - 1]):
                     tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
 

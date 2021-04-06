@@ -31,7 +31,6 @@ from .helpers import (
     mask_numerics,
     register_query_feature,
     requires,
-    get_non_overlapping_system_entities
 )
 
 
@@ -529,9 +528,7 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
-        filtered_system_entities = get_non_overlapping_system_entities(system_entities)
-        import pdb; pdb.set_trace()
-        for entity in filtered_system_entities:
+        for entity in system_entities:
             for i in entity.normalized_token_span:
                 for j in start_positions:
                     if 0 <= i - j < len(feat_seq):
@@ -540,13 +537,25 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
                                 entity.entity.type, entity.entity.value.get("grain"), j
                             )
                         )
-                        feat_seq[i - j][feat_name] = 1
+                        if feat_name in feat_seq[i - j]:
+                            feat_seq[i - j][feat_name] += 1
+                        else:
+                            feat_seq[i - j][feat_name] = 1
+
                         feat_name = "sys_candidate|type:{}|granularity:{}|pos:{}|log_len".format(
                             entity.entity.type, entity.entity.value.get("grain"), j
                         )
-                        feat_seq[i - j][feat_name] = math.log(
-                            len(entity.normalized_text)
-                        )
+                        if feat_name in feat_seq[i - j]:
+                            feat_seq[i - j][feat_name].append(len(entity.normalized_text))
+                        else:
+                            feat_seq[i - j][feat_name] = [len(entity.normalized_text)]
+
+        for token_features in feat_seq:
+            for feature, value in token_features.items():
+                if feature.endswith('log_len'):
+                    token_features[feature] = math.log(float(sum(value)) / len(value))
+                else:
+                    token_features[feature] = math.log(value)
         return feat_seq
 
     return _extractor

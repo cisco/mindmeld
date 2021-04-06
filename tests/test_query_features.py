@@ -1,7 +1,6 @@
 import math
 
 import pytest
-from mindmeld.query_factory import QueryFactory
 
 EXACT_QUERY_MATCH_SCALING_FACTOR = 10
 EPSILON = math.pow(10, -5)
@@ -255,7 +254,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(10), math.log(3)],
+            [math.log(37 / 3), math.log(2)],
             -1,
         ),
         # Test for sys_candidate features for normalized text
@@ -265,7 +264,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(10), math.log(3)],
+            [math.log(37 / 3), math.log(2)],
             -1,
         ),
     ],
@@ -441,7 +440,7 @@ def test_entity_query_features(
                 "00",
                 "el",
                 "lm",
-                1,
+                0.0,
                 0.6931471805599453,
             ],
             4,
@@ -527,7 +526,7 @@ def test_entity_no_context_detection(
 
 
 def test_stuff(kwik_e_mart_nlp):
-    feature_name = "'sys_candidate|type:sys_amount-of-money|granularity:None|pos"
+    feature_name = "sys_candidate|type:sys_amount-of-money|granularity:None|pos"
     er = kwik_e_mart_nlp.domains['banking'].intents['transfer_money'].entity_recognizer
 
     output_features = er.view_extracted_features('$2')
@@ -546,16 +545,21 @@ def test_stuff(kwik_e_mart_nlp):
     for feat in unexpected_features:
         assert feat not in output_features[0]
 
-    assert output_features[0][expected_features[1]] == 1
-    assert output_features[0][expected_features[0]] == math.log(len('$2'))
+    assert output_features[0][expected_features[1]] == math.log(len('$2'))
+    assert math.isclose(output_features[0][expected_features[0]], math.log(1.5), rel_tol=1e-04)
 
     output_features = er.view_extracted_features('$20 5')
-    assert output_features[0][f'{feature_name}:0'] == 1
-    assert output_features[0][f'{feature_name}:0|log_len'] == math.log(len('$20'))
-    assert output_features[0][f'{feature_name}:1'] == 1
-    assert output_features[0][f'{feature_name}:1|log_len'] == math.log(len('5'))
 
-    assert output_features[0][f'{feature_name}:-1'] == 1
-    assert output_features[0][f'{feature_name}:-1|log_len'] == math.log(len('$20'))
-    assert output_features[0][f'{feature_name}:0'] == 1
-    assert output_features[0][f'{feature_name}:0|log_len'] == math.log(len('5'))
+    assert output_features[0][f'{feature_name}:0'] == math.log(6)
+    assert math.isclose(output_features[0][f'{feature_name}:0|log_len'],
+                        math.log(3.833), rel_tol=1e-04)
+    assert output_features[0][f'{feature_name}:1'] == math.log(5)
+    assert math.isclose(output_features[0][f'{feature_name}:1|log_len'],
+                        math.log(3.8), rel_tol=1e-04)
+
+    assert output_features[1][f'{feature_name}:-1'] == math.log(6)
+    assert math.isclose(output_features[1][f'{feature_name}:-1|log_len'],
+                        math.log(3.833), rel_tol=1e-04)
+    assert output_features[1][f'{feature_name}:0'] == math.log(5)
+    assert math.isclose(output_features[1][f'{feature_name}:0|log_len'],
+                        math.log(3.8), rel_tol=1e-04)
