@@ -19,12 +19,15 @@ import logging
 import os
 import re
 from keyword import iskeyword
-
 import yaml
 
 from mindmeld.converter.converter import Converter
+from mindmeld.exceptions import MindMeldError
 
 logger = logging.getLogger(__name__)
+
+RASA_ENTITY_REGEX = re.compile(r"(\[(.+?)\]\((.*?)\))")
+MINDMELD_ENTITY_REGEX = re.compile(r"\{.+?\}")
 
 
 class RasaConverter(Converter):
@@ -41,6 +44,7 @@ class RasaConverter(Converter):
                 rasa_project_directory=rasa_project_directory
             )
             raise FileNotFoundError(msg)
+        self.all_entities = set()
 
     def _create_intents_directories(self, mindmeld_project_directory, intents):
         """Note: Because Rasa does not support multiple domains at this time. All intents
@@ -76,46 +80,28 @@ class RasaConverter(Converter):
             f.close()
 
     @staticmethod
-    def _does_intent_ex_contain_entity(intent_example):
-        return len(re.findall(r"\[.*\]\(.*\)", intent_example)) > 0
-
-    def _write_intent_with_entinty(self, intent_f, intent_example):
-        mindmend_intent_example = intent_example
-        pattern = re.compile(r"\[.*\]\(.*\)")
-        for match in pattern.findall(intent_example):
-            mindmeld_entity = (
-                match.replace("[", "{")
-                .replace("]", "|")
-                .replace("(", "")
-                .replace(")", "}")
-            ).lower()
-            mindmend_intent_example = mindmend_intent_example.replace(
-                match, mindmeld_entity
-            )
-            # add this to the respective entity gazetteer file as well
-            self.create_entity_files(mindmeld_entity)
-        intent_f.write(mindmend_intent_example)
-
-    @staticmethod
     def _remove_comments_from_line(line):
         start_of_comment = line.find("<!---")
         end_of_comment = line.find("-->")
         line_without_comment = line.replace(
-            line[start_of_comment : end_of_comment + 3], ""
+            line[start_of_comment: end_of_comment + 3], ""
         )
         line_without_comment = line_without_comment.rstrip()
         return line_without_comment
 
-    def _add_example_to_training_file(self, current_intent_path, line):
+    def _translate_rasa_entry_to_mindmeld_entry(self, rasa_entry: str) -> str:
+        mindmeld_entry = rasa_entry
+        for match, entity, entity_type in RASA_ENTITY_REGEX.findall(rasa_entry):
+            mindmeld_entity = f"{{{entity}|{entity_type.lower()}}}"
+            mindmeld_entry = mindmeld_entry.replace(match, mindmeld_entity)
+            self.all_entities.add(mindmeld_entity)
+        return mindmeld_entry
+
+    def _add_example_to_training_file(self, current_intent_path: str, rasa_entry: str):
         with open(current_intent_path + "/train.txt", "a") as intent_f:
-            intent_example = line[2:]
-            intent_example = (
-                RasaConverter._remove_comments_from_line(intent_example) + "\n"
-            )
-            if RasaConverter._does_intent_ex_contain_entity(intent_example):
-                self._write_intent_with_entinty(intent_f, intent_example)
-            else:
-                intent_f.write(intent_example)
+            rasa_entry = RasaConverter._remove_comments_from_line(rasa_entry)
+            mindmeld_entry = self._translate_rasa_entry_to_mindmeld_entry(rasa_entry)
+            intent_f.write(mindmeld_entry + "\n")
 
     def _get_action_endpoint(self):
         for file_ending in ["yaml", "yml"]:
@@ -218,7 +204,7 @@ class RasaConverter(Converter):
 
     @staticmethod
     def _does_intent_have_entity(stories_line):
-        return len(re.findall(r"\{.*\}", stories_line)) > 0
+        return len(MINDMELD_ENTITY_REGEX.findall(stories_line)) > 0
 
     @staticmethod
     def _clean_up_entities_list(entities_with_values):
@@ -233,7 +219,7 @@ class RasaConverter(Converter):
 
     def _get_intent_with_entity(self, stories_line):
         if RasaConverter._does_intent_have_entity(stories_line):
-            entities_with_values = re.search(r"\{.*\}", stories_line)
+            entities_with_values = MINDMELD_ENTITY_REGEX.search(stories_line)
             entities_with_values = entities_with_values.group(0)
             entities_list = self._clean_up_entities_list(entities_with_values)
             start_of_entity = stories_line.find(entities_with_values)
@@ -343,41 +329,49 @@ class RasaConverter(Converter):
         try:
             with open(nlu_data_loc, "r") as nlu_data_md_file:
                 nlu_data_lines = nlu_data_md_file.readlines()
-        except FileNotFoundError:
-            logger.error("Cannot open nlu_data.md file at %s", nlu_data_loc)
+        except FileNotFoundError as error:
+            raise MindMeldError(f"Cannot open nlu_data.md file at {nlu_data_loc}") from error
+
         # iterate through each line
-        current_intent = ""
         current_intent_path = ""
         for line in nlu_data_lines:
             if self._is_line_intent_definiton(line):
-                current_intent = RasaConverter._get_intent_from_line(line)
                 current_intent_path = (
                     self.mindmeld_project_directory
                     + "/domains/general/"
-                    + current_intent
+                    + RasaConverter._get_intent_from_line(line)
                 )
                 # create data text file for intent examples`
                 self._create_intent_training_file(current_intent_path)
             else:
-                if line[0] == "-":
-                    self._add_example_to_training_file(current_intent_path, line)
+                # We can add an extra space for rasa_entity since rasa_entity is rstripped
+                # during it's processing
+                delimiter, rasa_entity = (line + ' ').split(' ', maxsplit=1)
+                delimiter == '-' and self._add_example_to_training_file(  # pylint: disable=expression-not-assigned  # noqa: E501
+                    current_intent_path, rasa_entity)
+
+        # create all entity folders
+        for entity in self.all_entities:
+            self.create_entity_files(entity)
 
     def _write_init_header(self):
-        string = """from mindmeld import Application
-from mindmeld.components.custom_action import CustomAction
-from . import custom_features  # noqa: F401
+        initialization_strings = [
+            'from mindmeld import Application',
+            'from mindmeld.components.custom_action import CustomAction',
+            'from . import custom_features  # noqa: F401',
+            '\n',
+            'app = Application(__name__)',
+            "__all__ = ['app']"
+        ]
 
-app = Application(__name__)
-
-__all__ = ['app']
-"""
         url = self._get_action_endpoint()
         if url:
             action_config = "action_config = {{'url': '{url}'}}\n".format(url=url)
-            string += action_config
-        string += "\n\n"
+            initialization_strings.append(action_config)
+
+        initialization_strings.append("\n")
         f = open(self.mindmeld_project_directory + "/__init__.py", "w+")
-        f.write(string)
+        f.write('\n'.join(initialization_strings))
         return f
 
     @staticmethod
@@ -414,7 +408,7 @@ __all__ = ['app']
         prompts_list = []
         # check if prompts contain any entities
         for prompt in prompts:
-            entities = re.findall(r"\{.*\}", prompt)
+            entities = MINDMELD_ENTITY_REGEX.findall(prompt)
 
             # If we have entities, we do string format with entities; otherwise
             # just simple string prompts

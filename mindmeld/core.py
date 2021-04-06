@@ -124,6 +124,10 @@ class Span:
         """
         return Span(self.start + offset, self.end + offset)
 
+    def has_overlap(self, other):
+        """Determines whether two spans overlap."""
+        return self.end >= other.start and other.end >= self.start
+
     def __iter__(self):
         for index in range(self.start, self.end + 1):
             yield index
@@ -134,6 +138,26 @@ class Span:
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.start == other.start and self.end == other.end
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) > len(other)
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) >= len(other)
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) < len(other)
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) <= len(other)
         return NotImplemented
 
     def __ne__(self, other):
@@ -907,7 +931,11 @@ def _is_same_span(target, other):
 
 
 def _is_overlapping(target, other):
+    overlap = _get_overlap(target, other)
+    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+
+
+def _get_overlap(target, other):
     target_range = range(target.start, target.end + 1)
     predicted_range = range(other.start, other.end + 1)
-    overlap = set(target_range).intersection(predicted_range)
-    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+    return set(target_range).intersection(predicted_range)

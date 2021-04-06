@@ -314,3 +314,45 @@ def _find_config_file():
         current_dir = os.path.abspath(os.path.join(current_dir, ".."))
 
     return None
+
+
+def get_pattern(rule):
+    """Convert a rule represented as a dictionary with the keys "domains", "intents",
+    "files" into a regex pattern.
+
+    Args:
+        rule (dict): An annotation or augmentation rule.
+
+    Returns:
+        pattern (str): Regex pattern specifying allowed file paths.
+    """
+    pattern = [rule[x] for x in ["domains", "intents", "files"]]
+    return ".*/" + "/".join(pattern)
+
+
+def read_path_queries(filepath):
+    """Reads queries from given file path.
+
+        Args:
+            filepath (str): File path to read from.
+
+        Returns:
+            queries (list): List of queries.
+    """
+    with open(filepath, "r") as f:
+        queries = f.readlines()
+    return queries
+
+
+def write_to_file(filepath, queries, suffix):
+    """Writes queries to a new file in the path with given suffix.
+
+    Args:
+        filepath (str): File path to the original file.
+        queries (list): List of queries to be written to file.
+    """
+    write_path = filepath.rstrip(".txt") + suffix
+
+    with open(write_path, "w") as outfile:
+        for query in queries:
+            outfile.write(query.rstrip() + "\n")

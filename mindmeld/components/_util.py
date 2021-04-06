@@ -19,10 +19,8 @@ import importlib
 def _is_module_available(module_name: str):
     """
     checks if a module is available or not (eg. _is_module_available("sentence_transformers"))
-
     Args:
         module_name (str): name of the model to check
-
     Returns:
         bool, if or not the given module exists
     """

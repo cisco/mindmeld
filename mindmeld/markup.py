@@ -19,6 +19,7 @@ import csv
 import logging
 import sys
 
+from .constants import SPACY_SYS_ENTITIES_NOT_IN_DUCKLING
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .query_factory import QueryFactory
@@ -309,13 +310,18 @@ def _process_annotations(query, annotations, system_entity_recognizer):
         if ann["ann_type"] == "entity":
             span = Span(ann["start"], ann["end"])
             if Entity.is_system_entity(ann["type"]):
-                try:
-                    raw_entity = system_entity_recognizer.resolve_system_entity(
-                        query, ann["type"], span
-                    ).entity
-                except SystemEntityResolutionError as e:
-                    logger.warning("Unable to load query: %s", e)
-                    return
+                if ann["type"] in SPACY_SYS_ENTITIES_NOT_IN_DUCKLING:
+                    raw_entity = Entity(
+                        text=ann["text"], entity_type=ann["type"], value={"value": ann["text"]}
+                    )
+                else:
+                    try:
+                        raw_entity = system_entity_recognizer.resolve_system_entity(
+                            query, ann["type"], span
+                        ).entity
+                    except SystemEntityResolutionError as e:
+                        logger.warning("Unable to load query: %s", e)
+                        return
                 try:
                     raw_entity.role = ann["role"]
                 except KeyError:
