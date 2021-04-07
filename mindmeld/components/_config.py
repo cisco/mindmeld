@@ -517,6 +517,7 @@ DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS = {
             "bert_output_type": "mean",
             "augment_lower_case": False,
             "quantize_model": True,
+            "augment_average_synonyms_embeddings": False
         }
     },
     "tfidf_cosine_similarity": {
