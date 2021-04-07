@@ -1177,6 +1177,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
 
         # encode artificial synonyms if required
         aug_avg_syn_embs = self.er_config["model_settings"]["augment_average_synonyms_embeddings"]
+        dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
         if aug_avg_syn_embs:
             # obtain cnames to synonyms mapping
             entity_mapping_synonyms = self._entity_mapping["synonyms"]
@@ -1186,7 +1187,6 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
                     items = cnames2synonyms.get(cname, [])
                     items.append(syn)
                     cnames2synonyms[cname] = items
-            dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
             # assert dummy synonyms
             for cname, syns in cnames2synonyms.items():
                 dummy_synonym = f"{cname} - SYNONYMS AVERAGE"

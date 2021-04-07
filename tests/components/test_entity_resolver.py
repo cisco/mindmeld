@@ -66,6 +66,7 @@ def resolver_sbert(resource_loader):
             "bert_output_type": "mean",
             "augment_lower_case": False,
             "quantize_model": True,
+            "augment_average_synonyms_embeddings": False
         }
     }
     resolver = EntityResolver().get_resolver(
