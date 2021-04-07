@@ -2,3 +2,5 @@
 -e .[tensorflow]
 -e .[bert]
 -e .[examples]
+-e .[augment]
+-e .[language_annotator]

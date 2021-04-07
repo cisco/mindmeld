@@ -9,6 +9,7 @@ The Auto Annotator
 .. note::
 
    The examples in this section require the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``.
+   Examples related to the MultiLingualAnnotator requires the :doc:`Health Screening <../blueprints/screening_app>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint hr_assistant``
 
 .. warning::
 
@@ -40,7 +41,7 @@ Using the Auto Annotator
 ------------------------
 
 The Auto Annotator can be used by importing a class that implements the :class:`Annotator` abstract class in the :mod:`auto_annotator` module or through the command-line.
-We will demonstrate both approaches for annotation and unannotation using the :class:`SpacyAnnotator` class.
+We will demonstrate both approaches for annotation and unannotation using the :class:`MultiLingualAnnotator` class.
 
 Annotate
 ^^^^^^^^
@@ -59,10 +60,21 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
-
-	sa.annotate(overwrite=True)
+	from mindmeld.auto_annotator import MultiLingualAnnotator
+	annotation_rules = [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*",
+			"entities": ".*",
+		}
+	]
+	mla = MultiLingualAnnotator(
+		app_path="hr_assistant",
+		annotation_rules=annotation_rules,
+		overwrite=True
+	)
+	mla.annotate()
 
 If you do not want to annotate all supported entities, you can specify annotation rules instead.
 
@@ -74,9 +86,9 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 
 	AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": True, 
-		"annotate": [
+		"annotation_rules": [
 			{ 
 				"domains": "hierarchy", 
 				"intents": "get_hierarchy_up", 
@@ -85,7 +97,7 @@ Notice that we are setting :attr:`overwrite` to True since we want to replace th
 			}
 		],
 		"unannotate_supported_entities_only": True, 
-		"unannotate": None
+		"unannotation_rules": None
 	}
 
 Before running the annotation, let's take a look at the first four queries in the train.txt file for the :attr:`get_hierarchy_up` intent: 
@@ -119,16 +131,27 @@ You can :attr:`unannotate` using the command-line. To unannotate all entities, p
 	mindmeld unannotate --app-path "hr_assistant" --unannotate_all
 
 To unannotate by creating an instance of the :class:`Annotator` class, run the Python code below.
-To unannotate all annotations, pass in the optional param :attr:`unannotate_all`.
+To unannotate all annotations, use the the :attr:`unannotation_rules` shown below and set :attr:`unannotate_supported_entities_only` to False.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator
+	unannotation_rules = [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*",
+			"entities": ".*",
+		}
+	]
+	mla = MultiLingualAnnotator(
+		app_path="hr_assistant",
+		unannotation_rules=unannotation_rules,
+		unannotate_supported_entities_only=False
+	)
+	mla.unannotate()
 
-	sa.unannotate(unannotate_all=True)
-
-If :attr:`unannotate_all` is not set to True and you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
+If you see the following message, you need to update the unannotate parameter in your custom :attr:`AUTO_ANNOTATOR_CONFIG` dictionary in :attr:`config.py`.
 You can refer to the config specifications in the "Auto Annotator Configuration" section below.
 
 .. code-block:: console
@@ -144,7 +167,7 @@ To do this, we can add the following :attr:`AUTO_ANNOTATOR_CONFIG` dictionary to
 
 	AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": False, 
 		"annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*"}],
 		"unannotate_supported_entities_only": True, 
@@ -181,13 +204,16 @@ After running :attr:`unannotate` we find that instances of :attr:`sys_time` have
 	{count|function} of {eligible non citizen|citizendesc} workers {born|dob} {before|date_compare} 1994
 
 
-Default Auto Annotator: Spacy Annotator
----------------------------------------
+Default Auto Annotator: MultiLingual Annotator
+----------------------------------------------
 The :mod:`mindmeld.auto_annotator` module contains an abstract :class:`Annotator` class.
-This class serves as a base class for any MindMeld Annotator including the :class:`SpacyAnnotator` class.
-The :class:`SpacyAnnotator` leverages `Spacy's Named Entity Recognition <https://spacy.io/usage/linguistic-features#named-entities>`_ system to detect 21 different entities.
-Some of these entities are resolvable by Duckling. 
+This class serves as a base class for any MindMeld Annotator including the :class:`MultiLingualAnnotator` class.
+The :class:`MultiLingualAnnotator` leverages `Spacy's Named Entity Recognition <https://spacy.io/usage/linguistic-features#named-entities>`_ system and duckling to detect entities.
 
+
+Supported Entities and Languages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Up to 21 entities are supported across 15 languages. The table below defines these entities and whether they are resolvable by duckling.
 
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 | Supported Entities     | Resolvable by Duckling  | Examples or Definition                                                      |
@@ -235,66 +261,85 @@ Some of these entities are resolvable by Duckling.
 | "sys_other-quantity"   | No                      | "10 joules", "30 liters", "15 tons"                                         |
 +------------------------+-------------------------+-----------------------------------------------------------------------------+
 
+Supported languages include English (en), Spanish (es), French (fr), German (de), Danish (da), Greek (el), Portuguese (pt), Lithuanian (lt), Norwegian Bokmal (nb), Romanian (ro), Polish (pl), Italian (it), Japanese (ja), Chinese (zh), Dutch (nl).
+The table below identifies the supported entities for each language.
 
-To detect entities in a single sentence first create an instance of the :class:`SpacyAnnotator` class.
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+|                     | EN | ES | FR | DE | DA | EL | PT | LT | NB | RO | PL | IT | JA | ZH | NL |
++=====================+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+| sys_amount-of-money | y  | y  | y  | n  | n  | n  | y  | n  | y  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_distance        | y  | y  | y  | y  | n  | n  | y  | n  | n  | y  | n  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_duration        | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_event           | y  | n  | n  | n  | n  | y  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_fac             | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_gpe             | y  | n  | n  | n  | n  | y  | n  | y  | n  | y  | y  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_interval        | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_language        | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_law             | y  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_loc             | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_norp            | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_number          | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_ordinal         | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_org             | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_other-quantity  | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_percent         | y  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_person          | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_product         | y  | n  | n  | n  | n  | y  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_time            | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | y  | n  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_weight          | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+| sys_work_of_art     | y  | n  | n  | n  | n  | n  | n  | n  | n  | y  | n  | n  | y  | y  | y  |
++---------------------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+
+
+Working with English Sentences
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To detect entities in a single sentence first create an instance of the :class:`MultiLingualAnnotator` class.
+If a language is not specified in :attr:`LANGUAGE_CONFIG` (:attr:`config.py`) then by default English will be used.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import SpacyAnnotator 
-	sa = SpacyAnnotator(app_path="hr_assistant")
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(app_path="hr_assistant")
 
 Then use the :meth:`parse` function.
 
 .. code-block:: python
 	
-	sa.parse("Apple stock went up $10 last monday.") 
+	mla.parse("Apple stock went up $10 last monday.") 
 
-Three entities are automatically recognized and a list of dictionaries is returned. Each dictionary represents a detected entity.:
+Three entities are automatically recognized and a list of QueryEntity objects is returned. Each QueryEntity represents a detected entity.:
 
 .. code-block:: python
 	
 	[
-		{
-			'body': 'Apple',
-			'start': 0,
-			'end': 5,
-			'value': {'value': 'Apple'},
-			'dim': 'sys_org'
-		},
-		{
-			'body': '$10',
-			'start': 20,
-			'end': 23,
-			'value': {'value': 10, 'type': 'value', 'unit': '$'},
-			'dim': 'sys_amount-of-money'
-		},
-		{
-			'body': 'last monday',
-			'start': 24,
-			'end': 35,
-			'value': {'value': '2020-09-21T00:00:00.000-07:00',
-			'grain': 'day',
-			'type': 'value'},
-			'dim': 'sys_time'
-		}
+		<QueryEntity 'Apple' ('sys_org') char: [0-4], tok: [0-0]>,
+		<QueryEntity '$10' ('sys_amount-of-money') char: [20-22], tok: [4-4]>,
+		<QueryEntity 'last monday' ('sys_time') char: [24-34], tok: [5-6]>
 	]
 
 The Auto Annotator detected "Apple" as :attr:`sys_org`. Moreover, it recognized "$10" as :attr:`sys_amount-of-money` and resolved its :attr:`value` as 10 and :attr:`unit` as "$".
 Lastly, it recognized "last monday" as :attr:`sys_time` and resolved its :attr:`value` to be a timestamp representing the last monday from the current date.
-
-In general, detected entities will be represented in the following format:
-
-.. code-block:: python
-
-	entity = {
-
-		"body": (substring of sentence), 
-		"start": (start index), 
-		"end": (end index + 1), 
-		"dim": (entity type), 
-		"value": (resolved value, if it exists), 
-
-	}
 
 To restrict the types of entities returned from the :attr:`parse()` method use the :attr:`entity_types` parameter and pass in a list of entities to restrict parsing to. By default, all entities are allowed.
 For example, we can restrict the output of the previous example by doing the following:
@@ -304,23 +349,93 @@ For example, we can restrict the output of the previous example by doing the fol
 	
 	allowed_entites = ["sys_org", "sys_amount-of-money", "sys_time"]
 	sentence = "Apple stock went up $10 last monday."
-	sa.parse(sentence=sentence, entity_types=allowed_entities) 
+	mla.parse(sentence=sentence, entity_types=allowed_entities)
+
+Working with Non-English Sentences
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :class:`MultiLingualAnnotator` will use the language and locale specified in the :attr:`LANGUAGE_CONFIG` (:attr:`config.py`) if it used through the command-line.
+
+.. code-block:: python
+	
+	LANGUAGE_CONFIG = {'language': 'es'}
+
+Many Spacy non-English NER models have limited entity support. To overcome this, in addition to the entities detected by non-English NER models, the :class:`MultiLingualAnnotator` translates the sentence to English and detects entities
+using the English NER model. The English detected entities are compared against duckling candidates for the non-English sentence. Duckling candidates with a match between the type and value of the entity or the translated body text
+are selected. If a translation service is not available, the :class:`MultiLingualAnnotator` selects the duckling candidates with the largest non-overlapping spans. The sections below describe the steps to setup the annotator depending on whether a translation service is being used.
+
+Annotating with a Translation Service (Google)
+''''''''''''''''''''''''''''''''''''''''''''''
+The :class:`MultiLingualAnnotator` can leverage the Google Translation API to better detect entities in non-English sentences. To use this feature, export your Google application credentials.
+
+.. code-block:: console
+
+	export GOOGLE_APPLICATION_CREDENTIALS="/<YOUR_PATH>/google_application_credentials.json"
+
+Install the extras requirements for annotators.
+
+.. code-block:: console
+
+	pip install mindmeld[language_annotator]
+
+Finally, specify the translator in :attr:`AUTO_ANNOTATOR_CONFIG`. Set :attr:`translator` to :attr:`GoogleTranslator`.
+
+Annotating without a Translation Service
+''''''''''''''''''''''''''''''''''''''''
+We can still use the :class:`MultiLingualAnnotator` without a translation service. To do so, set :attr:`translator` to :attr:`NoOpTranslator` in :attr:`AUTO_ANNOTATOR_CONFIG`.
+
+Spanish Sentence Example
+''''''''''''''''''''''''
+Let's take a look at an example of the :class:`MultiLingualAnnotator` detecting entities in Spanish sentences.  
+To use a Spanish MindMeld application we can download the :attr:`Screening App` blueprint with the following command:
+
+.. code-block:: console
+
+	mindmeld blueprint screening_app
+
+We can now create our :class:`MultiLingualAnnotator` object and pass in the app_path. If a spanish Spacy model is not found in the environment, it will automatically be downloaded.
+
+.. code-block:: python
+
+	from mindmeld.auto_annotator import MultiLingualAnnotator 
+	mla = MultiLingualAnnotator(
+		app_path="screening_app",
+		language="es",
+		locale=None,
+	)
+
+Then use the :meth:`parse` function.
+
+.. code-block:: python
+	
+	mla.parse("Las acciones de Apple subieron $10 el lunes pasado.") 
+
+Three entities are automatically recognized.
+
+.. code-block:: python
+	
+	[
+		<QueryEntity 'Apple' ('sys_org') char: [16-20], tok: [3-3]>,
+		<QueryEntity 'el lunes pasado' ('sys_time') char: [35-49], tok: [6-8]>,
+		<QueryEntity '$10' ('sys_amount-of-money') char: [31-33], tok: [5-5]>
+	]
+
 
 Auto Annotator Configuration
 ----------------------------
 
 The :attr:`DEFAULT_AUTO_ANNOTATOR_CONFIG` shown below is the default config for an Annotator.
 A custom config can be included in :attr:`config.py` by duplicating the default config and renaming it to :attr:`AUTO_ANNOTATOR_CONFIG`.
-Alternatively, a custom config dictionary can be passed in directly to :class:`SpacyAnnotator` or any Annotator class upon instantiation.
+Alternatively, a custom config dictionary can be passed in directly to :class:`MultiLingualAnnotator` or any Annotator class upon instantiation.
 
 
 .. code-block:: python
 
 	DEFAULT_AUTO_ANNOTATOR_CONFIG = { 
 
-		"annotator_class": "SpacyAnnotator",
+		"annotator_class": "MultiLingualAnnotator",
 		"overwrite": False, 
-		"annotate": [ 
+		"annotation_rules": [ 
 			{ 
 				"domains": ".*", 
 				"intents": ".*", 
@@ -329,17 +444,17 @@ Alternatively, a custom config dictionary can be passed in directly to :class:`S
 			} 
 		], 
 		"unannotate_supported_entities_only": True, 
-		"unannotate": None, 
+		"unannotation_rules": None, 
 	}
 
 Let's take a look at the allowed values for each setting in an Auto Annotator configuration.
 
 
-``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation when invoked from the command line. By default, :class:`SpacyAnnotator` is used. 
+``'annotator_class'`` (:class:`str`): The class in auto_annotator.py to use for annotation when invoked from the command line. By default, :class:`MultiLingualAnnotator` is used. 
 
 ``'overwrite'`` (:class:`bool`): Whether new annotations should overwrite existing annotations in the case of a span conflict. False by default. 
 
-``'annotate'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
+``'annotation_rules'`` (:class:`list`): A list of annotation rules where each rule is represented as a dictionary. Each rule must have four keys: :attr:`domains`, :attr:`intents`, :attr:`files`, and :attr:`entities`.
 Annotation rules are combined internally to create Regex patterns to match selected files. The character :attr:`'.*'` can be used if all possibilities in a section are to be selected, while possibilities within
 a section are expressed with the usual Regex special characters, such as :attr:`'.'` for any single character and :attr:`'|'` to represent "or". 
 
@@ -363,15 +478,21 @@ Internally, the above rule is combined to a single pattern: "(faq|salary)/.*/(tr
 .. warning::
 	By default, all files in all intents across all domains will be annotated with all supported entities. Before annotating consider including custom annotation rules in :attr:`config.py`. 
 
+``'language'`` (:class:`str`): Language as specified using a 639-1/2 code.
+
+``'locale'`` (:class:`str`): The locale representing the ISO 639-1 language code and ISO3166 alpha 2 country code separated by an underscore character.
+
 ``'unannotate_supported_entities_only'`` (:class:`boolean`): By default, when the unannotate command is used only entities that the Annotator can annotate will be eligible for removal. 
 
-``'unannotate'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
+``'unannotation_rules'`` (:class:`list`): List of annotation rules in the same format as those used for annotation. These rules specify which entities should have their annotations removed. By default, :attr:`files` is None.
 
-``'spacy_model'`` (:class:`str`): :attr:`en_core_web_lg` is used by default for the best performance. Alternative options are :attr:`en_core_web_sm` and :attr:`en_core_web_md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator`.
-If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `English models <https://spacy.io/models/en>`_. The Spacy Annotator is currently not designed to support other language but they may be used.
+``'spacy_model_size'`` (:class:`str`): :attr:`lg` is used by default for the best performance. Alternative options are :attr:`sm` and :attr:`md`. This parameter is optional and is specific to the use of the :class:`SpacyAnnotator` and :class:`MultiLingualAnnotator`.
+If the selected model is not in the current environment it will automatically be downloaded. Refer to Spacy's documentation to learn more about their `NER models <https://spacy.io/models/>`_.
+
+``'translator'`` (:class:`str`): This parameter is used by the :class:`MultiLingualAnnotator`. If Google application credentials are available and have been exported, set this parameter to :attr:`GoogleTranslator`. Otherwise, set this paramter to :attr:`NoOpTranslator`.
 
 Using the Bootstrap Annotator
-----------------------------
+-----------------------------
 The :class:`BootstrapAnnotator` speeds up the data annotation process of new queries. When a :class:`BootstrapAnnotator` is instantiated a :class:`NaturalLanguageProcessor` is built for your app. For each intent, an entity recognizer is trained on the existing labeled data.
 The :class:`BootstrapAnnotator` uses these entity recognizers to predict and label the entities for your app if you have existing labeled queries. The :class:`BootstrapAnnotator` labels the entities for new queries using the trained entity recognizer for each given intent.
 
@@ -386,7 +507,7 @@ You can optionally set the :attr:`confidence_threshold` for labeling in the conf
 		"annotator_class": "BootstrapAnnotator",
 		"confidence_threshold": 0.95,
 		...
-		"annotate": [
+		"annotation_rules": [
 			{
 				"domains": ".*",
 				"intents": ".*",
@@ -417,10 +538,21 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 .. code-block:: python
 
-	from mindmeld.auto_annotator import BootstrapAnnotator 
-	ba = BootstrapAnnotator(app_path="hr_assistant")
-
-	ba.annotate(overwrite=True)
+	from mindmeld.auto_annotator import BootstrapAnnotator
+	annotation_rules: [
+		{
+			"domains": ".*",
+			"intents": ".*",
+			"files": ".*bootstrap.*\.txt",
+			"entities": ".*",
+		}
+	]
+	ba = BootstrapAnnotator(
+		app_path="hr_assistant",
+        annotation_rules=annotation_rules,
+        confidence_threshold=0.95,
+	)
+	ba.annotate()
 
 .. note::
 
@@ -429,7 +561,7 @@ An optional param :attr:`overwrite` can be passed in here as well.
 
 Creating a Custom Annotator
 ---------------------------
-The :class:`SpacyAnnotator` is a subclass of the abstract base class :class:`Annotator`.
+The :class:`MultiLingualAnnotator` is a subclass of the abstract base class :class:`Annotator`.
 The functionality for annotating and unannotating files is contained in :class:`Annotator` itself.
 A developer simply needs to implement two methods to create a custom annotator.
 
@@ -445,10 +577,28 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 		""" Custom Annotator class used to generate annotations.
 		"""
 
-		def __init__(self, app_path, config=None):
-			super().__init__(app_path=app_path, config=config)
-			
-			# Add additional attributes if needed
+		def __init__(
+			self,
+			app_path,
+			annotation_rules=None,
+			language=None,
+			locale=None,
+			overwrite=False,
+			unannotate_supported_entities_only=True,
+			unannotation_rules=None,
+			custom_param=None,
+		):
+			super().__init__(
+				app_path,
+				annotation_rules=annotation_rules,
+				language=language,
+				locale=locale,
+				overwrite=overwrite,
+				unannotate_supported_entities_only=unannotate_supported_entities_only,
+				unannotation_rules=unannotation_rules,
+			)
+			self.custom_param = custom_param
+			# Add additional params to init if needed
 
 		def parse(self, sentence, entity_types=None, **kwargs):
 			""" 
@@ -456,12 +606,13 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 				sentence (str): Sentence to detect entities.
 				entity_types (list): List of entity types to parse. If None, all
 					possible entity types will be parsed.
-			Returns: entities (list): List of entity dictionaries.
+			Returns:
+				query_entities (list[QueryEntity]): List of QueryEntity objects.
 			"""
 
 			# TODO: Add custom parse logic
 
-			return entities
+			return query_entities
 
 		@property
 		def supported_entity_types(self):
@@ -476,20 +627,20 @@ There are two "TODO"s. To implement a :class:`CustomAnnotator` class a developer
 			return supported_entities
 	
 	if __name__ == "__main__":
-		custom_annotator = CustomAnnotator(app_path="hr_assistant")
+		annotation_rules: [
+			{
+				"domains": ".*",
+				"intents": ".*",
+				"files": ".*",
+				"entities": ".*",
+			}
+		]
+		custom_annotator = CustomAnnotator(
+			app_path="hr_assistant",
+			annotation_rules=annotation_rules,
+		)
 		custom_annotator.annotate()
 
-Entities returned by :attr:`parse()` must have the following format:
-
-.. code-block:: python
-
-	entity = { 
-		"body": (substring of sentence), 
-		"start": (start index), 
-		"end": (end index + 1), 
-		"dim": (entity type), 
-		"value": (resolved value, if it exists), 
-	}
 
 To run your custom Annotator, simply run in the command line: :attr:`python custom_annotator.py`.
 To run unannotation with your custom Annotator, change the last line in your script to :attr:`custom_annotator.unannotate()`.
@@ -497,7 +648,7 @@ To run unannotation with your custom Annotator, change the last line in your scr
 Getting Custom Parameters from the Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:attr:`spacy_model` is an example of an optional parameter in the config that is relevant only for a specific :class:`Annotator` class.
+:attr:`spacy_model_size` is an example of an optional parameter in the config that is relevant only for a specific :class:`Annotator` class.
 
 .. code-block:: python
 
@@ -507,6 +658,6 @@ Getting Custom Parameters from the Config
 		... 
 	}
 
-:class:`SpacyAnnotator` checks if :attr:`spacy_model` exists in the config, and if it doesn't, it will use the default value of "en_core_web_lg".
+If a :class:`SpacyAnnotator` is created using the command-line, it will use the value for :attr:`spacy_model_size` that exists in the config during instantiation.
 
-Custom parameters for custom annotators can be implemented in a similar fashion.
+A similar approach can be taken for custom Annotators.
