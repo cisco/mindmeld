@@ -134,18 +134,18 @@ bert_tokenizer.normalizer = normalizers.Sequence([NFD(), Lowercase(), StripAccen
 Files related to text preprocessing can be moved into their own module within MindMeld.
 
 ```text
-text\_processing/
-
-- \_\_init\_\_.py
-- normalizers.py
-- preprocessor.py
-- processing\_pipeline.py
-- spacy\_model\_factory.py
-- stemmers.py
-- tokenizers.py
+text_processing
+|
+|---- __init__.py
+|---- normalizers.py
+|---- preprocessor.py
+|---- processing_pipeline.py
+|---- spacy_model_factory.py
+|---- stemmers.py
+|---- tokenizers.py
 ```
 
 ### Final Thoughts:
 
-This approach can be broken into two separate PRs. In the first PR, we would only replace the “tokenize\_raw” function with a configurable Tokenizer (Space, Character, or Spacy) and add this to the current config. This is comparatively simple and would take less time to implement. In the second PR, we can opt for the ProcessorPipeline approach.
+This approach can be broken into two separate PRs. In the first PR, we would only replace the “tokenize_raw” function with a configurable Tokenizer (Space, Character, or Spacy) and add this to the current config. This is comparatively simple and would take less time to implement. In the second PR, we can opt for the ProcessorPipeline approach.
 
