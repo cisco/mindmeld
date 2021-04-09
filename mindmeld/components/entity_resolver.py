@@ -26,6 +26,7 @@ from collections import OrderedDict
 from string import punctuation
 
 import numpy as np
+import scipy
 from elasticsearch.exceptions import ConnectionError as EsConnectionError
 from elasticsearch.exceptions import ElasticsearchException, TransportError
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -1433,10 +1434,56 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
             self.type, entity_map, augment_lower_case=augment_lower_case,
             augment_title_case=augment_title_case, augment_normalized=augment_normalized
         )
-        self._unique_synonyms = set(self._entity_mapping["synonyms"])
+
+        # obtain sparse matrix
+        synonyms = {v: k for k, v in dict(enumerate(set(self._entity_mapping["synonyms"]))).items()}
+        synonyms_embs = self._vectorizer.fit_transform([*synonyms.keys()])
+
+        # encode artificial synonyms
+        aug_max_syn_embs = self.er_config["model_settings"]["augment_max_synonyms_embeddings"]
+        if aug_max_syn_embs:
+            # obtain cnames to synonyms mapping
+            entity_mapping_synonyms = self._entity_mapping["synonyms"]
+            cnames2synonyms = {}
+            for syn, cnames in entity_mapping_synonyms.items():
+                for cname in cnames:
+                    items = cnames2synonyms.get(cname, [])
+                    items.append(syn)
+                    cnames2synonyms[cname] = items
+            dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
+            # assert dummy synonyms
+            for cname, syns in cnames2synonyms.items():
+                dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
+                # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
+                dummy_synonym_mappings = entity_mapping_synonyms.get(dummy_synonym, [])
+                dummy_synonym_mappings.append(cname)
+                entity_mapping_synonyms[dummy_synonym] = dummy_synonym_mappings
+                # check if needs to be encoded
+                if dummy_synonym in synonyms:
+                    continue
+                # if required, obtain dummy encoding and update collections
+                dummy_encoding = scipy.sparse.csr_matrix(
+                    np.max([synonyms_embs[synonyms[syn]].toarray() for syn in syns], axis=0)
+                )
+                dummy_new_synonyms_to_encode.append(dummy_synonym)
+                dummy_new_synonyms_encodings.append(dummy_encoding)
+            if dummy_new_synonyms_encodings:
+                dummy_new_synonyms_encodings = scipy.sparse.vstack(dummy_new_synonyms_encodings)
+            if dummy_new_synonyms_to_encode:
+                synonyms_embs = (
+                    dummy_new_synonyms_encodings if not synonyms else scipy.sparse.vstack(
+                        [synonyms_embs, dummy_new_synonyms_encodings])
+                )
+                synonyms.update(
+                    OrderedDict(zip(
+                        dummy_new_synonyms_to_encode,
+                        np.arange(len(synonyms), len(synonyms) + len(dummy_new_synonyms_to_encode)))
+                    )
+                )
 
         # returns a sparse matrix
-        self._syn_tfidf_matrix = self._vectorizer.fit_transform(self._unique_synonyms)
+        self._unique_synonyms = [*synonyms.keys()]
+        self._syn_tfidf_matrix = synonyms_embs
 
     def _predict(self, nbest_entities):
         """Predicts the resolved value(s) for the given entity using cosine similarity.

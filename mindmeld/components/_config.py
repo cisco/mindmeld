@@ -525,7 +525,8 @@ DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS = {
         "model_settings": {
             "augment_lower_case": True,
             "augment_normalized": False,
-            "augment_title_case": False
+            "augment_title_case": False,
+            "augment_max_synonyms_embeddings": True
         }
     },
 }
