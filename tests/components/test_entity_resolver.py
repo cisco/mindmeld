@@ -12,7 +12,7 @@ Tests for `entity_resolver` module.
 import pytest
 
 from mindmeld.components._elasticsearch_helpers import create_es_client
-from mindmeld.components.entity_resolver import EntityResolver
+from mindmeld.components.entity_resolver import EntityResolverFactory
 from mindmeld.core import Entity
 
 ENTITY_TYPE = "store_name"
@@ -31,7 +31,7 @@ def resolver_exact_match(resource_loader, es_client):
     er_config = {
         'model_type': 'exact_match'
     }
-    resolver = EntityResolver().get_resolver(
+    resolver = EntityResolverFactory.create_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
     )
@@ -45,7 +45,7 @@ def resolver_elastic_search(resource_loader, es_client):
     er_config = {
         'model_type': 'text_relevance',
     }
-    resolver = EntityResolver().get_resolver(
+    resolver = EntityResolverFactory.create_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
     )
@@ -66,10 +66,10 @@ def resolver_sbert(resource_loader):
             "bert_output_type": "mean",
             "augment_lower_case": False,
             "quantize_model": True,
-            "augment_average_synonyms_embeddings": False
+            "augment_average_synonyms_embeddings": True
         }
     }
-    resolver = EntityResolver().get_resolver(
+    resolver = EntityResolverFactory.create_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE, er_config=er_config
     )
     resolver.fit()
@@ -82,7 +82,7 @@ def resolver_tfidf(resource_loader, es_client):
     er_config = {
         'model_type': 'tfidf_cosine_similarity',
     }
-    resolver = EntityResolver().get_resolver(
+    resolver = EntityResolverFactory.create_resolver(
         APP_PATH, resource_loader, ENTITY_TYPE,
         es_client=es_client, er_config=er_config
     )

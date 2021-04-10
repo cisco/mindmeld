@@ -59,8 +59,7 @@ GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
 )
 GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
-GEN_ENTITY_RESOLVER_CACHE = os.path.join(
-    GEN_ENTITY_RESOLVERS_FOLDER, "{entity_type}_{model_type}_cache.pkl")
+GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -541,22 +540,17 @@ def get_embedder_cache_file_path(app_path, embedder_type, model_name):
 
 
 @safe_path
-def get_entity_resolver_cache_file_path(app_path, entity_type, model_type):
+def get_entity_resolver_cache_file_path(app_path, uid):
     """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.
 
     Args:
         app_path (str): The path to the app data.
-        entity_type (str): The entity class name.
-        model_type (str): The name of the specific model chosen for entity resolution.
+        uid (str): A unique filename for the .pkl file
 
     Returns:
         (str) The path for the .pkl cache.
     """
-    return GEN_ENTITY_RESOLVER_CACHE.format(
-        app_path=app_path,
-        entity_type=entity_type,
-        model_type=model_type,
-    )
+    return GEN_ENTITY_RESOLVER_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

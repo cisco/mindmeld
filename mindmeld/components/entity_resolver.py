@@ -35,7 +35,6 @@ from tqdm.autonotebook import trange
 from ._config import (
     DEFAULT_ES_SYNONYM_MAPPING,
     PHONETIC_ES_SYNONYM_MAPPING,
-    DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS,
     get_app_namespace,
     get_classifier_config,
 )
@@ -59,20 +58,20 @@ from ..exceptions import EntityResolverConnectionError, EntityResolverError
 logger = logging.getLogger(__name__)
 
 
-class EntityResolver:
+class EntityResolverFactory:
 
     @staticmethod
     def _validate_resolver_name(name):
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
-            msg = "Expected 'model_type' in ENTITY_RESOLVER_CONFIG among {!r}"
-            raise Exception(msg.format(ENTITY_RESOLVER_MODEL_TYPES))
+            raise Exception(f"Expected 'model_type' in ENTITY_RESOLVER_CONFIG "
+                            f"among {ENTITY_RESOLVER_MODEL_TYPES}")
         if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
-                "Must install the extra [bert] by running `pip install mindmeld[bert]`"
-                "to use the built in embbedder for entity resolution. See "
-                "https://www.mindmeld.com/docs/userguide/getting_started.html")
+                "Must install the extra [bert] by running `pip install mindmeld[bert]` "
+                "to use the built in embbedder for entity resolution.")
 
-    def get_resolver(self, app_path, resource_loader, entity_type, **kwargs):
+    @classmethod
+    def create_resolver(cls, app_path, resource_loader, entity_type, **kwargs):
         """
         Identifies appropriate entity resolver based on input config and
             returns it.
@@ -90,7 +89,7 @@ class EntityResolver:
             get_classifier_config("entity_resolution", app_path=app_path)
         )
         resolver_name = er_config.get("model_type", None)
-        self._validate_resolver_name(resolver_name)
+        cls._validate_resolver_name(resolver_name)
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_name)(
             app_path, resource_loader, entity_type, er_config, **kwargs
         )
@@ -112,35 +111,25 @@ class EntityResolverModelBase(ABC):
         self.normalizer = resource_loader.query_factory.normalize
 
         # default configs useful for obtaining model cache path
-        default_er_config = DEFAULT_ENTITY_RESOLVER_MODEL_CONFIGS[self.name]
+        default_er_config = self.get_default_er_config
         for key, value in er_config.get("model_settings", {}).items():
             default_er_config["model_settings"][key] = value
         self.er_config = default_er_config
 
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
-        self.top_n = 20
+
+    @property
+    def get_default_er_config(self):
+        return {}
 
     @property
     def _use_double_metaphone(self):
         return "double_metaphone" in self.er_config.get("phonetic_match_types", [])
 
-    def cache_path(self, tail_name="", hash_json=None):
-
-        entity_type = self.type
-        if hash_json:
-            hashid = hashlib.sha1(json.dumps(hash_json, sort_keys=True).encode()).hexdigest()
-            entity_type = f"{hashid}_{entity_type}"
-
-        model_type = f"{self.name}_{tail_name}" if tail_name else self.name
-
-        return path.get_entity_resolver_cache_file_path(
-            self.app_path, entity_type, model_type
-        )
-
     @staticmethod
-    def process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False,
-                           augment_title_case=False, augment_normalized=False):
+    def _process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False,
+                            augment_title_case=False, augment_normalized=False):
         """
         Loads in the mapping.json file and stores the synonym mappings in a item_map
             and a synonym_map
@@ -236,7 +225,7 @@ class EntityResolverModelBase(ABC):
         self.ready = True
 
     @abstractmethod
-    def _predict(self, nbest_entities):
+    def _predict(self, nbest_entities, top_n):
         raise NotImplementedError
 
     def predict(self, entity, top_n: int = 20):
@@ -265,9 +254,7 @@ class EntityResolverModelBase(ABC):
         if not self.entity_map.get("entities", []):
             return []
 
-        self.top_n = max(self.top_n, top_n)
-
-        results = self._predict(nbest_entities)
+        results = self._predict(nbest_entities, top_n)
 
         if results:
             if len(results) < top_n:
@@ -276,7 +263,7 @@ class EntityResolverModelBase(ABC):
                     "entity %r of type %r",
                     len(results), top_n, nbest_entities[0].text, self.type,
                 )
-            return results[:top_n]
+            results = results[:top_n]
 
         return results
 
@@ -483,7 +470,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
                 use_double_metaphone=self._use_double_metaphone,
             )
 
-    def _predict(self, nbest_entities):
+    def _predict(self, nbest_entities, top_n):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
@@ -718,6 +705,15 @@ class ExactMatchEntityResolver(EntityResolverModelBase):
         super().__init__(app_path, resource_loader, entity_type, er_config)
         self._entity_mapping = None
 
+    @property
+    def get_default_er_config(self):
+        defaults = {
+            "model_settings": {
+                "augment_lower_case": False
+            }
+        }
+        return defaults
+
     def _fit(self, clean):
         """Loads an entity mapping file to resolve entities using exact match.
         """
@@ -728,12 +724,12 @@ class ExactMatchEntityResolver(EntityResolverModelBase):
 
         entity_map = self.entity_map
         augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
-        self._entity_mapping = self.process_entity_map(
+        self._entity_mapping = self._process_entity_map(
             self.type, entity_map, normalizer=self.normalizer,
             augment_lower_case=augment_lower_case
         )
 
-    def _predict(self, nbest_entities):
+    def _predict(self, nbest_entities, top_n):
         """Looks for exact name in the synonyms data
         """
 
@@ -842,12 +838,45 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         logger.info(msg, self.type)
 
     @property
+    def get_default_er_config(self):
+        defaults = {
+            "model_settings": {
+                "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
+                "batch_size": 16,
+                "concat_last_n_layers": 4,
+                "normalize_token_embs": True,
+                "bert_output_type": "mean",
+                "augment_lower_case": False,
+                "quantize_model": True,
+                "augment_average_synonyms_embeddings": True
+            }
+        }
+        return defaults
+
+    @property
     def device(self):
         return "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
 
     @property
     def pretrained_name(self):
         return os.path.split(self._model_pretrained_name_or_abspath)[-1]
+
+    @staticmethod
+    def cache_path(app_path, er_config, entity_type):
+        """Obtains and return a unique cache path for saving synonyms' embeddings
+
+        Args:
+               er_config: the er_config dictionary of the reolver class
+               entity_type: entity type of the class instance, for unique path identification
+
+        Return:
+            str: path with a .pkl extension to cache embeddings
+        """
+
+        hashid = hashlib.sha1(json.dumps(er_config, sort_keys=True).encode()).hexdigest()
+        hashid = f"{hashid}_{entity_type}"
+
+        return path.get_entity_resolver_cache_file_path(app_path, hashid)
 
     @staticmethod
     def _get_transformer_and_pooler(name_or_path, out_type):
@@ -1143,7 +1172,11 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             clean (bool): If ``True``, deletes existing dump of synonym embeddings file
         """
 
-        cache_path = self.cache_path(hash_json=self.er_config)
+        cache_path = self.cache_path(
+            app_path=self.app_path,
+            er_config=self.er_config,
+            entity_type=self.type
+        )
 
         if clean and os.path.exists(cache_path):
             os.remove(cache_path)
@@ -1151,7 +1184,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         # load mapping.json data and process it
         entity_map = self.entity_map
         augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
-        self._entity_mapping = self.process_entity_map(
+        self._entity_mapping = self._process_entity_map(
             self.type, entity_map, augment_lower_case=augment_lower_case
         )
 
@@ -1221,7 +1254,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             self._dump_embeddings(cache_path, data_dump)
         self.dirty = False  # never True with the current logic, kept for consistency purpose
 
-    def _predict(self, nbest_entities):
+    def _predict(self, nbest_entities, top_n):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
 
         Args:
@@ -1245,8 +1278,9 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         top_entity_emb = top_entity_emb.reshape(1, -1)
 
         try:
-            sorted_items = self._compute_cosine_similarity(synonyms, synonyms_encodings,
-                                                           top_entity_emb, self.top_n)
+            sorted_items = self._compute_cosine_similarity(
+                synonyms, synonyms_encodings, top_entity_emb, top_n
+            )
             values = []
             for synonym, score in sorted_items:
                 cnames = self._entity_mapping["synonyms"][synonym]
@@ -1293,7 +1327,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         with open(cache_path, "wb") as fp:
             pickle.dump(data, fp)
 
-    def _predict_batch(self, nbest_entities_list, batch_size):
+    def _predict_batch(self, nbest_entities_list, batch_size, top_n):
 
         synonyms, synonyms_encodings = self._synonyms, self._synonyms_embs
 
@@ -1312,8 +1346,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
             sorted_items_list = []
             for st_idx in trange(0, len(top_entity_emb_list), batch_size, disable=False):
                 batch = top_entity_emb_list[st_idx:st_idx + batch_size]
-                result = self._compute_cosine_similarity(synonyms, synonyms_encodings, batch,
-                                                         self.top_n)
+                result = self._compute_cosine_similarity(synonyms, synonyms_encodings, batch, top_n)
                 # due to way compute similarity returns
                 if len(batch) == 1:
                     result = [result]
@@ -1344,8 +1377,6 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         if not self.entity_map.get("entities", []):
             return [[] for _ in entity_list]
 
-        self.top_n = max(self.top_n, top_n)
-
         nbest_entities_list = []
         results_list = []
         for entity in entity_list:
@@ -1366,7 +1397,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         if self._is_system_entity:
             return results_list
 
-        results_list = self._predict_batch(nbest_entities_list, batch_size)
+        results_list = self._predict_batch(nbest_entities_list, batch_size, top_n)
 
         for i, results in enumerate(results_list):
             if results:
@@ -1389,6 +1420,18 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
                                            lowercase=False)
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
+
+    @property
+    def get_default_er_config(self):
+        defaults = {
+            "model_settings": {
+                "augment_lower_case": True,
+                "augment_normalized": False,
+                "augment_title_case": False,
+                "augment_max_synonyms_embeddings": True
+            }
+        }
+        return defaults
 
     def _char_ngram_and_word_analyzer(self, string):
         results = []
@@ -1430,7 +1473,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
         augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
         augment_title_case = self.er_config["model_settings"]["augment_title_case"]
         augment_normalized = self.er_config["model_settings"]["augment_normalized"]
-        self._entity_mapping = self.process_entity_map(
+        self._entity_mapping = self._process_entity_map(
             self.type, entity_map, augment_lower_case=augment_lower_case,
             augment_title_case=augment_title_case, augment_normalized=augment_normalized
         )
@@ -1485,7 +1528,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
         self._unique_synonyms = [*synonyms.keys()]
         self._syn_tfidf_matrix = synonyms_embs
 
-    def _predict(self, nbest_entities):
+    def _predict(self, nbest_entities, top_n):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
 
         Args:
