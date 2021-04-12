@@ -525,7 +525,7 @@ def test_entity_no_context_detection(
     assert entities[0].entity.type == expected_entity_type
 
 
-def test_stuff(kwik_e_mart_nlp):
+def test_query_token_span_features(kwik_e_mart_nlp):
     feature_name = "sys_candidate|type:sys_amount-of-money|granularity:None|pos"
     er = kwik_e_mart_nlp.domains['banking'].intents['transfer_money'].entity_recognizer
 

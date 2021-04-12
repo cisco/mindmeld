@@ -537,18 +537,12 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
                                 entity.entity.type, entity.entity.value.get("grain"), j
                             )
                         )
-                        if feat_name in feat_seq[i - j]:
-                            feat_seq[i - j][feat_name] += 1
-                        else:
-                            feat_seq[i - j][feat_name] = 1
-
+                        feat_seq[i - j][feat_name] = feat_seq[i - j].get(feat_name, 0) + 1
                         feat_name = "sys_candidate|type:{}|granularity:{}|pos:{}|log_len".format(
                             entity.entity.type, entity.entity.value.get("grain"), j
                         )
-                        if feat_name in feat_seq[i - j]:
-                            feat_seq[i - j][feat_name].append(len(entity.normalized_text))
-                        else:
-                            feat_seq[i - j][feat_name] = [len(entity.normalized_text)]
+                        feat_value = feat_seq[i - j][feat_name] = feat_seq[i - j].get(feat_name, [])
+                        feat_value.append(len(entity.normalized_text))
 
         for token_features in feat_seq:
             for feature, value in token_features.items():
