@@ -538,7 +538,10 @@ class NestedEntity:
             query_normalized_tokens = query._normalized_tokens
             tok_start = _get_token_index_of_char_index(
                 query_normalized_tokens, span_out.start)
-            tok_span = Span(tok_start, tok_start - 1 + len(query_normalized_tokens))
+            tok_end = _get_token_index_of_char_index(
+                query_normalized_tokens, span_out.end)
+            tok_span = Span(tok_start, tok_end)
+
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
