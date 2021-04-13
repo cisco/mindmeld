@@ -1,5 +1,7 @@
 import pytest
 
+from marshmallow import ValidationError
+
 from mindmeld.components import schemas
 
 
@@ -35,4 +37,18 @@ from mindmeld.components import schemas
     )
 )
 def test_validate_timestamp(value, expected):
+    """Tests for `validate_timestamp()`"""
     assert schemas.validate_timestamp(value) == expected
+
+
+@pytest.mark.parametrize('value', (
+    "asdf",
+    "1.341.123",
+    -1600000000,
+    0,
+    None,
+))
+def test_validate_timestamp_negative(value):
+    """Negative tests for `validate_timestamp()`"""
+    with pytest.raises(ValidationError):
+        schemas.validate_timestamp(value)

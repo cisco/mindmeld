@@ -11,12 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Optional, Dict, Any, List
+import math
+from typing import Any, Dict, List, Optional, Union
+
 import immutables
+from marshmallow import EXCLUDE, Schema, fields, ValidationError
 import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
-from marshmallow import EXCLUDE, Schema, fields, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -116,23 +118,30 @@ def validate_locale_code_with_ref_language_code(locale: Optional[str],
     return locale
 
 
-def validate_timestamp(value: str) -> int:
-    if isinstance(value, int):
-        value = str(value)
+def validate_timestamp(value: Union[int, float, str]) -> int:
+    try:
+        result = float(value)
 
-    result = int(value)
-    if len(value) > 13:
-        raise ValidationError(f"Invalid timestamp {value}, it should be a 13 digit UTC "
-                              f"timestamp representation precise to the nearest millisecond. "
-                              f"Using the process timestamp instead.")
+        num_digits = math.floor(math.log10(result) + 1)
+        if num_digits > 13:
+            raise ValueError('Too many digits for millisecond timestamp')
 
-    if len(value) <= 10:
-        # Convert a second grain unix timestamp to millisecond
-        logger.debug(
-            "Warning: Possible non-millisecond unix timestamp passed in %s. "
-            "Multiplying it by 1000 to represent the timestamp in milliseconds.", value
+        if num_digits <= 10:
+            # Convert a second grain unix timestamp to millisecond
+            logger.debug(
+                "Warning: Possible non-millisecond unix timestamp passed in %r. "
+                "Multiplying it by 1000 to represent the timestamp in milliseconds.", value
+            )
+            result *= 1000
+
+        return round(result)
+    except (ValueError, TypeError) as exc:
+        error_message = (
+            f"Invalid timestamp {value!r}, it should be a 13 digit UTC "
+            f"timestamp representation precise to the nearest millisecond. "
+            f"Using the process timestamp instead."
         )
-        result *= 1000
+        raise ValidationError(error_message) from exc
 
     return result
 
