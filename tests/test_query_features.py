@@ -254,7 +254,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(37 / 3), math.log(2)],
+            [math.log(11), math.log(2)],
             -1,
         ),
         # Test for sys_candidate features for normalized text
@@ -264,7 +264,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(37 / 3), math.log(2)],
+            [math.log(11), math.log(2)],
             -1,
         ),
     ],

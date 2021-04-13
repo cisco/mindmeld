@@ -524,21 +524,27 @@ class NestedEntity:
             the created entity
 
         """
+        def _get_token_index_of_char_index(normalized_tokens, char_index):
+            tok_start = 0
+            for idx, token in enumerate(normalized_tokens):
+                if idx > 0 and char_index >= token['raw_start']:
+                    tok_start += 1
+            return tok_start
 
         def _get_form_details(query_span, offset, form_in, form_out):
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_start = 0
-            for idx, token in enumerate(query._normalized_tokens):
-                if idx > 0 and span_out.start >= token['raw_start']:
-                    tok_start += 1
-            tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
+            query_normalized_tokens = query._normalized_tokens
+            tok_start = _get_token_index_of_char_index(
+                query_normalized_tokens, span_out.start)
+            tok_span = Span(tok_start, tok_start - 1 + len(query_normalized_tokens))
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
                 span_out = span_out.shift(-offset_out)
-                tok_offset = len(full_text[:offset_out].split())
+                tok_offset = _get_token_index_of_char_index(
+                    query_normalized_tokens, offset_out)
                 tok_span.shift(-tok_offset)
 
             return text, span_out, tok_span
