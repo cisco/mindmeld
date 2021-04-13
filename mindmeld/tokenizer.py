@@ -18,7 +18,8 @@ import logging
 import re
 import sre_constants
 
-from .components._config import get_tokenizer_config
+from .text_processing.tokenizers import TokenizerFactory, NoOpTokenizer
+from .components._config import get_tokenizer_config, get_language_config
 from .constants import CURRENCY_SYMBOLS
 from .path import ASCII_FOLDING_DICT_PATH
 
@@ -41,8 +42,25 @@ class Tokenizer:
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
         self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
+        self.language, _ = get_language_config(app_path)
+        self._tokenizer = self._get_tokenizer()
         self._custom = False
         self._init_regex()
+
+    def _get_tokenizer(self):
+        """Gets the 'tokenizer' specified in the config.
+
+        Returns:
+            tokenizer (Tokenizer): Tokenizer specified in the config.
+        """
+        tokenizer = self.config.get("tokenizer")
+        if not tokenizer:
+            raise AssertionError("'tokenizer' cannot be None.")
+        elif tokenizer == NoOpTokenizer.__name__:
+            raise AssertionError(
+                f"'tokenizer' cannot be set to to {NoOpTokenizer.__name__}."
+            )
+        return TokenizerFactory().get_tokenizer(tokenizer, self.language)
 
     def _init_regex(self):
         """
@@ -117,7 +135,8 @@ class Tokenizer:
 
         try:
             self.keep_special_compiled = re.compile(
-                "(%s)" % (combined_re,), re.UNICODE,
+                "(%s)" % (combined_re,),
+                re.UNICODE,
             )
         except sre_constants.error:
             logger.error(
@@ -250,9 +269,7 @@ class Tokenizer:
         Returns:
             list: A list of normalized tokens
         """
-
-        raw_tokens = self.tokenize_raw(text)
-
+        raw_tokens = self._tokenizer.tokenize(text)
         norm_tokens = []
         for i, raw_token in enumerate(raw_tokens):
             if not raw_token["text"] or len(raw_token["text"]) == 0:
@@ -269,7 +286,8 @@ class Tokenizer:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
             # fold to ascii
-            norm_token_text = self.fold_str_to_ascii(norm_token_text)
+            if self.config.get("ascii_fold"):
+                norm_token_text = self.fold_str_to_ascii(norm_token_text)
 
             norm_token_text = norm_token_text.lower()
 

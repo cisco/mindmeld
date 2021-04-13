@@ -47,6 +47,8 @@ DOMAIN_MODEL_CONFIG = {
 
 TOKENIZER_CONFIG = {
     "allowed_patterns": ['\w+\.', '\{.*\|.*\}'],  # noqa: W605
+    "tokenizer": "WhiteSpaceTokenizer",
+    "ascii_fold": True,
 }
 
 

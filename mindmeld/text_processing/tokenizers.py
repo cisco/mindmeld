@@ -44,6 +44,7 @@ class NoOpTokenizer(Tokenizer):
     """A No-Ops tokenizer."""
 
     def __init__(self):
+        """Initialize the NoOpTokenizer."""
         pass
 
     def tokenize(self, text):
@@ -69,7 +70,7 @@ class CharacterTokenizer(Tokenizer):
         Args:
             text (str): The text to normalize
         Returns:
-            list: A list of normalized tokens
+            tokens (List[str]): List of tokenized tokens.
         """
         tokens = []
         token = {}
@@ -105,11 +106,11 @@ class CharacterTokenizer(Tokenizer):
         return tokens
 
 
-class SpaceTokenizer(Tokenizer):
+class WhiteSpaceTokenizer(Tokenizer):
     """A Tokenizer that splits text at spaces."""
 
     def __init__(self):
-        """Initializes the SpaceTokenizer."""
+        """Initializes the WhtieSpaceTokenizer."""
         pass
 
     def tokenize(self, text):
@@ -118,7 +119,7 @@ class SpaceTokenizer(Tokenizer):
         Args:
             text (str): The text to normalize
         Returns:
-            list: A list of normalized tokens
+            tokens (List[str]): List of tokenized tokens.
         """
         tokens = []
         token = {}
@@ -158,17 +159,25 @@ class SpacyTokenizer(Tokenizer):
         Returns:
             tokens (List[str]): List of tokens created using a Spacy Language Model.
         """
-        return [token.text for token in self.spacy_model(text)]
+        spacy_tokens = [token.text for token in self.spacy_model(text)]
 
-    # TODO: Add the start index of each token and return dictionaries instead of token list.
-    # Ex: [{'start': 0, 'text': 'I'}, {'start': 2, 'text': 'visited'}, {'start': 10, 'text': 'the'}..]
+        start_index = 0
+        tokens = []
+        for token_text in spacy_tokens:
+            token = {
+                "start": start_index,
+                "text": token_text,
+            }
+            tokens.append(token)
+            start_index += len(token_text)
+        return tokens
 
 
 class TokenizerFactory:
     """Tokenizer Factory Class"""
 
     @staticmethod
-    def get_tokenizer(tokenizer, language=None, spacy_model_size=None):
+    def get_tokenizer(tokenizer, language=None, spacy_model_size="lg"):
         """A static method to get a tokenizer
 
         Args:
@@ -183,8 +192,8 @@ class TokenizerFactory:
             return NoOpTokenizer()
         elif tokenizer == CharacterTokenizer.__name__:
             return CharacterTokenizer()
-        elif tokenizer == SpaceTokenizer.__name__:
-            return SpaceTokenizer()
+        elif tokenizer == WhiteSpaceTokenizer.__name__:
+            return WhiteSpaceTokenizer()
         elif tokenizer == SpacyTokenizer.__name__:
             return SpacyTokenizer(language, spacy_model_size)
         raise AssertionError(f" {tokenizer} is not a valid Tokenizer.")

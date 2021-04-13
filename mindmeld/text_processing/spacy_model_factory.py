@@ -30,7 +30,7 @@ class SpacyModelFactory:
     """Spacy (Language) Model Factory Class"""
 
     @staticmethod
-    def get_spacy_language_model(language, spacy_model_size):
+    def get_spacy_language_model(language, spacy_model_size="lg"):
         """Get a Spacy Language model.
 
         Args:
