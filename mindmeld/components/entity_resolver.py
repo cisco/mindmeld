@@ -61,9 +61,9 @@ logger = logging.getLogger(__name__)
 class EntityResolverFactory:
 
     @staticmethod
-    def _validate_resolver_name(name):
+    def _validate_resolver_type(name):
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
-            raise Exception(f"Expected 'model_type' in ENTITY_RESOLVER_CONFIG "
+            raise Exception(f"Expected 'resolver_type' in ENTITY_RESOLVER_CONFIG "
                             f"among {ENTITY_RESOLVER_MODEL_TYPES}")
         if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
@@ -88,9 +88,9 @@ class EntityResolverFactory:
             kwargs.pop("er_config", None) or
             get_classifier_config("entity_resolution", app_path=app_path)
         )
-        resolver_name = er_config.get("model_type", None)
-        cls._validate_resolver_name(resolver_name)
-        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_name)(
+        resolver_type = er_config["model_settings"]["resolver_type"]
+        cls._validate_resolver_type(resolver_type)
+        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
             app_path, resource_loader, entity_type, er_config, **kwargs
         )
 
@@ -105,27 +105,26 @@ class EntityResolverModelBase(ABC):
         self.app_path = app_path
         self.type = entity_type
         self._is_system_entity = Entity.is_system_entity(self.type)
-        self.app_namespace = get_app_namespace(self.app_path)
-        self.name = er_config.get("model_type")
+        self.name = er_config["model_settings"]["resolver_type"]
         self.entity_map = resource_loader.get_entity_map(self.type)
         self.normalizer = resource_loader.query_factory.normalize
 
         # default configs useful for obtaining model cache path
-        default_er_config = self.get_default_er_config
-        for key, value in er_config.get("model_settings", {}).items():
-            default_er_config["model_settings"][key] = value
-        self.er_config = default_er_config
+        for key, value in self.default_er_config.get("model_settings", {}).items():
+            er_config["model_settings"][key] = value
+        self.er_config = er_config
 
         self.dirty = False  # bool, True if exists any unsaved generated data that can be saved
         self.ready = False  # bool, True if the model is fit by calling .fit()
 
     @property
-    def get_default_er_config(self):
-        return {}
+    def default_er_config(self):
+        return {"model_settings": {}}
 
     @property
     def _use_double_metaphone(self):
-        return "double_metaphone" in self.er_config.get("phonetic_match_types", [])
+        return "double_metaphone" in self.er_config.get("model_settings", {}).get(
+            "phonetic_match_types", [])
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer=None, augment_lower_case=False,
@@ -292,6 +291,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
 
     def __init__(self, app_path, resource_loader, entity_type, er_config, **kwargs):
         super().__init__(app_path, resource_loader, entity_type, er_config)
+        self._app_namespace = get_app_namespace(self.app_path)
         self._es_host = kwargs.get("es_host", None)
         self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
 
@@ -407,7 +407,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
         try:
             if clean:
                 delete_index(
-                    self.app_namespace, self._es_index_name, self._es_host, self._es_client
+                    self._app_namespace, self._es_index_name, self._es_host, self._es_client
                 )
         except ValueError as e:  # when `clean = True` but no index to delete
             logger.info(e)
@@ -420,7 +420,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '%s'", self._es_index_name)
         self.ingest_synonym(
-            app_namespace=self.app_namespace,
+            app_namespace=self._app_namespace,
             index_name=self._es_index_name,
             data=entities,
             es_host=self._es_host,
@@ -440,14 +440,14 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
             # validate the KB index and field are valid.
             # TODO: this validation can probably be in some other places like resource loader.
             if not does_index_exist(
-                self.app_namespace, kb_index, self._es_host, self._es_client
+                self._app_namespace, kb_index, self._es_host, self._es_client
             ):
                 raise ValueError(
                     "Cannot import synonym data to knowledge base. The knowledge base "
                     "index name '{}' is not valid.".format(kb_index)
                 )
             if kb_field not in get_field_names(
-                self.app_namespace, kb_index, self._es_host, self._es_client
+                self._app_namespace, kb_index, self._es_host, self._es_client
             ):
                 raise ValueError(
                     "Cannot import synonym data to knowledge base. The knowledge base "
@@ -460,7 +460,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
                 )
             logger.info("Importing synonym data to knowledge base index '%s'", kb_index)
             ElasticsearchEntityResolver.ingest_synonym(
-                app_namespace=self.app_namespace,
+                app_namespace=self._app_namespace,
                 index_name=kb_index,
                 index_type="kb",
                 field_name=kb_field,
@@ -619,7 +619,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
         ].append(whitelist_query)
 
         try:
-            index = get_scoped_index_name(self.app_namespace, self._es_index_name)
+            index = get_scoped_index_name(self._app_namespace, self._es_index_name)
             response = self._es_client.search(index=index, body=text_relevance_query)
         except EsConnectionError as ex:
             logger.error(
@@ -674,7 +674,7 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
         """Loads the trained entity resolution model from disk."""
         try:
             scoped_index_name = get_scoped_index_name(
-                self.app_namespace, self._es_index_name
+                self._app_namespace, self._es_index_name
             )
             if not self._es_client.indices.exists(index=scoped_index_name):
                 self.fit()
@@ -706,7 +706,7 @@ class ExactMatchEntityResolver(EntityResolverModelBase):
         self._entity_mapping = None
 
     @property
-    def get_default_er_config(self):
+    def default_er_config(self):
         defaults = {
             "model_settings": {
                 "augment_lower_case": False
@@ -838,7 +838,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
         logger.info(msg, self.type)
 
     @property
-    def get_default_er_config(self):
+    def default_er_config(self):
         defaults = {
             "model_settings": {
                 "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
@@ -1422,7 +1422,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
         self._unique_synonyms = []
 
     @property
-    def get_default_er_config(self):
+    def default_er_config(self):
         defaults = {
             "model_settings": {
                 "augment_lower_case": True,
