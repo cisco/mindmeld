@@ -23,12 +23,6 @@ from abc import ABC, abstractmethod
 from elasticsearch import ConnectionError as EsConnectionError
 from elasticsearch import ElasticsearchException, TransportError
 
-from ..exceptions import (
-    KnowledgeBaseConnectionError,
-    KnowledgeBaseError,
-    ElasticsearchVersionError,
-)
-from ..resource_loader import ResourceLoader
 from ._config import (
     DEFAULT_ES_QA_MAPPING,
     DEFAULT_RANKING_CONFIG,
@@ -46,10 +40,15 @@ from ._elasticsearch_helpers import (
     is_es_version_7,
     resolve_es_config_for_version,
 )
+from ..exceptions import (
+    KnowledgeBaseConnectionError,
+    KnowledgeBaseError,
+    ElasticsearchVersionError,
+)
 from ..models import create_embedder_model
+from ..resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
-
 
 DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
@@ -273,9 +272,8 @@ class QuestionAnswerer:
     def save_embedder_model(self):
         self._embedder_model.dump()
 
-    @classmethod
+    @staticmethod
     def load_kb(
-        cls,
         app_namespace,
         index_name,
         data_file,
@@ -307,6 +305,17 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
+
+        if clean:
+            try:
+                delete_index(app_namespace, index_name, es_host, es_client)
+            except ValueError:
+                logger.warning(
+                    "Index %s does not exist for app %s, creating a new index",
+                    index_name,
+                    app_namespace,
+                )
+
         embedder_model = None
         embedding_fields = []
         if not app_path and not config:
@@ -323,9 +332,7 @@ class QuestionAnswerer:
                 )
             embedder_model = create_embedder_model(app_path, qa_config)
             embedding_fields = (
-                qa_config.get("model_settings", {})
-                .get("embedding_fields", {})
-                .get(index_name, [])
+                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
             )
 
         def _doc_data(data_file):
@@ -391,16 +398,6 @@ class QuestionAnswerer:
             )
             embedder_model = None
         docs = _doc_generator(data_file, embedder_model, embedding_fields)
-
-        if clean:
-            try:
-                delete_index(app_namespace, index_name, es_host, es_client)
-            except ValueError:
-                logger.warning(
-                    "Index %s does not exist for app %s, creating a new index",
-                    index_name,
-                    app_namespace,
-                )
 
         def _generate_mapping_data(embedder_model, embedding_fields):
             # generates a dictionary with any metadata needed to create the mapping"
@@ -922,7 +919,7 @@ class Search:
                         "script_score": {
                             "script": {
                                 "source": "cosineSimilarity(params.field_embedding,"
-                                " doc[params.matching_field]) + 1.0",
+                                          " doc[params.matching_field]) + 1.0",
                                 "params": {
                                     "field_embedding": self.value.tolist(),
                                     "matching_field": self.field,
