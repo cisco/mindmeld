@@ -58,6 +58,28 @@ from ..exceptions import EntityResolverConnectionError, EntityResolverError
 logger = logging.getLogger(__name__)
 
 
+def _correct_deprecated_er_config(er_config):
+    # for deprecated usage of er_config; code snippet to maintain backwards compatability
+    #   if `er_config` is supplied in deprecated format, it is modified to correct format and
+    #   returned, else it is not modified
+
+    if not er_config.get("model_settings", {}).get("resolver_type", None):
+        model_type = er_config.get("model_type")
+        if model_type == "resolver":
+            raise Exception("Could not find `resolver_type` in `model_settings` of entity resolver")
+        else:
+            logger.warning("DeprecationWarning: Use latest format of configs for entity resolver. "
+                           "See https://www.mindmeld.com/docs/userguide/entity_resolver.html "
+                           "for more details.")
+            er_config = copy.deepcopy(er_config)
+            model_settings = er_config.get("model_settings", {})
+            model_settings.update({"resolver_type": model_type})
+            er_config["model_settings"] = model_settings
+            er_config["model_type"] = "resolver"
+
+    return er_config
+
+
 class EntityResolverFactory:
 
     @staticmethod
@@ -88,6 +110,7 @@ class EntityResolverFactory:
             kwargs.pop("er_config", None) or
             get_classifier_config("entity_resolution", app_path=app_path)
         )
+        er_config = _correct_deprecated_er_config(er_config)
         resolver_type = er_config["model_settings"]["resolver_type"]
         cls._validate_resolver_type(resolver_type)
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
