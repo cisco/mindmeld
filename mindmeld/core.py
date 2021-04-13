@@ -529,9 +529,13 @@ class NestedEntity:
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
+            # The span range is till the span_out or max to the second last char
             tok_start = 0
-            for idx, token in enumerate(query._normalized_tokens):
-                if idx > 0 and span_out.start >= token['raw_start']:
+            span_range = min(span_out.start, len(full_text) - 1)
+            for idx, current_char in enumerate(full_text[:span_range]):
+                # Increment the counter only if a whitespace follows a non-whitespace
+                next_char = full_text[idx + 1]
+                if not current_char.isspace() and next_char.isspace():
                     tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
             # convert span from query's indexing to parent's indexing
