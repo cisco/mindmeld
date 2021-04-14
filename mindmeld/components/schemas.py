@@ -377,6 +377,7 @@ class RequestSchema(Schema):
     text = fields.String(required=True)
     domain = fields.String()
     intent = fields.String()
+    verbose = fields.Boolean()
     entities = fields.Method("serialize_entities",
                              deserialize="deserialize_list_of_maps")
     history = fields.Method("serialize_history",
