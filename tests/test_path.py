@@ -18,7 +18,7 @@ APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 
 DOMAIN_NAME = "store_info"
-DOMAINS = set([DOMAIN_NAME])
+DOMAINS = set([DOMAIN_NAME, 'banking'])
 
 INTENTS = set(
     [
@@ -34,7 +34,7 @@ INTENTS = set(
 
 def test_get_domains():
     domains = set(path.get_domains(APP_PATH))
-    assert len(domains) == 1
+    assert len(domains) == 2
     assert DOMAIN_NAME in domains
 
 

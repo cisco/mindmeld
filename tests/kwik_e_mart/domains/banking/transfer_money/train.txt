@@ -1,0 +1,16 @@
+Transfer {100k|sys_amount-of-money} from {checking|account_type|origin} to {savings|account_type|dest}
+Move {100k|sys_amount-of-money} to {savings|account_type|dest} from {checking|account_type|origin}
+I want to send {100k|sys_amount-of-money} from {savings|account_type|origin} to my {checkings|account_type|dest} account
+Pay {credit|account_type|dest} bill from {checkings|account_type|origin}
+Send {100k|sys_amount-of-money} to {checking|account_type|dest} from {savings|account_type|origin}
+Add {100k|sys_amount-of-money} to my {savings|account_type|dest} from {checkings|account_type|origin}
+take {$400|sys_amount-of-money} and move it from my {checkings|account_type|origin} account to {saving|account_type|dest} account today
+make a transfer of {$1500|sys_amount-of-money} from {savings|account_type|origin} to {money market|account_type|dest}
+I'd like to move {500 bucks|sys_amount-of-money} from {checkings|account_type|origin} to {savings|account_type|dest}.
+move {fifty bucks|sys_amount-of-money} into my {checkings|account_type|dest} from {savings|account_type|origin}
+transfer {100 thousand|sys_amount-of-money} dollars to my {external|account_type|dest} account
+Move {5k|sys_amount-of-money} from my {savings|account_type|origin} account to my {checkings|account_type|dest} account
+Move {100 bucks|sys_amount-of-money} from {savings|account_type|origin} to {checkings|account_type|dest} account
+transfer {20 dollars|sys_amount-of-money} from {savings|account_type|origin} to {checking|account_type|dest}
+Move {1000|sys_amount-of-money} to {checkings|account_type|dest} from {savings|account_type|origin}
+Move {twelve hundred dollars|sys_amount-of-money} from primary {checkings|account_type|origin} to rainy day {savings|account_type|dest}
