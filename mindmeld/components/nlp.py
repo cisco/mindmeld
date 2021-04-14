@@ -1083,6 +1083,28 @@ class IntentProcessor(Processor):
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
 
+    def extract_entities(self, label_set=None):
+
+        # Create the entity processors
+        _processors = Bunch()
+        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        for entity_type in entity_types:
+
+            if entity_type in self._children:
+                continue
+
+            processor = EntityProcessor(
+                self._app_path,
+                self.domain,
+                self.name,
+                entity_type,
+                self.resource_loader,
+                self.progress_bar,
+            )
+            _processors[entity_type] = processor
+
+        return _processors
+
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this intent"""
 

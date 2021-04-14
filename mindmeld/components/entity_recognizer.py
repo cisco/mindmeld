@@ -71,6 +71,23 @@ class EntityRecognizer(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
+    def get_entity_types(self, queries=None, label_set=None, **kwargs):
+
+        if not label_set:
+            label_set = self._get_model_config(**kwargs).train_label_set
+            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+
+        # Load labeled data
+        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+
+        # Build entity types set
+        entity_types = set()
+        for label in labels:
+            for entity in label:
+                entity_types.add(entity.entity.type)
+
+        return entity_types
+
     def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains the entity recognition model using the provided training queries.
 
