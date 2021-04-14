@@ -50,6 +50,8 @@ from .parser import Parser
 from .role_classifier import RoleClassifier
 from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 from ..models.helpers import GAZETTEER_RSC
+from ..constants import SYSTEM_ENTITY_PREFIX
+
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -1421,7 +1423,7 @@ class IntentProcessor(Processor):
                         n_best_entities.append(query_entity)
 
                     # check if entity is a system entity
-                    if entity.startswith('sys_'):
+                    if entity.startswith(SYSTEM_ENTITY_PREFIX):
                         for sys_entity in n_best_query.system_entity_candidates:
                             if sys_entity.entity.type == entity:
                                 n_best_entities.append(sys_entity)

@@ -32,6 +32,7 @@ from .components.schemas import (
 )
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import MindMeldError, SystemEntityResolutionError
+from .constants import SYSTEM_ENTITY_PREFIX
 
 SUCCESSFUL_HTTP_CODE = 200
 SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 3.0)
@@ -718,7 +719,7 @@ def dimensions_from_entity_types(entity_types):
     for entity_type in entity_types:
         if entity_type == "sys_interval":
             dims.add("time")
-        if entity_type.startswith("sys_"):
+        if entity_type.startswith(SYSTEM_ENTITY_PREFIX):
             dims.add(entity_type.split("_")[1])
     if not dims:
         return None

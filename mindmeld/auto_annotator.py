@@ -41,6 +41,7 @@ from .constants import (
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
     CURRENCY_SYMBOLS,
+    SYSTEM_ENTITY_PREFIX,
 )
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types
@@ -533,7 +534,7 @@ class SpacyAnnotator(Annotator):
                     params["sentence"] = sentence
                 entity = entity_resolution_func_map[entity["dim"]](**params)
             else:
-                entity["dim"] = "sys_" + entity["dim"].replace("_", "-")
+                entity["dim"] = SYSTEM_ENTITY_PREFIX + entity["dim"].replace("_", "-")
 
             if entity:
                 entities.append(entity)

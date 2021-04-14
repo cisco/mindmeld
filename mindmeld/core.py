@@ -16,6 +16,9 @@ import logging
 from typing import Optional, List, Dict
 import immutables
 
+from .constants import SYSTEM_ENTITY_PREFIX
+
+
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
 TEXT_FORM_NORMALIZED = 2
@@ -752,7 +755,7 @@ class Entity:
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith("sys_")
+        return entity_type.startswith(SYSTEM_ENTITY_PREFIX)
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
