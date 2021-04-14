@@ -464,13 +464,33 @@ DEFAULT_NLP_CONFIG = {
     },
 }
 
+DEFAULT_AUGMENTATION_CONFIG = {
+    "augmentor_class": "EnglishParaphraser",
+    "batch_size": 8,
+    "paths": [
+        {
+            "domains": ".*",
+            "intents": ".*",
+            "files": ".*",
+        }
+    ],
+    "path_suffix": "-augment.txt"
+}
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
-    "annotator_class": "SpacyAnnotator",
+    "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
-    "annotate": [{"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}],
+    "annotation_rules": [
+        {
+            "domains": ".*",
+            "intents": ".*",
+            "files": ".*",
+            "entities": ".*",
+        }
+    ],
     "unannotate_supported_entities_only": True,
-    "unannotate": None,
+    "unannotation_rules": None,
+    "translator": "NoOpTranslator",
 }
 
 DEFAULT_TOKENIZER_CONFIG = {
@@ -937,6 +957,29 @@ def get_nlp_config(app_path=None, config=None):
     return _get_default_nlp_config()
 
 
+def get_augmentation_config(app_path=None):
+    """Gets the augmentation config for the app.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app.
+
+    Returns:
+        dict: The augmentation config.
+    """
+    try:
+        augmentation_config = getattr(
+            _get_config_module(app_path),
+            "AUGMENTATION_CONFIG",
+            DEFAULT_AUGMENTATION_CONFIG,
+        )
+        return augmentation_config
+    except (OSError, IOError, AttributeError):
+        logger.info(
+            "No app configuration file found. Using the default augmentation config."
+        )
+        return DEFAULT_AUGMENTATION_CONFIG
+
+
 def get_auto_annotator_config(app_path=None):
     """Gets the automatic annotator config for the app at the
     given path.
@@ -1049,7 +1092,9 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     Returns:
         dict: The tokenizer configuration.
     """
-    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(exclude_from_norm)
+    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(
+        exclude_from_norm
+    )
 
     if not app_path:
         return DEFAULT_TOKENIZER_CONFIG

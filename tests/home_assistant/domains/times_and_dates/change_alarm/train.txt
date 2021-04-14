@@ -57,3 +57,7 @@ change my alarm to {11 am|sys_time|new_time}
 change alarm to {6:45am|sys_time|new_time}
 change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}
 change my {midnight|sys_time|old_time} alarm to {thursday at 11am|sys_time|new_time}
+{6 am|sys_time|new_time}
+{10 pm|sys_time|new_time}
+{4:30 am|sys_time|new_time}
+{2:11 am|sys_time|new_time}

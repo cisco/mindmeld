@@ -26,6 +26,7 @@ MODEL_MAP = {}
 LABEL_MAP = {}
 EMBEDDER_MAP = {}
 ANNOTATOR_MAP = {}
+AUGMENTATION_MAP = {}
 
 # Example types
 QUERY_EXAMPLE_TYPE = "query"
@@ -79,7 +80,7 @@ def create_model(config):
         raise ValueError(msg.format(config.model_type)) from e
 
 
-def create_annotator(app_path, config):
+def create_annotator(config):
     """Creates an annotator instance using the provided configuration
 
     Args:
@@ -95,13 +96,11 @@ def create_annotator(app_path, config):
         raise KeyError(
             "Missing required argument in AUTO_ANNOTATOR_CONFIG: 'annotator_class'"
         )
-    try:
-        return ANNOTATOR_MAP[config["annotator_class"]](
-            app_path=app_path, config=config
-        )
-    except KeyError as e:
+    if config["annotator_class"] in ANNOTATOR_MAP:
+        return ANNOTATOR_MAP[config.pop("annotator_class")](**config)
+    else:
         msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config["annotator_class"])) from e
+        raise KeyError(msg.format(config["annotator_class"]))
 
 
 def get_feature_extractor(example_type, name):
@@ -139,7 +138,9 @@ def create_embedder_model(app_path, config):
     try:
         embedder_type = embedder_config["embedder_type"]
     except KeyError as e:
-        raise ValueError("Invalid model configuration: No provided embedder type.") from e
+        raise ValueError(
+            "Invalid model configuration: No provided embedder type."
+        ) from e
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
@@ -190,6 +191,16 @@ def register_annotator(annotator_class_name, annotator_class):
         model_class (class): The annotator class to register
     """
     ANNOTATOR_MAP[annotator_class_name] = annotator_class
+
+
+def register_augmentor(augmentor_name, augmentor_class):
+    """Registers an Annotator class for use with `create_annotator()`
+
+    Args:
+        annotator_class_name (str): The annotator class name as specified in the config
+        model_class (class): The annotator class to register
+    """
+    AUGMENTATION_MAP[augmentor_name] = augmentor_class
 
 
 def register_feature(feature_type, feature_name):

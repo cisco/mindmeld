@@ -124,6 +124,10 @@ class Span:
         """
         return Span(self.start + offset, self.end + offset)
 
+    def has_overlap(self, other):
+        """Determines whether two spans overlap."""
+        return self.end >= other.start and other.end >= self.start
+
     def __iter__(self):
         for index in range(self.start, self.end + 1):
             yield index
@@ -134,6 +138,26 @@ class Span:
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.start == other.start and self.end == other.end
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) > len(other)
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) >= len(other)
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) < len(other)
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return len(self) <= len(other)
         return NotImplemented
 
     def __ne__(self, other):
@@ -529,19 +553,15 @@ class NestedEntity:
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_start = len(full_text[: span_out.start].split())
-            #tok_start = tok_start if tok_start > 1 else 0
+            # The span range is till the span_out or max to the second last char
             tok_start = 0
-            prev_char = ''
-            for idx, char in enumerate(full_text):
-                if idx == span_out.start:
-                    break
-                if char == ' ':
-                    if prev_char != ' ':
-                        tok_start += 1
-                prev_char = char
+            span_range = min(span_out.start, len(full_text) - 1)
+            for idx, current_char in enumerate(full_text[:span_range]):
+                # Increment the counter only if a whitespace follows a non-whitespace
+                next_char = full_text[idx + 1]
+                if not current_char.isspace() and next_char.isspace():
+                    tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
-
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
@@ -917,7 +937,11 @@ def _is_same_span(target, other):
 
 
 def _is_overlapping(target, other):
+    overlap = _get_overlap(target, other)
+    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+
+
+def _get_overlap(target, other):
     target_range = range(target.start, target.end + 1)
     predicted_range = range(other.start, other.end + 1)
-    overlap = set(target_range).intersection(predicted_range)
-    return overlap and not _is_subset(target, other) and not _is_superset(target, other)
+    return set(target_range).intersection(predicted_range)
