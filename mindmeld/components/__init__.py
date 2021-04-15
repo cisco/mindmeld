@@ -13,7 +13,7 @@
 
 """This module contains the components of the MindMeld platform"""
 from .dialogue import Conversation, DialogueManager, DialogueResponder
-from .entity_resolver import EntityResolverFactory
+from .entity_resolver import EntityResolver, EntityResolverFactory
 from .nlp import NaturalLanguageProcessor
 from .preprocessor import Preprocessor
 from .question_answerer import QuestionAnswerer
@@ -33,6 +33,7 @@ __all__ = [
     "DialogueManager",
     "NaturalLanguageProcessor",
     "QuestionAnswerer",
+    "EntityResolver",
     "EntityResolverFactory",
     "Preprocessor",
     "Request",
