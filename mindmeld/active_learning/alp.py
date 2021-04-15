@@ -4,9 +4,9 @@ import logging
 
 import math
 from .data_loading import DataBucketFactory
-from .output_manager import OutputManager
+from .results_manager import ResultsManager
 from .plot_manager import PlotManager
-from .classifiers import MindMeldClassifier
+from .classifiers import MindMeldALClassifier
 from .heuristics import HeuristicsFactory
 from ..constants import STRATEGY_ABRIDGED
 
@@ -29,7 +29,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         batch_size: int,
         training_strategies: list,
         training_level: str,
-        log_selection_strategy: str,
+        selection_strategy: str,
         save_sampled_queries: bool,
         early_stopping_window: int,
         log_usage_pct: float,
@@ -50,7 +50,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             batch_size (int): Number of queries to select at each iteration
             training_level (str): The hierarchy level to train ("domain" or "intent")
             training_strategies (List[str]): List of strategies to use for training
-            log_selection_strategy (str): Single strategy to use for log selection
+            selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
             early_stopping_window (int): If the drops for n iterations, terminate training early
             log_usage_pct (float): Percentage of the log data to use for selection
@@ -69,25 +69,25 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.batch_size = batch_size
         self.training_level = training_level
         self.training_strategies = training_strategies
-        self.log_selection_strategy = log_selection_strategy
+        self.selection_strategy = selection_strategy
         self.save_sampled_queries = save_sampled_queries
         self.early_stopping_window = early_stopping_window
         self.log_usage_pct = log_usage_pct
         self.labeled_logs_pattern = labeled_logs_pattern
         self.unlabeled_logs_path = unlabeled_logs_path
 
-        self.output_manager = self.get_output_manager(output_folder)
-        self.mindmeld_classifier = self.get_classifier()
+        self.results_manager = self.get_results_manager(output_folder)
+        self.mindmeld_al_classifier = self.get_classifier()
         self.init_data_bucket = None
         self.data_bucket = None
 
-    def get_output_manager(self, output_folder):
-        return OutputManager(
+    def get_results_manager(self, output_folder):
+        return ResultsManager(
             active_learning_params=deepcopy(self.__dict__), output_folder=output_folder
         )
 
     def get_classifier(self):
-        return MindMeldClassifier(
+        return MindMeldALClassifier(
             app_path=self.app_path,
             training_level=self.training_level,
             n_classifiers=self.n_classifiers,
@@ -96,7 +96,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def train(self):
         """Loads the initial data bucket and then trains on every strategy."""
         logger.info("Creating Training Data Bucket")
-        self.output_manager.create_experiment_folder(self.training_strategies)
+        self.results_manager.create_experiment_folder(self.training_strategies)
         self.init_data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
             self.load,
@@ -145,24 +145,24 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     preds_single,
                     preds_multi,
                     domain_indices,
-                ) = self.mindmeld_classifier.train(
+                ) = self.mindmeld_al_classifier.train(
                     data_bucket=self.data_bucket,
                     return_preds_multi=STRATEGY_ABRIDGED[strategy]
                     in ["ds", "ens", "kld"],
                 )
                 if not selection_mode:
-                    self.output_manager.update_accuracies_json(
+                    self.results_manager.update_accuracies_json(
                         strategy, epoch, iteration, eval_stats
                     )
                     if self.save_sampled_queries:
-                        self.output_manager.update_selected_queries_json(
+                        self.results_manager.update_selected_queries_json(
                             strategy,
                             epoch,
                             iteration,
                             self.data_bucket.newly_sampled_queries,
                         )
                     if self.early_stopping_window > 0:
-                        early_stop = self.output_manager.check_early_stopping(
+                        early_stop = self.results_manager.check_early_stopping(
                             strategy, self.early_stopping_window
                         )
                 num_unsampled = len(self.data_bucket.unsampled_queries)
@@ -203,19 +203,18 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.log_usage_pct,
         )
         logger.info("Starting Selection.")
-        self._train_strategy(strategy=self.log_selection_strategy, selection_mode=True)
-        self.output_manager.write_log_selected_queries_json(
-            strategy=self.log_selection_strategy,
+        self._train_strategy(strategy=self.selection_strategy, selection_mode=True)
+        self.results_manager.write_log_selected_queries_json(
+            strategy=self.selection_strategy,
             queries=self.data_bucket.newly_sampled_queries,
         )
 
     def plot(self):
         """Creates the generated folder and its subfolders if they do not already exist."""
-        plot_manager = PlotManager(self.output_manager.experiment_folder)
+        plot_manager = PlotManager(self.results_manager.experiment_folder)
         plot_manager.generate_plots()
 
 
-# TODO: This function is temporary. Replace with better data validation
 def flatten_active_learning_config(original_config):
     """Create a flattened config to use as params.
 

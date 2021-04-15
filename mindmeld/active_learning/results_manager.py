@@ -27,7 +27,7 @@ def create_dir_if_absent(base_path: str):
         pass
 
 
-class OutputManager:
+class ResultsManager:
     """Handles the initialization of generated folder and its contents. Keeps record of experiment
     results."""
 
@@ -153,14 +153,14 @@ class OutputManager:
         self, strategy: str, epoch: int, iteration: int, queries
     ):
         """Update accuracies.json with iteration metrics"""
-        query_dicts = OutputManager.queries_to_dict(queries)
+        query_dicts = ResultsManager.queries_to_dict(queries)
         self.update_json(
             AL_SELECTED_QUERIES_PATH, strategy, epoch, iteration, query_dicts
         )
 
     def write_log_selected_queries_json(self, strategy: str, queries):
         """Update accuracies.json with iteration metrics"""
-        query_dicts = OutputManager.queries_to_dict(queries)
+        query_dicts = ResultsManager.queries_to_dict(queries)
         log_selected_queries_path = os.path.join(
             self.output_folder, "log_selected_queries.json"
         )
@@ -189,7 +189,7 @@ class OutputManager:
             accuracy_data[strategy][str(epoch)][str(i)]["accuracies"]["overall"]
             for i in range(iteration + 1)
         ]
-        return OutputManager._check_early_stopping(accuracies, early_stopping_window)
+        return ResultsManager._check_early_stopping(accuracies, early_stopping_window)
 
     @staticmethod
     def _check_early_stopping(accuracies: List[float], early_stopping_window: int):

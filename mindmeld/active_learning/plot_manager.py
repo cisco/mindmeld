@@ -6,7 +6,7 @@ from typing import Dict, List
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .output_manager import create_dir_if_absent
+from .results_manager import create_dir_if_absent
 from ..path import (
     AL_ACCURACIES_PATH,
     AL_SELECTED_QUERIES_PATH,

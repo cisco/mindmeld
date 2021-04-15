@@ -938,7 +938,7 @@ def active_learning_select(
     if labeled_logs_pattern:
         config["labeled_logs_pattern"] = labeled_logs_pattern
     if strategy:
-        config["log_selection_strategy"] = strategy
+        config["selection_strategy"] = strategy
     if output_folder:
         config["output_folder"] = output_folder
     alp = ActiveLearningPipeline(**config)

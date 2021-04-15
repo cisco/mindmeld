@@ -2,18 +2,28 @@ import os
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from typing import List, Dict
 from sklearn.model_selection import StratifiedKFold
 
-from .data_loading import DataBucket
+from .data_loading import LabelMap, DataBucket
 
+from ..core import ProcessedQuery
+from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import ACTIVE_LEARNING_RANDOM_SEED
 
 logger = logging.getLogger(__name__)
 
 
-class Classifier(ABC):
-    def __init__(self, app_path, training_level):
+class ALClassifier(ABC):
+    """ Abstract class for Active Learning Classifiers."""
+
+    def __init__(self, app_path: str, training_level: str):
+        """
+        Args:
+            app_path (str): Path to MindMeld application
+            training_level (str): The hierarchy level to train ("domain" or "intent")
+        """
         self.app_path = app_path
         self.training_level = training_level
         self.intent2idx, self.idx2intent, self.domain_indices = self._get_mappings()
@@ -48,20 +58,32 @@ class Classifier(ABC):
         )
 
 
-class MindMeldClassifier(Classifier):
-    def __init__(self, app_path, training_level, n_classifiers):
+class MindMeldALClassifier(ALClassifier):
+    """Active Learning classifier that uses MindMeld classifiers internally.
+    Handles the training of MindMeld components (Domain or Intent classifiers)
+    and collecting performance statistics (eval_stats)."""
+
+    def __init__(self, app_path: str, training_level: str, n_classifiers: int):
+        """
+        Args:
+            app_path (str): Path to MindMeld application
+            training_level (str): The hierarchy level to train ("domain" or "intent")
+            n_classifiers (int): Number of classifiers to be used by multi-model strategies.
+        """
         super().__init__(app_path=app_path, training_level=training_level)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.n_classifiers = n_classifiers
 
     @staticmethod
-    def _get_probs(classifier, queries, class_id_map):
+    def _get_probs(
+        classifier: Classifier, queries: List[ProcessedQuery], nlp_component_to_id: Dict
+    ):
         """Get the probability distribution for for a query across domains or intents.
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
             queries (List of ProcessedQuery): List of MindMeld queries
-            class_id_map (Dict): Dictionary mapping domain or intent names to vector index
+            nlp_component_to_id (Dict): Dictionary mapping domain or intent names to vector index
                 positions.
 
         Returns:
@@ -71,14 +93,16 @@ class MindMeldClassifier(Classifier):
         if queries:
             classifier_eval = classifier.evaluate(queries=queries)
             for x in classifier_eval.results:
-                query_prob_vector = [None] * len(class_id_map)
-                for k, v in x.probas.items():
-                    query_prob_vector[class_id_map[k]] = v
+                query_prob_vector = [None] * len(nlp_component_to_id)
+                for nlp_component, index in x.probas.items():
+                    query_prob_vector[nlp_component_to_id[nlp_component]] = index
                 queries_prob_vectors.append(query_prob_vector)
             assert len(queries_prob_vectors) == len(queries)
         return queries_prob_vectors
 
-    def _pad_intent_probs(self, ic_queries_prob_vectors, intents):
+    def _pad_intent_probs(
+        self, ic_queries_prob_vectors: List[ProcessedQuery], intents: List
+    ):
         """Pads the intent probability array with zeroes for out-of-domain intents.
         Args:
             ic_queries_prob_vectors (List[List]]): 2D Array containing the probability distribution
@@ -100,7 +124,7 @@ class MindMeldClassifier(Classifier):
             padded_ic_queries_prob_vectors.append(ordered_ic_query_prob_vector)
         return padded_ic_queries_prob_vectors
 
-    def train(self, data_bucket, return_preds_multi=False):
+    def train(self, data_bucket: DataBucket, return_preds_multi: bool = False):
         """Main training function.
 
         Args:
@@ -122,8 +146,8 @@ class MindMeldClassifier(Classifier):
 
         return eval_stats, preds_single, preds_multi, self.domain_indices
 
-    def train_single(self, data_bucket, eval_stats=None):
-        """
+    def train_single(self, data_bucket: DataBucket, eval_stats: defaultdict = None):
+        """Trains a single model to get a 2D probability array for single-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
@@ -140,12 +164,23 @@ class MindMeldClassifier(Classifier):
 
     def _train_single(
         self,
-        sampled_queries,
-        unsampled_queries,
-        test_queries,
-        label_map,
-        eval_stats=None,
+        sampled_queries: List[ProcessedQuery],
+        unsampled_queries: List[ProcessedQuery],
+        test_queries: List[ProcessedQuery],
+        label_map: LabelMap,
+        eval_stats: Dict = None,
     ):
+        """Helper function to train a single model and obtain a 2D probability array.
+        Args:
+            sampled_queries List[ProcessedQuery]: Current set of sampled queries in DataBucket.
+            unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
+            test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
+            label_map LabelMap: Class that stores index mappings for a MindMeld app.
+                (Eg. Domain2Id, Intent2Id)
+            eval_stats (Dict): Evaluation metrics to be included in accuracies.json
+        Returns:
+            preds_single (List): 2D array with probability vectors for unsampled queries
+        """
         # Domain_Level
         dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
             sampled_queries=sampled_queries,
@@ -154,7 +189,9 @@ class MindMeldClassifier(Classifier):
             domain2id=label_map.domain2id,
         )
         if eval_stats:
-            MindMeldClassifier._update_eval_stats_domain_level(eval_stats, dc_eval_test)
+            MindMeldALClassifier._update_eval_stats_domain_level(
+                eval_stats, dc_eval_test
+            )
         preds_single = dc_queries_prob_vectors
 
         # Intent_Level
@@ -170,15 +207,15 @@ class MindMeldClassifier(Classifier):
                 intent2id=label_map.intent2id,
             )
             if eval_stats:
-                MindMeldClassifier._update_eval_stats_intent_level(
+                MindMeldALClassifier._update_eval_stats_intent_level(
                     eval_stats, ic_eval_test_dict
                 )
             preds_single = ic_queries_prob_vectors
 
         return preds_single
 
-    def train_multi(self, data_bucket):
-        """
+    def train_multi(self, data_bucket: DataBucket):
+        """Trains multiple models to get a 3D probability array for multi-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration
         Returns:
@@ -192,7 +229,24 @@ class MindMeldClassifier(Classifier):
             label_map=data_bucket.label_map,
         )
 
-    def _train_multi(self, sampled_queries, unsampled_queries, test_queries, label_map):
+    def _train_multi(
+        self,
+        sampled_queries: List[ProcessedQuery],
+        unsampled_queries: List[ProcessedQuery],
+        test_queries: List[ProcessedQuery],
+        label_map: LabelMap,
+    ):
+        """Helper function to train multiple models and obtain a 3D probability array.
+        Args:
+            sampled_queries List[ProcessedQuery]: Current set of sampled queries in DataBucket.
+            unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
+            test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
+            label_map LabelMap: Class that stores index mappings for a MindMeld app.
+                (Eg. Domain2Id, Intent2Id)
+        Returns:
+            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+                queries from multiple classifiers
+        """
         skf = StratifiedKFold(
             n_splits=self.n_classifiers, random_state=ACTIVE_LEARNING_RANDOM_SEED
         )
@@ -211,7 +265,11 @@ class MindMeldClassifier(Classifier):
         return preds_multi
 
     def domain_classifier_fit_eval(
-        self, sampled_queries, unsampled_queries, test_queries, domain2id
+        self,
+        sampled_queries: List[ProcessedQuery],
+        unsampled_queries: List[ProcessedQuery],
+        test_queries: List[ProcessedQuery],
+        domain2id: Dict,
     ):
         """Fit and evaluate the domain classifier.
         Args:
@@ -228,13 +286,13 @@ class MindMeldClassifier(Classifier):
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
         dc_eval_test = dc.evaluate(queries=test_queries)
-        dc_queries_prob_vectors = MindMeldClassifier._get_probs(
+        dc_queries_prob_vectors = MindMeldALClassifier._get_probs(
             dc, unsampled_queries, domain2id
         )
         return dc_queries_prob_vectors, dc_eval_test
 
     @staticmethod
-    def _update_eval_stats_domain_level(eval_stats, dc_eval_test):
+    def _update_eval_stats_domain_level(eval_stats: Dict, dc_eval_test):
         """Update the eval_stats dictionary with evaluation metrics from the domain
         classifier.
 
@@ -250,7 +308,12 @@ class MindMeldClassifier(Classifier):
         )
 
     def intent_classifiers_fit_eval(
-        self, sampled_queries, unsampled_queries, test_queries, domain2id, intent2id
+        self,
+        sampled_queries: List[ProcessedQuery],
+        unsampled_queries: List[ProcessedQuery],
+        test_queries: List[ProcessedQuery],
+        domain2id: Dict,
+        intent2id: Dict,
     ):
         """Fit and evaluate the domain classifier.
         Args:
@@ -291,10 +354,10 @@ class MindMeldClassifier(Classifier):
                 continue
             ic_eval_test_dict[domain] = ic_eval_test
             # Get Probability Vectors
-            ic_queries_prob_vectors = MindMeldClassifier._get_probs(
+            ic_queries_prob_vectors = MindMeldALClassifier._get_probs(
                 classifier=ic,
                 queries=filtered_unsampled_queries,
-                class_id_map=intent2id[domain],
+                nlp_component_to_id=intent2id[domain],
             )
             intents = [
                 f"{domain}|{intent}"
@@ -323,7 +386,9 @@ class MindMeldClassifier(Classifier):
         return [0] * len(self.intent2idx)
 
     @staticmethod
-    def _update_eval_stats_intent_level(eval_stats, ic_eval_test_dict):
+    def _update_eval_stats_intent_level(
+        eval_stats: defaultdict, ic_eval_test_dict: Dict
+    ):
         """Update the eval_stats dictionary with evaluation metrics from intent
         classifiers.
 

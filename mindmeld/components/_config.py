@@ -527,7 +527,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "early_stopping_window": 0,
     },
     "select_queries": {
-        "log_selection_strategy": "EntropySampling",
+        "selection_strategy": "EntropySampling",
         "log_usage_pct": 1.00,
         "labeled_logs_pattern": None,
         "unlabeled_logs_path": "logs.txt",

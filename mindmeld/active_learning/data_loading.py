@@ -328,32 +328,6 @@ class DataBucket:
             else deepcopy(sampled_queries)
         )
 
-    def convert_queries_to_tuples(self, queries: List, class_type: str = "domain"):
-        """Converts MindMeld queries into queries in a tuple format.
-
-        Args:
-            queries (list): List of queries to convert
-            class_type (str): Queries can map to "domain" or "intent" labels
-
-        Returns:
-            tuple_queries (list): List of queries in a tuple format. [(Text, Class)...]
-        """
-        tuple_queries = []
-
-        if class_type == "domain":
-            for query in queries:
-                encoded_domain = self.label_map.domain2id[query.domain]
-                tuple_queries.append((query.query.text, encoded_domain))
-        elif class_type == "intent":
-            for query in queries:
-                encoded_intent = self.label_map.intent2id[query.domain][query.intent]
-                tuple_queries.append((query.query.text, encoded_intent))
-        else:
-            raise ValueError(
-                f"Class type {class_type} is invalid. Must be 'domain' or 'intent'."
-            )
-        return tuple_queries
-
     @staticmethod
     def filter_queries(queries: List, domain: str, intent: str = None):
         """Filter queries for training preperation.
