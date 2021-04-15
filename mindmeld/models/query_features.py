@@ -31,7 +31,6 @@ from .helpers import (
     mask_numerics,
     register_query_feature,
     requires,
-    get_non_overlapping_system_entities
 )
 
 
@@ -43,7 +42,7 @@ def extract_in_gaz_span_features(**kwargs):
 
     def _extractor(query, resources):
         def _get_span_features(query, gazes, start, end, entity_type, entity):
-            tokens = [re.sub(r"\d+", "0", t) for t in query.normalized_tokens]
+            tokens = [re.sub(r"\d", "0", t) for t in query.normalized_tokens]
             feature_sequence = [{} for _ in tokens]
 
             pop = gazes[entity_type]["pop_dict"][entity]
@@ -376,12 +375,12 @@ def extract_bag_of_words_features(
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
-        tokens = [re.sub(r"\d+", "0", t) for t in tokens]
+        tokens = [re.sub(r"\d", "0", t) for t in tokens]
         feat_seq = [{} for _ in tokens]
 
         if kwargs.get(ENABLE_STEMMING, False):
             stemmed_tokens = query.stemmed_tokens
-            stemmed_tokens = [re.sub(r"\d+", "0", t) for t in stemmed_tokens]
+            stemmed_tokens = [re.sub(r"\d", "0", t) for t in stemmed_tokens]
 
         for i in range(len(tokens)):
             threshold_index = 0
@@ -484,7 +483,7 @@ def extract_char_ngrams_features(
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         # normalize digits
-        tokens = [re.sub(r"\d+", "0", t) for t in tokens]
+        tokens = [re.sub(r"\d", "0", t) for t in tokens]
         feat_seq = [{} for _ in tokens]
 
         for i in range(len(tokens)):
@@ -529,8 +528,7 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
-        filtered_entities = get_non_overlapping_system_entities(system_entities)
-        for entity in filtered_entities:
+        for entity in system_entities:
             for i in entity.normalized_token_span:
                 for j in start_positions:
                     if 0 <= i - j < len(feat_seq):
