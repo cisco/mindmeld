@@ -134,8 +134,12 @@ class EntityResolverFactory:
         resolver_type = er_config["model_settings"]["resolver_type"]
         cls._validate_resolver_type(resolver_type)
 
+        resource_loader = kwargs.pop(
+            "resource_loader",
+            ResourceLoader.create_resource_loader(app_path=app_path))
+
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
-            app_path, entity_type, er_config, **kwargs
+            app_path, entity_type, er_config, resource_loader, **kwargs
         )
 
 
@@ -150,7 +154,7 @@ class EntityResolverModelBase(ABC):
         self.type = entity_type
         self.er_config = er_config
         self._resource_loader = (
-            resource_loader or ResourceLoader.create_resource_loader(self.app_path)
+            resource_loader or ResourceLoader.create_resource_loader(app_path=self.app_path)
         )
 
         self.name = self.er_config["model_settings"]["resolver_type"]
@@ -240,8 +244,8 @@ class EntityResolverModelBase(ABC):
 
         return {"items": item_map, "synonyms": syn_map}
 
-    def _load_entity_map(self):
-        return self._resource_loader.get_entity_map(self.type)
+    def _get_entity_map(self, force_reload=False):
+        return self._resource_loader.get_entity_map(self.type, force_reload=force_reload)
 
     @abstractmethod
     def _fit(self, clean, entity_map):
@@ -274,7 +278,7 @@ class EntityResolverModelBase(ABC):
             return
 
         # load data: list of canonical entities and their synonyms
-        entity_map = self._load_entity_map()
+        entity_map = self._get_entity_map()
         if not entity_map.get("entities", []):
             self._no_trainable_canonical_entity_map = True
             self.ready = True
@@ -359,8 +363,8 @@ class ElasticsearchEntityResolver(EntityResolverModelBase):
     ES_SYNONYM_INDEX_PREFIX = "synonym"
     """The prefix of the ES index."""
 
-    def __init__(self, app_path, entity_type, er_config, **kwargs):
-        super().__init__(app_path, entity_type, er_config)
+    def __init__(self, app_path, entity_type, er_config, resource_loader, **kwargs):
+        super().__init__(app_path, entity_type, er_config, resource_loader=resource_loader)
 
         self._es_host = kwargs.get("es_host", None)
         self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
@@ -766,8 +770,8 @@ class ExactMatchEntityResolver(EntityResolverModelBase):
     Resolver class based on exact matching
     """
 
-    def __init__(self, app_path, entity_type, er_config, **_kwargs):
-        super().__init__(app_path, entity_type, er_config)
+    def __init__(self, app_path, entity_type, er_config, resource_loader, **_kwargs):
+        super().__init__(app_path, entity_type, er_config, resource_loader=resource_loader)
 
         self._augment_lower_case = self.er_config["model_settings"]["augment_lower_case"]
         self._processed_entity_map = None
@@ -836,13 +840,13 @@ class SentenceBertCosSimEntityResolver(EntityResolverModelBase):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    CACHE_MODELS_HASHES = [12]
-    CACHE_TRANSFORMER_MODELS = {2: 3}
-    CACHE_POOLING_MODELS = {4: 5}
-    CACHE_SBERT_MODELS = {6: 7}
+    CACHE_MODELS_HASHES = []
+    CACHE_TRANSFORMER_MODELS = {}
+    CACHE_POOLING_MODELS = {}
+    CACHE_SBERT_MODELS = {}
 
-    def __init__(self, app_path, entity_type, er_config, **_kwargs):
-        super().__init__(app_path, entity_type, er_config)
+    def __init__(self, app_path, entity_type, er_config, resource_loader, **_kwargs):
+        super().__init__(app_path, entity_type, er_config, resource_loader=resource_loader)
 
         self.device = "cuda" if self._torch("is_available", sub="cuda") else "cpu"
         model_configs = {
@@ -1494,8 +1498,8 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverModelBase):
     scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
     """
 
-    def __init__(self, app_path, entity_type, er_config, **_kwargs):
-        super().__init__(app_path, entity_type, er_config)
+    def __init__(self, app_path, entity_type, er_config, resource_loader, **_kwargs):
+        super().__init__(app_path, entity_type, er_config, resource_loader=resource_loader)
 
         self._processed_entity_map = None
         self._n = 5  # max number of ngrams to consider
