@@ -305,8 +305,9 @@ class EntityResolverModelBase(ABC):
             msg = "Resolver not ready, model must be built (.fit()) or loaded (.load()) first."
             logger.error(msg)
 
-        if not isinstance(entity, (list, tuple)):
-            nbest_entities = tuple([entity])
+        nbest_entities = entity
+        if not isinstance(nbest_entities, (list, tuple)):
+            nbest_entities = tuple([nbest_entities])
 
         nbest_entities = tuple(
             [Entity(e, self.type) if isinstance(e, str) else e for e in nbest_entities]
