@@ -20,8 +20,8 @@ In NLP literature, entity resolution or `entity linking <https://en.wikipedia.or
 
 In MindMeld, two different kinds of entities require resolution:
 
-  - *entities that refer to an object* in the knowledge base — these resolve to an *id, canonical name* pair consisting of the unique ID of the object in the knowledge base, and the :term:`canonical name` for the object, respectively
-  - *entities that refer to a property* of an object in the knowledge base — these resolve to a *id, canonical name* pair consisting of an optional user-specified ID and the :term:`canonical name` for the property respectively
+  - *entities that refer to an object* in the knowledge base — these resolve to an *id, canonical name* pair consisting of the unique ID of the object in the knowledge base, and the :term:`canonical name` for the object, respectively
+  - *entities that refer to a property* of an object in the knowledge base — these resolve to a *id, canonical name* pair consisting of an optional user-specified ID and the :term:`canonical name` for the property respectively
 
 For example, in a food-ordering app:
 
@@ -61,7 +61,7 @@ The most important task when you are developing a production-quality entity reso
 
 This section explains how entity mapping files and synonym files are structured, and how they work. Each sub-section concludes with instructions for generating the files.
 
-Entity mapping files come first, since they provide the framework into which the synonyms fit. 
+Entity mapping files come first, since they provide the framework into which the synonyms fit.
 
 Generate entity mapping files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,51 +171,230 @@ Create the synonyms and make them available to your MindMeld app, going entity t
 
     e. Choose a new target entity (continue until you have covered all the entities for the entity type)
 
-#. Choose a new entity type (stop when you have covered all the entity types for the app) 
+#. Choose a new entity type (stop when you have covered all the entity types for the app)
 
+Access the entity resolver
+----------------------------
+
+Working with any natural language processor component falls into two broad phases:
+
+ - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data.
+ - Then, conduct experimentation in the Python shell.
+
+Once all of the entity mapping files are generated, you can either (1) train the resolver as a standalone component, or (2) build the whole NLP pipeline, which trains the resolver along with the other components. We use the `Food Ordering blueprint <https://mindmeld.com/docs/blueprints/food_ordering.html>`_ to demonstrate using an entity resolver.
+
+Access through the `nlp` module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the MindMeld :mod:`nlp` module and instantiate an object with the path to your MindMeld project.
+
+.. code-block:: python
+
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   nlp = NaturalLanguageProcessor(app_path='food_ordering')
+
+Since the list of entity types for a selected intent are not readily visible as in the case of domains' name or intents' names, we will have to first extract the entity types present in the training data of the selected intent (see :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` to learn about data formatting). Once identified, we can obtain entity resolvers for each entity type as follows:
+
+.. code-block:: python
+
+   nlp.domains['ordering'].intents['build_order'].build()
+   er = nlp.domains['ordering'].intents['build_order'].extract_entities()['dish'].entity_resolver
+   er
+
+.. code-block:: console
+
+   <ElasticsearchEntityResolver ready: False, dirty: False>
+
+Alternatively, build the NLP pipeline using :meth:`NaturalLanguageProcessor.build()`. Among its other tasks, this initializes as well as fits the resolver. When you run :meth:`NaturalLanguageProcessor.process()`, the NLP pipeline includes the resolved entities in its results.
+
+.. code-block:: python
+
+   nlp.domains['ordering'].intents['build_order'].build()
+   er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
+   er
+
+.. code-block:: console
+
+   <ElasticsearchEntityResolver ready: False, dirty: False>
+
+Access through `EntityResolverFactory` module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+One can also use an entity resolver independent of the :mod:`nlp` pipeline. This could be useful to train/evaluate performances of different resolvers on your dataset(s). To do so, import `EntityResolverFactory` module as follows:
+
+.. code-block:: python
+
+   from mindmeld.components import EntityResolverFactory
+   er = EntityResolverFactory(app_path='food_ordering', entity_type='dish')
+   er
+
+.. code-block:: console
+
+   <ElasticsearchEntityResolver ready: False, dirty: False>
+
+If no resolver configs are specified, the module loads a resolver based on default configs, which involves `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ based entity resolution. Instead, one can specify the type of resolver they would like to use in the arguments of `EntityResolverFactory` as follows:
+
+.. code-block:: python
+
+    ENTITY_RESOLVER_CONFIG = {
+        'model_type': 'resolver',
+        "model_settings": {
+            "resolver_type": "sbert_cosine_similarity",
+        }
+    }
+    er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish', er_config=ENTITY_RESOLVER_CONFIG)
+    er
+
+.. code-block:: console
+
+   <SentenceBertCosSimEntityResolver ready: False, dirty: False>
 
 Train the entity resolver
 -------------------------
 
-The Entity Resolver uses the `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval. This is required by the advanced text similarity model MindMeld uses by default. Once Elasticsearch is up and running, no configuration needed is needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
+Use the :meth:`.fit()` method to train a entity resolution model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console.
+
+.. _baseline_er_fit:
+
+.. code-block:: python
+
+   from mindmeld import configure_logs; configure_logs()
+   er.fit()
+
+Using default settings is the recommended (and quickest) way to get started with any of the NLP components. The resulting baseline model should provide a reasonable starting point. You can then try alternate settings as you seek to identify the optimal resolver for your app.
 
 .. note::
 
-   If you choose not to use Elasticsearch (not recommended), MindMeld provides a simple baseline version of entity resolution as a fallback. See :ref:`About the Exact Match text similarity model <exact_match>`.
+   - Since a default resolver uses `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ for resolving entities, one needs to set up Elasticsearch before fitting. Once Elasticsearch is up and running, no configuration is needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
+   - If you choose not to use Elasticsearch, MindMeld now provides alternate choices for entity resolution. See :ref:`model_settings <model_settings>` below for those alternate choices.
 
-Once all of the entity mapping files are generated, you can either (1) train the resolver as a standalone component, or (2) build the whole NLP pipeline, which trains the resolver along with the other components.
+Resolver configurations
+^^^^^^^^^^^^^^^^^^^^^^^
 
-Train the resolver alone
-^^^^^^^^^^^^^^^^^^^^^^^^
+``'model_type'`` (:class:`str`)
+  |
 
-To train the resolver as a standalone component, adapt the following snippet to the particulars of your app:
+  Always ``'resolver'``, since the underlying models uses a text matching technique for populating the results.
+
+``'model_settings'`` (:class:`dict`)
+  |
+
+  Always a dictionary with the non-optional key ``'resolver_type'``, whose value specifies the algorithm to use. Allowed values are shown in the table below.
+
+  .. _model_settings:
+
+  ============================== =============================================================================================== =======================================================
+  Value                          Underlying algorithm                                                                            Reference for configurable parameters
+  ============================== =============================================================================================== =======================================================
+  ``'text_relevance'``           `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_                                :ref:`See optional parameters <configs_text_relevance>`
+  ``'tfidf_cosine_similarity'``  `term frequency-inverse document frequency <https://en.wikipedia.org/wiki/Tf%E2%80%93idf>`_     :ref:`See optional parameters <configs_tfidf>`
+  ``'sbert_cosine_similarity'``  `Sentence Transformers <https://www.sbert.net/index.html>`_ based on BERT models's architecture :ref:`See optional parameters <configs_sbert>`
+  ``'exact_match'``              Exact text matching                                                                             :ref:`See optional parameters <configs_exact_match>`
+  ============================== =============================================================================================== =======================================================
+
+Optional parameters
+^^^^^^^^^^^^^^^^^^^
+
+.. _configs_text_relevance:
+
+1. **text_relevance**
+    |
+
+    ``'phonetic_match_types'`` (`type`: :class:`list`, `default`: `None`)
+      |
+
+      Specifies if `double metaphone <https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone>`_ based phonetic encodings are to be used alongside textual character n-grams. Refer to :ref:`Dealing with Voice Inputs <dealing_with_voice_inputs>` section for applications of using this feature.
+
+.. _configs_tfidf:
+
+2. **tfidf_cosine_similarity**
+    |
+
+    ``'augment_lower_case'`` (`type`: :class:`bool`, `default`: `True`)
+      |
+
+      Specifies if lower cased text forms of canonical names and whitelist items are to be used for resolution. This can improve performance in most applications at minimal computation overhead.
+
+    ``'augment_title_case'`` (`type`: :class:`bool`, `default`: `False`)
+      |
+
+      Specifies if title cased text forms of canonical names and whitelist items are to be used for resolution.
+
+    ``'augment_normalized'`` (`type`: :class:`bool`, `default`: `False`)
+      |
+
+      Specifies if normalized text forms of canonical names and whitelist items are to be used for resolution.
+
+.. _configs_sbert:
+
+3. **sbert_cosine_similarity**
+    |
+
+    ``'pretrained_name_or_abspath'`` (`type`: :class:`str`, `default`: `distilbert-base-nli-stsb-mean-tokens`)
+      |
+
+      Name of a model from `Huggingface models <https://huggingface.co/models>`_ or a folder path to which the model is downloaded.
+
+    ``'bert_output_type'`` (`type`: :class:`str`, `default`: `mean`, `choices`: `mean` or `cls`)
+      |
+
+      Specifies if the embedding for a given phrase should be the traditional `"[CLS]" <https://www.aclweb.org/anthology/n19-1423.pdf>`_ output or a `mean pooling <https://www.aclweb.org/anthology/D19-1410.pdf>`_ of all sub-token's outputs.
+
+    ``'quantize_model'`` (`type`: :class:`bool`, `default`: `True`)
+      |
+
+      Specifies if the underlying pytorch model should be quantized for smaller memory footprint as well as faster inference times, while (slightly) compromising on model's accuracy.
+
+    ``'concat_last_n_layers'`` (`type`: :class:`int`, `default`: `4`)
+      |
+
+      Since transformer architecture based BERT models have several layers stacked, this parameter specifies how many of the last `n` layers' representation needs to be concatenated.
+
+    ``'normalize_token_embs'`` (`type`: :class:`bool`, `default`: `True`)
+      |
+
+      Specifies if the sub-token level outputs are to be unit normalized.
+
+
+    ``'augment_lower_case'`` (`type`: :class:`bool`, `default`: `False`)
+      |
+
+      Specifies if lower cased text forms of canonical names and whitelist items are to be used for resolution. This can improve performance in some applications and with some types of BERT models.
+
+    ``'augment_average_synonyms_embeddings'`` (`type`: :class:`bool`, `default`: `True`)
+      |
+
+      If specified `True`, representative synonyms whose embeddings are average of embeddings of all whitelist items are added to the synonyms data for improved resolution performnaces.
+
+
+    ``'batch_size'`` (`type`: :class:`int`, `default`: `16`)
+      |
+
+      Number of synonyms to group into a batch while training. Larger sizes might incur larger memory footprints.
+
+.. _configs_exact_match:
+
+4. **exact_match**
+    |
+
+    There aren't any configurable optional parameters for this resolution algorithm.
+
+.. note::
+
+   - To use the BERT based resolver (``'sbert_cosine_similarity'``), make sure you've installed the extra requirement with the command ``pip install mindmeld[bert]``.
+   - Since the BERT models are loaded directly from huggingface, one can utilize a diverse set of models including distilled versions such as `distill-bert <https://huggingface.co/distilbert-base-cased>`_ or multilingual versions such as `xlm-roberta-base <https://huggingface.co/xlm-roberta-base>`_.
+
+Clean fitting
+^^^^^^^^^^^^^
+
+In cases of **text_relevance** and **sbert_cosine_similarity** type resolvers when the `.fit()` method is run for the first time, MindMeld creates all the necessary encodings required for inference and dumps them in a cache file if required. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. For the sake of speed, subsequent calls to `.fit()` only update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
 
 .. code-block:: python
 
-  from mindmeld import configure_logs; configure_logs()
-  from mindmeld.components.nlp import NaturalLanguageProcessor
-  nlp = NaturalLanguageProcessor(app_path='food_ordering')
-  nlp.domains['ordering'].intents['build_order'].build()
-  er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
-  er.fit()
-
-Train the resolver by building the NLP pipeline
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Build the NLP pipeline using :meth:`NaturalLanguageProcessor.build()`. Among its other tasks, this fits the resolver. When you run :meth:`NaturalLanguageProcessor.process()`, the NLP pipeline includes the resolved entities in its results.
-
-About the `EntityResolver.fit()` method
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When :meth:`EntityResolver.fit()` method is run for the first time, MindMeld creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine.
-
-For the sake of speed, subsequent calls to :meth:`EntityResolver.fit()` update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
-
-.. code-block:: python
-
+   from mindmeld import configure_logs; configure_logs()
    er.fit(clean=True)
 
-Unlike the other NLP components, *EntityResolver.dump()* and *EntityResolver.load()* do not do anything since there are no model weights to be saved to disk. Everything needed exists in the Elasticsearch index and the entity mapping files.
+Unlike the other NLP components, there exists no `.dump()` method for resolver models since there are no model weights to be saved to disk. Additionally, the `.load()` method simply redirects to the `.fit()` method.
 
 Run the entity resolver
 -----------------------
@@ -285,7 +464,7 @@ Each entry in the list of resolved entities contains:
 **sort factor**      If the sort factor is provided in the entity mapping file, it is also returned.
 ==================== ===
 
-The Entity Resolver returns a ranked list of the top ten canonical forms for each recognized entity. Taking the top-ranked value usually works, but in some cases it's preferable to look at other options in the ranked list. Here are two examples:
+Unless specified, a resolver returns a ranked list of the top (at most) twenty canonical forms for each recognized entity. One can set the number of top results to return by passing in the argument `top_n` to the `.predict()` method. Taking the top-ranked value usually works, but in some cases it's preferable to look at other options in the ranked list. Here are two example use-cases:
 
 1. When building a browsing functionality in your app, you might want to offer the user a choice of the top three resolved values.
 2. Suppose the user has provided some constraints in a previous query. The entity resolver has no access to this previous context at resolution time, so the top-ranked result may not satisfy previously defined constraints. Here, you may want to look deeper into the ranked list.
@@ -307,18 +486,3 @@ There are two ways to accomplish context-aware resolution in MindMeld:
 
  - In your :doc:`dialogue state handlers <../quickstart/04_define_the_dialogue_handlers>`, iterate through the ranked list to find the first entry that satisfies the constraints.
  - Use the :doc:`Question Answerer <kb>` to do a filtered search against the knowledge base to disambiguate entities with contextual constraints.
-
-.. _exact_match:
-
-About the Exact Match text similarity model
--------------------------------------------
-
-If you choose not to use Elasticsearch, MindMeld provides a simple baseline version of entity resolution. This Exact Match Model only resolves to an object when the text exactly matches a canonical name or synonym. To use the Exact Match Model, add the following to your app config (``config.py``) located in the top level of your app folder:
-
-.. code-block:: python
-
-    ENTITY_RESOLVER_CONFIG = {
-        'model_type': 'exact_match'
-    }
-
-This is merely a fall-back option, for when you need to get an end-to-end app running without Elasticsearch. However, this approach is not optimal, and unsuitable for a broad-vocabulary conversational app.
