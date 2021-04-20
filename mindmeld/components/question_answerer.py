@@ -17,6 +17,7 @@ This module contains the question answerer component of MindMeld.
 import copy
 import json
 import logging
+import os
 import re
 from abc import ABC, abstractmethod
 
@@ -55,10 +56,7 @@ ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_
 EMBEDDING_FIELD_STRING = "_embedding"
 
 
-class QuestionAnswerer:
-    """The question answerer is primarily an information retrieval system that provides all the
-    necessary functionality for interacting with the application's knowledge base.
-    """
+class QuestionAnswererWithoutElasticsearch:
 
     def __init__(self, app_path, resource_loader=None, es_host=None, config=None):
         """Initializes a question answerer
@@ -67,10 +65,9 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
             resource_loader (ResourceLoader): An object which can load resources for the answerer
             es_host (str): The Elasticsearch host server
+            config (dict): The QA config if passed directly rather than loaded from the app config
         """
-        self._resource_loader = (
-            resource_loader or ResourceLoader.create_resource_loader(app_path)
-        )
+        self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
         self._app_namespace = get_app_namespace(app_path)
@@ -85,6 +82,87 @@ class QuestionAnswerer:
         self._embedder_model = None
         if self._qa_config.get("model_type") == "embedder":
             self._embedder_model = create_embedder_model(app_path, self._qa_config)
+
+        self._app_path = app_path
+
+    @classmethod
+    def load_kb(
+        cls,
+        app_namespace,
+        index_name,
+        data_file,
+        es_host=None,
+        es_client=None,
+        connect_timeout=2,
+        clean=False,
+        app_path=None,
+        config=None,
+    ):
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
+
+        Args:
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int, optional): The amount of time for a
+                connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+        print("cool !!!")
+
+
+class QuestionAnswerer:
+    """The question answerer is primarily an information retrieval system that provides all the
+    necessary functionality for interacting with the application's knowledge base.
+    """
+
+    def __new__(cls, app_path, resource_loader=None, es_host=None, config=None):
+
+        config = config or get_classifier_config("question_answering", app_path=app_path)
+        if config.get("model_type") == "embedder_without_elasticsearch":
+            return QuestionAnswererWithoutElasticsearch(app_path, resource_loader=resource_loader,
+                                                        es_host=es_host, config=config)
+
+        return super(QuestionAnswerer, cls).__new__(app_path, resource_loader=resource_loader,
+                                                    es_host=es_host, config=config)
+
+    def __init__(self, app_path, resource_loader=None, es_host=None, config=None):
+        """Initializes a question answerer
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the answerer
+            es_host (str): The Elasticsearch host server
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+        self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
+        self._es_host = es_host
+        self.__es_client = None
+        self._app_namespace = get_app_namespace(app_path)
+        self._es_field_info = {}
+        if config:
+            self._qa_config = config
+        else:
+            self._qa_config = get_classifier_config(
+                "question_answering", app_path=app_path
+            )
+
+        self._embedder_model = None
+        if self._qa_config.get("model_type") == "embedder":
+            self._embedder_model = create_embedder_model(app_path, self._qa_config)
+
+        self._app_path = app_path
 
     @property
     def _es_client(self):
@@ -261,19 +339,59 @@ class QuestionAnswerer:
             except ElasticsearchException as e:
                 raise KnowledgeBaseError from e
 
-    def config(self, config):
-        """Summary
-
-        Args:
-            config: Description
-        """
-        raise NotImplementedError
-
     def save_embedder_model(self):
         self._embedder_model.dump()
 
-    @staticmethod
+    def _load_kbs(self, kbs_data_folder, app_namespace=None, clean=False):
+
+        if not os.path.exists(kbs_data_folder):
+            msg = f"Folder doesn't exist {kbs_data_folder} to load all KBs related to this app"
+            logger.error(msg)
+            return
+
+        for file_name in os.listdir(kbs_data_folder):
+            ext = os.path.splitext(os.path.basename(file_name))[1]
+            if ext != ".json":
+                msg = f"Discarding file {file_name} in KBs folder {kbs_data_folder} due to " \
+                      f"incorrect extension. Expected `.json` but found `{ext}`"
+                logger.error(msg)
+                continue
+
+            self._load_kb(os.path.join(kbs_data_folder, file_name),
+                          app_namespace=app_namespace,
+                          clean=clean)
+
+    def _load_kb(
+        self,
+        data_file,
+        app_namespace=None,
+        index_name=None,
+        es_host=None,
+        es_client=None,
+        connect_timeout=2,
+        clean=False,
+        app_path=None,
+        config=None,
+    ):
+
+        app_namespace = app_namespace or self._app_namespace
+        index_name = index_name or os.path.splitext(os.path.basename(data_file))[0]
+        app_path = app_path or self._app_path
+
+        if not os.path.exists(data_file):
+            if not os.path.exists(kbs_data_folder):
+                msg = f"File {data_file} not found. Not building index."
+                logger.error(msg)
+                return
+
+        self.__class__.load_kb(app_namespace, index_name, data_file,
+                               es_host=es_host, es_client=es_client,
+                               connect_timeout=connect_timeout, clean=clean,
+                               app_path=app_path, config=config)
+
+    @classmethod
     def load_kb(
+        cls,
         app_namespace,
         index_name,
         data_file,
@@ -306,6 +424,26 @@ class QuestionAnswerer:
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
 
+        embedder_model = None
+        embedding_fields = []
+        if not app_path and not config:
+            logger.warning(
+                "You must provide either the application path to upload embeddings as specified"
+                " in the app config or directly provide the QA config."
+            )
+        else:
+            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
+            if qa_config.get("model_type") == "embedder_without_elasticsearch":
+                return QuestionAnswererWithoutElasticsearch.load_kb(
+                    app_namespace, index_name, data_file,
+                    es_host=es_host, es_client=es_client,
+                    connect_timeout=connect_timeout, clean=clean,
+                    app_path=app_path, config=config)
+            embedder_model = create_embedder_model(app_path, qa_config)
+            embedding_fields = (
+                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            )
+
         if clean:
             try:
                 delete_index(app_namespace, index_name, es_host, es_client)
@@ -316,30 +454,11 @@ class QuestionAnswerer:
                     app_namespace,
                 )
 
-        embedder_model = None
-        embedding_fields = []
-        if not app_path and not config:
-            logger.warning(
-                "You must provide either the application path to upload embeddings as specified"
-                " in the app config or directly provide the QA config."
-            )
-        else:
-            if config:
-                qa_config = config
-            else:
-                qa_config = get_classifier_config(
-                    "question_answering", app_path=app_path
-                )
-            embedder_model = create_embedder_model(app_path, qa_config)
-            embedding_fields = (
-                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
-            )
-
-        def _doc_data(data_file):
+        def _doc_data_count(data_file):
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
-                if line.strip() == "[":
+                if line.strip().startswith("["):
                     docs = json.load(data_fp)
                     count = len(docs)
                 else:
@@ -350,9 +469,7 @@ class QuestionAnswerer:
 
         def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
             def match_regex(string, pattern_list):
-                for pattern in pattern_list:
-                    if re.match(pattern, string):
-                        return True
+                return any([re.match(pattern, string) for pattern in pattern_list])
 
             def transform(doc, embedder_model, embedding_fields):
                 if embedder_model:
@@ -379,7 +496,7 @@ class QuestionAnswerer:
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
-                if line.strip() == "[":
+                if line.strip().startswith("["):
                     logging.debug("Loading data from a json file.")
                     docs = json.load(data_fp)
                     for doc in docs:
@@ -390,7 +507,7 @@ class QuestionAnswerer:
                         doc = json.loads(line)
                         yield transform(doc, embedder_model, embedding_fields)
 
-        docs_count = _doc_data(data_file)
+        docs_count = _doc_data_count(data_file)
         if embedder_model and len(embedding_fields) == 0:
             logger.warning(
                 "No embedding fields specified in the app config, "
