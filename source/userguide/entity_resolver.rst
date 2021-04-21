@@ -173,66 +173,53 @@ Create the synonyms and make them available to your MindMeld app, going entity t
 
 #. Choose a new entity type (stop when you have covered all the entity types for the app)
 
-Access the entity resolver
-----------------------------
+Train the entity resolver
+-------------------------
 
-Working with any natural language processor component falls into two broad phases:
+Once all of the entity mapping files are generated, you can either (1) build the whole NLP pipeline, which initializes and trains the resolver along with the other components, or (2) access and train a resolver as a standalone component. In the following sections, we use the `Food Ordering blueprint <https://mindmeld.com/docs/blueprints/food_ordering.html>`_ to demonstrate using an entity resolver.
 
- - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data.
- - Then, conduct experimentation in the Python shell.
+When no resolver configurations are provided, the Entity Resolver module by default uses the `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval. Once Elasticsearch is up and running, no configuration is further needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
 
-Once all of the entity mapping files are generated, you can either (1) train the resolver as a standalone component, or (2) build the whole NLP pipeline, which trains the resolver along with the other components. We use the `Food Ordering blueprint <https://mindmeld.com/docs/blueprints/food_ordering.html>`_ to demonstrate using an entity resolver.
+.. note::
 
-Access through the `nlp` module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   If you choose not to use Elasticsearch, MindMeld now provides alternate choices for entity resolution. See :ref:`Resolver configurations <resolver_configurations>` below for specifying a custom resolver configuration in your app.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the MindMeld :mod:`nlp` module and instantiate an object with the path to your MindMeld project.
+One can simply build all the entity resolvers required for an app in one-go by using :meth:`NaturalLanguageProcessor.build()`. Among its other tasks, this initializes as well as fits the required resolvers. Later on, when you run :meth:`NaturalLanguageProcessor.process()`, the NLP pipeline includes the resolved entities in its results.
 
 .. code-block:: python
 
-   from mindmeld.components.nlp import NaturalLanguageProcessor
-   nlp = NaturalLanguageProcessor(app_path='food_ordering')
+  from mindmeld import configure_logs; configure_logs()
+  from mindmeld.components.nlp import NaturalLanguageProcessor
+  nlp = NaturalLanguageProcessor(app_path='food_ordering')
+  nlp.build()
 
-Since the list of entity types for a selected intent are not readily visible as in the case of domains' name or intents' names, we will have to first extract the entity types present in the training data of the selected intent (see :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` to learn about data formatting). Once identified, we can obtain entity resolvers for each entity type as follows:
+Upon building all the required resolvers, to access a particular resolver, adapt the following snippet to the particulars of your app:
 
 .. code-block:: python
 
-   nlp.domains['ordering'].intents['build_order'].build()
-   er = nlp.domains['ordering'].intents['build_order'].extract_entities()['dish'].entity_resolver
-   er
+  er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
+  er
 
 .. code-block:: console
 
-   <ElasticsearchEntityResolver ready: False, dirty: False>
+  <ElasticsearchEntityResolver ready: True, dirty: False>
 
-Alternatively, build the NLP pipeline using :meth:`NaturalLanguageProcessor.build()`. Among its other tasks, this initializes as well as fits the resolver. When you run :meth:`NaturalLanguageProcessor.process()`, the NLP pipeline includes the resolved entities in its results.
+Access & train an entity resolver as standalone component
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: python
-
-   nlp.domains['ordering'].intents['build_order'].build()
-   er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
-   er
-
-.. code-block:: console
-
-   <ElasticsearchEntityResolver ready: False, dirty: False>
-
-Access through `EntityResolverFactory` module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-One can also use an entity resolver independent of the :mod:`nlp` pipeline. This could be useful to train/evaluate performances of different resolvers on your dataset(s). To do so, import `EntityResolverFactory` module as follows:
+Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate performances of different resolvers on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
 
 .. code-block:: python
 
    from mindmeld.components import EntityResolverFactory
-   er = EntityResolverFactory(app_path='food_ordering', entity_type='dish')
+   er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish')
    er
 
 .. code-block:: console
 
    <ElasticsearchEntityResolver ready: False, dirty: False>
 
-If no resolver configs are specified, the module loads a resolver based on default configs, which involves `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ based entity resolution. Instead, one can specify the type of resolver they would like to use in the arguments of `EntityResolverFactory` as follows:
+If no resolver configs are specified while creating a resolver, as mentioned previously, the module loads one based on default configs, which involves `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ based entity resolution. Instead, one can specify the type of resolver they would like to use in the arguments of `create_resolver()` as follows:
 
 .. code-block:: python
 
@@ -249,10 +236,7 @@ If no resolver configs are specified, the module loads a resolver based on defau
 
    <SentenceBertCosSimEntityResolver ready: False, dirty: False>
 
-Train the entity resolver
--------------------------
-
-Use the :meth:`.fit()` method to train a entity resolution model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console.
+Use the :meth:`.fit()` method to train an entity resolution model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console.
 
 .. _baseline_er_fit:
 
@@ -263,13 +247,33 @@ Use the :meth:`.fit()` method to train a entity resolution model. Depending on t
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP components. The resulting baseline model should provide a reasonable starting point. You can then try alternate settings as you seek to identify the optimal resolver for your app.
 
-.. note::
-
-   - Since a default resolver uses `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ for resolving entities, one needs to set up Elasticsearch before fitting. Once Elasticsearch is up and running, no configuration is needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
-   - If you choose not to use Elasticsearch, MindMeld now provides alternate choices for entity resolution. See :ref:`model_settings <model_settings>` below for those alternate choices.
+.. _resolver_configurations:
 
 Resolver configurations
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+To override MindMeld's default entity resolver configuration with custom settings, you can either edit the app configuration file, or, you can call the `create_resolver()` method with appropriate arguments. When you define custom resolver settings in your app's ``config.py``, the `create_resolver()` method uses those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named :data:`ENTITY_RESOLVER_CONFIG`.
+
+Here's an example from a ``config.py`` file where custom settings optimized for the app override the preset configuration for the entity resolver.
+
+.. code-block:: python
+
+  ENTITY_RESOLVER_CONFIG = {
+      'model_type': 'resolver',
+      "model_settings": {
+          "resolver_type": "sbert_cosine_similarity",
+          "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
+          "bert_output_type": "mean",
+          "quantize_model": True,
+          "concat_last_n_layers": 4,
+          "normalize_token_embs": True,
+          "augment_lower_case": False,
+          "augment_average_synonyms_embeddings": True,
+          "batch_size": 16,
+      }
+  }
+
+Following are the various details useful in creating your custom configuration.
 
 ``'model_type'`` (:class:`str`)
   |
@@ -279,12 +283,12 @@ Resolver configurations
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Always a dictionary with the non-optional key ``'resolver_type'``, whose value specifies the algorithm to use. Allowed values are shown in the table below.
+  Always a dictionary with a non-optional key ``'resolver_type'``, whose value specifies the algorithm to use. Allowed values are shown in the table below.
 
   .. _model_settings:
 
   ============================== =============================================================================================== =======================================================
-  Value                          Underlying algorithm                                                                            Reference for configurable parameters
+  Allowed Values                 Underlying algorithm                                                                            Reference for configurable parameters
   ============================== =============================================================================================== =======================================================
   ``'text_relevance'``           `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_                                :ref:`See optional parameters <configs_text_relevance>`
   ``'tfidf_cosine_similarity'``  `term frequency-inverse document frequency <https://en.wikipedia.org/wiki/Tf%E2%80%93idf>`_     :ref:`See optional parameters <configs_tfidf>`
@@ -292,8 +296,8 @@ Resolver configurations
   ``'exact_match'``              Exact text matching                                                                             :ref:`See optional parameters <configs_exact_match>`
   ============================== =============================================================================================== =======================================================
 
-Optional parameters
-^^^^^^^^^^^^^^^^^^^
+Optional parameters in resolver configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. _configs_text_relevance:
 
@@ -330,7 +334,7 @@ Optional parameters
 3. **sbert_cosine_similarity**
     |
 
-    ``'pretrained_name_or_abspath'`` (`type`: :class:`str`, `default`: `distilbert-base-nli-stsb-mean-tokens`)
+    ``'pretrained_name_or_abspath'`` (`type`: :class:`str`, `default`: `distilbert-base-nli-stsb-mean-tokens <https://huggingface.co/sentence-transformers/distilbert-base-nli-stsb-mean-tokens>`_)
       |
 
       Name of a model from `Huggingface models <https://huggingface.co/models>`_ or a folder path to which the model is downloaded.
@@ -338,7 +342,7 @@ Optional parameters
     ``'bert_output_type'`` (`type`: :class:`str`, `default`: `mean`, `choices`: `mean` or `cls`)
       |
 
-      Specifies if the embedding for a given phrase should be the traditional `"[CLS]" <https://www.aclweb.org/anthology/n19-1423.pdf>`_ output or a `mean pooling <https://www.aclweb.org/anthology/D19-1410.pdf>`_ of all sub-token's outputs.
+      Specifies if the embedding for a given phrase should be the traditional `"[CLS]" <https://www.aclweb.org/anthology/n19-1423.pdf>`_ output or a `mean pool <https://www.aclweb.org/anthology/D19-1410.pdf>`_ of last hidden state of the underlying model.
 
     ``'quantize_model'`` (`type`: :class:`bool`, `default`: `True`)
       |
@@ -348,12 +352,12 @@ Optional parameters
     ``'concat_last_n_layers'`` (`type`: :class:`int`, `default`: `4`)
       |
 
-      Since transformer architecture based BERT models have several layers stacked, this parameter specifies how many of the last `n` layers' representation needs to be concatenated.
+      Since transformer architecture based BERT models have several layers stacked, this parameter specifies how many of the last `n` layers' representation needs to be concatenated. Generally, concatenating more layers improves performance but at the cost of inference time.
 
     ``'normalize_token_embs'`` (`type`: :class:`bool`, `default`: `True`)
       |
 
-      Specifies if the sub-token level outputs are to be unit normalized.
+      Specifies if the outputs (specified by ``'bert_output_type'``) are to be unit normalized.
 
 
     ``'augment_lower_case'`` (`type`: :class:`bool`, `default`: `False`)
@@ -387,19 +391,23 @@ Optional parameters
 Clean fitting
 ^^^^^^^^^^^^^
 
-In cases of **text_relevance** and **sbert_cosine_similarity** type resolvers when the `.fit()` method is run for the first time, MindMeld creates all the necessary encodings required for inference and dumps them in a cache file if required. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. For the sake of speed, subsequent calls to `.fit()` only update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
+In case of **text_relevance** resolver, when the `.fit()` method is run for the first time, MindMeld creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. For the sake of speed, subsequent calls to the `.fit()` only updates the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
 
 .. code-block:: python
 
    from mindmeld import configure_logs; configure_logs()
    er.fit(clean=True)
 
-Unlike the other NLP components, there exists no `.dump()` method for resolver models since there are no model weights to be saved to disk. Additionally, the `.load()` method simply redirects to the `.fit()` method.
+Similarly, in case **sbert_cosine_similarity** resolver when the `.fit()` method is run for the first time, MindMeld creates all the necessary encodings required for inference and dumps them in a cache file. For the sake of speed, subsequent calls to `.fit()` only updates the existing index rather than creating a new one from scratch. This means that new objects' encodings are added, and the existing cache file is updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as above.
+
+.. note::
+
+   Unlike the other NLP components, there exists no `.dump()` method for resolver models since there is no necessity to save model weights to disk. On a similar note, the `.load()` method does not load any model weights and simply redirects to the `.fit()` method with `clean=False`.
 
 Run the entity resolver
 -----------------------
 
-Once the resolver has been fit, test the entity resolver by passing ``Entity`` objects as follows.
+Once the resolver is fit, use it by passing ``Entity`` objects as follows.
 
 .. code-block:: python
 
