@@ -193,6 +193,12 @@ One can simply build all the entity resolvers required for an app in one-go by u
   nlp = NaturalLanguageProcessor(app_path='food_ordering')
   nlp.build()
 
+In case you wish to build only resolvers of a particular domain-intent hierarchy, follow:
+
+.. code-block:: python
+
+  nlp.domains['ordering'].intents['build_order'].build()
+
 Upon building all the required resolvers, to access a particular resolver, adapt the following snippet to the particulars of your app:
 
 .. code-block:: python
@@ -207,10 +213,11 @@ Upon building all the required resolvers, to access a particular resolver, adapt
 Access & train an entity resolver as standalone component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate performances of different resolvers on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
+Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate their performances on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
 
 .. code-block:: python
 
+   from mindmeld import configure_logs; configure_logs()
    from mindmeld.components import EntityResolverFactory
    er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish')
    er
@@ -218,23 +225,6 @@ Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipe
 .. code-block:: console
 
    <ElasticsearchEntityResolver ready: False, dirty: False>
-
-If no resolver configs are specified while creating a resolver, as mentioned previously, the module loads one based on default configs, which involves `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ based entity resolution. Instead, one can specify the type of resolver they would like to use in the arguments of `create_resolver()` as follows:
-
-.. code-block:: python
-
-    ENTITY_RESOLVER_CONFIG = {
-        'model_type': 'resolver',
-        "model_settings": {
-            "resolver_type": "sbert_cosine_similarity",
-        }
-    }
-    er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish', er_config=ENTITY_RESOLVER_CONFIG)
-    er
-
-.. code-block:: console
-
-   <SentenceBertCosSimEntityResolver ready: False, dirty: False>
 
 Use the :meth:`.fit()` method to train an entity resolution model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console.
 
@@ -244,13 +234,93 @@ Use the :meth:`.fit()` method to train an entity resolution model. Depending on 
 
    from mindmeld import configure_logs; configure_logs()
    er.fit()
+   er
+
+.. code-block:: console
+
+   <ElasticsearchEntityResolver ready: True, dirty: False>
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP components. The resulting baseline model should provide a reasonable starting point. You can then try alternate settings as you seek to identify the optimal resolver for your app.
+
+Run the entity resolver
+-----------------------
+
+Once the resolver has been fit, test the entity resolver by passing ``Entity`` objects as follows.
+
+.. code-block:: python
+
+  from mindmeld.core import Entity
+  er.predict(Entity(text='gluten free pepperoni pizza', entity_type='dish'))
+
+
+.. code-block:: console
+
+    [{'cname': 'Pepperoni Pizza (Gluten Free)',
+      'id': 'B01D8TCLJ2',
+      'score': 119.62746,
+      'top_synonym': 'gluten free pepperoni pizza'},
+     {'cname': 'Margherita Pizza (Gluten Free)',
+      'id': 'B01D8TCRWI',
+      'score': 38.989628,
+      'top_synonym': 'gluten-free margherita pizza'},
+     {'cname': 'Barbecued Chicken Pizza (Gluten Free)',
+      'id': 'B01D8TCCK0',
+      'score': 35.846962,
+      'top_synonym': 'gluten-free barbeque chicken pizza'},
+     {'cname': 'Plain Cheese Pizza (Gluten Free)',
+      'id': 'B01D8TCJEE',
+      'score': 35.43069,
+      'top_synonym': 'cheese pizza gluten free'},
+     {'cname': 'Sausage and Mushroom Pizza (Gluten Free)',
+      'id': 'B01D8TD5T2',
+      'score': 35.094833,
+      'top_synonym': 'gluten-free sausage and mushroom pizza'},
+     {'cname': 'Four Cheese White Pizza (Gluten Free)',
+      'id': 'B01D8TD9DO',
+      'score': 31.833534,
+      'top_synonym': 'Four Cheese White Pizza (Gluten Free)'},
+     {'cname': 'The Truck Stop Burger',
+      'id': 'B01DWO5N5W',
+      'score': 28.069,
+      'top_synonym': 'gluten free burger'},
+     {'cname': 'Pesto with Red Pepper and Goat Cheese (Gluten Free)',
+      'id': 'B01D8TCA48',
+      'score': 28.018322,
+      'top_synonym': 'Pesto with Red Pepper and Goat Cheese (Gluten Free)'},
+     {'cname': 'Gluten Free Waffle',
+      'id': 'B01GXT877O',
+      'score': 27.94693,
+      'top_synonym': 'Gluten Free Waffle'},
+     {'cname': 'Lamb Platter',
+      'id': 'B01CRF8WAK',
+      'score': 27.913887,
+      'top_synonym': 'gluten free lamb platter'}]
+
+Each entry in the list of resolved entities contains:
+
+==================== ===
+**canonical name**   The name used to refer to the real-world entity.
+
+**unique ID**        The ID as listed in the entity mapping file which should correspond with a Knowledge Base object.
+
+**score**            A score which indicates the strength of the match. This score is a relative value (higher scores are better). It is not normalized accross all entity types or queries.
+
+**top synonym**      The synonym in the whitelist of this canonical form that most closely matched the user's query.
+
+**sort factor**      If the sort factor is provided in the entity mapping file, it is also returned.
+==================== ===
+
+The Entity Resolver returns a ranked list of the top ten canonical forms for each recognized entity. Taking the top-ranked value usually works, but in some cases it's preferable to look at other options in the ranked list. Here are two examples:
+
+1. When building a browsing functionality in your app, you might want to offer the user a choice of the top three resolved values.
+2. Suppose the user has provided some constraints in a previous query. The entity resolver has no access to this previous context at resolution time, so the top-ranked result may not satisfy previously defined constraints. Here, you may want to look deeper into the ranked list.
+
+The section :ref:`Consider context-aware entity resolution <context_aware_resolution>` explains how to handles scenarios like this.
 
 .. _resolver_configurations:
 
 Resolver configurations
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 To override MindMeld's default entity resolver configuration with custom settings, you can either edit the app configuration file, or, you can call the `create_resolver()` method with appropriate arguments. When you define custom resolver settings in your app's ``config.py``, the `create_resolver()` method uses those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named :data:`ENTITY_RESOLVER_CONFIG`.
 
@@ -263,15 +333,22 @@ Here's an example from a ``config.py`` file where custom settings optimized for 
       "model_settings": {
           "resolver_type": "sbert_cosine_similarity",
           "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
-          "bert_output_type": "mean",
           "quantize_model": True,
           "concat_last_n_layers": 4,
           "normalize_token_embs": True,
-          "augment_lower_case": False,
-          "augment_average_synonyms_embeddings": True,
-          "batch_size": 16,
       }
   }
+
+Alternatively, you can also specify the type of resolver through the `er_config` argument while creating a resolver as below.
+
+.. code-block:: python
+
+  er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish', er_config=ENTITY_RESOLVER_CONFIG)
+  er
+
+.. code-block:: console
+
+   <SentenceBertCosSimEntityResolver ready: False, dirty: False>
 
 Following are the various details useful in creating your custom configuration.
 
@@ -388,96 +465,35 @@ Optional parameters in resolver configuration
    - To use the BERT based resolver (``'sbert_cosine_similarity'``), make sure you've installed the extra requirement with the command ``pip install mindmeld[bert]``.
    - Since the BERT models are loaded directly from huggingface, one can utilize a diverse set of models including distilled versions such as `distill-bert <https://huggingface.co/distilbert-base-cased>`_ or multilingual versions such as `xlm-roberta-base <https://huggingface.co/xlm-roberta-base>`_.
 
-Clean fitting
-^^^^^^^^^^^^^
+Clean Fitting
+-------------
 
-In case of **text_relevance** resolver, when the `.fit()` method is run for the first time, MindMeld creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. For the sake of speed, subsequent calls to the `.fit()` only updates the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
+In case of **text_relevance** resolver, when the `.fit()` method is run for the first time, MindMeld creates a Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine.
+
+For the sake of speed, subsequent calls to :meth:`EntityResolver.fit()` update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
 
 .. code-block:: python
 
    from mindmeld import configure_logs; configure_logs()
    er.fit(clean=True)
 
-Similarly, in case **sbert_cosine_similarity** resolver when the `.fit()` method is run for the first time, MindMeld creates all the necessary encodings required for inference and dumps them in a cache file. For the sake of speed, subsequent calls to `.fit()` only updates the existing index rather than creating a new one from scratch. This means that new objects' encodings are added, and the existing cache file is updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as above.
+Clean fitting for non-Elasticsearch resolvers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In case of **sbert_cosine_similarity** resolver, when the `.fit()` method is run for the first time, MindMeld creates all the necessary encodings required for inference and dumps them in a cache file. For the sake of speed, subsequent calls to `.fit()` only updates the existing index rather than creating a new one from scratch. This means that new objects' encodings are added, and the existing cache file is updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows:
+
+.. code-block:: python
+
+   from mindmeld import configure_logs; configure_logs()
+   er.fit(clean=True)
+
+In case of **tfidf_cosine_similarity** and **exact_match** resolvers, since there is no cache to be dumped or loaded, setting `clean=True` has no affect on the fitting process.
 
 .. note::
 
    Unlike the other NLP components, there exists no `.dump()` method for resolver models since there is no necessity to save model weights to disk. On a similar note, the `.load()` method does not load any model weights and simply redirects to the `.fit()` method with `clean=False`.
 
-Run the entity resolver
------------------------
-
-Once the resolver is fit, use it by passing ``Entity`` objects as follows.
-
-.. code-block:: python
-
-  from mindmeld.core import Entity
-  er.predict(Entity(text='gluten free pepperoni pizza', entity_type='dish'))
-
-
-.. code-block:: console
-
-    [{'cname': 'Pepperoni Pizza (Gluten Free)',
-      'id': 'B01D8TCLJ2',
-      'score': 119.62746,
-      'top_synonym': 'gluten free pepperoni pizza'},
-     {'cname': 'Margherita Pizza (Gluten Free)',
-      'id': 'B01D8TCRWI',
-      'score': 38.989628,
-      'top_synonym': 'gluten-free margherita pizza'},
-     {'cname': 'Barbecued Chicken Pizza (Gluten Free)',
-      'id': 'B01D8TCCK0',
-      'score': 35.846962,
-      'top_synonym': 'gluten-free barbeque chicken pizza'},
-     {'cname': 'Plain Cheese Pizza (Gluten Free)',
-      'id': 'B01D8TCJEE',
-      'score': 35.43069,
-      'top_synonym': 'cheese pizza gluten free'},
-     {'cname': 'Sausage and Mushroom Pizza (Gluten Free)',
-      'id': 'B01D8TD5T2',
-      'score': 35.094833,
-      'top_synonym': 'gluten-free sausage and mushroom pizza'},
-     {'cname': 'Four Cheese White Pizza (Gluten Free)',
-      'id': 'B01D8TD9DO',
-      'score': 31.833534,
-      'top_synonym': 'Four Cheese White Pizza (Gluten Free)'},
-     {'cname': 'The Truck Stop Burger',
-      'id': 'B01DWO5N5W',
-      'score': 28.069,
-      'top_synonym': 'gluten free burger'},
-     {'cname': 'Pesto with Red Pepper and Goat Cheese (Gluten Free)',
-      'id': 'B01D8TCA48',
-      'score': 28.018322,
-      'top_synonym': 'Pesto with Red Pepper and Goat Cheese (Gluten Free)'},
-     {'cname': 'Gluten Free Waffle',
-      'id': 'B01GXT877O',
-      'score': 27.94693,
-      'top_synonym': 'Gluten Free Waffle'},
-     {'cname': 'Lamb Platter',
-      'id': 'B01CRF8WAK',
-      'score': 27.913887,
-      'top_synonym': 'gluten free lamb platter'}]
-
-Each entry in the list of resolved entities contains:
-
-==================== ===
-**canonical name**   The name used to refer to the real-world entity.
-
-**unique ID**        The ID as listed in the entity mapping file which should correspond with a Knowledge Base object.
-
-**score**            A score which indicates the strength of the match. This score is a relative value (higher scores are better). It is not normalized accross all entity types or queries.
-
-**top synonym**      The synonym in the whitelist of this canonical form that most closely matched the user's query.
-
-**sort factor**      If the sort factor is provided in the entity mapping file, it is also returned.
-==================== ===
-
-Unless specified, a resolver returns a ranked list of the top (at most) twenty canonical forms for each recognized entity. One can set the number of top results to return by passing in the argument `top_n` to the `.predict()` method. Taking the top-ranked value usually works, but in some cases it's preferable to look at other options in the ranked list. Here are two example use-cases:
-
-1. When building a browsing functionality in your app, you might want to offer the user a choice of the top three resolved values.
-2. Suppose the user has provided some constraints in a previous query. The entity resolver has no access to this previous context at resolution time, so the top-ranked result may not satisfy previously defined constraints. Here, you may want to look deeper into the ranked list.
-
-The next section explains how to handles scenarios like this.
+.. _context_aware_resolution:
 
 Consider context-aware entity resolution
 ----------------------------------------
