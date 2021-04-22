@@ -53,296 +53,29 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
+ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH = ["embedder_without_elasticsearch"]
 EMBEDDING_FIELD_STRING = "_embedding"
 
 
-class QuestionAnswererWithoutElasticsearch:
+class BaseQuestionAnswerer:
 
-    def __init__(self, app_path, resource_loader=None, es_host=None, config=None):
-        """Initializes a question answerer
-
-        Args:
-            app_path (str): The path to the directory containing the app's data
-            resource_loader (ResourceLoader): An object which can load resources for the answerer
-            es_host (str): The Elasticsearch host server
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-        self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
-        self._es_host = es_host
-        self.__es_client = None
-        self._app_namespace = get_app_namespace(app_path)
-        self._es_field_info = {}
-        if config:
-            self._qa_config = config
-        else:
-            self._qa_config = get_classifier_config(
-                "question_answering", app_path=app_path
-            )
-
-        self._embedder_model = None
-        if self._qa_config.get("model_type") == "embedder":
-            self._embedder_model = create_embedder_model(app_path, self._qa_config)
-
+    def __init__(self, app_path):
         self._app_path = app_path
-
-    @classmethod
-    def load_kb(
-        cls,
-        app_namespace,
-        index_name,
-        data_file,
-        es_host=None,
-        es_client=None,
-        connect_timeout=2,
-        clean=False,
-        app_path=None,
-        config=None,
-    ):
-        """Loads documents from disk into the specified index in the knowledge
-        base. If an index with the specified name doesn't exist, a new index
-        with that name will be created in the knowledge base.
-
-        Args:
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int, optional): The amount of time for a
-                connection to the Elasticsearch host.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-        print("cool !!!")
-
-
-class QuestionAnswerer:
-    """The question answerer is primarily an information retrieval system that provides all the
-    necessary functionality for interacting with the application's knowledge base.
-    """
-
-    def __new__(cls, app_path, resource_loader=None, es_host=None, config=None):
-
-        config = config or get_classifier_config("question_answering", app_path=app_path)
-        if config.get("model_type") == "embedder_without_elasticsearch":
-            return QuestionAnswererWithoutElasticsearch(app_path, resource_loader=resource_loader,
-                                                        es_host=es_host, config=config)
-
-        return super(QuestionAnswerer, cls).__new__(app_path, resource_loader=resource_loader,
-                                                    es_host=es_host, config=config)
-
-    def __init__(self, app_path, resource_loader=None, es_host=None, config=None):
-        """Initializes a question answerer
-
-        Args:
-            app_path (str): The path to the directory containing the app's data
-            resource_loader (ResourceLoader): An object which can load resources for the answerer
-            es_host (str): The Elasticsearch host server
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-        self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
-        self._es_host = es_host
-        self.__es_client = None
         self._app_namespace = get_app_namespace(app_path)
-        self._es_field_info = {}
-        if config:
-            self._qa_config = config
-        else:
-            self._qa_config = get_classifier_config(
-                "question_answering", app_path=app_path
-            )
 
-        self._embedder_model = None
-        if self._qa_config.get("model_type") == "embedder":
-            self._embedder_model = create_embedder_model(app_path, self._qa_config)
+    @abstractmethod
+    def get(self, *args, **kwargs):
+        raise NotImplementedError
 
-        self._app_path = app_path
+    @abstractmethod
+    def build_search(self, *args, **kwargs):
+        raise NotImplementedError
 
-    @property
-    def _es_client(self):
-        # Lazily connect to Elasticsearch
-        if self.__es_client is None:
-            self.__es_client = create_es_client(self._es_host)
-        return self.__es_client
+    @abstractmethod
+    def load_kb(self, app_namespace, index_name, data_file, **kwargs):
+        raise NotImplementedError
 
-    @property
-    def _query_type(self):
-        if self._qa_config.get("model_type") in ALL_QUERY_TYPES:
-            return self._qa_config.get("model_type")
-        else:
-            return DEFAULT_QUERY_TYPE
-
-    def get(self, index, size=10, query_type=None, **kwargs):
-        """Gets a collection of documents from the knowledge base matching the provided
-        search criteria. This API provides a simple interface for developers to specify a list of
-        knowledge base field and query string pairs to find best matches in a similar way as in
-        common Web search interfaces. The knowledge base fields to be used depend on the mapping
-        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
-        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
-        base object. The mapping is often application specific and is dependent on the data model
-        developers choose to use when building the knowledge base.
-
-        Examples:
-
-            >>> question_answerer.get(index='menu_items',
-                                      name='pork and shrimp',
-                                      restaurant_id='B01CGKGQ40',
-                                      _sort='price',
-                                      _sort_type='asc')
-
-        Args:
-            index (str): The name of an index.
-            size (int): The maximum number of records, default to 10.
-            query_type (str): Whether the search is over structured, unstructured and whether to use
-                              text signals for ranking, embedder signals, or both.
-            id (str): The id of a particular document to retrieve.
-            _sort (str): Specify the knowledge base field for custom sort.
-            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
-                              'distance'.
-            _sort_location (dict): The origin location to be used when sorting by distance.
-
-        Returns:
-            list: A list of matching documents.
-        """
-        doc_id = kwargs.get("id")
-
-        query_type = query_type or self._query_type
-
-        # If an id was passed in, simply retrieve the specified document
-        if doc_id:
-            logger.info(
-                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-            )
-            s = self.build_search(index)
-            s = s.filter(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
-            return results
-
-        sort_clause = {}
-        query_clauses = []
-
-        # iterate through keyword arguments to get KB field and value pairs for search and custom
-        # sort criteria
-        for key, value in kwargs.items():
-            logger.debug("Processing argument: key= %s value= %s.", key, value)
-            if key == "_sort":
-                sort_clause["field"] = value
-            elif key == "_sort_type":
-                sort_clause["type"] = value
-            elif key == "_sort_location":
-                sort_clause["location"] = value
-            elif "embedder" in query_type and self._embedder_model:
-                if "text" in query_type or "keyword" in query_type:
-                    query_clauses.append({key: value})
-                embedded_value = self._embedder_model.get_encodings([value])[0]
-                embedded_key = key + EMBEDDING_FIELD_STRING
-                query_clauses.append({embedded_key: embedded_value})
-            else:
-                query_clauses.append({key: value})
-                logger.debug("Added query clause: field= %s value= %s.", key, value)
-
-        logger.debug("Custom sort criteria %s.", sort_clause)
-
-        # build Search object with overriding ranking setting to require all query clauses are
-        # matched.
-        s = self.build_search(index, {"query_clauses_operator": "and"})
-
-        # add query clauses to Search object.
-        for clause in query_clauses:
-            s = s.query(query_type=query_type, **clause)
-
-        # add custom sort clause if specified.
-        if sort_clause:
-            s = s.sort(
-                field=sort_clause.get("field"),
-                sort_type=sort_clause.get("type"),
-                location=sort_clause.get("location"),
-            )
-
-        results = s.execute(size=size)
-        return results
-
-    def build_search(self, index, ranking_config=None):
-        """Build a search object for advanced filtered search.
-
-        Args:
-            index (str): index name of knowledge base object.
-            ranking_config (dict): overriding ranking configuration parameters.
-        Returns:
-            Search: a Search object for filtered search.
-        """
-
-        if not does_index_exist(app_namespace=self._app_namespace, index_name=index):
-            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
-
-        # get index name with app scope
-        index = get_scoped_index_name(self._app_namespace, index)
-
-        # load knowledge base field information for the specified index.
-        self._load_field_info(index)
-
-        return Search(
-            client=self._es_client,
-            index=index,
-            ranking_config=ranking_config,
-            field_info=self._es_field_info[index],
-        )
-
-    def _load_field_info(self, index):
-        """load knowledge base field metadata information for the specified index.
-
-        Args:
-            index (str): index name.
-        """
-
-        # load field info from local cache
-        index_info = self._es_field_info.get(index, {})
-
-        if not index_info:
-            try:
-                # TODO: move the ES API call logic to ES helper
-                self._es_field_info[index] = {}
-                res = self._es_client.indices.get(index=index)
-                if is_es_version_7(self._es_client):
-                    all_field_info = res[index]["mappings"]["properties"]
-                else:
-                    all_field_info = res[index]["mappings"][DOC_TYPE]["properties"]
-                for field_name in all_field_info:
-                    field_type = all_field_info[field_name].get("type")
-                    self._es_field_info[index][field_name] = FieldInfo(
-                        field_name, field_type
-                    )
-            except EsConnectionError as e:
-                logger.error(
-                    "Unable to connect to Elasticsearch: %s details: %s",
-                    e.error,
-                    e.info,
-                )
-                raise KnowledgeBaseConnectionError(
-                    es_host=self._es_client.transport.hosts
-                ) from e
-            except TransportError as e:
-                logger.error(
-                    "Unexpected error occurred when sending requests to Elasticsearch: %s "
-                    "Status code: %s details: %s",
-                    e.error,
-                    e.status_code,
-                    e.info,
-                )
-                raise KnowledgeBaseError from e
-            except ElasticsearchException as e:
-                raise KnowledgeBaseError from e
-
-    def save_embedder_model(self):
-        self._embedder_model.dump()
-
-    def _load_kbs(self, kbs_data_folder, app_namespace=None, clean=False):
+    def load_all_kbs(self, kbs_data_folder, app_namespace=None, clean=False):
 
         if not os.path.exists(kbs_data_folder):
             msg = f"Folder doesn't exist {kbs_data_folder} to load all KBs related to this app"
@@ -357,213 +90,11 @@ class QuestionAnswerer:
                 logger.error(msg)
                 continue
 
-            self._load_kb(os.path.join(kbs_data_folder, file_name),
-                          app_namespace=app_namespace,
-                          clean=clean)
+            data_file = os.path.join(kbs_data_folder, file_name)
 
-    def _load_kb(
-        self,
-        data_file,
-        app_namespace=None,
-        index_name=None,
-        es_host=None,
-        es_client=None,
-        connect_timeout=2,
-        clean=False,
-        app_path=None,
-        config=None,
-    ):
-
-        app_namespace = app_namespace or self._app_namespace
-        index_name = index_name or os.path.splitext(os.path.basename(data_file))[0]
-        app_path = app_path or self._app_path
-
-        if not os.path.exists(data_file):
-            if not os.path.exists(kbs_data_folder):
-                msg = f"File {data_file} not found. Not building index."
-                logger.error(msg)
-                return
-
-        self.__class__.load_kb(app_namespace, index_name, data_file,
-                               es_host=es_host, es_client=es_client,
-                               connect_timeout=connect_timeout, clean=clean,
-                               app_path=app_path, config=config)
-
-    @classmethod
-    def load_kb(
-        cls,
-        app_namespace,
-        index_name,
-        data_file,
-        es_host=None,
-        es_client=None,
-        connect_timeout=2,
-        clean=False,
-        app_path=None,
-        config=None,
-    ):
-        """Loads documents from disk into the specified index in the knowledge
-        base. If an index with the specified name doesn't exist, a new index
-        with that name will be created in the knowledge base.
-
-        Args:
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int, optional): The amount of time for a
-                connection to the Elasticsearch host.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-
-        embedder_model = None
-        embedding_fields = []
-        if not app_path and not config:
-            logger.warning(
-                "You must provide either the application path to upload embeddings as specified"
-                " in the app config or directly provide the QA config."
-            )
-        else:
-            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
-            if qa_config.get("model_type") == "embedder_without_elasticsearch":
-                return QuestionAnswererWithoutElasticsearch.load_kb(
-                    app_namespace, index_name, data_file,
-                    es_host=es_host, es_client=es_client,
-                    connect_timeout=connect_timeout, clean=clean,
-                    app_path=app_path, config=config)
-            embedder_model = create_embedder_model(app_path, qa_config)
-            embedding_fields = (
-                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
-            )
-
-        if clean:
-            try:
-                delete_index(app_namespace, index_name, es_host, es_client)
-            except ValueError:
-                logger.warning(
-                    "Index %s does not exist for app %s, creating a new index",
-                    index_name,
-                    app_namespace,
-                )
-
-        def _doc_data_count(data_file):
-            with open(data_file) as data_fp:
-                line = data_fp.readline()
-                data_fp.seek(0)
-                if line.strip().startswith("["):
-                    docs = json.load(data_fp)
-                    count = len(docs)
-                else:
-                    count = 0
-                    for line in data_fp:
-                        count += 1
-                return count
-
-        def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
-            def match_regex(string, pattern_list):
-                return any([re.match(pattern, string) for pattern in pattern_list])
-
-            def transform(doc, embedder_model, embedding_fields):
-                if embedder_model:
-                    embed_fields = [
-                        (key, str(val))
-                        for key, val in doc.items()
-                        if match_regex(key, embedding_fields)
-                    ]
-                    embed_keys = list(zip(*embed_fields))[0]
-                    embed_vals = embedder_model.get_encodings(
-                        list(zip(*embed_fields))[1]
-                    )
-                    embedded_doc = {
-                        key + EMBEDDING_FIELD_STRING: emb.tolist()
-                        for key, emb in zip(embed_keys, embed_vals)
-                    }
-                    doc.update(embedded_doc)
-                if not doc.get("id"):
-                    return doc
-                base = {"_id": doc["id"]}
-                base.update(doc)
-                return base
-
-            with open(data_file) as data_fp:
-                line = data_fp.readline()
-                data_fp.seek(0)
-                if line.strip().startswith("["):
-                    logging.debug("Loading data from a json file.")
-                    docs = json.load(data_fp)
-                    for doc in docs:
-                        yield transform(doc, embedder_model, embedding_fields)
-                else:
-                    logging.debug("Loading data from a jsonl file.")
-                    for line in data_fp:
-                        doc = json.loads(line)
-                        yield transform(doc, embedder_model, embedding_fields)
-
-        docs_count = _doc_data_count(data_file)
-        if embedder_model and len(embedding_fields) == 0:
-            logger.warning(
-                "No embedding fields specified in the app config, "
-                "continuing without generating embeddings..."
-            )
-            embedder_model = None
-        docs = _doc_generator(data_file, embedder_model, embedding_fields)
-
-        def _generate_mapping_data(embedder_model, embedding_fields):
-            # generates a dictionary with any metadata needed to create the mapping"
-            if not embedder_model:
-                return {}
-            MAX_ES_VECTOR_LEN = 2048
-            embedding_properties = []
-            mapping_data = {"embedding_properties": embedding_properties}
-
-            dims = len(embedder_model.get_encodings(["encoding"])[0])
-            if dims > MAX_ES_VECTOR_LEN:
-                logger.error(
-                    "Vectors in ElasticSearch must be less than size: %d",
-                    MAX_ES_VECTOR_LEN,
-                )
-            for field in embedding_fields:
-                embedding_properties.append(
-                    {"field": field + EMBEDDING_FIELD_STRING, "dims": dims}
-                )
-
-            return mapping_data
-
-        es_client = es_client or create_es_client(es_host)
-        if is_es_version_7(es_client):
-            mapping_data = _generate_mapping_data(embedder_model, embedding_fields)
-            qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
-        else:
-            if embedder_model:
-                logger.error(
-                    "You must upgrade to ElasticSearch 7 to use the embedding features."
-                )
-                raise ElasticsearchVersionError
-            qa_mapping = resolve_es_config_for_version(DEFAULT_ES_QA_MAPPING, es_client)
-
-        load_index(
-            app_namespace,
-            index_name,
-            docs,
-            docs_count,
-            qa_mapping,
-            DOC_TYPE,
-            es_host,
-            es_client,
-            connect_timeout=connect_timeout,
-        )
-
-        # Saves the embedder model cache to disk
-        if embedder_model:
-            embedder_model.dump()
+            self.load_kb(app_namespace or self._app_namespace,
+                         os.path.splitext(file_name)[0],
+                         data_file, clean=clean)
 
 
 class FieldInfo:
@@ -1365,3 +896,499 @@ class Search:
                     "Custom sort criteria can only be defined for"
                     + " 'number', 'date' or 'location' fields."
                 )
+
+
+class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
+    """The question answerer is primarily an information retrieval system that provides all the
+    necessary functionality for interacting with the application's knowledge base.
+    """
+
+    def __init__(self, app_path, **kwargs):
+        """Initializes a question answerer
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the answerer
+            es_host (str): The Elasticsearch host server
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+        super().__init__(app_path)
+        self._resource_loader = (
+            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(app_path))
+        )
+        self._es_host = kwargs.get("es_host", None)
+        self._qa_config = (
+            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
+        )
+
+        self.__es_client = None
+        self._es_field_info = {}
+
+        self._embedder_model = None
+        # bug-fix: previously, `_embedder_model` loaded only when `model_type` is `embedder`
+        if "embedder" in self._qa_config.get("model_type"):
+            self._embedder_model = create_embedder_model(app_path, self._qa_config)
+
+    @property
+    def _es_client(self):
+        # Lazily connect to Elasticsearch
+        if self.__es_client is None:
+            self.__es_client = create_es_client(self._es_host)
+        return self.__es_client
+
+    @property
+    def _query_type(self):
+        if self._qa_config.get("model_type") in ALL_QUERY_TYPES:
+            return self._qa_config.get("model_type")
+        else:
+            return DEFAULT_QUERY_TYPE
+
+    def _load_field_info(self, index):
+        """load knowledge base field metadata information for the specified index.
+
+        Args:
+            index (str): index name.
+        """
+
+        # load field info from local cache
+        index_info = self._es_field_info.get(index, {})
+
+        if not index_info:
+            try:
+                # TODO: move the ES API call logic to ES helper
+                self._es_field_info[index] = {}
+                res = self._es_client.indices.get(index=index)
+                if is_es_version_7(self._es_client):
+                    all_field_info = res[index]["mappings"]["properties"]
+                else:
+                    all_field_info = res[index]["mappings"][DOC_TYPE]["properties"]
+                for field_name in all_field_info:
+                    field_type = all_field_info[field_name].get("type")
+                    self._es_field_info[index][field_name] = FieldInfo(
+                        field_name, field_type
+                    )
+            except EsConnectionError as e:
+                logger.error(
+                    "Unable to connect to Elasticsearch: %s details: %s",
+                    e.error,
+                    e.info,
+                )
+                raise KnowledgeBaseConnectionError(
+                    es_host=self._es_client.transport.hosts
+                ) from e
+            except TransportError as e:
+                logger.error(
+                    "Unexpected error occurred when sending requests to Elasticsearch: %s "
+                    "Status code: %s details: %s",
+                    e.error,
+                    e.status_code,
+                    e.info,
+                )
+                raise KnowledgeBaseError from e
+            except ElasticsearchException as e:
+                raise KnowledgeBaseError from e
+
+    def save_embedder_model(self):
+        self._embedder_model.dump()
+
+    def get(self, index, size=10, query_type=None, **kwargs):
+        """Gets a collection of documents from the knowledge base matching the provided
+        search criteria. This API provides a simple interface for developers to specify a list of
+        knowledge base field and query string pairs to find best matches in a similar way as in
+        common Web search interfaces. The knowledge base fields to be used depend on the mapping
+        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
+        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
+        base object. The mapping is often application specific and is dependent on the data model
+        developers choose to use when building the knowledge base.
+
+        Examples:
+
+            >>> question_answerer.get(index='menu_items',
+                                      name='pork and shrimp',
+                                      restaurant_id='B01CGKGQ40',
+                                      _sort='price',
+                                      _sort_type='asc')
+
+        Args:
+            index (str): The name of an index.
+            size (int): The maximum number of records, default to 10.
+            query_type (str): Whether the search is over structured, unstructured and whether to use
+                              text signals for ranking, embedder signals, or both.
+            id (str): The id of a particular document to retrieve.
+            _sort (str): Specify the knowledge base field for custom sort.
+            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
+                              'distance'.
+            _sort_location (dict): The origin location to be used when sorting by distance.
+
+        Returns:
+            list: A list of matching documents.
+        """
+        doc_id = kwargs.get("id")
+
+        query_type = query_type or self._query_type
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index)
+            s = s.filter(query_type=query_type, id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        sort_clause = {}
+        query_clauses = []
+
+        # iterate through keyword arguments to get KB field and value pairs for search and custom
+        # sort criteria
+        for key, value in kwargs.items():
+            logger.debug("Processing argument: key= %s value= %s.", key, value)
+            if key == "_sort":
+                sort_clause["field"] = value
+            elif key == "_sort_type":
+                sort_clause["type"] = value
+            elif key == "_sort_location":
+                sort_clause["location"] = value
+            elif "embedder" in query_type and self._embedder_model:
+                if "text" in query_type or "keyword" in query_type:
+                    query_clauses.append({key: value})
+                embedded_value = self._embedder_model.get_encodings([value])[0]
+                embedded_key = key + EMBEDDING_FIELD_STRING
+                query_clauses.append({embedded_key: embedded_value})
+            else:
+                query_clauses.append({key: value})
+                logger.debug("Added query clause: field= %s value= %s.", key, value)
+
+        logger.debug("Custom sort criteria %s.", sort_clause)
+
+        # build Search object with overriding ranking setting to require all query clauses are
+        # matched.
+        s = self.build_search(index, {"query_clauses_operator": "and"})
+
+        # add query clauses to Search object.
+        for clause in query_clauses:
+            s = s.query(query_type=query_type, **clause)
+
+        # add custom sort clause if specified.
+        if sort_clause:
+            s = s.sort(
+                field=sort_clause.get("field"),
+                sort_type=sort_clause.get("type"),
+                location=sort_clause.get("location"),
+            )
+
+        results = s.execute(size=size)
+        return results
+
+    def build_search(self, index, ranking_config=None):
+        """Build a search object for advanced filtered search.
+
+        Args:
+            index (str): index name of knowledge base object.
+            ranking_config (dict): overriding ranking configuration parameters.
+        Returns:
+            Search: a Search object for filtered search.
+        """
+
+        if not does_index_exist(app_namespace=self._app_namespace, index_name=index):
+            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
+
+        # get index name with app scope
+        index = get_scoped_index_name(self._app_namespace, index)
+
+        # load knowledge base field information for the specified index.
+        self._load_field_info(index)
+
+        return Search(
+            client=self._es_client,
+            index=index,
+            ranking_config=ranking_config,
+            field_info=self._es_field_info[index],
+        )
+
+    @classmethod
+    def load_kb(
+        cls,
+        app_namespace,
+        index_name,
+        data_file,
+        es_host=None,
+        es_client=None,
+        connect_timeout=2,
+        clean=False,
+        app_path=None,
+        config=None,
+    ):
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
+
+        Args:
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int, optional): The amount of time for a
+                connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+
+        embedder_model = None
+        embedding_fields = []
+        if not app_path and not config:
+            logger.warning(
+                "You must provide either the application path to upload embeddings as specified"
+                " in the app config or directly provide the QA config."
+            )
+        else:
+            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
+            embedder_model = create_embedder_model(app_path, qa_config)
+            embedding_fields = (
+                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            )
+
+        if clean:
+            try:
+                delete_index(app_namespace, index_name, es_host, es_client)
+            except ValueError:
+                logger.warning(
+                    "Index %s does not exist for app %s, creating a new index",
+                    index_name,
+                    app_namespace,
+                )
+
+        def _doc_data_count(data_file):
+            with open(data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                if line.strip().startswith("["):
+                    docs = json.load(data_fp)
+                    count = len(docs)
+                else:
+                    count = 0
+                    for line in data_fp:
+                        count += 1
+                return count
+
+        def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
+            def match_regex(string, pattern_list):
+                return any([re.match(pattern, string) for pattern in pattern_list])
+
+            def transform(doc, embedder_model, embedding_fields):
+                if embedder_model:
+                    embed_fields = [
+                        (key, str(val))
+                        for key, val in doc.items()
+                        if match_regex(key, embedding_fields)
+                    ]
+                    embed_keys = list(zip(*embed_fields))[0]
+                    embed_vals = embedder_model.get_encodings(
+                        list(zip(*embed_fields))[1]
+                    )
+                    embedded_doc = {
+                        key + EMBEDDING_FIELD_STRING: emb.tolist()
+                        for key, emb in zip(embed_keys, embed_vals)
+                    }
+                    doc.update(embedded_doc)
+                if not doc.get("id"):
+                    return doc
+                base = {"_id": doc["id"]}
+                base.update(doc)
+                return base
+
+            with open(data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                if line.strip().startswith("["):
+                    logging.debug("Loading data from a json file.")
+                    docs = json.load(data_fp)
+                    for doc in docs:
+                        yield transform(doc, embedder_model, embedding_fields)
+                else:
+                    logging.debug("Loading data from a jsonl file.")
+                    for line in data_fp:
+                        doc = json.loads(line)
+                        yield transform(doc, embedder_model, embedding_fields)
+
+        docs_count = _doc_data_count(data_file)
+        if embedder_model and len(embedding_fields) == 0:
+            logger.warning(
+                "No embedding fields specified in the app config, "
+                "continuing without generating embeddings..."
+            )
+            embedder_model = None
+        docs = _doc_generator(data_file, embedder_model, embedding_fields)
+
+        def _generate_mapping_data(embedder_model, embedding_fields):
+            # generates a dictionary with any metadata needed to create the mapping"
+            if not embedder_model:
+                return {}
+            MAX_ES_VECTOR_LEN = 2048
+            embedding_properties = []
+            mapping_data = {"embedding_properties": embedding_properties}
+
+            dims = len(embedder_model.get_encodings(["encoding"])[0])
+            if dims > MAX_ES_VECTOR_LEN:
+                logger.error(
+                    "Vectors in ElasticSearch must be less than size: %d",
+                    MAX_ES_VECTOR_LEN,
+                )
+            for field in embedding_fields:
+                embedding_properties.append(
+                    {"field": field + EMBEDDING_FIELD_STRING, "dims": dims}
+                )
+
+            return mapping_data
+
+        es_client = es_client or create_es_client(es_host)
+        if is_es_version_7(es_client):
+            mapping_data = _generate_mapping_data(embedder_model, embedding_fields)
+            qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
+        else:
+            if embedder_model:
+                logger.error(
+                    "You must upgrade to ElasticSearch 7 to use the embedding features."
+                )
+                raise ElasticsearchVersionError
+            qa_mapping = resolve_es_config_for_version(DEFAULT_ES_QA_MAPPING, es_client)
+
+        load_index(
+            app_namespace,
+            index_name,
+            docs,
+            docs_count,
+            qa_mapping,
+            DOC_TYPE,
+            es_host,
+            es_client,
+            connect_timeout=connect_timeout,
+        )
+
+        # Saves the embedder model cache to disk
+        if embedder_model:
+            embedder_model.dump()
+
+
+class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
+
+    def __init__(self, app_path, **kwargs):
+        """Initializes a question answerer
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the answerer
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+        super().__init__(app_path)
+        self._resource_loader = (
+            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(app_path))
+        )
+        self._qa_config = (
+            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
+        )
+
+        self._validate_qa_config()
+
+        self._embedder_model = None
+        if "embedder" in self._qa_config.get("model_type"):
+            self._embedder_model = create_embedder_model(app_path, self._qa_config)
+
+    def _validate_qa_config(self):
+        model_type = getattr(self, "_qa_config").get("model_type")
+        if model_type != "embedder_without_elasticsearch":
+            raise NotImplementedError(f"Implemented model_types: "
+                                      f"{['embedder_without_elasticsearch']} ")
+
+    def save_embedder_model(self):
+        self._embedder_model.dump()
+
+    def get(self, index, size=10, query_type=None, **kwargs):
+        raise NotImplementedError
+
+    def build_search(self, index, ranking_config=None):
+        raise NotImplementedError
+
+    def load_kb(
+        self,
+        app_namespace,
+        index_name,
+        data_file,
+        clean=False,
+        app_path=None,
+        config=None,
+    ):
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
+
+        Args:
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+
+        raise NotImplementedError
+
+
+class QuestionAnswerer:
+
+    def __new__(cls, app_path, **kwargs):
+        """
+        This method is used to initialize a QuestionAnswerer based on model_type
+        To keep the code base backwards compatible, we use a `__new__()` way of creating instances
+        alongside using a factory approach.
+
+        The input arguments are kept as-is wrt to the `__init__()` of
+        `ElasticsearchQuestionAnswerer` class which was the `QuestionAnswerer` class in previous
+        version of `question_answerer.py`
+        """
+
+        config = kwargs.get(
+            "config",
+            get_classifier_config("question_answering", app_path=app_path)
+        )
+        kwargs.update({"config": config})
+        return cls.__get_question_answerer(config)(app_path, **kwargs)
+
+    @staticmethod
+    def __get_question_answerer(config):
+
+        if config.get("model_type") in ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
+            return SentenceBertCosSimQuestionAnswerer
+        elif config.get("model_type") in ALL_QUERY_TYPES:
+            return ElasticsearchQuestionAnswerer
+        else:
+            raise Exception(
+                f"Expected 'model_type' in input argument config or "
+                f"QUESTION_ANSWERER_CONFIG file to be among "
+                f"{ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH + ALL_QUERY_TYPES} "
+                f"but found {config.get('model_type', None)}"
+            )
+
+    @classmethod
+    def create_question_answerer(cls, app_path, **kwargs):
+        return cls(app_path, **kwargs)
+
+    @classmethod
+    def load_kb(cls, *args, **kwargs):
+        """
+        Implemented to maintain backward compatability. Should be removed in future versions.
+        """
+        return ElasticsearchQuestionAnswerer.load_kb(*args, **kwargs)
