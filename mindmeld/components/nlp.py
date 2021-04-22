@@ -24,6 +24,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, wait
 from copy import deepcopy
 from multiprocessing import cpu_count
+from weakref import WeakValueDictionary
 from tqdm import tqdm
 
 from .. import path
@@ -102,7 +103,7 @@ class Processor(ABC):
             messages.
     """
 
-    instance_map = {}
+    instance_map = WeakValueDictionary()
     """The map of identity to instance."""
 
     def __init__(self, app_path, resource_loader=None, config=None):
