@@ -212,7 +212,7 @@ class ActiveLearningPipelineFactory:
     @staticmethod
     def create_from_config(config):
         """Creates an augmentor instance using the provided configuration
-        Attributes:
+        Args:
             config (dict): A model configuration.
         Returns:
             ActiveLearningPipeline: An ActiveLearningPipeline class

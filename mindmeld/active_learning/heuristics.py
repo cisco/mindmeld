@@ -28,7 +28,12 @@ def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = No
 
 
 class Heuristic(ABC):
+    """ Heuristic base class used as Active Learning query selection strategies."""
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         self.sampling_size = sampling_size
         self.check_sampling_size()
 
@@ -54,6 +59,13 @@ class Heuristic(ABC):
                 confidence-sorting of data samples
             return_dict (bool, optional): if True, return a dict with sampled, unsampled, and
                 ranked indicies.
+        Returns:
+            results_dict (dict, optional): A dictionary containing sampled, unsampled, and
+                ranked indices.
+            newly_sampled (list): Newly sampled queries
+            sampled (list): Updated set of sampled queries with newly sampled queries added in.
+            unsampled (list): Updated set of sampled queries with newly sampled queries removed.
+            ranked (list): List of ranked queries after selection.
         """
         sampled, unsampled, do_rank = (
             kwargs.get("sampled", []),
@@ -76,20 +88,34 @@ class Heuristic(ABC):
 
 
 class StrategicRandomSampling(Heuristic):
+    """ Selection strategy that aims to randomly sample queries such that there is an even
+        distribution across domains or intents.
+    """
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
         self,
         unsampled: List,
         min_per_label: int = None,
-        label_type: bool = "intent",
+        label_type: str = "intent",
         allow_below_min: bool = False,
         **kwargs,
     ):
         """
         Args:
-            class_labels (list): list of labels for classification task
+            unsampled (list, optional): List of unsampled queries
+            min_per_label (int): Min number of queries to select per label
+            label_type (str): The level to split evenly by ('domain' or 'intent')
+            allow_below_min (bool): Allow intents that do not have enough queries to
+                meet the required count (sample_size/number_of_classes).
+        Returns:
+            sampled_indices (list): List of indices that were selected
+            unsampled_indices (list): List of indices that were not selected
         """
         class_labels = StrategicRandomSampling._get_class_labels(
             label_type=label_type, unsampled=unsampled
@@ -140,11 +166,20 @@ class StrategicRandomSampling(Heuristic):
                 idx for idx, _ in enumerate(class_labels) if idx not in sampled_indices
             ]
         assert len(sampled_indices) + len(unsampled_indices) == len(class_labels)
-        ranked_indices = None
-        return sampled_indices, unsampled_indices, ranked_indices
+        return sampled_indices, unsampled_indices, None
 
     @staticmethod
-    def _get_class_labels(label_type: str, unsampled: List):
+    def _get_class_labels(label_type: str, unsampled: List) -> List[str]:
+        """ Creates a class label for a set of queries. These labels are used to split
+            queries by type.
+
+        Args:
+            unsampled (list): List of unsampled queries
+            label_type (str): The level to split evenly by ('domain' or 'intent')
+        Returns:
+            class_labels (List[str]): list of labels for classification task. Labels follow
+                the format of "domain" or "domain|intent". For example, "date|get_date".
+        """
         if label_type == "domain":
             return [f"{q.domain}" for q in unsampled]
         elif label_type == "intent":
@@ -155,7 +190,17 @@ class StrategicRandomSampling(Heuristic):
             )
 
     @staticmethod
-    def _get_indices_per_label(unique_labels: List, class_labels: List):
+    def _get_indices_per_label(unique_labels: List[str], class_labels: List[str]):
+        """ Gets a mapping between a unique class label and a shuffled list of query indices
+            with that label.
+            Args:
+                unique_labels (List[str]): A list of unique class labels.
+                class_labels (List[str]): list of labels for classification task. Labels follow
+                    the format of "domain" or "domain|intent". For example, "date|get_date".
+            Returns:
+                indices_per_label (Dict[str, List[int]]): A mapping between a unique class label
+                    and a shuffled list of query indices with that label.
+        """
         indices_per_label = {}
         for label in unique_labels:
             indices_per_label[label] = [
@@ -167,7 +212,12 @@ class StrategicRandomSampling(Heuristic):
 
 
 class RandomSampling(Heuristic):
+    """ Selection strategy that randomly selects queries."""
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(self, preds_single: List[List[float]] = None, **kwargs):
@@ -175,22 +225,29 @@ class RandomSampling(Heuristic):
         Args:
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class.
+        Returns:
+            sampled_indices (list): List of indices that were selected.
+            unsampled_indices (list): List of indices that were not selected.
         """
         num_indicies = (
             len(preds_single) if preds_single else len(kwargs.get("unsampled"))
         )
         idxs = np.arange(num_indicies)
         np.random.shuffle(idxs)
-        sampled_indices, unsampled_indices, ranked_indices = (
+        sampled_indices, unsampled_indices = (
             idxs[: self.sampling_size].tolist(),
             idxs[self.sampling_size :].tolist(),
-            None,
         )
-        return sampled_indices, unsampled_indices, ranked_indices
+        return sampled_indices, unsampled_indices, None
 
 
 class LeastConfidenceSampling(Heuristic):
+    """ Selection strategy that select queries with the lowest max confidence."""
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
@@ -216,7 +273,13 @@ class LeastConfidenceSampling(Heuristic):
 
 
 class MarginSampling(Heuristic):
+    """ Selection strategy that select queries with the greatest difference between the highest
+        and second highest confidence value."""
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
@@ -245,7 +308,13 @@ class MarginSampling(Heuristic):
 
 
 class EntropySampling(Heuristic):
+    """ Selection strategy that select queries with the highest entropy."""
+
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
@@ -273,6 +342,10 @@ class EntropySampling(Heuristic):
 
 class DisagreementSampling(Heuristic):
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
@@ -307,6 +380,10 @@ class DisagreementSampling(Heuristic):
 
 class EnsembleSampling(Heuristic):
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
         self.sampling_methods = {
             "lcs": LeastConfidenceSampling(self.sampling_size),
@@ -386,21 +463,27 @@ class EnsembleSampling(Heuristic):
 
 class KLDivergenceSampling(Heuristic):
     def __init__(self, sampling_size):
+        """
+        Args:
+            sampling_size: Size of data being sampled in a turn.
+        """
         super().__init__(sampling_size=sampling_size)
 
     def _extractor(
         self,
         preds_multi: List[List[List[float]]],
         do_rank: bool = True,
-        domain_indices: Dict = None,
+        domain_indices: Dict[str, tuple(int, int)] = None,
         **kwargs,
     ):
         """
         Args:
-            preds: is a list of list[list[float]] and contains probability scores for each data
-                point for each class.
+            preds_multi (List[List[float]]): Probability scores for each data point for each
+                class from multiple classifiers.
             do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
                 samples.
+            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
+                corresponding indices in the probability vector. Used for intent-level KLD.
         """
         # Calculate average prediction values.
         avg_preds = None
@@ -435,6 +518,15 @@ class KLDivergenceSampling(Heuristic):
 
     @staticmethod
     def get_divergence_all_domains(preds_multi, avg_preds):
+        """
+        Args:
+            preds_multi (List[List[float]]): Probability scores for each data point for each
+                class from multiple classifiers.
+            avg_preds (List[float]): Average probability vector across all intents.
+        Returns:
+            divergences: List of divergence values for each query compared to the average
+                within-intent probability distribution.
+        """
         divergences = []
         for pred in preds_multi:
             kldivergences = scipy_entropy(
@@ -445,6 +537,17 @@ class KLDivergenceSampling(Heuristic):
 
     @staticmethod
     def get_divergences_within_domain(preds_multi, avg_preds, domain_indices):
+        """
+        Args:
+            preds_multi (List[List[float]]): Probability scores for each data point for each
+                class from multiple classifiers.
+            avg_preds (List[float]): Average probability vector across all intents.
+            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
+                corresponding indices in the probability vector. Used for intent-level KLD.
+        Returns:
+            divergences: List of divergence values for each query compared to the average
+                within-intent probability distribution.
+        """
         divergences = []
         # Calculate q_d
         q_d = {d: [] for d in domain_indices}
@@ -483,13 +586,26 @@ class KLDivergenceSampling(Heuristic):
 
     @staticmethod
     def get_domain(domain_indices, row):
+        """ Get the domain for a given probability row, inferred based on the non-zero values.
+        Args:
+            preds_multi (List[List[float]]): Probability scores for each data point for each
+                class from multiple classifiers.
+            avg_preds (List[float]): Average probability vector across all intents.
+            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
+                corresponding indices in the probability vector. Used for intent-level KLD.
+            row (List[List[float]]): A single row representing a queries probability distrubition.
+        Returns:
+            domain (str): The domain that the given row belongs to.
+        Raises:
+            AssertionError: If a row does not have an associated domain.
+        """
         if np.sum(row) == 0:
             row = [1 / len(row)] * len(row)
         for domain in domain_indices:
             start, end = domain_indices[domain]
             if sum(row[start : end + 1]) > 0:
                 return domain
-        raise (f"Row does not have an associated domain, Row: {row}")
+        raise AssertionError(f"Row does not have an associated domain, Row: {row}")
 
 
 class HeuristicsFactory:
