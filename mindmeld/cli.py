@@ -34,7 +34,7 @@ import distro
 import requests
 from tqdm import tqdm
 
-from .active_learning.alp import ActiveLearningPipeline, flatten_active_learning_config
+from .active_learning.alp import ActiveLearningPipelineFactory
 
 from .augmentation import AugmentorFactory, register_all_augmentors
 from .auto_annotator import register_all_annotators
@@ -819,75 +819,47 @@ def augment(app_path, language):
     logger.info("Augmentation Complete.")
 
 
-@shared_cli.command("active_learning_train", context_settings=CONTEXT_SETTINGS)
+@shared_cli.command("active_learning", context_settings=CONTEXT_SETTINGS)
+# Params Used for Both Select and Train
 @click.option("--app_path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
 @click.option(
-    "--train_seed_pct",
-    type=float,
-    help="Percentage of training data to use as the initial seed.",
-)
-@click.option(
     "--training_level",
     type=str,
     help="The hierarchy level to train ('domain' or 'intent').",
-)
-@click.option("--n_epochs", type=int, help="Number of epochs.")
-@click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
-@click.option(
-    "--strategy",
-    type=str,
-    help="Select a single strategy instead of the strategies listed in the config.",
 )
 @click.option(
     "--output_folder",
     type=str,
     help="Folder to store output.",
 )
-def active_learning_train(
-    app_path,
-    batch_size,
-    train_seed_pct,
-    training_level,
-    n_epochs,
-    no_plot,
-    strategy,
-    output_folder,
-):
-    """Command to run active learning training."""
-    config = get_active_learning_config(app_path=app_path)
-    config = flatten_active_learning_config(config)
-    if app_path:
-        config["app_path"] = app_path
-    if batch_size:
-        config["batch_size"] = batch_size
-    if train_seed_pct:
-        config["train_seed_pct"] = train_seed_pct
-    if training_level:
-        config["training_level"] = training_level
-    if n_epochs:
-        config["n_epochs"] = n_epochs
-    if strategy:
-        config["training_strategies"] = [strategy]
-    if output_folder:
-        config["output_folder"] = output_folder
-    alp = ActiveLearningPipeline(**config)
-    alp.train()
-    if not no_plot:
-        alp.plot()
-
-
-@shared_cli.command("active_learning_select", context_settings=CONTEXT_SETTINGS)
-@click.option("--app_path", type=str, help="Path to the MindMeld application")
+# Params Specific to Training
 @click.option(
-    "--batch_size", type=int, help="Number of queries to select each iteration."
+    "--train",
+    is_flag=True,
+    default=False,
+    help="Execute active learning training.",
 )
 @click.option(
-    "--training_level",
+    "--train_seed_pct",
+    type=float,
+    help="Percentage of training data to use as the initial seed.",
+)
+@click.option("--n_epochs", type=int, help="Number of epochs.")
+@click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
+# Params Specific to Selection
+@click.option(
+    "--select",
+    is_flag=True,
+    default=False,
+    help="Execute active learning log query selection.",
+)
+@click.option(
+    "--strategy",
     type=str,
-    help="The hierarchy level to train ('domain' or 'intent').",
+    help="Select a single strategy instead of the strategies listed in the config.",
 )
 @click.option(
     "--unlabeled_logs_path",
@@ -902,47 +874,56 @@ def active_learning_train(
     type=str,
     help="Pattern for labeled logs. Will override an unlabeled logs path.",
 )
-@click.option(
-    "--strategy",
-    type=str,
-    help="Select a single strategy instead of the strategies listed in the config.",
-)
-@click.option(
-    "--output_folder",
-    type=str,
-    help="Folder to store output.",
-)
-def active_learning_select(
+def active_learning(  # pylint: disable=R0913
     app_path,
     batch_size,
     training_level,
+    output_folder,
+    train,
+    train_seed_pct,
+    n_epochs,
+    no_plot,
+    select,
+    strategy,
     unlabeled_logs_path,
     log_usage_pct,
     labeled_logs_pattern,
-    strategy,
-    output_folder,
 ):
-    """Select the next set of queries for training from a set of log data."""
+    """Command to run active learning training or selection."""
+    if not (train or select):
+        raise AssertionError("'train' or 'select' must be passed in as a paramter.")
     config = get_active_learning_config(app_path=app_path)
-    config = flatten_active_learning_config(config)
     if app_path:
         config["app_path"] = app_path
     if batch_size:
-        config["batch_size"] = batch_size
+        config["training"]["batch_size"] = batch_size
     if training_level:
-        config["training_level"] = training_level
-    if unlabeled_logs_path:
-        config["unlabeled_logs_path"] = unlabeled_logs_path
-    if log_usage_pct:
-        config["log_usage_pct"] = log_usage_pct
-    if labeled_logs_pattern:
-        config["labeled_logs_pattern"] = labeled_logs_pattern
-    if strategy:
-        config["selection_strategy"] = strategy
+        config["training"]["training_level"] = training_level
     if output_folder:
         config["output_folder"] = output_folder
-    alp = ActiveLearningPipeline(**config)
-    alp.select_queries_to_label()
+    if train_seed_pct:
+        config["pre_training"]["train_seed_pct"] = train_seed_pct
+    if n_epochs:
+        config["training"]["n_epochs"] = n_epochs
+    if strategy:
+        if train:
+            config["training_strategies"] = [strategy]
+        elif select:
+            config["selection"]["selection_strategy"] = strategy
+    if unlabeled_logs_path:
+        config["selection"]["unlabeled_logs_path"] = unlabeled_logs_path
+    if log_usage_pct:
+        config["selection"]["log_usage_pct"] = log_usage_pct
+    if labeled_logs_pattern:
+        config["selection"]["labeled_logs_pattern"] = labeled_logs_pattern
+
+    alp = ActiveLearningPipelineFactory.create_from_config(config)
+    if train:
+        alp.train()
+        if not no_plot:
+            alp.plot()
+    elif select:
+        alp.select_queries_to_label()
 
 
 #

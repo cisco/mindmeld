@@ -500,6 +500,7 @@ DEFAULT_TOKENIZER_CONFIG = {
 
 
 DEFAULT_ACTIVE_LEARNING_CONFIG = {
+    "output_folder": None,
     "pre_training": {
         "train_pattern": ".*train.*.txt",
         "test_pattern": ".*test.*.txt",
@@ -509,7 +510,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     },
     "training": {
         "n_classifiers": 3,
-        "n_epochs": 1,
+        "n_epochs": 5,
         "batch_size": 100,
         "training_level": "domain",
         "training_strategies": [
@@ -524,9 +525,8 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     },
     "training_output": {
         "save_sampled_queries": True,
-        "early_stopping_window": 0,
     },
-    "select_queries": {
+    "selection": {
         "selection_strategy": "EntropySampling",
         "log_usage_pct": 1.00,
         "labeled_logs_pattern": None,

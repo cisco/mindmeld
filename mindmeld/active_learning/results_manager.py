@@ -32,9 +32,7 @@ class ResultsManager:
     results."""
 
     def __init__(
-        self,
-        active_learning_params: Dict,
-        output_folder: str,
+        self, active_learning_params: Dict, output_folder: str,
     ):
         """
         Args:
@@ -169,56 +167,6 @@ class ResultsManager:
             json.dump(data, outfile, indent=4)
             outfile.close()
         logger.info("Selected Log Queries saved at: %s", log_selected_queries_path)
-
-    def check_early_stopping(
-        self,
-        strategy: str,
-        early_stopping_window: int,
-    ):
-        """Helper method to update json files.
-        Args:
-            strategy (str): Current training strategy.
-        Returns:
-            accuracies (List[float]): Accuracies accross the latest epoch
-        """
-        accuracy_data = self.load_json(AL_ACCURACIES_PATH)
-        epoch = max(int(e) for e in accuracy_data[strategy])
-        iteration = max(int(i) for i in accuracy_data[strategy][str(epoch)])
-        assert strategy in STRATEGY_ABRIDGED, f"Invalid Strategy: {strategy}."
-        accuracies = [
-            accuracy_data[strategy][str(epoch)][str(i)]["accuracies"]["overall"]
-            for i in range(iteration + 1)
-        ]
-        return ResultsManager._check_early_stopping(accuracies, early_stopping_window)
-
-    @staticmethod
-    def _check_early_stopping(accuracies: List[float], early_stopping_window: int):
-        """
-        If the accuracy value just before the window is less than the highest accuracy
-        within the window then early stop.
-
-        Args:
-            accuracies (List[float]): Accuracies accross the latest epoch
-        Returns:
-            early_stop (bool): Whether to early stop
-        """
-        if len(accuracies) < early_stopping_window + 1:
-            return False
-        assert (
-            early_stopping_window == 0
-        ), "Early stopping window must be greater than 0"
-        pre_window_score = accuracies[-1 * early_stopping_window - 1]
-        max_in_window = max(accuracies[-1 * early_stopping_window :])
-        if pre_window_score > max_in_window:
-            logger.info(
-                """Early stopping. Accuracy before window start (%s) is greater than the
-                next %s accuracies (Max in window: %s).""",
-                pre_window_score,
-                early_stopping_window,
-                max_in_window,
-            )
-            return True
-        return False
 
     @staticmethod
     def queries_to_dict(queries: List) -> List:

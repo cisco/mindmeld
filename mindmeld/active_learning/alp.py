@@ -31,7 +31,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         training_level: str,
         selection_strategy: str,
         save_sampled_queries: bool,
-        early_stopping_window: int,
         log_usage_pct: float,
         labeled_logs_pattern: str,
         unlabeled_logs_path: str,
@@ -52,7 +51,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             training_strategies (List[str]): List of strategies to use for training
             selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
-            early_stopping_window (int): If the drops for n iterations, terminate training early
             log_usage_pct (float): Percentage of the log data to use for selection
             labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
@@ -71,7 +69,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.training_strategies = training_strategies
         self.selection_strategy = selection_strategy
         self.save_sampled_queries = save_sampled_queries
-        self.early_stopping_window = early_stopping_window
         self.log_usage_pct = log_usage_pct
         self.labeled_logs_pattern = labeled_logs_pattern
         self.unlabeled_logs_path = unlabeled_logs_path
@@ -110,9 +107,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self._train_strategy(strategy)
 
     def _train_strategy(
-        self,
-        strategy: str,
-        selection_mode: bool = None,
+        self, strategy: str, selection_mode: bool = None,
     ):
         """Helper function to traing a single strategy.
 
@@ -160,10 +155,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                             epoch,
                             iteration,
                             self.data_bucket.newly_sampled_queries,
-                        )
-                    if self.early_stopping_window > 0:
-                        early_stop = self.results_manager.check_early_stopping(
-                            strategy, self.early_stopping_window
                         )
                 num_unsampled = len(self.data_bucket.unsampled_queries)
                 if num_unsampled > 0:
@@ -215,19 +206,38 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         plot_manager.generate_plots()
 
 
-def flatten_active_learning_config(original_config):
-    """Create a flattened config to use as params.
+class ActiveLearningPipelineFactory:
+    """Creates an ActiveLearningPipeline instance from values in a config."""
 
-    Args:
-        original_config (dict): The original input config dictionary
+    @staticmethod
+    def create_from_config(config):
+        """Creates an augmentor instance using the provided configuration
+        Attributes:
+            config (dict): A model configuration.
+        Returns:
+            ActiveLearningPipeline: An ActiveLearningPipeline class
 
-    Returns:
-        flattened_config (dict): Flattened config
-    """
-    flattened_config = {}
-    for key in original_config:
-        if not isinstance(original_config[key], dict):
-            flattened_config[key] = original_config[key]
-        else:
-            flattened_config.update(original_config[key])
-    return flattened_config
+        Raises:
+            ValueError: When model configuration is invalid or required key is missing
+        """
+        return ActiveLearningPipeline(
+            app_path=config.get("app_path"),
+            train_pattern=config.get("pre_training").get("train_pattern"),
+            test_pattern=config.get("pre_training").get("test_pattern"),
+            load=config.get("pre_training").get("load"),
+            save=config.get("pre_training").get("save"),
+            train_seed_pct=config.get("pre_training").get("save"),
+            n_classifiers=config.get("training").get("n_classifiers"),
+            n_epochs=config.get("training").get("n_epochs"),
+            batch_size=config.get("training").get("batch_size"),
+            training_strategies=config.get("training").get("training_strategies"),
+            training_level=config.get("training").get("training_strategies"),
+            selection_strategy=config.get("selection").get("selection_strategy"),
+            save_sampled_queries=config.get("training_output").get(
+                "save_sampled_queries"
+            ),
+            log_usage_pct=config.get("selection").get("log_usage_pct"),
+            labeled_logs_pattern=config.get("selection").get("labeled_logs_pattern"),
+            unlabeled_logs_path=config.get("selection").get("unlabeled_logs_pattern"),
+            output_folder=config.get("training_output", "output_folder"),
+        )
