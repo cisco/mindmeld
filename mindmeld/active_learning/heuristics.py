@@ -29,6 +29,7 @@ def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = No
 
 class Heuristic(ABC):
     """ Heuristic base class used as Active Learning query selection strategies."""
+
     def __init__(self, sampling_size):
         """
         Args:
@@ -88,9 +89,10 @@ class Heuristic(ABC):
 
 
 class StrategicRandomSampling(Heuristic):
-    """ Selection strategy that aims to randomly sample queries such that there is an even
-        distribution across domains or intents.
+    """Selection strategy that aims to randomly sample queries such that there is an even
+    distribution across domains or intents.
     """
+
     def __init__(self, sampling_size):
         """
         Args:
@@ -170,7 +172,7 @@ class StrategicRandomSampling(Heuristic):
 
     @staticmethod
     def _get_class_labels(label_type: str, unsampled: List) -> List[str]:
-        """ Creates a class label for a set of queries. These labels are used to split
+        """Creates a class label for a set of queries. These labels are used to split
             queries by type.
 
         Args:
@@ -191,15 +193,15 @@ class StrategicRandomSampling(Heuristic):
 
     @staticmethod
     def _get_indices_per_label(unique_labels: List[str], class_labels: List[str]):
-        """ Gets a mapping between a unique class label and a shuffled list of query indices
-            with that label.
-            Args:
-                unique_labels (List[str]): A list of unique class labels.
-                class_labels (List[str]): list of labels for classification task. Labels follow
-                    the format of "domain" or "domain|intent". For example, "date|get_date".
-            Returns:
-                indices_per_label (Dict[str, List[int]]): A mapping between a unique class label
-                    and a shuffled list of query indices with that label.
+        """Gets a mapping between a unique class label and a shuffled list of query indices
+        with that label.
+        Args:
+            unique_labels (List[str]): A list of unique class labels.
+            class_labels (List[str]): list of labels for classification task. Labels follow
+                the format of "domain" or "domain|intent". For example, "date|get_date".
+        Returns:
+            indices_per_label (Dict[str, List[int]]): A mapping between a unique class label
+                and a shuffled list of query indices with that label.
         """
         indices_per_label = {}
         for label in unique_labels:
@@ -213,6 +215,7 @@ class StrategicRandomSampling(Heuristic):
 
 class RandomSampling(Heuristic):
     """ Selection strategy that randomly selects queries."""
+
     def __init__(self, sampling_size):
         """
         Args:
@@ -243,6 +246,7 @@ class RandomSampling(Heuristic):
 
 class LeastConfidenceSampling(Heuristic):
     """ Selection strategy that select queries with the lowest max confidence."""
+
     def __init__(self, sampling_size):
         """
         Args:
@@ -273,8 +277,9 @@ class LeastConfidenceSampling(Heuristic):
 
 
 class MarginSampling(Heuristic):
-    """ Selection strategy that select queries with the greatest difference between the highest
-        and second highest confidence value."""
+    """Selection strategy that select queries with the greatest difference between the highest
+    and second highest confidence value."""
+
     def __init__(self, sampling_size):
         """
         Args:
@@ -473,7 +478,7 @@ class KLDivergenceSampling(Heuristic):
         self,
         preds_multi: List[List[List[float]]],
         do_rank: bool = True,
-        domain_indices: Dict[str, tuple(int, int)] = None,
+        domain_indices: Dict = None,
         **kwargs,
     ):
         """
@@ -586,7 +591,7 @@ class KLDivergenceSampling(Heuristic):
 
     @staticmethod
     def get_domain(domain_indices, row):
-        """ Get the domain for a given probability row, inferred based on the non-zero values.
+        """Get the domain for a given probability row, inferred based on the non-zero values.
         Args:
             preds_multi (List[List[float]]): Probability scores for each data point for each
                 class from multiple classifiers.

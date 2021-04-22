@@ -13,6 +13,7 @@ from ..markup import read_query_file
 from ..path import AL_QUERIES_CACHE_PATH
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
+from ..constants import AL_MAX_LOG_USAGE_PCT
 
 
 logger = logging.getLogger(__name__)
@@ -269,7 +270,7 @@ class DataBucketFactory:
         test_pattern,
         unlabeled_logs_path,
         labeled_logs_pattern=None,
-        log_usage_pct=1.0,
+        log_usage_pct=AL_MAX_LOG_USAGE_PCT,
     ):
         """Creates a DataBucket to be used for log selection.
 
@@ -291,7 +292,7 @@ class DataBucketFactory:
             if labeled_logs_pattern
             else LogQueriesLoader(app_path, unlabeled_logs_path).queries
         )
-        if log_usage_pct < 1.0:
+        if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
             sample_size = int(log_usage_pct * len(log_queries))
             log_queries, _, _, _ = StrategicRandomSampling(sample_size).sample(
                 unsampled=log_queries

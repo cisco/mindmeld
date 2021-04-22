@@ -213,7 +213,11 @@ class PlotManager:
     # ACCURACIES.JSON
     # Plotting Functions
     def plot_single_epoch(
-        self, y_keys: List, epoch: int = 0, display: bool = False, save: bool = True,
+        self,
+        y_keys: List,
+        epoch: int = 0,
+        display: bool = False,
+        save: bool = True,
     ):
         """Plot accuracies across a single epoch for each strategy.
         Args:

@@ -8,7 +8,7 @@ from .results_manager import ResultsManager
 from .plot_manager import PlotManager
 from .classifiers import MindMeldALClassifier
 from .heuristics import HeuristicsFactory
-from ..constants import STRATEGY_ABRIDGED
+from ..constants import STRATEGY_ABRIDGED, MULTI_CLASSIFIER_STRATEGIES
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self._train_strategy(strategy)
 
     def _train_strategy(
-        self, strategy: str, selection_mode: bool = None,
+        self,
+        strategy: str,
+        selection_mode: bool = None,
     ):
         """Helper function to traing a single strategy.
 
@@ -116,15 +118,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             selection_mode (bool): If in selection mode, accuracies will not be recorded
                 and the run will terminate after the first iteration
         """
-        early_stop = False
+        num_iterations = math.ceil(
+            len(self.data_bucket.unsampled_queries) / self.batch_size
+        )
         for epoch in range(self.n_epochs):
             del self.data_bucket
             self.data_bucket = deepcopy(self.init_data_bucket)
-            num_iterations = math.ceil(
-                len(self.data_bucket.unsampled_queries) / self.batch_size
-            )
-            iteration = 0
-            while iteration <= num_iterations:
+            for iteration in range(num_iterations + 1):
+                # Log Training Status
                 logger.info(
                     "Strategy: %s. Epoch: %s. Iteration %s.", strategy, epoch, iteration
                 )
@@ -135,6 +136,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     "Remaining (Unsampled) Queries: %s",
                     len(self.data_bucket.unsampled_queries),
                 )
+                # Run training and obtain probability distributions for each query
                 (
                     eval_stats,
                     preds_single,
@@ -143,8 +145,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 ) = self.mindmeld_al_classifier.train(
                     data_bucket=self.data_bucket,
                     return_preds_multi=STRATEGY_ABRIDGED[strategy]
-                    in ["ds", "ens", "kld"],
+                    in MULTI_CLASSIFIER_STRATEGIES,
                 )
+                # If in Training mode and not selection, save selected queries and accuracies
                 if not selection_mode:
                     self.results_manager.update_accuracies_json(
                         strategy, epoch, iteration, eval_stats
@@ -163,6 +166,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         if num_unsampled > self.batch_size
                         else num_unsampled
                     )
+                    # Update  DataBucket with selected queries based on the current heuristic.
                     heuristic = HeuristicsFactory.get_heuristic(strategy, sampling_size)
                     (
                         self.data_bucket.newly_sampled_queries,
@@ -176,9 +180,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         preds_multi=preds_multi,
                         domain_indices=domain_indices,
                     )
-                if selection_mode or early_stop:
+                # Terminate on the first iteration if in selection mode.
+                if selection_mode:
                     return
-                iteration += 1
 
     def select_queries_to_label(self):
         """Selects the next batch of queries to label from a set of log queries."""

@@ -32,7 +32,9 @@ class ResultsManager:
     results."""
 
     def __init__(
-        self, active_learning_params: Dict, output_folder: str,
+        self,
+        active_learning_params: Dict,
+        output_folder: str,
     ):
         """
         Args:
