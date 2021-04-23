@@ -1664,6 +1664,8 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         top_entity_vector = self._vectorizer.transform([top_entity.text])
 
         similarity_scores = self._syn_tfidf_matrix.dot(top_entity_vector.T).toarray().reshape(-1)
+        # Rounding sometimes helps to bring correct answers on to the top score as other
+        # non-correct resolutions
         similarity_scores = np.around(similarity_scores, decimals=4)
         sorted_items = sorted(list(zip(self._unique_synonyms, similarity_scores)),
                               key=lambda x: x[1], reverse=True)
