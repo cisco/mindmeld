@@ -52,7 +52,7 @@ from ._elasticsearch_helpers import (
 )
 from ._util import _is_module_available, _get_module_or_attr as _getattr
 from .. import path
-from ..core import Entity
+from ..core import Entity, Bunch
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ..resource_loader import ResourceLoader, Hasher
 
@@ -143,22 +143,6 @@ class BertEmbedder:
 
         return num_layers
 
-    @staticmethod
-    def _text_length(text):
-        """
-        Help function to get the length for the input text. Text can be either
-        a list of ints (which means a single text as input), or a tuple of list of ints
-        (representing several text inputs to the model).
-
-        Union[List[int], List[List[int]]]
-        """
-        if isinstance(text, dict):
-            return len(next(iter(text.values())))
-        elif len(text) == 0 or isinstance(text[0], int):
-            return len(text)
-        else:
-            return sum([len(t) for t in text])
-
     @property
     def device(self):
         return "cuda" if _torch("is_available", sub="cuda") else "cpu"
@@ -171,8 +155,29 @@ class BertEmbedder:
     @staticmethod
     def get_sentence_transformers_encoder(name_or_path,
                                           output_type="mean",
-                                          all_modules=False,
-                                          quantize=True):
+                                          quantize=True,
+                                          return_components=False):
+        """
+        Retrieves a sentence-transformer model and returns it along with its transformer and
+        pooling components.
+
+        Args:
+            name_or_path: name or path to load a huggingface model
+            output_type: type of pooling required
+            quantize: if the model needs to be qunatized or not
+            return_components: if True, returns the Transformer and Poooling components of the
+                                sentence-bert model in a Bunch data type,
+                                else just returns the sentence-bert model
+
+        Returns:
+            Union[
+                sentence_transformers.SentenceTransformer,
+                Bunch(sentence_transformers.Transformer,
+                      sentence_transformers.Pooling,
+                      sentence_transformers.SentenceTransformer)
+            ]
+        """
+
         strans_models = _getattr("sentence_transformers.models")
         strans = _getattr("sentence_transformers", "SentenceTransformer")
 
@@ -203,10 +208,14 @@ class BertEmbedder:
                 sbert_model, {torch_nn_linear}, dtype=torch_qint8
             ) if sbert_model else None
 
-        if not all_modules:
-            return sbert_model
+        if return_components:
+            return Bunch(
+                transformer_model=transformer_model,
+                pooling_model=pooling_model,
+                sbert_model=sbert_model
+            )
 
-        return transformer_model, pooling_model, sbert_model
+        return sbert_model
 
     def _init_sentence_transformers_encoder(self, model_configs):
 
@@ -216,16 +225,16 @@ class BertEmbedder:
         sbert_output_type = model_configs["bert_output_type"]
         sbert_quantize_model = model_configs["quantize_model"]
 
-        if sbert_model_hashid not in self.__class__.CACHE_MODELS:
+        if sbert_model_hashid not in BertEmbedder.CACHE_MODELS:
 
             info_msg = ""
-            for name in [sbert_model_name, f"sentence-transformers/{sbert_model_name}"]:
+            for name in [f"sentence-transformers/{sbert_model_name}", sbert_model_name]:
                 try:
                     sbert_model = (
                         self.get_sentence_transformers_encoder(name,
                                                                output_type=sbert_output_type,
-                                                               all_modules=True,
-                                                               quantize=sbert_quantize_model)
+                                                               quantize=sbert_quantize_model,
+                                                               return_components=True)
                     )
                     info_msg += f"Successfully initialized name/path `{name}` directly through " \
                                 f"huggingface-transformers. "
@@ -243,10 +252,12 @@ class BertEmbedder:
                       f"Please check the model name and retry."
                 raise Exception(msg)
 
-            self.__class__.CACHE_MODELS.update({sbert_model_hashid: sbert_model})
+            BertEmbedder.CACHE_MODELS.update({sbert_model_hashid: sbert_model})
 
-        self.transformer_model, self.pooling_model, self.sbert_model = \
-            self.__class__.CACHE_MODELS.get(sbert_model_hashid)
+        sbert_model = BertEmbedder.CACHE_MODELS.get(sbert_model_hashid)
+        self.transformer_model = sbert_model.transformer_model
+        self.pooling_model = sbert_model.pooling_model
+        self.sbert_model = sbert_model.sbert_model
 
     def _encode_local(self,
                       sentences,
@@ -285,7 +296,7 @@ class BertEmbedder:
         self.pooling_model.to(device)
 
         all_embeddings = []
-        length_sorted_idx = np.argsort([self._text_length(sen) for sen in sentences])
+        length_sorted_idx = np.argsort([len(sen) for sen in sentences])
         sentences_sorted = [sentences[idx] for idx in length_sorted_idx]
 
         for start_index in trange(0, len(sentences), batch_size, desc="Batches",
@@ -417,35 +428,6 @@ class BertEmbedder:
         return results
 
 
-class EntityResolver:
-    """
-    for backwards compatability
-
-    deprecated usage
-        >>> entity_resolver = EntityResolver(
-                app_path, self.resource_loader, entity_type
-            )
-
-    new usage
-        >>> entity_resolver = EntityResolverFactory.create_resolver(
-                app_path, entity_type
-            )
-        # or ...
-        >>> entity_resolver = EntityResolverFactory.create_resolver(
-                app_path, entity_type, resource_loader=self.resource_loader
-            )
-    """
-
-    def __new__(cls, app_path, resource_loader, entity_type, es_host=None, es_client=None):
-        logger.warning(
-            "DeprecationWarning: Entity Resolver should now be loaded using EntityResolverFactory. "
-            "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details.")
-        return EntityResolverFactory.create_resolver(
-            app_path, entity_type, resource_loader=resource_loader,
-            es_host=es_host, es_client=es_client
-        )
-
-
 class EntityResolverFactory:
 
     @staticmethod
@@ -472,9 +454,11 @@ class EntityResolverFactory:
             es_host (str): The Elasticsearch host server.
             es_client (Elasticsearch): The Elasticsearch client.
         """
-        er_config = kwargs.pop(
-            "er_config",
-            get_classifier_config("entity_resolution", app_path=app_path))
+
+        er_config = (
+            kwargs.pop("er_config", None) or
+            get_classifier_config("entity_resolution", app_path=app_path)
+        )
         er_config = _correct_deprecated_er_config(er_config)
 
         resolver_type = er_config["model_settings"]["resolver_type"]
@@ -1338,9 +1322,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase, BertEmbedder):
             )
 
         # encode artificial synonyms if required
-        aug_avg_syn_embs = self._runtime_configs["augment_average_synonyms_embeddings"]
-        dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
-        if aug_avg_syn_embs:
+        if self._runtime_configs["augment_average_synonyms_embeddings"]:
             # obtain cnames to synonyms mapping
             entity_mapping_synonyms = self._processed_entity_map["synonyms"]
             cnames2synonyms = {}
@@ -1349,6 +1331,7 @@ class SentenceBertCosSimEntityResolver(EntityResolverBase, BertEmbedder):
                     items = cnames2synonyms.get(cname, [])
                     items.append(syn)
                     cnames2synonyms[cname] = items
+            dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
             # assert dummy synonyms
             for cname, syns in cnames2synonyms.items():
                 dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
@@ -1572,22 +1555,14 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         )
 
         self._processed_entity_map = None
-        self._n = 5  # max number of character ngrams to consider
-        self._vectorizer = TfidfVectorizer(
-            analyzer=self._char_ngram_and_word_analyzer, lowercase=False)
+        self.ngram_length = 5  # max number of character ngrams to consider
+        self._vectorizer = \
+            TfidfVectorizer(analyzer=self._char_ngram_and_word_analyzer, lowercase=False)
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
 
     def _char_ngram_and_word_analyzer(self, string):
-        results = []
-        # give more importance to starting and ending characters of a word
-        string = f" {string.strip()} "
-        for n in range(self._n + 1):
-            results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
-        results = list(set(results))
-        results.remove(' ')
-        # adding lowercased single characters might add more noise
-        results = [r for r in results if not (len(r) == 1 and r.islower())]
+        results = self._char_ngram_analyzer(string)
         # add words
         words = re.split(r'[\s{}]+'.format(re.escape(punctuation)), string.strip())
         results.extend(words)
@@ -1597,7 +1572,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         results = []
         # give more importance to starting and ending characters of a word
         string = f" {string.strip()} "
-        for n in range(self._n + 1):
+        for n in range(self.ngram_length + 1):
             results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
         results = list(set(results))
         results.remove(' ')
@@ -1714,6 +1689,35 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
 
     def _load(self):
         self.fit()
+
+
+class EntityResolver:
+    """
+    for backwards compatability
+
+    deprecated usage
+        >>> entity_resolver = EntityResolver(
+                app_path, self.resource_loader, entity_type
+            )
+
+    new usage
+        >>> entity_resolver = EntityResolverFactory.create_resolver(
+                app_path, entity_type
+            )
+        # or ...
+        >>> entity_resolver = EntityResolverFactory.create_resolver(
+                app_path, entity_type, resource_loader=self.resource_loader
+            )
+    """
+
+    def __new__(cls, app_path, resource_loader, entity_type, es_host=None, es_client=None):
+        logger.warning(
+            "DeprecationWarning: Entity Resolver should now be loaded using EntityResolverFactory. "
+            "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details.")
+        return EntityResolverFactory.create_resolver(
+            app_path, entity_type, resource_loader=resource_loader,
+            es_host=es_host, es_client=es_client
+        )
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {

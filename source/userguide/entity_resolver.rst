@@ -315,7 +315,7 @@ The Entity Resolver returns a ranked list of the top ten canonical forms for eac
 1. When building a browsing functionality in your app, you might want to offer the user a choice of the top three resolved values.
 2. Suppose the user has provided some constraints in a previous query. The entity resolver has no access to this previous context at resolution time, so the top-ranked result may not satisfy previously defined constraints. Here, you may want to look deeper into the ranked list.
 
-The section :ref:`Consider context-aware entity resolution <context_aware_resolution>` explains how to handles scenarios like this.
+The section :ref:`Consider context-aware entity resolution <context_aware_resolution>` explains how to handle scenarios like this.
 
 .. _resolver_configurations:
 
@@ -364,14 +364,19 @@ Following are the various details useful in creating your custom configuration.
 
   .. _model_settings:
 
-  ============================== =============================================================================================== =======================================================
-  Allowed Values                 Underlying algorithm                                                                            Reference for configurable parameters
-  ============================== =============================================================================================== =======================================================
-  ``'text_relevance'``           `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_                                :ref:`See optional parameters <configs_text_relevance>`
-  ``'tfidf_cosine_similarity'``  `term frequency-inverse document frequency <https://en.wikipedia.org/wiki/Tf%E2%80%93idf>`_     :ref:`See optional parameters <configs_tfidf>`
-  ``'sbert_cosine_similarity'``  `Sentence Transformers <https://www.sbert.net/index.html>`_ based on BERT models's architecture :ref:`See optional parameters <configs_sbert>`
-  ``'exact_match'``              Exact text matching                                                                             :ref:`See optional parameters <configs_exact_match>`
-  ============================== =============================================================================================== =======================================================
+  =================================== =============================================================================================== =======================================================
+  Allowed Values                      Underlying algorithm                                                                            Reference for configurable parameters
+  =================================== =============================================================================================== =======================================================
+  ``'text_relevance'`` **(default)**  `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_                                :ref:`See optional parameters <configs_text_relevance>`
+  ``'tfidf_cosine_similarity'``       `term frequency-inverse document frequency <https://en.wikipedia.org/wiki/Tf%E2%80%93idf>`_     :ref:`See optional parameters <configs_tfidf>`
+  ``'sbert_cosine_similarity'``       `Sentence Transformers <https://www.sbert.net/index.html>`_ based on BERT models's architecture :ref:`See optional parameters <configs_sbert>`
+  ``'exact_match'``                    Exact text matching                                                                            :ref:`See optional parameters <configs_exact_match>`
+  =================================== =============================================================================================== =======================================================
+
+.. note::
+
+   - To use the BERT based resolver (``'sbert_cosine_similarity'``), make sure you've installed the extra requirement with the command ``pip install mindmeld[bert]``.
+   - Since the BERT models are loaded directly from huggingface, one can utilize a diverse set of models including distilled versions such as `distill-bert <https://huggingface.co/distilbert-base-cased>`_ or multilingual versions such as `xlm-roberta-base <https://huggingface.co/xlm-roberta-base>`_.
 
 Optional parameters in resolver configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -459,11 +464,6 @@ Optional parameters in resolver configuration
     |
 
     There aren't any configurable optional parameters for this resolution algorithm.
-
-.. note::
-
-   - To use the BERT based resolver (``'sbert_cosine_similarity'``), make sure you've installed the extra requirement with the command ``pip install mindmeld[bert]``.
-   - Since the BERT models are loaded directly from huggingface, one can utilize a diverse set of models including distilled versions such as `distill-bert <https://huggingface.co/distilbert-base-cased>`_ or multilingual versions such as `xlm-roberta-base <https://huggingface.co/xlm-roberta-base>`_.
 
 Clean Fitting
 -------------
