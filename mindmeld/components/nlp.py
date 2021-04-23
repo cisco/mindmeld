@@ -45,7 +45,7 @@ from ._config import (
 )
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolver, EntityResolverConnectionError
+from .entity_resolver import EntityResolverFactory, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
@@ -1462,8 +1462,10 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(
             self.resource_loader, domain, intent, entity_type
         )
-        self.entity_resolver = EntityResolver(
-            app_path, self.resource_loader, entity_type
+        self.entity_resolver = EntityResolverFactory.create_resolver(
+            app_path,
+            entity_type,
+            resource_loader=self.resource_loader
         )
 
         self.progress_bar = progress_bar
