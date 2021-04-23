@@ -659,7 +659,7 @@ def get_classifier_config(
     try:
         module_conf = _get_config_module(app_path)
 
-    except (OSError, IOError):
+    except (TypeError, OSError, IOError):
         logger.info(
             "No app configuration file found. Using default %s model configuration",
             clf_type,
