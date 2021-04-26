@@ -46,6 +46,7 @@ from ..exceptions import (
     KnowledgeBaseError,
     ElasticsearchVersionError,
 )
+from .. import path
 from ..models import create_embedder_model
 from ..resource_loader import ResourceLoader
 
@@ -59,9 +60,15 @@ EMBEDDING_FIELD_STRING = "_embedding"
 
 class BaseQuestionAnswerer:
 
-    def __init__(self, app_path):
+    def __init__(self, app_path, **kwargs):
         self._app_path = app_path
-        self._app_namespace = get_app_namespace(app_path)
+        self._app_namespace = get_app_namespace(self._app_path) if self._app_path else None
+        self._resource_loader = (
+            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(self._app_path))
+        )
+        self._qa_config = (
+            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
+        )
 
     @abstractmethod
     def get(self, *args, **kwargs):
@@ -72,29 +79,11 @@ class BaseQuestionAnswerer:
         raise NotImplementedError
 
     @abstractmethod
-    def load_kb(self, app_namespace, index_name, data_file, **kwargs):
+    def load_kb(self, index_name, data_file, **kwargs):
         raise NotImplementedError
 
-    def load_all_kbs(self, kbs_data_folder, app_namespace=None, clean=False):
-
-        if not os.path.exists(kbs_data_folder):
-            msg = f"Folder doesn't exist {kbs_data_folder} to load all KBs related to this app"
-            logger.error(msg)
-            return
-
-        for file_name in os.listdir(kbs_data_folder):
-            ext = os.path.splitext(os.path.basename(file_name))[1]
-            if ext != ".json":
-                msg = f"Discarding file {file_name} in KBs folder {kbs_data_folder} due to " \
-                      f"incorrect extension. Expected `.json` but found `{ext}`"
-                logger.error(msg)
-                continue
-
-            data_file = os.path.join(kbs_data_folder, file_name)
-
-            self.load_kb(app_namespace or self._app_namespace,
-                         os.path.splitext(file_name)[0],
-                         data_file, clean=clean)
+    def __repr__(self):
+        return f"<{self.__class__.__name__} model_type: {self._qa_config.get('model_type')}>"
 
 
 class FieldInfo:
@@ -912,15 +901,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             es_host (str): The Elasticsearch host server
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
-        super().__init__(app_path)
-        self._resource_loader = (
-            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(app_path))
-        )
+        super().__init__(app_path, **kwargs)
         self._es_host = kwargs.get("es_host", None)
-        self._qa_config = (
-            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
-        )
-
         self.__es_client = None
         self._es_field_info = {}
 
@@ -1107,12 +1089,11 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             field_info=self._es_field_info[index],
         )
 
-    @classmethod
     def load_kb(
-        cls,
-        app_namespace,
+        self,
         index_name,
         data_file,
+        app_namespace=None,
         es_host=None,
         es_client=None,
         connect_timeout=2,
@@ -1125,22 +1106,28 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         with that name will be created in the knowledge base.
 
         Args:
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
             index_name (str): The name of the new index to be created.
             data_file (str): The path to the data file containing the documents
                 to be imported into the knowledge base index. It could be
                 either json or jsonl file.
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+            es_host (str, optional): The Elasticsearch host server.
+            es_client (Elasticsearch, optional): The Elasticsearch client.
             connect_timeout (int, optional): The amount of time for a
                 connection to the Elasticsearch host.
-            clean (bool): Set to true if you want to delete an existing index
+            clean (bool, optional): Set to true if you want to delete an existing index
                 and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
+            app_path (str, optional): The path to the directory containing the app's data
+            config (dict, optional): The QA config if passed directly rather than loaded from the
+            app config
         """
+
+        app_namespace = app_namespace or self._app_namespace
+        es_host = es_host or self._es_host
+        es_client = es_client or self._es_client
+        app_path = app_path or self._app_path
+        config = config or self._qa_config
 
         embedder_model = None
         embedding_fields = []
@@ -1288,14 +1275,7 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
             resource_loader (ResourceLoader): An object which can load resources for the answerer
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
-        super().__init__(app_path)
-        self._resource_loader = (
-            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(app_path))
-        )
-        self._qa_config = (
-            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
-        )
-
+        super().__init__(app_path, **kwargs)
         self._validate_qa_config()
 
         self._embedder_model = None
@@ -1319,9 +1299,9 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
 
     def load_kb(
         self,
-        app_namespace,
         index_name,
         data_file,
+        app_namespace=None,
         clean=False,
         app_path=None,
         config=None,
@@ -1331,18 +1311,46 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
         with that name will be created in the knowledge base.
 
         Args:
+            index_name (str): The name of the new index to be created.
             data_file (str): The path to the data file containing the documents
                 to be imported into the knowledge base index. It could be
                 either json or jsonl file.
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
-            index_name (str): The name of the new index to be created.
-            clean (bool): Set to true if you want to delete an existing index
+            app_namespace (str, optional): The namespace of the app. Used to prevent collisions
+                between the indices of this app and those of other apps.
+            clean (bool, optional): Set to true if you want to delete an existing index
                 and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
+            app_path (str, optional): The path to the directory containing the app's data
+            config (dict, optional): The QA config if passed directly rather than loaded from the
+                app config
         """
+
+        app_namespace = app_namespace or self._app_namespace
+        app_path = app_path or self._app_path
+        config = config or self._qa_config
+
+        embedder_model = None
+        embedding_fields = []
+        if not app_path and not config:
+            logger.warning(
+                "You must provide either the application path to upload embeddings as specified"
+                " in the app config or directly provide the QA config."
+            )
+        else:
+            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
+            embedder_model = create_embedder_model(app_path, qa_config)
+            embedding_fields = (
+                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            )
+
+        if clean:
+            try:
+                delete_index(app_namespace, index_name, es_host, es_client)
+            except ValueError:
+                logger.warning(
+                    "Index %s does not exist for app %s, creating a new index",
+                    index_name,
+                    app_namespace,
+                )
 
         raise NotImplementedError
 
@@ -1360,15 +1368,20 @@ class QuestionAnswerer:
         version of `question_answerer.py`
         """
 
-        config = kwargs.get(
-            "config",
-            get_classifier_config("question_answering", app_path=app_path)
-        )
+        config = cls._get_config(app_path, kwargs.get("config", None))
         kwargs.update({"config": config})
-        return cls.__get_question_answerer(config)(app_path, **kwargs)
+        return cls._get_question_answerer(config)(app_path, **kwargs)
+
+    @classmethod
+    def create_question_answerer(cls, app_path, **kwargs):
+        return cls(app_path, **kwargs)
 
     @staticmethod
-    def __get_question_answerer(config):
+    def _get_config(app_path, config=None):
+        return config or get_classifier_config("question_answering", app_path=app_path)
+
+    @staticmethod
+    def _get_question_answerer(config):
 
         if config.get("model_type") in ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
             return SentenceBertCosSimQuestionAnswerer
@@ -1378,17 +1391,51 @@ class QuestionAnswerer:
             raise Exception(
                 f"Expected 'model_type' in input argument config or "
                 f"QUESTION_ANSWERER_CONFIG file to be among "
-                f"{ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH + ALL_QUERY_TYPES} "
+                f"{ALL_QUERY_TYPES + ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH} "
                 f"but found {config.get('model_type', None)}"
             )
 
     @classmethod
-    def create_question_answerer(cls, app_path, **kwargs):
-        return cls(app_path, **kwargs)
-
-    @classmethod
-    def load_kb(cls, *args, **kwargs):
+    def load_kb(cls, app_namespace, index_name, data_file, **kwargs):
         """
         Implemented to maintain backward compatability. Should be removed in future versions.
         """
-        return ElasticsearchQuestionAnswerer.load_kb(*args, **kwargs)
+        msg = "DeprecationWarning: Refer the `load_kb(...)` method from object of a " \
+              "QuestionAnswerer. Deprecated Usage: `QuestionAnswerer.load_kb(...)`. New usage: " \
+              "`qa = QuestionAnswerer(...)`, then `qa.load_kb(...)` or `qa.load_all_kbs(...)`. " \
+              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
+        logger.warning(msg)
+
+        """
+        Args:
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int, optional): The amount of time for a
+                connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+
+        try:
+            app_path = kwargs.pop("app_path", None)
+            question_answerer = cls.create_question_answerer(app_path, **kwargs)
+            kwargs.update({
+                "app_namespace": app_namespace,
+                "app_path": app_path
+            })
+            question_answerer.load_kb(index_name, data_file, **kwargs)
+
+        except TypeError as e:
+            exp_msg = f"`model_type` in the provided QuestionAnswerer config must be among " \
+                      f"{ALL_QUERY_TYPES} to use `.load_kb(...)` as a classmethod through " \
+                      f"Elasticsearch. "
+            raise Exception(exp_msg + msg) from e
