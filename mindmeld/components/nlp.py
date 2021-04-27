@@ -28,7 +28,7 @@ from weakref import WeakValueDictionary
 from tqdm import tqdm
 
 from .. import path
-from ..core import Bunch, ProcessedQuery, QueryEntity, Span, Entity
+from ..core import Bunch, ProcessedQuery, QueryEntity, Span, Entity, NestedEntity
 from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
@@ -1373,15 +1373,19 @@ class IntentProcessor(Processor):
             return entity_confidence, [_pred_entities]
         return entity_confidence, entities
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False,
-                      max_ngram_search = 3):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None,
+                      max_ngram_search=3, verbose=False):
         """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent.
 
         Args:
             query (Query, tuple): The user input query, or a list of the n-best transcripts \
                 query objects.
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
+            max_ngram_search (int, optional): The max n-gram number to process the query for search
             verbose (bool, optional): If ``True``, returns class as well as predict probabilities.
 
         Returns:
@@ -1425,49 +1429,71 @@ class IntentProcessor(Processor):
                 nbest_aligned_entities=aligned_entities,
             )
 
-        return ProcessedQuery(
-            query[0], entities=processed_entities, confidence=confidence
-        )
+        return ProcessedQuery(query[0], entities=processed_entities, confidence=confidence)
 
-    def _find_entities_in_text(self, query, dynamic_resource, allowed_nlp_classes, max_ngram_search):
+    def _find_entities_in_text(self, query, dynamic_resource,
+                               allowed_nlp_classes, max_ngram_search):
+        """
+        This function finds all entities in the query using rule-based matching based on the user
+        provided allowed_nlp_classes dict. There are two matching criterion:
+        1. gazzeteer based matching: We compare query ngrams to the gazetteers
+        2. duckling based matching: We compare query ngrams to the duckling candidates
+        Since this approach is rule-based, there are bound to be overlapping entity candidates.
+        So we find the largest non-overlapping set of candidates.
+
+        Args:
+            query (tuple of Query): The n-best queries
+            dynamic_resource (dict): gazetteer resources
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
+            max_ngram_search (int): The max ngram value we want to break the input query
+
+        Returns:
+            list: A list of lists of non-overlapping entities for each n-best transcript
+        """
         # This code block implements allowed entities described here:
         # https://github.com/cisco/mindmeld/pull/280
 
         # We extract the `entity` key from each token since that represents the normalized text of
         # each token which we will compare against the normalized text of the query
-        tokenize_to_tuples = lambda text: tuple(
-            [token["entity"] for token in self.resource_loader.query_factory.tokenizer.tokenize(text)]
-        )
+
+        def tokenize_to_tuples(text):
+            return tuple([token["entity"] for token in
+                          self.resource_loader.query_factory.tokenizer.tokenize(text)])
+
         dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
-        entities = []
-        for n_best_query in query:
-            n_best_entities = []
-            for entity in allowed_nlp_classes:
-                # check if entity is a system entity
-                if entity.startswith(SYSTEM_ENTITY_PREFIX):
+        n_best_entities = [[] for _ in range(len(query))]
+
+        for entity in allowed_nlp_classes:
+            # check if entity is a system entity
+            if entity.startswith(SYSTEM_ENTITY_PREFIX):
+                for idx, n_best_query in enumerate(query):
                     for sys_entity in n_best_query.system_entity_candidates:
                         if sys_entity.entity.type == entity:
-                            n_best_entities.append(sys_entity)
-                    continue
+                            n_best_entities[idx].append(sys_entity)
+                continue
 
-                # check if entity is in the gazetteers
-                consolidated_set = \
-                    {
-                        tokenize_to_tuples(key) for key in
-                        {
-                                **self.resource_loader.get_gazetteer(entity)['pop_dict'],
-                                **dynamic_gazetteer.get(entity, {})
-                        }.keys()
-                    }
+            # check if entity is in the gazetteers
+            # TODO: We are tokenizing every phrase in the gazetteer.
+            # This is a large CPU intensive op
+            consolidate_list = {**self.resource_loader.get_gazetteer(entity)['pop_dict'],
+                                **dynamic_gazetteer.get(entity, {})}
+            consolidated_set = {tokenize_to_tuples(key) for key in consolidate_list.keys()}
+
+            for idx, n_best_query in enumerate(query):
                 for ngram, token_span in get_ngrams_upto_n(n_best_query.normalized_tokens,
                                                            max_ngram_search):
                     if ngram not in consolidated_set:
                         continue
 
-                    start_index = n_best_query._normalized_tokens[token_span[0]]['raw_start']
-                    end_index = n_best_query._normalized_tokens[token_span[1]]['raw_start'] + \
-                                    len(n_best_query._normalized_tokens[token_span[1]]['entity']) - 1
+                    start_token = n_best_query.get_verbose_normalized_tokens()[token_span[0]]
+                    end_token = n_best_query.get_verbose_normalized_tokens()[token_span[1]]
+
+                    start_index = start_token['raw_start']
+                    end_index = end_token['raw_start'] + len(end_token['entity']) - 1
                     span = Span(start_index, end_index)
+
                     entity_val = Entity(
                         text=n_best_query.text[start_index: end_index + 1],
                         entity_type=entity
@@ -1475,23 +1501,10 @@ class IntentProcessor(Processor):
                     query_entity = QueryEntity.from_query(
                         query=n_best_query, span=span, entity=entity_val
                     )
-                    n_best_entities.append(query_entity)
+                    n_best_entities[idx].append(query_entity)
 
-            entities.append(n_best_entities)
-
-        return [tuple(IntentProcessor._get_largest_non_overlapping_candidates(e)) for e in entities]
-
-    @staticmethod
-    def _get_largest_non_overlapping_candidates(entities):
-        final_spans = Span.get_largest_non_overlapping_candidates(
-            [e.span for e in entities])
-        final_candidates = []
-        for span in final_spans:
-            for candidate in entities:
-                if span == candidate.span:
-                    final_candidates.append(candidate)
-                    break
-        return final_candidates
+        return [tuple(NestedEntity.get_largest_non_overlapping_entities(
+            e, lambda candidate: candidate.span)) for e in n_best_entities]
 
 
 class EntityProcessor(Processor):
@@ -1608,6 +1621,9 @@ class EntityProcessor(Processor):
             query (Query): The query the entity originated from.
             entities (list): All entities recognized in the query.
             entity_index (int): The index of the entity to process.
+            allowed_nlp_classes (dict): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
             verbose (bool): If set to True, returns confidence scores of classes.
 
         Returns:

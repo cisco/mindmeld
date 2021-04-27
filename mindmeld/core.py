@@ -301,6 +301,12 @@ class Query:
         """
         return self._timestamp
 
+    def get_verbose_normalized_tokens(self):
+        """This function returns a list of dictionaries containing details of each normalized
+        token
+        """
+        return self._normalized_tokens
+
     def get_text_form(self, form):
         """Programmatically retrieves text by form
 
@@ -621,6 +627,29 @@ class NestedEntity:
             entity = Entity(texts[0], entity_type, role=role)
 
         return cls(texts, spans, tok_spans, entity, children)
+
+    @staticmethod
+    def get_largest_non_overlapping_entities(candidates, get_span_func):
+        """
+        This function filters out overlapping entity spans
+
+        Args:
+            candidates (iterable): A iterable of candidates to filter based on span
+            get_span_func (function): A function that accesses the span from each candidate
+
+        Returns:
+            list: A list of non-overlapping candidates
+        """
+        final_spans = Span.get_largest_non_overlapping_candidates(
+            [get_span_func(candidate) for candidate in candidates])
+
+        final_candidates = []
+        for span in final_spans:
+            for candidate in candidates:
+                if span == get_span_func(candidate):
+                    final_candidates.append(candidate)
+                    break
+        return final_candidates
 
     def to_dict(self):
         """Converts the query entity into a dictionary"""

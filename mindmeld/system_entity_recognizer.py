@@ -680,7 +680,7 @@ def duckling_item_to_entity(item):
                 elif "to" in item["value"]:
                     value["grain"] = item["value"]["to"].get("grain")
 
-    entity_type = "sys_{}".format(num_type)
+    entity_type = f"{SYSTEM_ENTITY_PREFIX}{num_type}"
     return Entity(item["body"], entity_type, value=value)
 
 

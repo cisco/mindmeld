@@ -300,6 +300,9 @@ def get_ngrams_upto_n(tokens, n):
     Args:
         tokens (list of str): Word tokens.
         n (int): The length of n-gram upto which the ngram tokens are generated
+
+    Returns:
+        tuple: ngram, (token index start, token index end)
     """
     assert n > 0
     for length, i in enumerate(range(1, n + 1)):
