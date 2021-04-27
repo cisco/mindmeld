@@ -13,6 +13,7 @@
 
 """This module contains some helper functions for the models package"""
 import re
+import nltk
 
 from sklearn.metrics import make_scorer
 
@@ -291,6 +292,19 @@ def get_ngram(tokens, start, length):
         )
         ngram_tokens.append(token)
     return " ".join(ngram_tokens)
+
+
+def get_ngrams_upto_n(tokens, n):
+    """This function returns a generator that returns ngram tuples with length upto n
+
+    Args:
+        tokens (list of str): Word tokens.
+        n (int): The length of n-gram upto which the ngram tokens are generated
+    """
+    assert n > 0
+    for length, i in enumerate(range(1, n + 1)):
+        for idx, j in enumerate(nltk.ngrams(tokens, i)):
+            yield j, (idx, idx + length)
 
 
 def get_seq_accuracy_scorer():

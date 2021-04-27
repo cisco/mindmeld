@@ -52,6 +52,7 @@ from .role_classifier import RoleClassifier
 from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 from ..models.helpers import GAZETTEER_RSC
 from ..constants import SYSTEM_ENTITY_PREFIX
+from ..models.helpers import get_ngrams_upto_n
 
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
@@ -1372,7 +1373,8 @@ class IntentProcessor(Processor):
             return entity_confidence, [_pred_entities]
         return entity_confidence, entities
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False,
+                      max_ngram_search = 3):
         """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent.
 
@@ -1400,37 +1402,9 @@ class IntentProcessor(Processor):
             query, dynamic_resource=dynamic_resource, verbose=verbose
         )
 
-        # This code block implements allowed entities described here:
-        # https://github.com/cisco/mindmeld/pull/280
         if allowed_nlp_classes and all(entity == () for entity in entities):
-            dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
-            entities = []
-            for n_best_query in query:
-                n_best_entities = []
-                for entity in allowed_nlp_classes:
-                    # check if entity is in the gazetteers
-                    if n_best_query.text in {
-                        **self.resource_loader.get_gazetteer(entity)['pop_dict'],
-                        **dynamic_gazetteer.get(entity, {})
-                    }:
-                        span = Span(0, len(n_best_query.text) - 1)
-                        entity = Entity(
-                            text=n_best_query.text,
-                            entity_type=entity
-                        )
-                        query_entity = QueryEntity.from_query(
-                            query=n_best_query, span=span, entity=entity
-                        )
-                        n_best_entities.append(query_entity)
-
-                    # check if entity is a system entity
-                    if entity.startswith(SYSTEM_ENTITY_PREFIX):
-                        for sys_entity in n_best_query.system_entity_candidates:
-                            if sys_entity.entity.type == entity:
-                                n_best_entities.append(sys_entity)
-                                break
-
-                entities.append(tuple(n_best_entities))
+            entities = self._find_entities_in_text(
+                query, dynamic_resource, allowed_nlp_classes, max_ngram_search)
 
         aligned_entities = self._align_entities(entities)
         processed_entities, role_confidence = self._process_entities(
@@ -1454,6 +1428,70 @@ class IntentProcessor(Processor):
         return ProcessedQuery(
             query[0], entities=processed_entities, confidence=confidence
         )
+
+    def _find_entities_in_text(self, query, dynamic_resource, allowed_nlp_classes, max_ngram_search):
+        # This code block implements allowed entities described here:
+        # https://github.com/cisco/mindmeld/pull/280
+
+        # We extract the `entity` key from each token since that represents the normalized text of
+        # each token which we will compare against the normalized text of the query
+        tokenize_to_tuples = lambda text: tuple(
+            [token["entity"] for token in self.resource_loader.query_factory.tokenizer.tokenize(text)]
+        )
+        dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
+        entities = []
+        for n_best_query in query:
+            n_best_entities = []
+            for entity in allowed_nlp_classes:
+                # check if entity is a system entity
+                if entity.startswith(SYSTEM_ENTITY_PREFIX):
+                    for sys_entity in n_best_query.system_entity_candidates:
+                        if sys_entity.entity.type == entity:
+                            n_best_entities.append(sys_entity)
+                    continue
+
+                # check if entity is in the gazetteers
+                consolidated_set = \
+                    {
+                        tokenize_to_tuples(key) for key in
+                        {
+                                **self.resource_loader.get_gazetteer(entity)['pop_dict'],
+                                **dynamic_gazetteer.get(entity, {})
+                        }.keys()
+                    }
+                for ngram, token_span in get_ngrams_upto_n(n_best_query.normalized_tokens,
+                                                           max_ngram_search):
+                    if ngram not in consolidated_set:
+                        continue
+
+                    start_index = n_best_query._normalized_tokens[token_span[0]]['raw_start']
+                    end_index = n_best_query._normalized_tokens[token_span[1]]['raw_start'] + \
+                                    len(n_best_query._normalized_tokens[token_span[1]]['entity']) - 1
+                    span = Span(start_index, end_index)
+                    entity_val = Entity(
+                        text=n_best_query.text[start_index: end_index + 1],
+                        entity_type=entity
+                    )
+                    query_entity = QueryEntity.from_query(
+                        query=n_best_query, span=span, entity=entity_val
+                    )
+                    n_best_entities.append(query_entity)
+
+            entities.append(n_best_entities)
+
+        return [tuple(IntentProcessor._get_largest_non_overlapping_candidates(e)) for e in entities]
+
+    @staticmethod
+    def _get_largest_non_overlapping_candidates(entities):
+        final_spans = Span.get_largest_non_overlapping_candidates(
+            [e.span for e in entities])
+        final_candidates = []
+        for span in final_spans:
+            for candidate in entities:
+                if span == candidate.span:
+                    final_candidates.append(candidate)
+                    break
+        return final_candidates
 
 
 class EntityProcessor(Processor):

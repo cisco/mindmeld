@@ -131,6 +131,25 @@ class Span:
         """Determines whether two spans overlap."""
         return self.end >= other.start and other.end >= self.start
 
+    @staticmethod
+    def get_largest_non_overlapping_candidates(spans):
+        """Finds the set of the largest non-overlapping candidates.
+
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+        Returns:
+            selected_spans (list): List of the largest non-overlapping spans.
+        """
+        spans.sort(reverse=True)
+        selected_spans = []
+        for span in spans:
+            has_overlaps = [
+                span.has_overlap(selected_span) for selected_span in selected_spans
+            ]
+            if not any(has_overlaps):
+                selected_spans.append(span)
+        return selected_spans
+
     def __iter__(self):
         for index in range(self.start, self.end + 1):
             yield index
