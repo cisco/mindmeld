@@ -42,7 +42,7 @@ from ._elasticsearch_helpers import (
     is_es_version_7,
     resolve_es_config_for_version,
 )
-from .entity_resolver import SentenceBertCosSimEntityResolver
+from .entity_resolver import EmbedderCosSimEntityResolver
 from .entity_resolver import TfIdfSparseCosSimEntityResolver
 from ..exceptions import (
     KnowledgeBaseConnectionError,
@@ -1130,6 +1130,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         clean=False,
         app_path=None,
         config=None,
+        **kwargs
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -1159,21 +1160,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         es_host = es_host or self._es_host
         es_client = es_client or self._es_client
 
-        config = config or self._query_settings
-        embedder_model = None
-        embedding_fields = []
-        if not app_path and not config:
-            logger.warning(
-                "You must provide either the application path to upload embeddings as specified"
-                " in the app config or directly provide the QA config."
-            )
-        else:
-            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
-            embedder_model = create_embedder_model(app_path, qa_config)
-            embedding_fields = (
-                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
-            )
-
+        # clean by deleting
         if clean:
             try:
                 delete_index(app_namespace, index_name, es_host, es_client)
@@ -1183,6 +1170,22 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     index_name,
                     app_namespace,
                 )
+
+        config = config or self._query_settings
+        embedder_model = None
+        embedding_fields = kwargs.get("embedding_fields", [])
+        if not app_path and not config:
+            logger.warning(
+                "You must provide either the application path to upload embeddings as specified"
+                " in the app config or directly provide the QA config."
+            )
+        else:
+            config = config or get_classifier_config("question_answering", app_path=app_path)
+            embedder_model = create_embedder_model(app_path, config)
+            embedding_fields = (
+                embedding_fields or
+                config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            )
 
         def _doc_data_count(data_file):
             with open(data_file) as data_fp:
@@ -1311,6 +1314,9 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             },
             ...
         }
+    >>> AVAILABLE_KB_FIELDS = {
+            scoped_index_name: set(scoped_key_names)
+        }
 
     During load_kb(),
       If clean=False, only if entity map gets updated, a new resolver is trained on updated data
@@ -1318,6 +1324,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
       If clean=True, the entire index is deleted and re-trained with whatever new data found
     """
     ALL_INDICES = {}
+    AVAILABLE_KB_FIELDS = {}  # mapping between scoped_index_name and fields observed in kb docs
 
     def __init__(self, app_path, **kwargs):
         """Initializes a question answerer
@@ -1334,14 +1341,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                   f"NonElasticsearchQuestionAnswerer. Available choices: " \
                   f"{['embedder_without_elasticsearch']} "
             raise NotImplementedError(msg)
-
-        embedder_type = self._query_settings.get("embedder_type", "bert")
-        if embedder_type != "bert":
-            msg = f"{embedder_type} embedder_type not allowed for " \
-                  f"NonElasticsearchQuestionAnswerer. Available choices: " \
-                  f"{['bert']} "
-            raise ValueError(msg)
-        self._query_settings.get("embedder_type", embedder_type)
 
         self._embedder_model = None
         if "embedder" in self._query_type:
@@ -1364,7 +1363,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         clean=False,
         app_path=None,
         config=None,
-        **_kwargs
+        **kwargs
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -1390,28 +1389,38 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # save/load docs through scoped index in cache
         scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
+        # clean by deleting
+        if clean:
+            try:
+                scoped_key_names = \
+                    NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name]
+                for scoped_key_name in scoped_key_names:
+                    try:
+                        del NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name]
+                    except KeyError as e:
+                        logger.info(e)
+                        continue
+            except KeyError:
+                msg = f"Index {index_name} does not exist for app {app_namespace}, " \
+                      f"creating a new index"
+                logger.warning(msg)
+
         # instantiate an embedder model
         config = config or self._query_settings
         embedder_model = None
-        embedding_fields = []
+        embedding_fields = kwargs.get("embedding_fields", [])
         if not app_path and not config:
             logger.warning(
                 "You must provide either the application path to upload embeddings as specified"
                 " in the app config or directly provide the QA config."
             )
         else:
-            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
-            embedder_model = create_embedder_model(app_path, qa_config)
+            config = config or get_classifier_config("question_answering", app_path=app_path)
+            embedder_model = create_embedder_model(app_path, config)
             embedding_fields = (
-                qa_config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+                embedding_fields or
+                config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
             )
-
-        if clean:
-            try:
-                del NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name]
-            except KeyError:
-                logger.warning(f"Index {index_name} does not exist for app {app_namespace}, "
-                               f"creating a new index")
 
         if embedder_model and len(embedding_fields) == 0:
             logger.warning(
@@ -1420,7 +1429,15 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             )
             embedder_model = None
 
-        # collect data related to all keys in all the docs in KB
+        # collect data related to all keys in all the docs in KB, and update database
+        kb_field_names = self.update_indices_data(data_file, scoped_index_name)
+
+        # update indices
+        self.update_indices(kb_field_names, embedding_fields, scoped_index_name, app_path, config)
+
+    @staticmethod
+    def update_indices_data(data_file, scoped_index_name):
+
         def _doc_generator(_data_file):
             with open(_data_file) as data_fp:
                 line = data_fp.readline()
@@ -1437,8 +1454,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         doc = json.loads(line)
                         yield doc
 
-        id_counter = 0
         kb_field_names = set()
+        id_counter = 0
         for doc in _doc_generator(data_file):
             # determine _id, remains same for all keys of the doc
             _id = doc.pop("_id", None)
@@ -1461,8 +1478,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name].update(
                     {"id2cname": _id2cname}
                 )
+        return kb_field_names
 
-        # verify if a particular scoped_key_name's entities data has changed and update resolver
+    @staticmethod
+    def update_indices(kb_field_names, embedding_fields, scoped_index_name, app_path, config):
+
+        if scoped_index_name not in NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS:
+            NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS.update({scoped_index_name: set()})
+
         def get_hashid(entities: List[Dict]):
             string = json.dumps(entities, sort_keys=True)
             return Hasher(algorithm="sha1").hash(string=string)
@@ -1470,7 +1493,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         def match_regex(string, pattern_list):
             return any([re.match(pattern, string) for pattern in pattern_list])
 
-        embedding_kb_field_names = []
+        # verify if a particular scoped_key_name's entities data has changed and update resolver
         for kb_field_name in kb_field_names:
             scoped_key_name = get_scoped_index_name(scoped_index_name, kb_field_name)
             scoped_key_name_cache = NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name]
@@ -1478,7 +1501,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             resolver = scoped_key_name_cache.get("resolver", None)
             id2cname_hash = scoped_key_name_cache.get("id2cname_hash", None)
             id2cname_hash_new = get_hashid(id2cname)
-            if not resolver or id2cname_hash_new != id2cname_hash:
+            create_resolver = not resolver or id2cname_hash_new != id2cname_hash
+            # update known list of kb fileds for .get() and .build_search()
+            NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name].update({
+                scoped_key_name
+            })
+
+            # create resolver if required
+            if create_resolver:
                 # format id2cname data into an `entity_map` format for resolvers
                 entity_map = {
                     "entities": [{"id": key, "cname": value} for key, value in id2cname.items()]
@@ -1495,16 +1525,27 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     "resolver": resolver,
                     "id2cname_hash": id2cname_hash_new
                 })
-                # if required, creating an embedding resolver and fit
-                if embedding_fields and match_regex(kb_field_name, embedding_fields):
-                    embedding_kb_field_name = kb_field_name + EMBEDDING_FIELD_STRING
-                    embedding_scoped_key_name = get_scoped_index_name(
-                        scoped_index_name, embedding_kb_field_name)
-                    embedding_kb_field_names.append(embedding_scoped_key_name)
+
+            # if required, creating an embedding resolver and fit
+            if embedding_fields and match_regex(kb_field_name, embedding_fields):
+                embedding_scoped_key_name = get_scoped_index_name(
+                    scoped_index_name, kb_field_name + EMBEDDING_FIELD_STRING)
+                NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name].update({
+                    embedding_scoped_key_name
+                })
+
+                if create_resolver:
+                    # format id2cname data into an `entity_map` format for resolvers
+                    entity_map = {
+                        "entities": [{"id": key, "cname": value} for key, value in id2cname.items()]
+                    }
+                    # create a new resolver and fit
                     resolver = (
-                        SentenceBertCosSimEntityResolver(
+                        EmbedderCosSimEntityResolver(
                             app_path=app_path or os.getcwd(),
-                            entity_type=embedding_scoped_key_name)
+                            entity_type=embedding_scoped_key_name,
+                            er_config=config
+                        )
                     )
                     resolver.fit(entity_map=entity_map)
                     resolver.dump()
@@ -1596,7 +1637,6 @@ class QuestionAnswerer:
             question_answerer = cls.create_question_answerer(app_path, **kwargs)
             kwargs.update({
                 "app_namespace": app_namespace,
-                "app_path": app_path,
                 "es_host": es_host,
                 "es_client": es_client,
                 "connect_timeout": connect_timeout,

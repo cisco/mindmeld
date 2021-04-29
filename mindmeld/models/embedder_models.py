@@ -105,14 +105,19 @@ class Embedder(ABC):
     """
 
     def __init__(self, app_path, **kwargs):
-        """Initializes an embedder."""
+        """
+        Initializes an embedder.
 
+        Args:
+            app_path: Path of the app used to create cache folder to dump encodings
+        """
         self.model_name = kwargs.get("model_name", "default")
-        self.model_id = str(self.model_name)
 
         # load model (and if required changes model_id)
+        self.model_id = str(self.model_name)
         self.model = self.load(**kwargs)
 
+        # cache path
         # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
         cache_path = path.get_embedder_cache_file_path(
             app_path, kwargs.get("embedder_type", "default"), self.model_name
@@ -122,10 +127,8 @@ class Embedder(ABC):
             # implies a previously used path name has no data and hence, is safe to change
             #   default cache path for this model (backwards compatability in loading data)
             cache_path = path.get_embedder_cache_file_path(app_path, self.model_id)
-
         # new: passing `cache_path` through kwargs preceeds any previously determined path string
         cache_path = kwargs.get("cache_path", None) or str(cache_path)
-
         self.cache = EmbeddingsCache(cache_path)
 
     @abstractmethod
@@ -138,7 +141,7 @@ class Embedder(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def encode(self, text_list, **kwargs):
+    def encode(self, text_list):
         """
         Args:
             text_list (list): A list of text strings for which to generate the embeddings.
@@ -185,6 +188,34 @@ class BertEmbedder(Embedder):
     #   when creating mutliple BERT based Entity Resolvers
     CACHE_MODELS = {}
 
+    def __init__(self, app_path, **kwargs):
+        """
+        Args:
+            batch_size (int): the batch size used for the computation
+            show_progress_bar (bool): Output a progress bar when encode sentences
+            output_value (str): Default sentence_embedding, to get sentence embeddings.
+                Can be set to token_embeddings to get wordpiece token embeddings.
+                Choices are `sentence_embedding` and `token_embedding`
+            convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it is a
+                list of pytorch tensors.
+            convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites any
+                setting from convert_to_numpy
+            device: Which torch.device to use for the computation
+            concat_last_n_layers (int): number of hidden outputs to concat starting from last layer
+            normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
+        """
+        super().__init__(app_path, **kwargs)
+
+        # init runtime configs for the model
+        self._batch_size = kwargs.get("batch_size", 16)
+        self._show_progress_bar = kwargs.get("show_progress_bar", False)
+        self._output_value = kwargs.get("output_value", 'sentence_embedding')
+        self._convert_to_numpy = kwargs.get("convert_to_numpy", True)
+        self._convert_to_tensor = kwargs.get("convert_to_tensor", False)
+        self.device = kwargs.get("device", "cuda" if _torch("is_available", sub="cuda") else "cpu")
+        self._concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
+        self._normalize_token_embs = kwargs.get("normalize_token_embs", False)
+
     @staticmethod
     def _batch_to_device(batch, target_device):
         """
@@ -214,10 +245,6 @@ class BertEmbedder(Embedder):
             raise ValueError(f"Not supported model {model} to obtain number of layers")
 
         return num_layers
-
-    @property
-    def device(self):
-        return "cuda" if _torch("is_available", sub="cuda") else "cpu"
 
     @staticmethod
     def get_hashid(**kwargs):
@@ -432,26 +459,16 @@ class BertEmbedder(Embedder):
 
         return model
 
-    def encode(self, phrases, **kwargs):
+    def encode(self, phrases):
         """Encodes input text(s) into embeddings, one vector for each phrase
 
         Args:
             phrases (str, list[str]): textual inputs that are to be encoded using sentence \
                                         transformers' model
-            batch_size (int): the batch size used for the computation
-            show_progress_bar (bool): Output a progress bar when encode sentences
-            output_value (str): Default sentence_embedding, to get sentence embeddings.
-                Can be set to token_embeddings to get wordpiece token embeddings.
-            convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it is a
-                list of pytorch tensors.
-            convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites any
-                setting from convert_to_numpy
-            device: Which torch.device to use for the computation
-            concat_last_n_layers (int): number of hidden outputs to concat starting from last layer
-            normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
+
 
         Returns:
-            (Union[List[Tensor], ndarray, Tensor]): By default, a list of tensors is returned.
+            (Union[List[Tensor], ndarray, Tensor]): By default, a numpy array is returned.
                 If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy
                 matrix is returned.
         """
@@ -462,15 +479,10 @@ class BertEmbedder(Embedder):
         if not isinstance(phrases, (str, list)):
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
-        batch_size = kwargs.get("batch_size", 16)
-        _len_phrases = len(phrases) if isinstance(phrases, list) else 1
-        show_progress_bar = kwargs.get("show_progress_bar", False) and _len_phrases > 1
-        output_value = kwargs.get("output_value", 'sentence_embedding')
-        convert_to_numpy = kwargs.get("convert_to_numpy", True)
-        convert_to_tensor = kwargs.get("convert_to_tensor", False)
-        device = kwargs.get("device", self.device)
-        concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
-        normalize_token_embs = kwargs.get("normalize_token_embs", False)
+        show_progress_bar = (
+            self._show_progress_bar and
+            (len(phrases) if isinstance(phrases, list) else 1) > 1
+        )
 
         # `False` for first call but might not for the subsequent calls
         _use_sbert_model = getattr(self, "_use_sbert_model", False)
@@ -484,32 +496,32 @@ class BertEmbedder(Embedder):
                 #   in `_encode_local` and hence will be addressed in future work
                 # TODO: eliminate depedency on sentence-transformers library
                 results = self._encode_local(phrases,
-                                             batch_size=batch_size,
+                                             batch_size=self._batch_size,
                                              show_progress_bar=show_progress_bar,
-                                             output_value=output_value,
-                                             convert_to_numpy=convert_to_numpy,
-                                             convert_to_tensor=convert_to_tensor,
-                                             device=device,
-                                             concat_last_n_layers=concat_last_n_layers,
-                                             normalize_token_embs=normalize_token_embs)
+                                             output_value=self._output_value,
+                                             convert_to_numpy=self._convert_to_numpy,
+                                             convert_to_tensor=self._convert_to_tensor,
+                                             device=self.device,
+                                             concat_last_n_layers=self._concat_last_n_layers,
+                                             normalize_token_embs=self._normalize_token_embs)
                 setattr(self, "_use_sbert_model", False)
             except TypeError as e:
                 logger.error(e)
-                if concat_last_n_layers != 1 or normalize_token_embs:
-                    msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
-                          f"{'normalize_token_embs' if normalize_token_embs else ''} " \
+                if self._concat_last_n_layers != 1 or self._normalize_token_embs:
+                    msg = f"{'concat_last_n_layers,' if self._concat_last_n_layers != 1 else ''} " \
+                          f"{'normalize_token_embs' if self._normalize_token_embs else ''} " \
                           f"ignored as resorting to using encode methods from sentence-transformers"
                     logger.warning(msg)
                 setattr(self, "_use_sbert_model", True)
 
         if getattr(self, "_use_sbert_model"):
             results = self.model.sbert_model.encode(phrases,
-                                                    batch_size=batch_size,
+                                                    batch_size=self._batch_size,
                                                     show_progress_bar=show_progress_bar,
-                                                    output_value=output_value,
-                                                    convert_to_numpy=convert_to_numpy,
-                                                    convert_to_tensor=convert_to_tensor,
-                                                    device=device)
+                                                    output_value=self._output_value,
+                                                    convert_to_numpy=self._convert_to_numpy,
+                                                    convert_to_tensor=self._convert_to_tensor,
+                                                    device=self.device)
 
         return results
 
