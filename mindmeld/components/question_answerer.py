@@ -20,6 +20,7 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
+from typing import Dict, List
 
 from elasticsearch import ConnectionError as EsConnectionError
 from elasticsearch import ElasticsearchException, TransportError
@@ -41,13 +42,15 @@ from ._elasticsearch_helpers import (
     is_es_version_7,
     resolve_es_config_for_version,
 )
+from .entity_resolver import SentenceBertCosSimEntityResolver
+from .entity_resolver import TfIdfSparseCosSimEntityResolver
 from ..exceptions import (
     KnowledgeBaseConnectionError,
     KnowledgeBaseError,
     ElasticsearchVersionError,
 )
-from .. import path
 from ..models import create_embedder_model
+from ..resource_loader import Hasher
 from ..resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -56,34 +59,6 @@ DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
 ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH = ["embedder_without_elasticsearch"]
 EMBEDDING_FIELD_STRING = "_embedding"
-
-
-class BaseQuestionAnswerer:
-
-    def __init__(self, app_path, **kwargs):
-        self._app_path = app_path
-        self._app_namespace = get_app_namespace(self._app_path) if self._app_path else None
-        self._resource_loader = (
-            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(self._app_path))
-        )
-        self._qa_config = (
-            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
-        )
-
-    @abstractmethod
-    def get(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    def build_search(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    def load_kb(self, index_name, data_file, **kwargs):
-        raise NotImplementedError
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} model_type: {self._qa_config.get('model_type')}>"
 
 
 class FieldInfo:
@@ -887,6 +862,62 @@ class Search:
                 )
 
 
+class BaseQuestionAnswerer(ABC):
+
+    def __init__(self, app_path, **kwargs):
+        """
+        Args:
+            app_path (str, optional): The path to the directory containing the app's data. If
+                provided, used to obtain default `app_namespace` and QA configurations
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+
+            config (dict, optional): The QA config if passed directly rather than loaded from the
+                app config
+            resource_loader (ResourceLoader, optional): An object which can load resources for the
+                question answerer.
+        """
+        self.app_path = app_path
+        self.app_namespace = (
+            kwargs.get(
+                "app_namespace",
+                get_app_namespace(self.app_path) if self.app_path else None)
+        )
+        self._resource_loader = (
+            kwargs.get("resource_loader", ResourceLoader.create_resource_loader(self.app_path))
+        )
+        self.__qa_config = (
+            kwargs.get("config", get_classifier_config("question_answering", app_path=app_path))
+        )
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} model_type: {self._query_type}>"
+
+    @property
+    def _query_type(self) -> str:
+        if self.__qa_config.get("model_type") in \
+            ALL_QUERY_TYPES + ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
+            return self.__qa_config.get("model_type")
+        else:
+            return DEFAULT_QUERY_TYPE
+
+    @property
+    def _query_settings(self) -> dict:
+        return {"model_settings": self.__qa_config.get("model_settings", {})}
+
+    @abstractmethod
+    def get(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def build_search(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def load_kb(self, index_name, data_file, **kwargs):
+        raise NotImplementedError
+
+
 class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     """The question answerer is primarily an information retrieval system that provides all the
     necessary functionality for interacting with the application's knowledge base.
@@ -906,10 +937,10 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         self.__es_client = None
         self._es_field_info = {}
 
+        # bug-fix: previously, `_embedder_model` is created only when `model_type` is `embedder`
         self._embedder_model = None
-        # bug-fix: previously, `_embedder_model` loaded only when `model_type` is `embedder`
-        if "embedder" in self._qa_config.get("model_type"):
-            self._embedder_model = create_embedder_model(app_path, self._qa_config)
+        if "embedder" in self._query_type:
+            self._embedder_model = create_embedder_model(self.app_path, self._query_settings)
 
     @property
     def _es_client(self):
@@ -917,13 +948,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         if self.__es_client is None:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
-
-    @property
-    def _query_type(self):
-        if self._qa_config.get("model_type") in ALL_QUERY_TYPES:
-            return self._qa_config.get("model_type")
-        else:
-            return DEFAULT_QUERY_TYPE
 
     def _load_field_info(self, index):
         """load knowledge base field metadata information for the specified index.
@@ -973,7 +997,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     def save_embedder_model(self):
         self._embedder_model.dump()
 
-    def get(self, index, size=10, query_type=None, **kwargs):
+    def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -1009,12 +1033,15 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         query_type = query_type or self._query_type
 
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
         # If an id was passed in, simply retrieve the specified document
         if doc_id:
             logger.info(
                 "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
             )
-            s = self.build_search(index)
+            s = self.build_search(index, app_namespace=app_namespace)
             s = s.filter(query_type=query_type, id=doc_id)
             results = s.execute(size=size)
             return results
@@ -1063,7 +1090,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         results = s.execute(size=size)
         return results
 
-    def build_search(self, index, ranking_config=None):
+    def build_search(self, index, ranking_config=None, app_namespace=None):
         """Build a search object for advanced filtered search.
 
         Args:
@@ -1073,11 +1100,14 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             Search: a Search object for filtered search.
         """
 
-        if not does_index_exist(app_namespace=self._app_namespace, index_name=index):
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        if not does_index_exist(app_namespace=app_namespace, index_name=index):
             raise ValueError("Knowledge base index '{}' does not exist.".format(index))
 
         # get index name with app scope
-        index = get_scoped_index_name(self._app_namespace, index)
+        index = get_scoped_index_name(app_namespace, index)
 
         # load knowledge base field information for the specified index.
         self._load_field_info(index)
@@ -1123,12 +1153,13 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             app config
         """
 
-        app_namespace = app_namespace or self._app_namespace
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
         es_host = es_host or self._es_host
         es_client = es_client or self._es_client
-        app_path = app_path or self._app_path
-        config = config or self._qa_config
 
+        config = config or self._query_settings
         embedder_model = None
         embedding_fields = []
         if not app_path and not config:
@@ -1157,6 +1188,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
+                # fix related to Issue 220: https://github.com/cisco/mindmeld/issues/220
                 if line.strip().startswith("["):
                     docs = json.load(data_fp)
                     count = len(docs)
@@ -1195,6 +1227,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
+                # fix related to Issue 220: https://github.com/cisco/mindmeld/issues/220
                 if line.strip().startswith("["):
                     logging.debug("Loading data from a json file.")
                     docs = json.load(data_fp)
@@ -1265,7 +1298,26 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             embedder_model.dump()
 
 
-class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
+class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
+    """
+    A non elastic question answerer class which stores indices locally in a class variable
+    as follows:
+
+    >>> ALL_INDICES = {
+            scoped_key_name: {
+                "id2cname": Dict[str, str],
+                "id2cname_hash": str, # a unique identifier to recognize data changes
+                "resolver": EntityResolver
+            },
+            ...
+        }
+
+    During load_kb(),
+      If clean=False, only if entity map gets updated, a new resolver is trained on updated data
+          else no chnage to corresponding resolver
+      If clean=True, the entire index is deleted and re-trained with whatever new data found
+    """
+    ALL_INDICES = {}
 
     def __init__(self, app_path, **kwargs):
         """Initializes a question answerer
@@ -1276,25 +1328,32 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
         super().__init__(app_path, **kwargs)
-        self._validate_qa_config()
+
+        if self._query_type != "embedder_without_elasticsearch":
+            msg = f"{self._query_type} model_type not implemented for " \
+                  f"NonElasticsearchQuestionAnswerer. Available choices: " \
+                  f"{['embedder_without_elasticsearch']} "
+            raise NotImplementedError(msg)
+
+        embedder_type = self._query_settings.get("embedder_type", "bert")
+        if embedder_type != "bert":
+            msg = f"{embedder_type} embedder_type not allowed for " \
+                  f"NonElasticsearchQuestionAnswerer. Available choices: " \
+                  f"{['bert']} "
+            raise ValueError(msg)
+        self._query_settings.get("embedder_type", embedder_type)
 
         self._embedder_model = None
-        if "embedder" in self._qa_config.get("model_type"):
-            self._embedder_model = create_embedder_model(app_path, self._qa_config)
-
-    def _validate_qa_config(self):
-        model_type = getattr(self, "_qa_config").get("model_type")
-        if model_type != "embedder_without_elasticsearch":
-            raise NotImplementedError(f"Implemented model_types: "
-                                      f"{['embedder_without_elasticsearch']} ")
+        if "embedder" in self._query_type:
+            self._embedder_model = create_embedder_model(self.app_path, self._query_settings)
 
     def save_embedder_model(self):
         self._embedder_model.dump()
 
-    def get(self, index, size=10, query_type=None, **kwargs):
+    def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
         raise NotImplementedError
 
-    def build_search(self, index, ranking_config=None):
+    def build_search(self, index, ranking_config=None, app_namespace=None):
         raise NotImplementedError
 
     def load_kb(
@@ -1305,6 +1364,7 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
         clean=False,
         app_path=None,
         config=None,
+        **_kwargs
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -1324,10 +1384,14 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
                 app config
         """
 
-        app_namespace = app_namespace or self._app_namespace
-        app_path = app_path or self._app_path
-        config = config or self._qa_config
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
 
+        # save/load docs through scoped index in cache
+        scoped_index_name = get_scoped_index_name(app_namespace, index_name)
+
+        # instantiate an embedder model
+        config = config or self._query_settings
         embedder_model = None
         embedding_fields = []
         if not app_path and not config:
@@ -1344,15 +1408,109 @@ class SentenceBertCosSimQuestionAnswerer(BaseQuestionAnswerer):
 
         if clean:
             try:
-                delete_index(app_namespace, index_name, es_host, es_client)
-            except ValueError:
-                logger.warning(
-                    "Index %s does not exist for app %s, creating a new index",
-                    index_name,
-                    app_namespace,
+                del NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name]
+            except KeyError:
+                logger.warning(f"Index {index_name} does not exist for app {app_namespace}, "
+                               f"creating a new index")
+
+        if embedder_model and len(embedding_fields) == 0:
+            logger.warning(
+                "No embedding fields specified in the app config, "
+                "continuing without generating embeddings..."
+            )
+            embedder_model = None
+
+        # collect data related to all keys in all the docs in KB
+        def _doc_generator(_data_file):
+            with open(_data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                # fix related to Issue 220: https://github.com/cisco/mindmeld/issues/220
+                if line.strip().startswith("["):
+                    logging.debug("Loading data from a json file.")
+                    docs = json.load(data_fp)
+                    for doc in docs:
+                        yield doc
+                else:
+                    logging.debug("Loading data from a jsonl file.")
+                    for line in data_fp:
+                        doc = json.loads(line)
+                        yield doc
+
+        id_counter = 0
+        kb_field_names = set()
+        for doc in _doc_generator(data_file):
+            # determine _id, remains same for all keys of the doc
+            _id = doc.pop("_id", None)
+            if not _id:
+                _id = id_counter
+                id_counter += 1
+            _id = str(_id)
+            # update data
+            for key, value in doc.items():
+                kb_field_names.update({key})
+                scoped_key_name = get_scoped_index_name(scoped_index_name, key)
+                if scoped_key_name not in NonElasticsearchQuestionAnswerer.ALL_INDICES:
+                    NonElasticsearchQuestionAnswerer.ALL_INDICES.update({scoped_key_name: {}})
+                _id2cname = (
+                    NonElasticsearchQuestionAnswerer
+                        .ALL_INDICES[scoped_key_name]
+                        .get("id2cname", {})
+                )
+                _id2cname.update({_id: value})
+                NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name].update(
+                    {"id2cname": _id2cname}
                 )
 
-        raise NotImplementedError
+        # verify if a particular scoped_key_name's entities data has changed and update resolver
+        def get_hashid(entities: List[Dict]):
+            string = json.dumps(entities, sort_keys=True)
+            return Hasher(algorithm="sha1").hash(string=string)
+
+        def match_regex(string, pattern_list):
+            return any([re.match(pattern, string) for pattern in pattern_list])
+
+        embedding_kb_field_names = []
+        for kb_field_name in kb_field_names:
+            scoped_key_name = get_scoped_index_name(scoped_index_name, kb_field_name)
+            scoped_key_name_cache = NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name]
+            id2cname = scoped_key_name_cache["id2cname"]
+            resolver = scoped_key_name_cache.get("resolver", None)
+            id2cname_hash = scoped_key_name_cache.get("id2cname_hash", None)
+            id2cname_hash_new = get_hashid(id2cname)
+            if not resolver or id2cname_hash_new != id2cname_hash:
+                # format id2cname data into an `entity_map` format for resolvers
+                entity_map = {
+                    "entities": [{"id": key, "cname": value} for key, value in id2cname.items()]
+                }
+                # create a new resolver and fit
+                resolver = (
+                    TfIdfSparseCosSimEntityResolver(
+                        app_path=app_path or os.getcwd(),
+                        entity_type=scoped_key_name)
+                )
+                resolver.fit(entity_map=entity_map)
+                resolver.dump()
+                NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name].update({
+                    "resolver": resolver,
+                    "id2cname_hash": id2cname_hash_new
+                })
+                # if required, creating an embedding resolver and fit
+                if embedding_fields and match_regex(kb_field_name, embedding_fields):
+                    embedding_kb_field_name = kb_field_name + EMBEDDING_FIELD_STRING
+                    embedding_scoped_key_name = get_scoped_index_name(
+                        scoped_index_name, embedding_kb_field_name)
+                    embedding_kb_field_names.append(embedding_scoped_key_name)
+                    resolver = (
+                        SentenceBertCosSimEntityResolver(
+                            app_path=app_path or os.getcwd(),
+                            entity_type=embedding_scoped_key_name)
+                    )
+                    resolver.fit(entity_map=entity_map)
+                    resolver.dump()
+                    NonElasticsearchQuestionAnswerer.ALL_INDICES.update(
+                        {embedding_scoped_key_name: {"resolver": resolver}}
+                    )
 
 
 class QuestionAnswerer:
@@ -1368,7 +1526,7 @@ class QuestionAnswerer:
         version of `question_answerer.py`
         """
 
-        config = cls._get_config(app_path, kwargs.get("config", None))
+        config = cls._get_config(kwargs.get("config", None), app_path)
         kwargs.update({"config": config})
         return cls._get_question_answerer(config)(app_path, **kwargs)
 
@@ -1377,14 +1535,14 @@ class QuestionAnswerer:
         return cls(app_path, **kwargs)
 
     @staticmethod
-    def _get_config(app_path, config=None):
+    def _get_config(config=None, app_path=None):
         return config or get_classifier_config("question_answering", app_path=app_path)
 
     @staticmethod
     def _get_question_answerer(config):
 
         if config.get("model_type") in ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
-            return SentenceBertCosSimQuestionAnswerer
+            return NonElasticsearchQuestionAnswerer
         elif config.get("model_type") in ALL_QUERY_TYPES:
             return ElasticsearchQuestionAnswerer
         else:
@@ -1396,17 +1554,20 @@ class QuestionAnswerer:
             )
 
     @classmethod
-    def load_kb(cls, app_namespace, index_name, data_file, **kwargs):
+    def load_kb(cls,
+                app_namespace,
+                index_name,
+                data_file,
+                es_host=None,
+                es_client=None,
+                connect_timeout=2,
+                clean=False,
+                app_path=None,
+                config=None,
+                **kwargs):
         """
         Implemented to maintain backward compatability. Should be removed in future versions.
-        """
-        msg = "DeprecationWarning: Refer the `load_kb(...)` method from object of a " \
-              "QuestionAnswerer. Deprecated Usage: `QuestionAnswerer.load_kb(...)`. New usage: " \
-              "`qa = QuestionAnswerer(...)`, then `qa.load_kb(...)` or `qa.load_all_kbs(...)`. " \
-              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
-        logger.warning(msg)
 
-        """
         Args:
             app_namespace (str): The namespace of the app. Used to prevent
                 collisions between the indices of this app and those of other
@@ -1424,13 +1585,24 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
+        msg = "DeprecationWarning: Refer the `load_kb(...)` method from object of a " \
+              "QuestionAnswerer. Deprecated Usage: `QuestionAnswerer.load_kb(...)`. New usage: " \
+              "`qa = QuestionAnswerer(...)`, then `qa.load_kb(...)` or `qa.load_all_kbs(...)`. " \
+              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
+        logger.warning(msg)
 
         try:
             app_path = kwargs.pop("app_path", None)
             question_answerer = cls.create_question_answerer(app_path, **kwargs)
             kwargs.update({
                 "app_namespace": app_namespace,
-                "app_path": app_path
+                "app_path": app_path,
+                "es_host": es_host,
+                "es_client": es_client,
+                "connect_timeout": connect_timeout,
+                "clean": clean,
+                "app_path": app_path,
+                "config": config,
             })
             question_answerer.load_kb(index_name, data_file, **kwargs)
 

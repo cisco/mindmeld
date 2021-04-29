@@ -34,7 +34,6 @@ ENTITY_EXAMPLE_TYPE = "entity"
 CLASS_LABEL_TYPE = "class"
 ENTITIES_LABEL_TYPE = "entities"
 
-
 # resource/requirements names
 GAZETTEER_RSC = "gazetteers"
 QUERY_FREQ_RSC = "q_freq"
@@ -129,16 +128,11 @@ def get_label_encoder(config):
 def create_embedder_model(app_path, config):
     """Creates and loads the embedder model."""
     embedder_config = config.get("model_settings", {})
-    embedding_fields = embedder_config.get("embedding_fields", [])
-    if len(embedding_fields) == 0:
-        # No embedding fields specified in the app config, continuing without embedder model.
+    embedder_type = embedder_config.get("embedder_type", None)
+
+    if not embedder_type:
+        # "No embedder type specified in the app config, continuing without embedder model."
         return None
-    try:
-        embedder_type = embedder_config["embedder_type"]
-    except KeyError as e:
-        raise ValueError(
-            "Invalid model configuration: No provided embedder type."
-        ) from e
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)

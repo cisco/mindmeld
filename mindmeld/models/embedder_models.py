@@ -14,27 +14,89 @@
 """
 This module contains the embedder model class.
 """
-from abc import ABC, abstractmethod
-import pickle
+import json
 import logging
 import os
-import numpy as np
+import pickle
+from abc import ABC, abstractmethod
 
-from .. import path
+import numpy as np
+from tqdm.autonotebook import trange
+
+from ._util import _is_module_available, _get_module_or_attr as _getattr
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
+from .. import path
+from ..core import Bunch
+from ..resource_loader import Hasher
 from ..tokenizer import Tokenizer
-
 
 logger = logging.getLogger(__name__)
 
-try:
-    from sentence_transformers import SentenceTransformer
 
-    register_bert = True
-except ImportError:
-    logger.info("Must install the extra [bert] to use the built in embbedder.")
-    register_bert = False
+def _torch(op, *args, sub="", **kwargs):
+    return _getattr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
+
+
+class EmbeddingsCache:
+
+    def __init__(self, cache_path):
+        self.cache_path = cache_path
+        self.data = {}
+
+        # load cache if exists
+        self.load()
+
+    def load(self):
+        """Loads the cache file."""
+
+        if os.path.exists(self.cache_path) and os.path.getsize(self.cache_path) > 0:
+            with open(self.cache_path, "rb") as fp:
+                self.data = pickle.load(fp)
+
+    def clear(self):
+        """Deletes the cache file."""
+
+        if os.path.exists(self.cache_path):
+            os.remove(self.cache_path)
+
+    def dump(self):
+        """Dumps the cache to disk."""
+
+        folder = os.path.dirname(self.cache_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        with open(self.cache_path, "wb") as fp:
+            pickle.dump(self.data, fp)
+
+    def get(self, text, default=None):
+        return self.__getitem__(text, default)
+
+    def __contains__(self, text):
+        if text in self.data:
+            return True
+        return False
+
+    def __getitem__(self, text, default=None):
+        return self.data.get(text, default)
+
+    def __setitem__(self, text, encoding):
+        self.data[text] = encoding
+
+    def __delitem__(self, text):
+        try:
+            del self.data[text]
+        except KeyError as e:
+            logger.error(e)
+            pass
+
+    def __iter__(self):
+        # zip texts and encodings into a dictionary for iteration
+        return iter(self.data)
+
+    def __len__(self):
+        return len(self.data)
 
 
 class Embedder(ABC):
@@ -44,22 +106,27 @@ class Embedder(ABC):
 
     def __init__(self, app_path, **kwargs):
         """Initializes an embedder."""
+
         self.model_name = kwargs.get("model_name", "default")
-        self.cache_path = path.get_embedder_cache_file_path(
+        self.model_id = str(self.model_name)
+
+        # load model (and if required changes model_id)
+        self.model = self.load(**kwargs)
+
+        # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
+        cache_path = path.get_embedder_cache_file_path(
             app_path, kwargs.get("embedder_type", "default"), self.model_name
         )
+        # new usage: determine cache path for the model using model_id (eg. new QA and ER modules)
+        if not (os.path.exists(cache_path) and os.path.getsize(cache_path) > 0):
+            # implies a previously used path name has no data and hence, is safe to change
+            #   default cache path for this model (backwards compatability in loading data)
+            cache_path = path.get_embedder_cache_file_path(app_path, self.model_id)
 
-        folder = os.path.dirname(self.cache_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+        # new: passing `cache_path` through kwargs preceeds any previously determined path string
+        cache_path = kwargs.get("cache_path", None) or str(cache_path)
 
-        if not os.path.exists(self.cache_path) or os.path.getsize(self.cache_path) == 0:
-            self.cache = {}
-        else:
-            with open(self.cache_path, "rb") as fp:
-                self.cache = pickle.load(fp)
-
-        self.model = self.load(**kwargs)
+        self.cache = EmbeddingsCache(cache_path)
 
     @abstractmethod
     def load(self, **kwargs):
@@ -68,10 +135,10 @@ class Embedder(ABC):
         Returns:
             The model object.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
-    def encode(self, text_list):
+    def encode(self, text_list, **kwargs):
         """
         Args:
             text_list (list): A list of text strings for which to generate the embeddings.
@@ -79,12 +146,7 @@ class Embedder(ABC):
         Returns:
             (list): A list of numpy arrays of the embeddings.
         """
-        pass
-
-    def clear_cache(self):
-        """Deletes the cache file."""
-        if os.path.exists(self.cache_path):
-            os.remove(self.cache_path)
+        raise NotImplementedError
 
     def get_encodings(self, text_list):
         """Fetches the encoded values from the cache, or generates them.
@@ -105,28 +167,351 @@ class Embedder(ABC):
         return encoded
 
     def dump(self):
-        """Dumps the cache to disk."""
-        with open(self.cache_path, "wb") as fp:
-            pickle.dump(self.cache, fp)
+        self.cache.dump()
+
+    def clear(self):
+        self.cache.clear()
 
 
 class BertEmbedder(Embedder):
     """
-    Encoder class for bert models as described here: https://github.com/UKPLab/sentence-transformers
+    Encoder class for bert models based on https://github.com/UKPLab/sentence-transformers
     """
 
     DEFAULT_BERT = "bert-base-nli-mean-tokens"
 
-    def load(self, **kwargs):
-        if self.model_name == "default":
-            bert_model_name = self.DEFAULT_BERT
-            logger.info("No bert model specifications passed, using default.")
-        else:
-            bert_model_name = self.model_name
-        return SentenceTransformer(bert_model_name)
+    # class variable to cache bert model(s);
+    #   helps to mitigate keeping duplicate sets of large weight matrices, especially
+    #   when creating mutliple BERT based Entity Resolvers
+    CACHE_MODELS = {}
 
-    def encode(self, text_list):
-        return self.model.encode(text_list)
+    @staticmethod
+    def _batch_to_device(batch, target_device):
+        """
+        send a pytorch batch to a device (CPU/GPU)
+        """
+        tensor = _getattr("torch", "Tensor")
+        for key in batch:
+            if isinstance(batch[key], tensor):
+                batch[key] = batch[key].to(target_device)
+        return batch
+
+    @staticmethod
+    def _num_layers(model):
+        """
+        Finds the number of layers in a given transformers model
+        """
+
+        if hasattr(model, "n_layers"):  # eg. xlm
+            num_layers = model.n_layers
+        elif hasattr(model, "layer"):  # eg. xlnet
+            num_layers = len(model.layer)
+        elif hasattr(model, "encoder"):  # eg. bert
+            num_layers = len(model.encoder.layer)
+        elif hasattr(model, "transformer"):  # eg. sentence_transformers models
+            num_layers = len(model.transformer.layer)
+        else:
+            raise ValueError(f"Not supported model {model} to obtain number of layers")
+
+        return num_layers
+
+    @property
+    def device(self):
+        return "cuda" if _torch("is_available", sub="cuda") else "cpu"
+
+    @staticmethod
+    def get_hashid(**kwargs):
+        string = json.dumps(kwargs, sort_keys=True)
+        return Hasher(algorithm="sha1").hash(string=string)
+
+    @staticmethod
+    def _get_sentence_transformers_encoder(name_or_path,
+                                           output_type="mean",
+                                           quantize=True,
+                                           return_components=False):
+        """
+        Retrieves a sentence-transformer model and returns it along with its transformer and
+        pooling components.
+
+        Args:
+            name_or_path: name or path to load a huggingface model
+            output_type: type of pooling required
+            quantize: if the model needs to be qunatized or not
+            return_components: if True, returns the Transformer and Poooling components of the
+                                sentence-bert model in a Bunch data type,
+                                else just returns the sentence-bert model
+
+        Returns:
+            Union[
+                sentence_transformers.SentenceTransformer,
+                Bunch(sentence_transformers.Transformer,
+                      sentence_transformers.Pooling,
+                      sentence_transformers.SentenceTransformer)
+            ]
+        """
+
+        strans_models = _getattr("sentence_transformers.models")
+        strans = _getattr("sentence_transformers", "SentenceTransformer")
+
+        transformer_model = strans_models.Transformer(name_or_path,
+                                                      model_args={"output_hidden_states": True})
+        pooling_model = strans_models.Pooling(transformer_model.get_word_embedding_dimension(),
+                                              pooling_mode_cls_token=output_type == "cls",
+                                              pooling_mode_max_tokens=False,
+                                              pooling_mode_mean_tokens=output_type == "mean",
+                                              pooling_mode_mean_sqrt_len_tokens=False)
+        sbert_model = strans(modules=[transformer_model, pooling_model])
+
+        if quantize:
+            if not _is_module_available("torch"):
+                raise ImportError("`torch` library required to quantize models") from None
+
+            torch_qint8 = _getattr("torch", "qint8")
+            torch_nn_linear = _getattr("torch.nn", "Linear")
+            torch_quantize_dynamic = _getattr("torch.quantization", "quantize_dynamic")
+
+            transformer_model = torch_quantize_dynamic(
+                transformer_model, {torch_nn_linear}, dtype=torch_qint8
+            ) if transformer_model else None
+            pooling_model = torch_quantize_dynamic(
+                pooling_model, {torch_nn_linear}, dtype=torch_qint8
+            ) if pooling_model else None
+            sbert_model = torch_quantize_dynamic(
+                sbert_model, {torch_nn_linear}, dtype=torch_qint8
+            ) if sbert_model else None
+
+        if return_components:
+            return Bunch(
+                transformer_model=transformer_model,
+                pooling_model=pooling_model,
+                sbert_model=sbert_model
+            )
+
+        return sbert_model
+
+    def _encode_local(self,
+                      sentences,
+                      batch_size,
+                      show_progress_bar,
+                      output_value,
+                      convert_to_numpy,
+                      convert_to_tensor,
+                      device,
+                      concat_last_n_layers,
+                      normalize_token_embs):
+        """
+        Computes sentence embeddings (Note: Method largely derived from Sentence Transformers
+            library to improve flexibility in encoding and pooling. Notably, `is_pretokenized` and
+            `num_workers` are ignored due to deprecation in their library, retrieved 23-Feb-2021)
+        """
+
+        self.transformer_model = self.model.transformer_model
+        self.pooling_model = self.model.pooling_model
+
+        if concat_last_n_layers != 1:
+            assert 1 <= concat_last_n_layers <= self._num_layers(self.transformer_model.auto_model)
+
+        self.transformer_model.eval()
+        if show_progress_bar is None:
+            show_progress_bar = (
+                logger.getEffectiveLevel() == logging.INFO or
+                logger.getEffectiveLevel() == logging.DEBUG
+            )
+
+        if convert_to_tensor:
+            convert_to_numpy = False
+
+        input_is_string = isinstance(sentences, str)
+        if input_is_string:  # Cast an individual sentence to a list with length 1
+            sentences = [sentences]
+
+        self.transformer_model.to(device)
+        self.pooling_model.to(device)
+
+        all_embeddings = []
+        length_sorted_idx = np.argsort([len(sen) for sen in sentences])
+        sentences_sorted = [sentences[idx] for idx in length_sorted_idx]
+
+        for start_index in trange(0, len(sentences), batch_size, desc="Batches",
+                                  disable=not show_progress_bar):
+            sentences_batch = sentences_sorted[start_index:start_index + batch_size]
+            features = self.transformer_model.tokenize(sentences_batch)
+            features = self._batch_to_device(features, device)
+
+            with _torch("no_grad"):
+                out_features_transformer = self.transformer_model.forward(features)
+                token_embeddings = out_features_transformer["token_embeddings"]
+                if concat_last_n_layers > 1:
+                    _all_layer_embs = out_features_transformer["all_layer_embeddings"]
+                    token_embeddings = _torch(
+                        "cat", _all_layer_embs[-concat_last_n_layers:], dim=-1)
+                if normalize_token_embs:
+                    _norm_token_embeddings = _torch(
+                        "norm", token_embeddings, sub="linalg", dim=2, keepdim=True)
+                    token_embeddings = token_embeddings.div(_norm_token_embeddings)
+                out_features_transformer.update({"token_embeddings": token_embeddings})
+                out_features = self.pooling_model.forward(out_features_transformer)
+
+                embeddings = out_features[output_value]
+
+                if output_value == 'token_embeddings':
+                    # Set token embeddings to 0 for padding tokens
+                    input_mask = out_features['attention_mask']
+                    input_mask_expanded = input_mask.unsqueeze(-1).expand(embeddings.size()).float()
+                    embeddings = embeddings * input_mask_expanded
+
+                embeddings = embeddings.detach()
+
+                if convert_to_numpy:
+                    embeddings = embeddings.cpu()
+
+                all_embeddings.extend(embeddings)
+
+        all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
+
+        if convert_to_tensor:
+            all_embeddings = _torch("stack", all_embeddings)
+        elif convert_to_numpy:
+            all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
+
+        if input_is_string:
+            all_embeddings = all_embeddings[0]
+
+        return all_embeddings
+
+    def load(self, **kwargs):
+
+        if not _is_module_available("sentence_transformers"):
+            raise ImportError(
+                "Must install the extra [bert] by running `pip install mindmeld[bert]` "
+                "to use the built in bert embedder.")
+
+        pretrained_name_or_abspath = (
+            kwargs.get("pretrained_name_or_abspath", None) or
+            BertEmbedder.DEFAULT_BERT if self.model_name == "default" else self.model_name
+        )
+        bert_output_type = kwargs.get("bert_output_type", "mean")
+        quantize_model = kwargs.get("quantize_model", False)
+
+        model_hashid = self.get_hashid(pretrained_name_or_abspath=pretrained_name_or_abspath,
+                                       bert_output_type=bert_output_type,
+                                       quantize_model=quantize_model)
+        model = BertEmbedder.CACHE_MODELS.get(model_hashid, None)
+
+        if not model:
+
+            info_msg = ""
+            for name in [f"sentence-transformers/{pretrained_name_or_abspath}",
+                         pretrained_name_or_abspath]:
+                try:
+                    model = (
+                        self._get_sentence_transformers_encoder(name,
+                                                                output_type=bert_output_type,
+                                                                quantize=quantize_model,
+                                                                return_components=True)
+                    )
+                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+                except OSError:
+                    info_msg += f"Could not initialize name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+
+                if model:
+                    break
+
+            logger.info(info_msg)
+
+            if not model:
+                msg = f"Could not resolve the name/path `{pretrained_name_or_abspath}`. " \
+                      f"Please check the model name and retry."
+                raise Exception(msg)
+
+            BertEmbedder.CACHE_MODELS.update({model_hashid: model})
+
+        self.model_id = str(model_hashid)
+
+        return model
+
+    def encode(self, phrases, **kwargs):
+        """Encodes input text(s) into embeddings, one vector for each phrase
+
+        Args:
+            phrases (str, list[str]): textual inputs that are to be encoded using sentence \
+                                        transformers' model
+            batch_size (int): the batch size used for the computation
+            show_progress_bar (bool): Output a progress bar when encode sentences
+            output_value (str): Default sentence_embedding, to get sentence embeddings.
+                Can be set to token_embeddings to get wordpiece token embeddings.
+            convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it is a
+                list of pytorch tensors.
+            convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites any
+                setting from convert_to_numpy
+            device: Which torch.device to use for the computation
+            concat_last_n_layers (int): number of hidden outputs to concat starting from last layer
+            normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
+
+        Returns:
+            (Union[List[Tensor], ndarray, Tensor]): By default, a list of tensors is returned.
+                If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy
+                matrix is returned.
+        """
+
+        if not phrases:
+            return []
+
+        if not isinstance(phrases, (str, list)):
+            raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
+
+        batch_size = kwargs.get("batch_size", 16)
+        _len_phrases = len(phrases) if isinstance(phrases, list) else 1
+        show_progress_bar = kwargs.get("show_progress_bar", False) and _len_phrases > 1
+        output_value = kwargs.get("output_value", 'sentence_embedding')
+        convert_to_numpy = kwargs.get("convert_to_numpy", True)
+        convert_to_tensor = kwargs.get("convert_to_tensor", False)
+        device = kwargs.get("device", self.device)
+        concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
+        normalize_token_embs = kwargs.get("normalize_token_embs", False)
+
+        # `False` for first call but might not for the subsequent calls
+        _use_sbert_model = getattr(self, "_use_sbert_model", False)
+
+        if not _use_sbert_model:
+            try:
+                # this snippet is to reduce dependency on sentence-transformers library
+                #   note that currently, the dependency is not fully eliminated due to backwards
+                #   compatability issues in huggingface-transformers between older (python 3.6)
+                #   and newer (python >=3.7) versions which needs more conditions to be implemented
+                #   in `_encode_local` and hence will be addressed in future work
+                # TODO: eliminate depedency on sentence-transformers library
+                results = self._encode_local(phrases,
+                                             batch_size=batch_size,
+                                             show_progress_bar=show_progress_bar,
+                                             output_value=output_value,
+                                             convert_to_numpy=convert_to_numpy,
+                                             convert_to_tensor=convert_to_tensor,
+                                             device=device,
+                                             concat_last_n_layers=concat_last_n_layers,
+                                             normalize_token_embs=normalize_token_embs)
+                setattr(self, "_use_sbert_model", False)
+            except TypeError as e:
+                logger.error(e)
+                if concat_last_n_layers != 1 or normalize_token_embs:
+                    msg = f"{'concat_last_n_layers,' if concat_last_n_layers != 1 else ''} " \
+                          f"{'normalize_token_embs' if normalize_token_embs else ''} " \
+                          f"ignored as resorting to using encode methods from sentence-transformers"
+                    logger.warning(msg)
+                setattr(self, "_use_sbert_model", True)
+
+        if getattr(self, "_use_sbert_model"):
+            results = self.model.sbert_model.encode(phrases,
+                                                    batch_size=batch_size,
+                                                    show_progress_bar=show_progress_bar,
+                                                    output_value=output_value,
+                                                    convert_to_numpy=convert_to_numpy,
+                                                    convert_to_tensor=convert_to_tensor,
+                                                    device=device)
+
+        return results
 
 
 class GloveEmbedder(Embedder):
@@ -176,7 +561,7 @@ class GloveEmbedder(Embedder):
         self.model.save_embeddings()
 
 
-if register_bert:
+if _is_module_available("sentence_transformers"):
     register_embedder("bert", BertEmbedder)
 
 register_embedder("glove", GloveEmbedder)
