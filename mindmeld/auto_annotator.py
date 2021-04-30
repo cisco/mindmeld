@@ -872,8 +872,8 @@ class BootstrapAnnotator(Annotator):
                     entities.append(
                         {
                             "body": entity.get("text"),
-                            "start": entity.get("span").get("start"),
-                            "end": entity.get("span").get("end") + 1,
+                            "start": entity.get("span", {}).get("start"),
+                            "end": entity.get("span", {}).get("end") + 1,
                             "dim": entity.get("type"),
                             "value": entity.get("value"),
                             "role": entity.get("role"),
@@ -890,7 +890,7 @@ class BootstrapAnnotator(Annotator):
             for entity in entities
         ]
 
-    def convert_text_queries_to_processed(self, text_queries):
+    def text_queries_to_processed_queries(self, text_queries):
         """Converts text queries into processed queries.
 
         Args:

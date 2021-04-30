@@ -196,7 +196,6 @@ class QueryLoader:
         try:
             with open(self.cache_file_path, "rb") as handle:
                 query_list = pickle.load(handle)
-                handle.close()
             return query_list
         except FileNotFoundError as error:
             raise FileNotFoundError(
@@ -209,7 +208,6 @@ class QueryLoader:
         logger.info("Saving queries with the file pattern: %s", self.file_pattern)
         with open(self.cache_file_path, "wb") as handle:
             pickle.dump(queries, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            handle.close()
 
     @property
     def queries(self):
@@ -390,7 +388,7 @@ class LogQueriesLoader:
         annotator_params = DEFAULT_AUTO_ANNOTATOR_CONFIG
         annotator_params["app_path"] = self.app_path
         bootstrap_annotator = BootstrapAnnotator(**annotator_params)
-        return bootstrap_annotator.convert_text_queries_to_processed(
+        return bootstrap_annotator.text_queries_to_processed_queries(
             text_queries=text_queries
         )
 

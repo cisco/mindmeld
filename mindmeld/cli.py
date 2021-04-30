@@ -821,7 +821,7 @@ def augment(app_path, language):
 
 @shared_cli.command("active_learning", context_settings=CONTEXT_SETTINGS)
 # Params Used for Both Select and Train
-@click.option("--app_path", type=str, help="Path to the MindMeld application")
+@click.option("--app-path", type=str, help="Path to the MindMeld application")
 @click.option(
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
@@ -848,7 +848,7 @@ def augment(app_path, language):
     help="Percentage of training data to use as the initial seed.",
 )
 @click.option("--n_epochs", type=int, help="Number of epochs.")
-@click.option("--no_plot", is_flag=True, default=False, help="Whether to plot results.")
+@click.option("--plot", is_flag=True, default=True, help="Whether to plot results.")
 # Params Specific to Selection
 @click.option(
     "--select",
@@ -882,7 +882,7 @@ def active_learning(  # pylint: disable=R0913
     train,
     train_seed_pct,
     n_epochs,
-    no_plot,
+    plot,
     select,
     strategy,
     unlabeled_logs_path,
@@ -893,21 +893,20 @@ def active_learning(  # pylint: disable=R0913
     if not (train or select):
         raise AssertionError("'train' or 'select' must be passed in as a paramter.")
     config = get_active_learning_config(app_path=app_path)
-    if app_path:
-        config["app_path"] = app_path
+
+    config["app_path"] = app_path or config.get("app_path")
     if batch_size:
         config["training"]["batch_size"] = batch_size
     if training_level:
         config["training"]["training_level"] = training_level
-    if output_folder:
-        config["output_folder"] = output_folder
+    config["output_folder"] = output_folder or config.get("output_folder")
     if train_seed_pct:
         config["pre_training"]["train_seed_pct"] = train_seed_pct
     if n_epochs:
         config["training"]["n_epochs"] = n_epochs
     if strategy:
         if train:
-            config["training_strategies"] = [strategy]
+            config["train"]["training_strategies"] = [strategy]
         elif select:
             config["selection"]["selection_strategy"] = strategy
     if unlabeled_logs_path:
@@ -920,7 +919,7 @@ def active_learning(  # pylint: disable=R0913
     alp = ActiveLearningPipelineFactory.create_from_config(config)
     if train:
         alp.train()
-        if not no_plot:
+        if plot:
             alp.plot()
     elif select:
         alp.select_queries_to_label()

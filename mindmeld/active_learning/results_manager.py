@@ -55,7 +55,7 @@ class ResultsManager:
         )
         now = datetime.datetime.now()
         self.experiment_folder_name = (
-            f"{now.month}-{now.day}_{now.hour}:{now.minute}_{strategies}"
+            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{strategies}"
         )
 
     @property
@@ -110,7 +110,6 @@ class ResultsManager:
             self.dump_json(formatted_path, data={})
         with open(formatted_path, "r") as infile:
             json_data = json.load(infile)
-            infile.close()
         return json_data
 
     def dump_json(self, unformatted_path: str, data: Dict):
@@ -122,7 +121,6 @@ class ResultsManager:
         formatted_path = self.format_path(unformatted_path)
         with open(formatted_path, "w") as outfile:
             json.dump(data, outfile, indent=4)
-            outfile.close()
 
     def update_json(
         self, unformatted_path: str, strategy: str, epoch: int, iteration: int, data
@@ -167,7 +165,6 @@ class ResultsManager:
         data = {"strategy": strategy, "selected_queries": query_dicts}
         with open(log_selected_queries_path, "w") as outfile:
             json.dump(data, outfile, indent=4)
-            outfile.close()
         logger.info("Selected Log Queries saved at: %s", log_selected_queries_path)
 
     @staticmethod
