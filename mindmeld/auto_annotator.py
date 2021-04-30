@@ -16,8 +16,8 @@ import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-import spacy
 from typing import List
+import spacy
 from tqdm import tqdm
 from ._util import get_pattern
 from .resource_loader import ResourceLoader
