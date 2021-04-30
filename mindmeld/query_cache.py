@@ -14,17 +14,20 @@
 """
 This module contains the query cache implementation.
 """
+from hashlib import md5
+import json
 import logging
 import os
 import shutil
+import sqlite3
 
 from sklearn.externals import joblib
 
 from ._version import get_mm_version
-from .path import GEN_FOLDER, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
+from .path import GEN_FOLDER, QUERY_CACHE_DB_PATH
+from .core import ProcessedQuery
 
 logger = logging.getLogger(__name__)
-
 
 class QueryCache:
     """
@@ -34,29 +37,58 @@ class QueryCache:
     """
 
     def __init__(self, app_path):
-        self.app_path = app_path
-        self.is_dirty = False
-        # We initialize cached_queries to None instead of {} since
-        # we want to lazy load it from disk only when necessary ie during
-        # set, get and dump ops. This allows us to run the application
-        # faster.
-        self._cached_queries = None
-        self.gen_folder = GEN_FOLDER.format(app_path=self.app_path)
-        self.main_cache_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
-        self.tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=self.app_path)
+        # make generated directory if necessary
+        gen_folder = GEN_FOLDER.format(app_path=app_path)
+        if not os.path.isdir(gen_folder):
+            os.makedirs(gen_folder)
 
-    @property
-    def cached_queries(self):
-        """A dictionary containing all the cached queries"""
-        if self._cached_queries is None:
-            self.load()
+        db_file_location = QUERY_CACHE_DB_PATH.format(app_path=app_path)
+        self.connection = sqlite3.connect(db_file_location)
+        cursor = self.connection.cursor()
 
-        return self._cached_queries
+        if not self.compatible_version():
+            cursor.execute('''
+            DROP TABLE IF EXISTS queries, version;
+            ''')
+        # Create table to store queries
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS queries
+        (hash_id TEXT PRIMARY KEY, query TEXT)
+        WITHOUT ROWID;
+        ''')
+        # Create table to store the data version
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS version
+        (version_string TEXT PRIMARY KEY)
+        WITHOUT ROWID;
+        ''')
+        cursor.execute('''
+        INSERT OR IGNORE INTO version values (?);
+        ''', (get_mm_version(),))
+        self.connection.commit()
 
-    @property
-    def versioned_data(self):
-        """A dictionary containing the MindMeld version in addition to any cached queries."""
-        return {"mm_version": get_mm_version(), "cached_queries": self.cached_queries}
+
+    def compatible_version(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute('''
+            SELECT version_string FROM version WHERE version_string=(?)
+            ''', (get_mm_version(),))
+            if len(cursor.fetchall()) == 0:
+                # version does not match
+                return False
+        except Exception:
+            pass
+        return True
+
+
+    @staticmethod
+    def get_key(domain, intent, query_text):
+        h = md5(domain.encode())
+        h.update(intent.encode())
+        h.update(query_text.encode())
+        return h.hexdigest()
+
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
@@ -69,11 +101,13 @@ class QueryCache:
             processed_query (ProcessedQuery): The ProcessedQuery \
                 object corresponding to the domain, intent and query_text
         """
-        if (domain, intent, query_text) in self.cached_queries:
-            return
+        key = self.get_key(domain, intent, query_text)
+        cursor = self.connection.cursor()
+        cursor.execute('''
+        INSERT OR IGNORE into queries values (?, ?)
+        ''', (key, json.dumps(processed_query.to_cache())))
+        self.connection.commit()
 
-        self.cached_queries[(domain, intent, query_text)] = processed_query
-        self.is_dirty = True
 
     def get_value(self, domain, intent, query_text):
         """
@@ -84,61 +118,22 @@ class QueryCache:
             intent (str): The intent
             query_text (str): The query text
         """
-        try:
-            return self.cached_queries[(domain, intent, query_text)]
-        except KeyError:
-            return
+        key = self.get_key(domain, intent, query_text)
+        cursor = self.connection.cursor()
+        cursor.execute('''
+        SELECT query FROM queries WHERE hash_id=(?);
+        ''', (key,))
+        row = cursor.fetchone()
+        if row:
+            return ProcessedQuery.from_cache(json.loads(row[0]))
+        return None
 
     def dump(self):
         """
         This function dumps the query cache mapping to disk. This operation is expensive,
         so use it sparingly!
         """
-        if not self.is_dirty:
-            return
-
-        # make generated directory if necessary
-        if not os.path.isdir(self.gen_folder):
-            os.makedirs(self.gen_folder)
-
-        try:
-            # We write to a new cache temp file and then rename it to prevent file corruption
-            # due to the user cancelling the training operation midway during the
-            # file write.
-            joblib.dump(self.versioned_data, self.tmp_cache_location)
-            if os.path.isfile(self.main_cache_location):
-                os.remove(self.main_cache_location)
-            shutil.move(self.tmp_cache_location, self.main_cache_location)
-            self.is_dirty = False
-        except (OSError, IOError, KeyboardInterrupt):
-            if os.path.exists(self.main_cache_location):
-                os.remove(self.main_cache_location)
-
-            if os.path.exists(self.tmp_cache_location):
-                os.remove(self.tmp_cache_location)
-
-            logger.error(
-                "Couldn't dump query cache to disk properly, "
-                "so deleting query cache due to possible corruption."
-            )
+        pass
 
     def load(self):
-        """
-        Loads a generated query cache into memory.
-        """
-        file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
-        try:
-            versioned_data = joblib.load(file_location)
-            if "cached_queries" not in versioned_data:
-                # The old version of caching did not have versions
-                logger.warning(
-                    "The cache contains deprecated versions of queries. Please "
-                    "run this command to clear the query cache: "
-                    '"python -m <app_name> clean -q"'
-                )
-                self._cached_queries = versioned_data
-            else:
-                self._cached_queries = versioned_data["cached_queries"]
-        except (OSError, IOError, KeyboardInterrupt):
-            self._cached_queries = {}
-        self.is_dirty = False
+        pass
