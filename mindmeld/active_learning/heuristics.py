@@ -308,7 +308,11 @@ class EntropySampling(Heuristic):
     """ Selection strategy that select queries with the highest entropy."""
 
     def _extractor(
-        self, sampling_size: int, preds_single: List[List[float]], do_rank: bool = True, **kwargs
+        self,
+        sampling_size: int,
+        preds_single: List[List[float]],
+        do_rank: bool = True,
+        **kwargs,
     ):
         """
         Args:

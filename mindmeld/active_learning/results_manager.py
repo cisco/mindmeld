@@ -134,10 +134,10 @@ class ResultsManager:
             data (Dict or List): Data to store for current strategy, epoch, and iteration.
         """
         json_data = self.load_json(unformatted_path)
-        if strategy not in json_data:
-            json_data[strategy] = {}
-        if str(epoch) not in json_data[strategy]:
-            json_data[strategy][str(epoch)] = {}
+        json_data[strategy] = json_data.get(strategy, {})
+        json_data[strategy][str(epoch)] = json_data[strategy].get(
+            str(epoch), {str(epoch): {}}
+        )
         json_data[strategy][str(epoch)][str(iteration)] = data
         self.dump_json(unformatted_path, json_data)
 
