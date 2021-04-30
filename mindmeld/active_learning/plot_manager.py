@@ -47,9 +47,11 @@ class PlotManager:
             return json.load(infile)
 
     def get_queries_json_data(self) -> Dict:
-        """Loads queries.json from the experiment directory path.
+        """Loads selected_queries.json from the experiment directory path.
+        selected_queries.json stores the queries selected by active learning
+        at each iteration.
         Returns:
-            data (dict): Data loaded from queries.json.
+            data (dict): Data loaded from selected_queries.json.
         """
         selected_queries_json_path = AL_SELECTED_QUERIES_PATH.format(
             experiment_folder=self.experiment_dir_path
@@ -96,15 +98,12 @@ class PlotManager:
             plot_entities (bool): Whether to generate plots at the entity level.
         """
         if plot_domain:
-            y_keys = ["overall"]
-            function(self, y_keys=y_keys)
+            function(self, y_keys=["overall"])
             for domain in self.get_domain_list():
-                y_keys = [domain, "overall"]
-                function(self, y_keys=y_keys)
+                function(self, y_keys=[domain, "overall"])
                 if plot_intents:
                     for intent in self.get_intent_list(domain):
-                        y_keys = [domain, intent, "overall"]
-                        function(self, y_keys=y_keys)
+                        function(self, y_keys=[domain, intent, "overall"])
                         if plot_entities:
                             y_keys = [domain, intent, "entities", "overall"]
                             function(self, y_keys=y_keys)
@@ -345,7 +344,6 @@ class PlotManager:
                 fig.savefig(self.get_img_path(y_keys, title))
                 plt.clf()
 
-    # QUERIES.JSON
     @staticmethod
     def get_counter(labels: List):
         """Makes a counter with counts from a given set of labels.
