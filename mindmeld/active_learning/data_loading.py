@@ -251,7 +251,9 @@ class DataBucketFactory:
             sampled_queries,
             unsampled_queries,
             _,
-        ) = StrategicRandomSampling(sample_size).sample(unsampled=train_queries)
+        ) = StrategicRandomSampling().sample(
+            sampling_size=sample_size, unsampled=train_queries
+        )
 
         return DataBucket(
             label_map=LabelMap.get_label_map(app_path, train_pattern),
@@ -294,8 +296,8 @@ class DataBucketFactory:
         )
         if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
             sample_size = int(log_usage_pct * len(log_queries))
-            log_queries, _, _, _ = StrategicRandomSampling(sample_size).sample(
-                unsampled=log_queries
+            log_queries, _, _, _ = StrategicRandomSampling().sample(
+                sampling_size=sample_size, unsampled=log_queries
             )
         return DataBucket(
             label_map=LabelMap.get_label_map(app_path, train_pattern),
@@ -346,6 +348,7 @@ class DataBucket:
         filtered_queries = []
         for index, query in enumerate(queries):
             if query.domain == domain:
+                # Add queries if not filtering at the intent level. Otherwise, add intent match.
                 if not intent or (intent and query.intent == intent):
                     filtered_queries_indices.append(index)
                     filtered_queries.append(query)

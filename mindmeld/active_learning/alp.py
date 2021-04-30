@@ -12,6 +12,8 @@ from ..constants import STRATEGY_ABRIDGED, MULTI_CLASSIFIER_STRATEGIES
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_TRAIN_SEED_PERCENT = 0.2
+
 
 class ActiveLearningPipeline:  # pylint: disable=R0902
     """Class that executes the training and selection process for the Active Learning Pipeline"""
@@ -54,7 +56,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             log_usage_pct (float): Percentage of the log data to use for selection
             labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
-            output_folder (str):
+            output_folder (str): Folder to store active learning results.
         """
         self.app_path = app_path
         self.train_pattern = train_pattern
@@ -72,16 +74,34 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.log_usage_pct = log_usage_pct
         self.labeled_logs_pattern = labeled_logs_pattern
         self.unlabeled_logs_path = unlabeled_logs_path
+        self.output_folder = output_folder
 
-        self.results_manager = self.get_results_manager(output_folder)
+        self.results_manager = ResultsManager(output_folder)
         self.mindmeld_al_classifier = self.get_classifier()
         self.init_data_bucket = None
         self.data_bucket = None
 
-    def get_results_manager(self, output_folder):
-        return ResultsManager(
-            active_learning_params=deepcopy(self.__dict__), output_folder=output_folder
-        )
+    def as_dict(self):
+        """ Custom dictionary method used to save key experiment params. """
+        return {
+            "app_path": self.app_path,
+            "train_pattern": self.train_pattern,
+            "test_pattern": self.test_pattern,
+            "load": self.load,
+            "save": self.save,
+            "train_seed_pct": self.train_seed_pct,
+            "n_classifiers": self.n_classifiers,
+            "n_epochs": self.n_epochs,
+            "batch_size": self.batch_size,
+            "training_level": self.training_level,
+            "training_strategies": self.training_strategies,
+            "selection_strategy": self.selection_strategy,
+            "save_sampled_queries": self.save_sampled_queries,
+            "log_usage_pct": self.log_usage_pct,
+            "labeled_logs_pattern": self.labeled_logs_pattern,
+            "unlabled_logs_path": self.unlabeled_logs_path,
+            "output_folder": self.output_folder,
+        }
 
     def get_classifier(self):
         return MindMeldALClassifier(
@@ -92,8 +112,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     def train(self):
         """Loads the initial data bucket and then trains on every strategy."""
-        logger.info("Creating Training Data Bucket")
-        self.results_manager.create_experiment_folder(self.training_strategies)
+        logger.info("Creating Output Folder and Saving Params.")
+        self.results_manager.create_experiment_folder(
+            active_learning_params=self.as_dict(),
+            training_strategies=self.training_strategies,
+        )
+        logger.info("Creating Training Data Bucket.")
         self.init_data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
             self.load,
@@ -119,8 +143,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 and the run will terminate after the first iteration
         """
         num_iterations = math.ceil(
-            len(self.data_bucket.unsampled_queries) / self.batch_size
+            len(self.init_data_bucket.unsampled_queries) / self.batch_size
         )
+        heuristic = HeuristicsFactory.get_heuristic(strategy)
         for epoch in range(self.n_epochs):
             del self.data_bucket
             self.data_bucket = deepcopy(self.init_data_bucket)
@@ -166,14 +191,13 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         if num_unsampled > self.batch_size
                         else num_unsampled
                     )
-                    # Update  DataBucket with selected queries based on the current heuristic.
-                    heuristic = HeuristicsFactory.get_heuristic(strategy, sampling_size)
                     (
                         self.data_bucket.newly_sampled_queries,
                         self.data_bucket.sampled_queries,
                         self.data_bucket.unsampled_queries,
                         _,
                     ) = heuristic.sample(
+                        sampling_size=sampling_size,
                         sampled=self.data_bucket.sampled_queries,
                         unsampled=self.data_bucket.unsampled_queries,
                         preds_single=preds_single,
@@ -230,18 +254,18 @@ class ActiveLearningPipelineFactory:
             test_pattern=config.get("pre_training").get("test_pattern"),
             load=config.get("pre_training").get("load"),
             save=config.get("pre_training").get("save"),
-            train_seed_pct=config.get("pre_training").get("save"),
+            train_seed_pct=config.get("pre_training").get("train_seed_pct"),
             n_classifiers=config.get("training").get("n_classifiers"),
             n_epochs=config.get("training").get("n_epochs"),
             batch_size=config.get("training").get("batch_size"),
             training_strategies=config.get("training").get("training_strategies"),
-            training_level=config.get("training").get("training_strategies"),
+            training_level=config.get("training").get("training_level"),
             selection_strategy=config.get("selection").get("selection_strategy"),
             save_sampled_queries=config.get("training_output").get(
                 "save_sampled_queries"
             ),
             log_usage_pct=config.get("selection").get("log_usage_pct"),
             labeled_logs_pattern=config.get("selection").get("labeled_logs_pattern"),
-            unlabeled_logs_path=config.get("selection").get("unlabeled_logs_pattern"),
-            output_folder=config.get("training_output", "output_folder"),
+            unlabeled_logs_path=config.get("selection").get("unlabeled_logs_path"),
+            output_folder=config.get("output_folder"),
         )

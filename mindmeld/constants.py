@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unicodedata
 
 DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
@@ -19,8 +20,10 @@ BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
 # ACTIVE LEARNING CONSTANTS
+TRAIN_LEVEL_DOMAIN = "domain"
+TRAIN_LEVEL_INTENT = "intent"
 ENTROPY_LOG_BASE = 2
-ACTIVE_LEARNING_RANDOM_SEED = 2020
+ACTIVE_LEARNING_RANDOM_SEED = os.environ.get("ACTIVE_LEARNING_RANDOM_SEED") or 2020
 MULTI_CLASSIFIER_STRATEGIES = ["ds", "ens", "kld"]
 AL_MAX_LOG_USAGE_PCT = 1.0
 STRATEGY_ABRIDGED = {

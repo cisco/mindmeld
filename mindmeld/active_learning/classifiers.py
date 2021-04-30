@@ -7,10 +7,10 @@ from sklearn.model_selection import StratifiedKFold
 
 from .data_loading import LabelMap, DataBucket
 
-from ..core import ProcessedQuery
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
-from ..constants import ACTIVE_LEARNING_RANDOM_SEED
+from ..constants import TRAIN_LEVEL_INTENT, ACTIVE_LEARNING_RANDOM_SEED
+from ..core import ProcessedQuery
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +195,7 @@ class MindMeldALClassifier(ALClassifier):
         preds_single = dc_queries_prob_vectors
 
         # Intent_Level
-        if self.training_level == "intent":
+        if self.training_level == TRAIN_LEVEL_INTENT:
             (
                 ic_queries_prob_vectors,
                 ic_eval_test_dict,

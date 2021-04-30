@@ -4,7 +4,12 @@ from collections import Counter
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
 
-from ..constants import ENTROPY_LOG_BASE, ACTIVE_LEARNING_RANDOM_SEED
+from ..constants import (
+    ENTROPY_LOG_BASE,
+    TRAIN_LEVEL_DOMAIN,
+    TRAIN_LEVEL_INTENT,
+    ACTIVE_LEARNING_RANDOM_SEED,
+)
 
 
 def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = None):
@@ -30,20 +35,17 @@ def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = No
 class Heuristic(ABC):
     """ Heuristic base class used as Active Learning query selection strategies."""
 
-    def __init__(self, sampling_size):
-        """
+    @staticmethod
+    def validate_sampling_size(sampling_size: int):
+        """Verify the sampling size is a positive integer
         Args:
-            sampling_size: Size of data being sampled in a turn.
+            sampling_size (int): Size of data being sampled in a turn.
         """
-        self.sampling_size = sampling_size
-        self.check_sampling_size()
-
-    def check_sampling_size(self):
-        """Verify the sampling size is a positive integer"""
-        assert isinstance(self.sampling_size, int)
-        assert self.sampling_size > 0, print(
-            f"Current Sampling Size: {self.sampling_size}, Required size > 0"
+        assert isinstance(sampling_size, int)
+        assert sampling_size > 0, print(
+            f"Current Sampling Size: {sampling_size}, Required size > 0"
         )
+        return sampling_size
 
     @abstractmethod
     def _extractor(self, **kwargs):
@@ -93,23 +95,18 @@ class StrategicRandomSampling(Heuristic):
     distribution across domains or intents.
     """
 
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
-
     def _extractor(
         self,
+        sampling_size: int,
         unsampled: List,
         min_per_label: int = None,
-        label_type: str = "intent",
+        label_type: str = TRAIN_LEVEL_INTENT,
         allow_below_min: bool = False,
         **kwargs,
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             unsampled (list, optional): List of unsampled queries
             min_per_label (int): Min number of queries to select per label
             label_type (str): The level to split evenly by ('domain' or 'intent')
@@ -119,6 +116,7 @@ class StrategicRandomSampling(Heuristic):
             sampled_indices (list): List of indices that were selected
             unsampled_indices (list): List of indices that were not selected
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         class_labels = StrategicRandomSampling._get_class_labels(
             label_type=label_type, unsampled=unsampled
         )
@@ -152,14 +150,12 @@ class StrategicRandomSampling(Heuristic):
                 evenly_sampled.extend(indices[:min_per_label])
                 outstanding_sampled.extend(indices[min_per_label:])
         np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
-        if len(evenly_sampled) > self.sampling_size:
+        if len(evenly_sampled) > sampling_size:
             np.random.shuffle(evenly_sampled)
-            sampled_indices = evenly_sampled[: self.sampling_size]
-            unsampled_indices = (
-                evenly_sampled[self.sampling_size :] + outstanding_sampled
-            )
+            sampled_indices = evenly_sampled[:sampling_size]
+            unsampled_indices = evenly_sampled[sampling_size:] + outstanding_sampled
         else:
-            num_left_to_sample = self.sampling_size - len(evenly_sampled)
+            num_left_to_sample = sampling_size - len(evenly_sampled)
             outstanding_sampled_subset = np.random.choice(
                 outstanding_sampled, num_left_to_sample, replace=False
             )
@@ -182,13 +178,14 @@ class StrategicRandomSampling(Heuristic):
             class_labels (List[str]): list of labels for classification task. Labels follow
                 the format of "domain" or "domain|intent". For example, "date|get_date".
         """
-        if label_type == "domain":
+        if label_type == TRAIN_LEVEL_DOMAIN:
             return [f"{q.domain}" for q in unsampled]
-        elif label_type == "intent":
+        elif label_type == TRAIN_LEVEL_INTENT:
             return [f"{q.domain}|{q.intent}" for q in unsampled]
         else:
             raise ValueError(
-                f"Invalid label_type {label_type}. Must be 'domain' or 'intent'"
+                f"Invalid label_type {label_type}. Must be '{TRAIN_LEVEL_DOMAIN}'"
+                f" or '{TRAIN_LEVEL_INTENT}'"
             )
 
     @staticmethod
@@ -216,30 +213,27 @@ class StrategicRandomSampling(Heuristic):
 class RandomSampling(Heuristic):
     """ Selection strategy that randomly selects queries."""
 
-    def __init__(self, sampling_size):
+    def _extractor(
+        self, sampling_size: int, preds_single: List[List[float]] = None, **kwargs
+    ):
         """
         Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
-
-    def _extractor(self, preds_single: List[List[float]] = None, **kwargs):
-        """
-        Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class.
         Returns:
             sampled_indices (list): List of indices that were selected.
             unsampled_indices (list): List of indices that were not selected.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         num_indicies = (
             len(preds_single) if preds_single else len(kwargs.get("unsampled"))
         )
         idxs = np.arange(num_indicies)
         np.random.shuffle(idxs)
         sampled_indices, unsampled_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
         )
         return sampled_indices, unsampled_indices, None
 
@@ -247,30 +241,29 @@ class RandomSampling(Heuristic):
 class LeastConfidenceSampling(Heuristic):
     """ Selection strategy that select queries with the lowest max confidence."""
 
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
-
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
+        self,
+        sampling_size: int,
+        preds_single: List[List[float]],
+        do_rank: bool = True,
+        **kwargs,
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class.
             do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
                 samples.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         confidences = np.max(preds_single, axis=1)
         idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=self.sampling_size
+            confidences, do_rank=do_rank, sampling_size=sampling_size
         )
         sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
             idxs.tolist() if do_rank else None,
         )
         return sampled_indices, unsampled_indices, ranked_indices
@@ -280,33 +273,32 @@ class MarginSampling(Heuristic):
     """Selection strategy that select queries with the greatest difference between the highest
     and second highest confidence value."""
 
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
-
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
+        self,
+        sampling_size: int,
+        preds_single: List[List[float]],
+        do_rank: bool = True,
+        **kwargs,
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class.
             do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
                 samples.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         # partition along last axis by default
         partition_ = np.partition(preds_single, len(preds_single[0]) - 2)
         # diff between the highest two values
         confidences = np.abs(partition_[:, -1] - partition_[:, -2])
         idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=self.sampling_size
+            confidences, do_rank=do_rank, sampling_size=sampling_size
         )
         sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
             idxs.tolist() if do_rank else None,
         )
         return sampled_indices, unsampled_indices, ranked_indices
@@ -315,54 +307,50 @@ class MarginSampling(Heuristic):
 class EntropySampling(Heuristic):
     """ Selection strategy that select queries with the highest entropy."""
 
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
-
     def _extractor(
-        self, preds_single: List[List[float]], do_rank: bool = True, **kwargs
+        self, sampling_size: int, preds_single: List[List[float]], do_rank: bool = True, **kwargs
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class.
             do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
                 samples.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         entropies = scipy_entropy(np.array(preds_single), axis=1, base=ENTROPY_LOG_BASE)
         confidences = -entropies
         idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=self.sampling_size
+            confidences, do_rank=do_rank, sampling_size=sampling_size
         )
         sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
             idxs.tolist() if do_rank else None,
         )
         return sampled_indices, unsampled_indices, ranked_indices
 
 
 class DisagreementSampling(Heuristic):
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
+    """ Selection strategy that measures 'disagreement' across multiple classifiers."""
 
     def _extractor(
-        self, preds_multi: List[List[List[float]]], do_rank: bool = True, **kwargs
+        self,
+        sampling_size: int,
+        preds_multi: List[List[List[float]]],
+        do_rank: bool = True,
+        **kwargs,
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_multi: is a list of list[list[float]] and contains probability scores for each
                 data point for each class.
             do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
                 samples.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
         choices = []
         for pred in preds_multi:
             model_choices = np.argmax(pred, axis=1).tolist()
@@ -373,43 +361,50 @@ class DisagreementSampling(Heuristic):
             Counter(row.tolist()).most_common(1)[0][1] / len(row) for row in choices
         ]
         idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=self.sampling_size
+            confidences, do_rank=do_rank, sampling_size=sampling_size
         )
         sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
             idxs.tolist() if do_rank else None,
         )
         return sampled_indices, unsampled_indices, ranked_indices
 
 
 class EnsembleSampling(Heuristic):
-    def __init__(self, sampling_size):
+    """ Selection strategy that combines other selection strategies using a ranked approach."""
+
+    @staticmethod
+    def get_sampling_methods():
         """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
+        Returns:
+            sampling_methods (Dict): Dict that maps a strategy abbreviation to instance.
         """
-        super().__init__(sampling_size=sampling_size)
-        self.sampling_methods = {
-            "lcs": LeastConfidenceSampling(self.sampling_size),
-            "es": EntropySampling(self.sampling_size),
-            "ms": MarginSampling(self.sampling_size),
-            "ds": DisagreementSampling(self.sampling_size),
+        return {
+            "lcs": LeastConfidenceSampling(),
+            "es": EntropySampling(),
+            "ms": MarginSampling(),
+            "ds": DisagreementSampling(),
+            "kld": KLDivergenceSampling(),
         }
 
     def _extractor(
         self,
+        sampling_size: int,
         preds_single: List[List[float]],
         preds_multi: List[List[List[float]]],
         **kwargs,
     ):
         """
         Args:
+            sampling_size (int): Size of data being sampled in a turn.
             preds_single: is a list[list[float]] and contains probability scores for each data
                 point for each class will be used to sample with lcs, es and ms.
             preds_multi: is a list of list[list[float]] and contains probability scores for each
                 data point for each class will be used to sample with ds.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
+        sampling_methods = EnsembleSampling.get_sampling_methods()
         assert len(preds_single) != 0, print(f"{len(preds_single)}")
         if preds_multi:
             assert len(preds_single) == len(preds_multi[0]), print(
@@ -418,6 +413,7 @@ class EnsembleSampling(Heuristic):
         qid2rank = {i: 0 for i in range(len(preds_single))}
         num_strategies_used = 0
         heuristic_params = {
+            "sampling_size": sampling_size,
             "sampled": kwargs["sampled"],
             "unsampled": kwargs["unsampled"],
             "preds_single": preds_single,
@@ -425,57 +421,39 @@ class EnsembleSampling(Heuristic):
             "do_rank": True,
             "return_dict": True,
         }
-        if preds_single:
-            ranked_inds = self.sampling_methods["lcs"].sample(**heuristic_params)[
+
+        strategies = ["lcs", "ms", "es"]
+        strategies = strategies + ["ds", "kld"] if preds_multi else strategies
+
+        for strategy in strategies:
+            ranked_inds = sampling_methods[strategy].sample(**heuristic_params)[
                 "ranked_indices"
             ]
             for rank, qid in enumerate(ranked_inds):
                 qid2rank[qid] += rank
             num_strategies_used += 1
 
-            ranked_inds = self.sampling_methods["ms"].sample(**heuristic_params)[
-                "ranked_indices"
-            ]
-            for rank, qid in enumerate(ranked_inds):
-                qid2rank[qid] += rank
-            num_strategies_used += 1
-            ranked_inds = self.sampling_methods["es"].sample(**heuristic_params)[
-                "ranked_indices"
-            ]
-            for rank, qid in enumerate(ranked_inds):
-                qid2rank[qid] += rank
-            num_strategies_used += 1
-        if preds_multi:
-            ranked_inds = self.sampling_methods["ds"].sample(**heuristic_params)[
-                "ranked_indices"
-            ]
-            for rank, qid in enumerate(ranked_inds):
-                qid2rank[qid] += rank
-            num_strategies_used += 1
         qid2rank = [(k, v / num_strategies_used) for k, v in qid2rank.items()]
         all_qids, all_ranks = list(zip(*qid2rank))
 
         reordered = custom_reordering(
-            all_ranks, do_rank=False, sampling_size=self.sampling_size
+            all_ranks, do_rank=False, sampling_size=sampling_size
         )
         ranked_indices = [all_qids[i] for i in reordered]
         sampled_indices, unsampled_indices = (
-            ranked_indices[: self.sampling_size],
-            ranked_indices[self.sampling_size :],
+            ranked_indices[:sampling_size],
+            ranked_indices[sampling_size:],
         )
         return sampled_indices, unsampled_indices, ranked_indices
 
 
 class KLDivergenceSampling(Heuristic):
-    def __init__(self, sampling_size):
-        """
-        Args:
-            sampling_size: Size of data being sampled in a turn.
-        """
-        super().__init__(sampling_size=sampling_size)
+    """Selection strategy that calculates the KL divergence between the posterior
+    distribution of multiple classifiers."""
 
     def _extractor(
         self,
+        sampling_size: int,
         preds_multi: List[List[List[float]]],
         do_rank: bool = True,
         domain_indices: Dict = None,
@@ -490,6 +468,8 @@ class KLDivergenceSampling(Heuristic):
             domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
                 corresponding indices in the probability vector. Used for intent-level KLD.
         """
+        sampling_size = Heuristic.validate_sampling_size(sampling_size)
+
         # Calculate average prediction values.
         avg_preds = None
         for pred in preds_multi:
@@ -512,11 +492,11 @@ class KLDivergenceSampling(Heuristic):
         divergences = np.array(divergences).T
         confidences = -np.max(divergences, axis=1)
         idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=self.sampling_size
+            confidences, do_rank=do_rank, sampling_size=sampling_size
         )
         sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[: self.sampling_size].tolist(),
-            idxs[self.sampling_size :].tolist(),
+            idxs[:sampling_size].tolist(),
+            idxs[sampling_size:].tolist(),
             idxs.tolist() if do_rank else None,
         )
         return sampled_indices, unsampled_indices, ranked_indices
@@ -617,12 +597,11 @@ class HeuristicsFactory:
     """Heuristics Factory Class"""
 
     @staticmethod
-    def get_heuristic(heuristic, sampling_size):
+    def get_heuristic(heuristic):
         """A static method to get a translator
 
         Args:
             heuristic (str): Name of the desired Heuristic class
-            sampling_size (int): Heuristic sample size
         Returns:
             (Heuristic): Heuristic Class
         """
@@ -638,5 +617,5 @@ class HeuristicsFactory:
         ]
         for heuristic_class in heuristic_classes:
             if heuristic == heuristic_class.__name__:
-                return heuristic_class(sampling_size=sampling_size)
+                return heuristic_class()
         raise AssertionError(f" {heuristic} is not a valid 'heuristic'.")

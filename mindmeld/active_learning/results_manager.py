@@ -33,15 +33,12 @@ class ResultsManager:
 
     def __init__(
         self,
-        active_learning_params: Dict,
         output_folder: str,
     ):
         """
         Args:
-            active_learning_params (Dict): Dictionary representation of the params to store.
             output_folder (str): Directory to create an experiment folder or save log queries.
         """
-        self.active_learning_params = active_learning_params
         self.output_folder = output_folder
         self.experiment_folder_name = None
 
@@ -69,14 +66,17 @@ class ResultsManager:
         """
         return os.path.join(self.output_folder, self.experiment_folder_name)
 
-    def create_experiment_folder(self, selection_strategies: List):
+    def create_experiment_folder(
+        self, active_learning_params: Dict, training_strategies: List
+    ):
         """Creates the active learning experiment folder.
         Args:
-            selection_strategies (list): List of strategies used for the experiment.
+            active_learning_params (Dict): Dictionary representation of the params to store.
+            training_strategies (list): List of strategies used for the experiment.
         """
-        self.set_experiment_folder_name(selection_strategies)
+        self.set_experiment_folder_name(training_strategies)
         create_dir_if_absent(self.experiment_folder)
-        self.dump_json(AL_PARAMS_PATH, self.active_learning_params)
+        self.dump_json(AL_PARAMS_PATH, active_learning_params)
         self.create_folder(AL_RESULTS_FOLDER)
         self.create_folder(AL_PLOTS_FOLDER)
 
@@ -177,9 +177,14 @@ class ResultsManager:
             queries (List): List of ProcessedQuery objects
         Returns:
             query_dicts (List): List of queries represented as a dict with the keys
-                "text", "domain", and "intent".
+                "unannotated_text", "annotated_text", "domain", and "intent".
         """
         return [
-            {"text": dump_query(query), "domain": query.domain, "intent": query.intent}
+            {
+                "unannotated_text": query.query.text,
+                "annotated_text": dump_query(query),
+                "domain": query.domain,
+                "intent": query.intent,
+            }
             for query in queries
         ]
