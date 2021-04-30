@@ -602,7 +602,7 @@ class HeuristicsFactory:
 
     @staticmethod
     def get_heuristic(heuristic):
-        """A static method to get a translator
+        """A static method to get a Heuristic class.
 
         Args:
             heuristic (str): Name of the desired Heuristic class
@@ -622,4 +622,4 @@ class HeuristicsFactory:
         for heuristic_class in heuristic_classes:
             if heuristic == heuristic_class.__name__:
                 return heuristic_class()
-        raise AssertionError(f" {heuristic} is not a valid 'heuristic'.")
+        raise AssertionError(f" {heuristic} is not a valid heuristic.")

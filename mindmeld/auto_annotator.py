@@ -17,6 +17,7 @@ import re
 from abc import ABC, abstractmethod
 from enum import Enum
 import spacy
+from typing import List
 from tqdm import tqdm
 from ._util import get_pattern
 from .resource_loader import ResourceLoader
@@ -207,11 +208,13 @@ class Annotator(ABC):
                 entity_types = file_entities_map[path]
                 if action == AnnotatorAction.ANNOTATE:
                     self._annotate_query(
-                        processed_query=processed_query, entity_types=entity_types,
+                        processed_query=processed_query,
+                        entity_types=entity_types,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
-                        processed_query=processed_query, remove_entities=entity_types,
+                        processed_query=processed_query,
+                        remove_entities=entity_types,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -890,31 +893,17 @@ class BootstrapAnnotator(Annotator):
             for entity in entities
         ]
 
-    def text_queries_to_processed_queries(self, text_queries):
+    def text_queries_to_processed_queries(self, text_queries: List[str]):
         """Converts text queries into processed queries.
 
         Args:
-            text_queries (list): List of raw text queries.
+            text_queries (List[str]): List of raw text queries.
         Returns:
-            processed_queries (list): List of processed queries.
+            processed_queries (List[ProcessedQuery]): List of processed queries.
         """
-        processed_queries = []
-        for text_query in text_queries:
-            processed_output = self.nlp.process(text_query)
-            processed_query = load_query(
-                text_query,
-                query_factory=self.nlp.resource_loader.query_factory,
-                domain=processed_output["domain"],
-                intent=processed_output["intent"],
-            )
-            processed_query.entities = self.parse(
-                sentence=text_query,
-                entity_types=None,
-                domain=processed_query.domain,
-                intent=processed_query.intent,
-            )
-            processed_queries.append(processed_query)
-        return processed_queries
+        return [
+            self.nlp.process_query(query=self.nlp.create_query(q)) for q in text_queries
+        ]
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
@@ -975,15 +964,19 @@ class NoTranslationDucklingAnnotator(Annotator):
             language=self.language,
             locale=self.locale,
         )
-        filtered_candidates = NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
-            duckling_candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
+                duckling_candidates
+            )
         )
         spans = [
             Span(candidate["start"], candidate["end"] - 1)
             for candidate in filtered_candidates
         ]
-        final_spans = NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
-            spans
+        final_spans = (
+            NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
+                spans
+            )
         )
         final_candidates = []
         for span in final_spans:
@@ -1037,8 +1030,10 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
-            candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
+                candidates
+            )
         )
         return filtered_candidates
 
@@ -1058,7 +1053,7 @@ class NoTranslationDucklingAnnotator(Annotator):
 
 
 class TranslationDucklingAnnotator(Annotator):
-    """ The TranslationDucklingAnnotator detects entities in non-English sentences using
+    """The TranslationDucklingAnnotator detects entities in non-English sentences using
     a translation service and Duckling by following these steps:
         1. The non-English sentence is translated to English.
         2. Spacy detects entities in the translated English sentence.
@@ -1105,7 +1100,7 @@ class TranslationDucklingAnnotator(Annotator):
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):
-        """ Implements a heuristic to match English entities detected by Spacy on the
+        """Implements a heuristic to match English entities detected by Spacy on the
         translated non-English sentence against the non-English entities detected by
         Duckling on the non-English sentence.
 
@@ -1176,7 +1171,7 @@ class TranslationDucklingAnnotator(Annotator):
 
 
 class MultiLingualAnnotator(Annotator):
-    """ The MultiLingualAnnotator detects entities in English and non-English sentences.
+    """The MultiLingualAnnotator detects entities in English and non-English sentences.
 
     1. If the 'language' is English, this annotator solely uses the Spacy's English NER model to
         detect entities.
@@ -1215,7 +1210,9 @@ class MultiLingualAnnotator(Annotator):
         if self.language != ENGLISH_LANGUAGE_CODE:
             self.duckling_annotator = self._get_duckling_annotator()
             self.non_en_annotator = SpacyAnnotator(
-                app_path=self.app_path, language=self.language, locale=self.locale,
+                app_path=self.app_path,
+                language=self.language,
+                locale=self.locale,
             )
 
     def _get_duckling_annotator(self):
@@ -1228,7 +1225,9 @@ class MultiLingualAnnotator(Annotator):
                 translator=self.translator,
             )
         return NoTranslationDucklingAnnotator(
-            app_path=self.app_path, language=self.language, locale=self.locale,
+            app_path=self.app_path,
+            language=self.language,
+            locale=self.locale,
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):
