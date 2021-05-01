@@ -170,9 +170,15 @@ class Embedder(ABC):
         return encoded
 
     def dump(self):
+        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
+              f"{self.__class__.__name__}.dump()"
+        logger.warning(msg)
+        self.dump_cache()
+
+    def dump_cache(self):
         self.cache.dump()
 
-    def clear(self):
+    def clear_cache(self):
         self.cache.clear()
 
 

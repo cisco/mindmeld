@@ -257,9 +257,6 @@ class EntityResolverBase(ABC):
         if not entity_map.get("entities", []):
             return entity_map
 
-        # copy all remianing key-values except entities
-        new_entity_map = {key: value for key, value in entity_map.items() if key != "entities"}
-
         # format (if required) entities key-field
         new_entities = []
         id_counter = 0
@@ -272,8 +269,9 @@ class EntityResolverBase(ABC):
                 _id = str(id_counter)
                 id_counter += 1
             new_entities.append({"id": _id, "cname": cname, "whitelist": whitelist})
-        new_entity_map["entities"] = new_entities
-        return new_entity_map
+
+        entity_map["entities"] = new_entities
+        return entity_map
 
     def fit(self, clean=False, entity_map=None):
         """Fits the resolver model, if required
@@ -898,6 +896,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         self._augment_average_synonyms_embeddings = (
             settings.get("augment_average_synonyms_embeddings", True)
         )
+        self._scores_normalizer = settings.get("scores_normalizer", None)
         self._embedder_model = create_embedder_model(self.app_path, er_config)
 
         self._processed_entity_map = None
@@ -912,7 +911,8 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                                    synonyms_encodings,
                                    entity_emb,
                                    top_n,
-                                   return_as_dict=False):
+                                   return_as_dict=False,
+                                   scores_normalizer=None):
         """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
             for entity resolution
 
@@ -923,6 +923,9 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                                             size equal to number of synonyms
             entity_emb (np.array): a 2d array of embedding of the input entity text(s)
             top_n (int): maximum number of results to populate
+            return_as_dict (bool, optional): if the results should be returned as a dictionary
+            scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
+                                                are: "min_max_scaler", "standard_scaler"
         Returns:
             Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of synonyms and their
                                         scores, else a list of sorted synonym names, paired with
@@ -948,7 +951,26 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         results = []
         for similarity_scores in similarity_scores_2d:
             similarity_scores = similarity_scores.reshape(-1)
+            # Rounding sometimes helps to bring correct answers on to the
+            # top score as other non-correct resolutions
             similarity_scores = np.around(similarity_scores, decimals=2)
+
+            if scores_normalizer:
+                if scores_normalizer == "min_max_scaler":
+                    _min = np.min(similarity_scores)
+                    _max = np.max(similarity_scores)
+                    denominator = (_max - _min) if (_max - _min) != 0 else 1.0
+                    similarity_scores = (similarity_scores - _min) / denominator
+                elif scores_normalizer == "standard_scaler":
+                    _mean = np.mean(similarity_scores)
+                    _std = np.std(similarity_scores)
+                    denominator = _std if _std else 1.0
+                    similarity_scores = (similarity_scores - _mean) / denominator
+                else:
+                    msg = f"Allowed values for `scores_normalizer` are only " \
+                          f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
+                          f"normalizing similarity scores."
+                    logger.error(msg)
 
             if return_as_dict:
                 results.append(dict(zip(synonyms.keys(), similarity_scores)))
@@ -1078,7 +1100,8 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
 
         try:
             sorted_items = self._compute_cosine_similarity(
-                synonyms, synonyms_encodings, top_entity_emb, top_n
+                synonyms, synonyms_encodings, top_entity_emb, top_n,
+                scores_normalizer=self._scores_normalizer
             )
             values = []
             for synonym, score in sorted_items:
@@ -1137,7 +1160,10 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             sorted_items_list = []
             for st_idx in trange(0, len(top_entity_emb_list), batch_size, disable=False):
                 batch = top_entity_emb_list[st_idx:st_idx + batch_size]
-                result = self._compute_cosine_similarity(synonyms, synonyms_encodings, batch, top_n)
+                result = self._compute_cosine_similarity(
+                    synonyms, synonyms_encodings, batch, top_n,
+                    scores_normalizer=self._scores_normalizer
+                )
                 # due to way compute similarity returns
                 if len(batch) == 1:
                     result = [result]
@@ -1214,11 +1240,12 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
 
-        setting = kwargs.pop("er_config", {}).get("model_settings", {})
-        self._aug_lower_case = setting.get("augment_lower_case", True)
-        self._aug_title_case = setting.get("augment_title_case", False)
-        self._aug_normalized = setting.get("augment_normalized", False)
-        self._aug_max_syn_embs = setting.get("augment_max_synonyms_embeddings", True)
+        settings = kwargs.pop("er_config", {}).get("model_settings", {})
+        self._aug_lower_case = settings.get("augment_lower_case", True)
+        self._aug_title_case = settings.get("augment_title_case", False)
+        self._aug_normalized = settings.get("augment_normalized", False)
+        self._aug_max_syn_embs = settings.get("augment_max_synonyms_embeddings", True)
+        self._scores_normalizer = settings.get("scores_normalizer", None)
 
         self._processed_entity_map = None
         self.ngram_length = 5  # max number of character ngrams to consider
@@ -1329,9 +1356,28 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         top_entity_vector = self._vectorizer.transform([top_entity.text])
 
         similarity_scores = self._syn_tfidf_matrix.dot(top_entity_vector.T).toarray().reshape(-1)
-        # Rounding sometimes helps to bring correct answers on to the top score as other
-        # non-correct resolutions
+        # Rounding sometimes helps to bring correct answers on to the
+        # top score as other non-correct resolutions
         similarity_scores = np.around(similarity_scores, decimals=4)
+
+        scores_normalizer = self._scores_normalizer
+        if scores_normalizer:
+            if scores_normalizer == "min_max_scaler":
+                _min = np.min(similarity_scores)
+                _max = np.max(similarity_scores)
+                denominator = (_max - _min) if (_max - _min) != 0 else 1.0
+                similarity_scores = (similarity_scores - _min) / denominator
+            elif scores_normalizer == "standard_scaler":
+                _mean = np.mean(similarity_scores)
+                _std = np.std(similarity_scores)
+                denominator = _std if _std else 1.0
+                similarity_scores = (similarity_scores - _mean) / denominator
+            else:
+                msg = f"Allowed values for `scores_normalizer` are only " \
+                      f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
+                      f"normalizing similarity scores."
+                logger.error(msg)
+
         sorted_items = sorted(list(zip(self._unique_synonyms, similarity_scores)),
                               key=lambda x: x[1], reverse=True)
 

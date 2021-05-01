@@ -17,6 +17,7 @@ This module contains the question answerer component of MindMeld.
 import copy
 import json
 import logging
+import numbers
 import os
 import re
 from abc import ABC, abstractmethod
@@ -57,7 +58,6 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
-ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH = ["embedder_without_elasticsearch"]
 EMBEDDING_FIELD_STRING = "_embedding"
 
 
@@ -895,11 +895,18 @@ class BaseQuestionAnswerer(ABC):
 
     @property
     def _query_type(self) -> str:
-        if self.__qa_config.get("model_type") in \
-            ALL_QUERY_TYPES + ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
+        if self.__qa_config.get("model_type") in ALL_QUERY_TYPES:
             return self.__qa_config.get("model_type")
         else:
             return DEFAULT_QUERY_TYPE
+
+    @_query_type.setter
+    def _query_type(self, query_type):
+        if not query_type in ALL_QUERY_TYPES:
+            msg = f"Cannot set query_type to a vlaue outside {ALL_QUERY_TYPES}. Found {query_type}"
+            logger.error(msg)
+            return
+        self.__qa_config.update({"model_type": query_type})
 
     @property
     def _query_settings(self) -> dict:
@@ -1171,21 +1178,38 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     app_namespace,
                 )
 
-        config = config or self._query_settings
-        embedder_model = None
-        embedding_fields = kwargs.get("embedding_fields", [])
+        # determine config: precedence is first given to argument `config`,
+        #   then argument `app_path`, and then fallback option is self._query_settings
         if not app_path and not config:
             logger.warning(
                 "You must provide either the application path to upload embeddings as specified"
                 " in the app config or directly provide the QA config."
             )
+            qa_config = self._query_settings
         else:
-            config = config or get_classifier_config("question_answering", app_path=app_path)
-            embedder_model = create_embedder_model(app_path, config)
-            embedding_fields = (
-                embedding_fields or
-                config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
-            )
+            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
+        config = qa_config
+
+        # determine embedding fields and load embedder model
+        embedding_fields = (
+            kwargs.get("embedding_fields", []) or
+            config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+        )
+        embedder_model = None
+        if embedding_fields:
+            if "embedder" not in self._query_type:
+                msg = f"Found fields to upload embedding ({embedding_fields}) but specified " \
+                      f"`model_type` has no `embedder` phrase in it. Found `model_type`: " \
+                      f"{self._query_type}. Ignoring provided `embedding_fields`."
+                logger.error(msg)
+            else:
+                embedder_model = create_embedder_model(app_path, config)
+        else:
+            if "embedder" in self._query_type:
+                logger.warning(
+                    "No embedding fields specified in the app config, "
+                    "continuing without generating embeddings..."
+                )
 
         def _doc_data_count(data_file):
             with open(data_file) as data_fp:
@@ -1243,12 +1267,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         yield transform(doc, embedder_model, embedding_fields)
 
         docs_count = _doc_data_count(data_file)
-        if embedder_model and len(embedding_fields) == 0:
-            logger.warning(
-                "No embedding fields specified in the app config, "
-                "continuing without generating embeddings..."
-            )
-            embedder_model = None
         docs = _doc_generator(data_file, embedder_model, embedding_fields)
 
         def _generate_mapping_data(embedder_model, embedding_fields):
@@ -1307,15 +1325,9 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     as follows:
 
     >>> ALL_INDICES = {
-            scoped_key_name: {
-                "id2cname": Dict[str, str],
-                "id2cname_hash": str, # a unique identifier to recognize data changes
-                "resolver": EntityResolver
-            },
+            scoped_index_name1: {key1: FieldResource1, key2: FieldResource2, ...),
+            scoped_index_name2: {...},
             ...
-        }
-    >>> AVAILABLE_KB_FIELDS = {
-            scoped_index_name: set(scoped_key_names)
         }
 
     During load_kb(),
@@ -1324,7 +1336,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
       If clean=True, the entire index is deleted and re-trained with whatever new data found
     """
     ALL_INDICES = {}
-    AVAILABLE_KB_FIELDS = {}  # mapping between scoped_index_name and fields observed in kb docs
 
     def __init__(self, app_path, **kwargs):
         """Initializes a question answerer
@@ -1336,11 +1347,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         """
         super().__init__(app_path, **kwargs)
 
-        if self._query_type != "embedder_without_elasticsearch":
-            msg = f"{self._query_type} model_type not implemented for " \
-                  f"NonElasticsearchQuestionAnswerer. Available choices: " \
-                  f"{['embedder_without_elasticsearch']} "
-            raise NotImplementedError(msg)
+        self._query_type = "embedder_keyword" if "embedder" in self._query_type else "keyword"
 
         self._embedder_model = None
         if "embedder" in self._query_type:
@@ -1350,9 +1357,32 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         self._embedder_model.dump()
 
     def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
+
         raise NotImplementedError
 
+        # doc_id = kwargs.get("id")
+        #
+        # query_type = query_type or self._query_type
+        #
+        # # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        # app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        # if doc_id:
+        #     logger.info(
+        #         "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+        #     )
+        #     s = self.build_search(index, app_namespace=app_namespace)
+        #     s = s.filter(query_type=query_type, id=doc_id)
+        #     results = s.execute(size=size)
+        #     return results
+
     def build_search(self, index, ranking_config=None, app_namespace=None):
+
+        if ranking_config:
+            msg = "`ranking_config` is not used in a non-elastic search QA. "
+            logger.error(msg)
+
         raise NotImplementedError
 
     def load_kb(
@@ -1392,51 +1422,47 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # clean by deleting
         if clean:
             try:
-                scoped_key_names = \
-                    NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name]
-                for scoped_key_name in scoped_key_names:
-                    try:
-                        del NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name]
-                    except KeyError as e:
-                        logger.info(e)
-                        continue
+                scoped_key_names = NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name]
+                msg = f"Deleting `{index_name}` index for app `{app_namespace}`."
+                logger.info(msg)
             except KeyError:
-                msg = f"Index {index_name} does not exist for app {app_namespace}, " \
+                msg = f"Index `{index_name}` does not exist for app `{app_namespace}`, " \
                       f"creating a new index"
                 logger.warning(msg)
 
-        # instantiate an embedder model
-        config = config or self._query_settings
-        embedder_model = None
-        embedding_fields = kwargs.get("embedding_fields", [])
+        # determine config: precedence is first given to argument `config`,
+        #   then argument `app_path`, and then fallback option is self._query_settings
         if not app_path and not config:
             logger.warning(
                 "You must provide either the application path to upload embeddings as specified"
                 " in the app config or directly provide the QA config."
             )
+            qa_config = self._query_settings
         else:
-            config = config or get_classifier_config("question_answering", app_path=app_path)
-            embedder_model = create_embedder_model(app_path, config)
-            embedding_fields = (
-                embedding_fields or
-                config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
-            )
+            qa_config = config or get_classifier_config("question_answering", app_path=app_path)
+        config = qa_config
 
-        if embedder_model and len(embedding_fields) == 0:
+        # determine embedding fields and load embedder model
+        embedding_fields = (
+            kwargs.get("embedding_fields", []) or
+            config.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+        )
+        if embedding_fields and "embedder" not in self._query_type:
+            msg = f"Found KB fields to upload embedding ({embedding_fields}) but specified " \
+                  f"`model_type` has no `embedder` phrase in it. Found `model_type`: " \
+                  f"{self._query_type}. Ignoring provided `embedding_fields`."
+            logger.error(msg)
+        if not embedding_fields and "embedder" in self._query_type:
             logger.warning(
                 "No embedding fields specified in the app config, "
                 "continuing without generating embeddings..."
             )
-            embedder_model = None
 
         # collect data related to all keys in all the docs in KB, and update database
-        kb_field_names = self.update_indices_data(data_file, scoped_index_name)
-
-        # update indices
-        self.update_indices(kb_field_names, embedding_fields, scoped_index_name, app_path, config)
+        self.update_indices(data_file, scoped_index_name, embedding_fields, config, app_path)
 
     @staticmethod
-    def update_indices_data(data_file, scoped_index_name):
+    def update_indices(data_file, scoped_index_name, embedding_fields, config, app_path):
 
         def _doc_generator(_data_file):
             with open(_data_file) as data_fp:
@@ -1454,7 +1480,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         doc = json.loads(line)
                         yield doc
 
-        kb_field_names = set()
+        all_id2value = {}
         id_counter = 0
         for doc in _doc_generator(data_file):
             # determine _id, remains same for all keys of the doc
@@ -1465,93 +1491,300 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             _id = str(_id)
             # update data
             for key, value in doc.items():
-                kb_field_names.update({key})
-                scoped_key_name = get_scoped_index_name(scoped_index_name, key)
-                if scoped_key_name not in NonElasticsearchQuestionAnswerer.ALL_INDICES:
-                    NonElasticsearchQuestionAnswerer.ALL_INDICES.update({scoped_key_name: {}})
-                _id2cname = (
-                    NonElasticsearchQuestionAnswerer
-                        .ALL_INDICES[scoped_key_name]
-                        .get("id2cname", {})
-                )
-                _id2cname.update({_id: value})
-                NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name].update(
-                    {"id2cname": _id2cname}
-                )
-        return kb_field_names
+                if key not in all_id2value:
+                    all_id2value[key] = {}
+                all_id2value[key].update({_id: value})
 
-    @staticmethod
-    def update_indices(kb_field_names, embedding_fields, scoped_index_name, app_path, config):
-
-        if scoped_index_name not in NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS:
-            NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS.update({scoped_index_name: set()})
-
-        def get_hashid(entities: List[Dict]):
-            string = json.dumps(entities, sort_keys=True)
-            return Hasher(algorithm="sha1").hash(string=string)
+        # create a key for scoped_index_name in ALL_INDICES, if unavailable
+        if scoped_index_name not in NonElasticsearchQuestionAnswerer.ALL_INDICES:
+            NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name] = {}
 
         def match_regex(string, pattern_list):
             return any([re.match(pattern, string) for pattern in pattern_list])
 
-        # verify if a particular scoped_key_name's entities data has changed and update resolver
-        for kb_field_name in kb_field_names:
-            scoped_key_name = get_scoped_index_name(scoped_index_name, kb_field_name)
-            scoped_key_name_cache = NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name]
-            id2cname = scoped_key_name_cache["id2cname"]
-            resolver = scoped_key_name_cache.get("resolver", None)
-            id2cname_hash = scoped_key_name_cache.get("id2cname_hash", None)
-            id2cname_hash_new = get_hashid(id2cname)
-            create_resolver = not resolver or id2cname_hash_new != id2cname_hash
-            # update known list of kb fileds for .get() and .build_search()
-            NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name].update({
-                scoped_key_name
-            })
+        # for each key field in doc, reuse an already existing FieldResource or create one
+        for key, id2value in all_id2value.items():
+            fieldResource = (
+                NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name].get(key, None) or
+                NonElasticsearchQuestionAnswerer.FieldResource(index_name=scoped_index_name,
+                                                               field_name=key)
+            )
+            fieldResource.bulk_update_data(
+                id2value,
+                app_path,
+                has_embedding_resolver=match_regex(key, embedding_fields),
+                resolver_settings=config.get("model_settings", {})
+            )
+            NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name].update(
+                {key: fieldResource}
+            )
 
-            # create resolver if required
-            if create_resolver:
-                # format id2cname data into an `entity_map` format for resolvers
-                entity_map = {
-                    "entities": [{"id": key, "cname": value} for key, value in id2cname.items()]
-                }
-                # create a new resolver and fit
-                resolver = (
-                    TfIdfSparseCosSimEntityResolver(
-                        app_path=app_path or os.getcwd(),
-                        entity_type=scoped_key_name)
-                )
-                resolver.fit(entity_map=entity_map)
-                resolver.dump()
-                NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_key_name].update({
-                    "resolver": resolver,
-                    "id2cname_hash": id2cname_hash_new
-                })
+        return
 
-            # if required, creating an embedding resolver and fit
-            if embedding_fields and match_regex(kb_field_name, embedding_fields):
-                embedding_scoped_key_name = get_scoped_index_name(
-                    scoped_index_name, kb_field_name + EMBEDDING_FIELD_STRING)
-                NonElasticsearchQuestionAnswerer.AVAILABLE_KB_FIELDS[scoped_index_name].update({
-                    embedding_scoped_key_name
-                })
+    class FieldResource:
 
-                if create_resolver:
-                    # format id2cname data into an `entity_map` format for resolvers
-                    entity_map = {
-                        "entities": [{"id": key, "cname": value} for key, value in id2cname.items()]
-                    }
+        def __init__(self, index_name, field_name):
+
+            self.index_name = index_name
+            self.field_name = field_name
+            self.dtype = None
+
+            self.id2value = {}  # warning: a duplicated data also exists in a resolver object
+            self._hash = None  # hash for identifying any data changes in order to build resolver
+
+            self._text_resolver = None  # an entity resolver if string type data
+            self._embedding_resolver = None  # an embedding based entity resolver
+            self.has_text_resolver = None
+            self.has_embedding_resolver = None
+            self.resolver_settings = {}
+            # any QA-style or ER-style configs dict with "model_settings" key field in it
+
+            if field_name == "location":
+                self.dtype = "location"
+                self.has_text_resolver = False
+                self.has_embedding_resolver = False
+                self.resolver_settings = {}
+
+        def __repr__(self):
+            return f"{self.__class__.__name__} dtype: {self.dtype}"
+
+        def get_all_ids(self):
+            return [*self.id2value.keys()]
+
+        def validate_and_reformat_value(self, value):
+            if self.dtype == "location":
+                if field_name == "location":
+                    # convert it into standard format "37.77,122.41"
+                    if isinstance(value, list):  # eg. [37.77, 122.41]
+                        value = ",".join([str(_value) for _value in value])
+                    elif isinstance(value, dict):  # eg. {"lat": 37.77, "lon": 122.41}
+                        value = ",".join([str(value["lat"]), str(value["lon"])])
+                    elif isinstance(value, str):  # eg. "37.77,122.41"
+                        if not "," in value or len(value.split(",")) != 2:
+                            raise TypeError("incorrect `location` field value format")
+                    else:
+                        msg = f"Invalid `location` field value format: {value}"
+                        raise TypeError(msg)
+            elif self.dtype == "bool":
+                assert isinstance(value, bool), print(type(value))
+            elif self.dtype == "number":
+                assert isinstance(value, numbers.Number), print(type(value))
+            elif self.dtype == "string":
+                assert isinstance(value, str), print(type(value))
+
+            return value
+
+        def bulk_update_data(self,
+                             id2value,
+                             app_path,
+                             has_text_resolver=True,
+                             has_embedding_resolver=False,
+                             resolver_settings=None):
+
+            # return if empty id2value
+            if not id2value:
+                return
+
+            # data type validation and updation
+            for _id, value in id2value.items():
+                if not value:  # cases when the value is `null`
+                    continue
+                # determine dtype if not previously determined, determined already for `location`
+                if not self.dtype:
+                    if isinstance(value, bool):
+                        self.dtype = "bool"
+                        self.has_text_resolver = False
+                        self.has_embedding_resolver = False
+                        self.resolver_settings = {}
+                    elif isinstance(value, numbers.Number):
+                        self.dtype = "number"
+                        self.has_text_resolver = False
+                        self.has_embedding_resolver = False
+                        self.resolver_settings = {}
+                    elif isinstance(value, str):
+                        # self.has_text_resolver, self.has_embedding_resolver kept as-is
+                        self.dtype = "string"
+                        self.has_text_resolver = has_text_resolver
+                        self.has_embedding_resolver = has_embedding_resolver
+                        self.resolver_settings.update(resolver_settings or {})
+                        if not self.has_text_resolver and not self.has_embedding_resolver:
+                            msg = "Atleast one of text or embedder resolver needs to be applied " \
+                                  "for string type field. "
+                            raise Exception(msg)
+                    else:
+                        msg = f"Unknown field type: {isinstance(value, str)}"
+                        raise TypeError(msg)
+                # validation and re-fromatting
+                self.validate_and_reformat_value(value)
+                # update database
+                self.id2value.update({_id: value})
+
+            def get_hashid(entities: List[Dict]):
+                string = json.dumps(entities, sort_keys=True)
+                return Hasher(algorithm="sha1").hash(string=string)
+
+            # compute hash and if required, recreate resolvers
+            new_hash = get_hashid(self.id2value)
+
+            # tfidf based text resolver
+            if self.has_text_resolver:
+
+                if not self._text_resolver or new_hash != self._hash:
+                    # log info
+                    msg = f"Creating a text resolver for field `{self.field_name}` in " \
+                          f"index `{self.index_name}`."
+                    logger.info(msg)
+
                     # create a new resolver and fit
-                    resolver = (
+                    er_config = {
+                        "model_type": "resolver",
+                        "model_settings": {
+                            # "resolver_type": "" # not required as using resolver name directly
+                            **self.resolver_settings,
+                            "scores_normalizer": "min_max_scaler"}
+                    }
+                    self._text_resolver = (
+                        TfIdfSparseCosSimEntityResolver(
+                            app_path=app_path or os.getcwd(),
+                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                            er_config=er_config)
+                    )
+                    # format id2value data into an `entity_map` format for resolvers
+                    entity_map = {
+                        "entities":
+                            [{"id": key, "cname": value} for key, value in self.id2value.items()]
+                    }
+                    self._text_resolver.fit(entity_map=entity_map)
+                    self._text_resolver.dump()  # for faster loading next time!
+
+            # embedder based resolver
+            if self.has_embedding_resolver:
+
+                if not self._embedding_resolver or new_hash != self._hash:
+                    # log info
+                    msg = f"Creating an embedder resolver for field `{self.field_name}` in " \
+                          f"index `{self.index_name}`."
+                    logger.info(msg)
+
+                    # create a new resolver and fit
+                    er_config = {
+                        "model_type": "resolver",
+                        "model_settings": {
+                            # "resolver_type": "" # not required as using resolver name directly
+                            **self.resolver_settings,
+                            "scores_normalizer": "min_max_scaler"}
+                    }
+                    self._embedding_resolver = (
                         EmbedderCosSimEntityResolver(
                             app_path=app_path or os.getcwd(),
-                            entity_type=embedding_scoped_key_name,
-                            er_config=config
-                        )
+                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                            er_config=er_config)
                     )
-                    resolver.fit(entity_map=entity_map)
-                    resolver.dump()
-                    NonElasticsearchQuestionAnswerer.ALL_INDICES.update(
-                        {embedding_scoped_key_name: {"resolver": resolver}}
-                    )
+                    # use same data as text resolver!
+                    entity_map = {
+                        "entities":
+                            [{"id": key, "cname": value} for key, value in self.id2value.items()]
+                    }
+                    self._embedding_resolver.fit(entity_map=entity_map)
+                    self._embedding_resolver.dump()  # for faster loading next time!
+
+            # update hash
+            self._hash = new_hash
+
+        @classmethod
+        def make_docs(cls, index_resources, _ids=None):
+            """
+            Collates all field names into docs
+
+            Args:
+                index_resources: a dict of filed names and corresponding FieldResource instances
+                _ids: if provided as a list/set of values, only docs with those ids are obtained,
+                        else all ids are used
+            Returns:
+                list[dict]: compiled docs
+            """
+            docs = {}
+            all_ids = set() if not _ids else set(_ids)
+            if not all_ids:
+                for field_name, filedResource in index_resources.items():
+                    all_ids.update(set(filedResource.get_all_ids()))
+            for _id in all_ids:
+                docs[_id] = {}
+            for field_name, filedResource in index_resources.items():
+                for _id in all_ids:
+                    docs[_id][field_name] = filedResource.id2value[_id]
+            return [*docs.values()]
+
+    class GenericSearch:
+
+        def __init__(self, index_name, app_namespace):
+            """Initialize a Search object.
+            """
+            self.index_name = index_name
+            self.app_namespace = app_namespace
+            self._search_queries = {}
+            self._filter_queries = {}
+            self._sort_queries = {}
+
+        def query(self, **kwargs):
+            for key, value in kwargs.items():
+                if key in self._search_queries:
+                    msg = "Found a duplicate search clause against same field name. " \
+                          "Considering only latest input."
+                    logger.warning(msg)
+                self._search_queries.update({key: value})
+            return self
+
+        def filter(self, **kwargs):
+            for key, value in kwargs.items():
+                if key in self._filter_queries:
+                    msg = "Found a duplicate filter clause against same field name. " \
+                          "Considering only latest input."
+                    logger.warning(msg)
+                self._filter_queries.update({key: value})
+            return self
+
+        def sort(self, field, sort_type, **kwargs):
+            if field in self._sort_queries:
+                msg = "Found a duplicate sort clause against same field name. " \
+                      "Considering only latest input."
+                logger.warning(msg)
+            self._sort_queries.update({field: {"sort_type": sort_type, **kwargs}})
+            return self
+
+        def execute(self, size=100):
+
+            results = []
+            scoped_index_name = get_scoped_index_name(self.app_namespace, self.index_name)
+
+            if scoped_index_name not in NonElasticsearchQuestionAnswerer.ALL_INDICES:
+                msg = f"The index `{self.index_name}` for app `{self.app_namespace}` looks " \
+                      f"unavailable. Consider doing `.load_kb(...)` to create indices for " \
+                      f"search queries."
+                logger.error(msg)
+                return []
+
+            index_resources = NonElasticsearchQuestionAnswerer.ALL_INDICES[scoped_index_name]
+
+            # get results for `query` clauses
+            if not self._search_queries:
+                results = NonElasticsearchQuestionAnswerer.FieldResource.make_docs(index_resources)
+            else:
+                # for field_name, query_text in self._search_queries.items():
+                #     fieldResource = index_resources.get(field_name, None)
+                #     if not fieldResource:
+                #         msg = f"The field name `{field_name}` is unavailable in index " \
+                #               f"{self.index_name} in the app {self.app_namespace}"
+                #         logger.error(msg)
+                #         return []
+                #     fieldResource.search(query_text)
+                pass
+
+            # get narrowed results for `filter` clause
+
+            # get sorted results for `sort` clause
+
+            return results
 
 
 class QuestionAnswerer:
@@ -1582,17 +1815,12 @@ class QuestionAnswerer:
     @staticmethod
     def _get_question_answerer(config):
 
-        if config.get("model_type") in ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH:
+        use_elastic_search = config.get("use_elastic_search", True)
+
+        if not use_elastic_search:
             return NonElasticsearchQuestionAnswerer
-        elif config.get("model_type") in ALL_QUERY_TYPES:
-            return ElasticsearchQuestionAnswerer
         else:
-            raise Exception(
-                f"Expected 'model_type' in input argument config or "
-                f"QUESTION_ANSWERER_CONFIG file to be among "
-                f"{ALL_QUERY_TYPES + ALL_QUERY_TYPES_WITHOUT_ELASTICSEARCH} "
-                f"but found {config.get('model_type', None)}"
-            )
+            return ElasticsearchQuestionAnswerer
 
     @classmethod
     def load_kb(cls,
