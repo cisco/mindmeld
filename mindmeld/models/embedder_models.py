@@ -19,6 +19,7 @@ import logging
 import os
 import pickle
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 
 import numpy as np
 from tqdm.autonotebook import trange
@@ -38,71 +39,102 @@ def _torch(op, *args, sub="", **kwargs):
     return _getattr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
 
 
-class EmbeddingsCache:
-
-    def __init__(self, cache_path):
-        self.cache_path = cache_path
-        self.data = {}
-
-        # load cache if exists
-        self.load()
-
-    def load(self):
-        """Loads the cache file."""
-
-        if os.path.exists(self.cache_path) and os.path.getsize(self.cache_path) > 0:
-            with open(self.cache_path, "rb") as fp:
-                self.data = pickle.load(fp)
-
-    def clear(self):
-        """Deletes the cache file."""
-
-        if os.path.exists(self.cache_path):
-            os.remove(self.cache_path)
-
-    def dump(self):
-        """Dumps the cache to disk."""
-
-        folder = os.path.dirname(self.cache_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        with open(self.cache_path, "wb") as fp:
-            pickle.dump(self.data, fp)
-
-    def get(self, text, default=None):
-        return self.__getitem__(text, default)
-
-    def __contains__(self, text):
-        if text in self.data:
-            return True
-        return False
-
-    def __getitem__(self, text, default=None):
-        return self.data.get(text, default)
-
-    def __setitem__(self, text, encoding):
-        self.data[text] = encoding
-
-    def __delitem__(self, text):
-        try:
-            del self.data[text]
-        except KeyError as e:
-            logger.error(e)
-            pass
-
-    def __iter__(self):
-        # zip texts and encodings into a dictionary for iteration
-        return iter(self.data)
-
-    def __len__(self):
-        return len(self.data)
-
-
 class Embedder(ABC):
     """
     Base class for embedder model
     """
+
+    class EmbeddingsCache:
+
+        def __init__(self, cache_path):
+            self.cache_path = cache_path
+            self.reset_data()
+            self.load()
+
+        def reset_data(self):
+            self.data = OrderedDict()
+
+        def load(self):
+            """Loads the cache file."""
+
+            if os.path.exists(self.cache_path) and os.path.getsize(self.cache_path) > 0:
+                with open(self.cache_path, "rb") as fp:
+                    data = pickle.load(fp)
+
+                if (
+                    "_texts" in data and
+                    "_texts_embeddings" in data and
+                    isinstance(data["_texts"], list)
+                ):  # new format;
+                    self.data = dict(zip(data["_texts"], data["_texts_embeddings"]))
+
+                elif (
+                    "synonyms" in data and
+                    "synonyms_embs" in data and
+                    isinstance(data["synonyms"], dict)
+                ):  # deprecated format; backwards compatible with ER module code
+                    self.data = {key: data["synonyms_embs"][j] for key, j in data["synonyms"]}
+
+                else:  # deprecated format; backwards compatible with QA module code
+                    if not isinstance(data, dict):
+                        msg = "Unknown data format while loading cache embeddings. Ignoring loading ..."
+                        logger.error(msg)
+                    self.data = data
+
+        def clear(self):
+            """Deletes the cache file."""
+
+            self.reset_data()
+
+            if os.path.exists(self.cache_path):
+                os.remove(self.cache_path)
+
+        def dump(self):
+            """Dumps the cache to disk."""
+
+            if self.data:
+                folder = os.path.split(self.cache_path)[0]
+                if folder and not os.path.exists(folder):
+                    os.makedirs(folder)
+                data = {
+                    "_texts": [*self.data.keys()],
+                    "_texts_embeddings": np.array([*self.data.values()])
+                }
+                with open(self.cache_path, "wb") as fp:
+                    pickle.dump(data, fp)
+                    fp.close()
+            else:
+                msg = "No embedding data exists to dump. Ignoring dumping."
+                logger.warning(msg)
+
+        def get(self, text, default=None):
+            return self.__getitem__(text, default)
+
+        def __contains__(self, text):
+            if text in self.data:
+                return True
+            return False
+
+        def __getitem__(self, text, default=None):
+            return self.data.get(text, default)
+
+        def __setitem__(self, text, encoding):
+            self.data[text] = encoding
+
+        def __delitem__(self, text):
+            try:
+                del self.data[text]
+            except KeyError as e:
+                logger.error(e)
+                pass
+
+        def __iter__(self):
+            # zip texts and encodings into a dictionary for iteration
+            if self.data:
+                return iter(self.data)
+
+        def __len__(self):
+            len(self.data)
 
     def __init__(self, app_path, **kwargs):
         """
@@ -112,36 +144,43 @@ class Embedder(ABC):
             app_path: Path of the app used to create cache folder to dump encodings
         """
         self.model_name = kwargs.get("model_name", "default")
-
-        # load model (and if required changes model_id)
         self.model_id = str(self.model_name)
-        self.model = self.load(**kwargs)
+        self.emb_dim = None
+
+        # load model (change `emb_dim` and if required change `model_id`)
+        self.model = self._load(**kwargs)
 
         # cache path
-        # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
-        cache_path = path.get_embedder_cache_file_path(
-            app_path, kwargs.get("embedder_type", "default"), self.model_name
-        )
-        # new usage: determine cache path for the model using model_id (eg. new QA and ER modules)
-        if not (os.path.exists(cache_path) and os.path.getsize(cache_path) > 0):
-            # implies a previously used path name has no data and hence, is safe to change
-            #   default cache path for this model (backwards compatability in loading data)
-            cache_path = path.get_embedder_cache_file_path(app_path, self.model_id)
-        # new: passing `cache_path` through kwargs preceeds any previously determined path string
-        cache_path = kwargs.get("cache_path", None) or str(cache_path)
-        self.cache = EmbeddingsCache(cache_path)
+        cache_path = kwargs.get("cache_path", None)
+        if not cache_path:
+            # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
+            cache_path = path.get_embedder_cache_file_path(
+                app_path, kwargs.get("embedder_type", "default"), self.model_name
+            )
+            # new usage: determine cache path for the model using model_id (eg. new QA and ER modules)
+            if not (os.path.exists(cache_path) and os.path.getsize(cache_path) > 0):
+                # implies a previously used path name has no data and hence, is safe to change
+                #   default cache path for this model (backwards compatability in loading data)
+                cache_path = path.get_embedder_cache_file_path(app_path, self.model_id)
+        self.cache = Embedder.EmbeddingsCache(str(cache_path))
 
     @abstractmethod
-    def load(self, **kwargs):
+    def _load(self, **kwargs):
         """Loads the embedder model
 
         Returns:
             The model object.
         """
+
+        # backwards compatability
+        if getattr(self, "load", None):
+            # implies a `load()` is implemented as an abstract class instead of the new way `_load()`
+            getattr(self, "load")(**kwargs)
+
         raise NotImplementedError
 
     @abstractmethod
-    def encode(self, text_list):
+    def _encode(self, text_list):
         """
         Args:
             text_list (list): A list of text strings for which to generate the embeddings.
@@ -149,12 +188,26 @@ class Embedder(ABC):
         Returns:
             (list): A list of numpy arrays of the embeddings.
         """
+
+        # backwards compatability
+        if getattr(self, "encode", None):
+            # implies a `encode()` is implemented as an abstract class instead of the new way `_encode()`
+            getattr(self, "encode")(text_list)
+
         raise NotImplementedError
 
-    def get_encodings(self, text_list):
+    # deprecated method
+    def dump(self):
+        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
+              f"{self.__class__.__name__}.dump()"
+        logger.warning(msg)
+        self.dump_cache()
+
+    def get_encodings(self, text_list, add_to_cache=True):
         """Fetches the encoded values from the cache, or generates them.
         Args:
             text_list (list): A list of text strings for which to get the embeddings.
+            add_to_cache (bool): If True, adds te encodings to self.cache and returns embeddings
 
         Returns:
             (list): A list of numpy arrays with the embeddings.
@@ -162,24 +215,179 @@ class Embedder(ABC):
         encoded = [self.cache.get(text, None) for text in text_list]
         cache_miss_indices = [i for i, vec in enumerate(encoded) if vec is None]
         text_to_encode = [text_list[i] for i in cache_miss_indices]
-        model_encoded_text = self.encode(text_to_encode)
+        model_encoded_text = self._encode(text_to_encode)
 
         for i, v in enumerate(cache_miss_indices):
             encoded[v] = model_encoded_text[i]
-            self.cache[text_to_encode[i]] = model_encoded_text[i]
+            if add_to_cache:
+                self.cache[text_to_encode[i]] = model_encoded_text[i]
+
         return encoded
 
-    def dump(self):
-        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
-              f"{self.__class__.__name__}.dump()"
-        logger.warning(msg)
-        self.dump_cache()
+    def add_to_cache(self, superficial_data):
+        """Manually add some embeddings to cache. This method is created to entertain storing
+        superficial text-encoding pairs wherein the encodings are not the encodings of the text
+        itself but a combination of encodings of some list of texts from same embedder model.
+        For example, to add superficial entity embeddings as average of whitelist embeddings
+        in Entity Resolution.
+
+        Args:
+            superficial_data (dict): texts and their correspoonding superficial embeddings as
+                numpy array, having same length as self.emb_dim
+        """
+        for key, value in superficial_data.items():
+            value = np.asarray(value).reshape(-1)
+            if self.emb_dim and not len(value) == self.emb_dim:
+                msg = f"Expected superficial embedding of length {self.emb_dim} but found " \
+                      f"{len(value)}. Not adding the embedding for {key} to cache."
+                logger.error(msg)
+            if key in self.cache:
+                msg = f"Overwriting a superficial embedding for {key}"
+                logger.warning(msg)
+            self.cache[key] = value
 
     def dump_cache(self):
         self.cache.dump()
 
     def clear_cache(self):
         self.cache.clear()
+
+    @staticmethod
+    def _pytorch_cos_sim_generic(src_vecs, tgt_vecs, as_numpy=False):
+        """Computes the cosine similarity
+        """
+
+        src_vecs = _torch("as_tensor", src_vecs)
+        tgt_vecs = _torch("as_tensor", tgt_vecs)
+
+        if len(src_vecs.shape) == 1:
+            src_vecs = src_vecs.view(1, -1)
+
+        if len(tgt_vecs.shape) == 1:
+            tgt_vecs = tgt_vecs.view(1, -1)
+
+        n_src = len(src_vecs)
+
+        # [n_tgt, ...] -> [n_src, n_tgt, ...]
+        tgt_vecs = tgt_vecs.expand([n_src, *tgt_vecs.shape])
+        # [n_src, ..., emd_dim] -> [n_src, n_tgt, ...]
+        src_vecs = src_vecs.unsqueeze(dim=1).expand_as(tgt_vecs)
+
+        # returns -> [n_src, n_tgt]
+        similarity_scores = _torch("cosine_similarity", src_vecs, tgt_vecs, dim=-1)
+
+        if as_numpy:
+            return similarity_scores.numpy()
+
+        return similarity_scores
+
+    @staticmethod
+    def _pytorch_cos_sim(src_vecs, tgt_vecs):
+        """Computes the cosine similarity for 2d matrices
+        """
+
+        src_vecs = _torch("as_tensor", src_vecs)
+        tgt_vecs = _torch("as_tensor", tgt_vecs)
+
+        if len(src_vecs.shape) == 1:
+            src_vecs = src_vecs.view(1, -1)
+
+        if len(tgt_vecs.shape) == 1:
+            tgt_vecs = tgt_vecs.view(1, -1)
+
+        if len(src_vecs.shape) != 2 or len(tgt_vecs.shape) != 2:
+            msg = "Only 2-dimensional arrays/tensors are allowed in Embedder._pytorch_cos_sim()"
+            raise ValueError(msg)
+
+        # a_norm = torch.nn.functional.normalize(src_vecs, p=2, dim=1)
+        # b_norm = torch.nn.functional.normalize(tgt_vecs, p=2, dim=1)
+        # return torch.mm(a_norm, b_norm.transpose(0, 1))
+
+        return Embedder._pytorch_cos_sim_generic(src_vecs, tgt_vecs, as_numpy=True)
+
+    def find_similar_texts(self, src_texts,
+                           top_n,
+                           tgt_texts=None,
+                           return_as_dict=False,
+                           scores_normalizer=None,
+                           sim_func=None):
+        """Computes the cosine similarity
+
+        Args:
+            src_texts (Union[str, list]): string or list of strings to obtain matching scores for.
+            top_n (int): maximum number of results to populate. if None, equals length of tgt_texts
+            tgt_texts (list, optional): list of strings that will be matched to.
+                if None, existing cache is used as target strings
+            return_as_dict (bool, optional): if the results should be returned as a dictionary of
+                target_text name as keys and scores as corresponding values
+            scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
+                are: "min_max_scaler", "standard_scaler"
+            sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If specified,
+                must take two numpy array arguments for similarity computation
+        Returns:
+            Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of tgt_texts and their
+                scores, else a list of sorted synonym names paired with their
+                similarity scores (descending order)
+        """
+
+        is_single = False
+        if isinstance(src_texts, str):
+            is_single = True
+            src_texts = [src_texts]
+
+        tgt_texts = [*self.cache.data.keys()] if not tgt_texts else tgt_texts
+        top_n = len(tgt_texts) if not top_n else top_n
+        sim_func = sim_func or self._pytorch_cos_sim
+
+        src_vecs = np.asarray(self.get_encodings(list(src_texts), add_to_cache=False))
+        tgt_vecs = np.asarray(self.get_encodings(list(tgt_texts), add_to_cache=False))
+
+        similarity_scores_2d = sim_func(src_vecs, tgt_vecs)  # a 2d numpy array
+
+        results = []
+        for similarity_scores in similarity_scores_2d:
+            similarity_scores = similarity_scores.reshape(-1)
+            # Rounding sometimes helps to bring correct answers on to the list of top scored results
+            similarity_scores = np.around(similarity_scores, decimals=2)
+
+            if scores_normalizer:
+                if scores_normalizer == "min_max_scaler":
+                    _min = np.min(similarity_scores)
+                    _max = np.max(similarity_scores)
+                    denominator = (_max - _min) if (_max - _min) != 0 else 1.0
+                    similarity_scores = (similarity_scores - _min) / denominator
+                elif scores_normalizer == "standard_scaler":
+                    _mean = np.mean(similarity_scores)
+                    _std = np.std(similarity_scores)
+                    denominator = _std if _std else 1.0
+                    similarity_scores = (similarity_scores - _mean) / denominator
+                else:
+                    msg = f"Allowed values for `scores_normalizer` are only " \
+                          f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
+                          f"normalizing similarity scores."
+                    logger.error(msg)
+
+            if return_as_dict:
+                results.append(dict(zip(tgt_texts, similarity_scores)))
+            else:
+                # sort results in descending scores
+                n_scores = len(similarity_scores)
+                if n_scores > top_n:
+                    top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
+                    result = sorted(
+                        [(tgt_texts[ii], similarity_scores[ii]) for ii in top_inds],
+                        key=lambda x: x[1],
+                        reverse=True)
+                else:
+                    result = sorted(zip(tgt_texts, similarity_scores),
+                                    key=lambda x: x[1],
+                                    reverse=True)
+                results.append(result)
+
+        if is_single:
+            return results[0]
+
+        return results
 
 
 class BertEmbedder(Embedder):
@@ -412,7 +620,7 @@ class BertEmbedder(Embedder):
 
         return all_embeddings
 
-    def load(self, **kwargs):
+    def _load(self, **kwargs):
 
         if not _is_module_available("sentence_transformers"):
             raise ImportError(
@@ -465,7 +673,7 @@ class BertEmbedder(Embedder):
 
         return model
 
-    def encode(self, phrases):
+    def _encode(self, phrases):
         """Encodes input text(s) into embeddings, one vector for each phrase
 
         Args:
@@ -548,7 +756,7 @@ class GloveEmbedder(Embedder):
         token_list = [t["entity"] for t in tokens]
         return token_list
 
-    def load(self, **kwargs):
+    def _load(self, **kwargs):
         token_embedding_dimension = kwargs.get(
             "token_embedding_dimension", self.DEFAULT_EMBEDDING_DIM
         )
@@ -562,7 +770,7 @@ class GloveEmbedder(Embedder):
             use_padding=False,
         )
 
-    def encode(self, text_list):
+    def _encode(self, text_list):
         token_list = [self.tokenize(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []

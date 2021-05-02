@@ -19,7 +19,6 @@ import hashlib
 import json
 import logging
 import os
-import pickle
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -374,11 +373,6 @@ class EntityResolverBase(ABC):
         """
         self._load()
 
-    def dump(self):
-        """If required, dumps cache such as embeddings of synonyms in a path
-        """
-        self._dump()
-
     @abstractmethod
     def _fit(self, clean, entity_map):
         """Fits the entity resolver model
@@ -397,9 +391,6 @@ class EntityResolverBase(ABC):
     @abstractmethod
     def _load(self):
         raise NotImplementedError
-
-    def _dump(self):
-        pass
 
 
 class ElasticsearchEntityResolver(EntityResolverBase):
@@ -881,12 +872,30 @@ class ExactMatchEntityResolver(EntityResolverBase):
 
 class EmbedderCosSimEntityResolver(EntityResolverBase):
     """
-    Resolver class for bert models as described here:
-    https://github.com/UKPLab/sentence-transformers
+    Resolver class for embedder models that create dense embeddings
     """
 
     def __init__(self, app_path, **kwargs):
+        """
+        Args:
+            app_path (str): App's path to cache embeddings
+            er_config (dict): Configurations can be passed in through `model_settings` field
+                `model_settings`:
+                    embedder_type: the type of embedder picked from embedder_models.py class
+                        (eg. 'bert', 'glove', etc. )
+                    augment_lower_case: to augment lowercased synonyms as whitelist
+                    augment_title_case: to augment titlecased synonyms as whitelist
+                    augment_normalized: to augment text normalized synonyms as whitelist
+                    augment_average_synonyms_embeddings: to augment dummy synonyms whose embedding
+                        is average of all whitelist's (including above alterations) encodings.
+                    scores_normalizer: a normalizer that normalizes computed similarity scores
+                        allowed choices are "min_max_scaler", "standard_scaler"
+                    cache_path: a predetermined cache path to dump embeddings
+                    batch_size: can be set based on machine capabilities and RAM
+        """
         super().__init__(app_path, **kwargs)
+
+        self._processed_entity_map = None
 
         er_config = kwargs.pop("er_config", {})
         settings = er_config.get("model_settings", {})
@@ -897,105 +906,14 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             settings.get("augment_average_synonyms_embeddings", True)
         )
         self._scores_normalizer = settings.get("scores_normalizer", None)
+
         self._embedder_model = create_embedder_model(self.app_path, er_config)
-
-        self._processed_entity_map = None
-
-        # TODO: move these to embedder model only!
-        self.cache_path = settings.get("cache_path", None) or self._embedder_model.cache.cache_path
-        self._synonyms = None
-        self._synonyms_embs = None
-
-    @staticmethod
-    def _compute_cosine_similarity(synonyms,
-                                   synonyms_encodings,
-                                   entity_emb,
-                                   top_n,
-                                   return_as_dict=False,
-                                   scores_normalizer=None):
-        """Uses cosine similarity metric on synonym embeddings to sort most relevant ones
-            for entity resolution
-
-        Args:
-            synonyms (dict): a dict of synonym and its corresponding embedding's row index
-                                in synonyms_encodings
-            synonyms_encodings (np.array): a 2d array of embedding of the synonyms; an array of
-                                            size equal to number of synonyms
-            entity_emb (np.array): a 2d array of embedding of the input entity text(s)
-            top_n (int): maximum number of results to populate
-            return_as_dict (bool, optional): if the results should be returned as a dictionary
-            scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
-                                                are: "min_max_scaler", "standard_scaler"
-        Returns:
-            Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of synonyms and their
-                                        scores, else a list of sorted synonym names, paired with
-                                        their similarity scores (descending)
-        """
-
-        n_entities = len(entity_emb)
-
-        is_single = n_entities == 1
-
-        # [n_syns, emd_dim] -> [n_entities, n_syns, emd_dim]
-        t_syn_enc = _torch("as_tensor", synonyms_encodings)
-        t_syn_enc = t_syn_enc.expand([n_entities, *t_syn_enc.shape])
-
-        # [n_entities, emd_dim] -> [n_entities, n_syns, emd_dim]
-        t_entity_emb = _torch("as_tensor", entity_emb)
-        t_entity_emb = t_entity_emb.unsqueeze(dim=1).expand_as(t_syn_enc)
-
-        # returns -> [n_entities, n_syns]
-        similarity_scores_2d = _torch(
-            "cosine_similarity", t_syn_enc, t_entity_emb, dim=-1).numpy()
-
-        results = []
-        for similarity_scores in similarity_scores_2d:
-            similarity_scores = similarity_scores.reshape(-1)
-            # Rounding sometimes helps to bring correct answers on to the
-            # top score as other non-correct resolutions
-            similarity_scores = np.around(similarity_scores, decimals=2)
-
-            if scores_normalizer:
-                if scores_normalizer == "min_max_scaler":
-                    _min = np.min(similarity_scores)
-                    _max = np.max(similarity_scores)
-                    denominator = (_max - _min) if (_max - _min) != 0 else 1.0
-                    similarity_scores = (similarity_scores - _min) / denominator
-                elif scores_normalizer == "standard_scaler":
-                    _mean = np.mean(similarity_scores)
-                    _std = np.std(similarity_scores)
-                    denominator = _std if _std else 1.0
-                    similarity_scores = (similarity_scores - _mean) / denominator
-                else:
-                    msg = f"Allowed values for `scores_normalizer` are only " \
-                          f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
-                          f"normalizing similarity scores."
-                    logger.error(msg)
-
-            if return_as_dict:
-                results.append(dict(zip(synonyms.keys(), similarity_scores)))
-            else:
-                # results in descending scores
-                n_scores = len(similarity_scores)
-                if n_scores > top_n:
-                    top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
-                    result = sorted(
-                        zip(np.asarray([*synonyms.keys()])[top_inds], similarity_scores[top_inds]),
-                        key=lambda x: x[1], reverse=True)
-                else:
-                    result = sorted(zip(synonyms.keys(), similarity_scores), key=lambda x: x[1],
-                                    reverse=True)
-                results.append(result)
-
-        if is_single:
-            return results[0]
-
-        return results
 
     def _fit(self, clean, entity_map):
 
-        if clean and os.path.exists(self.cache_path):
-            os.remove(self.cache_path)
+        # if clean, clear cache
+        if clean:
+            self._embedder_model.clear_cache()
 
         entities = entity_map.get("entities", [])
         self._processed_entity_map = self.process_entities(
@@ -1007,72 +925,29 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         )
 
         # load embeddings from cache if exists, encode any other synonyms if required
-        synonyms, synonyms_embs = OrderedDict(), np.empty(0)
-        if os.path.exists(self.cache_path):
-            msg = f"Cached embs exists for entity {self.type}. " \
-                  f"Loading existing data from: {self.cache_path}"
-            logger.info(msg)
-            cached_data = self._load_embeddings()
-            synonyms, synonyms_embs = cached_data["synonyms"], cached_data["synonyms_embs"]
-        new_synonyms_to_encode = [syn for syn in self._processed_entity_map["synonyms"] if
-                                  syn not in synonyms]
-        if new_synonyms_to_encode:
-            new_synonyms_encodings = self._embedder_model.encode(new_synonyms_to_encode)
-            synonyms_embs = new_synonyms_encodings if not synonyms else np.concatenate(
-                [synonyms_embs, new_synonyms_encodings])
-            synonyms.update(
-                OrderedDict(zip(
-                    new_synonyms_to_encode,
-                    np.arange(len(synonyms), len(synonyms) + len(new_synonyms_to_encode)))
-                )
-            )
+        self._embedder_model.get_encodings([*self._processed_entity_map["synonyms"].keys()])
 
         # encode artificial synonyms if required
         if self._augment_average_synonyms_embeddings:
             # obtain cnames to synonyms mapping
-            entity_mapping_synonyms = self._processed_entity_map["synonyms"]
             cnames2synonyms = {}
-            for syn, cnames in entity_mapping_synonyms.items():
+            for syn, cnames in self._processed_entity_map["synonyms"].items():
                 for cname in cnames:
-                    items = cnames2synonyms.get(cname, [])
-                    items.append(syn)
-                    cnames2synonyms[cname] = items
-            dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
-            # assert dummy synonyms
+                    cnames2synonyms[cname] = cnames2synonyms.get(cname, []) + [syn]
+            # cretae and add superficial data
             for cname, syns in cnames2synonyms.items():
                 dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
-                dummy_synonym_mappings = entity_mapping_synonyms.get(dummy_synonym, [])
-                dummy_synonym_mappings.append(cname)
-                entity_mapping_synonyms[dummy_synonym] = dummy_synonym_mappings
-                # check if needs to be encoded
-                if dummy_synonym in synonyms:
+                if dummy_synonym not in self._processed_entity_map["synonyms"]:
+                    self._processed_entity_map["synonyms"][dummy_synonym] = [cname]
+                # obtain encoding and update cache
+                # TODO: asumption that embedding cache has __getitem__ can be addressed
+                if dummy_synonym in self._embedder_model.cache:
                     continue
-                # if required, obtain dummy encoding and update collections
-                dummy_encoding = np.mean([synonyms_embs[synonyms[syn]] for syn in syns], axis=0)
-                dummy_new_synonyms_to_encode.append(dummy_synonym)
-                dummy_new_synonyms_encodings.append(dummy_encoding)
-            if dummy_new_synonyms_encodings:
-                dummy_new_synonyms_encodings = np.vstack(dummy_new_synonyms_encodings)
-            if dummy_new_synonyms_to_encode:
-                synonyms_embs = dummy_new_synonyms_encodings if not synonyms else np.concatenate(
-                    [synonyms_embs, dummy_new_synonyms_encodings])
-                synonyms.update(
-                    OrderedDict(zip(
-                        dummy_new_synonyms_to_encode,
-                        np.arange(len(synonyms), len(synonyms) + len(dummy_new_synonyms_to_encode)))
-                    )
-                )
+                dummy_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
+                self._embedder_model.add_to_cache({dummy_synonym: dummy_encoding})
 
-        # dump embeddings if required
-        self._synonyms, self._synonyms_embs = synonyms, synonyms_embs
-        do_dump = (
-            new_synonyms_to_encode or
-            dummy_new_synonyms_to_encode or
-            not os.path.exists(self.cache_path)
-        )
-        if do_dump:
-            self.dump()
+        self._embedder_model.dump_cache()
         self.dirty = False  # never True with the current logic, kept for consistency purpose
 
     def _predict(self, nbest_entities, top_n):
@@ -1086,21 +961,14 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             (list): The resolved values for the provided entity.
         """
 
-        synonyms, synonyms_encodings = self._synonyms, self._synonyms_embs
-
         # encode input entity
         # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
-        top_entity = nbest_entities[0]  # top_entity
-        existing_index = synonyms.get(top_entity.text, None)
-        if existing_index:
-            top_entity_emb = synonyms_encodings[existing_index]
-        else:
-            top_entity_emb = self._embedder_model.encode(top_entity.text)
-        top_entity_emb = top_entity_emb.reshape(1, -1)
+        top_entity = nbest_entities[0].text  # top_entity
 
         try:
-            sorted_items = self._compute_cosine_similarity(
-                synonyms, synonyms_encodings, top_entity_emb, top_n,
+            sorted_items = self._embedder_model.find_similar_texts(
+                top_entity,
+                top_n=top_n,
                 scores_normalizer=self._scores_normalizer
             )
             values = []
@@ -1131,42 +999,22 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
     def _load(self):
         self.fit()
 
-    def _dump(self):
-        """Dumps embeddings of synonyms into a .pkl file
-        """
-        data = {"synonyms": self._synonyms, "synonyms_embs": self._synonyms_embs}
-
-        folder = os.path.split(self.cache_path)[0]
-        if folder and not os.path.exists(folder):
-            os.makedirs(folder)
-        with open(self.cache_path, "wb") as fp:
-            pickle.dump(data, fp)
-
     def _predict_batch(self, nbest_entities_list, batch_size, top_n):
-        synonyms, synonyms_encodings = self._synonyms, self._synonyms_embs
 
         # encode input entity
-        top_entity_list = [i[0] for i in nbest_entities_list]  # top_entity
-        # called a list but observed as a list
-        top_entity_emb_list = []
-        for st_idx in trange(0, len(top_entity_list), batch_size, disable=False):
-            batch = [top_entity.text for top_entity in top_entity_list[st_idx:st_idx + batch_size]]
-            top_entity_emb_list.append(self._embedder_model.encode(batch))
-        top_entity_emb_list = np.vstack(top_entity_emb_list)
+        top_entity_list = [i[0].text for i in nbest_entities_list]  # top_entity
 
         try:
             # w/o batch,  [ nsyms x 768*4 ] x [ 1 x 768*4 ] --> [ nsyms x 1 ]
             # w/  batch,  [ nsyms x 768*4 ] x [ k x 768*4 ] --> [ nsyms x k ]
             sorted_items_list = []
-            for st_idx in trange(0, len(top_entity_emb_list), batch_size, disable=False):
-                batch = top_entity_emb_list[st_idx:st_idx + batch_size]
-                result = self._compute_cosine_similarity(
-                    synonyms, synonyms_encodings, batch, top_n,
+            for st_idx in trange(0, len(top_entity_list), batch_size, disable=False):
+                batch = top_entity_list[st_idx:st_idx + batch_size]
+                result = self._embedder_model.find_similar_texts(
+                    batch,
+                    top_n=top_n,
                     scores_normalizer=self._scores_normalizer
                 )
-                # due to way compute similarity returns
-                if len(batch) == 1:
-                    result = [result]
                 sorted_items_list.extend(result)
 
             values_list = []
@@ -1221,14 +1069,6 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                 results_list[i] = results[:top_n]
 
         return results_list
-
-    def _load_embeddings(self):
-        """Loads embeddings for all synonyms, previously dumped into a .pkl file
-        """
-
-        with open(self.cache_path, "rb") as fp:
-            _cached_embs = pickle.load(fp)
-        return _cached_embs
 
 
 class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
@@ -1412,65 +1252,52 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
 
     def __init__(self, app_path, **kwargs):
         """
-        updates er_config in kwargs with
+        This wrapper class allows creation of a BERT base embedder class
+        (currently based on sentence-transformers)
+
+        Specificall, this wrapper updates er_config in kwargs with
             - any default settings if unavailable in input
             - cache path
+
+        Args:
+            app_path (str): App's path to cache embeddings
+            er_config (dict): Configurations can be passed in through `model_settings` field
+                `model_settings`:
+                    embedder_type: the type of embedder picked from embedder_models.py class
+                        (eg. 'bert', 'glove', etc. )
+                    pretrained_name_or_abspath: the pretrained model for 'bert' embedder
+                    bert_output_type: if the output is a sentence mean pool or CLS output
+                    quantize_model: if the model needs to be qunatized for faster inference time
+                        but at a possibly reduced accuracy
+                    concat_last_n_layers: if some of the last layers of a BERT model are to be
+                        concatenated for better accuracies
+                    normalize_token_embs: if the obtained sub-token level encodings are to be
+                        normalized
         """
 
         # default configs useful for reusing model's encodings through a cache path
-        default_model_settings = {
+        defaults = {
             "embedder_type": "bert",
             "pretrained_name_or_abspath": "distilbert-base-nli-stsb-mean-tokens",
-            "batch_size": 16,
+            "bert_output_type": "mean",
+            "quantize_model": True,
             "concat_last_n_layers": 4,
             "normalize_token_embs": True,
-            "bert_output_type": "mean",
-            "augment_lower_case": False,
-            "quantize_model": True,
-            "augment_average_synonyms_embeddings": True
         }
 
-        # set configs
-        er_config = kwargs.get("er_config", {})
-        for key, value in er_config.get("model_settings", {}).items():
-            default_model_settings.update({key: value})
-        er_config.update({"model_settings": default_model_settings})
+        # determine cache path and pass it in `model_settings`
+        er_config = copy.deepcopy(kwargs.get("er_config", {}))
+        model_settings = er_config.get("model_settings", {})
+        for key, value in model_settings.items():
+            if key in defaults:
+                defaults.update({key: value})
+        string = json.dumps(defaults, sort_keys=True)
+        hashid = f"{Hasher(algorithm='sha1').hash(string=string)}$synonym_{kwargs['entity_type']}"
+        defaults.update({"cache_path": path.get_entity_resolver_cache_file_path(app_path, hashid)})
 
-        model_creation_configs = {
-            "pretrained_name_or_abspath": default_model_settings["pretrained_name_or_abspath"],
-            "bert_output_type": default_model_settings["bert_output_type"],
-            "quantize_model": default_model_settings["quantize_model"],
-        }
-        model_runtime_configs = {
-            "concat_last_n_layers": default_model_settings["concat_last_n_layers"],
-            "normalize_token_embs": default_model_settings["normalize_token_embs"],
-            "augment_lower_case": default_model_settings["augment_lower_case"],
-            "augment_average_synonyms_embeddings":
-                default_model_settings["augment_average_synonyms_embeddings"],
-        }
-
-        def get_cache_path(_app_path, _er_config, _entity_type):
-            """Obtains and return a unique cache path for saving synonyms' embeddings
-            Args:
-                _app_path: app's path where the cache folder will be created
-                _er_config: the er_config dictionary of the reolver class
-                _entity_type: entity type of the class instance, for unique path identification
-            Return:
-                str: path with a .pkl extension to cache embeddings
-            """
-            string = json.dumps(_er_config, sort_keys=True)
-            hashid = Hasher(algorithm="sha1").hash(string=string)
-            hashid = f"{hashid}$synonym_{_entity_type}"
-            return path.get_entity_resolver_cache_file_path(_app_path, hashid)
-
-        cache_path = get_cache_path(
-            app_path,
-            {**model_creation_configs, **model_runtime_configs},
-            kwargs["entity_type"]
-        )
-        er_config["model_settings"].update({"cache_path": cache_path})
+        model_settings.update(defaults)
+        er_config.update({"model_settings": defaults})
         kwargs.update({"er_config": er_config})
-
         super().__init__(app_path, **kwargs)
 
 
