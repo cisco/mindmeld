@@ -1402,17 +1402,21 @@ class IntentProcessor(Processor):
         else:
             query = (query,)
 
-        entity_confidence, entities = self._get_pred_entities(
+        entity_confidence, nbest_entities = self._get_pred_entities(
             query, dynamic_resource=dynamic_resource, verbose=verbose
         )
 
-        if allowed_nlp_classes and all(entity == () for entity in entities):
-            entities = self._find_entities_in_text(
+        allowed_nlp_entity_exists_in_inference = allowed_nlp_classes and all(
+            query_entity.entity.type not in allowed_nlp_classes for entities in
+            nbest_entities for query_entity in entities)
+
+        if allowed_nlp_entity_exists_in_inference:
+            nbest_entities = self._find_entities_in_text(
                 query, dynamic_resource, allowed_nlp_classes, max_ngram_search)
 
-        aligned_entities = self._align_entities(entities)
+        aligned_entities = self._align_entities(nbest_entities)
         processed_entities, role_confidence = self._process_entities(
-            query, entities, aligned_entities, allowed_nlp_classes, verbose
+            query, nbest_entities, aligned_entities, allowed_nlp_classes, verbose
         )
 
         confidence = (
@@ -1425,7 +1429,7 @@ class IntentProcessor(Processor):
                 entities=processed_entities,
                 confidence=confidence,
                 nbest_transcripts_queries=query,
-                nbest_transcripts_entities=entities,
+                nbest_transcripts_entities=nbest_entities,
                 nbest_aligned_entities=aligned_entities,
             )
 
@@ -1436,7 +1440,7 @@ class IntentProcessor(Processor):
         """
         This function finds all entities in the query using rule-based matching based on the user
         provided allowed_nlp_classes dict. There are two matching criterion:
-        1. gazzeteer based matching: We compare query ngrams to the gazetteers
+        1. gazetteer based matching: We compare query ngrams to the gazetteers
         2. duckling based matching: We compare query ngrams to the duckling candidates
         Since this approach is rule-based, there are bound to be overlapping entity candidates.
         So we find the largest non-overlapping set of candidates.
@@ -1479,7 +1483,7 @@ class IntentProcessor(Processor):
             # This is a large CPU intensive op
             consolidate_list = {**self.resource_loader.get_gazetteer(entity)['pop_dict'],
                                 **dynamic_gazetteer.get(entity, {})}
-            consolidated_set = {tokenize_to_tuples(key) for key in consolidate_list.keys()}
+            consolidated_set = {tokenize_to_tuples(key) for key in consolidate_list}
 
             for idx, n_best_query in enumerate(query):
                 for ngram, token_span in get_ngrams_upto_n(n_best_query.normalized_tokens,
