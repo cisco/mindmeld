@@ -906,7 +906,7 @@ def active_learning(  # pylint: disable=R0913
         config["training"]["n_epochs"] = n_epochs
     if strategy:
         if train:
-            config["train"]["training_strategies"] = [strategy]
+            config["training"]["training_strategies"] = [strategy]
         elif select:
             config["selection"]["selection_strategy"] = strategy
     if unlabeled_logs_path:
