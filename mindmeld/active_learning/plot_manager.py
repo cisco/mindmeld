@@ -209,7 +209,6 @@ class PlotManager:
         path_list = [self.experiment_dir_path, "plots"] + y_keys + [f"{file_name}.png"]
         return os.path.join(*path_list)
 
-    # ACCURACIES.JSON
     # Plotting Functions
     def plot_single_epoch(
         self,

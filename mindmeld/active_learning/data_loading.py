@@ -357,10 +357,13 @@ class DataBucket:
         heuristic: Heuristic,
         confidence_segments: Dict = None,
     ):
+
+        params_rank_3d = {"confidences_3d": confidences_3d}
+        if confidence_segments:
+            params_rank_3d["confidence_segments"] = confidence_segments
+
         ranked_indices = (
-            heuristic.rank_3d(
-                confidences_3d=confidences_3d, confidence_segments=confidence_segments
-            )
+            heuristic.rank_3d(**params_rank_3d)
             if confidences_3d
             else heuristic.rank_2d(confidences_2d)
         )

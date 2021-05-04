@@ -6,6 +6,12 @@ from typing import List, Dict
 from sklearn.model_selection import StratifiedKFold
 
 from .data_loading import LabelMap, DataBucket
+from .heuristics import (
+    Heuristic,
+    KLDivergenceSampling,
+    DisagreementSampling,
+    EnsembleSampling,
+)
 
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
@@ -13,6 +19,8 @@ from ..constants import TRAIN_LEVEL_INTENT, ACTIVE_LEARNING_RANDOM_SEED
 from ..core import ProcessedQuery
 
 logger = logging.getLogger(__name__)
+
+MULTI_MODEL_HEURISTICS = (KLDivergenceSampling, DisagreementSampling, EnsembleSampling)
 
 
 class ALClassifier(ABC):
@@ -124,12 +132,12 @@ class MindMeldALClassifier(ALClassifier):
             padded_ic_queries_prob_vectors.append(ordered_ic_query_prob_vector)
         return padded_ic_queries_prob_vectors
 
-    def train(self, data_bucket: DataBucket, return_preds_multi: bool = False):
+    def train(self, data_bucket: DataBucket, heuristic: Heuristic):
         """Main training function.
 
         Args:
             data_bucket (DataBucket): DataBucket for current iteration
-            return_preds_multi (bool): Whether to return a 3d array with probability vectors
+            heuristic (Heuristic): Current Heuristic.
 
         Returns:
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
@@ -142,9 +150,12 @@ class MindMeldALClassifier(ALClassifier):
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
         preds_single = self.train_single(data_bucket, eval_stats)
+        return_preds_multi = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
         preds_multi = self.train_multi(data_bucket) if return_preds_multi else None
-
-        return eval_stats, preds_single, preds_multi, self.domain_indices
+        domain_indices = (
+            self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
+        )
+        return eval_stats, preds_single, preds_multi, domain_indices
 
     def train_single(self, data_bucket: DataBucket, eval_stats: defaultdict = None):
         """Trains a single model to get a 2D probability array for single-model selection strategies.

@@ -66,7 +66,7 @@ class Heuristic(ABC):
 
     @staticmethod
     @abstractmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Ranking method for 2d confidence arrays.
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
@@ -77,7 +77,7 @@ class Heuristic(ABC):
 
     @staticmethod
     @abstractmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Ranking method for 3d confidence arrays.
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
@@ -101,7 +101,7 @@ class RandomSampling(ABC):
         return list(ranked_indices)
 
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Randomly shuffles indices.
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
@@ -112,7 +112,7 @@ class RandomSampling(ABC):
         return RandomSampling.random_rank(num_elements)
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Randomly shuffles indices.
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
@@ -125,7 +125,7 @@ class RandomSampling(ABC):
 
 class LeastConfidenceSampling(ABC):
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """First calculates the highest (max) confidences per element and then returns
         the elements with the lowest max confidence.
 
@@ -138,7 +138,7 @@ class LeastConfidenceSampling(ABC):
         return list(np.argsort(highest_confidence_per_element))
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """First calculates the highest (max) confidences per element and then returns
         the elements with the lowest max confidence. This is done for each confidence_2d
         in a confidence_3d. The rankings are added to generate a final ranking.
@@ -149,7 +149,7 @@ class LeastConfidenceSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
         """
         total_rank_score = np.sum(
-            [LeastConfidenceSampling.rank_2d(c) for c in confidences_3d], axis=1
+            [LeastConfidenceSampling.rank_2d(c) for c in confidences_3d], axis=0
         )
         high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
         return list(high_to_low_ranked_indices)
@@ -157,7 +157,7 @@ class LeastConfidenceSampling(ABC):
 
 class MarginSampling(ABC):
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Calculates the "margin" or difference between the highest and second highest
         confidence score per element. Elements are ranked from highest to lowest margin.
 
@@ -179,7 +179,7 @@ class MarginSampling(ABC):
         return list(ranked_indices_high_to_low_margin)
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Calculates the "margin" or difference between the highest and second highest
         confidence score per element. Elements are ranked from highest to lowest margin.
         This is done for each confidence_2d in a confidence_3d. The rankings are added
@@ -191,7 +191,7 @@ class MarginSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
         """
         total_rank_score = np.sum(
-            [MarginSampling.rank_2d(c) for c in confidences_3d], axis=1
+            [MarginSampling.rank_2d(c) for c in confidences_3d], axis=0
         )
         high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
         return list(high_to_low_ranked_indices)
@@ -199,7 +199,7 @@ class MarginSampling(ABC):
 
 class EntropySampling(ABC):
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Calculates the entropy score of the confidences per element. Elements are ranked from
         highest to lowest entropy.
 
@@ -215,7 +215,7 @@ class EntropySampling(ABC):
         return list(high_to_low_entropy)
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Calculates the entropy score of the confidences per element. Elements are ranked from
         highest to lowest entropy. This is done for each confidence_2d in a confidence_3d. The
         rankings are added to generate a final ranking.
@@ -226,7 +226,7 @@ class EntropySampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
         """
         total_rank_score = np.sum(
-            [EntropySampling.rank_2d(c) for c in confidences_3d], axis=1
+            [EntropySampling.rank_2d(c) for c in confidences_3d], axis=0
         )
         high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
         return list(high_to_low_ranked_indices)
@@ -234,7 +234,7 @@ class EntropySampling(ABC):
 
 class DisagreementSampling(ABC):
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Need confidences_2d from more than one model (confidences_3d) to run
         DisagreementSampling.
 
@@ -248,7 +248,7 @@ class DisagreementSampling(ABC):
         )
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Finds the most frequent class label for a given element across all models.
         Calculates the agreement per element (% of models who voted the most frequent class).
         Ranks elements by highest to lowest agreement.
@@ -277,7 +277,7 @@ class DisagreementSampling(ABC):
 
 class KLDivergenceSampling(ABC):
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Need confidences_2d from more than one model (confidences_3d) to run
         KLDivergenceSampling.
 
@@ -292,9 +292,7 @@ class KLDivergenceSampling(ABC):
 
     @staticmethod
     def rank_3d(
-        confidences_3d: List[List[List[float]]],
-        confidence_segments: Dict = None,
-        **kwargs,
+        confidences_3d: List[List[List[float]]], confidence_segments: Dict = None
     ) -> List[int]:
         """Calculates the KL Divergence between the average confidence distribution across
         all models for a given class and the confidence distribution for a given element in
@@ -317,7 +315,6 @@ class KLDivergenceSampling(ABC):
             divergences = KLDivergenceSampling.get_divergences_per_element_no_segments(
                 confidences_3d
             )
-        print("Divergences", divergences)
         # X: Element, Y: Divergence Per Model
         divergences = np.array(divergences).T
         divergence_per_element = np.max(divergences, axis=1)
@@ -432,7 +429,7 @@ class EnsembleSampling(ABC):
         )
 
     @staticmethod
-    def rank_2d(confidences_2d: List[List[float]], **kwargs) -> List[int]:
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Combine ranks from all heuristics that can support ranking given 2d confidence
         input.
 
@@ -449,7 +446,7 @@ class EnsembleSampling(ABC):
         return list(high_to_low_ranked_indices)
 
     @staticmethod
-    def rank_3d(confidences_3d: List[List[List[float]]], **kwargs) -> List[int]:
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Combine ranks from all heuristics that can support ranking given 3d confidence
         input.
 

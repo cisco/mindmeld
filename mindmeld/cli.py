@@ -922,7 +922,7 @@ def active_learning(  # pylint: disable=R0913
         if plot:
             alp.plot()
     elif select:
-        alp.select_queries_to_label()
+        alp.select()
 
 
 #
