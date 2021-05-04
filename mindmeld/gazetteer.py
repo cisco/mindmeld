@@ -36,7 +36,7 @@ class Gazetteer:
       sys_types (set): The set of nested numeric types for this entity
     """
 
-    def __init__(self, name, exclude_ngrams=False):
+    def __init__(self, name, tokenizer, exclude_ngrams=False):
         """
         Args:
             domain (str): The domain that this gazetteer is used
@@ -52,6 +52,7 @@ class Gazetteer:
         self.index = defaultdict(set)
         self.entities = []
         self.sys_types = set()
+        self.tokenizer = tokenizer
 
     def to_dict(self):
         """
@@ -103,6 +104,7 @@ class Gazetteer:
 
         """
         gaz_data = joblib.load(gaz_path)
+
         self.name = gaz_data["name"]
         self.entity_count = gaz_data["total_entities"]
         self.pop_dict = gaz_data["pop_dict"]
@@ -123,7 +125,9 @@ class Gazetteer:
         """
         # Only update the relevant data structures when the entity isn't
         # already in the gazetteer. Update the popularity either way.
-        if self.pop_dict[entity] == 0:
+        tokenized_gaz_entry = tuple(token["entity"] for token in self.tokenizer.tokenize(entity))
+
+        if self.pop_dict[tokenized_gaz_entry] == 0:
             self.entities.append(entity)
             if not self.exclude_ngrams:
                 for ngram in iterate_ngrams(entity.split(), max_length=self.max_ngram):
@@ -131,17 +135,17 @@ class Gazetteer:
             self.entity_count += 1
 
         if keep_max:
-            old_value = self.pop_dict[entity]
-            self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
-            if self.pop_dict[entity] != old_value:
+            old_value = self.pop_dict[tokenized_gaz_entry]
+            self.pop_dict[tokenized_gaz_entry] = max(self.pop_dict[entity], popularity)
+            if self.pop_dict[tokenized_gaz_entry] != old_value:
                 logger.debug(
                     "Updating gazetteer value of entity %s from %s to %s",
                     entity,
                     old_value,
-                    self.pop_dict[entity],
+                    self.pop_dict[tokenized_gaz_entry],
                 )
         else:
-            self.pop_dict[entity] = popularity
+            self.pop_dict[tokenized_gaz_entry] = popularity
 
     def update_with_entity_data_file(self, filename, popularity_cutoff, normalizer):
         """
@@ -212,23 +216,25 @@ class Gazetteer:
         if len(self.pop_dict) > 0:
             min_popularity = min(self.pop_dict.values())
         for item in mapping:
-            canonical = normalizer(item["cname"])
+            tokenized_canonical = tuple(
+                token["entity"] for token in self.tokenizer.tokenize(
+                    normalizer(item["cname"])))
 
             for syn in item["whitelist"]:
                 line_count += 1
                 synonym = normalizer(syn)
 
-                if update_if_missing_canonical or canonical in self.pop_dict:
+                if update_if_missing_canonical or tokenized_canonical in self.pop_dict:
                     self._update_entity(
-                        synonym, self.pop_dict.get(canonical, min_popularity)
+                        synonym, self.pop_dict.get(tokenized_canonical, min_popularity)
                     )
                     synonyms_added += 1
-                if canonical not in self.pop_dict:
+                if tokenized_canonical not in self.pop_dict:
                     missing_canonicals += 1
                     logger.debug(
                         "Synonym '%s' for entity '%s' not in gazetteer",
                         synonym,
-                        canonical,
+                        str(tokenized_canonical),
                     )
         logger.info(
             "Added %d/%d synonyms from file into gazetteer", synonyms_added, line_count

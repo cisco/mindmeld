@@ -304,7 +304,8 @@ def get_ngrams_upto_n(tokens, n):
     Returns:
         tuple: ngram, (token index start, token index end)
     """
-    assert n > 0
+    if n == 0:
+        return []
     for length, i in enumerate(range(1, n + 1)):
         for idx, j in enumerate(nltk.ngrams(tokens, i)):
             yield j, (idx, idx + length)
@@ -425,7 +426,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
             # If the entity type is in the dyn gaz, we merge the data. Else,
             # just pass by reference the original resource data
             if entity_type in dynamic_resource[key]:
-                new_gaz = Gazetteer(entity_type)
+                new_gaz = Gazetteer(entity_type, tokenizer)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
                 new_gaz.from_dict(resource[key][entity_type])

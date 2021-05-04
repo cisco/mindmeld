@@ -1461,7 +1461,6 @@ class IntentProcessor(Processor):
 
         # We extract the `entity` key from each token since that represents the normalized text of
         # each token which we will compare against the normalized text of the query
-
         def tokenize_to_tuples(text):
             return tuple([token["entity"] for token in
                           self.resource_loader.query_factory.tokenizer.tokenize(text)])
@@ -1479,11 +1478,9 @@ class IntentProcessor(Processor):
                 continue
 
             # check if entity is in the gazetteers
-            # TODO: We are tokenizing every phrase in the gazetteer.
-            # This is a large CPU intensive op
-            consolidate_list = {**self.resource_loader.get_gazetteer(entity)['pop_dict'],
-                                **dynamic_gazetteer.get(entity, {})}
-            consolidated_set = {tokenize_to_tuples(key) for key in consolidate_list}
+            consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
+            consolidated_set = consolidated_set.union(
+                {tokenize_to_tuples(key) for key in dynamic_gazetteer.get(entity, {})})
 
             for idx, n_best_query in enumerate(query):
                 for ngram, token_span in get_ngrams_upto_n(n_best_query.normalized_tokens,
