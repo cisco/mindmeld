@@ -122,6 +122,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.app_path,
             self.load,
             self.save,
+            self.training_level,
             self.train_pattern,
             self.test_pattern,
             self.train_seed_pct,
@@ -191,18 +192,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         if num_unsampled > self.batch_size
                         else num_unsampled
                     )
-                    (
-                        self.data_bucket.newly_sampled_queries,
-                        self.data_bucket.sampled_queries,
-                        self.data_bucket.unsampled_queries,
-                        _,
-                    ) = heuristic.sample(
+                    self.data_bucket.sample_and_update(
                         sampling_size=sampling_size,
-                        sampled=self.data_bucket.sampled_queries,
-                        unsampled=self.data_bucket.unsampled_queries,
-                        preds_single=preds_single,
-                        preds_multi=preds_multi,
-                        domain_indices=domain_indices,
+                        confidences_2d=preds_single,
+                        confidences_3d=preds_multi,
+                        heuristic=heuristic,
+                        confidence_segments=domain_indices,
                     )
                 # Terminate on the first iteration if in selection mode.
                 if selection_mode:
@@ -215,6 +210,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.app_path,
             self.load,
             self.save,
+            self.training_level,
             self.train_pattern,
             self.test_pattern,
             self.unlabeled_logs_path,

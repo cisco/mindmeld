@@ -1,557 +1,319 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
-from collections import Counter
+from collections import Counter, defaultdict
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
 
 from ..constants import (
     ENTROPY_LOG_BASE,
-    TRAIN_LEVEL_DOMAIN,
-    TRAIN_LEVEL_INTENT,
     ACTIVE_LEARNING_RANDOM_SEED,
 )
 
 
-def custom_reordering(confidences, do_rank: bool = True, sampling_size: int = None):
+def stratified_random_sample(labels: List) -> List[int]:
     """
     Args:
-        confidences: List of confidence scores from heuristic.
-        do_rank: If True, this function will return rank-sorted confidence scores.
-        sampling_size: Size of data being sampled in a turn.
+        labels (List[str or int]): A list of labels. (Eg: labels = ["R", "B", "B", "C"])
+    Returns:
+        ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
     """
-    if not do_rank:
-        assert isinstance(sampling_size, int) and sampling_size > 0, print(
-            type(sampling_size), sampling_size
-        )
-        if sampling_size >= len(confidences):
-            return np.arange(len(confidences))
-        # samples at indices {0,...,sampling_size-1}<={sampling_size}<={sampling_size+1,...}
-        idxs = np.argpartition(confidences, sampling_size)
-    else:
-        idxs = np.argsort(confidences)  # ascending order sort
-    return idxs
+    np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
+
+    label_to_indices = _get_labels_to_indices(labels)
+    lowest_label_freq = min([len(indices) for indices in label_to_indices.values()])
+    avg_label_freq = len(labels) // len(label_to_indices)
+    sample_per_label = min(lowest_label_freq, avg_label_freq)
+
+    selected_indices = []
+    for i in range(sample_per_label):
+        for indices in label_to_indices.values():
+            selected_indices.append(indices[i])
+
+    remaining_indices = [i for i in range(len(labels)) if i not in selected_indices]
+    np.random.shuffle(remaining_indices)
+
+    ranked_indices = selected_indices + remaining_indices
+    return ranked_indices
+
+
+def _get_labels_to_indices(labels: List) -> defaultdict:
+    """
+    Args:
+        labels (List[str or int]): A list of labels. (Eg: labels = ["R", "B", "B", "C"])
+    Returns:
+    """
+    labels_to_indices = defaultdict(list)
+    for i, label in enumerate(labels):
+        labels_to_indices[label].append(i)
+    for v in labels_to_indices.values():
+        np.random.shuffle(v)
+    return labels_to_indices
 
 
 class Heuristic(ABC):
     """ Heuristic base class used as Active Learning query selection strategies."""
 
     @staticmethod
-    def validate_sampling_size(sampling_size: int):
-        """Verify the sampling size is a positive integer
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-        """
-        assert isinstance(sampling_size, int)
-        assert sampling_size > 0, print(
-            f"Current Sampling Size: {sampling_size}, Required size > 0"
-        )
-        return sampling_size
-
     @abstractmethod
-    def _extractor(self, **kwargs):
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @staticmethod
+    @abstractmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+
+class RandomSampling(ABC):
+    @staticmethod
+    def random_rank(num_elements: int) -> List[int]:
+        """
+        Args:
+            num_elements (int): Number of elements to randomly sample.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by randomly.
+        """
+        return list(np.random.choice(range(num_elements), num_elements, replace=False))
+
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        num_elements = len(confidences_2d)
+        return RandomSampling.random_rank(num_elements)
+
+    @staticmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        _, num_elements, _ = np.array(confidences_3d).shape
+        return RandomSampling.random_rank(num_elements)
+
+
+class LeastConfidenceSampling(ABC):
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        highest_confidence_per_element = np.max(confidences_2d, axis=1)
+        return list(np.argsort(highest_confidence_per_element))
+
+    @staticmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        total_rank_score = np.sum(
+            [LeastConfidenceSampling.rank_2d(c) for c in confidences_3d], axis=1
+        )
+        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
+        return list(high_to_low_ranked_indices)
+
+
+class MarginSampling(ABC):
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        _, element_size = np.array(confidences_2d).shape
+        descending_confidences_per_element = np.partition(
+            confidences_2d, kth=(element_size - 1)
+        )[::-1]
+        highest_val_per_element = descending_confidences_per_element[:, 1]
+        second_highest_val_per_element = descending_confidences_per_element[:, 2]
+        margin_per_element = np.abs(
+            highest_val_per_element - second_highest_val_per_element
+        )
+        ranked_indices_high_to_low_margin = np.argsort(margin_per_element)[::-1]
+        return list(ranked_indices_high_to_low_margin)
+
+    @staticmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        total_rank_score = np.sum(
+            [MarginSampling.rank_2d(c) for c in confidences_3d], axis=1
+        )
+        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
+        return list(high_to_low_ranked_indices)
+
+
+class EntropySampling(ABC):
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        entropy_per_element = scipy_entropy(
+            np.array(confidences_2d), axis=1, base=ENTROPY_LOG_BASE
+        )
+        high_to_low_entropy = np.argsort(entropy_per_element)[::-1]
+        return list(high_to_low_entropy)
+
+    @staticmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        total_rank_score = np.sum(
+            [EntropySampling.rank_2d(c) for c in confidences_3d], axis=1
+        )
+        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
+        return list(high_to_low_ranked_indices)
+
+
+class DisagreementSampling(ABC):
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
         raise NotImplementedError(
-            "Subclasses must implement this method for heuristic logic."
+            "DisagreementSampling does not support 2d confidences."
         )
-
-    def sample(self, **kwargs):
-        """
-        Args:
-            sampled (list, optional): List of sampled queries
-            unsampled (list, optional): List of unsampled queries
-            do_rank (bool, optional): if True, returns a ranked list of the indices for
-                confidence-sorting of data samples
-            return_dict (bool, optional): if True, return a dict with sampled, unsampled, and
-                ranked indicies.
-        Returns:
-            results_dict (dict, optional): A dictionary containing sampled, unsampled, and
-                ranked indices.
-            newly_sampled (list): Newly sampled queries
-            sampled (list): Updated set of sampled queries with newly sampled queries added in.
-            unsampled (list): Updated set of sampled queries with newly sampled queries removed.
-            ranked (list): List of ranked queries after selection.
-        """
-        sampled, unsampled, do_rank = (
-            kwargs.get("sampled", []),
-            kwargs.get("unsampled"),
-            kwargs.get("do_rank"),
-        )
-        sampled_indices, unsampled_indices, ranked_indices = self._extractor(**kwargs)
-        if kwargs.get("return_dict"):
-            return {
-                "sampled_indices": sampled_indices,
-                "unsampled_indices": unsampled_indices,
-                "ranked_indices": ranked_indices,
-            }
-        else:
-            newly_sampled = [unsampled[i] for i in sampled_indices]
-            sampled += newly_sampled
-            unsampled = [unsampled[i] for i in unsampled_indices]
-            ranked = [unsampled[i] for i in ranked_indices] if do_rank else None
-            return newly_sampled, sampled, unsampled, ranked
-
-
-class StrategicRandomSampling(Heuristic):
-    """Selection strategy that aims to randomly sample queries such that there is an even
-    distribution across domains or intents.
-    """
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        unsampled: List,
-        min_per_label: int = None,
-        label_type: str = TRAIN_LEVEL_INTENT,
-        allow_below_min: bool = False,
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            unsampled (list, optional): List of unsampled queries
-            min_per_label (int): Min number of queries to select per label
-            label_type (str): The level to split evenly by ('domain' or 'intent')
-            allow_below_min (bool): Allow intents that do not have enough queries to
-                meet the required count (sample_size/number_of_classes).
-        Returns:
-            sampled_indices (list): List of indices that were selected
-            unsampled_indices (list): List of indices that were not selected
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        class_labels = StrategicRandomSampling._get_class_labels(
-            label_type=label_type, unsampled=unsampled
-        )
-        unique_labels = np.unique(class_labels)
-        indices_per_label = StrategicRandomSampling._get_indices_per_label(
-            unique_labels=unique_labels, class_labels=class_labels
-        )
-        if not min_per_label:
-            min_per_label = min([len(v) for k, v in indices_per_label.items()])
-            print(
-                f"{len(unique_labels)} unique labels. Using min_per_label value of {min_per_label}"
-            )
-        evenly_sampled, outstanding_sampled = [], []
-        for label in unique_labels:
-            indices = indices_per_label[label]
-            if len(indices) < min_per_label:
-                if allow_below_min:
-                    print(
-                        f"Allowing {label}, Count {len(indices)}, min_per_label = {min_per_label}"
-                    )
-                    evenly_sampled.extend(indices)
-                else:
-                    min_count = min(
-                        [len(indices_per_label[label]) for label in unique_labels]
-                    )
-                    raise ValueError(
-                        f"{label} Count = {len(indices)} and min_per_label = {min_per_label}. "
-                        f"The lowest label count is {min_count}."
-                    )
-            else:
-                evenly_sampled.extend(indices[:min_per_label])
-                outstanding_sampled.extend(indices[min_per_label:])
-        np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
-        if len(evenly_sampled) > sampling_size:
-            np.random.shuffle(evenly_sampled)
-            sampled_indices = evenly_sampled[:sampling_size]
-            unsampled_indices = evenly_sampled[sampling_size:] + outstanding_sampled
-        else:
-            num_left_to_sample = sampling_size - len(evenly_sampled)
-            outstanding_sampled_subset = np.random.choice(
-                outstanding_sampled, num_left_to_sample, replace=False
-            )
-            sampled_indices = list(evenly_sampled) + list(outstanding_sampled_subset)
-            unsampled_indices = [
-                idx for idx, _ in enumerate(class_labels) if idx not in sampled_indices
-            ]
-        assert len(sampled_indices) + len(unsampled_indices) == len(class_labels)
-        return sampled_indices, unsampled_indices, None
 
     @staticmethod
-    def _get_class_labels(label_type: str, unsampled: List) -> List[str]:
-        """Creates a class label for a set of queries. These labels are used to split
-            queries by type.
-
-        Args:
-            unsampled (list): List of unsampled queries
-            label_type (str): The level to split evenly by ('domain' or 'intent')
-        Returns:
-            class_labels (List[str]): list of labels for classification task. Labels follow
-                the format of "domain" or "domain|intent". For example, "date|get_date".
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """
-        if label_type == TRAIN_LEVEL_DOMAIN:
-            return [f"{q.domain}" for q in unsampled]
-        elif label_type == TRAIN_LEVEL_INTENT:
-            return [f"{q.domain}|{q.intent}" for q in unsampled]
-        else:
-            raise ValueError(
-                f"Invalid label_type {label_type}. Must be '{TRAIN_LEVEL_DOMAIN}'"
-                f" or '{TRAIN_LEVEL_INTENT}'"
-            )
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        # X: Model, Y: Classes Chosen Per Element
+        chosen_classes_per_model = np.argmax(confidences_3d, axis=2)
+        # X: Element, Y: Class Chosen Per Model
+        chosen_classes_per_element = chosen_classes_per_model.T
+        # Calculate Disagreement Scores
+        disagreement_scores = []
+        for row in chosen_classes_per_element:
+            class_counts_per_element = Counter(row)
+            _, freq = class_counts_per_element.most_common()[0]
+            num_models = len(row)
+            percent_voted_most_req_class = freq / num_models
+            disagreement_score = 1 - percent_voted_most_req_class
+            disagreement_scores.append(disagreement_score)
+        high_to_low_disagreement = np.argsort(disagreement_scores)
+        return list(high_to_low_disagreement)
+
+
+class KLDivergenceSampling(ABC):
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        raise NotImplementedError(
+            "KLDivergenceSampling does not support 2d confidences."
+        )
 
     @staticmethod
-    def _get_indices_per_label(unique_labels: List[str], class_labels: List[str]):
-        """Gets a mapping between a unique class label and a shuffled list of query indices
-        with that label.
+    def rank_3d(
+        confidences_3d: List[List[List[float]]], confidence_segments: Dict = None
+    ) -> List[int]:
+        """
         Args:
-            unique_labels (List[str]): A list of unique class labels.
-            class_labels (List[str]): list of labels for classification task. Labels follow
-                the format of "domain" or "domain|intent". For example, "date|get_date".
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            indices_per_label (Dict[str, List[int]]): A mapping between a unique class label
-                and a shuffled list of query indices with that label.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
+                segments to run KL Divergence.
         """
-        indices_per_label = {}
-        for label in unique_labels:
-            indices_per_label[label] = [
-                i for i in range(len(class_labels)) if class_labels[i] == label
-            ]
-            np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
-            np.random.shuffle(indices_per_label[label])
-        return indices_per_label
-
-
-class RandomSampling(Heuristic):
-    """ Selection strategy that randomly selects queries."""
-
-    def _extractor(
-        self, sampling_size: int, preds_single: List[List[float]] = None, **kwargs
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_single: is a list[list[float]] and contains probability scores for each data
-                point for each class.
-        Returns:
-            sampled_indices (list): List of indices that were selected.
-            unsampled_indices (list): List of indices that were not selected.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        num_indicies = (
-            len(preds_single) if preds_single else len(kwargs.get("unsampled"))
-        )
-        idxs = np.arange(num_indicies)
-        np.random.shuffle(idxs)
-        sampled_indices, unsampled_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-        )
-        return sampled_indices, unsampled_indices, None
-
-
-class LeastConfidenceSampling(Heuristic):
-    """ Selection strategy that select queries with the lowest max confidence."""
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_single: List[List[float]],
-        do_rank: bool = True,
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_single: is a list[list[float]] and contains probability scores for each data
-                point for each class.
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
-                samples.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        confidences = np.max(preds_single, axis=1)
-        idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=sampling_size
-        )
-        sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-            idxs.tolist() if do_rank else None,
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
-
-
-class MarginSampling(Heuristic):
-    """Selection strategy that select queries with the greatest difference between the highest
-    and second highest confidence value."""
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_single: List[List[float]],
-        do_rank: bool = True,
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_single: is a list[list[float]] and contains probability scores for each data
-                point for each class.
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
-                samples.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        # partition along last axis by default
-        partition_ = np.partition(preds_single, len(preds_single[0]) - 2)
-        # diff between the highest two values
-        confidences = np.abs(partition_[:, -1] - partition_[:, -2])
-        idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=sampling_size
-        )
-        sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-            idxs.tolist() if do_rank else None,
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
-
-
-class EntropySampling(Heuristic):
-    """ Selection strategy that select queries with the highest entropy."""
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_single: List[List[float]],
-        do_rank: bool = True,
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_single: is a list[list[float]] and contains probability scores for each data
-                point for each class.
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
-                samples.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        entropies = scipy_entropy(np.array(preds_single), axis=1, base=ENTROPY_LOG_BASE)
-        confidences = -entropies
-        idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=sampling_size
-        )
-        sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-            idxs.tolist() if do_rank else None,
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
-
-
-class DisagreementSampling(Heuristic):
-    """ Selection strategy that measures 'disagreement' across multiple classifiers."""
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_multi: List[List[List[float]]],
-        do_rank: bool = True,
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_multi: is a list of list[list[float]] and contains probability scores for each
-                data point for each class.
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
-                samples.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        choices = []
-        for pred in preds_multi:
-            model_choices = np.argmax(pred, axis=1).tolist()
-            choices.append(model_choices)
-        # Transpose to make rows correspond to datapoints, and columns to models
-        choices = np.array(choices).T
-        confidences = [
-            Counter(row.tolist()).most_common(1)[0][1] / len(row) for row in choices
-        ]
-        idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=sampling_size
-        )
-        sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-            idxs.tolist() if do_rank else None,
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
-
-
-class EnsembleSampling(Heuristic):
-    """ Selection strategy that combines other selection strategies using a ranked approach."""
-
-    @staticmethod
-    def get_sampling_methods():
-        """
-        Returns:
-            sampling_methods (Dict): Dict that maps a strategy abbreviation to instance.
-        """
-        return {
-            "lcs": LeastConfidenceSampling(),
-            "es": EntropySampling(),
-            "ms": MarginSampling(),
-            "ds": DisagreementSampling(),
-            "kld": KLDivergenceSampling(),
-        }
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_single: List[List[float]],
-        preds_multi: List[List[List[float]]],
-        **kwargs,
-    ):
-        """
-        Args:
-            sampling_size (int): Size of data being sampled in a turn.
-            preds_single: is a list[list[float]] and contains probability scores for each data
-                point for each class will be used to sample with lcs, es and ms.
-            preds_multi: is a list of list[list[float]] and contains probability scores for each
-                data point for each class will be used to sample with ds.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-        sampling_methods = EnsembleSampling.get_sampling_methods()
-        assert len(preds_single) != 0, print(f"{len(preds_single)}")
-        if preds_multi:
-            assert len(preds_single) == len(preds_multi[0]), print(
-                f"{len(preds_single)}, {len(preds_multi)}"
-            )
-        qid2rank = {i: 0 for i in range(len(preds_single))}
-        num_strategies_used = 0
-        heuristic_params = {
-            "sampling_size": sampling_size,
-            "sampled": kwargs["sampled"],
-            "unsampled": kwargs["unsampled"],
-            "preds_single": preds_single,
-            "preds_multi": preds_multi,
-            "do_rank": True,
-            "return_dict": True,
-        }
-
-        strategies = ["lcs", "ms", "es"]
-        strategies = strategies + ["ds", "kld"] if preds_multi else strategies
-
-        for strategy in strategies:
-            ranked_inds = sampling_methods[strategy].sample(**heuristic_params)[
-                "ranked_indices"
-            ]
-            for rank, qid in enumerate(ranked_inds):
-                qid2rank[qid] += rank
-            num_strategies_used += 1
-
-        qid2rank = [(k, v / num_strategies_used) for k, v in qid2rank.items()]
-        all_qids, all_ranks = list(zip(*qid2rank))
-
-        reordered = custom_reordering(
-            all_ranks, do_rank=False, sampling_size=sampling_size
-        )
-        ranked_indices = [all_qids[i] for i in reordered]
-        sampled_indices, unsampled_indices = (
-            ranked_indices[:sampling_size],
-            ranked_indices[sampling_size:],
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
-
-
-class KLDivergenceSampling(Heuristic):
-    """Selection strategy that calculates the KL divergence between the posterior
-    distribution of multiple classifiers."""
-
-    def _extractor(
-        self,
-        sampling_size: int,
-        preds_multi: List[List[List[float]]],
-        do_rank: bool = True,
-        domain_indices: Dict = None,
-        **kwargs,
-    ):
-        """
-        Args:
-            preds_multi (List[List[float]]): Probability scores for each data point for each
-                class from multiple classifiers.
-            do_rank: if True, returns a ranked list of the indices for confidence-sorting of data
-                samples.
-            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
-                corresponding indices in the probability vector. Used for intent-level KLD.
-        """
-        sampling_size = Heuristic.validate_sampling_size(sampling_size)
-
-        # Calculate average prediction values.
-        avg_preds = None
-        for pred in preds_multi:
-            if avg_preds is None:
-                avg_preds = np.array(pred, dtype=np.float64)
-            else:
-                avg_preds += np.array(pred, dtype=np.float64)
-        avg_preds /= len(preds_multi)
-        # Estimate divergence.
-        divergences = None
-        if not domain_indices:
-            divergences = KLDivergenceSampling.get_divergence_all_domains(
-                preds_multi, avg_preds
+        if confidence_segments:
+            divergences = (
+                KLDivergenceSampling.get_divergences_per_element_with_segments(
+                    confidences_3d, confidence_segments
+                )
             )
         else:
-            divergences = KLDivergenceSampling.get_divergences_within_domain(
-                preds_multi, avg_preds, domain_indices
+            divergences = KLDivergenceSampling.get_divergences_per_element_no_segments(
+                confidences_3d
             )
-        # after transpose: row -> data point, column -> model
+
+        # X: Element, Y: Divergence Per Model
         divergences = np.array(divergences).T
-        confidences = -np.max(divergences, axis=1)
-        idxs = custom_reordering(
-            confidences, do_rank=do_rank, sampling_size=sampling_size
-        )
-        sampled_indices, unsampled_indices, ranked_indices = (
-            idxs[:sampling_size].tolist(),
-            idxs[sampling_size:].tolist(),
-            idxs.tolist() if do_rank else None,
-        )
-        return sampled_indices, unsampled_indices, ranked_indices
+        divergence_per_element = np.max(divergences, axis=1)
+        ranked_indices_high_to_low_divergence = np.argsort(divergence_per_element)[::-1]
+        return list(ranked_indices_high_to_low_divergence)
 
     @staticmethod
-    def get_divergence_all_domains(preds_multi, avg_preds):
-        """
-        Args:
-            preds_multi (List[List[float]]): Probability scores for each data point for each
-                class from multiple classifiers.
-            avg_preds (List[float]): Average probability vector across all intents.
-        Returns:
-            divergences: List of divergence values for each query compared to the average
-                within-intent probability distribution.
-        """
-        divergences = []
-        for pred in preds_multi:
-            kldivergences = scipy_entropy(
-                np.array(pred), avg_preds, axis=1, base=ENTROPY_LOG_BASE
-            )
-            divergences.append(kldivergences.tolist())
+    def get_divergences_per_element_no_segments(
+        confidences_3d: List[List[List[float]]],
+    ):
+        # Calculate average prediction values.
+        q_x = np.mean(confidences_3d, axis=0)
+        # Duplicate the mean distribution by number of models
+        num_models, _, _ = np.array(confidences_3d).shape
+        q_x = [q_x for n in range(num_models)]
+        # X: Model, Y: Divergence Per Element
+        divergences = scipy_entropy(confidences_3d, q_x, axis=2, base=ENTROPY_LOG_BASE)
         return divergences
 
     @staticmethod
-    def get_divergences_within_domain(preds_multi, avg_preds, domain_indices):
-        """
-        Args:
-            preds_multi (List[List[float]]): Probability scores for each data point for each
-                class from multiple classifiers.
-            avg_preds (List[float]): Average probability vector across all intents.
-            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
-                corresponding indices in the probability vector. Used for intent-level KLD.
-        Returns:
-            divergences: List of divergence values for each query compared to the average
-                within-intent probability distribution.
-        """
+    def get_divergences_per_element_with_segments(confidences_3d, confidence_segments):
+        avg_preds = np.mean(confidences_3d, axis=0)
         divergences = []
         # Calculate q_d
-        q_d = {d: [] for d in domain_indices}
+        q_d = {d: [] for d in confidence_segments}
         for row in avg_preds:
-            domain = KLDivergenceSampling.get_domain(domain_indices, row)
+            domain = KLDivergenceSampling.get_domain(confidence_segments, row)
             q_d[domain].append(row)
-        for pred in preds_multi:
+        for pred in confidences_3d:
             # Calculate p_d
-            p_d = {d: [] for d in domain_indices}
+            p_d = {d: [] for d in confidence_segments}
             for row in pred:
-                domain = KLDivergenceSampling.get_domain(domain_indices, row)
+                domain = KLDivergenceSampling.get_domain(confidence_segments, row)
                 p_d[domain].append(row)
             # Calculate Divergence Scores by Domain
-            divergence_scores_by_domain = {d: [] for d in domain_indices}
-            for domain in domain_indices:
+            divergence_scores_by_domain = {d: [] for d in confidence_segments}
+            for domain in confidence_segments:
                 if len(p_d[domain]) > 0 and len(q_d[domain]) > 0:
                     divergence_scores_by_domain[domain] = scipy_entropy(
                         np.array(p_d[domain]),
@@ -563,9 +325,9 @@ class KLDivergenceSampling(Heuristic):
                     divergence_scores_by_domain[domain] = 0
             # Reorder Divergence Scores by Domain to Original order
             single_pred_divergence_scores = []
-            domain_counter = {d: 0 for d in domain_indices}
+            domain_counter = {d: 0 for d in confidence_segments}
             for row in pred:
-                domain = KLDivergenceSampling.get_domain(domain_indices, row)
+                domain = KLDivergenceSampling.get_domain(confidence_segments, row)
                 single_pred_divergence_scores.append(
                     divergence_scores_by_domain[domain][domain_counter[domain]]
                 )
@@ -574,13 +336,13 @@ class KLDivergenceSampling(Heuristic):
         return divergences
 
     @staticmethod
-    def get_domain(domain_indices, row):
+    def get_domain(confidence_segments, row) -> str:
         """Get the domain for a given probability row, inferred based on the non-zero values.
         Args:
             preds_multi (List[List[float]]): Probability scores for each data point for each
                 class from multiple classifiers.
             avg_preds (List[float]): Average probability vector across all intents.
-            domain_indices (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
+            confidence_segments (Dict[str, tuple(int, int)]): A mapping between domains (str) to the
                 corresponding indices in the probability vector. Used for intent-level KLD.
             row (List[List[float]]): A single row representing a queries probability distrubition.
         Returns:
@@ -589,19 +351,65 @@ class KLDivergenceSampling(Heuristic):
             AssertionError: If a row does not have an associated domain.
         """
         if np.sum(row) == 0:
-            row = [1 / len(row)] * len(row)
-        for domain in domain_indices:
-            start, end = domain_indices[domain]
+            row = list(np.repeat(1 / len(row), repeats=len(row)))
+        for domain in confidence_segments:
+            start, end = confidence_segments[domain]
             if sum(row[start : end + 1]) > 0:
                 return domain
         raise AssertionError(f"Row does not have an associated domain, Row: {row}")
+
+
+class EnsembleSampling(ABC):
+    @staticmethod
+    def get_heuristics_2d():
+        return (LeastConfidenceSampling, MarginSampling, EntropySampling)
+
+    @staticmethod
+    def get_heuristics_3d():
+        return (
+            LeastConfidenceSampling,
+            MarginSampling,
+            EntropySampling,
+            DisagreementSampling,
+            KLDivergenceSampling,
+        )
+
+    @staticmethod
+    def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
+        """
+        Args:
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        num_elements = len(confidences_2d)
+        total_rank_score = np.zeros(num_elements, dtype=int)
+        for heuristic in EnsembleSampling.get_heuristics_2d():
+            total_rank_score += heuristic.rank_2d(confidences_2d)
+        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
+        return list(high_to_low_ranked_indices)
+
+    @staticmethod
+    def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
+        """
+        Args:
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        """
+        _, num_elements, _ = np.array(confidences_3d).shape
+        total_rank_score = np.zeros(num_elements, dtype=int)
+        for heuristic in EnsembleSampling.get_heuristics_3d():
+            total_rank_score += heuristic.rank_3d(confidences_3d)
+        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
+        return list(high_to_low_ranked_indices)
 
 
 class HeuristicsFactory:
     """Heuristics Factory Class"""
 
     @staticmethod
-    def get_heuristic(heuristic):
+    def get_heuristic(heuristic) -> Heuristic:
         """A static method to get a Heuristic class.
 
         Args:
@@ -610,7 +418,6 @@ class HeuristicsFactory:
             (Heuristic): Heuristic Class
         """
         heuristic_classes = [
-            StrategicRandomSampling,
             RandomSampling,
             LeastConfidenceSampling,
             MarginSampling,

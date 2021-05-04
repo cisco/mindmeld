@@ -2,18 +2,17 @@ from typing import Dict, List
 import pickle
 import logging
 from os.path import normpath, basename
-from copy import deepcopy
 
-from .heuristics import StrategicRandomSampling
-
+from .heuristics import Heuristic, stratified_random_sample
 
 from ..auto_annotator import BootstrapAnnotator
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
+from ..constants import TRAIN_LEVEL_DOMAIN, TRAIN_LEVEL_INTENT, AL_MAX_LOG_USAGE_PCT
+from ..core import ProcessedQuery
 from ..markup import read_query_file
 from ..path import AL_QUERIES_CACHE_PATH
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
-from ..constants import AL_MAX_LOG_USAGE_PCT
 
 
 logger = logging.getLogger(__name__)
@@ -123,15 +122,24 @@ class LabelMap:
 class QueryLoader:
     """Class that handles creating a query tree given an app path and file pattern."""
 
-    def __init__(self, app_path, file_pattern, load, save):
+    def __init__(
+        self,
+        app_path: str,
+        training_level: str,
+        file_pattern: str,
+        load: bool,
+        save: bool,
+    ):
         """
         Args:
             app_path (str): Path to MindMeld application
+            training_level (str): The hierarchy level to train ("domain" or "intent")
             file_pattern (str): Regex pattern to match text files. (".*train.*.txt")
             load (bool): Whether to load the list of queries
             save (bool): Whether to save the list of queries
         """
         self.app_path = app_path
+        self.training_level = training_level
         self.file_pattern = file_pattern
         self.load = load
         self.save = save
@@ -218,169 +226,63 @@ class QueryLoader:
             self.save_queries(queries)
         return queries
 
-
-class DataBucketFactory:
-    """Class to generate the initial data for experimentation. (Seed Queries, Remaining Queries,
-    and Test Queries). Loads/Saves data loaders, handles initial sampling and data split based
-    on configuation details.
-    """
+    @property
+    def class_labels(self):
+        return QueryLoader.get_class_labels(self.training_level, self.queries)
 
     @staticmethod
-    def get_data_bucket_for_training(
-        app_path, load, save, train_pattern, test_pattern, train_seed_pct
-    ):
-        """Creates a DataBucket to be used for training.
+    def get_class_labels(training_level: str, queries: List) -> List[str]:
+        """Creates a class label for a set of queries. These labels are used to split
+            queries by type. Labels follow the format of "domain" or "domain|intent".
+            For example, "date|get_date".
 
         Args:
-            app_path (str): Path to MindMeld application
-            load (bool): Whether to load pickled queries from a local folder
-            save (bool): Whether to save queries as a local pickle file
-            train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
-            test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
-            train_seed_pct (float): Percentage of training data to use as the initial seed
-
+            training_level (str): The hierarchy level to train ("domain" or "intent")
+            queries (List[ProcessedQuery]): List of query objects.
         Returns:
-            train_data_bucket (DataBucket): DataBucket for training
+            class_labels (List[str]): list of labels for classification task.
         """
-        train_queries = QueryLoader(app_path, train_pattern, load, save).queries
-        sample_size = int(train_seed_pct * len(train_queries))
-        (
-            newly_sampled_queries,
-            sampled_queries,
-            unsampled_queries,
-            _,
-        ) = StrategicRandomSampling().sample(
-            sampling_size=sample_size, unsampled=train_queries
-        )
-
-        return DataBucket(
-            label_map=LabelMap.get_label_map(app_path, train_pattern),
-            test_queries=QueryLoader(app_path, test_pattern, load, save).queries,
-            unsampled_queries=unsampled_queries,
-            sampled_queries=sampled_queries,
-            newly_sampled_queries=newly_sampled_queries,
-        )
-
-    @staticmethod
-    def get_data_bucket_for_selection(
-        app_path,
-        load,
-        save,
-        train_pattern,
-        test_pattern,
-        unlabeled_logs_path,
-        labeled_logs_pattern=None,
-        log_usage_pct=AL_MAX_LOG_USAGE_PCT,
-    ):
-        """Creates a DataBucket to be used for log selection.
-
-        Args:
-            app_path (str): Path to MindMeld application
-            load (bool): Whether to load pickled queries from a local folder
-            save (bool): Whether to save queries as a local pickle file
-            train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
-            test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
-            unlabeled_logs_path (str): Path a logs text file with unlabeled queries
-            labeled_logs_pattern (str): Pattern to obtain logs already labeled within a MindMeld app
-            log_usage_pct (float): Percentage of the log data to use for selection
-
-        Returns:
-            selection_data_bucket (DataBucket): DataBucket for log selection
-        """
-        log_queries = (
-            QueryLoader(app_path, labeled_logs_pattern, load, save).queries
-            if labeled_logs_pattern
-            else LogQueriesLoader(app_path, unlabeled_logs_path).queries
-        )
-        if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
-            sample_size = int(log_usage_pct * len(log_queries))
-            log_queries, _, _, _ = StrategicRandomSampling().sample(
-                sampling_size=sample_size, unsampled=log_queries
+        if training_level == TRAIN_LEVEL_DOMAIN:
+            return [f"{q.domain}" for q in queries]
+        elif training_level == TRAIN_LEVEL_INTENT:
+            return [f"{q.domain}|{q.intent}" for q in queries]
+        else:
+            raise ValueError(
+                f"Invalid label_type {training_level}. Must be '{TRAIN_LEVEL_DOMAIN}'"
+                f" or '{TRAIN_LEVEL_INTENT}'"
             )
-        return DataBucket(
-            label_map=LabelMap.get_label_map(app_path, train_pattern),
-            test_queries=QueryLoader(app_path, test_pattern, load, save).queries,
-            unsampled_queries=log_queries,
-            sampled_queries=QueryLoader(app_path, train_pattern, load, save).queries,
-        )
-
-
-class DataBucket:
-    """Class to hold data throughout the Active Learning training pipeline.
-    Responsible for data conversion, filtration, and storage.
-    """
-
-    def __init__(
-        self,
-        label_map,
-        test_queries,
-        unsampled_queries,
-        sampled_queries,
-        newly_sampled_queries=None,
-    ):
-
-        self.label_map = label_map
-        self.test_queries = test_queries
-        self.unsampled_queries = unsampled_queries
-        self.sampled_queries = sampled_queries
-        self.newly_sampled_queries = (
-            newly_sampled_queries
-            if newly_sampled_queries
-            else deepcopy(sampled_queries)
-        )
-
-    @staticmethod
-    def filter_queries(queries: List, domain: str, intent: str = None):
-        """Filter queries for training preperation.
-
-        Args:
-            queries (list): List of queries to filter
-            domain (str): Domain of desired queries
-            intent (str): Intent of desired queries, can be None.
-
-        Returns:
-            filtered_queries_indices (list): List of indices of filtered queries.
-            filtered_queries (list): List of filtered queries.
-        """
-        filtered_queries_indices = []
-        filtered_queries = []
-        for index, query in enumerate(queries):
-            if query.domain == domain:
-                # Add queries if not filtering at the intent level. Otherwise, add intent match.
-                if not intent or (intent and query.intent == intent):
-                    filtered_queries_indices.append(index)
-                    filtered_queries.append(query)
-        return filtered_queries_indices, filtered_queries
 
 
 class LogQueriesLoader:
-    def __init__(self, app_path: str, log_file_path: str):
+    def __init__(self, app_path: str, training_level: str, log_file_path: str):
         """This class loads data as processed queries from a specified log file.
         Args:
             app_path (str): Path to the MindMeld application.
+            training_level (str): The hierarchy level to train ("domain" or "intent")
             log_file_path (str): Path to the log file with log queries.
         """
-        self.log_file_path = log_file_path
         self.app_path = app_path
+        self.training_level = training_level
+        self.log_file_path = log_file_path
 
     @staticmethod
-    def filter_raw_text_queries(log_queries_iter):
+    def filter_raw_text_queries(log_queries_iter) -> List[str]:
         """Removes duplicates in the text queries.
 
         Args:
             log_queries_iter (generator): Log queries generator.
-
         Returns:
             filtered_text_queries (List[str]): a List of filtered text queries.
         """
         return list(set(q for q in log_queries_iter))
 
-    def convert_text_queries_to_processed(self, text_queries):
+    def convert_text_queries_to_processed(
+        self, text_queries: List[str]
+    ) -> List[ProcessedQuery]:
         """Converts text queries to processed queries using an annotator.
 
         Args:
             text_queries (List[str]): a List of text queries.
-
         Returns:
             queries (List[ProcessedQuery]): List of processed queries.
         """
@@ -399,3 +301,174 @@ class LogQueriesLoader:
             log_queries_iter
         )
         return self.convert_text_queries_to_processed(filtered_text_queries)
+
+    @property
+    def class_labels(self):
+        return QueryLoader.get_class_labels(self.training_level, self.queries)
+
+
+class DataBucket:
+    """Class to hold data throughout the Active Learning training pipeline.
+    Responsible for data conversion, filtration, and storage.
+    """
+
+    def __init__(
+        self,
+        label_map: LabelMap,
+        test_queries: List[ProcessedQuery],
+        unsampled_queries: List[ProcessedQuery],
+        sampled_queries: List[ProcessedQuery],
+        newly_sampled_queries: List[ProcessedQuery] = None,
+    ):
+        self.label_map = label_map
+        self.test_queries = test_queries
+        self.unsampled_queries = unsampled_queries
+        self.sampled_queries = sampled_queries
+        self.newly_sampled_queries = newly_sampled_queries
+
+    @staticmethod
+    def filter_queries(queries: List, domain: str, intent: str = None):
+        """Filter queries for training preperation.
+
+        Args:
+            queries (list): List of queries to filter
+            domain (str): Domain of desired queries
+            intent (str): Intent of desired queries, can be None.
+
+        Returns:
+            filtered_queries_indices (list): List of indices of filtered queries.
+            filtered_queries (list): List of filtered queries.
+        """
+        filtered_queries = []
+        filtered_queries_indices = []
+        for index, query in enumerate(queries):
+            if query.domain == domain:
+                # Add queries if not filtering at the intent level. Otherwise, add intent match.
+                if not intent or (intent and query.intent == intent):
+                    filtered_queries_indices.append(index)
+                    filtered_queries.append(query)
+        return filtered_queries_indices, filtered_queries
+
+    def sample_and_update(
+        self,
+        sampling_size: int,
+        confidences_2d: List[List[float]],
+        confidences_3d: List[List[List[float]]],
+        heuristic: Heuristic,
+        confidence_segments: Dict = None,
+    ):
+        ranked_indices = (
+            heuristic.rank_3d(confidences_3d, confidence_segments)
+            if confidences_3d
+            else heuristic.rank_2d(confidences_2d)
+        )
+        newly_sampled_indices = ranked_indices[:sampling_size]
+        remaining_unsampled_indices = ranked_indices[sampling_size:]
+        self.newly_sampled_queries = [
+            self.unsampled_queries[i] for i in newly_sampled_indices
+        ]
+        self.sampled_queries += self.newly_sampled_queries
+        self.unsampled_queries = [
+            self.unsampled_queries[i] for i in remaining_unsampled_indices
+        ]
+
+
+class DataBucketFactory:
+    """Class to generate the initial data for experimentation. (Seed Queries, Remaining Queries,
+    and Test Queries). Loads/Saves data loaders, handles initial sampling and data split based
+    on configuation details.
+    """
+
+    @staticmethod
+    def get_data_bucket_for_training(
+        app_path: str,
+        load: bool,
+        save: bool,
+        training_level: str,
+        train_pattern: str,
+        test_pattern: str,
+        train_seed_pct: float,
+    ):
+        """Creates a DataBucket to be used for training.
+
+        Args:
+            app_path (str): Path to MindMeld application
+            load (bool): Whether to load pickled queries from a local folder
+            save (bool): Whether to save queries as a local pickle file
+            training_level (str): The hierarchy level to train ("domain" or "intent")
+            train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
+            test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
+            train_seed_pct (float): Percentage of training data to use as the initial seed
+
+        Returns:
+            train_data_bucket (DataBucket): DataBucket for training
+        """
+        train_query_loader = QueryLoader(
+            app_path, training_level, train_pattern, load, save
+        )
+        train_queries = train_query_loader.queries
+        ranked_indices = stratified_random_sample(train_query_loader.class_labels)
+        sampling_size = int(train_seed_pct * len(train_queries))
+        sampled_queries = [train_queries[i] for i in ranked_indices[:sampling_size]]
+        unsampled_queries = [train_queries[i] for i in ranked_indices[sampling_size:]]
+        return DataBucket(
+            label_map=LabelMap.get_label_map(app_path, train_pattern),
+            test_queries=QueryLoader(
+                app_path, training_level, test_pattern, load, save
+            ).queries,
+            unsampled_queries=unsampled_queries,
+            sampled_queries=sampled_queries,
+            newly_sampled_queries=sampled_queries,
+        )
+
+    @staticmethod
+    def get_data_bucket_for_selection(
+        app_path: str,
+        load: bool,
+        save: bool,
+        training_level: str,
+        train_pattern: str,
+        test_pattern: str,
+        unlabeled_logs_path: str,
+        labeled_logs_pattern: str = None,
+        log_usage_pct: float = AL_MAX_LOG_USAGE_PCT,
+    ):
+        """Creates a DataBucket to be used for log selection.
+
+        Args:
+            app_path (str): Path to MindMeld application
+            load (bool): Whether to load pickled queries from a local folder
+            save (bool): Whether to save queries as a local pickle file
+            training_level (str): The hierarchy level to train ("domain" or "intent")
+            train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
+            test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
+            unlabeled_logs_path (str): Path a logs text file with unlabeled queries
+            labeled_logs_pattern (str): Pattern to obtain logs already labeled within a MindMeld app
+            log_usage_pct (float): Percentage of the log data to use for selection
+
+        Returns:
+            selection_data_bucket (DataBucket): DataBucket for log selection
+        """
+        log_query_loader = (
+            QueryLoader(app_path, training_level, labeled_logs_pattern, load, save)
+            if labeled_logs_pattern
+            else LogQueriesLoader(app_path, training_level, unlabeled_logs_path)
+        )
+        log_queries = log_query_loader.queries
+        if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
+            sampling_size = int(log_usage_pct * len(log_queries))
+            ranked_indices = stratified_random_sample(
+                labels=log_query_loader.class_labels
+            )
+            log_queries = [log_queries[i] for i in ranked_indices[:sampling_size]]
+
+        return DataBucket(
+            label_map=LabelMap.get_label_map(app_path, train_pattern),
+            test_queries=QueryLoader(
+                app_path, training_level, test_pattern, load, save
+            ).queries,
+            unsampled_queries=log_queries,
+            sampled_queries=QueryLoader(
+                app_path, training_level, train_pattern, load, save
+            ).queries,
+        )
