@@ -943,7 +943,7 @@ def get_nlp_config(app_path=None, config=None):
     try:
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):
-        logger.info("No app configuration file found.")
+        logger.info("No app configuration file found. Using default nlp config.")
         return _get_default_nlp_config()
 
     # Try provider first
@@ -1109,5 +1109,5 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
         )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
-        logger.info("No app configuration file found.")
+        logger.info("No app configuration file found. Using default tokenizer config.")
         return DEFAULT_TOKENIZER_CONFIG

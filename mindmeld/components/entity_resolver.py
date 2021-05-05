@@ -164,9 +164,10 @@ class EntityResolverBase(ABC):
         """Initializes an entity resolver"""
         self.app_path = app_path
         self.type = entity_type
-        self._resource_loader = (
-            resource_loader or ResourceLoader.create_resource_loader(app_path=self.app_path)
-        )
+        self._resource_loader = resource_loader
+
+        if not self._resource_loader:
+            self._resource_loader = ResourceLoader.create_resource_loader(app_path=self.app_path)
 
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._no_trainable_canonical_entity_map = False
@@ -320,14 +321,17 @@ class EntityResolverBase(ABC):
         self.ready = True
         return
 
-    def predict(self, entity, top_n: int = 20):
+    def predict(self, entity, top_n=20):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
 
         Args:
             entity (Entity, tuple[Entity], str, tuple[str]): An entity found in an input query,
                                                                 or a list of n-best entity objects.
-            top_n (int): maximum number of results to populate
+            top_n (int): maximum number of results to populate. If specifically inputted as
+                0 or `None`, results in an unsorted list of results in case of embedder and tfidf
+                 entity resolvers. This is sometimes helpful when a developer wishes to do some
+                 wrapper operations on top of raw results.
 
         Returns:
             (list): The top n resolved values for the provided entity.
@@ -344,27 +348,33 @@ class EntityResolverBase(ABC):
         nbest_entities = tuple(
             [Entity(e, self.type) if isinstance(e, str) else e for e in nbest_entities]
         )
-        top_entity = nbest_entities[0]
 
         if self._is_system_entity:
             # system entities are already resolved
+            top_entity = nbest_entities[0]
             return [top_entity.value]
 
         if self._no_trainable_canonical_entity_map:
             return []
 
+        # TODO: remove duplicate ids by retaining only the top scored doc for any given id
+        if top_n is None or top_n == 0:
+            msg = f"`top_n` set to `{top_n}` while calling `.predict()` in " \
+                  f"{self.__class__.__name__}. This might result in unsorted list of documents. "
+            logger.warning(msg)
         results = self._predict(nbest_entities, top_n)
 
         if not results:
             return None
 
-        results = results[:top_n]
-        if len(results) < top_n:
-            logger.info(
-                "Retrieved only %d entity resolutions instead of asked number %d for "
-                "entity %r of type %r",
-                len(results), top_n, nbest_entities[0].text, self.type,
-            )
+        if top_n and top_n > 0:
+            results = results[:top_n]
+            if len(results) < top_n:
+                logger.info(
+                    "Retrieved only %d entity resolutions instead of asked number %d for "
+                    "entity %r of type %r",
+                    len(results), top_n, nbest_entities[0].text, self.type,
+                )
 
         return results
 
@@ -592,6 +602,9 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         Returns:
             (list): The resolved values for the provided entity.
         """
+
+        if not isinstance(top_n, int) or top_n is None or top_n <= 0:
+            top_n = 20
 
         top_entity = nbest_entities[0]
 
@@ -839,6 +852,9 @@ class ExactMatchEntityResolver(EntityResolverBase):
         """Looks for exact name in the synonyms data
         """
 
+        if not isinstance(top_n, int) or top_n is None or top_n <= 0:
+            top_n = 20
+
         entity = nbest_entities[0]  # top_entity
 
         normed = self._resource_loader.query_factory.normalize(entity.text)
@@ -941,8 +957,11 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             for syn, cnames in self._processed_entity_map["synonyms"].items():
                 for cname in cnames:
                     cnames2synonyms[cname] = cnames2synonyms.get(cname, []) + [syn]
-            # cretae and add superficial data
+            # create and add superficial data
             for cname, syns in cnames2synonyms.items():
+                syns = list(set(syns))
+                if len(syns) == 1:
+                    continue
                 dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
                 if dummy_synonym not in self._processed_entity_map["synonyms"]:
@@ -968,15 +987,19 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             (list): The resolved values for the provided entity.
         """
 
+        if not isinstance(top_n, int) or top_n is None or top_n <= 0:
+            top_n = None
+
         # encode input entity
         # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
-        top_entity = nbest_entities[0].text  # top_entity
+        top_entity = nbest_entities[0]  # top_entity
 
         try:
-            sorted_items = self._embedder_model.find_similar_texts(
-                top_entity,
+            sorted_items = self._embedder_model.find_similarity(
+                top_entity.text,
                 top_n=top_n,
-                scores_normalizer=self._scores_normalizer
+                scores_normalizer=self._scores_normalizer,
+                _no_sort=True if not top_n else False
             )
             values = []
             for synonym, score in sorted_items:
@@ -1008,6 +1031,9 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
 
     def _predict_batch(self, nbest_entities_list, batch_size, top_n):
 
+        if not isinstance(top_n, int) or top_n is None or top_n <= 0:
+            top_n = None
+
         # encode input entity
         top_entity_list = [i[0].text for i in nbest_entities_list]  # top_entity
 
@@ -1017,10 +1043,11 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             sorted_items_list = []
             for st_idx in trange(0, len(top_entity_list), batch_size, disable=False):
                 batch = top_entity_list[st_idx:st_idx + batch_size]
-                result = self._embedder_model.find_similar_texts(
+                result = self._embedder_model.find_similarity(
                     batch,
                     top_n=top_n,
-                    scores_normalizer=self._scores_normalizer
+                    scores_normalizer=self._scores_normalizer,
+                    _no_sort=True if not top_n else False
                 )
                 sorted_items_list.extend(result)
 
@@ -1077,9 +1104,6 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
 
         return results_list
 
-    def clear_cache(self):
-        self._embedder_model.clear_cache()
-
 
 class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
     """
@@ -1123,6 +1147,90 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         results = [r for r in results if not (len(r) == 1 and r.islower())]
         return results
 
+    def find_similarity(self,
+                        src_texts,
+                        top_n=None,
+                        return_as_dict=False,
+                        scores_normalizer=None,
+                        _no_sort=False):
+        """Computes sparse cosine similarity
+
+        Args:
+            src_texts (Union[str, list]): string or list of strings to obtain matching scores for.
+            top_n (int, optional): maximum number of results to populate. if None, equals length
+                of self._syn_tfidf_matrix
+            return_as_dict (bool, optional): if the results should be returned as a dictionary of
+                target_text name as keys and scores as corresponding values
+            scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
+                are: "min_max_scaler", "standard_scaler"
+            _no_sort (bool, optional): If True, results are returned without sorting. This is
+                helpful at times when you wish to do additional wrapper operations on top of raw
+                results and would like to save computational time without sorting.
+        Returns:
+            Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of tgt_texts and their
+                scores, else a list of sorted synonym names paired with their
+                similarity scores (descending order)
+        """
+
+        is_single = False
+        if isinstance(src_texts, str):
+            is_single = True
+            src_texts = [src_texts]
+
+        top_n = self._syn_tfidf_matrix.shape[0] if not top_n else top_n
+
+        results = []
+        for src_text in src_texts:
+            src_text_vector = self._vectorizer.transform([src_text])
+
+            similarity_scores = self._syn_tfidf_matrix.dot(src_text_vector.T).toarray().reshape(-1)
+            # Rounding sometimes helps to bring correct answers on to the
+            # top score as other non-correct resolutions
+            similarity_scores = np.around(similarity_scores, decimals=4)
+
+            if scores_normalizer:
+                if scores_normalizer == "min_max_scaler":
+                    _min = np.min(similarity_scores)
+                    _max = np.max(similarity_scores)
+                    denominator = (_max - _min) if (_max - _min) != 0 else 1.0
+                    similarity_scores = (similarity_scores - _min) / denominator
+                elif scores_normalizer == "standard_scaler":
+                    _mean = np.mean(similarity_scores)
+                    _std = np.std(similarity_scores)
+                    denominator = _std if _std else 1.0
+                    similarity_scores = (similarity_scores - _mean) / denominator
+                else:
+                    msg = f"Allowed values for `scores_normalizer` are only " \
+                          f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
+                          f"normalizing similarity scores."
+                    logger.error(msg)
+
+            if return_as_dict:
+                results.append(dict(zip(self._unique_synonyms, similarity_scores)))
+            else:
+                if not _no_sort:  # sort results in descending scores
+                    n_scores = len(similarity_scores)
+                    if n_scores > top_n:
+                        top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
+                        result = sorted(
+                            [(self._unique_synonyms[ii], similarity_scores[ii])
+                             for ii in top_inds],
+                            key=lambda x: x[1],
+                            reverse=True)
+                    else:
+                        result = sorted(zip(self._unique_synonyms, similarity_scores),
+                                        key=lambda x: x[1],
+                                        reverse=True)
+                    results.append(result)
+                else:
+                    result = list(zip(self._unique_synonyms, similarity_scores))
+                    results.append(result)
+
+        if is_single:
+            return results[0]
+
+        return results
+
     def _fit(self, clean, entity_map):
 
         if clean:
@@ -1157,6 +1265,9 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
             dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
             # assert dummy synonyms
             for cname, syns in cnames2synonyms.items():
+                syns = list(set(syns))
+                if len(syns) == 1:
+                    continue
                 dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
                 dummy_synonym_mappings = entity_mapping_synonyms.get(dummy_synonym, [])
@@ -1200,38 +1311,20 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
             (list): The resolved values for the provided entity.
         """
 
+        if not isinstance(top_n, int) or top_n is None or top_n <= 0:
+            top_n = None
+
         # encode input entity
         # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
-        top_entity_vector = self._vectorizer.transform([top_entity.text])
-
-        similarity_scores = self._syn_tfidf_matrix.dot(top_entity_vector.T).toarray().reshape(-1)
-        # Rounding sometimes helps to bring correct answers on to the
-        # top score as other non-correct resolutions
-        similarity_scores = np.around(similarity_scores, decimals=4)
-
-        scores_normalizer = self._scores_normalizer
-        if scores_normalizer:
-            if scores_normalizer == "min_max_scaler":
-                _min = np.min(similarity_scores)
-                _max = np.max(similarity_scores)
-                denominator = (_max - _min) if (_max - _min) != 0 else 1.0
-                similarity_scores = (similarity_scores - _min) / denominator
-            elif scores_normalizer == "standard_scaler":
-                _mean = np.mean(similarity_scores)
-                _std = np.std(similarity_scores)
-                denominator = _std if _std else 1.0
-                similarity_scores = (similarity_scores - _mean) / denominator
-            else:
-                msg = f"Allowed values for `scores_normalizer` are only " \
-                      f"{['min_max_scaler', 'standard_scaler']}. Continuing without " \
-                      f"normalizing similarity scores."
-                logger.error(msg)
-
-        sorted_items = sorted(list(zip(self._unique_synonyms, similarity_scores)),
-                              key=lambda x: x[1], reverse=True)
 
         try:
+            sorted_items = self.find_similarity(
+                top_entity.text,
+                top_n=top_n,
+                scores_normalizer=self._scores_normalizer,
+                _no_sort=True if not top_n else False
+            )
             values = []
             for synonym, score in sorted_items:
                 cnames = self._processed_entity_map["synonyms"][synonym]
@@ -1242,7 +1335,14 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
                         item_value.update({"score": score})
                         item_value.update({"top_synonym": synonym})
                         values.append(item_value)
-        except (TypeError, KeyError):
+        except KeyError:
+            logger.warning(
+                "Failed to resolve entity %r for type %r; "
+                "set 'clean=True' for computing embeddings of newly added items in mappings.json",
+                top_entity.text, top_entity.type
+            )
+            return None
+        except TypeError:
             logger.warning(
                 "Failed to resolve entity %r for type %r", top_entity.text, top_entity.type
             )

@@ -88,6 +88,8 @@ class Embedder(ABC):
 
             if os.path.exists(self.cache_path):
                 os.remove(self.cache_path)
+                msg = f"Embedder cache cleared at {self.cache_path}"
+                logger.info(msg)
 
         def dump(self):
             """Dumps the cache to disk."""
@@ -103,6 +105,10 @@ class Embedder(ABC):
                 with open(self.cache_path, "wb") as fp:
                     pickle.dump(data, fp)
                     fp.close()
+
+                msg = f"Embedder cache dumped at {self.cache_path}"
+                logger.info(msg)
+
             else:
                 msg = "No embedding data exists to dump. Ignoring dumping."
                 logger.warning(msg)
@@ -163,6 +169,9 @@ class Embedder(ABC):
                 #   default cache path for this model (backwards compatability in loading data)
                 cache_path = path.get_embedder_cache_file_path(app_path, self.model_id)
         self.cache = Embedder.EmbeddingsCache(str(cache_path))
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} cache_path: {self.cache.cache_path}"
 
     @abstractmethod
     def _load(self, **kwargs):
@@ -286,26 +295,32 @@ class Embedder(ABC):
 
         return similarity_scores
 
-    def find_similar_texts(self, src_texts,
-                           top_n,
-                           tgt_texts=None,
-                           return_as_dict=False,
-                           scores_normalizer=None,
-                           sim_func=None):
+    def find_similarity(self,
+                        src_texts,
+                        tgt_texts=None,
+                        top_n=None,
+                        return_as_dict=False,
+                        scores_normalizer=None,
+                        _sim_func=None,
+                        _no_sort=False):
         """Computes the cosine similarity
 
         Args:
             src_texts (Union[str, list]): string or list of strings to obtain matching scores for.
-            top_n (int): maximum number of results to populate. if None, equals length of tgt_texts
             tgt_texts (list, optional): list of strings that will be matched to.
                 if None, existing cache is used as target strings
+            top_n (int, optional): maximum number of results to populate. if None, equals length
+                of tgt_texts
             return_as_dict (bool, optional): if the results should be returned as a dictionary of
                 target_text name as keys and scores as corresponding values
             scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
                 are: "min_max_scaler", "standard_scaler"
-            sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If specified,
-                must take two numpy-array/pytorch-tensor arguments for similarity computation with
-                an additional argument to return results as numpy or as tensor
+            _sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If
+                specified, must take two numpy-array/pytorch-tensor arguments for similarity
+                computation with an optional argument to return results as numpy or tensor
+            _no_sort (bool, optional): If True, results are returned without sorting. This is
+                helpful at times when you wish to do additional wrapper operations on top of raw
+                results and would like to save computational time without sorting.
         Returns:
             Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of tgt_texts and their
                 scores, else a list of sorted synonym names paired with their
@@ -319,12 +334,12 @@ class Embedder(ABC):
 
         tgt_texts = [*self.cache.data.keys()] if not tgt_texts else tgt_texts
         top_n = len(tgt_texts) if not top_n else top_n
-        sim_func = sim_func or self._pytorch_cos_sim
+        _sim_func = _sim_func or self._pytorch_cos_sim
 
         src_vecs = np.asarray(self.get_encodings(list(src_texts), add_to_cache=False))
         tgt_vecs = np.asarray(self.get_encodings(list(tgt_texts), add_to_cache=False))
 
-        similarity_scores_2d = sim_func(src_vecs, tgt_vecs, as_numpy=True)  # a 2d numpy array
+        similarity_scores_2d = _sim_func(src_vecs, tgt_vecs, as_numpy=True)  # a 2d numpy array
 
         results = []
         for similarity_scores in similarity_scores_2d:
@@ -352,19 +367,22 @@ class Embedder(ABC):
             if return_as_dict:
                 results.append(dict(zip(tgt_texts, similarity_scores)))
             else:
-                # sort results in descending scores
-                n_scores = len(similarity_scores)
-                if n_scores > top_n:
-                    top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
-                    result = sorted(
-                        [(tgt_texts[ii], similarity_scores[ii]) for ii in top_inds],
-                        key=lambda x: x[1],
-                        reverse=True)
+                if not _no_sort:  # sort results in descending scores
+                    n_scores = len(similarity_scores)
+                    if n_scores > top_n:
+                        top_inds = similarity_scores.argpartition(n_scores - top_n)[-top_n:]
+                        result = sorted(
+                            [(tgt_texts[ii], similarity_scores[ii]) for ii in top_inds],
+                            key=lambda x: x[1],
+                            reverse=True)
+                    else:
+                        result = sorted(zip(tgt_texts, similarity_scores),
+                                        key=lambda x: x[1],
+                                        reverse=True)
+                    results.append(result)
                 else:
-                    result = sorted(zip(tgt_texts, similarity_scores),
-                                    key=lambda x: x[1],
-                                    reverse=True)
-                results.append(result)
+                    result = list(zip(tgt_texts, similarity_scores))
+                    results.append(result)
 
         if is_single:
             return results[0]
