@@ -253,37 +253,13 @@ class Embedder(ABC):
         self.cache.clear()
 
     @staticmethod
-    def _pytorch_cos_sim_generic(src_vecs, tgt_vecs, as_numpy=False):
-        """Computes the cosine similarity
-        """
-
-        src_vecs = _torch("as_tensor", src_vecs)
-        tgt_vecs = _torch("as_tensor", tgt_vecs)
-
-        if len(src_vecs.shape) == 1:
-            src_vecs = src_vecs.view(1, -1)
-
-        if len(tgt_vecs.shape) == 1:
-            tgt_vecs = tgt_vecs.view(1, -1)
-
-        n_src = len(src_vecs)
-
-        # [n_tgt, ...] -> [n_src, n_tgt, ...]
-        tgt_vecs = tgt_vecs.expand([n_src, *tgt_vecs.shape])
-        # [n_src, ..., emd_dim] -> [n_src, n_tgt, ...]
-        src_vecs = src_vecs.unsqueeze(dim=1).expand_as(tgt_vecs)
-
-        # returns -> [n_src, n_tgt]
-        similarity_scores = _torch("cosine_similarity", src_vecs, tgt_vecs, dim=-1)
-
-        if as_numpy:
-            return similarity_scores.numpy()
-
-        return similarity_scores
-
-    @staticmethod
-    def _pytorch_cos_sim(src_vecs, tgt_vecs):
+    def _pytorch_cos_sim(src_vecs, tgt_vecs, as_numpy=False):
         """Computes the cosine similarity for 2d matrices
+
+        Args:
+            src_vecs: a 2d numpy array or pytorch tensor
+            tgt_vecs: a 2d numpy array or pytorch tensor
+            as_numpy: If true, returns the cosine similarity as a numpy 2d array instead of tensor
         """
 
         src_vecs = _torch("as_tensor", src_vecs)
@@ -299,11 +275,16 @@ class Embedder(ABC):
             msg = "Only 2-dimensional arrays/tensors are allowed in Embedder._pytorch_cos_sim()"
             raise ValueError(msg)
 
-        # a_norm = torch.nn.functional.normalize(src_vecs, p=2, dim=1)
-        # b_norm = torch.nn.functional.normalize(tgt_vecs, p=2, dim=1)
-        # return torch.mm(a_norm, b_norm.transpose(0, 1))
+        # method specific to 2d tensors
+        # [n_src, emb_dim] * [n_tgt, emb_dim] -> [n_src, n_tgt]
+        a_norm = _torch("normalize", src_vecs, sub="nn.functional", p=2, dim=1)
+        b_norm = _torch("normalize", tgt_vecs, sub="nn.functional", p=2, dim=1)
+        similarity_scores = _torch("mm", a_norm, b_norm.transpose(0, 1))
 
-        return Embedder._pytorch_cos_sim_generic(src_vecs, tgt_vecs, as_numpy=True)
+        if as_numpy:
+            return similarity_scores.numpy()
+
+        return similarity_scores
 
     def find_similar_texts(self, src_texts,
                            top_n,
@@ -323,7 +304,8 @@ class Embedder(ABC):
             scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
                 are: "min_max_scaler", "standard_scaler"
             sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If specified,
-                must take two numpy array arguments for similarity computation
+                must take two numpy-array/pytorch-tensor arguments for similarity computation with
+                an additional argument to return results as numpy or as tensor
         Returns:
             Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of tgt_texts and their
                 scores, else a list of sorted synonym names paired with their
@@ -342,7 +324,7 @@ class Embedder(ABC):
         src_vecs = np.asarray(self.get_encodings(list(src_texts), add_to_cache=False))
         tgt_vecs = np.asarray(self.get_encodings(list(tgt_texts), add_to_cache=False))
 
-        similarity_scores_2d = sim_func(src_vecs, tgt_vecs)  # a 2d numpy array
+        similarity_scores_2d = sim_func(src_vecs, tgt_vecs, as_numpy=True)  # a 2d numpy array
 
         results = []
         for similarity_scores in similarity_scores_2d:

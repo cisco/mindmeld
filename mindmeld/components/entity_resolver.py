@@ -907,6 +907,13 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         )
         self._scores_normalizer = settings.get("scores_normalizer", None)
 
+        cache_path = settings.get("cache_path", None)
+        if not cache_path:
+            hashid = f"{self.__class__.__name__}$synonym_{self.type}"
+            cache_path = path.get_entity_resolver_cache_file_path(app_path, hashid)
+            settings.update({"cache_path": cache_path})
+            er_config.update({"model_settings": settings})
+
         self._embedder_model = create_embedder_model(self.app_path, er_config)
 
     def _fit(self, clean, entity_map):
@@ -1069,6 +1076,9 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                 results_list[i] = results[:top_n]
 
         return results_list
+
+    def clear_cache(self):
+        self._embedder_model.clear_cache()
 
 
 class TfIdfSparseCosSimEntityResolver(EntityResolverBase):

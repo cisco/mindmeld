@@ -63,6 +63,8 @@ GEN_EMBEDDER_MODEL_PATH = os.path.join(
 )
 GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
 GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
+GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
+GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -547,6 +549,19 @@ def get_embedder_cache_file_path(app_path, embedder_type, model_name=None):
             model_id=embedder_type
         )
 
+
+@safe_path
+def get_question_answerer_index_cache_file_path(app_path, uid):
+    """Gets the path to the question answerer index cache file.
+
+    Args:
+        app_path (str): The path to the app data.
+        uid (str): A unique filename for the .pkl file
+
+    Returns:
+        (str) The path for the .pkl cache.
+    """
+    return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
 
 @safe_path
 def get_entity_resolver_cache_file_path(app_path, uid):
