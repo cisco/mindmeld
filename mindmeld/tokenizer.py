@@ -13,15 +13,14 @@
 
 """This module contains the tokenizer."""
 
-import codecs
 import logging
 import re
 import sre_constants
 
 from .text_processing.tokenizers import TokenizerFactory, NoOpTokenizer
+from .text_processing.normalizers import NormalizerFactory, NoOpNormalizer
 from .components._config import get_tokenizer_config, get_language_config
 from .constants import CURRENCY_SYMBOLS
-from .path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,6 @@ class Tokenizer:
     """The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
     given piece of text."""
 
-    _ASCII_CUTOFF = ord("\u0080")
-
     def __init__(self, app_path=None, exclude_from_norm=None):
         """Initializes the tokenizer.
 
@@ -39,11 +36,11 @@ class Tokenizer:
             exclude_from_norm (optional) - list of chars to exclude from normalization
         """
 
-        self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []
         self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
         self.language, _ = get_language_config(app_path)
         self._tokenizer = self._get_tokenizer()
+        self._normalizer = self._get_normalizer()
         self._custom = False
         self._init_regex()
 
@@ -61,6 +58,22 @@ class Tokenizer:
                 f"'tokenizer' cannot be set to to {NoOpTokenizer.__name__}."
             )
         return TokenizerFactory().get_tokenizer(tokenizer, self.language)
+
+    def _get_normalizer(self):
+        """Gets the 'normalizer' specified in the config.
+
+        Returns:
+            normalizer (Normalizer): Normalizer specified in the config.
+        """
+        normalizer = self.config.get("normalizer")
+        if not normalizer:
+            logger.warning("'normalizer' not found in the config.")
+            return NoOpNormalizer()
+        elif normalizer == NoOpNormalizer.__name__:
+            raise AssertionError(
+                f"'normalizer' cannot be set to to {NoOpNormalizer.__name__}."
+            )
+        return NormalizerFactory().get_normalizer(normalizer)
 
     def _init_regex(self):
         """
@@ -152,28 +165,6 @@ class Tokenizer:
     def __deepcopy__(self, memo):
         # TODO: optimize this
         return Tokenizer(exclude_from_norm=self.exclude_from_norm)
-
-    @staticmethod
-    def load_ascii_folding_table():
-        """
-        Load mapping of ascii code points to ascii characters.
-        """
-        logger.debug(
-            "Loading ascii folding mapping from file: %s.", ASCII_FOLDING_DICT_PATH
-        )
-
-        ascii_folding_table = {}
-
-        with codecs.open(
-            ASCII_FOLDING_DICT_PATH, "r", encoding="unicode_escape"
-        ) as mapping_file:
-            for line in mapping_file:
-                tokens = line.split()
-                codepoint = tokens[0]
-                ascii_char = tokens[1]
-                ascii_folding_table[ord(codepoint)] = ascii_char
-
-        return ascii_folding_table
 
     def _one_xlat(self, match_object):
         """
@@ -285,9 +276,7 @@ class Tokenizer:
             else:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
-            # fold to ascii
-            if self.config.get("ascii_fold"):
-                norm_token_text = self.fold_str_to_ascii(norm_token_text)
+            norm_token_text = self._normalizer.normalize(norm_token_text)
 
             norm_token_text = norm_token_text.lower()
 
@@ -339,7 +328,7 @@ class Tokenizer:
 
         return tokens
 
-    def get_char_index_map(self, raw_text, normalized_text):
+    def get_char_index_map(self, raw_text, normalized_text):     # pylint: disable=R0201
         """
         Generates character index mapping from normalized query to raw query. The entity model
         always operates on normalized query during NLP processing but for entity output we need
@@ -356,7 +345,6 @@ class Tokenizer:
         """
 
         text = raw_text.lower()
-        text = self.fold_str_to_ascii(text)
 
         m = len(raw_text)
         n = len(normalized_text)
@@ -436,41 +424,6 @@ class Tokenizer:
                 raw_to_norm_mapping[i] = raw_to_norm_mapping[i - 1]
 
         return raw_to_norm_mapping, mapping
-
-    def fold_char_to_ascii(self, char):
-        """
-        Return the ASCII character corresponding to the folding token.
-
-        Args:
-            char: ASCII folding token
-
-        Returns:
-            char: a ASCII character
-        """
-        char_ord = ord(char)
-        if char_ord < self._ASCII_CUTOFF:
-            return char
-
-        try:
-            return self.ascii_folding_table[char_ord]
-        except KeyError:
-            return char
-
-    def fold_str_to_ascii(self, text):
-        """
-        Return the ASCII character corresponding to the folding token string.
-
-        Args:
-            str: ASCII folding token string
-
-        Returns:
-            char: a ASCII character
-        """
-        folded_str = ""
-        for char in text:
-            folded_str += self.fold_char_to_ascii(char)
-
-        return folded_str
 
     def __repr__(self):
         return "<Tokenizer exclude_from_norm: {}>".format(

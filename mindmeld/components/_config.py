@@ -290,7 +290,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
     "settings": {
         "analysis": {
-            "char_filter": {
+            "regex_norm_rules": {
                 "remove_loose_apostrophes": {
                     "pattern": " '|' ",
                     "type": "pattern_replace",
@@ -497,7 +497,7 @@ DEFAULT_TOKENIZER_CONFIG = {
     # populated in the `get_tokenizer_config` func
     "allowed_patterns": [],
     "tokenizer": "WhiteSpaceTokenizer",
-    "ascii_fold": True,
+    "normalizer": "ASCIIFold",
 }
 
 
