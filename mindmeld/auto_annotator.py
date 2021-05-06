@@ -22,7 +22,7 @@ from .components._config import (
     ENGLISH_US_LOCALE,
 )
 from .components.translators import NoOpTranslator, TranslatorFactory
-from .text_processing.spacy_model_factory import SpacyModelFactory
+from .text_preparation.spacy_model_factory import SpacyModelFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
     duckling_item_to_query_entity,
