@@ -246,6 +246,40 @@ class Gazetteer:
             )
 
 
+class NestedGazetteer:
+
+    def __init__(self, start_token_index, end_token_index,
+                 gaz_name, token_ngram, raw_ngram):
+        self._start_token_index = start_token_index
+        self._end_token_index = end_token_index
+        self._gaz_name = gaz_name
+        self._token_ngram = token_ngram
+        self._raw_ngram = raw_ngram
+
+    @property
+    def start_token_index(self):
+        return self._start_token_index
+
+    @property
+    def end_token_index(self):
+        return self._end_token_index
+
+    @property
+    def gaz_name(self):
+        return self._gaz_name
+
+    @property
+    def token_ngram(self):
+        return self._token_ngram
+
+    @property
+    def raw_ngram(self):
+        return self._raw_ngram
+
+    def __gt__(self, other_gaz):
+        return self.start_token_index > other_gaz.start_token_index
+
+
 def iterate_ngrams(tokens, min_length=1, max_length=1):
     """Iterates over all n-grams in a list of tokens.
 
