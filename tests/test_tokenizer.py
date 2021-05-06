@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_markup
+test_tokenizer
 ----------------------------------
 
-Tests for `markup` module.
+Tests for `tokenizer` module.
 """
 # pylint: disable=I0011,W0621
 import os

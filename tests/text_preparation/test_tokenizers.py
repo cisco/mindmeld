@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+test Tokenizers
+----------------------------------
+
+Tests for Tokenizers in the `text_preparation.tokenizers` module.
+"""
+import pytest
+
+
+from mindmeld.text_preparation.tokenizers import (
+    CharacterTokenizer,
+    WhiteSpaceTokenizer,
+    SpacyTokenizer,
+)
+
+JA_SENTENCE_ONE = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
+JA_SENTENCE_TWO = "株式会社ＫＡＤＯＫＡＷＡ Ｆｕｔｕｒｅ Ｐｕｂｌｉｓｈｉｎｇ"
+JA_SENTENCE_THREE = "パピプペポ"
+DE_SENTENCE_ONE = "Ein Gentleman ist vorbeigekommen, der weiß"
+ES_SENTENCE_ONE = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
+EN_SENTENCE_ONE = "Hello Sir. I'd like to tell you how much I like MindMeld."
+
+
+@pytest.fixture
+def white_space_tokenizer():
+    return WhiteSpaceTokenizer()
+
+
+@pytest.fixture
+def spacy_tokenizer_ja():
+    return SpacyTokenizer(language="ja", spacy_model_size="lg")
+
+
+@pytest.fixture
+def character_tokenizer():
+    return CharacterTokenizer()
+
+
+def test_white_space_tokenizer_en(white_space_tokenizer):
+    tokenized_output = white_space_tokenizer.tokenize(EN_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "Hello"},
+        {"start": 6, "text": "Sir."},
+        {"start": 11, "text": "I'd"},
+        {"start": 15, "text": "like"},
+        {"start": 20, "text": "to"},
+        {"start": 23, "text": "tell"},
+        {"start": 28, "text": "you"},
+        {"start": 32, "text": "how"},
+        {"start": 36, "text": "much"},
+        {"start": 41, "text": "I"},
+        {"start": 43, "text": "like"},
+        {"start": 48, "text": "MindMeld."},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_white_space_tokenizer_es(white_space_tokenizer):
+    tokenized_output = white_space_tokenizer.tokenize(ES_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "Ha"},
+        {"start": 3, "text": "pasado"},
+        {"start": 10, "text": "un"},
+        {"start": 13, "text": "caballero,"},
+        {"start": 24, "text": "¡quién"},
+        {"start": 31, "text": "sabe"},
+        {"start": 36, "text": "por"},
+        {"start": 40, "text": "qué"},
+        {"start": 44, "text": "pasó!"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_white_space_tokenizer_de(white_space_tokenizer):
+    tokenized_output = white_space_tokenizer.tokenize(DE_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "Ein"},
+        {"start": 4, "text": "Gentleman"},
+        {"start": 14, "text": "ist"},
+        {"start": 18, "text": "vorbeigekommen,"},
+        {"start": 34, "text": "der"},
+        {"start": 38, "text": "weiß"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_character_tokenizer_ja(character_tokenizer):
+    tokenized_output = character_tokenizer.tokenize(JA_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "紳"},
+        {"start": 1, "text": "士"},
+        {"start": 2, "text": "が"},
+        {"start": 3, "text": "過"},
+        {"start": 4, "text": "ぎ"},
+        {"start": 5, "text": "去"},
+        {"start": 6, "text": "っ"},
+        {"start": 7, "text": "た"},
+        {"start": 8, "text": "、"},
+        {"start": 10, "text": "な"},
+        {"start": 11, "text": "ぜ"},
+        {"start": 12, "text": "そ"},
+        {"start": 13, "text": "れ"},
+        {"start": 14, "text": "が"},
+        {"start": 15, "text": "起"},
+        {"start": 16, "text": "こ"},
+        {"start": 17, "text": "っ"},
+        {"start": 18, "text": "た"},
+        {"start": 19, "text": "の"},
+        {"start": 20, "text": "か"},
+        {"start": 21, "text": "誰"},
+        {"start": 22, "text": "に"},
+        {"start": 23, "text": "も"},
+        {"start": 24, "text": "分"},
+        {"start": 25, "text": "か"},
+        {"start": 26, "text": "り"},
+        {"start": 27, "text": "ま"},
+        {"start": 28, "text": "せ"},
+        {"start": 29, "text": "ん"},
+        {"start": 30, "text": "！"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_spacy_tokenizer_ja_one(spacy_tokenizer_ja):
+    tokenized_output = spacy_tokenizer_ja.tokenize(JA_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "紳士"},
+        {"start": 2, "text": "が"},
+        {"start": 3, "text": "過ぎ"},
+        {"start": 5, "text": "去っ"},
+        {"start": 7, "text": "た"},
+        {"start": 8, "text": "、"},
+        {"start": 9, "text": "なぜ"},
+        {"start": 11, "text": "それ"},
+        {"start": 13, "text": "が"},
+        {"start": 14, "text": "起こっ"},
+        {"start": 17, "text": "た"},
+        {"start": 18, "text": "の"},
+        {"start": 19, "text": "か"},
+        {"start": 20, "text": "誰"},
+        {"start": 21, "text": "に"},
+        {"start": 22, "text": "も"},
+        {"start": 23, "text": "分かり"},
+        {"start": 26, "text": "ませ"},
+        {"start": 28, "text": "ん"},
+        {"start": 29, "text": "！"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_spacy_tokenizer_ja_two(spacy_tokenizer_ja):
+    tokenized_output = spacy_tokenizer_ja.tokenize(JA_SENTENCE_TWO)
+    expected_output = [
+        {"start": 0, "text": "株式"},
+        {"start": 2, "text": "会社"},
+        {"start": 4, "text": "ＫＡＤＯＫＡＷＡ"},
+        {"start": 12, "text": "Ｆｕｔｕｒｅ"},
+        {"start": 18, "text": "Ｐｕｂｌｉｓｈｉｎｇ"},
+    ]
+    assert tokenized_output == expected_output
