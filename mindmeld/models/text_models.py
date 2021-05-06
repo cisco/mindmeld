@@ -158,9 +158,14 @@ class TextModel(Model):
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
         random.shuffle(indices)
-        examples = [examples[i] for i in indices]
-        labels = [labels[i] for i in indices]
-
+        try:
+            examples.reorder(indices)
+        except AttributeError:
+            examples = [examples[i] for i in indices]
+        try:
+            labels.reorder(indices)
+        except AttributeError:
+            labels = [labels[i] for i in indices]
         distinct_labels = set(labels)
         if len(set(distinct_labels)) <= 1:
             return self

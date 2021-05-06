@@ -181,6 +181,10 @@ class Classifier(ABC):
                 feature extractor function, or a callable which will be used as to
                 extract features.
 
+        Returns:
+            True if model was loaded and fit, False if a valid cached model exists.  The cached
+            model must be loaded if fit() returns False.
+
         Examples:
             Fit using default the configuration.
 
@@ -220,9 +224,8 @@ class Classifier(ABC):
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit.  Previous model is cached.")
+            return False
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
 
@@ -233,12 +236,12 @@ class Classifier(ABC):
                 "files in your MindMeld project.",
                 label_set,
             )
-            return
-
-        if len(set(classes)) <= 1:
-            phrase = ["are no classes", "is only one class"][len(set(classes))]
+            return True
+        num_classes = len(set(classes))
+        if num_classes <= 1:
+            phrase = ["are no classes", "is only one class"][num_classes]
             logger.info("Not doing anything for fit since there %s.", phrase)
-            return
+            return True
 
         model.initialize_resources(self._resource_loader, queries, classes)
         model.fit(queries, classes)
@@ -248,6 +251,7 @@ class Classifier(ABC):
 
         self.ready = True
         self.dirty = True
+        return True
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
@@ -424,6 +428,14 @@ class Classifier(ABC):
             if path == model_path:
                 self.dirty = False
 
+    def unload(self):
+        '''
+        Unloads the model from memory. This helps reduce memory requirements while
+        training other models.
+        '''
+        self._model = None
+        self.config = None
+
     def load(self, model_path):
         """Loads the trained classification model from disk
 
@@ -466,43 +478,9 @@ class Classifier(ABC):
             model_hash = hash_file.read()
         return model_hash
 
-    @staticmethod
-    def _build_query_tree(queries, domain=None, intent=None, raw=False):
-        """Build a query tree from a list of ProcessedQueries. The tree is
-        organized by domain then by intent.
-
-        Args:
-            queries (list): list of ProcessedQuery
-            domain (str, optional): The domain to filter on
-            intent (str, optional): The intent to filter on
-            raw (bool, optional): If true, the leaves of the query tree are
-                strings associated with the ProcessedQueries, else the leaves
-                are ProcessedQueries
-        """
-        query_tree = {}
-        for query in queries:
-
-            if domain and query.domain != domain:
-                continue
-
-            if intent and query.intent != intent:
-                continue
-
-            if query.domain not in query_tree:
-                query_tree[query.domain] = {}
-            if query.intent not in query_tree[query.domain]:
-                query_tree[query.domain][query.intent] = []
-
-            if raw:
-                query_tree[query.domain][query.intent].append(markup.dump_query(query))
-            else:
-                query_tree[query.domain][query.intent].append(query)
-
-        return query_tree
-
     @abstractmethod
     def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns the set of queries to train on
 
@@ -511,7 +489,6 @@ class Classifier(ABC):
                 train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
 
         Returns:
             List: list of queries

@@ -81,17 +81,16 @@ def load_query(
         query, domain=domain, intent=intent, entities=entities, is_gold=is_gold
     )
 
-
-def load_query_file(
+def cache_query_file(
     file_path,
+    query_cache,
     query_factory=None,
     app_path=None,
     domain=None,
     intent=None,
-    is_gold=False,
-    query_cache=None,
+    is_gold=False
 ):
-    """Loads the queries from the specified file
+    """Loads the specified query file into the query cache
 
     Args:
         app_path (str): The app path
@@ -105,27 +104,18 @@ def load_query_file(
         query_cache (QueryCache): A container containing cache query objects
 
     Returns:
-        ProcessedQuery: a processed query
+        List of cached query ids
     """
     query_factory = query_factory or QueryFactory.create_query_factory(app_path)
 
-    queries = []
+    query_ids = []
     for query_text in read_query_file(file_path):
         if query_text[0] == "-":
             continue
 
-        if query_cache:
-            query = query_cache.get_value(domain, intent, query_text)
-            if not query:
-                query = load_query(
-                    query_text,
-                    query_factory=query_factory,
-                    domain=domain,
-                    intent=intent,
-                    is_gold=is_gold,
-                )
-                query_cache.set_value(domain, intent, query_text, query)
-        else:
+        key = query_cache.get_key(domain, intent, query_text)
+        row_id = query_cache.key_to_row_id(key)
+        if not row_id:
             query = load_query(
                 query_text,
                 query_factory=query_factory,
@@ -133,9 +123,9 @@ def load_query_file(
                 intent=intent,
                 is_gold=is_gold,
             )
-
-        queries.append(query)
-    return queries
+            row_id = query_cache.put(key, query)
+        query_ids.append(row_id)
+    return query_ids
 
 
 def mark_down_file(file_path):

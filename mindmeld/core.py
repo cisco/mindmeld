@@ -437,7 +437,9 @@ class ProcessedQuery:
         confidence (dict): A dictionary of the class probas for the domain and intent classifier
     """
 
-    # TODO: look into using __slots__
+    # version the cached data.  Bump this if any changes are made
+    # to the to_cache() and from_cache() functions for the core classes.
+    version = 1
 
     def __init__(
         self,
@@ -844,7 +846,7 @@ class Entity:
         which was serialized when it's to_cache() function was called.
         '''
         entity_class = obj.pop('class')
-        return globals()[entity_class].from_cache(obj)
+        return Entity.entity_class_map[entity_class].from_cache(obj)
 
     @staticmethod
     def is_system_entity(entity_type):  # pylint: disable=method-hidden
@@ -882,6 +884,11 @@ class Entity:
         text = self.display_text or self.text
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
 
+Entity.entity_class_map = {
+    Entity.__name__: Entity,
+    QueryEntity.__name__: QueryEntity,
+    NestedEntity.__name__: NestedEntity
+}
 
 class FormEntity:
     """A form entity is used for defining custom objects for the entity form used in

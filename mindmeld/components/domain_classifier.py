@@ -64,7 +64,7 @@ class DomainClassifier(Classifier):
 
         """
         logger.info("Fitting domain classifier")
-        super().fit(*args, **kwargs)
+        return super().fit(*args, **kwargs)
 
     def dump(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Persists the trained domain classification model to disk.
@@ -74,6 +74,10 @@ class DomainClassifier(Classifier):
         """
         logger.info("Saving domain classifier")
         super().dump(*args, **kwargs)
+
+    def unload(self):
+        logger.info("Unloading domain classifier")
+        super().unload()
 
     def load(self, *args, **kwargs):
         """Loads the trained domain classification model from disk
@@ -110,15 +114,14 @@ class DomainClassifier(Classifier):
                 train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
 
         Returns:
             (list): list of queries
         """
         if queries:
-            return self._build_query_tree(queries, raw=raw)
+            return self._build_query_tree(queries)
 
-        return self._resource_loader.get_labeled_queries(label_set=label_set, raw=raw)
+        return self._resource_loader.get_labeled_queries(label_set=label_set)
 
     def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
@@ -134,16 +137,17 @@ class DomainClassifier(Classifier):
 
         if not queries:
             return [None, None]
-        return list(zip(*[(q.query, q.domain) for q in queries]))
+        return (queries.queries(),
+                list(queries.domains()))
 
     def _get_queries_and_labels_hash(
         self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        query_tree = self._get_query_tree(queries, label_set=label_set)
         queries = []
         for domain in query_tree:
             for intent in query_tree[domain]:
-                for query_text in query_tree[domain][intent]:
+                for query_text in query_tree[domain][intent].raw_queries():
                     queries.append(domain + "###" + mark_down(query_text))
 
         queries.sort()

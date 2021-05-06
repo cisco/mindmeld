@@ -102,9 +102,8 @@ class RoleClassifier(Classifier):
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit. Previous model is cached.")
+            return False
 
         # Load labeled data
         examples, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -124,6 +123,7 @@ class RoleClassifier(Classifier):
 
         self.ready = True
         self.dirty = True
+        return True
 
     def _data_dump_payload(self):
         return {"model": self._model, "roles": self.roles}
@@ -143,6 +143,11 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         super().dump(model_path, incremental_model_path)
+
+    def unload(self):
+        self._model = None
+        self.roles = set()
+        self.ready = False
 
     def load(self, model_path):
         """Loads the trained role classification model from disk.
@@ -272,7 +277,7 @@ class RoleClassifier(Classifier):
         return self._model._extract_features((query, entities, entity_index))
 
     def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns the set of queries to train on
 
@@ -281,18 +286,17 @@ class RoleClassifier(Classifier):
                 train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
 
         Returns:
             List: list of queries
         """
         if queries:
             return self._build_query_tree(
-                queries, domain=self.domain, intent=self.intent, raw=raw
+                queries, domain=self.domain, intent=self.intent
             )
 
         return self._resource_loader.get_labeled_queries(
-            domain=self.domain, intent=self.intent, label_set=label_set, raw=raw
+            domain=self.domain, intent=self.intent, label_set=label_set
         )
 
     def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
@@ -310,7 +314,7 @@ class RoleClassifier(Classifier):
         # build list of examples -- entities of this role classifier's type
         examples = []
         labels = []
-        for query in queries:
+        for query in queries.processed_queries():
             for idx, entity in enumerate(query.entities):
                 if entity.entity.type == self.entity_type and entity.entity.role:
                     examples.append((query.query, query.entities, idx))
@@ -333,11 +337,11 @@ class RoleClassifier(Classifier):
     def _get_queries_and_labels_hash(
         self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        query_tree = self._get_query_tree(queries, label_set=label_set)
         queries = self._resource_loader.flatten_query_tree(query_tree)
         hashable_queries = [
             self.domain + "###" + self.intent + "###" + self.entity_type + "###"
-        ] + sorted(queries)
+        ] + sorted(list(queries.raw_queries()))
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

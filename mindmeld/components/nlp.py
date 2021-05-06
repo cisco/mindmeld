@@ -136,23 +136,27 @@ class Processor(ABC):
                 configuration has changed since the last build. Defaults to ``False``.
             label_set (string, optional): The label set from which to train all classifiers.
         """
+        self._build_recursive(incremental=incremental, label_set=label_set)
+        self.load()
+
+    def _build_recursive(self, incremental=False, label_set=None):
+        """Builds all the natural language processing models for this processor and its children.
+
+        Args:
+            incremental (bool, optional): When ``True``, only build models whose training data or
+                configuration has changed since the last build. Defaults to ``False``.
+            label_set (string, optional): The label set from which to train all classifiers.
+        """
         self._build(incremental=incremental, label_set=label_set)
-        # Dumping the model when incremental builds are turned on
-        # allows for other models with identical data and configs
-        # to use a pre-existing model's results on the same run.
-        if incremental:
+        # We dump and unload the model to reduce memory consumption while training
+        if self.ready:
             self._dump()
+            self.unload()
 
         for child in self._children.values():
             # We pass the incremental_timestamp to children processors
             child.incremental_timestamp = self.incremental_timestamp
-            child.build(incremental=incremental, label_set=label_set)
-            if incremental:
-                child.dump()
-
-        self.resource_loader.query_cache.dump()
-        self.ready = True
-        self.dirty = True
+            child._build_recursive(incremental=incremental, label_set=label_set)
 
     @property
     def incremental_timestamp(self):
@@ -175,11 +179,13 @@ class Processor(ABC):
         for child in self._children.values():
             child.dump()
 
-        self.resource_loader.query_cache.dump()
         self.dirty = False
 
     @abstractmethod
     def _dump(self):
+        raise NotImplementedError
+
+    def unload(self):
         raise NotImplementedError
 
     def load(self, incremental_timestamp=None):
@@ -471,9 +477,11 @@ class NaturalLanguageProcessor(Processor):
         if len(self.domains) == 1:
             return
 
-        self.domain_classifier.fit(
+        self.ready = self.domain_classifier.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
+
+
 
     def _dump(self):
         if len(self.domains) == 1:
@@ -484,6 +492,9 @@ class NaturalLanguageProcessor(Processor):
         )
 
         self.domain_classifier.dump(model_path, incremental_model_path)
+
+    def unload(self):
+        self.domain_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.domains) == 1:
@@ -821,7 +832,7 @@ class DomainProcessor(Processor):
         if len(self.intents) == 1:
             return
         # train intent model
-        self.intent_classifier.fit(
+        self.ready = self.intent_classifier.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
@@ -840,6 +851,9 @@ class DomainProcessor(Processor):
         self.intent_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.intent_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.intents) == 1:
@@ -1088,7 +1102,7 @@ class IntentProcessor(Processor):
         """Builds the models for this intent"""
 
         # train entity recognizer
-        self.entity_recognizer.fit(
+        self.ready = self.entity_recognizer.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
@@ -1121,6 +1135,9 @@ class IntentProcessor(Processor):
         self.entity_recognizer.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
         model_path, incremental_model_path = path.get_entity_model_paths(
@@ -1474,7 +1491,7 @@ class EntityProcessor(Processor):
 
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
-        self.role_classifier.fit(
+        self.ready = self.role_classifier.fit(
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
         self.entity_resolver.fit()
@@ -1493,6 +1510,9 @@ class EntityProcessor(Processor):
         self.role_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.role_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         try:
