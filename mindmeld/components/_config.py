@@ -290,7 +290,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
     "settings": {
         "analysis": {
-            "regex_norm_rules": {
+            "char_filter": {
                 "remove_loose_apostrophes": {
                     "pattern": " '|' ",
                     "type": "pattern_replace",
