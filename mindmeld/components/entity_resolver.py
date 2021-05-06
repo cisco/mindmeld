@@ -999,7 +999,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                 top_entity.text,
                 top_n=top_n,
                 scores_normalizer=self._scores_normalizer,
-                _no_sort=True if not top_n else False
+                _no_sort=not top_n
             )
             values = []
             for synonym, score in sorted_items:
@@ -1047,7 +1047,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                     batch,
                     top_n=top_n,
                     scores_normalizer=self._scores_normalizer,
-                    _no_sort=True if not top_n else False
+                    _no_sort=not top_n
                 )
                 sorted_items_list.extend(result)
 
@@ -1323,7 +1323,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
                 top_entity.text,
                 top_n=top_n,
                 scores_normalizer=self._scores_normalizer,
-                _no_sort=True if not top_n else False
+                _no_sort=not top_n
             )
             values = []
             for synonym, score in sorted_items:

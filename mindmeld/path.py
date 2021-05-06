@@ -563,6 +563,7 @@ def get_question_answerer_index_cache_file_path(app_path, uid):
     """
     return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
 
+
 @safe_path
 def get_entity_resolver_cache_file_path(app_path, uid):
     """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.

@@ -64,749 +64,6 @@ EMBEDDING_FIELD_STRING = "_embedding"
 DEFAULT_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), ".cache/mindmeld")
 
 
-class Search:
-    """This class models a generic filtered search in knowledge base. It allows developers to
-    construct more complex knowledge base search criteria based on the application requirements.
-
-    """
-
-    SYN_FIELD_SUFFIX = "$whitelist"
-
-    def __init__(self, client, index, ranking_config=None, field_info=None):
-        """Initialize a Search object.
-
-        Args:
-            client (Elasticsearch): Elasticsearch client.
-            index (str): index name of knowledge base object.
-            ranking_config (dict): overriding ranking configuration parameters for current search.
-            field_info (dict): dictionary contains knowledge base matadata objects.
-        """
-        self.index = index
-        self.client = client
-
-        self._clauses = {"query": [], "filter": [], "sort": []}
-
-        self._ranking_config = ranking_config
-        if not ranking_config:
-            self._ranking_config = copy.deepcopy(DEFAULT_RANKING_CONFIG)
-
-        self._kb_field_info = field_info
-
-    def _clone(self):
-        """Clone a Search object.
-
-        Returns:
-            Search: cloned copy of the Search object.
-        """
-        s = Search(client=self.client, index=self.index)
-        s._clauses = copy.deepcopy(self._clauses)
-        s._ranking_config = copy.deepcopy(self._ranking_config)
-        s._kb_field_info = copy.deepcopy(self._kb_field_info)
-
-        return s
-
-    def _build_query_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
-        field, value = next(iter(kwargs.items()))
-        field_info = self._kb_field_info.get(field)
-        if not field_info:
-            raise ValueError("Invalid knowledge base field '{}'".format(field))
-
-        # check whether the synonym field is available. By default the synonyms are
-        # imported to "<field_name>$whitelist" field.
-        synonym_field = (
-            field + self.SYN_FIELD_SUFFIX
-            if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX)
-            else None
-        )
-        clause = Search.QueryClause(field, field_info, value, query_type, synonym_field)
-        clause.validate()
-        self._clauses[clause.get_type()].append(clause)
-
-    def _build_filter_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
-        # set the filter type to be 'range' if any range operator is specified.
-        if (
-            kwargs.get("gt")
-            or kwargs.get("gte")
-            or kwargs.get("lt")
-            or kwargs.get("lte")
-        ):
-            field = kwargs.get("field")
-            gt = kwargs.get("gt")
-            gte = kwargs.get("gte")
-            lt = kwargs.get("lt")
-            lte = kwargs.get("lte")
-
-            if field not in self._kb_field_info:
-                raise ValueError("Invalid knowledge base field '{}'".format(field))
-
-            clause = Search.FilterClause(
-                field=field,
-                field_info=self._kb_field_info.get(field),
-                range_gt=gt,
-                range_gte=gte,
-                range_lt=lt,
-                range_lte=lte,
-            )
-        else:
-            key, value = next(iter(kwargs.items()))
-            if key not in self._kb_field_info:
-                raise ValueError("Invalid knowledge base field '{}'".format(key))
-            clause = Search.FilterClause(field=key, value=value, query_type=query_type)
-        clause.validate()
-        self._clauses[clause.get_type()].append(clause)
-
-    def _build_sort_clause(self, **kwargs):
-        sort_field = kwargs.get("field")
-        sort_type = kwargs.get("sort_type")
-        sort_location = kwargs.get("location")
-
-        field_info = self._kb_field_info.get(sort_field)
-        if not field_info:
-            raise ValueError("Invalid knowledge base field '{}'".format(sort_field))
-
-        # only compute field stats if sort field is number or date type.
-        field_stats = None
-        if field_info.is_number_field() or field_info.is_date_field():
-            field_stats = self._get_field_stats(sort_field)
-
-        clause = Search.SortClause(
-            sort_field, field_info, sort_type, field_stats, sort_location
-        )
-        clause.validate()
-        self._clauses[clause.get_type()].append(clause)
-
-    def _build_clause(self, clause_type, query_type=DEFAULT_QUERY_TYPE, **kwargs):
-        """Helper method to build query, filter and sort clauses.
-
-        Args:
-            clause_type (str): type of clause
-        """
-        if clause_type == "query":
-            self._build_query_clause(query_type, **kwargs)
-        elif clause_type == "filter":
-            self._build_filter_clause(query_type, **kwargs)
-        elif clause_type == "sort":
-            self._build_sort_clause(**kwargs)
-        else:
-            raise Exception("Unknown clause type.")
-
-    def query(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
-        """Specify the query text to match on a knowledge base text field. The query text is
-        normalized and processed (based on query_type) to find matches in knowledge base using
-        several text relevance scoring factors including exact matches, phrase matches and partial
-        matches.
-
-        Examples:
-
-            >>> s = question_answerer.build_search(index='dish')
-            >>> s.query(name='pad thai')
-
-        In the example above the query text "pad thai" will be used to match against document field
-        "name" in knowledge base index "dish".
-
-        Args:
-            a keyword argument to specify the query text and the knowledge base document field along
-            with the query type (keyword/text/embedder/embedder_keyword/embedder_text).
-        Returns:
-            Search: a new Search object with added search criteria.
-        """
-        new_search = self._clone()
-        new_search._build_clause("query", query_type, **kwargs)
-
-        return new_search
-
-    def filter(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
-        """Specify filter condition to be applied to specified knowledge base field. In MindMeld
-        two types of filters are supported: text filter and range filters.
-
-        Text filters are used to apply hard filters on specified knowledge base text fields.
-        The filter text value is normalized and matched using entire text span against the
-        knowledge base field.
-
-        It's common to have filter conditions based on other resolved canonical entities.
-        For example, in food ordering domain the resolved restaurant entity can be used as a filter
-        to resolve dish entities. The exact knowledge base field to apply these filters depends on
-        the knowledge base data model of the application.
-        If the entity is not in the canonical form, a fuzzy filter can be applied by setting the
-        query_type to 'text'.
-
-        Range filters are used to filter with a value range on specified knowledge base number or
-        date fields. Example use cases include price range filters and date range filters.
-
-        Examples:
-
-        add text filter:
-            >>> s = question_answerer.build_search(index='menu_items')
-            >>> s.filter(restaurant_id='B01CGKGQ40')
-
-        add range filter:
-                >>> s = question_answerer.build_search(index='menu_items')
-                >>> s.filter(field='price', gte=1, lt=10)
-
-        Args:
-            query_type (str): Whether the filter is over structured or unstructured text.
-            kwargs: A keyword argument to specify the filter text and the knowledge base text field.
-            field (str): knowledge base field name for range filter.
-            gt (number or str): range filter operator for greater than.
-            gte (number or str): range filter operator for greater than or equal to.
-            lt (number or str): range filter operator for less than.
-            lte (number or str): range filter operator for less or equal to.
-
-        Returns:
-            Search: A new Search object with added search criteria.
-        """
-        new_search = self._clone()
-        new_search._build_clause("filter", query_type, **kwargs)
-
-        return new_search
-
-    def sort(self, field, sort_type=None, location=None):
-        """Specify custom sort criteria.
-
-        Args:
-            field (str): knowledge base field for sort.
-            sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'. 'asc' and
-                             'desc' can be used to sort numeric or date fields and 'distance' can
-                             be used to sort by distance on geo_point fields. Default sort type
-                             is 'desc' if not specified.
-            location (str): location (lat, lon) in geo_point format to be used as origin when
-                            sorting by 'distance'
-        """
-        new_search = self._clone()
-        new_search._build_clause(
-            "sort", field=field, sort_type=sort_type, location=location
-        )
-        return new_search
-
-    def _get_field_stats(self, field):
-        """Get knowledge field statistics for custom sort functions. The field statistics is
-        only available for number and date typed fields.
-
-        Args:
-            field(str): knowledge base field name
-
-        Returns:
-            dict: dictionary that contains knowledge base field statistics.
-        """
-
-        stats_query = {"aggs": {}, "size": 0}
-        stats_query["aggs"][field + "_min"] = {"min": {"field": field}}
-        stats_query["aggs"][field + "_max"] = {"max": {"field": field}}
-
-        res = self.client.search(
-            index=self.index, body=stats_query, search_type="query_then_fetch"
-        )
-
-        return {
-            "min_value": res["aggregations"][field + "_min"]["value"],
-            "max_value": res["aggregations"][field + "_max"]["value"],
-        }
-
-    def _build_es_query(self, size=10):
-        """Build knowledge base search syntax based on provided search criteria.
-
-        Args:
-            size (int): The maximum number of records to fetch, default to 10.
-
-        Returns:
-            str: knowledge base search syntax for the current search object.
-        """
-        es_query = {
-            "query": {
-                "function_score": {
-                    "query": {},
-                    "functions": [],
-                    "score_mode": "sum",
-                    "boost_mode": "sum",
-                }
-            },
-            "_source": {"excludes": ["*" + self.SYN_FIELD_SUFFIX]},
-            "size": size,
-        }
-
-        if not self._clauses["query"] and not self._clauses["filter"]:
-            # no query/filter clauses - use match_all
-            es_query["query"]["function_score"]["query"] = {"match_all": {}}
-        else:
-            es_query["query"]["function_score"]["query"]["bool"] = {}
-
-            if self._clauses["query"]:
-                es_query_clauses = []
-                es_boost_functions = []
-                for clause in self._clauses["query"]:
-                    query_clause, boost_functions = clause.build_query()
-                    if query_clause:
-                        es_query_clauses.append(query_clause)
-                    es_boost_functions.extend(boost_functions)
-
-                if self._ranking_config["query_clauses_operator"] == "and":
-                    es_query["query"]["function_score"]["query"]["bool"][
-                        "must"
-                    ] = es_query_clauses
-                else:
-                    es_query["query"]["function_score"]["query"]["bool"][
-                        "should"
-                    ] = es_query_clauses
-
-                # add all boost functions for the query clause
-                # right now the only boost functions supported are exact match boosting for
-                # CNAME and synonym whitelists.
-                es_query["query"]["function_score"]["functions"].extend(
-                    es_boost_functions
-                )
-
-            if self._clauses["filter"]:
-                es_filter_clauses = {"bool": {"must": []}}
-                for clause in self._clauses["filter"]:
-                    es_filter_clauses["bool"]["must"].append(clause.build_query())
-
-                es_query["query"]["function_score"]["query"]["bool"][
-                    "filter"
-                ] = es_filter_clauses
-
-        # add scoring function for custom sort criteria
-        for clause in self._clauses["sort"]:
-            sort_function = clause.build_query()
-            es_query["query"]["function_score"]["functions"].append(sort_function)
-
-        logger.debug("ES query syntax: %s.", es_query)
-
-        return es_query
-
-    def execute(self, size=10):
-        """Executes the knowledge base search with provided criteria and returns matching documents.
-
-        Args:
-            size (int): The maximum number of records to fetch, default to 10.
-
-        Returns:
-            a list of matching documents.
-        """
-        try:
-            # TODO: move the ES API call logic to ES helper
-            es_query = self._build_es_query(size=size)
-
-            response = self.client.search(index=self.index, body=es_query)
-
-            # construct results, removing embedding metadata and exposing score
-            results = []
-            for hit in response["hits"]["hits"]:
-                item = {key: val for (key, val) in hit["_source"].items()
-                        if not key.endswith(EMBEDDING_FIELD_STRING)}
-                item['_score'] = hit['_score']
-                results.append(item)
-            return results
-        except EsConnectionError as e:
-            logger.error(
-                "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
-            )
-            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts) from e
-        except TransportError as e:
-            logger.error(
-                "Unexpected error occurred when sending requests to Elasticsearch: %s "
-                "Status code: %s details: %s",
-                e.error,
-                e.status_code,
-                e.info,
-            )
-            raise KnowledgeBaseError from e
-        except ElasticsearchException as e:
-            raise KnowledgeBaseError from e
-
-    class Clause(ABC):
-        """This class models an abstract knowledge base clause."""
-
-        def __init__(self):
-            """Initialize a knowledge base clause"""
-            self.clause_type = None
-
-        @abstractmethod
-        def validate(self):
-            """Validate the clause."""
-            raise NotImplementedError("Must override validate()")
-
-        @abstractmethod
-        def build_query(self):
-            """Build knowledge base query."""
-            raise NotImplementedError("Must override build_query()")
-
-        def get_type(self):
-            """Returns clause type"""
-            return self.clause_type
-
-    class QueryClause(Clause):
-        """This class models a knowledge base query clause."""
-
-        DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
-
-        def __init__(
-            self,
-            field,
-            field_info,
-            value,
-            query_type=DEFAULT_QUERY_TYPE,
-            synonym_field=None,
-        ):
-            """Initialize a knowledge base query clause."""
-            self.field = field
-            self.field_info = field_info
-            self.value = value
-            self.query_type = query_type
-            self.syn_field = synonym_field
-
-            self.clause_type = "query"
-
-        def build_query(self):
-            """build knowledge base query for query clause"""
-
-            # ES syntax is generated based on specified knowledge base field
-            # the following ranking factors are considered:
-            # 1. exact matches (with boosted weight)
-            # 2. word N-gram matches
-            # 3. character N-gram matches
-            # 4. matches on synonym if available (exact, word N-gram and character N-gram):
-            # for a knowledge base text field the synonym are indexed in a separate field
-            # "<field name>$whitelist" if available.
-            functions = []
-
-            if "embedder" in self.query_type and self.field_info.is_vector_field():
-                clause = None
-                functions = [
-                    {
-                        "script_score": {
-                            "script": {
-                                "source": "cosineSimilarity(params.field_embedding,"
-                                          " doc[params.matching_field]) + 1.0",
-                                "params": {
-                                    "field_embedding": self.value.tolist(),
-                                    "matching_field": self.field,
-                                },
-                            }
-                        },
-                        "weight": 10,
-                    }
-                ]
-            elif "text" in self.query_type:
-                clause = {
-                    "bool": {
-                        "should": [
-                            {"match": {self.field: {"query": self.value}}},
-                            {
-                                "match": {
-                                    self.field
-                                    + ".processed_text": {"query": self.value}
-                                }
-                            },
-                        ]
-                    }
-                }
-            elif "keyword" in self.query_type:
-                clause = {
-                    "bool": {
-                        "should": [
-                            {"match": {self.field: {"query": self.value}}},
-                            {
-                                "match": {
-                                    self.field
-                                    + ".normalized_keyword": {"query": self.value}
-                                }
-                            },
-                            {
-                                "match": {
-                                    self.field + ".char_ngram": {"query": self.value}
-                                }
-                            },
-                        ]
-                    }
-                }
-            else:
-                raise Exception("Unknown query type.")
-
-            if self.field_info.is_text_field():
-                # Boost function for boosting conditions, e.g. exact match boosting
-                functions = [
-                    {
-                        "filter": {
-                            "match": {self.field + ".normalized_keyword": self.value}
-                        },
-                        "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
-                    }
-                ]
-
-            # generate ES syntax for matching on synonym whitelist if available.
-            if self.syn_field:
-                clause["bool"]["should"].append(
-                    {
-                        "nested": {
-                            "path": self.syn_field,
-                            "score_mode": "max",
-                            "query": {
-                                "bool": {
-                                    "should": [
-                                        {
-                                            "match": {
-                                                self.syn_field
-                                                + ".name.normalized_keyword": {
-                                                    "query": self.value
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "match": {
-                                                self.syn_field
-                                                + ".name": {"query": self.value}
-                                            }
-                                        },
-                                        {
-                                            "match": {
-                                                self.syn_field
-                                                + ".name.char_ngram": {
-                                                    "query": self.value
-                                                }
-                                            }
-                                        },
-                                    ]
-                                }
-                            },
-                            "inner_hits": {},
-                        }
-                    }
-                )
-
-                functions.append(
-                    {
-                        "filter": {
-                            "nested": {
-                                "path": self.syn_field,
-                                "query": {
-                                    "match": {
-                                        self.syn_field
-                                        + ".name.normalized_keyword": self.value
-                                    }
-                                },
-                            }
-                        },
-                        "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
-                    }
-                )
-
-            return clause, functions
-
-        def validate(self):
-            if (
-                not self.field_info.is_text_field()
-                and not self.field_info.is_vector_field()
-            ):
-                raise ValueError(
-                    "Query can only be defined on text and vector fields. If it is,"
-                    " try running load_kb with clean=True and reinitializing your"
-                    " QuestionAnswerer object."
-                )
-
-    class FilterClause(Clause):
-        """This class models a knowledge base filter clause."""
-
-        def __init__(
-            self,
-            field,
-            field_info=None,
-            value=None,
-            query_type=DEFAULT_QUERY_TYPE,
-            range_gt=None,
-            range_gte=None,
-            range_lt=None,
-            range_lte=None,
-        ):
-            """Initialize a knowledge base filter clause. The filter type is determined by whether
-            the range operators or value is passed in.
-            """
-
-            self.field = field
-            self.field_info = field_info
-            self.value = value
-            self.query_type = query_type
-            self.range_gt = range_gt
-            self.range_gte = range_gte
-            self.range_lt = range_lt
-            self.range_lte = range_lte
-
-            if self.value:
-                self.filter_type = "text"
-            else:
-                self.filter_type = "range"
-
-            self.clause_type = "filter"
-
-        def build_query(self):
-            """build knowledge base query for filter clause"""
-            clause = {}
-            if self.filter_type == "text":
-                if self.field == "id":
-                    clause = {"term": {"id": self.value}}
-                else:
-                    if self.query_type == "text":
-                        clause = {
-                            "match": {self.field + ".char_ngram": {"query": self.value}}
-                        }
-                    else:
-                        clause = {
-                            "match": {
-                                self.field
-                                + ".normalized_keyword": {"query": self.value}
-                            }
-                        }
-            elif self.filter_type == "range":
-                lower_bound = None
-                upper_bound = None
-                if self.range_gt:
-                    lower_bound = ("gt", self.range_gt)
-                elif self.range_gte:
-                    lower_bound = ("gte", self.range_gte)
-
-                if self.range_lt:
-                    upper_bound = ("lt", self.range_lt)
-                elif self.range_lte:
-                    upper_bound = ("lte", self.range_lte)
-
-                clause = {"range": {self.field: {}}}
-
-                if lower_bound:
-                    clause["range"][self.field][lower_bound[0]] = lower_bound[1]
-
-                if upper_bound:
-                    clause["range"][self.field][upper_bound[0]] = upper_bound[1]
-            else:
-                raise Exception("Unknown filter type.")
-
-            return clause
-
-        def validate(self):
-            if self.filter_type == "range":
-                if (
-                    not self.range_gt
-                    and not self.range_gte
-                    and not self.range_lt
-                    and not self.range_lte
-                ):
-                    raise ValueError("No range parameter is specified")
-                elif self.range_gte and self.range_gt:
-                    raise ValueError(
-                        "Invalid range parameters. Cannot specify both 'gte' and 'gt'."
-                    )
-                elif self.range_lte and self.range_lt:
-                    raise ValueError(
-                        "Invalid range parameters. Cannot specify both 'lte' and 'lt'."
-                    )
-                elif (
-                    not self.field_info.is_number_field()
-                    and not self.field_info.is_date_field()
-                ):
-                    raise ValueError(
-                        "Range filter can only be defined for number or date field."
-                    )
-
-    class SortClause(Clause):
-        """This class models a knowledge base sort clause."""
-
-        SORT_ORDER_ASC = "asc"
-        SORT_ORDER_DESC = "desc"
-        SORT_DISTANCE = "distance"
-        SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
-
-        # default weight for adjusting sort scores so that they will be on the same scale when
-        # combined with text relevance scores.
-        DEFAULT_SORT_WEIGHT = 30
-
-        def __init__(
-            self,
-            field,
-            field_info=None,
-            sort_type=None,
-            field_stats=None,
-            location=None,
-        ):
-            """Initialize a knowledge base sort clause"""
-            self.field = field
-            self.location = location
-            self.sort_type = sort_type if sort_type else self.SORT_ORDER_DESC
-            self.field_stats = field_stats
-            self.field_info = field_info
-
-            self.clause_type = "sort"
-
-        def build_query(self):
-            """build knowledge base query for sort clause"""
-
-            # sort by distance based on passed in origin
-            if self.sort_type == "distance":
-                origin = self.location
-                scale = "5km"
-            else:
-                max_value = self.field_stats["max_value"]
-                min_value = self.field_stats["min_value"]
-
-                if self.field_info.is_date_field():
-                    # ensure the timestamps for date fields are integer values
-                    max_value = int(max_value)
-                    min_value = int(min_value)
-
-                    # add time unit for date field
-                    scale = (
-                        "{}ms".format(int(0.5 * (max_value - min_value)))
-                        if max_value != min_value
-                        else 1
-                    )
-                else:
-                    scale = (
-                        0.5 * (max_value - min_value) if max_value != min_value else 1
-                    )
-
-                if self.sort_type == "asc":
-                    origin = min_value
-                else:
-                    origin = max_value
-
-            sort_clause = {
-                "linear": {self.field: {"origin": origin, "scale": scale}},
-                "weight": self.DEFAULT_SORT_WEIGHT,
-            }
-
-            return sort_clause
-
-        def validate(self):
-            # validate the sort type to be valid.
-            if self.sort_type not in self.SORT_TYPES:
-                raise ValueError(
-                    "Invalid value for sort type '{}'".format(self.sort_type)
-                )
-
-            if self.field == "location" and self.sort_type != self.SORT_DISTANCE:
-                raise ValueError(
-                    "Invalid value for sort type '{}'".format(self.sort_type)
-                )
-
-            if self.field == "location" and not self.location:
-                raise ValueError(
-                    "No origin location specified for sorting by distance."
-                )
-
-            if self.sort_type == self.SORT_DISTANCE and self.field != "location":
-                raise ValueError(
-                    "Sort by distance is only supported using 'location' field."
-                )
-
-            # validate the sort field is number, date or location field
-            if not (
-                self.field_info.is_number_field()
-                or self.field_info.is_date_field()
-                or self.field_info.is_location_field()
-            ):
-                raise ValueError(
-                    "Custom sort criteria can only be defined for"
-                    + " 'number', 'date' or 'location' fields."
-                )
-
-
 class BaseQuestionAnswerer(ABC):
 
     def __init__(self, app_path, **kwargs):
@@ -846,7 +103,7 @@ class BaseQuestionAnswerer(ABC):
 
     @_query_type.setter
     def _query_type(self, query_type):
-        if not query_type in ALL_QUERY_TYPES:
+        if query_type not in ALL_QUERY_TYPES:
             msg = f"Cannot set query_type to a vlaue outside {ALL_QUERY_TYPES}. Found {query_type}"
             logger.error(msg)
             return
@@ -1063,7 +320,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # load knowledge base field information for the specified index.
         self._load_field_info(index)
 
-        return Search(
+        return ElasticsearchQuestionAnswerer.Search(
             client=self._es_client,
             index=index,
             ranking_config=ranking_config,
@@ -1262,6 +519,753 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         if embedder_model:
             embedder_model.dump()
 
+    class Search:
+        """This class models a generic filtered search in knowledge base. It allows developers to
+        construct more complex knowledge base search criteria based on the application requirements.
+
+        """
+
+        SYN_FIELD_SUFFIX = "$whitelist"
+
+        def __init__(self, client, index, ranking_config=None, field_info=None):
+            """Initialize a Search object.
+
+            Args:
+                client (Elasticsearch): Elasticsearch client.
+                index (str): index name of knowledge base object.
+                ranking_config (dict): overriding ranking configuration parameters for current
+                                        search.
+                field_info (dict): dictionary contains knowledge base matadata objects.
+            """
+            self.index = index
+            self.client = client
+
+            self._clauses = {"query": [], "filter": [], "sort": []}
+
+            self._ranking_config = ranking_config
+            if not ranking_config:
+                self._ranking_config = copy.deepcopy(DEFAULT_RANKING_CONFIG)
+
+            self._kb_field_info = field_info
+
+        def _clone(self):
+            """Clone a Search object.
+
+            Returns:
+                Search: cloned copy of the Search object.
+            """
+            s = ElasticsearchQuestionAnswerer.Search(client=self.client, index=self.index)
+            s._clauses = copy.deepcopy(self._clauses)
+            s._ranking_config = copy.deepcopy(self._ranking_config)
+            s._kb_field_info = copy.deepcopy(self._kb_field_info)
+
+            return s
+
+        def _build_query_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+            field, value = next(iter(kwargs.items()))
+            field_info = self._kb_field_info.get(field)
+            if not field_info:
+                raise ValueError("Invalid knowledge base field '{}'".format(field))
+
+            # check whether the synonym field is available. By default the synonyms are
+            # imported to "<field_name>$whitelist" field.
+            synonym_field = (
+                field + self.SYN_FIELD_SUFFIX
+                if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX)
+                else None
+            )
+            clause = ElasticsearchQuestionAnswerer.Search.QueryClause(
+                field, field_info, value, query_type, synonym_field)
+            clause.validate()
+            self._clauses[clause.get_type()].append(clause)
+
+        def _build_filter_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+            # set the filter type to be 'range' if any range operator is specified.
+            if (
+                kwargs.get("gt")
+                or kwargs.get("gte")
+                or kwargs.get("lt")
+                or kwargs.get("lte")
+            ):
+                field = kwargs.get("field")
+                gt = kwargs.get("gt")
+                gte = kwargs.get("gte")
+                lt = kwargs.get("lt")
+                lte = kwargs.get("lte")
+
+                if field not in self._kb_field_info:
+                    raise ValueError("Invalid knowledge base field '{}'".format(field))
+
+                clause = ElasticsearchQuestionAnswerer.Search.FilterClause(
+                    field=field,
+                    field_info=self._kb_field_info.get(field),
+                    range_gt=gt,
+                    range_gte=gte,
+                    range_lt=lt,
+                    range_lte=lte,
+                )
+            else:
+                key, value = next(iter(kwargs.items()))
+                if key not in self._kb_field_info:
+                    raise ValueError("Invalid knowledge base field '{}'".format(key))
+                clause = ElasticsearchQuestionAnswerer.Search.FilterClause(
+                    field=key, value=value, query_type=query_type)
+            clause.validate()
+            self._clauses[clause.get_type()].append(clause)
+
+        def _build_sort_clause(self, **kwargs):
+            sort_field = kwargs.get("field")
+            sort_type = kwargs.get("sort_type")
+            sort_location = kwargs.get("location")
+
+            field_info = self._kb_field_info.get(sort_field)
+            if not field_info:
+                raise ValueError("Invalid knowledge base field '{}'".format(sort_field))
+
+            # only compute field stats if sort field is number or date type.
+            field_stats = None
+            if field_info.is_number_field() or field_info.is_date_field():
+                field_stats = self._get_field_stats(sort_field)
+
+            clause = ElasticsearchQuestionAnswerer.Search.SortClause(
+                sort_field, field_info, sort_type, field_stats, sort_location
+            )
+            clause.validate()
+            self._clauses[clause.get_type()].append(clause)
+
+        def _build_clause(self, clause_type, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+            """Helper method to build query, filter and sort clauses.
+
+            Args:
+                clause_type (str): type of clause
+            """
+            if clause_type == "query":
+                self._build_query_clause(query_type, **kwargs)
+            elif clause_type == "filter":
+                self._build_filter_clause(query_type, **kwargs)
+            elif clause_type == "sort":
+                self._build_sort_clause(**kwargs)
+            else:
+                raise Exception("Unknown clause type.")
+
+        def query(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+            """Specify the query text to match on a knowledge base text field. The query text is
+            normalized and processed (based on query_type) to find matches in knowledge base using
+            several text relevance scoring factors including exact matches, phrase matches and
+            partial matches.
+
+            Examples:
+
+                >>> s = question_answerer.build_search(index='dish')
+                >>> s.query(name='pad thai')
+
+            In the example above the query text "pad thai" will be used to match against document
+            field "name" in knowledge base index "dish".
+
+            Args:
+                a keyword argument to specify the query text and the knowledge base document field
+                along with the query type (keyword/text/embedder/embedder_keyword/embedder_text).
+            Returns:
+                Search: a new Search object with added search criteria.
+            """
+            new_search = self._clone()
+            new_search._build_clause("query", query_type, **kwargs)
+
+            return new_search
+
+        def filter(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+            """Specify filter condition to be applied to specified knowledge base field. In MindMeld
+            two types of filters are supported: text filter and range filters.
+
+            Text filters are used to apply hard filters on specified knowledge base text fields.
+            The filter text value is normalized and matched using entire text span against the
+            knowledge base field.
+
+            It's common to have filter conditions based on other resolved canonical entities.
+            For example, in food ordering domain the resolved restaurant entity can be used as a
+            filter to resolve dish entities. The exact knowledge base field to apply these filters
+            depends on the knowledge base data model of the application.
+            If the entity is not in the canonical form, a fuzzy filter can be applied by setting the
+            query_type to 'text'.
+
+            Range filters are used to filter with a value range on specified knowledge base number
+            or date fields. Example use cases include price range filters and date range filters.
+
+            Examples:
+
+            add text filter:
+                >>> s = question_answerer.build_search(index='menu_items')
+                >>> s.filter(restaurant_id='B01CGKGQ40')
+
+            add range filter:
+                    >>> s = question_answerer.build_search(index='menu_items')
+                    >>> s.filter(field='price', gte=1, lt=10)
+
+            Args:
+                query_type (str): Whether the filter is over structured or unstructured text.
+                kwargs: A keyword argument to specify the filter text and the knowledge base text
+                        field.
+                field (str): knowledge base field name for range filter.
+                gt (number or str): range filter operator for greater than.
+                gte (number or str): range filter operator for greater than or equal to.
+                lt (number or str): range filter operator for less than.
+                lte (number or str): range filter operator for less or equal to.
+
+            Returns:
+                Search: A new Search object with added search criteria.
+            """
+            new_search = self._clone()
+            new_search._build_clause("filter", query_type, **kwargs)
+
+            return new_search
+
+        def sort(self, field, sort_type=None, location=None):
+            """Specify custom sort criteria.
+
+            Args:
+                field (str): knowledge base field for sort.
+                sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'.
+                                 'asc' and 'desc' can be used to sort numeric or date fields and
+                                 'distance' can be used to sort by distance on geo_point fields.
+                                 Default sort type is 'desc' if not specified.
+                location (str): location (lat, lon) in geo_point format to be used as origin when
+                                sorting by 'distance'
+            """
+            new_search = self._clone()
+            new_search._build_clause(
+                "sort", field=field, sort_type=sort_type, location=location
+            )
+            return new_search
+
+        def _get_field_stats(self, field):
+            """Get knowledge field statistics for custom sort functions. The field statistics is
+            only available for number and date typed fields.
+
+            Args:
+                field(str): knowledge base field name
+
+            Returns:
+                dict: dictionary that contains knowledge base field statistics.
+            """
+
+            stats_query = {"aggs": {}, "size": 0}
+            stats_query["aggs"][field + "_min"] = {"min": {"field": field}}
+            stats_query["aggs"][field + "_max"] = {"max": {"field": field}}
+
+            res = self.client.search(
+                index=self.index, body=stats_query, search_type="query_then_fetch"
+            )
+
+            return {
+                "min_value": res["aggregations"][field + "_min"]["value"],
+                "max_value": res["aggregations"][field + "_max"]["value"],
+            }
+
+        def _build_es_query(self, size=10):
+            """Build knowledge base search syntax based on provided search criteria.
+
+            Args:
+                size (int): The maximum number of records to fetch, default to 10.
+
+            Returns:
+                str: knowledge base search syntax for the current search object.
+            """
+            es_query = {
+                "query": {
+                    "function_score": {
+                        "query": {},
+                        "functions": [],
+                        "score_mode": "sum",
+                        "boost_mode": "sum",
+                    }
+                },
+                "_source": {"excludes": ["*" + self.SYN_FIELD_SUFFIX]},
+                "size": size,
+            }
+
+            if not self._clauses["query"] and not self._clauses["filter"]:
+                # no query/filter clauses - use match_all
+                es_query["query"]["function_score"]["query"] = {"match_all": {}}
+            else:
+                es_query["query"]["function_score"]["query"]["bool"] = {}
+
+                if self._clauses["query"]:
+                    es_query_clauses = []
+                    es_boost_functions = []
+                    for clause in self._clauses["query"]:
+                        query_clause, boost_functions = clause.build_query()
+                        if query_clause:
+                            es_query_clauses.append(query_clause)
+                        es_boost_functions.extend(boost_functions)
+
+                    if self._ranking_config["query_clauses_operator"] == "and":
+                        es_query["query"]["function_score"]["query"]["bool"][
+                            "must"
+                        ] = es_query_clauses
+                    else:
+                        es_query["query"]["function_score"]["query"]["bool"][
+                            "should"
+                        ] = es_query_clauses
+
+                    # add all boost functions for the query clause
+                    # right now the only boost functions supported are exact match boosting for
+                    # CNAME and synonym whitelists.
+                    es_query["query"]["function_score"]["functions"].extend(
+                        es_boost_functions
+                    )
+
+                if self._clauses["filter"]:
+                    es_filter_clauses = {"bool": {"must": []}}
+                    for clause in self._clauses["filter"]:
+                        es_filter_clauses["bool"]["must"].append(clause.build_query())
+
+                    es_query["query"]["function_score"]["query"]["bool"][
+                        "filter"
+                    ] = es_filter_clauses
+
+            # add scoring function for custom sort criteria
+            for clause in self._clauses["sort"]:
+                sort_function = clause.build_query()
+                es_query["query"]["function_score"]["functions"].append(sort_function)
+
+            logger.debug("ES query syntax: %s.", es_query)
+
+            return es_query
+
+        def execute(self, size=10):
+            """Executes the knowledge base search with provided criteria and returns matching
+            documents.
+
+            Args:
+                size (int): The maximum number of records to fetch, default to 10.
+
+            Returns:
+                a list of matching documents.
+            """
+            try:
+                # TODO: move the ES API call logic to ES helper
+                es_query = self._build_es_query(size=size)
+
+                response = self.client.search(index=self.index, body=es_query)
+
+                # construct results, removing embedding metadata and exposing score
+                results = []
+                for hit in response["hits"]["hits"]:
+                    item = {key: val for (key, val) in hit["_source"].items()
+                            if not key.endswith(EMBEDDING_FIELD_STRING)}
+                    item['_score'] = hit['_score']
+                    results.append(item)
+                return results
+            except EsConnectionError as e:
+                logger.error(
+                    "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+                )
+                raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts) from e
+            except TransportError as e:
+                logger.error(
+                    "Unexpected error occurred when sending requests to Elasticsearch: %s "
+                    "Status code: %s details: %s",
+                    e.error,
+                    e.status_code,
+                    e.info,
+                )
+                raise KnowledgeBaseError from e
+            except ElasticsearchException as e:
+                raise KnowledgeBaseError from e
+
+        class Clause(ABC):
+            """This class models an abstract knowledge base clause."""
+
+            def __init__(self):
+                """Initialize a knowledge base clause"""
+                self.clause_type = None
+
+            @abstractmethod
+            def validate(self):
+                """Validate the clause."""
+                raise NotImplementedError("Must override validate()")
+
+            @abstractmethod
+            def build_query(self):
+                """Build knowledge base query."""
+                raise NotImplementedError("Must override build_query()")
+
+            def get_type(self):
+                """Returns clause type"""
+                return self.clause_type
+
+        class QueryClause(Clause):
+            """This class models a knowledge base query clause."""
+
+            DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
+
+            def __init__(
+                self,
+                field,
+                field_info,
+                value,
+                query_type=DEFAULT_QUERY_TYPE,
+                synonym_field=None,
+            ):
+                """Initialize a knowledge base query clause."""
+                self.field = field
+                self.field_info = field_info
+                self.value = value
+                self.query_type = query_type
+                self.syn_field = synonym_field
+
+                self.clause_type = "query"
+
+            def build_query(self):
+                """build knowledge base query for query clause"""
+
+                # ES syntax is generated based on specified knowledge base field
+                # the following ranking factors are considered:
+                # 1. exact matches (with boosted weight)
+                # 2. word N-gram matches
+                # 3. character N-gram matches
+                # 4. matches on synonym if available (exact, word N-gram and character N-gram):
+                # for a knowledge base text field the synonym are indexed in a separate field
+                # "<field name>$whitelist" if available.
+                functions = []
+
+                if "embedder" in self.query_type and self.field_info.is_vector_field():
+                    clause = None
+                    functions = [
+                        {
+                            "script_score": {
+                                "script": {
+                                    "source": "cosineSimilarity(params.field_embedding,"
+                                              " doc[params.matching_field]) + 1.0",
+                                    "params": {
+                                        "field_embedding": self.value.tolist(),
+                                        "matching_field": self.field,
+                                    },
+                                }
+                            },
+                            "weight": 10,
+                        }
+                    ]
+                elif "text" in self.query_type:
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"match": {self.field: {"query": self.value}}},
+                                {
+                                    "match": {
+                                        self.field
+                                        + ".processed_text": {"query": self.value}
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                elif "keyword" in self.query_type:
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"match": {self.field: {"query": self.value}}},
+                                {
+                                    "match": {
+                                        self.field
+                                        + ".normalized_keyword": {"query": self.value}
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        self.field + ".char_ngram": {"query": self.value}
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                else:
+                    raise Exception("Unknown query type.")
+
+                if self.field_info.is_text_field():
+                    # Boost function for boosting conditions, e.g. exact match boosting
+                    functions = [
+                        {
+                            "filter": {
+                                "match": {self.field + ".normalized_keyword": self.value}
+                            },
+                            "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
+                        }
+                    ]
+
+                # generate ES syntax for matching on synonym whitelist if available.
+                if self.syn_field:
+                    clause["bool"]["should"].append(
+                        {
+                            "nested": {
+                                "path": self.syn_field,
+                                "score_mode": "max",
+                                "query": {
+                                    "bool": {
+                                        "should": [
+                                            {
+                                                "match": {
+                                                    self.syn_field
+                                                    + ".name.normalized_keyword": {
+                                                        "query": self.value
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    self.syn_field
+                                                    + ".name": {"query": self.value}
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    self.syn_field
+                                                    + ".name.char_ngram": {
+                                                        "query": self.value
+                                                    }
+                                                }
+                                            },
+                                        ]
+                                    }
+                                },
+                                "inner_hits": {},
+                            }
+                        }
+                    )
+
+                    functions.append(
+                        {
+                            "filter": {
+                                "nested": {
+                                    "path": self.syn_field,
+                                    "query": {
+                                        "match": {
+                                            self.syn_field
+                                            + ".name.normalized_keyword": self.value
+                                        }
+                                    },
+                                }
+                            },
+                            "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
+                        }
+                    )
+
+                return clause, functions
+
+            def validate(self):
+                if (
+                    not self.field_info.is_text_field()
+                    and not self.field_info.is_vector_field()
+                ):
+                    raise ValueError(
+                        "Query can only be defined on text and vector fields. If it is,"
+                        " try running load_kb with clean=True and reinitializing your"
+                        " QuestionAnswerer object."
+                    )
+
+        class FilterClause(Clause):
+            """This class models a knowledge base filter clause."""
+
+            def __init__(
+                self,
+                field,
+                field_info=None,
+                value=None,
+                query_type=DEFAULT_QUERY_TYPE,
+                range_gt=None,
+                range_gte=None,
+                range_lt=None,
+                range_lte=None,
+            ):
+                """Initialize a knowledge base filter clause. The filter type is determined by
+                whether the range operators or value is passed in.
+                """
+
+                self.field = field
+                self.field_info = field_info
+                self.value = value
+                self.query_type = query_type
+                self.range_gt = range_gt
+                self.range_gte = range_gte
+                self.range_lt = range_lt
+                self.range_lte = range_lte
+
+                if self.value:
+                    self.filter_type = "text"
+                else:
+                    self.filter_type = "range"
+
+                self.clause_type = "filter"
+
+            def build_query(self):
+                """build knowledge base query for filter clause"""
+                clause = {}
+                if self.filter_type == "text":
+                    if self.field == "id":
+                        clause = {"term": {"id": self.value}}
+                    else:
+                        if self.query_type == "text":
+                            clause = {
+                                "match": {self.field + ".char_ngram": {"query": self.value}}
+                            }
+                        else:
+                            clause = {
+                                "match": {
+                                    self.field
+                                    + ".normalized_keyword": {"query": self.value}
+                                }
+                            }
+                elif self.filter_type == "range":
+                    lower_bound = None
+                    upper_bound = None
+                    if self.range_gt:
+                        lower_bound = ("gt", self.range_gt)
+                    elif self.range_gte:
+                        lower_bound = ("gte", self.range_gte)
+
+                    if self.range_lt:
+                        upper_bound = ("lt", self.range_lt)
+                    elif self.range_lte:
+                        upper_bound = ("lte", self.range_lte)
+
+                    clause = {"range": {self.field: {}}}
+
+                    if lower_bound:
+                        clause["range"][self.field][lower_bound[0]] = lower_bound[1]
+
+                    if upper_bound:
+                        clause["range"][self.field][upper_bound[0]] = upper_bound[1]
+                else:
+                    raise Exception("Unknown filter type.")
+
+                return clause
+
+            def validate(self):
+                if self.filter_type == "range":
+                    if (
+                        not self.range_gt
+                        and not self.range_gte
+                        and not self.range_lt
+                        and not self.range_lte
+                    ):
+                        raise ValueError("No range parameter is specified")
+                    elif self.range_gte and self.range_gt:
+                        raise ValueError(
+                            "Invalid range parameters. Cannot specify both 'gte' and 'gt'."
+                        )
+                    elif self.range_lte and self.range_lt:
+                        raise ValueError(
+                            "Invalid range parameters. Cannot specify both 'lte' and 'lt'."
+                        )
+                    elif (
+                        not self.field_info.is_number_field()
+                        and not self.field_info.is_date_field()
+                    ):
+                        raise ValueError(
+                            "Range filter can only be defined for number or date field."
+                        )
+
+        class SortClause(Clause):
+            """This class models a knowledge base sort clause."""
+
+            SORT_ORDER_ASC = "asc"
+            SORT_ORDER_DESC = "desc"
+            SORT_DISTANCE = "distance"
+            SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
+
+            # default weight for adjusting sort scores so that they will be on the same scale when
+            # combined with text relevance scores.
+            DEFAULT_SORT_WEIGHT = 30
+
+            def __init__(
+                self,
+                field,
+                field_info=None,
+                sort_type=None,
+                field_stats=None,
+                location=None,
+            ):
+                """Initialize a knowledge base sort clause"""
+                self.field = field
+                self.location = location
+                self.sort_type = sort_type if sort_type else self.SORT_ORDER_DESC
+                self.field_stats = field_stats
+                self.field_info = field_info
+
+                self.clause_type = "sort"
+
+            def build_query(self):
+                """build knowledge base query for sort clause"""
+
+                # sort by distance based on passed in origin
+                if self.sort_type == "distance":
+                    origin = self.location
+                    scale = "5km"
+                else:
+                    max_value = self.field_stats["max_value"]
+                    min_value = self.field_stats["min_value"]
+
+                    if self.field_info.is_date_field():
+                        # ensure the timestamps for date fields are integer values
+                        max_value = int(max_value)
+                        min_value = int(min_value)
+
+                        # add time unit for date field
+                        scale = (
+                            "{}ms".format(int(0.5 * (max_value - min_value)))
+                            if max_value != min_value
+                            else 1
+                        )
+                    else:
+                        scale = (
+                            0.5 * (max_value - min_value) if max_value != min_value else 1
+                        )
+
+                    if self.sort_type == "asc":
+                        origin = min_value
+                    else:
+                        origin = max_value
+
+                sort_clause = {
+                    "linear": {self.field: {"origin": origin, "scale": scale}},
+                    "weight": self.DEFAULT_SORT_WEIGHT,
+                }
+
+                return sort_clause
+
+            def validate(self):
+                # validate the sort type to be valid.
+                if self.sort_type not in self.SORT_TYPES:
+                    raise ValueError(
+                        "Invalid value for sort type '{}'".format(self.sort_type)
+                    )
+
+                if self.field == "location" and self.sort_type != self.SORT_DISTANCE:
+                    raise ValueError(
+                        "Invalid value for sort type '{}'".format(self.sort_type)
+                    )
+
+                if self.field == "location" and not self.location:
+                    raise ValueError(
+                        "No origin location specified for sorting by distance."
+                    )
+
+                if self.sort_type == self.SORT_DISTANCE and self.field != "location":
+                    raise ValueError(
+                        "Sort by distance is only supported using 'location' field."
+                    )
+
+                # validate the sort field is number, date or location field
+                if not (
+                    self.field_info.is_number_field()
+                    or self.field_info.is_date_field()
+                    or self.field_info.is_location_field()
+                ):
+                    raise ValueError(
+                        "Custom sort criteria can only be defined for"
+                        + " 'number', 'date' or 'location' fields."
+                    )
+
     class FieldInfo:
         """This class models an information source of a knowledge base field metadata"""
 
@@ -1295,7 +1299,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return self.type
 
         def is_number_field(self):
-            """Returns True if the knowledge base field is a number field, otherwise returns False"""
+            """Returns True if the knowledge base field is a number field, otherwise returns False
+            """
 
             return self.type in self.NUMBER_TYPES
 
@@ -1305,7 +1310,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return self.type in self.DATE_TYPES
 
         def is_location_field(self):
-            """Returns True if the knowledge base field is a location field, otherwise returns False"""
+            """Returns True if the knowledge base field is a location field, otherwise returns False
+            """
 
             return self.type in self.GEO_TYPES
 
@@ -1315,7 +1321,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return self.type in self.TEXT_TYPES
 
         def is_vector_field(self):
-            """Returns True if the knowledge base field is a vector field, otherwise returns False"""
+            """Returns True if the knowledge base field is a vector field, otherwise returns False
+            """
 
             return self.type in self.VECTOR_TYPES
 
@@ -1346,24 +1353,27 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
     def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
 
-        raise NotImplementedError
+        doc_id = kwargs.get("id")
 
-        # doc_id = kwargs.get("id")
-        #
-        # query_type = query_type or self._query_type
-        #
-        # # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        # app_namespace = app_namespace or self.app_namespace
-        #
-        # # If an id was passed in, simply retrieve the specified document
-        # if doc_id:
-        #     logger.info(
-        #         "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-        #     )
-        #     s = self.build_search(index, app_namespace=app_namespace)
-        #     s = s.filter(query_type=query_type, id=doc_id)
-        #     results = s.execute(size=size)
-        #     return results
+        query_type = query_type or self._query_type
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index, app_namespace=app_namespace)
+            s = s.filter(id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        s = self.build_search(index, app_namespace=app_namespace).query(**kwargs)
+        results = s.execute(size=size)
+
+        return results
 
     def build_search(self, index, ranking_config=None, app_namespace=None):
 
@@ -1451,12 +1461,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 "continuing without generating embeddings..."
             )
 
-        #     # collect data related to all keys in all the docs in KB, and update database
-        #     self._update_indices(data_file, scoped_index_name, embedding_fields, config, app_path, clean)
-        #
-        # @staticmethod
-        # def _update_indices(data_file, scoped_index_name, embedding_fields, config, app_path, clean):
-
         def _doc_generator(_data_file):
             with open(_data_file) as data_fp:
                 line = data_fp.readline()
@@ -1480,7 +1484,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         id_counter = 0
         for doc in _doc_generator(data_file):
             # determine _id, remains same for all keys of the doc
-            _id = doc.pop("_id", None)
+            _id = doc.get("id", None)
             if not _id:
                 _id = id_counter
                 id_counter += 1
@@ -1575,7 +1579,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             if index_name not in self._indices:
                 try:
                     return self._load_index_metadata(index_name)
-                except:
+                except IndexError:
                     return {}
 
             # in case if metadata is already loaded, return that
@@ -1614,8 +1618,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             self._indices.update({index_name: index_resources})
 
         def is_available(self, index_name):
-            if index_name in self._indices or \
-                os.path.exists(self._get_cache_path_for_index(index_name)):
+            if (
+                index_name in self._indices or
+                os.path.exists(self._get_cache_path_for_index(index_name))
+            ):
                 return True
 
             return False
@@ -1623,7 +1629,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         def get(self, index_name):
             try:
                 return self._indices[index_name]
-            except KeyError:
+            except KeyError as e:
                 msg = f"Index {index_name} does not exist in scope of {self._app_path}. " \
                       f"Consider creating one."
                 raise KeyError(msg) from e
@@ -1637,7 +1643,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # warning: duplicated contents of `id2value` also exists in a resolver object if created
             self.id2value = {}
-            self.data_type = "location" if field_name == "location" else None
+            self.data_type = None
             self.hash = None  # to identify any data changes before build resolver
             self.has_text_resolver = None
             self.has_embedding_resolver = None
@@ -1647,6 +1653,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             self._text_resolver = None  # an entity resolver if string type data
             self._embedding_resolver = None  # an embedding based entity resolver
+
+            # Currently we do not support `date` filed type sperately and consider it as a `string`
+            if field_name.startswith("location"):
+                self.data_type = "location"
 
         def __repr__(self):
             return f"{self.__class__.__name__} field_name: {self.field_name} " \
@@ -1681,18 +1691,17 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             errmsg = "Formatting error in field {} in doc id {}. Found an unexpected type {}"
 
             if self.data_type == "location":
-                if field_name == "location":
-                    # convert it into standard format "37.77,122.41"
-                    if isinstance(value, list):  # eg. [37.77, 122.41]
-                        value = ",".join([str(_value) for _value in value])
-                    elif isinstance(value, dict):  # eg. {"lat": 37.77, "lon": 122.41}
-                        value = ",".join([str(value["lat"]), str(value["lon"])])
-                    elif isinstance(value, str):  # eg. "37.77,122.41"
-                        if not "," in value or len(value.split(",")) != 2:
-                            raise TypeError("incorrect `location` field value format")
-                    else:
-                        errmsg.format(self.field_name, _id, type(value))
-                        raise TypeError(errmsg)
+                # convert it into standard format "37.77,122.41"
+                if isinstance(value, list):  # eg. [37.77, 122.41]
+                    value = ",".join([str(_value) for _value in value])
+                elif isinstance(value, dict):  # eg. {"lat": 37.77, "lon": 122.41}
+                    value = ",".join([str(value["lat"]), str(value["lon"])])
+                elif isinstance(value, str):  # eg. "37.77,122.41"
+                    if "," not in value or len(value.split(",")) != 2:
+                        raise TypeError("incorrect `location` field value format")
+                else:
+                    errmsg.format(self.field_name, _id, type(value))
+                    raise TypeError(errmsg)
             elif self.data_type == "bool":
                 if not isinstance(value, bool):
                     errmsg.format(self.field_name, _id, type(value))
@@ -1719,9 +1728,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             if not id2value and not self.data_type:
                 return  # else, if required, update resolvers
 
-            # update id2cname
+            # update id2cname and compute hash
             for _id, value in id2value.items():
-                if not value:  # cases when the value is `null`
+                # TODO: must consider those cases where the value is `null`
+                if value is None:
                     continue
                 # determine data_type if not previously determined (only once for all input data),
                 #   note: it is already determined for `location` field type
@@ -1735,7 +1745,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     else:
                         msg = f"Unknown field type: {isinstance(value, str)}"
                         raise TypeError(msg)
-                # validation and re-fromatting and update database
+                # validation and re-formatting and update database
                 value = self._validate_and_reformat_value(_id, value)
                 self.id2value.update({_id: value})
             new_hash = Hasher(algorithm="sha1").hash(
@@ -1744,6 +1754,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # ascertain resolver requirement
             if self.data_type in ["location", "bool", "number"]:
+                # discard input arguments
                 self.has_text_resolver = False
                 self.has_embedding_resolver = False
                 self.resolver_settings = {}
@@ -1843,7 +1854,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             # update hash
             self.hash = new_hash
 
-        def get_similarity_scores(self, query):
+        def do_search(self, query):
             """
             Retrieves doc ids with corresponsing similarity scores for the given query
 
@@ -1852,36 +1863,124 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             """
 
             # maps doc ids with their similarity scores
-            scores = {}
+            this_field_scores = {}
             n_scores = 0
-
             for resolver in [self._text_resolver, self._embedding_resolver]:
                 if resolver:
                     # obtain all synonyms' scores in predictions
                     predictions = resolver.predict(query, top_n=None)
-                    # sort predictions retaining only top scored entried for each id
-
-
-                    # do some form of normalization on the scores
-
-
-
                     # retain only top scored entries for each id
-                    _scores = {}
+                    _best_scores = {}
                     for prediction in predictions:
-                        if prediction["id"] not in _scores:
-                            _scores.update(
-                                {
-                                    prediction["id"]: (
-                                        (scores.get(prediction["id"], 0.0) + prediction["score"]) /
-                                        (n_scores + 1)
-                                    )
-                                }
-                            )
-                    scores.update(_scores)
+                        _id, _score = prediction["id"], prediction["score"]
+                        if _id not in _best_scores:
+                            _best_scores[_id] = _score
+                        else:
+                            _best_scores[_id] = max(_best_scores[_id], _score)
+                    # for missing doc ids, populate the minimum score
+                    min_best_scores = min([*_best_scores.values()])
+                    for _id in self.id2value.keys():
+                        if _id not in _best_scores:
+                            _best_scores[_id] = min_best_scores
+                    # retain only top scored entries for each id
+                    this_field_scores = {
+                        _id: (this_field_scores.get(_id, 0.0) + _score) / (n_scores + 1)
+                        for _id, _score in _best_scores.items()
+                    }
                     n_scores += 1
 
-            return scores
+            # Case where-in no resolver exists (eg. other data types)
+            if not this_field_scores:
+                this_field_scores = {_id: 0.0 for _id in self.id2value.keys()}
+
+            return this_field_scores
+
+        def do_filter(self, curated_docs, query_text=None,
+                      gt=None, gte=None, lt=None, lte=None, boolean=None):
+
+            if not curated_docs:
+                return curated_docs
+
+            # sanity check
+            if self.data_type not in ["number", "string", "bool"]:
+                msg = f"Filtering is not allowed for data type `{self.data_type}`. "
+                logger.error(msg)
+                return curated_docs
+
+            if self.data_type in ["number"]:
+
+                if gt is None and gte is None and lt is None and lte is None:
+                    return curated_docs
+
+                def is_valid(value):
+                    if gt and not (value > gt):
+                        return False
+                    if gte and not (value >= gte):
+                        return False
+                    if lt and not (value < lt):
+                        return False
+                    if lte and not (value <= lte):
+                        return False
+                    return True
+
+            elif self.data_type in ["string"]:
+
+                if query_text is None:
+                    return curated_docs
+
+                query_text_aliases = set([query_text, query_text.lower()])
+
+                def is_valid(value):
+                    if value in query_text_aliases:
+                        return True
+                    if value.lower() in query_text_aliases:
+                        return True
+                    return False
+
+            elif self.data_type == "bool":
+
+                if not isinstance(boolean, bool):
+                    return curated_docs
+
+                def is_valid(value):
+                    return value == boolean
+
+            valid_indices = []
+            for i, doc in enumerate(curated_docs):
+                _id = doc["_id"]
+                if _id in self.id2value and is_valid(self.id2value[_id]):
+                    valid_indices.append(i)
+
+            return [curated_docs[i] for i in valid_indices]
+
+        def do_sort(self, curated_docs, sort_type=None, distance=None, location=None):
+
+            if not curated_docs:
+                return curated_docs
+
+            # sanity check
+            if self.data_type not in ["string", "number", "location"]:
+                msg = f"Sorting is not allowed for data type `{self.data_type}`. "
+                logger.error(msg)
+                return curated_docs
+
+            if self.data_type in ["string", "number"]:
+                sort_type = sort_type or "desc"  # "asc" and "desc" are standardized values
+                if sort_type not in ["asc", "desc"]:
+                    return curated_docs
+
+                return sorted(curated_docs, key=lambda x: x[self.field_name],
+                              reverse=sort_type != "asc")
+
+            elif self.data_type == "location":
+
+                if distance is None and location is None:
+                    return curated_docs
+
+                if distance is not None or location is not None:
+                    msg = "NotImplemented: Using location based sorting isn't implemented yet"
+                    logger.error(msg)
+                    return curated_docs
 
         @property
         def docs_ids(self):
@@ -1894,8 +1993,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             Args:
                 index_resources: a dict of filed names and corresponding FieldResource instances
-                _ids: if provided as a list of values, only docs with those ids are obtained in
-                        the same order of the ids, else all ids are used
+                _ids (List[str]): if provided as a list of strings, only docs with those ids are
+                    obtained in the same order of the ids, else all ids are used
             Returns:
                 list[dict]: compiled docs
             """
@@ -1915,12 +2014,16 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # initialize docs
             for i, _id in enumerate(all_ids):
-                docs[_id] = {"_score": _scores[i]} if _scores else {}
+                docs[_id] = {"_id": _id, "_score": _scores[i]} if _scores else {"_id": _id}
 
             # populate docs
             for field_name, field_resource in index_resources.items():
                 for _id in all_ids:
-                    docs[_id][field_name] = field_resource.id2value[_id]
+                    # 1103024456
+                    try:
+                        docs[_id][field_name] = field_resource.id2value[_id]
+                    except KeyError:
+                        print(_id)
 
             return [*docs.values()]
 
@@ -1935,6 +2038,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 logger.warning(msg)
 
             self.index_name = index
+
+            # TODO: Populate these as lists to entertain more flexible order of building search
             self._search_queries = {}
             self._filter_queries = {}
             self._sort_queries = {}
@@ -1943,26 +2048,55 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             for key, value in kwargs.items():
                 if key in self._search_queries:
                     msg = f"Found a duplicate search clause against `{key}` field name. " \
-                          "Considering only latest input."
+                          "Utilizing only latest input."
                     logger.warning(msg)
                 self._search_queries.update({key: value})
             return self
 
         def filter(self, **kwargs):
-            for key, value in kwargs.items():
-                if key in self._filter_queries:
-                    msg = f"Found a duplicate filter clause against `{key}` field name. " \
-                          "Considering only latest input."
+
+            gt = kwargs.pop("gt", None)
+            gte = kwargs.pop("gte", None)
+            lt = kwargs.pop("lt", None)
+            lte = kwargs.pop("lte", None)
+            field = kwargs.pop("field", None)
+
+            # NEW! to support boolean filtering as well
+            boolean = kwargs.pop("boolean", None)  # if inputted, must be a bool- True or False
+
+            # filter that operates on numeric values
+            if field:
+                if field in self._filter_queries:
+                    msg = f"Found a duplicate filter clause against `{field}` field name. " \
+                          "Utilizing only latest input."
                     logger.warning(msg)
-                self._filter_queries.update({key: value})
+                self._filter_queries.update(
+                    {field: {"gt": gt, "gte": gte, "lt": lt, "lte": lte, "boolean": boolean}}
+                )
+
+            # filter that operates on strings; extract field name and query strings then
+            else:
+                for key, value in kwargs.items():
+                    if key in self._filter_queries:
+                        msg = f"Found a duplicate filter clause against `{key}` field name. " \
+                              "Utilizing only latest input."
+                        logger.warning(msg)
+                    self._filter_queries.update({key: {"query_text": value}})
+
             return self
 
-        def sort(self, field, sort_type, **kwargs):
+        def sort(self, field, **kwargs):
+
+            sort_type = kwargs.pop("sort_type", None)
+            distance = kwargs.pop("distance", None)
+            location = kwargs.pop("location", None)
+
             if field in self._sort_queries:
                 msg = f"Found a duplicate sort clause against `{field}` field name. " \
-                      "Considering only latest input."
+                      "Utilizing only latest input."
                 logger.warning(msg)
-            self._sort_queries.update({field: {"sort_type": sort_type, **kwargs}})
+            self._sort_queries.update(
+                {field: {"sort_type": sort_type, "distance": distance, "location": location}})
             return self
 
         def execute(self, size=10):
@@ -1971,14 +2105,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 index_resources = (
                     NonElasticsearchQuestionAnswerer.ALL_INDICES.get(self.index_name)
                 )
-            except Exception as e:
+            except KeyError:
                 msg = f"The index `{self.index_name}` looks unavailable. " \
                       f"Consider running `.load_kb(...)` to create indices for " \
                       f"running search queries. "
-                logger.error(msg + e)
+                logger.error(msg)
                 return []
 
-            # get results for `query` clauses
+            # get results (aka. curated_docs) for `query` clauses
             n_scores = 0
             scores = {}
             for field_name, query_text in self._search_queries.items():
@@ -1987,25 +2121,49 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
                     continue
-                this_field_scores = field_resource.get_similarity_scores(query_text)
+                this_field_scores = field_resource.do_search(query_text)
                 scores = {_id: (scores.get(_id, 0.0) + _score) / (n_scores + 1)
                           for _id, _score in this_field_scores.items()}
                 n_scores += 1
-            if scores:
-                _ids, _scores = zip(*sorted(scores.items(), key=lambda x: x[1], reverse=True))
-            else:
-                _ids, _scores = None, None
-            results = (
-                NonElasticsearchQuestionAnswerer
-                    .FieldResource
-                    .curate_docs_to_return(index_resources, _ids=_ids, _scores=_scores)
+            _ids, _scores = (
+                zip(*sorted(scores.items(), key=lambda x: x[1], reverse=True))
+                if scores else (None, None)
+            )
+            curated_docs = (
+                NonElasticsearchQuestionAnswerer.FieldResource.curate_docs_to_return(
+                    index_resources, _ids=_ids, _scores=_scores)
             )
 
             # get narrowed results for `filter` clause
+            for field_name, kwargs in self._filter_queries.items():
+                field_resource = index_resources.get(field_name, None)
+                if not field_resource:
+                    msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
+                    logger.error(msg)
+                    continue
+                curated_docs = field_resource.do_filter(curated_docs, **kwargs)
 
             # get sorted results for `sort` clause
+            for field_name, kwargs in self._sort_queries.items():
+                field_resource = index_resources.get(field_name, None)
+                if not field_resource:
+                    msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
+                    logger.error(msg)
+                    continue
+                curated_docs = field_resource.do_sort(curated_docs, **kwargs)
 
-            return results
+            # pop `_id` key fields
+            for doc in curated_docs:
+                doc.pop("_id")
+
+            # reduce to the required size
+            curated_docs = curated_docs[:size]
+            if len(curated_docs) < size:
+                msg = f"Retrieved only {len(curated_docs)} matches instead of asked number " \
+                      f"{size} for index `{self.index_name}`."
+                logger.info(msg)
+
+            return curated_docs
 
     ALL_INDICES = Indices()
 

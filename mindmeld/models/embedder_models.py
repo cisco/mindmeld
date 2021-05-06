@@ -77,7 +77,8 @@ class Embedder(ABC):
 
                 else:  # deprecated format; backwards compatible with QA module code
                     if not isinstance(data, dict):
-                        msg = "Unknown data format while loading cache embeddings. Ignoring loading ..."
+                        msg = "Unknown data format while loading cache embeddings. " \
+                              "Ignoring loading ..."
                         logger.error(msg)
                     self.data = data
 
@@ -163,7 +164,7 @@ class Embedder(ABC):
             cache_path = path.get_embedder_cache_file_path(
                 app_path, kwargs.get("embedder_type", "default"), self.model_name
             )
-            # new usage: determine cache path for the model using model_id (eg. new QA and ER modules)
+            # new usage: determine cache path for the model using model_id (eg. ER module)
             if not (os.path.exists(cache_path) and os.path.getsize(cache_path) > 0):
                 # implies a previously used path name has no data and hence, is safe to change
                 #   default cache path for this model (backwards compatability in loading data)
@@ -183,7 +184,7 @@ class Embedder(ABC):
 
         # backwards compatability
         if getattr(self, "load", None):
-            # implies a `load()` is implemented as an abstract class instead of the new way `_load()`
+            # implies `load()` is implemented as an abstract class instead of the new way `_load()`
             getattr(self, "load")(**kwargs)
 
         raise NotImplementedError
@@ -200,7 +201,7 @@ class Embedder(ABC):
 
         # backwards compatability
         if getattr(self, "encode", None):
-            # implies a `encode()` is implemented as an abstract class instead of the new way `_encode()`
+            # implies `encode()` is implemented as an abstract class instead of new way `_encode()`
             getattr(self, "encode")(text_list)
 
         raise NotImplementedError
