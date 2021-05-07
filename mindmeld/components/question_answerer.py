@@ -91,6 +91,11 @@ class BaseQuestionAnswerer(ABC):
         if not self.__qa_config:
             self.__qa_config = get_classifier_config("question_answering", app_path=app_path)
 
+        if not self.app_path and not self.app_namespace:
+            msg = "Atlease one of `app_path` or `app_namespace` must be inputted to distinctly " \
+                  "identify the indices being created from you data files."
+            raise Exception(msg)
+
     def __repr__(self):
         return f"<{self.__class__.__name__} model_type: {self._query_type}>"
 
@@ -1654,7 +1659,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             self._text_resolver = None  # an entity resolver if string type data
             self._embedding_resolver = None  # an embedding based entity resolver
 
-            # Currently we do not support `date` filed type sperately and consider it as a `string`
+            # Currently we do not support `date` field type sperately and consider it as a `string`
             if field_name.startswith("location"):
                 self.data_type = "location"
 
@@ -1700,20 +1705,18 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     if "," not in value or len(value.split(",")) != 2:
                         raise TypeError("incorrect `location` field value format")
                 else:
-                    errmsg.format(self.field_name, _id, type(value))
-                    raise TypeError(errmsg)
+                    raise TypeError(errmsg.format(self.field_name, _id, type(value)))
             elif self.data_type == "bool":
                 if not isinstance(value, bool):
-                    errmsg.format(self.field_name, _id, type(value))
-                    raise TypeError(errmsg)
+                    raise TypeError(errmsg.format(self.field_name, _id, type(value)))
             elif self.data_type == "number":
                 if not isinstance(value, numbers.Number):
-                    errmsg.format(self.field_name, _id, type(value))
-                    raise TypeError(errmsg)
+                    raise TypeError(errmsg.format(self.field_name, _id, type(value)))
             elif self.data_type == "string":
                 if not (isinstance(value, str) or all([isinstance(val, str) for val in value])):
-                    errmsg.format(self.field_name, _id, type(value))
-                    raise TypeError(errmsg)
+                    msg = errmsg.format(self.field_name, _id, type(value))
+                    logger.error(msg)
+                    value = str(value)
 
             return value
 
@@ -1743,8 +1746,12 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     elif isinstance(value, str) or all([isinstance(val, str) for val in value]):
                         self.data_type = "string"
                     else:
-                        msg = f"Unknown field type: {isinstance(value, str)}"
-                        raise TypeError(msg)
+                        msg = f"TypeError: Unknown field type for value {value}: {type(value)}. " \
+                              f"Allowed field types are " \
+                              f"[location, string, list of strings, number, boolean]. " \
+                              f"All other field types' values are converted to raw strings."
+                        logger.error(msg)
+                        self.data_type = "string"
                 # validation and re-formatting and update database
                 value = self._validate_and_reformat_value(_id, value)
                 self.id2value.update({_id: value})
@@ -1781,17 +1788,24 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 # new: https://github.com/cisco/mindmeld/issues/291
                 #   making `value` into a list for cname and whitelist conversion.
                 #   If more than one items in `value`, all items after first one go into whitelist
-                entity_map = {
-                    "entities":
-                        [
-                            (
-                                {"id": key, "cname": list(value)[0], "whitelist": list(value)[1:]}
-                                if isinstance(value, (set, list)) else
-                                {"id": key, "cname": value, "whitelist": []}
-                            )
-                            for key, value in self.id2value.items()
-                        ]
-                }
+                try:
+                    entity_map = {
+                        "entities":
+                            [
+                                (
+                                    {"id": key, "cname": list(value)[0],
+                                     "whitelist": list(value)[1:]}
+                                    if isinstance(value, (set, list)) else
+                                    {"id": key, "cname": value, "whitelist": []}
+                                )
+                                for key, value in self.id2value.items()
+                            ]
+                    }
+                except IndexError:
+                    msg = f"Unable to create entity mapping data to fit resolver. This could be " \
+                          f"due to the way the values of the KB field ({self.field_name}) are!"
+                    logger.error(msg)
+                    entity_map = {}
                 return entity_map
 
             # tfidf based text resolver
@@ -1992,7 +2006,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             Collates all field names into docs
 
             Args:
-                index_resources: a dict of filed names and corresponding FieldResource instances
+                index_resources: a dict of field names and corresponding FieldResource instances
                 _ids (List[str]): if provided as a list of strings, only docs with those ids are
                     obtained in the same order of the ids, else all ids are used
             Returns:
@@ -2170,7 +2184,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
 class QuestionAnswerer:
 
-    def __new__(cls, app_path, **kwargs):
+    def __new__(cls, app_path=None, **kwargs):
         """
         This method is used to initialize a QuestionAnswerer based on model_type
         To keep the code base backwards compatible, we use a `__new__()` way of creating instances
@@ -2186,7 +2200,7 @@ class QuestionAnswerer:
         return cls._get_question_answerer(config)(app_path, **kwargs)
 
     @classmethod
-    def create_question_answerer(cls, app_path, **kwargs):
+    def create_question_answerer(cls, app_path=None, **kwargs):
         return cls(app_path, **kwargs)
 
     @staticmethod

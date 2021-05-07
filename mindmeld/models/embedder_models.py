@@ -299,10 +299,10 @@ class Embedder(ABC):
     def find_similarity(self,
                         src_texts,
                         tgt_texts=None,
-                        top_n=None,
-                        return_as_dict=False,
+                        top_n=20,
                         scores_normalizer=None,
                         _sim_func=None,
+                        _return_as_dict=False,
                         _no_sort=False):
         """Computes the cosine similarity
 
@@ -312,19 +312,19 @@ class Embedder(ABC):
                 if None, existing cache is used as target strings
             top_n (int, optional): maximum number of results to populate. if None, equals length
                 of tgt_texts
-            return_as_dict (bool, optional): if the results should be returned as a dictionary of
-                target_text name as keys and scores as corresponding values
             scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
                 are: "min_max_scaler", "standard_scaler"
             _sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If
                 specified, must take two numpy-array/pytorch-tensor arguments for similarity
                 computation with an optional argument to return results as numpy or tensor
+            _return_as_dict (bool, optional): if the results should be returned as a dictionary of
+                target_text name as keys and scores as corresponding values
             _no_sort (bool, optional): If True, results are returned without sorting. This is
                 helpful at times when you wish to do additional wrapper operations on top of raw
                 results and would like to save computational time without sorting.
         Returns:
-            Union[dict, list[tuple]]: if return_as_dict, returns a dictionary of tgt_texts and their
-                scores, else a list of sorted synonym names paired with their
+            Union[dict, list[tuple]]: if _return_as_dict, returns a dictionary of tgt_texts and
+                their scores, else a list of sorted synonym names paired with their
                 similarity scores (descending order)
         """
 
@@ -365,7 +365,7 @@ class Embedder(ABC):
                           f"normalizing similarity scores."
                     logger.error(msg)
 
-            if return_as_dict:
+            if _return_as_dict:
                 results.append(dict(zip(tgt_texts, similarity_scores)))
             else:
                 if not _no_sort:  # sort results in descending scores
