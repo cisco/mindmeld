@@ -518,7 +518,7 @@ class FileBackedList:
             except Exception:
                 self.file_handle.close()
                 self.file_handle = None
-                raise StopIteration
+                raise StopIteration from Exception
 
         def __del__(self):
             if self.file_handle:

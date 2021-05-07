@@ -81,7 +81,7 @@ class QueryCache:
                 # version does not match
                 return False
             return True
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             return False
 
     @staticmethod

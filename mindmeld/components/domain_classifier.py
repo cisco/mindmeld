@@ -105,25 +105,20 @@ class DomainClassifier(Classifier):
         )
 
     def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+        self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns the set of queries to train on
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
 
         Returns:
             ProcessedQueryList: list of queries
         """
-        if queries:
-            return self._build_query_tree(queries)
-
         return self._resource_loader.get_labeled_queries(label_set=label_set)
 
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         """
         Returns a set of queries and their labels based on the label set.
         Because the query set is large for domain classification, it uses a
@@ -131,8 +126,6 @@ class DomainClassifier(Classifier):
         over multiple times so they are resolved to an in-memory list.
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
 
@@ -140,7 +133,7 @@ class DomainClassifier(Classifier):
             tuple(ProcessedQueryList.QueryIterator,list[str])
 
         """
-        query_tree = self._get_query_tree(queries, label_set=label_set)
+        query_tree = self._get_query_tree(label_set=label_set)
         queries = self._resource_loader.flatten_query_tree(query_tree)
 
         if not queries:
@@ -149,9 +142,9 @@ class DomainClassifier(Classifier):
                 list(queries.domains()))
 
     def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+        self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
-        query_tree = self._get_query_tree(queries, label_set=label_set)
+        query_tree = self._get_query_tree(label_set=label_set)
         queries = []
         for domain in query_tree:
             for intent in query_tree[domain]:

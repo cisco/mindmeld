@@ -149,12 +149,11 @@ class Classifier(ABC):
         self.config = None
         self.hash = ""
 
-    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
+    def fit(self, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                  training set will be loaded.
             incremental_timestamp (str, optional): The timestamp folder to cache models in
@@ -219,14 +218,14 @@ class Classifier(ABC):
             label_set = model_config.train_label_set
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
-        new_hash = self._get_model_hash(model_config, queries, label_set)
+        new_hash = self._get_model_hash(model_config, label_set)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
             logger.info("No need to fit.  Previous model is cached.")
             return False
 
-        queries, classes = self._get_queries_and_labels(queries, label_set)
+        queries, classes = self._get_queries_and_labels(label_set)
 
         if not queries:
             logger.warning(
@@ -307,12 +306,10 @@ class Classifier(ABC):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, queries=None, label_set=None):
+    def evaluate(self, label_set=None):
         """Evaluates the trained classification model on the given test data
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
-                are provided, the test label set will be used.
             label_set (str): The label set to use for evaluation.
 
         Returns:
@@ -328,7 +325,7 @@ class Classifier(ABC):
             logger.error("You must fit or load the model before running evaluate.")
             return None
 
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        queries, labels = self._get_queries_and_labels(label_set=label_set)
 
         if not queries:
             logger.info(
@@ -339,7 +336,7 @@ class Classifier(ABC):
             )
             return None
 
-        evaluation = self._model.evaluate(queries, labels)
+        evaluation = self._model.evaluate(labels)
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
@@ -479,13 +476,11 @@ class Classifier(ABC):
 
     @abstractmethod
     def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+        self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns the set of queries to train on
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
 
@@ -495,12 +490,10 @@ class Classifier(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns the set of queries and their labels to train on
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
@@ -508,27 +501,23 @@ class Classifier(ABC):
 
     @abstractmethod
     def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+        self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns a hashed string representing the labeled queries
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
         raise NotImplementedError("Subclasses must implement this method")
 
     def _get_model_hash(
-        self, model_config, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+        self, model_config, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
         """Returns a hash representing the inputs into the model
 
         Args:
             model_config (ModelConfig): The model configuration
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
 
@@ -538,7 +527,7 @@ class Classifier(ABC):
 
         # Hash queries
         queries_hash = self._get_queries_and_labels_hash(
-            queries=queries, label_set=label_set
+            label_set=label_set
         )
 
         # Hash config
