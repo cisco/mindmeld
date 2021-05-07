@@ -40,6 +40,7 @@ from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
 
+
 class ProcessedQueryList:
     """
     ProcessedQueryList provides a memory efficient disk backed list representation
@@ -87,7 +88,6 @@ class ProcessedQueryList:
     def intents(self):
         return ProcessedQueryList.IntentIterator(self)
 
-
     class Iterator:
         def __init__(self, source):
             self.source = source
@@ -120,26 +120,21 @@ class ProcessedQueryList:
         def reorder(self, indices):
             self.row_ids = [self.row_ids[i] for i in indices]
 
-
     class RawQueryIterator(Iterator):
         def __getitem__(self, key):
             return self.source.cache.get_raw_query(self.row_ids[key])
-
 
     class QueryIterator(Iterator):
         def __getitem__(self, key):
             return self.source.cache.get_query(self.row_ids[key])
 
-
     class EntitiesIterator(Iterator):
         def __getitem__(self, key):
             return self.source.cache.get_entities(self.row_ids[key])
 
-
     class DomainIterator(Iterator):
         def __getitem__(self, key):
             return self.source.cache.get_domain(self.row_ids[key])
-
 
     class IntentIterator(Iterator):
         def __getitem__(self, key):
@@ -627,7 +622,6 @@ class ResourceLoader:
             # file existed before and now -> update
             old_file_info["modified"] = new_file_info["modified"]
 
-
     class WordFreqBuilder:
         '''
         Compiles unigram frequency dictionary of normalized query tokens
@@ -635,7 +629,6 @@ class ResourceLoader:
         def __init__(self, enable_stemming=False):
             self.enable_stemming = enable_stemming
             self.tokens = []
-
 
         def add(self, query):
             for i in range(len(query.normalized_tokens)):
@@ -652,7 +645,6 @@ class ResourceLoader:
         def get_resource(self):
             return Counter(self.tokens)
 
-
     class CharNgramFreqBuilder:
         '''
         Compiles n-gram character frequency dictionary of normalized query tokens
@@ -662,20 +654,18 @@ class ResourceLoader:
             self.thresholds = thresholds
             self.char_freq_dict = Counter()
 
-
         def add(self, query):
             for length, threshold in zip(self.lengths, self.thresholds):
                 if threshold > 0:
                     character_tokens = [
-                        q.normalized_text[i : i + length]
-                        for i in range(len(q.normalized_text))
-                        if len(q.normalized_text[i : i + length]) == length
+                        query.normalized_text[i : i + length]
+                        for i in range(len(query.normalized_text))
+                        if len(query.normalized_text[i : i + length]) == length
                     ]
                     self.char_freq_dict.update(character_tokens)
 
         def get_resource(self):
             return self.char_freq_dict
-
 
     class WordNgramFreqBuilder:
         '''
@@ -694,7 +684,7 @@ class ResourceLoader:
                     for i in range(len(query.normalized_tokens)):
                         ngram_query = " ".join(query.normalized_tokens[i : i + length])
                         ngram_tokens.append(ngram_query)
-                        if enable_stemming:
+                        if self.enable_stemming:
                             stemmed_ngram_query = " ".join(
                                 query.stemmed_tokens[i : i + length]
                             )
@@ -704,7 +694,6 @@ class ResourceLoader:
 
         def get_resource(self):
             return self.word_freq_dict
-
 
     class QueryFreqBuilder:
         '''
@@ -733,7 +722,6 @@ class ResourceLoader:
             self.query_dict += self.stemmed_query_dict
 
             return self.query_dict
-
 
     def get_sys_entity_types(self, labels):  # pylint: disable=no-self-use
         """Get all system entity types from the entity labels.

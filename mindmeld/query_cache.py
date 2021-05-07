@@ -19,15 +19,13 @@ from hashlib import sha256
 import json
 import logging
 import os
-import shutil
 import sqlite3
-
-from sklearn.externals import joblib
 
 from .path import GEN_FOLDER, QUERY_CACHE_DB_PATH
 from .core import ProcessedQuery
 
 logger = logging.getLogger(__name__)
+
 
 class QueryCache:
     '''
@@ -82,7 +80,7 @@ class QueryCache:
             if len(cursor.fetchall()) == 0:
                 # version does not match
                 return False
-            return  True
+            return True
         except Exception:
             return False
 
@@ -144,6 +142,7 @@ class QueryCache:
               ))
         self.connection.commit()
         return self.key_to_row_id(key)
+
     @lru_cache(maxsize=1)
     def get(self, row_id):
         '''

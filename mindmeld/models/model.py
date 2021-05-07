@@ -1207,7 +1207,8 @@ class Model:
                 resource_builders[rname] = resource_loader.CharNgramFreqBuilder(l, t)
             elif rname == WORD_NGRAM_FREQ_RSC:
                 l, t = self.config.get_ngram_lengths_and_thresholds(rname)
-                resource_builders[rname] = resource_loader.WordNgramFreqBuilder(l, t, enable_stemming)
+                resource_builders[rname] = \
+                    resource_loader.WordNgramFreqBuilder(l, t, enable_stemming)
             elif rname == QUERY_FREQ_RSC:
                 resource_builders[rname] = resource_loader.QueryFreqBuilder(enable_stemming)
 

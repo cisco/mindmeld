@@ -481,8 +481,6 @@ class NaturalLanguageProcessor(Processor):
             label_set=label_set, incremental_timestamp=self.incremental_timestamp
         )
 
-
-
     def _dump(self):
         if len(self.domains) == 1:
             return

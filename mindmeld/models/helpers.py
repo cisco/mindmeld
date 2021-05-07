@@ -467,6 +467,7 @@ def requires(resource):
 
     return add_resource
 
+
 class FileBackedList:
     """
     FileBackedList implements an interface for simple list use cases

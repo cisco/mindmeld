@@ -257,7 +257,9 @@ class Query:
     def from_cache(obj):
         system_entity_candidates = obj.pop('system_entity_candidates')
         result = Query(**obj)
-        result.system_entity_candidates = [Entity.from_cache_typed(e) for e in system_entity_candidates]
+        result.system_entity_candidates = [
+            Entity.from_cache_typed(e) for e in system_entity_candidates
+        ]
         return result
 
     @property
@@ -502,11 +504,17 @@ class ProcessedQuery:
             'confidence': self.confidence
         }
         if self.nbest_transcripts_queries:
-            obj['nbest_transcripts_queries'] =[q.to_cache() for q in self.nbest_transcripts_queries]
+            obj['nbest_transcripts_queries'] = [
+                q.to_cache() for q in self.nbest_transcripts_queries
+            ]
         if self.nbest_transcripts_entities:
-            obj['nbest_transcripts_entities'] = [e.to_cache() for e in self.nbest_transcripts_entities]
+            obj['nbest_transcripts_entities'] = [
+                e.to_cache() for e in self.nbest_transcripts_entities
+            ]
         if self.nbest_aligned_entities:
-            obj['nbest_aligned_entities'] =[e.to_cache() for e in self.nbest_aligned_entities]
+            obj['nbest_aligned_entities'] = [
+                e.to_cache() for e in self.nbest_aligned_entities
+            ]
         return obj
 
     @staticmethod
@@ -514,11 +522,17 @@ class ProcessedQuery:
         obj['query'] = Query.from_cache(obj['query'])
         obj['entities'] = [Entity.from_cache_typed(e) for e in obj['entities']]
         if 'nbest_transcripts_queries' in obj:
-            obj['nbest_transcripts_queries'] = [Query.from_cache(q) for q in obj['nbest_transcripts_queries']]
+            obj['nbest_transcripts_queries'] = [
+                Query.from_cache(q) for q in obj['nbest_transcripts_queries']
+            ]
         if 'nbest_transcripts_entities' in obj:
-            obj['nbest_transcripts_entities'] = [Entity.from_cache_typed(e) for e in obj['nbest_transcripts_entities']]
+            obj['nbest_transcripts_entities'] = [
+                Entity.from_cache_typed(e) for e in obj['nbest_transcripts_entities']
+            ]
         if 'nbest_aligned_entities' in obj:
-            obj['nbest_aligned_entities'] = [Entity.from_cache_typed(e) for e in obj['nbest_aligned_entities']]
+            obj['nbest_aligned_entities'] = [
+                Entity.from_cache_typed(e) for e in obj['nbest_aligned_entities']
+            ]
         return ProcessedQuery(**obj)
 
     def __eq__(self, other):
@@ -767,6 +781,7 @@ class NestedEntity:
             self.token_span.end,
         )
 
+
 class QueryEntity(NestedEntity):
     """An entity with the context of the query it came from.
 
@@ -884,11 +899,13 @@ class Entity:
         text = self.display_text or self.text
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
 
+
 Entity.entity_class_map = {
     Entity.__name__: Entity,
     QueryEntity.__name__: QueryEntity,
     NestedEntity.__name__: NestedEntity
 }
+
 
 class FormEntity:
     """A form entity is used for defining custom objects for the entity form used in

@@ -81,6 +81,7 @@ def load_query(
         query, domain=domain, intent=intent, entities=entities, is_gold=is_gold
     )
 
+
 def cache_query_file(
     file_path,
     query_cache,
