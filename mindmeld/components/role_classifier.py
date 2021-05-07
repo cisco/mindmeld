@@ -288,7 +288,7 @@ class RoleClassifier(Classifier):
                 the default training set will be loaded.
 
         Returns:
-            List: list of queries
+            Union(ProcessedQueryList, list(ProcessedQuery): list of queries
         """
         if queries:
             return self._build_query_tree(

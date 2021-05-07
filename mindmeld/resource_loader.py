@@ -664,7 +664,7 @@ class ResourceLoader:
 
 
         def add(self, query):
-            for length, threshold in zip(lengths, thresholds):
+            for length, threshold in zip(self.lengths, self.thresholds):
                 if threshold > 0:
                     character_tokens = [
                         q.normalized_text[i : i + length]
