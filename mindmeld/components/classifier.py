@@ -149,7 +149,7 @@ class Classifier(ABC):
         self.config = None
         self.hash = ""
 
-    def fit(self, label_set=None, incremental_timestamp=None, **kwargs):
+    def fit(self, label_set=None, incremental_timestamp=None, load_cached=True, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -178,6 +178,7 @@ class Classifier(ABC):
                 values are either a kwargs dict which will be passed into the
                 feature extractor function, or a callable which will be used as to
                 extract features.
+            load_cached (bool): If the model is cached on disk should it be loaded?
 
         Returns:
             True if model was loaded and fit, False if a valid cached model exists.  The cached
@@ -223,6 +224,9 @@ class Classifier(ABC):
 
         if incremental_timestamp and cached_model:
             logger.info("No need to fit.  Previous model is cached.")
+            if load_cached:
+                self.load(cached_model)
+                return True
             return False
 
         queries, classes = self._get_queries_and_labels(label_set)

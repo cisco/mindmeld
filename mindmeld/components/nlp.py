@@ -147,7 +147,7 @@ class Processor(ABC):
                 configuration has changed since the last build. Defaults to ``False``.
             label_set (string, optional): The label set from which to train all classifiers.
         """
-        self._build(incremental=incremental, label_set=label_set)
+        self._build(incremental=incremental, label_set=label_set, load_cached=False)
         # We dump and unload the model to reduce memory consumption while training
         if self.ready:
             self._dump()
@@ -168,7 +168,7 @@ class Processor(ABC):
         self._incremental_timestamp = ts
 
     @abstractmethod
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         raise NotImplementedError
 
     def dump(self):
@@ -460,7 +460,7 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application."""
         return self._children
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
 
         # reset display for the progress bar. This is important for repeated use of the
         # progress bar
@@ -478,7 +478,9 @@ class NaturalLanguageProcessor(Processor):
             return
 
         self.ready = self.domain_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
     def _dump(self):
@@ -826,12 +828,14 @@ class DomainProcessor(Processor):
                 app_path, domain, intent, self.resource_loader, progress_bar
             )
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         if len(self.intents) == 1:
             return
         # train intent model
         self.ready = self.intent_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if len(self._children) > 1 and self.progress_bar is not None:
@@ -1096,12 +1100,14 @@ class IntentProcessor(Processor):
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
 
         # train entity recognizer
         self.ready = self.entity_recognizer.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if isinstance(self.progress_bar, tqdm):
@@ -1487,10 +1493,12 @@ class EntityProcessor(Processor):
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.total += 1
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this entity type"""
         self.ready = self.role_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
         self.entity_resolver.fit()
         if isinstance(self.progress_bar, tqdm):

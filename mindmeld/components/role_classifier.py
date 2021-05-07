@@ -74,7 +74,7 @@ class RoleClassifier(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, label_set=None, incremental_timestamp=None, **kwargs):
+    def fit(self, label_set=None, incremental_timestamp=None, load_cached=True, **kwargs):
         """Trains a statistical model for role classification using the provided training examples.
 
         Args:
@@ -103,6 +103,9 @@ class RoleClassifier(Classifier):
 
         if incremental_timestamp and cached_model:
             logger.info("No need to fit. Previous model is cached.")
+            if load_cached:
+                self.load(cached_model)
+                return True
             return False
 
         # Load labeled data
