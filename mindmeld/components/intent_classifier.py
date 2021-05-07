@@ -116,20 +116,10 @@ class IntentClassifier(Classifier):
             example=query, gold_label=intent, dynamic_resource=dynamic_resource
         )
 
-    def _get_query_tree(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-
-        Returns:
-            ProcessedQueryList: list of queries
-        """
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, label_set=label_set
+    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            label_set=label_set
         )
 
     def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
@@ -146,8 +136,7 @@ class IntentClassifier(Classifier):
         Returns
             tuple(ProcessedQueryList.QueryIterator, list[str])
         """
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries = self._get_flattened_label_set(label_set)
         if len(queries) < 1:
             return [None, None]
         return (queries.queries(),
@@ -156,14 +145,11 @@ class IntentClassifier(Classifier):
     def _get_queries_and_labels_hash(
         self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = []
-
-        for intent in query_tree.get(self.domain, []):
-            for query_text in query_tree[self.domain][intent].raw_queries():
-                queries.append(
-                    self.domain + "###" + intent + "###" + mark_down(query_text)
-                )
-
-        queries.sort()
-        return self._resource_loader.hash_list(queries)
+        queries = self._get_flattened_label_set(label_set)
+        raw_queries = []
+        for intent, raw_query in zip(queries.intents(), queries.raw_queries()):
+            raw_queries.append(
+                self.domain + "###" + intent + "###" + mark_down(raw_query)
+            )
+        raw_queries.sort()
+        return self._resource_loader.hash_list(raw_queries)

@@ -475,9 +475,7 @@ class Classifier(ABC):
         return model_hash
 
     @abstractmethod
-    def _get_query_tree(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
+    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns the set of queries to train on
 
         Args:
@@ -485,7 +483,7 @@ class Classifier(ABC):
                 the default training set will be loaded.
 
         Returns:
-            List: list of queries
+            ProcessedQueryList
         """
         raise NotImplementedError("Subclasses must implement this method")
 

@@ -500,6 +500,13 @@ class ResourceLoader:
                 flattened.extend(queries.row_ids)
         return flattened
 
+    def get_flattened_label_set(
+        self, domain=None, intent=None, label_set=None, force_reload=False
+    ):
+        return self.flatten_query_tree(
+            self.get_labeled_queries(domain, intent, label_set, force_reload)
+        )
+
     def _traverse_labeled_queries_files(
         self, domain=None, intent=None, file_pattern=DEFAULT_TRAIN_SET_REGEX
     ):

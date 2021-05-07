@@ -269,41 +269,26 @@ class EntityRecognizer(Classifier):
         predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
-    def _get_query_tree(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-
-        Returns:
-            List: list of queries
-        """
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, intent=self.intent, label_set=label_set
+    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            intent=self.intent,
+            label_set=label_set
         )
 
     def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries = self._get_flattened_label_set(label_set)
         return (queries.queries(),
                 queries.entities())
 
-    def _get_queries_and_labels_hash(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
+    def _get_queries_and_labels_hash(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        queries = self._get_flattened_label_set(label_set)
         hashable_queries = [
             self.domain + "###" + self.intent + "###entity###"
         ] + sorted(list(queries.raw_queries()))

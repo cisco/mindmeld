@@ -104,19 +104,8 @@ class DomainClassifier(Classifier):
             example=query, gold_label=domain, dynamic_resource=dynamic_resource
         )
 
-    def _get_query_tree(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-
-        Returns:
-            ProcessedQueryList: list of queries
-        """
-        return self._resource_loader.get_labeled_queries(label_set=label_set)
+    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(label_set=label_set)
 
     def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         """
@@ -133,9 +122,7 @@ class DomainClassifier(Classifier):
             tuple(ProcessedQueryList.QueryIterator,list[str])
 
         """
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-
+        queries = self._get_flattened_label_set(label_set)
         if not queries:
             return [None, None]
         return (queries.queries(),
@@ -144,12 +131,9 @@ class DomainClassifier(Classifier):
     def _get_queries_and_labels_hash(
         self, label_set=DEFAULT_TRAIN_SET_REGEX
     ):
-        query_tree = self._get_query_tree(label_set=label_set)
-        queries = []
-        for domain in query_tree:
-            for intent in query_tree[domain]:
-                for query_text in query_tree[domain][intent].raw_queries():
-                    queries.append(domain + "###" + mark_down(query_text))
-
-        queries.sort()
-        return self._resource_loader.hash_list(queries)
+        queries = self._get_flattened_label_set(label_set)
+        raw_queries = []
+        for domain, raw_query in zip(queries.domains(), queries.raw_queries()):
+            raw_queries.append(domain + '###' + mark_down(raw_query))
+        raw_queries.sort()
+        return self._resource_loader.hash_list(raw_queries)
