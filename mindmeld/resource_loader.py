@@ -292,7 +292,7 @@ class ResourceLoader:
 
         # We changed the value type for the pop_dict dict, so we check to make sure its a tuple
         pop_dict = self._entity_files[gaz_name]['gazetteer'].get('data', {}).get('pop_dict')
-        if pop_dict and not isinstance(list(pop_dict.keys())[0], tuple):
+        if pop_dict and not all(isinstance(elem, tuple) for elem in list(pop_dict.keys())):
             return True
 
         data_modified = self._entity_files[gaz_name]["entity_data"]["modified"]

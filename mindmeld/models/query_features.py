@@ -59,7 +59,7 @@ def extract_in_gaz_span_features(**kwargs):
             p_joint = math.log(len(
                 all_gazes[current_gaz.gaz_name]["index"][current_gaz.raw_ngram]) + 1)
 
-            for i in range(current_gaz.start_token_index, current_gaz.end_token_index):
+            for i in range(current_gaz.start_token_index, current_gaz.end_token_index + 1):
                 # Generic non-positional features
                 gaz_feat_prefix = "in_gaz|type:{}".format(current_gaz.gaz_name)
 
@@ -69,7 +69,7 @@ def extract_in_gaz_span_features(**kwargs):
                 # Used to distinguish among B/I/E/S tags
                 if i == current_gaz.start_token_index:
                     pos_attr = "start"
-                elif i == current_gaz.end_token_index - 1:
+                elif i == current_gaz.end_token_index:
                     pos_attr = "end"
                 else:
                     pos_attr = "cont"
@@ -89,13 +89,13 @@ def extract_in_gaz_span_features(**kwargs):
                     ),
                     # Features for ngram after the span
                     "|ngram_after|length:{}".format(1): get_ngram(
-                        tokens, current_gaz.end_token_index, 1),
+                        tokens, current_gaz.end_token_index + 1, 1),
                     # Features for ngram at start of span
                     "|ngram_first|length:{}".format(1): get_ngram(
                         tokens, current_gaz.start_token_index, 1),
                     # Features for ngram at end of span
                     "|ngram_last|length:{}".format(1): get_ngram(
-                        tokens, current_gaz.end_token_index - 1, 1),
+                        tokens, current_gaz.end_token_index, 1),
                     # Popularity features
                     "|pop": pop,
                     # Character length features
@@ -112,9 +112,9 @@ def extract_in_gaz_span_features(**kwargs):
                         feature_sequence[i][prefix + key] = value
 
             # End of span feature
-            if nested_gaz.end_token_index < len(tokens):
+            if nested_gaz.end_token_index + 1 < len(tokens):
                 feat_prefix = "in-gaz|type:{}|signal_entity_end".format(nested_gaz.gaz_name)
-                feature_sequence[nested_gaz.end_token_index][feat_prefix] = 1
+                feature_sequence[nested_gaz.end_token_index + 1][feat_prefix] = 1
 
                 span_features = {
                     "|log_char_len": math.log(len(nested_gaz.raw_ngram)),
@@ -125,13 +125,13 @@ def extract_in_gaz_span_features(**kwargs):
                 }
 
                 for key, value in span_features.items():
-                    feature_sequence[nested_gaz.end_token_index][feat_prefix + key] = value
+                    feature_sequence[nested_gaz.end_token_index + 1][feat_prefix + key] = value
 
             return feature_sequence
 
         def get_exact_span_conflict_features(query, gazes, nested_gaz, other_nested_gaz):
             feature_sequence = [{} for _ in query.normalized_tokens]
-            for i in range(nested_gaz.start_token_index, nested_gaz.end_token_index):
+            for i in range(nested_gaz.start_token_index, nested_gaz.end_token_index + 1):
                 feat_prefix = "in-gaz|conflict:exact|type1:{}|type2:{}".format(
                     nested_gaz.gaz_name, other_nested_gaz.gaz_name
                 )
@@ -164,19 +164,19 @@ def extract_in_gaz_span_features(**kwargs):
             """Collect tuples of (start index, end index, ngram, entity type)
             tracking ngrams that match with the entity gazetteer data
             """
-            spans = []
+            nested_gazes = []
             tokens = query.get_verbose_normalized_tokens()
             # Collect ngrams of plain normalized ngrams
             for start_index, _ in enumerate(tokens):
                 for end_index in range(start_index + 1, len(tokens) + 1):
                     for gaz_name, gaz in gazetteers.items():
-                        token_ngram, raw_ngram = query.get_token_ngram_and_raw_ngram(
+                        token_ngram, raw_ngram, _ = query.get_token_ngram_raw_ngram_span(
                             tokens, start_index, end_index - 1)
-                        if token_ngram in gaz["pop_dict"]:
-                            spans.append(NestedGazetteer(
-                                start_index, end_index,
+                        if token_ngram and token_ngram in gaz["pop_dict"]:
+                            nested_gazes.append(NestedGazetteer(
+                                start_index, end_index - 1,
                                 gaz_name, token_ngram, raw_ngram))
-            return spans
+            return nested_gazes
 
         gazetteers = resources[GAZETTEER_RSC]
         feat_seq = [{} for _ in query.normalized_tokens]
@@ -191,7 +191,7 @@ def extract_in_gaz_span_features(**kwargs):
             update_features_sequence(feat_seq, span_feat_seq)
 
             for other_nested_gaz in in_gaz_spans:
-                if nested_gaz.start_token_index >= nested_gaz.end_token_index:
+                if nested_gaz.start_token_index >= nested_gaz.end_token_index + 1:
                     break
                 # For now, if two spans of the same type start at the same
                 # place, take the longer one.
@@ -199,7 +199,7 @@ def extract_in_gaz_span_features(**kwargs):
                         other_nested_gaz.gaz_name == nested_gaz.gaz_name:
                     continue
                 if nested_gaz.start_token_index == other_nested_gaz.start_token_index:
-                    if nested_gaz.end_token_index == other_nested_gaz.end_token_index:
+                    if nested_gaz.end_token_index + 1 == other_nested_gaz.end_token_index + 1:
                         cmp_span_features = get_exact_span_conflict_features(
                             query,
                             gazetteers,
@@ -941,7 +941,7 @@ def extract_in_gaz_feature(scaling=1, **kwargs):
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 if ngram in gaz["pop_dict"]:
                     popularity = gaz["pop_dict"].get(ngram, 0.0)
-                    _, raw_ngram = query.get_token_ngram_and_raw_ngram(
+                    _, raw_ngram, _ = query.get_token_ngram_raw_ngram_span(
                         verbose_tokens, token_span[0], token_span[1])
                     ratio = len(raw_ngram) / len(norm_text) * scaling
                     ratio_pop = ratio * popularity

@@ -28,7 +28,7 @@ from weakref import WeakValueDictionary
 from tqdm import tqdm
 
 from .. import path
-from ..core import Bunch, ProcessedQuery, QueryEntity, Span, Entity, NestedEntity
+from ..core import Bunch, ProcessedQuery, QueryEntity, Entity, NestedEntity
 from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
@@ -1483,20 +1483,19 @@ class IntentProcessor(Processor):
                 {tokenize_to_tuples(key) for key in dynamic_gazetteer.get(entity, {})})
 
             for idx, n_best_query in enumerate(query):
-                for ngram, token_span in get_ngrams_upto_n(n_best_query.normalized_tokens,
+                normalized_tokens = n_best_query.normalized_tokens
+                normalized_verbose_tokens = n_best_query.get_verbose_normalized_tokens()
+
+                for ngram, token_span in get_ngrams_upto_n(normalized_tokens,
                                                            max_ngram_search):
                     if ngram not in consolidated_set:
                         continue
 
-                    start_token = n_best_query.get_verbose_normalized_tokens()[token_span[0]]
-                    end_token = n_best_query.get_verbose_normalized_tokens()[token_span[1]]
-
-                    start_index = start_token['raw_start']
-                    end_index = end_token['raw_start'] + len(end_token['entity']) - 1
-                    span = Span(start_index, end_index)
+                    _, raw_ngram, span = n_best_query.get_token_ngram_raw_ngram_span(
+                        normalized_verbose_tokens, token_span[0], token_span[1])
 
                     entity_val = Entity(
-                        text=n_best_query.text[start_index: end_index + 1],
+                        text=raw_ngram,
                         entity_type=entity
                     )
                     query_entity = QueryEntity.from_query(

@@ -403,16 +403,17 @@ class Query:
         except KeyError as e:
             raise ValueError("Invalid index {}".format(index)) from e
 
-    def get_token_ngram_and_raw_ngram(self, tokens, start_token_index, end_token_index):
+    def get_token_ngram_raw_ngram_span(self, tokens, start_token_index, end_token_index):
         token_ngram = tuple(
-            [token['entity'] for token in tokens[start_token_index:end_token_index]]
+            [token['entity'] for token in tokens[start_token_index:end_token_index + 1]]
         )
-        last_token_start = tokens[end_token_index]['raw_start']
-        last_token_entity = tokens[end_token_index]['entity']
-        first_token_start = tokens[start_token_index]['raw_start']
-        ngram_length = last_token_start + len(last_token_entity) - first_token_start
-        raw_ngram = self.text[first_token_start: first_token_start + ngram_length]
-        return token_ngram, raw_ngram
+        last_raw_start = tokens[end_token_index]['raw_start']
+        last_raw_entity = tokens[end_token_index]['entity']
+        first_raw_start = tokens[start_token_index]['raw_start']
+        ngram_length = last_raw_start + len(last_raw_entity) - first_raw_start
+        result_span = Span(first_raw_start, first_raw_start + ngram_length - 1)
+        raw_ngram = self.text[result_span.start: result_span.end + 1]
+        return token_ngram, raw_ngram, result_span
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

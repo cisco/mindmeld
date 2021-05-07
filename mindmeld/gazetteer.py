@@ -127,6 +127,9 @@ class Gazetteer:
         # already in the gazetteer. Update the popularity either way.
         tokenized_gaz_entry = tuple(token["entity"] for token in self.tokenizer.tokenize(entity))
 
+        if not tokenized_gaz_entry:
+            return
+
         if self.pop_dict[tokenized_gaz_entry] == 0:
             self.entities.append(entity)
             if not self.exclude_ngrams:
@@ -136,7 +139,7 @@ class Gazetteer:
 
         if keep_max:
             old_value = self.pop_dict[tokenized_gaz_entry]
-            self.pop_dict[tokenized_gaz_entry] = max(self.pop_dict[entity], popularity)
+            self.pop_dict[tokenized_gaz_entry] = max(self.pop_dict[tokenized_gaz_entry], popularity)
             if self.pop_dict[tokenized_gaz_entry] != old_value:
                 logger.debug(
                     "Updating gazetteer value of entity %s from %s to %s",
