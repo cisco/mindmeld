@@ -336,7 +336,7 @@ class Classifier(ABC):
             )
             return None
 
-        evaluation = self._model.evaluate(labels)
+        evaluation = self._model.evaluate(queries, labels)
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
