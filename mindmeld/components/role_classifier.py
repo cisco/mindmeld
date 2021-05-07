@@ -317,7 +317,7 @@ class RoleClassifier(Classifier):
         return examples, labels
 
     def _get_queries_and_labels_hash(self, label_set=DEFAULT_TRAIN_SET_REGEX):
-        queries = self._get_flattened_data_set(label_set)
+        queries = self._get_flattened_label_set(label_set)
         hashable_queries = [
             self.domain + "###" + self.intent + "###" + self.entity_type + "###"
         ] + sorted(list(queries.raw_queries()))
