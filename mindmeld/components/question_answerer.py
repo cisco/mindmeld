@@ -73,7 +73,6 @@ class BaseQuestionAnswerer(ABC):
                 provided, used to obtain default `app_namespace` and QA configurations
             app_namespace (str, optional): The namespace of the app. Used to prevent
                 collisions between the indices of this app and those of other apps.
-
             config (dict, optional): The QA config if passed directly rather than loaded from the
                 app config
             resource_loader (ResourceLoader, optional): An object which can load resources for the
@@ -84,17 +83,20 @@ class BaseQuestionAnswerer(ABC):
         self._resource_loader = kwargs.get("resource_loader", None)
         self.__qa_config = kwargs.get("config", None)
 
+        # create app_namespace implicitly from app_path is not provided
         if not self.app_namespace:
             self.app_namespace = get_app_namespace(self.app_path) if self.app_path else None
+        if not self.app_path and not self.app_namespace:
+            msg = f"Atlease one of `app_path` or `app_namespace` must be inputted as arguments " \
+                  f"to {self.__class__.__name__} in order to distinctly " \
+                  "identify the indices being created from you data files."
+            raise Exception(msg)
+
+        # create resource loader and qa configs if not inputted already
         if not self._resource_loader:
             self._resource_loader = ResourceLoader.create_resource_loader(self.app_path)
         if not self.__qa_config:
             self.__qa_config = get_classifier_config("question_answering", app_path=app_path)
-
-        if not self.app_path and not self.app_namespace:
-            msg = "Atlease one of `app_path` or `app_namespace` must be inputted to distinctly " \
-                  "identify the indices being created from you data files."
-            raise Exception(msg)
 
     def __repr__(self):
         return f"<{self.__class__.__name__} model_type: {self._query_type}>"
@@ -378,11 +380,9 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             try:
                 delete_index(app_namespace, index_name, es_host, es_client)
             except ValueError:
-                logger.warning(
-                    "Index %s does not exist for app %s, creating a new index",
-                    index_name,
-                    app_namespace,
-                )
+                msg = f"Index {index_name} does not exist for app {app_namespace}, " \
+                      f"creating a new index"
+                logger.warning(msg)
 
         # determine config: precedence is first given to argument `config`,
         #   then argument `app_path`, and then fallback option is self._query_settings
@@ -1802,8 +1802,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                             ]
                     }
                 except IndexError:
-                    msg = f"Unable to create entity mapping data to fit resolver. This could be " \
-                          f"due to the way the values of the KB field ({self.field_name}) are!"
+                    msg = f"Unable to create entity mapping data to fit a resolver. This could be" \
+                          f" due to the way the values of the KB field ({self.field_name}) are! " \
+                          f"Make sure the value types are among " \
+                          f"[location, string, list of strings, number, boolean]."
                     logger.error(msg)
                     entity_map = {}
                 return entity_map
@@ -1881,7 +1883,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             n_scores = 0
             for resolver in [self._text_resolver, self._embedding_resolver]:
                 if resolver:
-                    # obtain all synonyms' scores in predictions
+                    # obtain all synonyms' scores in predictions, without sorting! (saves time)
                     predictions = resolver.predict(query, top_n=None)
                     # retain only top scored entries for each id
                     _best_scores = {}
@@ -1892,16 +1894,19 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         else:
                             _best_scores[_id] = max(_best_scores[_id], _score)
                     # for missing doc ids, populate the minimum score
-                    min_best_scores = min([*_best_scores.values()])
-                    for _id in self.id2value.keys():
-                        if _id not in _best_scores:
-                            _best_scores[_id] = min_best_scores
-                    # retain only top scored entries for each id
-                    this_field_scores = {
-                        _id: (this_field_scores.get(_id, 0.0) + _score) / (n_scores + 1)
-                        for _id, _score in _best_scores.items()
-                    }
-                    n_scores += 1
+                    # in cases where there was no training data for resolver, all ids are absent
+                    #   in the returned predictions! And then the _best_scores will be empty
+                    if _best_scores:
+                        min_best_scores = min([*_best_scores.values()])
+                        for _id in self.id2value.keys():
+                            if _id not in _best_scores:
+                                _best_scores[_id] = min_best_scores
+                        # retain only top scored entries for each id
+                        this_field_scores = {
+                            _id: (this_field_scores.get(_id, 0.0) + _score) / (n_scores + 1)
+                            for _id, _score in _best_scores.items()
+                        }
+                        n_scores += 1
 
             # Case where-in no resolver exists (eg. other data types)
             if not this_field_scores:
@@ -2184,24 +2189,27 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
 class QuestionAnswerer:
 
-    def __new__(cls, app_path=None, **kwargs):
+    def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
         """
         This method is used to initialize a QuestionAnswerer based on model_type
-        To keep the code base backwards compatible, we use a `__new__()` way of creating instances
-        alongside using a factory approach.
 
-        The input arguments are kept as-is wrt to the `__init__()` of
+        To keep the code base backwards compatible, we use a `__new__()` way of creating instances
+        alongside using a factory approach. For cases wherein a question-answerer is instantiated
+        from `QuestionAnswerer` class instead of  `QuestionAnswerer.create_question_answerer`,
+        this method is first hit and returns an instance of a question-answerer.
+
+        See that the input arguments are kept as-is wrt to the `__init__()` of
         `ElasticsearchQuestionAnswerer` class which was the `QuestionAnswerer` class in previous
         version of `question_answerer.py`
         """
 
-        config = cls._get_config(kwargs.get("config", None), app_path)
-        kwargs.update({"config": config})
+        config = cls._get_config(config, app_path)
+        kwargs.update({
+            "resource_loader": resource_loader,
+            "es_host": es_host,
+            "config": config,
+        })
         return cls._get_question_answerer(config)(app_path, **kwargs)
-
-    @classmethod
-    def create_question_answerer(cls, app_path=None, **kwargs):
-        return cls(app_path, **kwargs)
 
     @staticmethod
     def _get_config(config=None, app_path=None):
@@ -2218,6 +2226,21 @@ class QuestionAnswerer:
             return NonElasticsearchQuestionAnswerer
         else:
             return ElasticsearchQuestionAnswerer
+
+    @classmethod
+    def create_question_answerer(cls, **kwargs):
+        """
+        Args:
+            app_path (str, optional): The path to the directory containing the app's data. If
+                provided, used to obtain default `app_namespace` and QA configurations
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+            config (dict, optional): The QA config if passed directly rather than loaded from the
+                app config
+            resource_loader (ResourceLoader, optional): An object which can load resources for the
+                question answerer.
+        """
+        return cls(**kwargs)
 
     @classmethod
     def load_kb(cls,
@@ -2251,26 +2274,28 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
+
+        # As a way to reduce entropy in using `load_kb()` and it's related inconsistencies of not
+        # exposing `app_namespace` argument in `.get()` and `.build_search()`, this reformatting
+        # recommends that all these methods be used as instance methods and not as class methods
         msg = "DeprecationWarning: Refer the `load_kb(...)` method from object of a " \
               "QuestionAnswerer. Deprecated Usage: `QuestionAnswerer.load_kb(...)`. New usage: " \
               "`qa = QuestionAnswerer(...)`, then `qa.load_kb(...)`. " \
               "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
         logger.warning(msg)
 
-        try:
-            kwargs.update({
-                "app_namespace": app_namespace,
-                "es_host": es_host,
-                "es_client": es_client,
-                "connect_timeout": connect_timeout,
-                "clean": clean,
-                "config": config,
-            })
-            question_answerer = cls.create_question_answerer(app_path, **kwargs)
-            question_answerer.load_kb(index_name, data_file, **kwargs)
-
-        except TypeError as e:
-            exp_msg = f"`model_type` in the provided QuestionAnswerer config must be among " \
-                      f"{ALL_QUERY_TYPES} to use `.load_kb(...)` as a classmethod through " \
-                      f"Elasticsearch. "
-            raise Exception(exp_msg + msg) from e
+        # add everything except `index_name` and `data_file` to kwargs
+        kwargs.update({
+            "app_namespace": app_namespace,
+            "es_host": es_host,
+            "es_client": es_client,
+            "connect_timeout": connect_timeout,
+            "clean": clean,
+            "app_path": app_path,
+            "config": config,
+        })
+        question_answerer = cls.create_question_answerer(**kwargs)
+        # if provided, the `question_answerer` now contains information about
+        # `app_path`, `app_namspace`, `configs` and would be used in `.load_kb` of individual
+        # classes as backups to None values.
+        question_answerer.load_kb(index_name, data_file, **kwargs)
