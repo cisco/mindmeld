@@ -326,10 +326,10 @@ class KLDivergenceSampling(ABC):
 
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
-        Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
+        Returns:
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         if confidence_segments:
             divergences = (
@@ -376,10 +376,10 @@ class KLDivergenceSampling(ABC):
 
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
-        Returns:
-            divergences (List[List[float]]): Divergences per model for each element.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
+        Returns:
+            divergences (List[List[float]]): Divergences per model for each element.
         """
         avg_preds = np.mean(confidences_3d, axis=0)
         divergences = []
