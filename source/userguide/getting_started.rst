@@ -474,6 +474,8 @@ Here's an example usage:
 Troubleshooting
 ---------------
 
+.. _ES docs: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
+
 +---------------+---------------------------------------------+-----------------------------------------------+
 |    Context    |    Error                                    |    Resolution                                 |
 +===============+=============================================+===============================================+
@@ -486,6 +488,17 @@ Troubleshooting
 |               |                                             | If you're using Docker, you can               |
 |               |                                             | increase memory to 4GB from                   |
 |               |                                             | *Preferences | Advanced*.                     |
++---------------+---------------------------------------------+-----------------------------------------------+
+| Elasticsearch | ``KnowledgeBaseError``                      | If error is due to maximum shards open, run   |
+|               |                                             | ``curl -XDELETE 'http://localhost:9200/_all'``|
+|               |                                             | to delete all existing shards from all apps.  |
+|               |                                             | Alternatively, to delete an app specific      |
+|               |                                             | indices, run                                  |
+|               |                                             | ``curl -XDELETE 'localhost:9200/<app_name>*'``|
+|               |                                             | For example, to delete indices of             |
+|               |                                             | a hr_assistant application, one can run       |
+|               |                                             | ``curl -XDELETE localhost:9200/hr_assistant*``|
+|               |                                             | For more details, see `ES docs`_              |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Numerical     | ``OS is incompatible with duckling binary`` | Run the numerical parser via                  |
 | Parser        |                                             | Docker.                                       |
