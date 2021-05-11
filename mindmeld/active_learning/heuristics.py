@@ -22,7 +22,7 @@ def stratified_random_sample(labels: List) -> List[int]:
     Args:
         labels (List[str or int]): A list of labels. (Eg: labels = ["R", "B", "B", "C"])
     Returns:
-        ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+        ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
     """
     np.random.seed(ACTIVE_LEARNING_RANDOM_SEED)
 
@@ -61,6 +61,37 @@ def _get_labels_to_indices(labels: List) -> defaultdict:
     return labels_to_indices
 
 
+def _convert_to_sample_ranks(ordered_sample_indices: List[int]):
+    """
+    Args:
+        ordered_sample_indices (List[int]): List of indices corresponding to values ordered
+        from least to greatest.
+    Returns:
+        sample_ranks (List[int]): List where the value at each index is the rank of the
+            corresponding sample.
+    """
+    sample_ranks = np.zeros(len(ordered_sample_indices), dtype=int)
+    for rank, sample_index in enumerate(ordered_sample_indices):
+        sample_ranks[sample_index] = rank
+    return sample_ranks
+
+
+def _ordered_indices_list_to_final_rank(ordered_sample_indices_list: List[List[int]]):
+    """Converts multiple lists of ordered indices to a final rank.
+    Args:
+        ordered_sample_indices_list (List[List[int]]): Multiple lists of ordered sample indices.
+
+    Returns:
+        ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
+
+    """
+    all_sample_ranks = np.apply_along_axis(
+        _convert_to_sample_ranks, axis=1, arr=ordered_sample_indices_list
+    )
+    total_sample_ranks = all_sample_ranks.sum(axis=0)
+    return list(np.argsort(total_sample_ranks))
+
+
 class Heuristic(ABC):
     """ Heuristic base class used as Active Learning query selection strategies."""
 
@@ -71,7 +102,7 @@ class Heuristic(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -82,7 +113,7 @@ class Heuristic(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -94,7 +125,7 @@ class RandomSampling(ABC):
         Args:
             num_elements (int): Number of elements to randomly sample.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by randomly.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         ranked_indices = np.arange(num_elements)
         np.random.shuffle(ranked_indices)
@@ -106,7 +137,7 @@ class RandomSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         num_elements = len(confidences_2d)
         return RandomSampling.random_rank(num_elements)
@@ -117,7 +148,7 @@ class RandomSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         _, num_elements, _ = np.array(confidences_3d).shape
         return RandomSampling.random_rank(num_elements)
@@ -132,7 +163,7 @@ class LeastConfidenceSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         highest_confidence_per_element = np.max(confidences_2d, axis=1)
         return list(np.argsort(highest_confidence_per_element))
@@ -146,13 +177,12 @@ class LeastConfidenceSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
-        total_rank_score = np.sum(
-            [LeastConfidenceSampling.rank_2d(c) for c in confidences_3d], axis=0
-        )
-        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
-        return list(high_to_low_ranked_indices)
+        all_ordered_sample_indices = [
+            LeastConfidenceSampling.rank_2d(c) for c in confidences_3d
+        ]
+        return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
 
 class MarginSampling(ABC):
@@ -164,14 +194,14 @@ class MarginSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         _, element_size = np.array(confidences_2d).shape
         descending_confidences_per_element = np.partition(
             confidences_2d, kth=(element_size - 1)
-        )[::-1]
-        highest_val_per_element = descending_confidences_per_element[:, 1]
-        second_highest_val_per_element = descending_confidences_per_element[:, 2]
+        )
+        highest_val_per_element = descending_confidences_per_element[:, -1]
+        second_highest_val_per_element = descending_confidences_per_element[:, -2]
         margin_per_element = np.abs(
             highest_val_per_element - second_highest_val_per_element
         )
@@ -188,13 +218,10 @@ class MarginSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
-        total_rank_score = np.sum(
-            [MarginSampling.rank_2d(c) for c in confidences_3d], axis=0
-        )
-        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
-        return list(high_to_low_ranked_indices)
+        all_ordered_sample_indices = [MarginSampling.rank_2d(c) for c in confidences_3d]
+        return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
 
 class EntropySampling(ABC):
@@ -206,7 +233,7 @@ class EntropySampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         entropy_per_element = scipy_entropy(
             np.array(confidences_2d), axis=1, base=ENTROPY_LOG_BASE
@@ -223,13 +250,12 @@ class EntropySampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
-        total_rank_score = np.sum(
-            [EntropySampling.rank_2d(c) for c in confidences_3d], axis=0
-        )
-        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
-        return list(high_to_low_ranked_indices)
+        all_ordered_sample_indices = [
+            EntropySampling.rank_2d(c) for c in confidences_3d
+        ]
+        return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
 
 class DisagreementSampling(ABC):
@@ -241,7 +267,7 @@ class DisagreementSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         raise NotImplementedError(
             "DisagreementSampling does not support 2d confidences."
@@ -256,7 +282,7 @@ class DisagreementSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         # X: Model, Y: Classes Chosen Per Element
         chosen_classes_per_model = np.argmax(confidences_3d, axis=2)
@@ -284,7 +310,7 @@ class KLDivergenceSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         raise NotImplementedError(
             "KLDivergenceSampling does not support 2d confidences."
@@ -301,7 +327,7 @@ class KLDivergenceSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
         """
@@ -436,14 +462,12 @@ class EnsembleSampling(ABC):
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
-        num_elements = len(confidences_2d)
-        total_rank_score = np.zeros(num_elements, dtype=int)
-        for heuristic in EnsembleSampling.get_heuristics_2d():
-            total_rank_score += heuristic.rank_2d(confidences_2d)
-        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
-        return list(high_to_low_ranked_indices)
+        all_ordered_sample_indices = [
+            heuristic.rank_2d(confidences_2d) for heuristic in EnsembleSampling.get_heuristics_2d()
+        ]
+        return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
     @staticmethod
     def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
@@ -453,14 +477,12 @@ class EnsembleSampling(ABC):
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
         Returns:
-            ranked_indices (List[int]): Indices corresponding to elements ranked by utility.
+            ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
-        _, num_elements, _ = np.array(confidences_3d).shape
-        total_rank_score = np.zeros(num_elements, dtype=int)
-        for heuristic in EnsembleSampling.get_heuristics_3d():
-            total_rank_score += heuristic.rank_3d(confidences_3d)
-        high_to_low_ranked_indices = np.argsort(total_rank_score)[::-1]
-        return list(high_to_low_ranked_indices)
+        all_ordered_sample_indices = [
+            heuristic.rank_3d(confidences_3d) for heuristic in EnsembleSampling.get_heuristics_3d()
+        ]
+        return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
 
 class HeuristicsFactory:

@@ -117,12 +117,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     def train(self):
         """Loads the initial data bucket and then trains on every strategy."""
-        logger.info("Creating Output Folder and Saving Params.")
+        logger.info("Creating output folder and saving params.")
         self.results_manager.create_experiment_folder(
             active_learning_params=self._as_dict(),
             training_strategies=self.training_strategies,
         )
-        logger.info("Creating Training Data Bucket.")
+        logger.info("Creating training data bucket.")
         self.init_train_data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
             self.load,
@@ -132,12 +132,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.test_pattern,
             self.train_seed_pct,
         )
-        logger.info("Starting Training")
+        logger.info("Starting training.")
         self._train_all_strategies()
 
     def select(self):
         """Selects the next batch of queries to label from a set of log queries."""
-        logger.info("Loading Queries for active learning.")
+        logger.info("Loading queries for active learning.")
         self.init_train_data_bucket = DataBucketFactory.get_data_bucket_for_selection(
             self.app_path,
             self.load,
@@ -149,7 +149,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.labeled_logs_pattern,
             self.log_usage_pct,
         )
-        logger.info("Starting Selection.")
+        logger.info("Starting selection.")
         self._train_single_strategy(
             strategy=self.selection_strategy, training_mode=False
         )
