@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
-from collections import Counter, defaultdict
+from collections import defaultdict
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
 
@@ -277,7 +277,7 @@ class DisagreementSampling(ABC):
     def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Finds the most frequent class label for a given element across all models.
         Calculates the agreement per element (% of models who voted the most frequent class).
-        Ranks elements by highest to lowest agreement.
+        Ranks elements by highest to lowest disagreement.
 
         Args:
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
@@ -286,17 +286,9 @@ class DisagreementSampling(ABC):
         """
         # X: Model, Y: Classes Chosen Per Element
         chosen_classes_per_model = np.argmax(confidences_3d, axis=2)
-        # X: Element, Y: Class Chosen Per Model
-        chosen_classes_per_element = chosen_classes_per_model.T
-        # Calculate Disagreement Scores
-        disagreement_scores = []
-        for row in chosen_classes_per_element:
-            class_counts_per_element = Counter(row)
-            _, freq = class_counts_per_element.most_common()[0]
-            num_models = len(row)
-            percent_voted_most_req_class = freq / num_models
-            disagreement_score = 1 - percent_voted_most_req_class
-            disagreement_scores.append(disagreement_score)
+        disagreement_scores = 1 - np.array(
+            [max(np.bincount(row)) / len(row) for row in chosen_classes_per_model.T]
+        )
         high_to_low_disagreement = np.argsort(disagreement_scores)
         return list(high_to_low_disagreement)
 
@@ -341,9 +333,7 @@ class KLDivergenceSampling(ABC):
             divergences = KLDivergenceSampling.get_divergences_per_element_no_segments(
                 confidences_3d
             )
-        # X: Element, Y: Divergence Per Model
-        divergences = np.array(divergences).T
-        divergence_per_element = np.max(divergences, axis=1)
+        divergence_per_element = np.max(divergences, axis=0)
         ranked_indices_high_to_low_divergence = np.argsort(divergence_per_element)[::-1]
         return list(ranked_indices_high_to_low_divergence)
 
@@ -465,7 +455,8 @@ class EnsembleSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         all_ordered_sample_indices = [
-            heuristic.rank_2d(confidences_2d) for heuristic in EnsembleSampling.get_heuristics_2d()
+            heuristic.rank_2d(confidences_2d)
+            for heuristic in EnsembleSampling.get_heuristics_2d()
         ]
         return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
@@ -480,7 +471,8 @@ class EnsembleSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         all_ordered_sample_indices = [
-            heuristic.rank_3d(confidences_3d) for heuristic in EnsembleSampling.get_heuristics_3d()
+            heuristic.rank_3d(confidences_3d)
+            for heuristic in EnsembleSampling.get_heuristics_3d()
         ]
         return _ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
