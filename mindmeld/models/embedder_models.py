@@ -36,6 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 def _torch(op, *args, sub="", **kwargs):
+    """
+    A safe function caller for torch module
+    Usage:
+        call ```_torch("normalize", arg1, arg2, sub="nn.functional", p=2, dim=1)```
+        instead of ```torch.nn.functional.normalize(arg1, arg2, p=2, dim=1)```
+    """
+
     return _getattr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
 
 

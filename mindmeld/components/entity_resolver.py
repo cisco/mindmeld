@@ -26,41 +26,40 @@ from string import punctuation
 
 import numpy as np
 import scipy
-from elasticsearch.exceptions import ConnectionError as EsConnectionError
-from elasticsearch.exceptions import ElasticsearchException, TransportError
 from sklearn.feature_extraction.text import TfidfVectorizer
-from tqdm.autonotebook import trange
+from tqdm.auto import trange
 
 from ._config import (
-    DEFAULT_ES_SYNONYM_MAPPING,
-    PHONETIC_ES_SYNONYM_MAPPING,
     get_app_namespace,
     get_classifier_config,
 )
-from ._elasticsearch_helpers import (
-    INDEX_TYPE_KB,
-    INDEX_TYPE_SYNONYM,
-    DOC_TYPE,
-    create_es_client,
-    delete_index,
-    does_index_exist,
-    get_field_names,
-    get_scoped_index_name,
-    load_index,
-    resolve_es_config_for_version,
-)
 from ._util import _is_module_available, _get_module_or_attr as _getattr
-from .. import path
 from ..core import Entity
-from ..exceptions import EntityResolverConnectionError, EntityResolverError
+from ..exceptions import (
+    ElasticsearchConnectionError,
+    EntityResolverError
+)
 from ..models import create_embedder_model
+from ..path import get_entity_resolver_cache_file_path
 from ..resource_loader import ResourceLoader, Hasher
 
+if _is_module_available("elasticsearch"):
+    from ._elasticsearch_helpers import (
+        INDEX_TYPE_KB,
+        INDEX_TYPE_SYNONYM,
+        DOC_TYPE,
+        DEFAULT_ES_SYNONYM_MAPPING,
+        PHONETIC_ES_SYNONYM_MAPPING,
+        create_es_client,
+        delete_index,
+        does_index_exist,
+        get_field_names,
+        get_scoped_index_name,
+        load_index,
+        resolve_es_config_for_version,
+    )
+
 logger = logging.getLogger(__name__)
-
-
-def _torch(op, *args, sub="", **kwargs):
-    return _getattr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
 
 
 class EntityResolverFactory:
@@ -117,6 +116,11 @@ class EntityResolverFactory:
             raise ImportError(
                 "Must install the extra [bert] by running `pip install mindmeld[bert]` "
                 "to use the built in embedder for entity resolution.")
+        if name == "text_relevance" and not _is_module_available("elasticsearch"):
+            raise ImportError(
+                "Must install the extra [elasticsearch] by running "
+                "`pip install mindmeld[elasticsearch]` "
+                "to use Elasticsearch based entity resolution.")
 
     @classmethod
     def create_resolver(cls, app_path, entity_type, **kwargs):
@@ -227,9 +231,8 @@ class EntityResolverBase(ABC):
                 if augment_normalized and normalizer:
                     new_aliases.extend([normalizer(string) for string in aliases])
                 aliases = set([*aliases, *new_aliases])
-            if normalize_aliases:
-                alias_normalizer = normalizer
-                aliases = [alias_normalizer(alias) for alias in aliases]
+            if normalize_aliases and normalizer:
+                aliases = [normalizer(alias) for alias in aliases]
 
             items_for_cname = item_map.get(cname, [])
             items_for_cname.append(item)
@@ -774,12 +777,12 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         try:
             index = get_scoped_index_name(self._app_namespace, self._es_index_name)
             response = self._es_client.search(index=index, body=text_relevance_query)
-        except EsConnectionError as ex:
+        except _getattr("elasticsearch", "ConnectionError") as ex:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", ex.error, ex.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from ex
-        except TransportError as ex:
+            raise ElasticsearchConnectionError(es_host=self._es_client.transport.hosts) from ex
+        except _getattr("elasticsearch", "TransportError") as ex:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
                 "Status code: %s details: %s",
@@ -792,7 +795,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 "Elasticsearch: {} Status code: {} details: "
                 "{}".format(ex.error, ex.status_code, ex.info)
             ) from ex
-        except ElasticsearchException as ex:
+        except _getattr("elasticsearch", "ElasticsearchException") as ex:
             raise EntityResolverError from ex
         else:
             hits = response["hits"]["hits"]
@@ -831,12 +834,12 @@ class ElasticsearchEntityResolver(EntityResolverBase):
             )
             if not self._es_client.indices.exists(index=scoped_index_name):
                 self.fit()
-        except EsConnectionError as e:
+        except _getattr("elasticsearch", "ConnectionError") as e:
             logger.error(
                 "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
             )
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
-        except TransportError as e:
+            raise ElasticsearchConnectionError(es_host=self._es_client.transport.hosts) from e
+        except _getattr("elasticsearch", "TransportError") as e:
             logger.error(
                 "Unexpected error occurred when sending requests to Elasticsearch: %s "
                 "Status code: %s details: %s",
@@ -845,7 +848,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
                 e.info,
             )
             raise EntityResolverError from e
-        except ElasticsearchException as e:
+        except _getattr("elasticsearch", "ElasticsearchException") as e:
             raise EntityResolverError from e
 
 
@@ -857,9 +860,11 @@ class ExactMatchEntityResolver(EntityResolverBase):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
 
-        self._augment_lower_case = (
-            kwargs.pop("er_config", {}).get("model_settings", {}).get("augment_lower_case", False)
-        )
+        settings = kwargs.pop("er_config", {}).get("model_settings", {})
+        self._aug_lower_case = settings.get("augment_lower_case", False)
+        self._aug_title_case = settings.get("augment_title_case", False)
+        self._aug_normalized = settings.get("augment_normalized", False)
+
         self._processed_entity_map = None
 
     def _fit(self, clean, entity_map):
@@ -873,7 +878,9 @@ class ExactMatchEntityResolver(EntityResolverBase):
         self._processed_entity_map = self.process_entities(
             entities,
             normalizer=self._resource_loader.query_factory.normalize,
-            augment_lower_case=self._augment_lower_case,
+            augment_lower_case=self._aug_lower_case,
+            augment_title_case=self._aug_title_case,
+            augment_normalized=self._aug_normalized,
             normalize_aliases=True
         )
 
@@ -937,26 +944,23 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         """
         super().__init__(app_path, **kwargs)
 
-        self._processed_entity_map = None
-
         er_config = kwargs.pop("er_config", {})
         settings = er_config.get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", False)
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
-        self._augment_average_synonyms_embeddings = (
-            settings.get("augment_average_synonyms_embeddings", True)
-        )
-        self._scores_normalizer = settings.get("scores_normalizer", None)
+        self._aug_avg_syn_embs = settings.get("augment_average_synonyms_embeddings", True)
 
         cache_path = settings.get("cache_path", None)
         if not cache_path:
             hashid = f"{self.__class__.__name__}$synonym_{self.type}"
-            cache_path = path.get_entity_resolver_cache_file_path(app_path, hashid)
+            cache_path = get_entity_resolver_cache_file_path(app_path, hashid)
             settings.update({"cache_path": cache_path})
             er_config.update({"model_settings": settings})
 
         self._embedder_model = create_embedder_model(self.app_path, er_config)
+
+        self._processed_entity_map = None
 
     def _fit(self, clean, entity_map):
 
@@ -977,7 +981,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         self._embedder_model.get_encodings([*self._processed_entity_map["synonyms"].keys()])
 
         # encode artificial synonyms if required
-        if self._augment_average_synonyms_embeddings:
+        if self._aug_avg_syn_embs:
             # obtain cnames to synonyms mapping
             cnames2synonyms = {}
             for syn, cnames in self._processed_entity_map["synonyms"].items():
@@ -1018,11 +1022,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         top_entity = nbest_entities[0]  # top_entity
 
         try:
-            sorted_items = self._embedder_model.find_similarity(
-                top_entity.text,
-                scores_normalizer=self._scores_normalizer,
-                _no_sort=True
-            )
+            sorted_items = self._embedder_model.find_similarity(top_entity.text, _no_sort=True)
             values = []
             for synonym, score in sorted_items:
                 cnames = self._processed_entity_map["synonyms"][synonym]
@@ -1062,11 +1062,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
             sorted_items_list = []
             for st_idx in trange(0, len(top_entity_list), batch_size, disable=False):
                 batch = top_entity_list[st_idx:st_idx + batch_size]
-                result = self._embedder_model.find_similarity(
-                    batch,
-                    scores_normalizer=self._scores_normalizer,
-                    _no_sort=True
-                )
+                result = self._embedder_model.find_similarity(batch, _no_sort=True)
                 sorted_items_list.extend(result)
 
             values_list = []
@@ -1128,37 +1124,49 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
 
+        self._processed_entity_map = None
+
         settings = kwargs.pop("er_config", {}).get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", True)
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
         self._aug_max_syn_embs = settings.get("augment_max_synonyms_embeddings", True)
-        self._scores_normalizer = settings.get("scores_normalizer", None)
 
-        self._processed_entity_map = None
-        self.ngram_length = 5  # max number of character ngrams to consider
-        self._vectorizer = \
-            TfidfVectorizer(analyzer=self._char_ngram_and_word_analyzer, lowercase=False)
+        self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
+        self._analyzer = kwargs.get("analyzer", None) or self._char_ngrams_plus_words_analyzer
+        self._vectorizer = TfidfVectorizer(analyzer=self._analyzer, lowercase=False)
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
 
-    def _char_ngram_and_word_analyzer(self, string):
-        results = self._char_ngram_analyzer(string)
-        # add words
+    def _char_ngrams_plus_words_analyzer(self, string):
+        """
+        Analyzer that accounts for character ngrams as well as individual words in the input
+        """
+        # get char ngrams
+        results = self._char_ngrams_analyzer(string)
+        # add individual words
         words = re.split(r'[\s{}]+'.format(re.escape(punctuation)), string.strip())
         results.extend(words)
         return results
 
-    def _char_ngram_analyzer(self, string):
+    def _char_ngrams_analyzer(self, string):
+        """
+        Analyzer that only accounts for character ngrams from size 1 to self.ngram_length
+        """
+        string = string.strip()
+        if len(string) == 1:
+            return [string]
+
         results = []
-        # give more importance to starting and ending characters of a word
-        string = f" {string.strip()} "
+        # give importance to starting and ending characters of a word
+        string = f" {string} "
         for n in range(self.ngram_length + 1):
             results.extend([''.join(gram) for gram in zip(*[string[i:] for i in range(n)])])
         results = list(set(results))
         results.remove(' ')
         # adding lowercased single characters might add more noise
         results = [r for r in results if not (len(r) == 1 and r.islower())]
+        # returns empty list of an empty string
         return results
 
     def find_similarity(self,
@@ -1330,11 +1338,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         top_entity = nbest_entities[0]  # top_entity
 
         try:
-            sorted_items = self.find_similarity(
-                top_entity.text,
-                scores_normalizer=self._scores_normalizer,
-                _no_sort=True
-            )
+            sorted_items = self.find_similarity(top_entity.text, _no_sort=True)
             values = []
             for synonym, score in sorted_items:
                 cnames = self._processed_entity_map["synonyms"][synonym]
@@ -1413,7 +1417,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
                 defaults.update({key: value})
         string = json.dumps(defaults, sort_keys=True)
         hashid = f"{Hasher(algorithm='sha1').hash(string=string)}$synonym_{kwargs['entity_type']}"
-        defaults.update({"cache_path": path.get_entity_resolver_cache_file_path(app_path, hashid)})
+        defaults.update({"cache_path": get_entity_resolver_cache_file_path(app_path, hashid)})
 
         model_settings.update(defaults)
         er_config.update({"model_settings": defaults})
