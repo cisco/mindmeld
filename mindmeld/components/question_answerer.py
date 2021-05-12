@@ -22,8 +22,14 @@ import numbers
 import os
 import pickle
 import re
+import unicodedata
 from abc import ABC, abstractmethod
 from math import sin, cos, sqrt, atan2, radians
+
+import nltk
+from nltk.corpus import stopwords as nltk_stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize as nltk_word_tokenize
 
 from ._config import (
     get_app_namespace,
@@ -89,8 +95,11 @@ class BaseQuestionAnswerer(ABC):
         if not self.app_path and not self.app_namespace:
             msg = f"Atlease one of `app_path` or `app_namespace` must be inputted as arguments " \
                   f"to {self.__class__.__name__} in order to distinctly " \
-                  "identify the indices being created from you data files."
-            raise Exception(msg)
+                  "identify the indices being created from you data files. Setting `app_path` as " \
+                  "current working directory."
+            logger.error(msg)
+            self.app_path = os.getcwd()
+            self.app_namespace = get_app_namespace(self.app_path)
 
         # create resource loader and qa configs if not inputted already
         if not self._resource_loader:
@@ -1333,8 +1342,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     A question answerer class not using Elasticsearch
     """
 
-    # TODO: ensure raised Exceptions are similar to ES based QA, see unit tests for more details
-
     def __init__(self, app_path, **kwargs):
         """Initializes a question answerer
 
@@ -1367,7 +1374,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
             )
             s = self.build_search(index, app_namespace=app_namespace)
-            s = s.filter(query_type=query_type, id=doc_id)
+
+            if NonElasticsearchQuestionAnswerer.FieldResource.is_number(doc_id):
+                # if a number, look for that doc_id
+                s = s.filter(query_type=query_type, field="id", et=doc_id)
+            else:
+                s = s.filter(query_type=query_type, id=doc_id)
+                # TODO: should consider s.query() to do fuzzy presence match like in Elasticsearch?
+                # s = s.query(query_type=query_type, id=doc_id)
             results = s.execute(size=size)
             return results
 
@@ -1496,13 +1510,15 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         all_id2value = {}  # a mapping from id to value(s) for each kb field
         id_counter = 0
+        all_ids = []  # maintained to keep a record of order preserved doc ids in KB
         for doc in _doc_generator(data_file):
-            # determine _id, remains same for all keys of the doc
+            # determine _id; once determined, it remains same for all keys of the doc
             _id = doc.get("id", None)
             if not _id:
                 _id = id_counter
                 id_counter += 1
             _id = str(_id)
+            all_ids.append(_id)
             # update data
             for key, value in doc.items():
                 if key not in all_id2value:
@@ -1529,7 +1545,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # update and dump
         NonElasticsearchQuestionAnswerer.ALL_INDICES.update_and_dump_index(scoped_index_name,
-                                                                           index_resources)
+                                                                           index_resources, all_ids)
 
     class Indices:
         """
@@ -1551,6 +1567,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         def __init__(self, indices_cache_path=None):
             self._indices = {}
+            self._indices_all_ids = {}  # maintained to keep a record of all doc ids of each KB
             self.indices_cache_path = indices_cache_path or NON_ELASTICSEARCH_INDICES_STORAGE_PATH
 
         def __contains__(self, item):
@@ -1559,11 +1576,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         def _get_index_cache_path(self, index_name):
             return get_question_answerer_index_cache_file_path(self.indices_cache_path, index_name)
 
-        def _make_metadata_dump(self, index_name):
+        def _create_metadata_for_dumping(self, index_name):
             index_resources = self._indices[index_name]
-            return {
-                field: resource.to_metadata() for field, resource in index_resources.items()
-            }
+            dump = {field: resource.to_metadata() for field, resource in index_resources.items()}
+            return dump
 
         def get(self, index_name):
             try:
@@ -1571,6 +1587,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             except KeyError as e:
                 msg = f"Index {index_name} does not exist in scope of {self.indices_cache_path}. " \
                       f"Consider creating one before calling `.get()`. "
+                raise KeyError(msg) from e
+
+        def get_all_ids(self, index_name):
+            try:
+                return self._indices_all_ids[index_name]
+            except KeyError as e:
+                msg = f"Index {index_name} does not exist in scope of {self.indices_cache_path}. " \
+                      f"Consider creating one before calling `.get_all_ids()`. "
                 raise KeyError(msg) from e
 
         def get_index_metadata(self, index_name):
@@ -1586,11 +1610,12 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             cache_path = self._get_index_cache_path(index_name)
 
             if index_name in self:
-                metadata_dump = self._make_metadata_dump(index_name)
+                metadata_dump = self._create_metadata_for_dumping(index_name)
 
             elif os.path.exists(cache_path):
                 opfile = open(cache_path, "rb")
                 metadata_dump = pickle.load(opfile)
+                metadata_dump.pop("__all_ids")
                 opfile.close()
 
             else:
@@ -1616,17 +1641,21 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             if cache_path and os.path.exists(cache_path):
                 os.remove(cache_path)
 
-        def update_and_dump_index(self, index_name, index_resources):
+        def update_and_dump_index(self, index_name, index_resources, index_all_ids):
 
             # update
             self._indices.update({index_name: index_resources})
+            self._indices_all_ids.update({index_name: index_all_ids})
 
-            # dump
+            # create repo for dumping if required
             cache_path = self._get_index_cache_path(index_name)
             dir_name = os.path.dirname(cache_path)
             if not os.path.exists(dir_name):
                 os.makedirs(dir_name)
-            metadata_dump = self._make_metadata_dump(index_name)
+
+            # dump
+            metadata_dump = self._create_metadata_for_dumping(index_name)
+            metadata_dump.update({"__all_ids": index_all_ids})
             opfile = open(cache_path, "wb")
             pickle.dump(metadata_dump, opfile)
             opfile.close()
@@ -1641,6 +1670,20 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return False
 
     class Search:
+        """
+        Search class enabling functionality to query, filter and sort.
+        Utilizes various methods from Indices and FiledResource to compute results.
+
+        Currently, the following are supported data types for each clause type:
+        Query -> "string", "date"  (assumes that "date" field exists as strings, both are supported
+                    through kwargs)
+        Filter -> "number" and "date" (through range parameters), "bool" (though boolean parameter),
+                    "string" (through kwargs)
+        Sort -> "number" and "date" (by specifying sort_type=asc or sort_type=desc),
+                    "location" (by specifying sort_type=distance and passing origin location)
+
+        Note: This Search class supports more items than Elasticsearch based QA
+        """
 
         def __init__(self, index):
             """Initialize a Search object.
@@ -1672,17 +1715,18 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             gte = kwargs.pop("gte", None)
             lt = kwargs.pop("lt", None)
             lte = kwargs.pop("lte", None)
-            # NEW! to support boolean filtering as well; if inputted, must be a bool- True or False
-            boolean = kwargs.pop("boolean", None)
+            et = kwargs.pop("et", None)  # NEW! support equals-to filter; similar to above
+            boolean = kwargs.pop("boolean", None)  # NEW! support boolean filter; input True/False
 
-            # filter that operates on numeric values or boolean
+            # filter that operates on numeric values or date values or boolean
             if field:
                 if field in self._filter_queries:
                     msg = f"Found a duplicate filter clause against `{field}` field name. " \
                           "Utilizing only latest input."
                     logger.warning(msg)
                 self._filter_queries.update(
-                    {field: {"gt": gt, "gte": gte, "lt": lt, "lte": lte, "boolean": boolean}}
+                    {field: {"gt": gt, "gte": gte, "lt": lt, "lte": lte, "et": et,
+                             "boolean": boolean}}
                 )
 
             # filter that operates on strings; extract field name and query strings then
@@ -1698,12 +1742,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         def sort(self, field, sort_type=None, location=None):
 
-            if sort_type not in ["asc", "desc", "distance"]:
-                msg = f"Unexpected value for argument `sort_type`: {sort_type}. " \
-                      f"Expected it to be among ['asc', 'desc', 'distance']. "
-                logger.error(msg)
-                return self
-
             if field in self._sort_queries:
                 msg = f"Found a duplicate sort clause against `{field}` field name. " \
                       "Utilizing only latest input."
@@ -1716,8 +1754,9 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         def execute(self, size=10):
 
             try:
-                index_resources = (
-                    NonElasticsearchQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                index_resources = NonElasticsearchQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                index_all_ids = (
+                    NonElasticsearchQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)
                 )
             except KeyError:
                 msg = f"The index `{self.index_name}` looks unavailable. " \
@@ -1736,12 +1775,13 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
-                    continue
+                    raise ValueError("Invalid knowledge base field '{}'".format(field_name))
                 this_field_scores = field_resource.do_search(query_type, value)
                 scores = {_id: (scores.get(_id, 0.0) + _score) / (n_scores + 1)
                           for _id, _score in this_field_scores.items()}
                 n_scores += 1
-            _ids, _scores = None, None
+            # pass in all indices if no similarities computed
+            _ids, _scores = index_all_ids, None
             if scores:
                 _ids, _scores = zip(*sorted(scores.items(), key=lambda x: x[1], reverse=True))
             curated_docs = (
@@ -1755,7 +1795,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
-                    continue
+                    raise ValueError("Invalid knowledge base field '{}'".format(field_name))
                 curated_docs = field_resource.do_filter(curated_docs, **kwargs)
 
             # get sorted results for `sort` clause
@@ -1764,7 +1804,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
-                    continue
+                    raise ValueError("Invalid knowledge base field '{}'".format(field_name))
                 curated_docs = field_resource.do_sort(curated_docs, **kwargs)
 
             # remove `_id` key fields
@@ -1849,46 +1889,51 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         @staticmethod
         def auto_string_processor(string_or_strings, query_type):
 
-            def keyword_processor(_input):
-                """
-                Args:
-                    _input: a string or list of strings for processing
-                """
+            try:
+                english_stop_words = set(nltk_stopwords.words('english'))
+            except LookupError:
+                nltk.download('stopwords')
+                english_stop_words = set(nltk_stopwords.words('english'))
 
-                def process_string(string):
-                    # TODO: complete this method
-                    return str(string)
+            english_stemmer = PorterStemmer()
 
-                if isinstance(_input, str):
-                    return process_string(_input)
-                elif isinstance(_input, (list, set)):
-                    return [process_string(_inp) for _inp in _input]
+            try:
+                nltk_word_tokenize(" ")
+            except LookupError:
+                nltk.download('punkt')
 
-                return _input
+            def lowercase(string):
+                return string.lower()
 
-            def text_processor(_input):
-                """
-                Args:
-                    _input: a string or list of strings for processing
-                """
+            def strip_accents(string):
+                return ''.join((c for c in unicodedata.normalize('NFD', string) if
+                                unicodedata.category(c) != 'Mn'))
 
-                def process_string(string):
-                    # TODO: complete this method
-                    return str(string)
+            def keyword_processor(string):
+                # TODO: can add char_filters like Elasticsearch; see `keyword_match_analyzer` in
+                #       `components/_elasticsearch_hepers.py`
+                return strip_accents(lowercase(str(string)))
 
-                if isinstance(_input, str):
-                    return process_string(_input)
-                elif isinstance(_input, (list, set)):
-                    return [process_string(_inp) for _inp in _input]
+            def text_processor(string):
+                string = strip_accents(lowercase(str(string)))
+                word_tokens = nltk_word_tokenize(string)
+                filtered_string = " ".join(
+                    [english_stemmer.stem(w) for w in word_tokens if w not in english_stop_words])
+                return filtered_string
 
-                return _input
+            if "keyword" in query_type:
+                processor = keyword_processor
+            elif "text" in query_type:
+                processor = text_processor
+            else:
+                raise ValueError("query_type in processor must contain `text` or `keyword` string")
 
-            if "text" in query_type:
-                return text_processor(string_or_strings)
-            elif "keyword" in query_type:
-                return keyword_processor(string_or_strings)
-
-            return string_or_strings
+            if isinstance(string_or_strings, str):
+                return processor(string_or_strings)
+            elif isinstance(string_or_strings, (list, set)):
+                return [processor(string) for string in string_or_strings]
+            else:
+                raise ValueError("Input to auto processor must be string or list of strings")
 
         @staticmethod
         def is_bool(value):
@@ -1933,6 +1978,9 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         @staticmethod
         def date_scorer(some_date, origin_date=datetime.datetime.now()):
+            """
+            returns # of days as score
+            """
             target_date = origin_date
             for fmt in NonElasticsearchQuestionAnswerer.FieldResource.DATE_FORMATS:
                 try:
@@ -1993,7 +2041,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         def validate_and_reformat_value(self, value, _id=None):
 
-            def raise_type_error():
+            def _raise_error():
                 errmsg = f"Formatting error for the field {self.field_name}" \
                          f"{' in doc id' if _id else ''} {str(_id) if _id else ''} " \
                          f"in index {self.index_name}. Found an unexpected type {type(value)} " \
@@ -2003,24 +2051,24 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             if self.data_type == "bool":
                 if not self.is_bool(value):
-                    raise_type_error()
+                    _raise_error()
             elif self.data_type == "number":
                 if not self.is_number(value):
-                    raise_type_error()
+                    _raise_error()
             elif self.data_type == "string":
                 if self.is_string(value):
                     value = value.strip()
                 elif self.is_list_of_strings(value):
                     value = [val.strip() for val in value]
                 else:
-                    raise_type_error()
+                    _raise_error()
             elif self.data_type == "date":
                 value = value.strip()
                 if not self.is_date(value):
-                    raise_type_error()
+                    _raise_error()
             elif self.data_type == "location":
                 if not self.is_location(value):
-                    raise_type_error()
+                    _raise_error()
                 # convert it into standard format "37.77,122.41"
                 if isinstance(value, list):  # eg. [37.77, 122.41]
                     value = ",".join([str(_value) for _value in value])
@@ -2145,8 +2193,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         er_config={"model_settings": {**resolver_settings}})
                 )
                 # format id2value data into an `entity_map` format for resolvers
-                processed_id2value = {_id: self.auto_string_processor(val, self.processor_type)
-                                      for _id, val in self.id2value.items()}
+                values = self.auto_string_processor([*self.id2value.values()], self.processor_type)
+                processed_id2value = dict(zip(self.id2value.keys(), values))
                 entity_map = get_entity_map(processed_id2value)
                 self._text_resolver.fit(entity_map=entity_map, clean=lazy_clean)
 
@@ -2185,13 +2233,23 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 dict: a mapping between _ids recorded in this field and their corresponding scores
             """
 
-            # sanity check
+            # validation
             if self.data_type not in ["string", "date"]:
                 msg = f"Searching is not allowed for data type `{self.data_type}`. "
                 logger.error(msg)
-                return {_id: 0.0 for _id in self.id2value.keys()}
+                raise ValueError(
+                    "Query can only be defined on text and vector fields. If it is,"
+                    " try running load_kb with clean=True and reinitializing your"
+                    " QuestionAnswerer object."
+                )
 
-            query_type = self.validate_and_reformat_value(query_type)
+            # validation
+            if query_type not in ALL_QUERY_TYPES:
+                msg = f"Unknown query type- {query_type}"
+                logger.error(msg)
+                raise ValueError(msg)
+
+            value = self.validate_and_reformat_value(value)
 
             def update_scores(resolver, value_string, this_field_scores, n_scores):
 
@@ -2256,8 +2314,49 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             return this_field_scores
 
-        def do_filter(self, curated_docs, filter_text=None,
-                      gt=None, gte=None, lt=None, lte=None, boolean=None):
+        def do_filter_validation(self, filter_text, gt, gte, lt, lte, et, boolean):
+            # code inspired and adapted from Elasticsearch QA class (see Sort/Filter/QueryClause)
+
+            if self.data_type in ["number", "date"]:
+                if (
+                    not gt
+                    and not gte
+                    and not lt
+                    and not lte
+                    and not et
+                ):
+                    raise ValueError("No range parameter is specified")
+                elif gte and gt:
+                    raise ValueError(
+                        "Invalid range parameters. Cannot specify both 'gte' and 'gt'."
+                    )
+                elif lte and lt:
+                    raise ValueError(
+                        "Invalid range parameters. Cannot specify both 'lte' and 'lt'."
+                    )
+                elif (gt or gte or lt or lte) and et:
+                    raise ValueError(
+                        "Invalid range parameters. Cannot specify 'et' when specifying one of "
+                        "[gt, gte, lt, lte]"
+                    )
+            elif self.data_type in ["bool"]:
+                if not isinstance(boolean, bool):
+                    raise ValueError(
+                        "Invalid boolean parameter."
+                    )
+            elif self.data_type in ["string"]:
+                if not self.is_string(filter_text):
+                    raise ValueError(
+                        "Invalid textual input parameter."
+                    )
+            else:
+                raise ValueError(
+                    "Custom filter can only be defined for boolean, number, string or date field."
+                )
+
+        def do_filter(self, curated_docs,
+                      filter_text=None,
+                      gt=None, gte=None, lt=None, lte=None, et=None, boolean=None):
             """
             Filters a list of docs to a subset based on some criteria such as a boolean value
             or ><= operations or a text snippet.
@@ -2266,16 +2365,9 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             if not curated_docs:
                 return curated_docs
 
-            # sanity check
-            if self.data_type not in ["number", "bool", "string"]:
-                msg = f"Filtering is not allowed for data type `{self.data_type}`. "
-                logger.error(msg)
-                return curated_docs
+            self.do_filter_validation(filter_text, gt, gte, lt, lte, et, boolean)
 
             if self.data_type in ["number"]:
-
-                if gt is None and gte is None and lt is None and lte is None:
-                    return curated_docs
 
                 def is_valid(value):
                     if gt and not (value > gt):
@@ -2286,16 +2378,31 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         return False
                     if lte and not (value <= lte):
                         return False
+                    if et and not (value != et):
+                        return False
+                    return True
+
+            elif self.data_type in ["date"]:
+
+                def is_valid(value):
+                    value = abs(self.date_scorer(value))  # returns no. of days
+                    if gt and not (value > gt):
+                        return False
+                    if gte and not (value >= gte):
+                        return False
+                    if lt and not (value < lt):
+                        return False
+                    if lte and not (value <= lte):
+                        return False
+                    if et and not (value != et):
+                        return False
                     return True
 
             elif self.data_type in ["string"]:
+                # different from Elasticsearch filtering on strings, this method only allows
+                #   exact presence of that input text and not a fuzzy match!
 
-                if filter_text is None:
-                    return curated_docs
-
-                if filter_text is not None:
-                    filter_text = self.validate_and_reformat_value(filter_text)
-
+                filter_text = self.validate_and_reformat_value(filter_text)
                 filter_text_aliases = set([filter_text, filter_text.lower()])
 
                 def is_valid(value):
@@ -2305,10 +2412,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         return True
                     return False
 
-            elif self.data_type == "bool":
-
-                if not isinstance(boolean, bool):
-                    return curated_docs
+            elif self.data_type in ["bool"]:
 
                 def is_valid(value):
                     return value == boolean
@@ -2321,95 +2425,97 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             return [curated_docs[i] for i in valid_indices]
 
-        def do_sort(self, curated_docs, sort_type=None, location=None):
+        def do_sort_validation(self, sort_type, location):
+            # code inspired and adapted from Elasticsearch QA class (see Sort/Filter/QueryClause)
+
+            SORT_ORDER_ASC = "asc"
+            SORT_ORDER_DESC = "desc"
+            SORT_DISTANCE = "distance"
+            SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
+
+            if sort_type not in SORT_TYPES:
+                raise ValueError(
+                    "Invalid value for sort type '{}'".format(sort_type)
+                )
+
+            if self.data_type == "location" and sort_type != SORT_DISTANCE:
+                raise ValueError(
+                    "Invalid value for sort type '{}'".format(sort_type)
+                )
+
+            if self.data_type == "location" and not location:
+                raise ValueError(
+                    "No origin location specified for sorting by distance."
+                )
+
+            if sort_type == SORT_DISTANCE and self.data_type != "location":
+                raise ValueError(
+                    "Sort by distance is only supported using 'location' field."
+                )
+
+            if self.data_type not in ["number", "date", "location"]:
+                raise ValueError(
+                    "Custom sort criteria can only be defined for"
+                    + " 'number', 'date' or 'location' fields."
+                )
+
+        def do_sort(self, curated_docs, sort_type, location=None):
+            # TODO: combining the sort-field values &  _scores is pretty naive, should be improved
 
             if not curated_docs:
                 return curated_docs
 
-            # sanity check
-            if self.data_type not in ["string", "number", "date", "location"]:
-                msg = f"Sorting is not allowed for data type `{self.data_type}`. "
-                logger.error(msg)
-                return curated_docs
+            self.do_sort_validation(sort_type, location)
 
-            if self.data_type in ["string", "number", "date"]:
+            if self.data_type == "number":
+                # obtain scores for this field values, normalize and multiply with _scores field
+                #    in docs and sort them
+                # _scores will all be zeros in case no similarity match is computed before sort
+                inds, common_ids, _scores = zip(
+                    *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
+                      doc["_id"] in self.id2value])
+                field_value_scores = [self.number_scorer(self.id2value[_id]) for _id in common_ids]
 
-                sort_type = sort_type or "desc"  # "asc" and "desc" are standardized terms to use
-                if sort_type not in ["asc", "desc"]:
-                    msg = f"'asc' and 'desc' are the only valid sort_type values allowed for " \
-                          f"field {self.field_name} in index {self.index_name}"
-                    logger.warning(msg)
-                    return curated_docs
+                _scores = self.min_max_normalizer(_scores)
+                field_value_scores = self.min_max_normalizer(field_value_scores)
+                final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
 
-                if self.data_type == "string":
-                    return sorted(curated_docs, key=lambda x: x[self.field_name],
-                                  reverse=sort_type != "asc")
+                curated_docs = [curated_docs[ii] for ii in inds]
+                for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
+                    doc.update({"_sort_score": final_score})
+                    curated_docs[jj] = doc
 
-                elif self.data_type == "number":
-                    # obtain scores for this field values, normalize and multiply with _scores field
-                    #    in docs and sort them
+                return sorted(curated_docs, key=lambda x: x["_sort_score"],
+                              reverse=sort_type != "asc")
 
-                    # _scores will all be zeros in case no similarity match is computed before sort
-                    inds, common_ids, _scores = zip(
-                        *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
-                          doc["_id"] in self.id2value])
-                    field_value_scores = [self.number_scorer(self.id2value[_id]) for _id in
-                                          common_ids]
+            elif self.data_type == "date":
+                # obtain scores for this field values using self.date_scorer, then normalize
+                #   and multiply with _scores field in docs and sort them
+                # _scores will all be zeros in case no similarity match is computed before sort
+                inds, common_ids, _scores = zip(
+                    *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
+                      doc["_id"] in self.id2value])
+                field_value_scores = [self.date_scorer(self.id2value[_id]) for _id in common_ids]
 
-                    _scores = self.min_max_normalizer(_scores)
-                    field_value_scores = self.min_max_normalizer(field_value_scores)
-                    final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
+                _scores = self.min_max_normalizer(_scores)
+                field_value_scores = self.min_max_normalizer(field_value_scores)
+                final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
 
-                    curated_docs = [curated_docs[ii] for ii in inds]
-                    for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
-                        doc.update({"_sort_score": final_score})
-                        curated_docs[jj] = doc
+                curated_docs = [curated_docs[ii] for ii in inds]
+                for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
+                    doc.update({"_sort_score": final_score})
+                    curated_docs[jj] = doc
 
-                    return sorted(curated_docs, key=lambda x: x["_sort_score"],
-                                  reverse=sort_type != "asc")
-
-                elif self.data_type == "date":
-                    # obtain scores for this field values using self.date_scorer, then normalize
-                    #   and multiply with _scores field in docs and sort them
-
-                    # _scores will all be zeros in case no similarity match is computed before sort
-                    inds, common_ids, _scores = zip(
-                        *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
-                          doc["_id"] in self.id2value])
-                    field_value_scores = [self.date_scorer(self.id2value[_id]) for _id in
-                                          common_ids]
-
-                    _scores = self.min_max_normalizer(_scores)
-                    field_value_scores = self.min_max_normalizer(field_value_scores)
-                    final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
-
-                    curated_docs = [curated_docs[ii] for ii in inds]
-                    for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
-                        doc.update({"_sort_score": final_score})
-                        curated_docs[jj] = doc
-
-                    return sorted(curated_docs, key=lambda x: x["_sort_score"],
-                                  reverse=sort_type != "asc")
+                return sorted(curated_docs, key=lambda x: x["_sort_score"],
+                              reverse=sort_type != "asc")
 
             elif self.data_type == "location":
-
-                if sort_type not in ["distance"]:
-                    msg = f"'distance' is the only valid sort_type value allowed for " \
-                          f"field {self.field_name} in index {self.index_name}"
-                    logger.warning(msg)
-                    return curated_docs
-
-                if location is None:
-                    msg = f"Missing origin location to sort for field {self.field_name}. "
-                    logger.warning(msg)
-                    return curated_docs
 
                 origin_location = self.validate_and_reformat_value(location)
                 sort_type = "asc"
 
                 # obtain scores for this field values using self.location_scorer, then normalize
                 #   and multiply with _scores field in docs and sort them
-
                 # _scores will all be zeros in case no similarity match is computed before sort
                 inds, common_ids, _scores = zip(
                     *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
@@ -2451,7 +2557,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             all_ids = _ids
             if not all_ids:
                 ids_are_curated = True
-                # TODO: add indices in a order preserving manner
                 all_ids = set()
                 for field_name, field_resource in index_resources.items():
                     all_ids.update(field_resource.doc_ids_in_this_field)
@@ -2465,8 +2570,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # initialize docs
             for i, _id in enumerate(all_ids):
-                docs[_id] = {"_id": _id, "_score": _scores[i]} if _scores \
-                    else {"_id": _id, "_score": 0.0}
+                docs[_id] = {"_id": _id, "_score": _scores[i] if _scores else 0.0}
 
             # populate docs for all collected ids
             for field_name, field_resource in index_resources.items():
