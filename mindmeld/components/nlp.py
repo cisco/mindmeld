@@ -1083,14 +1083,14 @@ class IntentProcessor(Processor):
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
 
-    def extract_entities(self, label_set=None):
+    def get_entity_processors(self, label_set=None):
 
         # Create the entity processors
         _processors = Bunch()
         entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
         for entity_type in entity_types:
 
-            if entity_type in self._children:
+            if entity_type in _processors:
                 continue
 
             processor = EntityProcessor(
