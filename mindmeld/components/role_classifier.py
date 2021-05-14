@@ -21,6 +21,7 @@ from sklearn.externals import joblib
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
+from ..resource_loader import ProcessedQueryList
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
@@ -74,7 +75,11 @@ class RoleClassifier(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, label_set=None, incremental_timestamp=None, load_cached=True, **kwargs):
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True, **kwargs):
         """Trains a statistical model for role classification using the provided training examples.
 
         Args:
@@ -94,11 +99,15 @@ class RoleClassifier(Classifier):
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
 
-        if not label_set:
-            label_set = model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        if not queries:
+            if not label_set:
+                label_set = model_config.train_label_set
+                label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+            queries = self._get_queries_from_label_set(label_set)
+        elif not isinstance(queries, ProcessedQueryList):
+            queries = ProcessedQueryList.from_in_memory_list(queries)
 
-        new_hash = self._get_model_hash(model_config, label_set)
+        new_hash = self._get_model_hash(model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
@@ -108,8 +117,9 @@ class RoleClassifier(Classifier):
                 return True
             return False
 
-        # Load labeled data
-        examples, labels = self._get_queries_and_labels(label_set=label_set)
+        # These examples and labels are flat lists, not
+        # a ProcessedQueryList.Iterator
+        examples, labels = self._get_examples_and_labels(queries)
 
         if examples:
             # Build roles set
@@ -279,23 +289,22 @@ class RoleClassifier(Classifier):
         self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
         return self._model._extract_features((query, entities, entity_index))
 
-    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         return self._resource_loader.get_flattened_label_set(
             domain=self.domain,
             intent=self.intent,
             label_set=label_set
         )
 
-    def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_examples_and_labels(self, queries):
         """Returns a set of queries and their labels based on the label set
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
+            queries (list): A list of ProcessedQuery objects, to
                 train on. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
+        Returns:
+            tuple(list(Any), list(Any))
         """
-        queries = self._get_flattened_label_set(label_set)
         # build list of examples -- entities of this role classifier's type
         examples = []
         labels = []
@@ -319,8 +328,7 @@ class RoleClassifier(Classifier):
 
         return examples, labels
 
-    def _get_queries_and_labels_hash(self, label_set=DEFAULT_TRAIN_SET_REGEX):
-        queries = self._get_flattened_label_set(label_set)
+    def _get_examples_and_labels_hash(self, queries):
         hashable_queries = [
             self.domain + "###" + self.intent + "###" + self.entity_type + "###"
         ] + sorted(list(queries.raw_queries()))

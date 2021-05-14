@@ -88,10 +88,27 @@ class ProcessedQueryList:
     def intents(self):
         return ProcessedQueryList.IntentIterator(self)
 
+    @staticmethod
+    def from_in_memory_list(queries):
+        '''
+        Creates a ProcessedQueryList wrapper around an
+        in-memory list of ProcessedQuery objects
+
+        Args:
+            queries (list(ProcessedQuery)): queries to wrap
+        Returns:
+            ProcessedQueryList object
+        '''
+        return ProcessedQueryList(
+            cache=ProcessedQueryList.MemoryCache(queries),
+            row_ids=list(range(len(queries)))
+        )
+
     class Iterator:
-        def __init__(self, source):
+        def __init__(self, source, cached=False):
             self.source = source
             self.row_ids = source.row_ids
+            self.result_cache = [] if not cached else [None] * len(source)
             self.iter_idx = -1
 
         def __iter__(self):
@@ -102,7 +119,12 @@ class ProcessedQueryList:
             self.iter_idx += 1
             if self.iter_idx == len(self.source.row_ids):
                 raise StopIteration
-            return self[self.iter_idx]
+            if self.result_cache and self.result_cache[self.iter_idx] is not None:
+                return self.result_cache[self.iter_idx]
+            result = self[self.iter_idx]
+            if self.result_cache:
+                self.result_cache[self.iter_idx] = result
+            return result
 
         def __len__(self):
             return len(self.source)
@@ -113,12 +135,10 @@ class ProcessedQueryList:
             '''
             return self.source.cache.get(self.row_ids[key])
 
-        @staticmethod
-        def passthrough(processed_query):
-            return processed_query
-
         def reorder(self, indices):
             self.row_ids = [self.row_ids[i] for i in indices]
+            if self.result_cache:
+                self.result_cache = [self.result_cache[i] for i in indices]
 
     class RawQueryIterator(Iterator):
         def __getitem__(self, key):
@@ -133,12 +153,46 @@ class ProcessedQueryList:
             return self.source.cache.get_entities(self.row_ids[key])
 
     class DomainIterator(Iterator):
+        def __init__(self, source):
+            # Cache the domains in memory
+            super().__init__(source, cached=True)
+
         def __getitem__(self, key):
             return self.source.cache.get_domain(self.row_ids[key])
 
     class IntentIterator(Iterator):
+        def __init__(self, source):
+            # Cache the intents in memory
+            super().__init__(source, cached=True)
+
         def __getitem__(self, key):
             return self.source.cache.get_intent(self.row_ids[key])
+
+    class MemoryCache:
+        '''
+        A class to provide cache functionality for in-memory
+        lists of ProcessedQuery objects
+        '''
+        def __init__(self, queries):
+            self.queries = queries
+
+        def get(self, row_id):
+            return self.queries[row_id]
+
+        def get_raw_query(self, row_id):
+            return self.get(row_id).query.text
+
+        def get_query(self, row_id):
+            return self.get(row_id).query
+
+        def get_entities(self, row_id):
+            return self.get(row_id).entities
+
+        def get_domain(self, row_id):
+            return self.get(row_id).domain
+
+        def get_intent(self, row_id):
+            return self.get(row_id).intent
 
 
 class ResourceLoader:

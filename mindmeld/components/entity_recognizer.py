@@ -21,6 +21,7 @@ from sklearn.externals import joblib
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Entity, Query
 from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
+from ..resource_loader import ProcessedQueryList
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
@@ -71,26 +72,28 @@ class EntityRecognizer(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, label_set=None, incremental_timestamp=None, load_cached=True, **kwargs):
-        """Trains the entity recognition model using the provided training queries.
-
-        Args:
-            label_set (list, optional): A label set to load. If not specified, use the default.
-            incremental_timestamp (str, optional): The timestamp folder to cache models in.
-        """
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True,
+            **kwargs):
         logger.info(
             "Fitting entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
 
-        if not label_set:
-            label_set = self._model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        if not queries:
+            if not label_set:
+                label_set = self._model_config.train_label_set
+                label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+            queries = self._get_queries_from_label_set(label_set)
+        elif not isinstance(queries, ProcessedQueryList):
+            queries = ProcessedQueryList.from_in_memory_list(queries)
 
-        new_hash = self._get_model_hash(self._model_config, label_set)
+        new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
@@ -101,7 +104,7 @@ class EntityRecognizer(Classifier):
             return False
 
         # Load labeled data
-        queries, labels = self._get_queries_and_labels(label_set=label_set)
+        examples, labels = self._get_examples_and_labels(queries)
 
         # Build entity types set
         self.entity_types = set()
@@ -109,8 +112,8 @@ class EntityRecognizer(Classifier):
             for entity in label:
                 self.entity_types.add(entity.entity.type)
 
-        model.initialize_resources(self._resource_loader, queries, labels)
-        model.fit(queries, labels)
+        model.initialize_resources(self._resource_loader, examples, labels)
+        model.fit(examples, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
         self.hash = new_hash
@@ -272,26 +275,17 @@ class EntityRecognizer(Classifier):
         predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
-    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         return self._resource_loader.get_flattened_label_set(
             domain=self.domain,
             intent=self.intent,
             label_set=label_set
         )
 
-    def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """Returns a set of queries and their labels based on the label set
+    def _get_examples_and_labels(self, queries):
+        return (queries.queries(), queries.entities())
 
-        Args:
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-        """
-        queries = self._get_flattened_label_set(label_set)
-        return (queries.queries(),
-                queries.entities())
-
-    def _get_queries_and_labels_hash(self, label_set=DEFAULT_TRAIN_SET_REGEX):
-        queries = self._get_flattened_label_set(label_set)
+    def _get_examples_and_labels_hash(self, queries):
         hashable_queries = [
             self.domain + "###" + self.intent + "###entity###"
         ] + sorted(list(queries.raw_queries()))

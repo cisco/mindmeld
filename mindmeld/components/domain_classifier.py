@@ -104,34 +104,13 @@ class DomainClassifier(Classifier):
             example=query, gold_label=domain, dynamic_resource=dynamic_resource
         )
 
-    def _get_flattened_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
         return self._resource_loader.get_flattened_label_set(label_set=label_set)
 
-    def _get_queries_and_labels(self, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """
-        Returns a set of queries and their labels based on the label set.
-        Because the query set is large for domain classification, it uses a
-        lazy loading iterator, the labels are relatively small and iterated
-        over multiple times so they are resolved to an in-memory list.
+    def _get_examples_and_labels(self, queries):
+        return (queries.queries(), queries.domains())
 
-        Args:
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-
-        Returns:
-            tuple(ProcessedQueryList.QueryIterator,list[str])
-
-        """
-        queries = self._get_flattened_label_set(label_set)
-        if not queries:
-            return [None, None]
-        return (queries.queries(),
-                list(queries.domains()))
-
-    def _get_queries_and_labels_hash(
-        self, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        queries = self._get_flattened_label_set(label_set)
+    def _get_examples_and_labels_hash(self, queries):
         raw_queries = []
         for domain, raw_query in zip(queries.domains(), queries.raw_queries()):
             raw_queries.append(domain + '###' + mark_down(raw_query))
