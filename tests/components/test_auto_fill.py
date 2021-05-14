@@ -11,6 +11,7 @@ from .test_dialogue_flow import assert_target_dialogue_state, assert_reply
 def test_auto_fill_happy_path(kwik_e_mart_app, qa_kwik_e_mart):
     """Tests a happy path for the app."""
     convo = Conversation(app=kwik_e_mart_app)
+    import pdb; pdb.set_trace()
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
     assert_reply(directives, "Which store would you like to know about?")
