@@ -121,8 +121,8 @@ class TaggerModel(Model):
         """Trains the model.
 
         Args:
-            examples (list of mindmeld.core.Query): A list of queries to train on.
-            labels (list of tuples of mindmeld.core.QueryEntity): A list of expected labels.
+            examples (ProcessedQueryList.QueryIterator): A list of queries to train on.
+            labels (ProcessedQueryList.EntitiesIterator): A list of expected labels.
             params (dict): Parameters of the classifier.
         """
         skip_param_selection = params is not None or self.config.param_selection is None
@@ -131,14 +131,9 @@ class TaggerModel(Model):
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
         random.shuffle(indices)
-        try:
-            examples.reorder(indices)
-        except AttributeError:
-            examples = [examples[i] for i in indices]
-        try:
-            labels.reorder(indices)
-        except AttributeError:
-            labels = [labels[i] for i in indices]
+        examples.reorder(indices)
+        labels.reorder(indices)
+
         types = [entity.entity.type for label in labels for entity in label]
         self.types = types
         if len(set(types)) == 0:

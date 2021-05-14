@@ -186,11 +186,11 @@ class Classifier(ABC):
                 values are either a kwargs dict which will be passed into the
                 feature extractor function, or a callable which will be used as to
                 extract features.
-            load_cached (bool): If the model is cached on disk should it be loaded?
+            load_cached (bool): If the model is cached on disk, load it into memory.
 
         Returns:
-            True if model was loaded and fit, False if a valid cached model exists.  The cached
-            model must be loaded if fit() returns False.
+            True if model was loaded and fit, False if a valid cached model exists but was not
+            loaded (controlled by the load_cached arg).
 
         Examples:
             Fit using default the configuration.

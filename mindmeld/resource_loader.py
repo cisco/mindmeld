@@ -117,7 +117,7 @@ class ProcessedQueryList:
 
         def __next__(self):
             self.iter_idx += 1
-            if self.iter_idx == len(self.source.row_ids):
+            if self.iter_idx == len(self):
                 raise StopIteration
             if self.result_cache and self.result_cache[self.iter_idx] is not None:
                 return self.result_cache[self.iter_idx]
@@ -167,6 +167,23 @@ class ProcessedQueryList:
 
         def __getitem__(self, key):
             return self.source.cache.get_intent(self.row_ids[key])
+
+    class ListIterator(Iterator):
+        def __init__(self, elements):
+            self.source = None
+            self.row_ids = None
+            self.result_cache = None
+            self.iter_idx = -1
+            self.elements = elements
+
+        def __getitem__(self, key):
+            return self.elements[key]
+
+        def __len__(self):
+            return len(self.elements)
+
+        def reorder(self, indices):
+            self.elements = [self.elements[i] for i in indices]
 
     class MemoryCache:
         '''

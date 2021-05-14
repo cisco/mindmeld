@@ -326,7 +326,8 @@ class RoleClassifier(Classifier):
                 )
             raise ValueError("One or more invalid entity annotations, expecting role")
 
-        return examples, labels
+        return (ProcessedQueryList.ListIterator(examples),
+                ProcessedQueryList.ListIterator(labels))
 
     def _get_examples_and_labels_hash(self, queries):
         hashable_queries = [
