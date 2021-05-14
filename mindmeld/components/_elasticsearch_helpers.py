@@ -482,6 +482,7 @@ def create_index(
         if not does_index_exist(
             app_namespace, index_name, es_host, es_client, connect_timeout
         ):
+            # TODO: add support for non-english texts by allowing configurable `langauge` as input
             template = resolve_es_config_for_version(
                 DEFAULT_ES_INDEX_TEMPLATE, es_client
             )

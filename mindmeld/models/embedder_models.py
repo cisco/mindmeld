@@ -224,7 +224,7 @@ class Embedder(ABC):
         """Fetches the encoded values from the cache, or generates them.
         Args:
             text_list (list): A list of text strings for which to get the embeddings.
-            add_to_cache (bool): If True, adds te encodings to self.cache and returns embeddings
+            add_to_cache (bool): If True, adds the encodings to self.cache and returns embeddings
 
         Returns:
             (list): A list of numpy arrays with the embeddings.
@@ -241,18 +241,18 @@ class Embedder(ABC):
 
         return encoded
 
-    def add_to_cache(self, superficial_data):
-        """Manually add some embeddings to cache. This method is created to entertain storing
-        superficial text-encoding pairs wherein the encodings are not the encodings of the text
-        itself but a combination of encodings of some list of texts from same embedder model.
-        For example, to add superficial entity embeddings as average of whitelist embeddings
-        in Entity Resolution.
+    def add_to_cache(self, mean_or_max_pooled_whitelist_embs):
+        """Manually add some max-pooled or mean-pooled embeddings to cache. This method is created
+        to entertain storing superficial text-encoding pairs (superficial because the encodings are
+        not the encodings of the text itself but a combination of encodings of some list of texts
+        from the same embedder model). For example, to add superficial entity embeddings as average
+        of whitelist embeddings in Entity Resolution.
 
         Args:
-            superficial_data (dict): texts and their correspoonding superficial embeddings as
-                numpy array, having same length as self.emb_dim
+            mean_or_max_pooled_whitelist_embs (dict): texts and their corresponding superficial
+                embeddings as a 1D numpy array, having same length as self.emb_dim
         """
-        for key, value in superficial_data.items():
+        for key, value in mean_or_max_pooled_whitelist_embs.items():
             value = np.asarray(value).reshape(-1)
             if self.emb_dim and not len(value) == self.emb_dim:
                 msg = f"Expected superficial embedding of length {self.emb_dim} but found " \

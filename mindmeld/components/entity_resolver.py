@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import re
+import uuid
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from string import punctuation
@@ -89,7 +90,7 @@ class EntityResolverFactory:
                 }
         """
 
-        if not er_config.get("model_settings", {}).get("resolver_type", None):
+        if not er_config.get("model_settings", {}).get("resolver_type"):
             model_type = er_config.get("model_type")
             if model_type == "resolver":
                 raise Exception(
@@ -138,7 +139,7 @@ class EntityResolverFactory:
         """
 
         er_config = (
-            kwargs.pop("er_config", None) or
+            kwargs.pop("er_config", {}) or
             get_classifier_config("entity_resolution", app_path=app_path)
         )
         er_config = cls._correct_deprecated_er_config(er_config)
@@ -148,7 +149,8 @@ class EntityResolverFactory:
 
         resource_loader = kwargs.pop(
             "resource_loader",
-            ResourceLoader.create_resource_loader(app_path=app_path))
+            ResourceLoader.create_resource_loader(app_path=app_path)
+        )
 
         kwargs.update({
             "entity_type": entity_type,
@@ -168,10 +170,9 @@ class EntityResolverBase(ABC):
         """Initializes an entity resolver"""
         self.app_path = app_path
         self.type = entity_type
-        self._resource_loader = resource_loader
-
-        if not self._resource_loader:
-            self._resource_loader = ResourceLoader.create_resource_loader(app_path=self.app_path)
+        self._resource_loader = (
+            resource_loader or ResourceLoader.create_resource_loader(app_path=self.app_path)
+        )
 
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._no_trainable_canonical_entity_map = False
@@ -262,15 +263,27 @@ class EntityResolverBase(ABC):
 
         # format (if required) entities key-field
         new_entities = []
-        id_counter = 0
+        all_ids = {}
         for ent in entity_map.get("entities", []):
-            cname = ent.get("cname", None)
-            if not cname:
+            cname, _id = ent.get("cname"), ent.get("id")
+            whitelist = list(dict.fromkeys(ent.get("whitelist", [])))
+            if not cname and not whitelist:
                 continue
-            _id, whitelist = ent.get("id", None), ent.get("whitelist", [])
+            if not cname:
+                cname = whitelist[0]
+                whitelist = whitelist[1:]
+            if _id in all_ids:
+                msg = f"Found a duplicate id {_id} while formatting data for entity resolution. "
+                _id = uuid.uuid4()
+                msg += f"Replacing it with a new id: {_id}"
+                logger.warning(msg)
             if not _id:
-                _id = str(id_counter)
-                id_counter += 1
+                _id = uuid.uuid4()
+                msg = f"Found an entry in entity_map without a corresponding id. " \
+                      f"Creating a random new id ({_id}) for this object."
+                logger.warning(msg)
+            _id = str(_id)
+            all_ids.update({_id: None})
             new_entities.append({"id": _id, "cname": cname, "whitelist": whitelist})
 
         entity_map["entities"] = new_entities
@@ -299,16 +312,17 @@ class EntityResolverBase(ABC):
             logger.warning(msg)
             return results
 
-        # Obtain top scored for each doc id, if scores field exist in results
+        # Obtain top scored result for each doc id (only if scores field exist in results)
         best_results = {}
         for result in results:
             if "score" not in result:
                 return results
+            # use cname as id if no `id` field exist in results
             _id = result["id"] if "id" in result else result["cname"]
             if _id not in best_results or result["score"] > best_results[_id]["score"]:
                 best_results[_id] = result
 
-        # sort as per requirement using the score field
+        # sort as per top_n requirement using the score field
         results = [*best_results.values()]
         n_scores = len(results)
         if n_scores < top_n:
@@ -450,8 +464,8 @@ class ElasticsearchEntityResolver(EntityResolverBase):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
 
-        self._es_host = kwargs.get("es_host", None)
-        self._es_config = {"client": kwargs.get("es_client", None), "pid": os.getpid()}
+        self._es_host = kwargs.get("es_host")
+        self._es_config = {"client": kwargs.get("es_client"), "pid": os.getpid()}
         self._use_double_metaphone = "double_metaphone" in (
             kwargs.pop("er_config", {}).get("model_settings", {}).get("phonetic_match_types", [])
         )
@@ -951,7 +965,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         self._aug_normalized = settings.get("augment_normalized", False)
         self._aug_avg_syn_embs = settings.get("augment_average_synonyms_embeddings", True)
 
-        cache_path = settings.get("cache_path", None)
+        cache_path = settings.get("cache_path")
         if not cache_path:
             hashid = f"{self.__class__.__name__}$synonym_{self.type}"
             cache_path = get_entity_resolver_cache_file_path(app_path, hashid)
@@ -1133,7 +1147,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         self._aug_max_syn_embs = settings.get("augment_max_synonyms_embeddings", True)
 
         self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
-        self._analyzer = kwargs.get("analyzer", None) or self._char_ngrams_plus_words_analyzer
+        self._analyzer = kwargs.get("analyzer") or self._char_ngrams_plus_words_analyzer
         self._vectorizer = TfidfVectorizer(analyzer=self._analyzer, lowercase=False)
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
@@ -1416,7 +1430,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
             if key in defaults:
                 defaults.update({key: value})
         string = json.dumps(defaults, sort_keys=True)
-        hashid = f"{Hasher(algorithm='sha1').hash(string=string)}$synonym_{kwargs['entity_type']}"
+        hashid = f"{Hasher(algorithm='sha256').hash(string=string)}$synonym_{kwargs['entity_type']}"
         defaults.update({"cache_path": get_entity_resolver_cache_file_path(app_path, hashid)})
 
         model_settings.update(defaults)

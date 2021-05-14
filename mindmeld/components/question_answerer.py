@@ -23,6 +23,7 @@ import os
 import pickle
 import re
 import unicodedata
+import uuid
 from abc import ABC, abstractmethod
 from math import sin, cos, sqrt, atan2, radians
 
@@ -70,6 +71,8 @@ EMBEDDING_FIELD_STRING = "_embedding"
 NON_ELASTICSEARCH_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), ".cache/mindmeld")
 
 
+# TODO: Both QA classes assume input text is in English. Going forward, this should be configurable!
+
 class BaseQuestionAnswerer(ABC):
 
     def __init__(self, app_path, **kwargs):
@@ -85,9 +88,9 @@ class BaseQuestionAnswerer(ABC):
                 question answerer.
         """
         self.app_path = app_path
-        self.app_namespace = kwargs.get("app_namespace", None)
-        self._resource_loader = kwargs.get("resource_loader", None)
-        self.__qa_config = kwargs.get("config", None)
+        self.app_namespace = kwargs.get("app_namespace")
+        self._resource_loader = kwargs.get("resource_loader")
+        self.__qa_config = kwargs.get("config")
 
         # create app_namespace implicitly from app_path is not provided
         if not self.app_namespace:
@@ -149,7 +152,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
         super().__init__(app_path, **kwargs)
-        self._es_host = kwargs.get("es_host", None)
+        self._es_host = kwargs.get("es_host")
         self.__es_client = None
         self._es_field_info = {}
 
@@ -397,7 +400,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             config = get_classifier_config("question_answering", app_path=app_path)
 
         # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        query_type = config.get("model_type", None) or self._query_type
+        query_type = config.get("model_type") or self._query_type
 
         # determine embedding fields and load embedder model
         embedding_fields = (
@@ -1470,7 +1473,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             config = get_classifier_config("question_answering", app_path=app_path)
 
         # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        query_type = config.get("model_type", None) or self._query_type
+        query_type = config.get("model_type") or self._query_type
 
         # determine embedding fields and load embedder model
         embedding_fields = (
@@ -1509,16 +1512,22 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return any([re.match(pattern, string) for pattern in pattern_list])
 
         all_id2value = {}  # a mapping from id to value(s) for each kb field
-        id_counter = 0
-        all_ids = []  # maintained to keep a record of order preserved doc ids in KB
+        all_ids = {}  # maintained to keep a record of order-preserved-doc-ids of the knowledge base
         for doc in _doc_generator(data_file):
             # determine _id; once determined, it remains same for all keys of the doc
-            _id = doc.get("id", None)
+            _id = doc.get("id")
+            if _id in all_ids:
+                msg = f"Found a duplicate id {_id} while processing {data_file}. "
+                _id = uuid.uuid4()
+                msg += f"Replacing it with a new id: {_id}"
+                logger.warning(msg)
             if not _id:
-                _id = id_counter
-                id_counter += 1
+                _id = uuid.uuid4()
+                msg = f"Found an entry in {data_file} without a corresponding id. " \
+                      f"Creating a random new id ({_id}) for this object."
+                logger.warning(msg)
             _id = str(_id)
-            all_ids.append(_id)
+            all_ids.update({_id: None})
             # update data
             for key, value in doc.items():
                 if key not in all_id2value:
@@ -1529,7 +1538,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         index_resources = \
             NonElasticsearchQuestionAnswerer.ALL_INDICES.get_index_metadata(scoped_index_name)
         for key, id2value in all_id2value.items():
-            field_resource = index_resources.get(key, None)
+            field_resource = index_resources.get(key)
             if not field_resource:
                 field_resource = NonElasticsearchQuestionAnswerer.FieldResource(
                     index_name=scoped_index_name, field_name=key)
@@ -1545,7 +1554,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # update and dump
         NonElasticsearchQuestionAnswerer.ALL_INDICES.update_and_dump_index(scoped_index_name,
-                                                                           index_resources, all_ids)
+                                                                           index_resources,
+                                                                           [*all_ids.keys()])
 
     class Indices:
         """
@@ -1615,7 +1625,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             elif os.path.exists(cache_path):
                 opfile = open(cache_path, "rb")
                 metadata_dump = pickle.load(opfile)
-                metadata_dump.pop("__all_ids")
+                metadata_dump.pop("__all_ids", None)
                 opfile.close()
 
             else:
@@ -1661,13 +1671,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             opfile.close()
 
         def is_available(self, index_name):
-            if (
-                index_name in self._indices or
-                os.path.exists(self._get_index_cache_path(index_name))
-            ):
-                return True
-
-            return False
+            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
 
     class Search:
         """
@@ -1771,7 +1775,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             for field_name, kwargs in self._search_queries.items():
                 query_type = kwargs["query_type"]
                 value = kwargs["value"]
-                field_resource = index_resources.get(field_name, None)
+                field_resource = index_resources.get(field_name)
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
@@ -1791,7 +1795,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # get narrowed results for `filter` clause
             for field_name, kwargs in self._filter_queries.items():
-                field_resource = index_resources.get(field_name, None)
+                field_resource = index_resources.get(field_name)
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
@@ -1800,7 +1804,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # get sorted results for `sort` clause
             for field_name, kwargs in self._sort_queries.items():
-                field_resource = index_resources.get(field_name, None)
+                field_resource = index_resources.get(field_name)
                 if not field_resource:
                     msg = f"The field `{field_name}` is not available in index `{self.index_name}`."
                     logger.error(msg)
@@ -1809,7 +1813,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             # remove `_id` key fields
             for doc in curated_docs:
-                doc.pop("_id")
+                doc.pop("_id", None)
 
             # reduce to the required size
             curated_docs = curated_docs[:size]
@@ -1887,13 +1891,19 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return cache_object
 
         @staticmethod
-        def auto_string_processor(string_or_strings, query_type):
+        def auto_string_processor(string_or_strings, query_type, language='english'):
+
+            if language != 'english':
+                msg = "Only allowed language for processing in QA is `english`. " \
+                      "More support coming soon!!"
+                # TODO: implement support for non-english texts
+                raise NotImplementedError(msg)
 
             try:
-                english_stop_words = set(nltk_stopwords.words('english'))
+                english_stop_words = set(nltk_stopwords.words(language))
             except LookupError:
                 nltk.download('stopwords')
-                english_stop_words = set(nltk_stopwords.words('english'))
+                english_stop_words = set(nltk_stopwords.words(language))
 
             english_stemmer = PorterStemmer()
 
@@ -2016,7 +2026,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             list_of_numbers = [num / _max for num in list_of_numbers]
             return list_of_numbers
 
-        def determine_data_type(self, value):
+        def update_data_type(self, value):
 
             if self.data_type is not None:
                 return
@@ -2110,7 +2120,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 #   determined. will be `unknown` if all values are empty or if there is a ambiguity
                 #   in deciding the data type.
                 if not self.data_type:
-                    self.determine_data_type(value)
+                    self.update_data_type(value)
                 # validation and re-formatting to update database, no change for unknown data type
                 try:
                     value = self.validate_and_reformat_value(value, _id)
@@ -2144,7 +2154,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                           f"for string(s) type data field ({self.field_name}). "
                     logger.error(msg)
                     return
-                new_hash = Hasher(algorithm="sha1").hash(
+                new_hash = Hasher(algorithm="sha256").hash(
                     string=json.dumps(self.id2value, sort_keys=True)
                 )
 
@@ -2558,10 +2568,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             if not all_ids:
                 ids_are_curated = True
                 all_ids = set()
-                for field_name, field_resource in index_resources.items():
+                for _, field_resource in index_resources.items():
                     all_ids.update(field_resource.doc_ids_in_this_field)
 
-            if (not ids_are_curated) and _scores:
+            if not ids_are_curated and _scores:
                 if len(_scores) != len(all_ids):
                     msg = f"Number of ids ({len(all_ids)}) did not match number of " \
                           f"scores ({len(_scores)}). Discarding inputted scores. "
