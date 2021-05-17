@@ -53,10 +53,6 @@ class Tokenizer:
         tokenizer = self.config.get("tokenizer")
         if not tokenizer:
             raise AssertionError("'tokenizer' cannot be None.")
-        elif tokenizer == NoOpTokenizer.__name__:
-            raise AssertionError(
-                f"'tokenizer' cannot be set to to {NoOpTokenizer.__name__}."
-            )
         return TokenizerFactory().get_tokenizer(tokenizer, self.language)
 
     def _get_normalizer(self):
@@ -69,10 +65,6 @@ class Tokenizer:
         if not normalizer:
             logger.warning("'normalizer' not found in the config.")
             return NoOpNormalizer()
-        elif normalizer == NoOpNormalizer.__name__:
-            raise AssertionError(
-                f"'normalizer' cannot be set to to {NoOpNormalizer.__name__}."
-            )
         return NormalizerFactory().get_normalizer(normalizer)
 
     def _init_regex(self):
@@ -328,7 +320,7 @@ class Tokenizer:
 
         return tokens
 
-    def get_char_index_map(self, raw_text, normalized_text):     # pylint: disable=R0201
+    def get_char_index_map(self, raw_text, normalized_text):  # pylint: disable=R0201
         """
         Generates character index mapping from normalized query to raw query. The entity model
         always operates on normalized query during NLP processing but for entity output we need
