@@ -29,7 +29,7 @@ def extract_in_gaz_features(**kwargs):
         domain_gazes = resources[GAZETTEER_RSC]
 
         for gaz_name, gaz in domain_gazes.items():
-            if current_entity.normalized_text in gaz["pop_dict"]:
+            if current_entity.normalized_tokens in gaz["pop_dict"]:
                 feat_name = "in_gaz|type:{}".format(gaz_name)
                 features[feat_name] = 1
 
