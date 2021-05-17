@@ -250,11 +250,14 @@ class Gazetteer:
 
 
 class NestedGazetteer:
+    """
+    This class represents a gazetteer entry corresponding to a Query object
+    """
 
-    def __init__(self, start_token_index, end_token_index,
+    def __init__(self, start_token_index, end_token_index_plus_one,
                  gaz_name, token_ngram, raw_ngram):
         self._start_token_index = start_token_index
-        self._end_token_index = end_token_index
+        self._end_token_index_plus_one = end_token_index_plus_one
         self._gaz_name = gaz_name
         self._token_ngram = token_ngram
         self._raw_ngram = raw_ngram
@@ -264,8 +267,8 @@ class NestedGazetteer:
         return self._start_token_index
 
     @property
-    def end_token_index(self):
-        return self._end_token_index
+    def end_token_index_plus_one(self):
+        return self._end_token_index_plus_one
 
     @property
     def gaz_name(self):
