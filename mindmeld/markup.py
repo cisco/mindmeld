@@ -94,15 +94,15 @@ def cache_query_file(
     """Loads the specified query file into the query cache
 
     Args:
-        app_path (str): The app path
         file_path (str): The path of the file to load
+        query_cache (QueryCache): A container containing cache query objects
         query_factory (QueryFactory, optional): An object which can create
             queries.
+        app_path (str): The app path
         domain (str, optional): The name of the domain annotated for the query.
         intent (str, optional): The name of the intent annotated for the query.
         is_gold (bool, optional): True if the markup passed in is a reference,
             human-labeled example. Defaults to False.
-        query_cache (QueryCache): A container containing cache query objects
 
     Returns:
         List of cached query ids
