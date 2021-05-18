@@ -42,16 +42,17 @@ def test_flatten_query_tree(resource_loader):
     with pytest.raises(ValueError):
         flattened = resource_loader.flatten_query_tree(qmap)
 
+
 def _run_tests_on_pql(queries):
     # verify the correct types are returned by the iterators
-    assert isinstance (next(queries.processed_queries()), ProcessedQuery)
-    assert isinstance (next(queries.raw_queries()), str)
-    assert isinstance (next(queries.queries()), Query)
-    assert isinstance (next(queries.entities())[0], NestedEntity)
-    assert isinstance (next(queries.domains()), str)
-    assert isinstance (next(queries.intents()), str)
+    assert isinstance(next(queries.processed_queries()), ProcessedQuery)
+    assert isinstance(next(queries.raw_queries()), str)
+    assert isinstance(next(queries.queries()), Query)
+    assert isinstance(next(queries.entities())[0], NestedEntity)
+    assert isinstance(next(queries.domains()), str)
+    assert isinstance(next(queries.intents()), str)
     int_iterator = ProcessedQueryList.ListIterator(list(range(len(queries))))
-    assert isinstance (next(int_iterator), int)
+    assert isinstance(next(int_iterator), int)
 
     # verify the domains are correct
     assert set(queries.domains()) == {'banking', 'store_info'}
