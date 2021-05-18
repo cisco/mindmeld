@@ -268,6 +268,7 @@ class Tokenizer:
             else:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
+            # TODO: Move normalization out of the Tokenizer (Phase 2)
             norm_token_text = self._normalizer.normalize(norm_token_text)
 
             norm_token_text = norm_token_text.lower()
