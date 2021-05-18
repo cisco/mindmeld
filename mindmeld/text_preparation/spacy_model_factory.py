@@ -14,7 +14,7 @@
 """This module contains a Spacy Model Factory."""
 import importlib
 import logging
-import os
+import subprocess
 import spacy
 
 from ..constants import (
@@ -113,7 +113,7 @@ class SpacyModelFactory:
         Args:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
-        os.system("python -m spacy download " + spacy_model_name)
+        subprocess.run(["python", "-m", "spacy", "download", spacy_model_name])
 
     @staticmethod
     def _import_spacy_model(spacy_model_name):

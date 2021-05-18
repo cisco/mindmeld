@@ -17,7 +17,7 @@ import logging
 import re
 import sre_constants
 
-from .text_preparation.tokenizers import TokenizerFactory, NoOpTokenizer
+from .text_preparation.tokenizers import TokenizerFactory
 from .text_preparation.normalizers import NormalizerFactory, NoOpNormalizer
 from .components._config import get_tokenizer_config, get_language_config
 from .constants import CURRENCY_SYMBOLS
