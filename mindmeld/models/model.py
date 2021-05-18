@@ -1212,7 +1212,7 @@ class Model:
             elif rname == QUERY_FREQ_RSC:
                 resource_builders[rname] = resource_loader.QueryFreqBuilder(enable_stemming)
 
-        if len(resource_builders):
+        if resource_builders:
             for query in examples:
                 for rname, builder in resource_builders.items():
                     builder.add(query)
