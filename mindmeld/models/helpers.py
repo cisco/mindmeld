@@ -13,6 +13,7 @@
 
 """This module contains some helper functions for the models package"""
 import json
+import logging
 import os
 import re
 from tempfile import mkstemp
@@ -21,6 +22,8 @@ from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
 from ..tokenizer import Tokenizer
+
+logger = logging.getLogger(__name__)
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -515,10 +518,12 @@ class FileBackedList:
             try:
                 line = next(self.file_handle)
                 return json.loads(line)
-            except Exception:
+            except Exception as e:
                 self.file_handle.close()
                 self.file_handle = None
-                raise StopIteration from Exception
+                if not isinstance(e, StopIteration):
+                    logger.error('Error reading from FileBackedList')
+                raise
 
         def __del__(self):
             if self.file_handle:

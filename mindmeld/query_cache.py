@@ -168,7 +168,7 @@ class QueryCache:
         return ProcessedQuery.from_cache(json.loads(row[0]))
 
     def get_value(self, domain, intent, query_text):
-        row_id = self.get_row_id(self.get_key(domain, intent, query_text))
+        row_id = self.key_to_row_id(self.get_key(domain, intent, query_text))
         return None if row_id is None else self.get(row_id)
 
     def get_raw_query(self, row_id):
