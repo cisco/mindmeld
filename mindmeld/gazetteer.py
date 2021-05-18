@@ -127,9 +127,6 @@ class Gazetteer:
         # already in the gazetteer. Update the popularity either way.
         tokenized_gaz_entry = tuple(token["entity"] for token in self.tokenizer.tokenize(entity))
 
-        if not tokenized_gaz_entry:
-            return
-
         if self.pop_dict[tokenized_gaz_entry] == 0:
             self.entities.append(entity)
             if not self.exclude_ngrams:
