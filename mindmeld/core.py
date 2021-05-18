@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains a collection of the core data structures used in MindMeld."""
+import json
 import logging
 from typing import Optional, List, Dict
 import immutables
@@ -239,12 +240,15 @@ class Query:
         self._timestamp = timestamp
         self.stemmed_tokens = stemmed_tokens or tuple()
 
+    def char_maps_to_cache(self):
+        return {json.dumps(k) : v for k,v in self._char_maps.items()}
+
     def to_cache(self):
         return {
             'raw_text': self.text,
             'processed_text': self.processed_text,
             'normalized_tokens': self._normalized_tokens,
-            'char_maps': {},
+            'char_maps': self.char_maps_to_cache(),
             'locale': self._locale,
             'language': self._language,
             'time_zone': self._time_zone,
@@ -254,8 +258,17 @@ class Query:
         }
 
     @staticmethod
+    def char_maps_from_cache(obj):
+        result = {}
+        for k,v in obj.items():
+            k = json.loads(k)
+            result[tuple(k)] = {int(k2): v2 for k2, v2 in v.items()}
+        return result
+
+    @staticmethod
     def from_cache(obj):
         system_entity_candidates = obj.pop('system_entity_candidates')
+        obj['char_maps'] = Query.char_maps_from_cache(obj['char_maps'])
         result = Query(**obj)
         result.system_entity_candidates = [
             Entity.from_cache_typed(e) for e in system_entity_candidates
@@ -365,7 +378,6 @@ class Query:
         """
         if form_in not in TEXT_FORMS or form_out not in TEXT_FORMS:
             raise ValueError("Invalid text form")
-
         if form_in > form_out:
             while form_in > form_out:
                 index = self._unprocess_index(index, form_in)
@@ -441,7 +453,7 @@ class ProcessedQuery:
 
     # version the cached data.  Bump this if any changes are made
     # to the to_cache() and from_cache() functions for the core classes.
-    version = 1
+    version = 2
 
     def __init__(
         self,
