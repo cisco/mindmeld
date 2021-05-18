@@ -21,7 +21,6 @@ from sklearn.externals import joblib
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Entity, Query
 from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
-from ..resource_loader import ProcessedQueryList
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
@@ -85,13 +84,8 @@ class EntityRecognizer(Classifier):
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
 
-        if not queries:
-            if not label_set:
-                label_set = self._model_config.train_label_set
-                label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
-            queries = self._get_queries_from_label_set(label_set)
-        elif not isinstance(queries, ProcessedQueryList):
-            queries = ProcessedQueryList.from_in_memory_list(queries)
+        label_set = label_set or self._model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)

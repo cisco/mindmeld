@@ -160,9 +160,9 @@ class Classifier(ABC):
         model configuration.
 
         Args:
-            queries (list(ProcessedQuery), optional): A list of queries to train on. If not
-                 specified the queries will be loaded from the label_set.
-            label_set (list, optional): A label set to load. If not specified, the default
+            queries (list(ProcessedQuery) or ProcessedQueryList, optional): A list of queries
+                 to train on. If not specified the queries will be loaded from the label_set.
+            label_set (str): A label set to load. If not specified, the default
                  training set will be loaded.
             incremental_timestamp (str, optional): The timestamp folder to cache models in
             model_type (str, optional): The type of machine learning model to use. If omitted, the
@@ -223,13 +223,9 @@ class Classifier(ABC):
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
 
-        if not queries:
-            if not label_set:
-                label_set = model_config.train_label_set
-                label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
-            queries = self._get_queries_from_label_set(label_set)
-        elif not isinstance(queries, ProcessedQueryList):
-            queries = ProcessedQueryList.from_in_memory_list(queries)
+        # resolve query set
+        label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
@@ -266,6 +262,25 @@ class Classifier(ABC):
         self.ready = True
         self.dirty = True
         return True
+
+    def _resolve_queries(self, queries=None, label_set=None):
+        """
+        Resolve queries and/or label_set into a ProcessedQueryList.
+        queries is preferred over label_set.
+
+        Args:
+            queries (ProcessedQueryList or list(ProcessedQuery): A set of queries to use for
+                the operation.
+            label_set (str): The label set to load queries from
+
+        Returns:
+            ProcessedQueryList: The set of queries
+        """
+        if not queries:
+            queries = self._get_queries_from_label_set(label_set)
+        elif not isinstance(queries, ProcessedQueryList):
+            queries = ProcessedQueryList.from_in_memory_list(queries)
+        return queries
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
@@ -337,14 +352,8 @@ class Classifier(ABC):
             return None
 
         model_config = self._get_model_config()
-
-        if not queries:
-            if not label_set:
-                label_set = model_config.test_label_set
-                label_set = label_set if label_set else DEFAULT_TEST_SET_REGEX
-            queries = self._get_queries_from_label_set(label_set)
-        elif not isinstance(queries, ProcessedQueryList):
-            queries = ProcessedQueryList.from_in_memory_list(queries)
+        label_set = label_set or model_config.test_label_set or DEFAULT_TEST_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
         examples, labels = self._get_examples_and_labels(queries)
 
