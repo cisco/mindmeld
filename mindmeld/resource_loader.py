@@ -154,16 +154,16 @@ class ProcessedQueryList:
 
     class DomainIterator(Iterator):
         def __init__(self, source):
-            # Cache the domains in memory
-            super().__init__(source, cached=True)
+            cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
+            super().__init__(source, cached=cached)
 
         def __getitem__(self, key):
             return self.source.cache.get_domain(self.row_ids[key])
 
     class IntentIterator(Iterator):
         def __init__(self, source):
-            # Cache the intents in memory
-            super().__init__(source, cached=True)
+            cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
+            super().__init__(source, cached=cached)
 
         def __getitem__(self, key):
             return self.source.cache.get_intent(self.row_ids[key])
@@ -567,7 +567,11 @@ class ResourceLoader:
         flattened = ProcessedQueryList()
         for _, intent_queries in query_tree.items():
             for _, queries in intent_queries.items():
-                flattened.cache = queries.cache
+                if not flattened.cache:
+                    flattened.cache = queries.cache
+                elif flattened.cache != queries.cache:
+                    logger.error('query_tree is built from incompatible query_caches')
+                    raise ValueError()
                 flattened.extend(queries.row_ids)
         return flattened
 
