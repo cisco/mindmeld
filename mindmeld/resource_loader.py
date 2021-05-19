@@ -46,9 +46,9 @@ class ProcessedQueryList:
     ProcessedQueryList provides a memory efficient disk backed list representation
     for a list of queries.
     """
-    def __init__(self, cache=None, row_ids=None):
+    def __init__(self, cache=None, elements=None):
         self._cache = cache
-        self.row_ids = row_ids or []
+        self.elements = elements or []
 
     @property
     def cache(self):
@@ -59,13 +59,13 @@ class ProcessedQueryList:
         self._cache = cache
 
     def append(self, query_id):
-        self.row_ids.append(query_id)
+        self.elements.append(query_id)
 
     def extend(self, query_ids):
-        self.row_ids.extend(query_ids)
+        self.elements.extend(query_ids)
 
     def __len__(self):
-        return len(self.row_ids)
+        return len(self.elements)
 
     def __bool__(self):
         return bool(len(self))
@@ -101,13 +101,13 @@ class ProcessedQueryList:
         '''
         return ProcessedQueryList(
             cache=ProcessedQueryList.MemoryCache(queries),
-            row_ids=list(range(len(queries)))
+            elements=list(range(len(queries)))
         )
 
     class Iterator:
         def __init__(self, source, cached=False):
             self.source = source
-            self.row_ids = source.row_ids
+            self.elements = source.elements
             self.result_cache = [] if not cached else [None] * len(source)
             self.iter_idx = -1
 
@@ -127,63 +127,64 @@ class ProcessedQueryList:
             return result
 
         def __len__(self):
-            return len(self.source)
+            return len(self.elements)
 
         def __getitem__(self, key):
             '''
             Override this function for getting other types of cached data.
             '''
-            return self.source.cache.get(self.row_ids[key])
+            return self.source.cache.get(self.elements[key])
 
         def reorder(self, indices):
-            self.row_ids = [self.row_ids[i] for i in indices]
+            self.elements = [self.elements[i] for i in indices]
             if self.result_cache:
                 self.result_cache = [self.result_cache[i] for i in indices]
 
     class RawQueryIterator(Iterator):
         def __getitem__(self, key):
-            return self.source.cache.get_raw_query(self.row_ids[key])
+            return self.source.cache.get_raw_query(self.elements[key])
 
     class QueryIterator(Iterator):
         def __getitem__(self, key):
-            return self.source.cache.get_query(self.row_ids[key])
+            return self.source.cache.get_query(self.elements[key])
 
     class EntitiesIterator(Iterator):
         def __getitem__(self, key):
-            return self.source.cache.get_entities(self.row_ids[key])
+            return self.source.cache.get_entities(self.elements[key])
 
     class DomainIterator(Iterator):
         def __init__(self, source):
+            # Caches the elements in memory if they are backed by sqlite3
             cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
             super().__init__(source, cached=cached)
 
         def __getitem__(self, key):
-            return self.source.cache.get_domain(self.row_ids[key])
+            return self.source.cache.get_domain(self.elements[key])
 
     class IntentIterator(Iterator):
         def __init__(self, source):
+            # Caches the elements in memory if they are backed by sqlite3
             cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
             super().__init__(source, cached=cached)
 
         def __getitem__(self, key):
-            return self.source.cache.get_intent(self.row_ids[key])
+            return self.source.cache.get_intent(self.elements[key])
 
     class ListIterator(Iterator):
+        """
+        ListIterator is a wrapper around a in memory list that supports the same
+        functionality as a ProcessedQueryList.Iterator.  This allows building
+        of arbitrary lists of data and presenting them as a
+        ProcessedQueryList.Iterator to functions that require them.
+        """
         def __init__(self, elements):
             self.source = None
-            self.row_ids = None
+            self.elements = elements
             self.result_cache = None
             self.iter_idx = -1
-            self.elements = elements
 
         def __getitem__(self, key):
             return self.elements[key]
-
-        def __len__(self):
-            return len(self.elements)
-
-        def reorder(self, indices):
-            self.elements = [self.elements[i] for i in indices]
 
     class MemoryCache:
         '''
@@ -571,8 +572,8 @@ class ResourceLoader:
                     flattened.cache = queries.cache
                 elif flattened.cache != queries.cache:
                     logger.error('query_tree is built from incompatible query_caches')
-                    raise ValueError()
-                flattened.extend(queries.row_ids)
+                    raise ValueError('query_tree is built from incompatible query_caches')
+                flattened.extend(queries.elements)
         return flattened
 
     def get_flattened_label_set(

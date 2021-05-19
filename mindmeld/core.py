@@ -241,7 +241,8 @@ class Query:
         self.stemmed_tokens = stemmed_tokens or tuple()
 
     def char_maps_to_cache(self):
-        return {json.dumps(k) : v for k,v in self._char_maps.items()}
+        # dump the tuple keys to a string and trim the ( ) symbols from the end
+        return {str(k)[1:-1] : v for k,v in self._char_maps.items()}
 
     def to_cache(self):
         return {
@@ -261,8 +262,8 @@ class Query:
     def char_maps_from_cache(obj):
         result = {}
         for k,v in obj.items():
-            k = json.loads(k)
-            result[tuple(k)] = {int(k2): v2 for k2, v2 in v.items()}
+            tuple_key = tuple(map(int, k.split(',')))
+            result[tuple_key] = v
         return result
 
     @staticmethod
@@ -453,7 +454,7 @@ class ProcessedQuery:
 
     # version the cached data.  Bump this if any changes are made
     # to the to_cache() and from_cache() functions for the core classes.
-    version = 2
+    version = 3
 
     def __init__(
         self,
