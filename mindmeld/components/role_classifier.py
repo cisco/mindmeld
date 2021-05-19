@@ -108,6 +108,7 @@ class RoleClassifier(Classifier):
         if incremental_timestamp and cached_model:
             logger.info("No need to fit. Previous model is cached.")
             if load_cached:
+                # load() sets self.ready = True
                 self.load(cached_model)
                 return True
             return False

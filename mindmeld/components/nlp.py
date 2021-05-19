@@ -494,6 +494,7 @@ class NaturalLanguageProcessor(Processor):
         self.domain_classifier.dump(model_path, incremental_model_path)
 
     def unload(self):
+        self.ready = False
         self.domain_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
@@ -855,6 +856,7 @@ class DomainProcessor(Processor):
         )
 
     def unload(self):
+        self.ready = False
         self.intent_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
@@ -1141,6 +1143,7 @@ class IntentProcessor(Processor):
         )
 
     def unload(self):
+        self.ready = False
         self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
@@ -1518,6 +1521,7 @@ class EntityProcessor(Processor):
         )
 
     def unload(self):
+        self.ready = False
         self.role_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
