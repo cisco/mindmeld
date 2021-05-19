@@ -90,7 +90,7 @@ class ProcessedQueryList:
 
     @staticmethod
     def from_in_memory_list(queries):
-        '''
+        """
         Creates a ProcessedQueryList wrapper around an
         in-memory list of ProcessedQuery objects
 
@@ -98,7 +98,7 @@ class ProcessedQueryList:
             queries (list(ProcessedQuery)): queries to wrap
         Returns:
             ProcessedQueryList object
-        '''
+        """
         return ProcessedQueryList(
             cache=ProcessedQueryList.MemoryCache(queries),
             elements=list(range(len(queries)))
@@ -130,9 +130,9 @@ class ProcessedQueryList:
             return len(self.elements)
 
         def __getitem__(self, key):
-            '''
+            """
             Override this function for getting other types of cached data.
-            '''
+            """
             return self.source.cache.get(self.elements[key])
 
         def reorder(self, indices):
@@ -187,10 +187,10 @@ class ProcessedQueryList:
             return self.elements[key]
 
     class MemoryCache:
-        '''
+        """
         A class to provide cache functionality for in-memory
         lists of ProcessedQuery objects
-        '''
+        """
         def __init__(self, queries):
             self.queries = queries
 
@@ -571,8 +571,8 @@ class ResourceLoader:
                 if not flattened.cache:
                     flattened.cache = queries.cache
                 elif flattened.cache != queries.cache:
-                    logger.error('query_tree is built from incompatible query_caches')
-                    raise ValueError('query_tree is built from incompatible query_caches')
+                    logger.error("query_tree is built from incompatible query_caches")
+                    raise ValueError("query_tree is built from incompatible query_caches")
                 flattened.extend(queries.elements)
         return flattened
 
@@ -706,9 +706,9 @@ class ResourceLoader:
             old_file_info["modified"] = new_file_info["modified"]
 
     class WordFreqBuilder:
-        '''
+        """
         Compiles unigram frequency dictionary of normalized query tokens
-        '''
+        """
         def __init__(self, enable_stemming=False):
             self.enable_stemming = enable_stemming
             self.tokens = []
@@ -729,9 +729,9 @@ class ResourceLoader:
             return Counter(self.tokens)
 
     class CharNgramFreqBuilder:
-        '''
+        """
         Compiles n-gram character frequency dictionary of normalized query tokens
-        '''
+        """
         def __init__(self, lengths, thresholds):
             self.lengths = lengths
             self.thresholds = thresholds
@@ -751,9 +751,9 @@ class ResourceLoader:
             return self.char_freq_dict
 
     class WordNgramFreqBuilder:
-        '''
+        """
         Compiles n-gram frequency dictionary of normalized query tokens
-        '''
+        """
         def __init__(self, lengths, thresholds, enable_stemming=False):
             self.lengths = lengths
             self.thresholds = thresholds
@@ -779,9 +779,9 @@ class ResourceLoader:
             return self.word_freq_dict
 
     class QueryFreqBuilder:
-        '''
+        """
         Compiles frequency dictionary of normalized and stemmed query strings
-        '''
+        """
         def __init__(self, enable_stemming=False):
             self.enable_stemming = enable_stemming
             self.query_dict = Counter()

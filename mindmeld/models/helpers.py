@@ -489,9 +489,9 @@ class FileBackedList:
 
     def append(self, line):
         if self.file_handle is None:
-            self.file_handle = open(self.filename, 'w')
+            self.file_handle = open(self.filename, "w")
         self.file_handle.write(json.dumps(line))
-        self.file_handle.write('\n')
+        self.file_handle.write("\n")
         self.num_lines += 1
 
     def __del__(self):
@@ -509,7 +509,7 @@ class FileBackedList:
     class Iterator:
         def __init__(self, source):
             self.source = source
-            self.file_handle = open(source.filename, 'r')
+            self.file_handle = open(source.filename, "r")
 
         def __len__(self):
             return len(self.source)
@@ -522,7 +522,7 @@ class FileBackedList:
                 self.file_handle.close()
                 self.file_handle = None
                 if not isinstance(e, StopIteration):
-                    logger.error('Error reading from FileBackedList')
+                    logger.error("Error reading from FileBackedList")
                 raise
 
         def __del__(self):

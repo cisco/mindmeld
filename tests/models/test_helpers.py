@@ -9,7 +9,7 @@ from mindmeld.models.helpers import FileBackedList
 
 def test_file_backed_list_data():
     # test that the file backed list saves and retrieves data properly
-    test_data = [1, 2, 3, {'a': 'a'}, ['1', '2', '3']]
+    test_data = [1, 2, 3, {"a": "a"}, ["1", "2", "3"], "\n", ";", "'", "á", "囧"]
 
     fb_list = FileBackedList()
     for data in test_data:
@@ -23,7 +23,7 @@ def test_file_backed_list_data():
 
 
 def test_file_backed_list_cleanup():
-    test_data = ['a'] * 1000
+    test_data = ["a"] * 1000
     fb_list = FileBackedList()
     fname = fb_list.filename
     assert os.path.exists(fname)
@@ -45,13 +45,13 @@ def test_file_backed_list_cleanup():
 def test_file_back_list_exception():
     fb_list = FileBackedList()
     fname = fb_list.filename
-    for data in ['a'] * 1000:
+    for data in ["a"] * 1000:
         fb_list.append(data)
     # flush file writer
     fb_list.file_handle.close()
     fb_list.file_handle = None
     # overwrite the file with bad json data
-    with open(fname, 'w') as tmp_file:
+    with open(fname, "w") as tmp_file:
         tmp_file.write('{"this":"is almost", "valid":"json\n"')
     with pytest.raises(JSONDecodeError):
         for data in fb_list:

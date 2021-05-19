@@ -103,8 +103,8 @@ class Span:
 
     def to_cache(self):
         return {
-            'start': self.start,
-            'end': self.end
+            "start": self.start,
+            "end": self.end
         }
 
     @staticmethod
@@ -246,30 +246,30 @@ class Query:
 
     def to_cache(self):
         return {
-            'raw_text': self.text,
-            'processed_text': self.processed_text,
-            'normalized_tokens': self._normalized_tokens,
-            'char_maps': self.char_maps_to_cache(),
-            'locale': self._locale,
-            'language': self._language,
-            'time_zone': self._time_zone,
-            'timestamp': self._timestamp,
-            'stemmed_tokens': self.stemmed_tokens,
-            'system_entity_candidates': [e.to_cache() for e in self.system_entity_candidates]
+            "raw_text": self.text,
+            "processed_text": self.processed_text,
+            "normalized_tokens": self._normalized_tokens,
+            "char_maps": self.char_maps_to_cache(),
+            "locale": self._locale,
+            "language": self._language,
+            "time_zone": self._time_zone,
+            "timestamp": self._timestamp,
+            "stemmed_tokens": self.stemmed_tokens,
+            "system_entity_candidates": [e.to_cache() for e in self.system_entity_candidates]
         }
 
     @staticmethod
     def char_maps_from_cache(obj):
         result = {}
         for k,v in obj.items():
-            tuple_key = tuple(map(int, k.split(',')))
+            tuple_key = tuple(map(int, k.split(",")))
             result[tuple_key] = v
         return result
 
     @staticmethod
     def from_cache(obj):
-        system_entity_candidates = obj.pop('system_entity_candidates')
-        obj['char_maps'] = Query.char_maps_from_cache(obj['char_maps'])
+        system_entity_candidates = obj.pop("system_entity_candidates")
+        obj["char_maps"] = Query.char_maps_from_cache(obj["char_maps"])
         result = Query(**obj)
         result.system_entity_candidates = [
             Entity.from_cache_typed(e) for e in system_entity_candidates
@@ -509,42 +509,42 @@ class ProcessedQuery:
 
     def to_cache(self):
         obj = {
-            'query': self.query.to_cache(),
-            'domain': self.domain,
-            'intent': self.intent,
-            'entities': [e.to_cache() for e in self.entities],
-            'is_gold': self.is_gold,
-            'confidence': self.confidence
+            "query": self.query.to_cache(),
+            "domain": self.domain,
+            "intent": self.intent,
+            "entities": [e.to_cache() for e in self.entities],
+            "is_gold": self.is_gold,
+            "confidence": self.confidence
         }
         if self.nbest_transcripts_queries:
-            obj['nbest_transcripts_queries'] = [
+            obj["nbest_transcripts_queries"] = [
                 q.to_cache() for q in self.nbest_transcripts_queries
             ]
         if self.nbest_transcripts_entities:
-            obj['nbest_transcripts_entities'] = [
+            obj["nbest_transcripts_entities"] = [
                 e.to_cache() for e in self.nbest_transcripts_entities
             ]
         if self.nbest_aligned_entities:
-            obj['nbest_aligned_entities'] = [
+            obj["nbest_aligned_entities"] = [
                 e.to_cache() for e in self.nbest_aligned_entities
             ]
         return obj
 
     @staticmethod
     def from_cache(obj):
-        obj['query'] = Query.from_cache(obj['query'])
-        obj['entities'] = [Entity.from_cache_typed(e) for e in obj['entities']]
-        if 'nbest_transcripts_queries' in obj:
-            obj['nbest_transcripts_queries'] = [
-                Query.from_cache(q) for q in obj['nbest_transcripts_queries']
+        obj["query"] = Query.from_cache(obj["query"])
+        obj["entities"] = [Entity.from_cache_typed(e) for e in obj["entities"]]
+        if "nbest_transcripts_queries" in obj:
+            obj["nbest_transcripts_queries"] = [
+                Query.from_cache(q) for q in obj["nbest_transcripts_queries"]
             ]
-        if 'nbest_transcripts_entities' in obj:
-            obj['nbest_transcripts_entities'] = [
-                Entity.from_cache_typed(e) for e in obj['nbest_transcripts_entities']
+        if "nbest_transcripts_entities" in obj:
+            obj["nbest_transcripts_entities"] = [
+                Entity.from_cache_typed(e) for e in obj["nbest_transcripts_entities"]
             ]
-        if 'nbest_aligned_entities' in obj:
-            obj['nbest_aligned_entities'] = [
-                Entity.from_cache_typed(e) for e in obj['nbest_aligned_entities']
+        if "nbest_aligned_entities" in obj:
+            obj["nbest_aligned_entities"] = [
+                Entity.from_cache_typed(e) for e in obj["nbest_aligned_entities"]
             ]
         return ProcessedQuery(**obj)
 
@@ -602,23 +602,23 @@ class NestedEntity:
 
     def to_cache(self):
         obj = {
-            'class': self.__class__.__name__,
-            'texts': self._texts,
-            'spans': [s.to_cache() for s in self._spans],
-            'token_spans': [s.to_cache() for s in self._token_spans],
-            'entity': self.entity.to_cache(),
+            "class": self.__class__.__name__,
+            "texts": self._texts,
+            "spans": [s.to_cache() for s in self._spans],
+            "token_spans": [s.to_cache() for s in self._token_spans],
+            "entity": self.entity.to_cache(),
         }
         if self.children:
-            obj['children'] = [e.to_cache() for e in self.children]
+            obj["children"] = [e.to_cache() for e in self.children]
         return obj
 
     @staticmethod
     def from_cache(obj):
-        obj['spans'] = [Span.from_cache(s) for s in obj['spans']]
-        obj['token_spans'] = [Span.from_cache(s) for s in obj['token_spans']]
-        obj['entity'] = Entity.from_cache_typed(obj['entity'])
-        if 'children' in obj:
-            obj['children'] = [Entity.from_cache_typed(e) for e in obj['children']]
+        obj["spans"] = [Span.from_cache(s) for s in obj["spans"]]
+        obj["token_spans"] = [Span.from_cache(s) for s in obj["token_spans"]]
+        obj["entity"] = Entity.from_cache_typed(obj["entity"])
+        if "children" in obj:
+            obj["children"] = [Entity.from_cache_typed(e) for e in obj["children"]]
         return NestedEntity(**obj)
 
     def with_children(self, children):
@@ -854,13 +854,13 @@ class Entity:
 
     def to_cache(self):
         return {
-            'class': self.__class__.__name__,
-            'text': self.text,
-            'entity_type': self.type,
-            'role': self.role,
-            'value': self.value,
-            'display_text': self.display_text,
-            'confidence': self.confidence
+            "class": self.__class__.__name__,
+            "text": self.text,
+            "entity_type": self.type,
+            "role": self.role,
+            "value": self.value,
+            "display_text": self.display_text,
+            "confidence": self.confidence
         }
 
     @staticmethod
@@ -869,11 +869,11 @@ class Entity:
 
     @staticmethod
     def from_cache_typed(obj):
-        '''
+        """
         Function to instantiate a cached Entity by the class type
         which was serialized when it's to_cache() function was called.
-        '''
-        entity_class = obj.pop('class')
+        """
+        entity_class = obj.pop("class")
         return Entity.entity_class_map[entity_class].from_cache(obj)
 
     @staticmethod

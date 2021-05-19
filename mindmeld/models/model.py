@@ -1192,8 +1192,6 @@ class Model:
         enable_stemming = ENABLE_STEMMING in required_resources
         resource_builders = {}
         for rname in required_resources:
-            if rname in self._resources:
-                continue
             if rname == GAZETTEER_RSC:
                 self._resources[rname] = resource_loader.get_gazetteers()
             elif rname == SENTIMENT_ANALYZER:

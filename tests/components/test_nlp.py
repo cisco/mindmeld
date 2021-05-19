@@ -77,7 +77,7 @@ def test_query_info_contains_language_information(kwik_e_mart_nlp):
         if "train.txt" in file:
             file_to_test = file
             break
-    row_id = query_info[file_to_test]['query_ids'][0]
+    row_id = query_info[file_to_test]["query_ids"][0]
     query = kwik_e_mart_nlp.resource_loader.query_cache.get(row_id).query
     assert query.language == "en"
     assert query.locale == "en_CA"

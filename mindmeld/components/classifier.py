@@ -455,10 +455,10 @@ class Classifier(ABC):
                 self.dirty = False
 
     def unload(self):
-        '''
+        """
         Unloads the model from memory. This helps reduce memory requirements while
         training other models.
-        '''
+        """
         self._model = None
         self.config = None
 

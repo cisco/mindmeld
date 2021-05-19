@@ -113,6 +113,6 @@ class DomainClassifier(Classifier):
     def _get_examples_and_labels_hash(self, queries):
         raw_queries = []
         for domain, raw_query in zip(queries.domains(), queries.raw_queries()):
-            raw_queries.append(domain + '###' + mark_down(raw_query))
+            raw_queries.append(domain + "###" + mark_down(raw_query))
         raw_queries.sort()
         return self._resource_loader.hash_list(raw_queries)

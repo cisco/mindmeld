@@ -18,13 +18,13 @@ from mindmeld.resource_loader import ProcessedQueryList
 def test_get_labeled_queries(resource_loader):
     qmap = resource_loader.get_labeled_queries()
     # verify the domains are correct
-    assert set(qmap.keys()) == {'banking', 'store_info'}
+    assert set(qmap.keys()) == {"banking", "store_info"}
 
     # verify the intents are correct
-    assert set(qmap['banking'].keys()) == {'transfer_money'}
-    assert set(qmap['store_info'].keys()) == {'greet', 'get_store_number',
-                                              'find_nearest_store', 'exit',
-                                              'get_store_hours', 'help'}
+    assert set(qmap["banking"].keys()) == {"transfer_money"}
+    assert set(qmap["store_info"].keys()) == {"greet", "get_store_number",
+                                              "find_nearest_store", "exit",
+                                              "get_store_hours", "help"}
 
 
 def test_flatten_query_tree(resource_loader):
@@ -38,7 +38,7 @@ def test_flatten_query_tree(resource_loader):
     assert count == len(flattened)
 
     # verify that query trees built from different query_caches will raise an error
-    qmap['banking']['transfer_money'].cache = QueryCache(app_path=resource_loader.app_path)
+    qmap["banking"]["transfer_money"].cache = QueryCache(app_path=resource_loader.app_path)
     with pytest.raises(ValueError):
         flattened = resource_loader.flatten_query_tree(qmap)
 
@@ -55,11 +55,11 @@ def _run_tests_on_pql(queries):
     assert isinstance(next(int_iterator), int)
 
     # verify the domains are correct
-    assert set(queries.domains()) == {'banking', 'store_info'}
+    assert set(queries.domains()) == {"banking", "store_info"}
 
     # verify the intents are correct
-    assert set(queries.intents()) == {'transfer_money', 'greet', 'get_store_number',
-                                      'find_nearest_store', 'exit', 'get_store_hours', 'help'}
+    assert set(queries.intents()) == {"transfer_money", "greet", "get_store_number",
+                                      "find_nearest_store", "exit", "get_store_hours", "help"}
 
     def test_reordering(iterator):
         # verify that reordering works properly
