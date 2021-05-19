@@ -1383,7 +1383,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 s = s.filter(query_type=query_type, field="id", et=doc_id)
             else:
                 s = s.filter(query_type=query_type, id=doc_id)
-                # TODO: should consider s.query() to do fuzzy presence match like in Elasticsearch?
+                # TODO: should consider s.query() to do fuzzy match like in Elasticsearch?
                 # s = s.query(query_type=query_type, id=doc_id)
             results = s.execute(size=size)
             return results
@@ -1652,6 +1652,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 os.remove(cache_path)
 
         def update_and_dump_index(self, index_name, index_resources, index_all_ids):
+            # a method to be used with load_kb() function
 
             # update
             self._indices.update({index_name: index_resources})
@@ -1684,7 +1685,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         Filter -> "number" and "date" (through range parameters), "bool" (though boolean parameter),
                     "string" (through kwargs)
         Sort -> "number" and "date" (by specifying sort_type=asc or sort_type=desc),
-                    "location" (by specifying sort_type=distance and passing origin location)
+                    "location" (by specifying sort_type=distance and passing origin
+                    `location` parameter)
 
         Note: This Search class supports more items than Elasticsearch based QA
         """
@@ -1759,13 +1761,14 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             try:
                 index_resources = NonElasticsearchQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                # obtain all doc ids in the order they were present in the KB
                 index_all_ids = (
                     NonElasticsearchQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)
                 )
             except KeyError:
                 msg = f"The index `{self.index_name}` looks unavailable. " \
                       f"Consider running `.load_kb(...)` to create indices " \
-                      f"before search/filter/sort queries. "
+                      f"before creating search/filter/sort queries. "
                 logger.error(msg)
                 return []
 
@@ -1785,9 +1788,11 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                           for _id, _score in this_field_scores.items()}
                 n_scores += 1
             # pass in all indices if no similarities computed
-            _ids, _scores = index_all_ids, None
             if scores:
                 _ids, _scores = zip(*sorted(scores.items(), key=lambda x: x[1], reverse=True))
+            else:
+                _ids, _scores = index_all_ids, None
+            has_similarity_scores = _scores is not None
             curated_docs = (
                 NonElasticsearchQuestionAnswerer.FieldResource.curate_docs_to_return(
                     index_resources, _ids=_ids, _scores=_scores)
@@ -1802,7 +1807,12 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     raise ValueError("Invalid knowledge base field '{}'".format(field_name))
                 curated_docs = field_resource.do_filter(curated_docs, **kwargs)
 
-            # get sorted results for `sort` clause
+            # if sim scores are available, get the top_n and then sort only the top_n objects
+            #   else sort first and then get the top_n
+            if has_similarity_scores:
+                curated_docs = sorted(curated_docs, key=lambda x: x["_score"], reverse=True)[:size]
+
+            # get sorted results for `sort` clause, only on the resultant curated_docs
             for field_name, kwargs in self._sort_queries.items():
                 field_resource = index_resources.get(field_name)
                 if not field_resource:
@@ -1811,16 +1821,15 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     raise ValueError("Invalid knowledge base field '{}'".format(field_name))
                 curated_docs = field_resource.do_sort(curated_docs, **kwargs)
 
-            # remove `_id` key fields
-            for doc in curated_docs:
-                doc.pop("_id", None)
-
-            # reduce to the required size
             curated_docs = curated_docs[:size]
             if len(curated_docs) < size:
                 msg = f"Retrieved only {len(curated_docs)} matches instead of asked number " \
                       f"{size} for index `{self.index_name}`."
                 logger.info(msg)
+
+            # remove `_id` key fields, as it meant for internal purposes only!
+            for doc in curated_docs:
+                doc.pop("_id", None)
 
             return curated_docs
 
@@ -1864,6 +1873,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                    f"data_type: {self.data_type} " \
                    f"has_text_resolver: {self.has_text_resolver} " \
                    f"has_embedding_resolver: {self.has_embedding_resolver}"
+
+        @property
+        def doc_ids(self):
+            return [*self.id2value.keys()]
 
         @classmethod
         def from_metadata(cls, cache_object: Bunch):
@@ -2408,12 +2421,17 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                         return False
                     return True
 
+            elif self.data_type in ["bool"]:
+
+                def is_valid(value):
+                    return value == boolean
+
             elif self.data_type in ["string"]:
                 # different from Elasticsearch filtering on strings, this method only allows
                 #   exact presence of that input text and not a fuzzy match!
 
                 filter_text = self.validate_and_reformat_value(filter_text)
-                filter_text_aliases = set([filter_text, filter_text.lower()])
+                filter_text_aliases = {filter_text, filter_text.lower()}
 
                 def is_valid(value):
                     if value in filter_text_aliases:
@@ -2421,11 +2439,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     if value.lower() in filter_text_aliases:
                         return True
                     return False
-
-            elif self.data_type in ["bool"]:
-
-                def is_valid(value):
-                    return value == boolean
 
             valid_indices = []
             for i, doc in enumerate(curated_docs):
@@ -2470,87 +2483,43 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 )
 
         def do_sort(self, curated_docs, sort_type, location=None):
-            # TODO: combining the sort-field values &  _scores is pretty naive, should be improved
 
             if not curated_docs:
                 return curated_docs
 
             self.do_sort_validation(sort_type, location)
 
-            if self.data_type == "number":
-                # obtain scores for this field values, normalize and multiply with _scores field
-                #    in docs and sort them
-                # _scores will all be zeros in case no similarity match is computed before sort
-                inds, common_ids, _scores = zip(
-                    *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
-                      doc["_id"] in self.id2value])
-                field_value_scores = [self.number_scorer(self.id2value[_id]) for _id in common_ids]
+            validated_curated_docs, field_values = [], []
+            for doc in curated_docs:
+                _id = doc["_id"]
+                value = self.id2value.get(_id)
+                if value is None:
+                    msg = f"Discarding doc with id: {doc['id']} while sorting as no " \
+                          f"{self.field_name} field available for it."
+                    logger.info(msg)
+                    continue
+                validated_curated_docs.append(doc)
+                field_values.append(value)
+            curated_docs = validated_curated_docs
 
-                _scores = self.min_max_normalizer(_scores)
-                field_value_scores = self.min_max_normalizer(field_value_scores)
-                final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
-
-                curated_docs = [curated_docs[ii] for ii in inds]
-                for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
-                    doc.update({"_sort_score": final_score})
-                    curated_docs[jj] = doc
-
-                return sorted(curated_docs, key=lambda x: x["_sort_score"],
-                              reverse=sort_type != "asc")
-
-            elif self.data_type == "date":
-                # obtain scores for this field values using self.date_scorer, then normalize
-                #   and multiply with _scores field in docs and sort them
-                # _scores will all be zeros in case no similarity match is computed before sort
-                inds, common_ids, _scores = zip(
-                    *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
-                      doc["_id"] in self.id2value])
-                field_value_scores = [self.date_scorer(self.id2value[_id]) for _id in common_ids]
-
-                _scores = self.min_max_normalizer(_scores)
-                field_value_scores = self.min_max_normalizer(field_value_scores)
-                final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
-
-                curated_docs = [curated_docs[ii] for ii in inds]
-                for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
-                    doc.update({"_sort_score": final_score})
-                    curated_docs[jj] = doc
-
-                return sorted(curated_docs, key=lambda x: x["_sort_score"],
-                              reverse=sort_type != "asc")
-
-            elif self.data_type == "location":
-
+            if self.data_type == "location":
                 origin_location = self.validate_and_reformat_value(location)
                 sort_type = "asc"
+                field_values = [
+                    self.location_scorer(value, origin_location) for value in field_values
+                ]
+            elif self.data_type == "number":
+                field_values = [self.number_scorer(value) for value in field_values]
+            elif self.data_type == "date":
+                field_values = [self.date_scorer(value) for value in field_values]
 
-                # obtain scores for this field values using self.location_scorer, then normalize
-                #   and multiply with _scores field in docs and sort them
-                # _scores will all be zeros in case no similarity match is computed before sort
-                inds, common_ids, _scores = zip(
-                    *[(ii, doc["_id"], doc["_score"]) for ii, doc in enumerate(curated_docs) if
-                      doc["_id"] in self.id2value])
-                field_value_scores = [self.location_scorer(self.id2value[_id], origin_location) for
-                                      _id in common_ids]
-
-                _scores = self.min_max_normalizer(_scores)
-                field_value_scores = self.min_max_normalizer(field_value_scores)
-                final_scores = [0.5 * a + 0.5 * b for a, b in zip(_scores, field_value_scores)]
-
-                curated_docs = [curated_docs[ii] for ii in inds]
-                for jj, (doc, final_score) in enumerate(zip(curated_docs, final_scores)):
-                    doc.update({"_sort_score": final_score})
-                    curated_docs[jj] = doc
-
-                return sorted(curated_docs, key=lambda x: x["_sort_score"],
-                              reverse=sort_type != "asc")
-
-        @property
-        def doc_ids_in_this_field(self):
-            return [*self.id2value.keys()]
+            _, results = zip(*sorted(enumerate(curated_docs),
+                                     key=lambda x: field_values[x[0]],
+                                     reverse=sort_type != "asc"))
+            return results
 
         @staticmethod
-        def curate_docs_to_return(index_resources, _ids=None, _scores=None):
+        def curate_docs_to_return(index_resources, _ids, _scores=None):
             """
             Collates all field names into docs
 
@@ -2558,38 +2527,33 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 index_resources: a dict of field names and corresponding FieldResource instances
                 _ids (List[str]): if provided as a list of strings, only docs with those ids are
                     obtained in the same order of the ids, else all ids are used
+                _scores (List[number], optional): if provided as a list of numbers and of same size
+                    as the _ids, they will be attached to the curated results for corresponding _ids
             Returns:
                 list[dict]: compiled docs
             """
             docs = {}
 
-            ids_are_curated = False
-            all_ids = _ids
-            if not all_ids:
-                ids_are_curated = True
-                all_ids = set()
-                for _, field_resource in index_resources.items():
-                    all_ids.update(field_resource.doc_ids_in_this_field)
-
-            if not ids_are_curated and _scores:
-                if len(_scores) != len(all_ids):
-                    msg = f"Number of ids ({len(all_ids)}) did not match number of " \
-                          f"scores ({len(_scores)}). Discarding inputted scores. "
+            if _scores:
+                if len(_scores) != len(_ids):
+                    msg = f"Number of ids ({len(_ids)}) supplied did not match " \
+                          f"number of  scores ({len(_scores)}). Discarding inputted scores " \
+                          f"while curating docs for QA results. "
                     logger.warning(msg)
-                    _scores = None
+                else:
+                    docs = {_id: {"_id": _id, "_score": _scores[i]} for i, _id in enumerate(_ids)}
 
-            # initialize docs
-            for i, _id in enumerate(all_ids):
-                docs[_id] = {"_id": _id, "_score": _scores[i] if _scores else 0.0}
+            if not docs:
+                # when no _scores are inputted or when number of _scores do not match umber of _ids
+                docs = {_id: {"_id": _id} for _id in _ids}
 
             # populate docs for all collected ids
             for field_name, field_resource in index_resources.items():
-                for _id in all_ids:
+                for _id in _ids:
                     try:
                         docs[_id][field_name] = field_resource.id2value[_id]
                     except KeyError:
-                        # print(_id, field_resource.id2value)
-                        pass
+                        docs[_id][field_name] = None
 
             return [*docs.values()]
 
