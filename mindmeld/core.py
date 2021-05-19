@@ -261,8 +261,10 @@ class Query:
     def char_maps_from_cache(obj):
         result = {}
         for k,v in obj.items():
+            # Convert string key back into tuple
             tuple_key = tuple(map(int, k.split(",")))
-            result[tuple_key] = v
+            # Convert string key for dicts back into integer
+            result[tuple_key] = {int(k2): v2 for k2, v2 in v.items()}
         return result
 
     @staticmethod

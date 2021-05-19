@@ -1195,10 +1195,8 @@ class Model:
                 self._resources[rname] = resource_loader.get_gazetteers()
             elif rname == SENTIMENT_ANALYZER:
                 self._resources[rname] = resource_loader.get_sentiment_analyzer()
-            # These resources requires labels to build
-            if labels:
-                if rname == SYS_TYPES_RSC:
-                    self._resources[rname] = resource_loader.get_sys_entity_types(labels)
+            if rname == SYS_TYPES_RSC:
+                self._resources[rname] = resource_loader.get_sys_entity_types(labels)
             # These resources require examples to build
             if examples:
                 if rname == WORD_FREQ_RSC:
