@@ -12,7 +12,6 @@
 # limitations under the License.
 
 """This module contains a collection of the core data structures used in MindMeld."""
-import json
 import logging
 from typing import Optional, List, Dict
 import immutables
