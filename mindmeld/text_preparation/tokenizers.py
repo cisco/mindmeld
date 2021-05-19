@@ -110,7 +110,7 @@ class WhiteSpaceTokenizer(Tokenizer):
     """A Tokenizer that splits text at spaces."""
 
     def __init__(self):
-        """Initializes the WhtieSpaceTokenizer."""
+        """Initializes the WhiteSpaceTokenizer."""
         pass
 
     def tokenize(self, text):

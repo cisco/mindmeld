@@ -19,6 +19,7 @@ from mindmeld.text_preparation.tokenizers import (
 JA_SENTENCE_ONE = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
 JA_SENTENCE_TWO = "株式会社ＫＡＤＯＫＡＷＡ Ｆｕｔｕｒｅ Ｐｕｂｌｉｓｈｉｎｇ"
 JA_SENTENCE_THREE = "パピプペポ"
+JA_SENTENCE_FOUR = "サウンドレベルアップして下さい"
 DE_SENTENCE_ONE = "Ein Gentleman ist vorbeigekommen, der weiß"
 ES_SENTENCE_ONE = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
 EN_SENTENCE_ONE = "Hello Sir. I'd like to tell you how much I like MindMeld."
@@ -31,7 +32,7 @@ def white_space_tokenizer():
 
 @pytest.fixture
 def spacy_tokenizer_ja():
-    return SpacyTokenizer(language="ja", spacy_model_size="lg")
+    return SpacyTokenizer(language="ja", spacy_model_size="sm")
 
 
 @pytest.fixture
@@ -159,5 +160,18 @@ def test_spacy_tokenizer_ja_two(spacy_tokenizer_ja):
         {"start": 4, "text": "ＫＡＤＯＫＡＷＡ"},
         {"start": 12, "text": "Ｆｕｔｕｒｅ"},
         {"start": 18, "text": "Ｐｕｂｌｉｓｈｉｎｇ"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_spacy_tokenizer_ja_four(spacy_tokenizer_ja):
+    tokenized_output = spacy_tokenizer_ja.tokenize(JA_SENTENCE_FOUR)
+    expected_output = [
+        {"start": 0, "text": "サウンド"},
+        {"start": 4, "text": "レベル"},
+        {"start": 7, "text": "アップ"},
+        {"start": 10, "text": "し"},
+        {"start": 11, "text": "て"},
+        {"start": 12, "text": "下さい"},
     ]
     assert tokenized_output == expected_output
