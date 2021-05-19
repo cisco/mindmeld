@@ -113,7 +113,9 @@ class SpacyModelFactory:
         Args:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
-        subprocess.run(["python", "-m", "spacy", "download", spacy_model_name], check=True)
+        subprocess.run(
+            ["python", "-m", "spacy", "download", spacy_model_name], check=True
+        )
 
     @staticmethod
     def _import_spacy_model(spacy_model_name):

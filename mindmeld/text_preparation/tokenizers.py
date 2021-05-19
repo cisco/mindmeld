@@ -18,6 +18,7 @@ import logging
 import unicodedata
 
 from .spacy_model_factory import SpacyModelFactory
+from ..constants import UNICODE_NON_LATIN_CATEGORY, UNICODE_SPACE_CATEGORY
 
 logger = logging.getLogger(__name__)
 
@@ -70,39 +71,93 @@ class CharacterTokenizer(Tokenizer):
         Args:
             text (str): The text to normalize
         Returns:
-            tokens (List[str]): List of tokenized tokens.
+            tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                Keys include "start" (token starting index), "end" (token ending index), and
+                "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
+        """
+        actions_by_char = CharacterTokenizer.get_actions_by_char(text)
+        token_num_by_char = CharacterTokenizer.get_token_num_by_char(actions_by_char)
+        return CharacterTokenizer.create_tokens(text, token_num_by_char)
+
+    @staticmethod
+    def get_actions_by_char(text):
+        """
+        Identify the appropriate action at each character ("separate", "skip", "no_action")
+        Actions are determined by the unicode category of each character. More details can be
+        found here: https://www.compart.com/en/unicode/category.
+        Args:
+            text (str): The text to process and get actions per character.
+        Returns:
+            actions_by_char (List[str]): List of actions corresponding to each character.
+                For example: ["separate", "separate", "skip", "no_action"]
+        """
+        category_by_char = [unicodedata.category(x) for x in text]
+        actions_by_char = []
+        for index, category in enumerate(category_by_char):
+            same_category_as_previous = (
+                index > 0 and category[0] == category_by_char[index - 1][0]
+            )
+            if category == UNICODE_SPACE_CATEGORY:
+                action = "skip"
+            elif (
+                category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous
+            ):
+                action = "separate"
+            else:
+                action = "no_action"
+            actions_by_char.append(action)
+        return actions_by_char
+
+    @staticmethod
+    def get_token_num_by_char(actions_by_char):
+        """
+        Get the token number that each character belongs to.
+        Args:
+            actions_by_char (List[str]): List of actions corresponding to each character.
+                For example: ["separate", "separate", "skip", "no_action"]
+        Returns:
+            token_num_by_char (List[str]): Token number that each character belongs to.
+                Spaces are represented as -1. For example: [1,2,2,3,-1,4,-1,5,5,5]
+        """
+        token_num_by_char = []
+        token_num = 0
+        for action in actions_by_char:
+            if action == "skip":
+                token_num_by_char.append(-1)
+                continue
+            if action == "separate":
+                token_num += 1
+            token_num_by_char.append(token_num)
+        return token_num_by_char
+
+    @staticmethod
+    def create_tokens(text, token_num_by_char):
+        """
+        Generate token dictionaries from the original text and the token numbers by character.
+        Args:
+            text (str): The text to normalize
+            token_num_by_char (List[str]): Token number that each character belongs to.
+                Spaces are represented as -1. For example: [1,2,2,3,-1,4,-1,5,5,5]
+        Returns:
+            tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                Keys include "start" (token starting index), "end" (token ending index), and
+                "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
         """
         tokens = []
-        token = {}
         token_text = ""
-        for i, char in enumerate(text):
-            cat = unicodedata.category(char)
-            if char.isspace():
-                # if we hit a space, close the token and empty the buffer
-                if token and token_text:
-                    token["text"] = token_text
-                    tokens.append(token)
-                token = {}
-                token_text = ""
-                continue
-            if (
-                token_text and cat[0] != unicodedata.category(token_text[-1])[0]
-            ) or cat == "Lo":
-                # if we hit a non-Latin character, close the token and restart buffer
-                if token and token_text:
-                    token["text"] = token_text
-                    tokens.append(token)
-                token = {"start": i}
-                token_text = char
+        for index, token_num in enumerate(token_num_by_char):
+            if token_num == -1:
                 continue
             if not token_text:
-                token = {"start": i}
-            token_text += char
-
-        if token and token_text:
-            token["text"] = token_text
-            tokens.append(token)
-
+                start = index
+            token_text += text[index]
+            is_last_char = index == len(token_num_by_char) - 1
+            # Close off entity if char is the last or if next char is a different token number
+            if is_last_char or (
+                not is_last_char and token_num != token_num_by_char[index + 1]
+            ):
+                tokens.append({"start": start, "text": token_text, "end": index})
+                token_text = ""
         return tokens
 
 
