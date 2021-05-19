@@ -1191,24 +1191,25 @@ class Model:
         enable_stemming = ENABLE_STEMMING in required_resources
         resource_builders = {}
         for rname in required_resources:
+            if rname in self._resources:
+                continue
             if rname == GAZETTEER_RSC:
                 self._resources[rname] = resource_loader.get_gazetteers()
             elif rname == SENTIMENT_ANALYZER:
                 self._resources[rname] = resource_loader.get_sentiment_analyzer()
             elif rname == SYS_TYPES_RSC:
                 self._resources[rname] = resource_loader.get_sys_entity_types(labels)
-            if examples:
-                if rname == WORD_FREQ_RSC:
-                    resource_builders[rname] = resource_loader.WordFreqBuilder()
-                elif rname == CHAR_NGRAM_FREQ_RSC:
-                    l, t = self.config.get_ngram_lengths_and_thresholds(rname)
-                    resource_builders[rname] = resource_loader.CharNgramFreqBuilder(l, t)
-                elif rname == WORD_NGRAM_FREQ_RSC:
-                    l, t = self.config.get_ngram_lengths_and_thresholds(rname)
-                    resource_builders[rname] = \
-                        resource_loader.WordNgramFreqBuilder(l, t, enable_stemming)
-                elif rname == QUERY_FREQ_RSC:
-                    resource_builders[rname] = resource_loader.QueryFreqBuilder(enable_stemming)
+            elif rname == WORD_FREQ_RSC:
+                resource_builders[rname] = resource_loader.WordFreqBuilder()
+            elif rname == CHAR_NGRAM_FREQ_RSC:
+                l, t = self.config.get_ngram_lengths_and_thresholds(rname)
+                resource_builders[rname] = resource_loader.CharNgramFreqBuilder(l, t)
+            elif rname == WORD_NGRAM_FREQ_RSC:
+                l, t = self.config.get_ngram_lengths_and_thresholds(rname)
+                resource_builders[rname] = \
+                    resource_loader.WordNgramFreqBuilder(l, t, enable_stemming)
+            elif rname == QUERY_FREQ_RSC:
+                resource_builders[rname] = resource_loader.QueryFreqBuilder(enable_stemming)
 
         if resource_builders:
             for query in examples:
