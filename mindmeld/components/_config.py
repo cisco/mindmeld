@@ -1106,7 +1106,10 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
         )
         if not tokenizer_config.get("allowed_patterns"):
             # If allowed_patterns are not provided, use default
-            tokenizer_config["allowed_patterns"] = _get_default_regex(exclude_from_norm)
+            tokenizer_config["allowed_patterns"] = []
+            tokenizer_config["default_allowed_patterns"] = _get_default_regex(
+                exclude_from_norm
+            )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
