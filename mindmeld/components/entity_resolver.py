@@ -1099,7 +1099,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
 
         return values_list
 
-    def predict_batch(self, entity_list, top_n: int = 20, batch_size: int = 16):
+    def predict_batch(self, entity_list, top_n: int = 20, batch_size: int = 8):
 
         if self._no_trainable_canonical_entity_map:
             return [[] for _ in entity_list]

@@ -71,8 +71,6 @@ EMBEDDING_FIELD_STRING = "_embedding"
 NON_ELASTICSEARCH_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), ".cache/mindmeld")
 
 
-# TODO: Both QA classes assume input text is in English. Going forward, this should be configurable!
-
 class BaseQuestionAnswerer(ABC):
 
     def __init__(self, app_path, **kwargs):
@@ -2002,7 +2000,8 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         @staticmethod
         def date_scorer(some_date, origin_date=datetime.datetime.now()):
             """
-            returns # of days as score
+            ascertains a suitable date format for input and
+            returns number of days from origin date as score
             """
             target_date = origin_date
             for fmt in NonElasticsearchQuestionAnswerer.FieldResource.DATE_FORMATS:
@@ -2015,14 +2014,35 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         @staticmethod
         def location_scorer(some_location, origin_location):
-            # assumes both args are of format "37.77,122.41" where comma seperated lat and lon
+            """
+            Uses Haversine formula to find distance between two coordinates
+            references: https://en.wikipedia.org/wiki/Haversine_formula and
+                        http://www.movable-type.co.uk/scripts/latlong.html
+
+            Args:
+                some_location (str): latitude and longitude supplied as
+                    comma separated strings, eg. "37.77,122.41"
+                origin_location (str): latitude and longitude supplied as
+                    comma separated strings, eg. "37.77,122.41"
+
+            Returns:
+                float: distance between the coordinates in kilometers
+
+            Example 1:
+                >>> point_1 = "37.78953146306901,-122.41160227491551" # SF in CA
+                >>> point_2 = "47.65182346406002, -122.36765696283909" # Seattle in WA
+                >>> location_scorer(point_1, point_2)
+                >>> # 1096.98 kms (approx. points on Google maps says 680.23 miles/1094.72 kms)
+            Example 2:
+                >>> point_3, point_4 = "52.2296756,21.0122287", "52.406374,16.9251681"
+                >>> location_scorer(point_3, point_4)
+                >>> # 278.54 kms
+            """
 
             R = 6373.0
-            lat1, lon1 = [float(ii) for ii in some_location.split(",")]
-            lat2, lon2 = [float(ii) for ii in origin_location.split(",")]
-
-            dlon = radians(lon2) - radians(lon1)
-            dlat = radians(lat2) - radians(lat1)
+            lat1, lon1 = [radians(float(ii.strip())) for ii in some_location.split(",")]
+            lat2, lon2 = [radians(float(ii.strip())) for ii in origin_location.split(",")]
+            dlon, dlat = lon2 - lon1, lat2 - lat1
 
             a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
             c = 2 * atan2(sqrt(a), sqrt(1 - a))
@@ -2592,6 +2612,9 @@ class QuestionAnswerer:
 
     @staticmethod
     def _get_question_answerer(config):
+
+        # TODO: Both QA classes assume input text is in English.
+        #  Going forward, this should be configurable!
 
         use_elastic_search = config.get("use_elastic_search", True)
 

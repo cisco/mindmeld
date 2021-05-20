@@ -429,7 +429,7 @@ class BertEmbedder(Embedder):
         super().__init__(app_path, **kwargs)
 
         # init runtime configs for the model
-        self._batch_size = kwargs.get("batch_size", 16)
+        self._batch_size = kwargs.get("batch_size", 8)
         self._show_progress_bar = kwargs.get("show_progress_bar", False)
         self._output_value = kwargs.get("output_value", 'sentence_embedding')
         self._convert_to_numpy = kwargs.get("convert_to_numpy", True)
