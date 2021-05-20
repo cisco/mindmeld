@@ -461,6 +461,7 @@ class Classifier(ABC):
         """
         self._model = None
         self.config = None
+        self.ready = False
 
     def load(self, model_path):
         """Loads the trained classification model from disk
