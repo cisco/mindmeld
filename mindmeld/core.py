@@ -853,19 +853,30 @@ class Entity:
         self.confidence = confidence
         self.is_system_entity = self.__class__.is_system_entity(entity_type)
 
+    @staticmethod
+    def value_to_cache(value):
+        result = value
+        if value is not None:
+            result = value.copy()
+            if "children" in value:
+                result["children"] = [e.to_cache() for e in value["children"]]
+        return result
+
     def to_cache(self):
         return {
             "class": self.__class__.__name__,
             "text": self.text,
             "entity_type": self.type,
             "role": self.role,
-            "value": self.value,
+            "value": self.value_to_cache(self.value),
             "display_text": self.display_text,
             "confidence": self.confidence
         }
 
     @staticmethod
     def from_cache(obj):
+        if "children" in obj:
+            obj["children"] = [Entity.from_cache_type(e) for e in obj["children"]]
         return Entity(**obj)
 
     @staticmethod
