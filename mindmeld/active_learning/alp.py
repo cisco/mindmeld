@@ -85,10 +85,11 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     @property
     def num_iterations(self) -> int:
-        """
+        """Calculates the number of iterations needed for training.
         Returns:
             num_iterations (int): Number of iterations needed for training.
         """
+        # An additional iteration is added to save training data after the last sampling round.
         return 1 + math.ceil(
             len(self.init_train_data_bucket.unsampled_queries) / self.batch_size
         )
@@ -150,9 +151,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.log_usage_pct,
         )
         logger.info("Starting selection.")
-        self._train_single_strategy(
-            strategy=self.selection_strategy, training_mode=False
-        )
+        self._run_strategy(strategy=self.selection_strategy, select_mode=True)
         self.results_manager.write_log_selected_queries_json(
             strategy=self.selection_strategy,
             queries=self.data_bucket.newly_sampled_queries,
@@ -166,15 +165,15 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def _train_all_strategies(self):
         """ Train with all active learning strategies."""
         for strategy in self.training_strategies:
-            self._train_single_strategy(strategy)
+            self._run_strategy(strategy)
 
-    def _train_single_strategy(self, strategy: str, training_mode: bool = True):
+    def _run_strategy(self, strategy: str, select_mode: bool = False):
         """Helper function to train a single strategy.
 
         Args:
             strategy (str): Single strategy to train
-            training_mode (bool): If True, accuracies will be recorded. If False, accuracies
-                will not be recorded and run will terminate after first iteration.
+            select_mode (bool): If True, accuracies will not be recorded and run will
+                terminate after first iteration. If False, accuracies will be recorded.
         """
         heuristic = HeuristicsFactory.get_heuristic(strategy)
         for epoch in range(self.n_epochs):
@@ -189,7 +188,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     confidence_segments,
                 ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic)
 
-                if training_mode:
+                if not select_mode:
                     self._save_training_data(strategy, epoch, iteration, eval_stats)
 
                 num_unsampled = len(self.data_bucket.unsampled_queries)
@@ -202,7 +201,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         confidence_segments=confidence_segments,
                     )
                 # Terminate on the first iteration if in selection mode.
-                if not training_mode:
+                if select_mode:
                     return
 
     def _reset_data_bucket(self):
@@ -215,7 +214,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         logger.info("Remaining Elements: %s", len(self.data_bucket.unsampled_queries))
 
     def _save_training_data(self, strategy, epoch, iteration, eval_stats):
-        """ Save training data if in training_mode. """
+        """ Save training data if in training mode. """
         self.results_manager.update_accuracies_json(
             strategy, epoch, iteration, eval_stats
         )
