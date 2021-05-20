@@ -136,23 +136,27 @@ class Processor(ABC):
                 configuration has changed since the last build. Defaults to ``False``.
             label_set (string, optional): The label set from which to train all classifiers.
         """
-        self._build(incremental=incremental, label_set=label_set)
-        # Dumping the model when incremental builds are turned on
-        # allows for other models with identical data and configs
-        # to use a pre-existing model's results on the same run.
-        if incremental:
+        self._build_recursive(incremental=incremental, label_set=label_set)
+        self.load()
+
+    def _build_recursive(self, incremental=False, label_set=None):
+        """Builds all the natural language processing models for this processor and its children.
+
+        Args:
+            incremental (bool, optional): When ``True``, only build models whose training data or
+                configuration has changed since the last build. Defaults to ``False``.
+            label_set (string, optional): The label set from which to train all classifiers.
+        """
+        self._build(incremental=incremental, label_set=label_set, load_cached=False)
+        # We dump and unload the model to reduce memory consumption while training
+        if self.ready:
             self._dump()
+            self.unload()
 
         for child in self._children.values():
             # We pass the incremental_timestamp to children processors
             child.incremental_timestamp = self.incremental_timestamp
-            child.build(incremental=incremental, label_set=label_set)
-            if incremental:
-                child.dump()
-
-        self.resource_loader.query_cache.dump()
-        self.ready = True
-        self.dirty = True
+            child._build_recursive(incremental=incremental, label_set=label_set)
 
     @property
     def incremental_timestamp(self):
@@ -164,7 +168,7 @@ class Processor(ABC):
         self._incremental_timestamp = ts
 
     @abstractmethod
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         raise NotImplementedError
 
     def dump(self):
@@ -175,11 +179,13 @@ class Processor(ABC):
         for child in self._children.values():
             child.dump()
 
-        self.resource_loader.query_cache.dump()
         self.dirty = False
 
     @abstractmethod
     def _dump(self):
+        raise NotImplementedError
+
+    def unload(self):
         raise NotImplementedError
 
     def load(self, incremental_timestamp=None):
@@ -454,7 +460,7 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application."""
         return self._children
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
 
         # reset display for the progress bar. This is important for repeated use of the
         # progress bar
@@ -471,8 +477,10 @@ class NaturalLanguageProcessor(Processor):
         if len(self.domains) == 1:
             return
 
-        self.domain_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.domain_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
     def _dump(self):
@@ -484,6 +492,10 @@ class NaturalLanguageProcessor(Processor):
         )
 
         self.domain_classifier.dump(model_path, incremental_model_path)
+
+    def unload(self):
+        self.ready = False
+        self.domain_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.domains) == 1:
@@ -817,12 +829,14 @@ class DomainProcessor(Processor):
                 app_path, domain, intent, self.resource_loader, progress_bar
             )
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         if len(self.intents) == 1:
             return
         # train intent model
-        self.intent_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.intent_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if len(self._children) > 1 and self.progress_bar is not None:
@@ -840,6 +854,10 @@ class DomainProcessor(Processor):
         self.intent_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.intent_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.intents) == 1:
@@ -1084,12 +1102,14 @@ class IntentProcessor(Processor):
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
 
         # train entity recognizer
-        self.entity_recognizer.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.entity_recognizer.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if isinstance(self.progress_bar, tqdm):
@@ -1121,6 +1141,10 @@ class IntentProcessor(Processor):
         self.entity_recognizer.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
         model_path, incremental_model_path = path.get_entity_model_paths(
@@ -1472,10 +1496,12 @@ class EntityProcessor(Processor):
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.total += 1
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this entity type"""
-        self.role_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.role_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
         self.entity_resolver.fit()
         if isinstance(self.progress_bar, tqdm):
@@ -1493,6 +1519,10 @@ class EntityProcessor(Processor):
         self.role_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.role_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         try:

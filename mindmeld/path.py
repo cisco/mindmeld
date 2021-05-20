@@ -32,8 +32,7 @@ APP_PATH = "{app_path}"
 # Generated folder structure for models
 GEN_FOLDER = os.path.join(APP_PATH, ".generated")
 MODEL_CACHE_PATH = os.path.join(GEN_FOLDER, "cached_models")
-QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, "query_cache.pkl")
-QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, "query_cache_tmp.pkl")
+QUERY_CACHE_DB_PATH = os.path.join(GEN_FOLDER, "query_cache.db")
 DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, "domain.pkl")
 GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, "domains")
 GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, "{timestamp}")
