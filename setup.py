@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc1",
+    version="4.3.5rc3",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -91,6 +91,7 @@ setup(
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
         "bert": [
+            'torch~=1.7.0; python_version>="3.6"',
             'transformers~=3.5.1; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
             "elasticsearch>=7.0",

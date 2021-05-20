@@ -121,8 +121,8 @@ class TaggerModel(Model):
         """Trains the model.
 
         Args:
-            examples (list of mindmeld.core.Query): A list of queries to train on.
-            labels (list of tuples of mindmeld.core.QueryEntity): A list of expected labels.
+            examples (ProcessedQueryList.QueryIterator): A list of queries to train on.
+            labels (ProcessedQueryList.EntitiesIterator): A list of expected labels.
             params (dict): Parameters of the classifier.
         """
         skip_param_selection = params is not None or self.config.param_selection is None
@@ -131,8 +131,8 @@ class TaggerModel(Model):
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
         random.shuffle(indices)
-        examples = [examples[i] for i in indices]
-        labels = [labels[i] for i in indices]
+        examples.reorder(indices)
+        labels.reorder(indices)
 
         types = [entity.entity.type for label in labels for entity in label]
         self.types = types
@@ -142,7 +142,6 @@ class TaggerModel(Model):
                 "There are no labels in this label set, so we don't " "fit the model."
             )
             return self
-
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
@@ -370,6 +369,12 @@ class TaggerModel(Model):
             )
 
         joblib.dump(config, path)
+
+    def unload(self):
+        self._clf = None
+        self._current_params = None
+        self._label_encoder = None
+        self._no_entities = None
 
     def load(self, path, config):
         """
