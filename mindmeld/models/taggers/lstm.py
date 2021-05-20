@@ -989,6 +989,17 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
 
         joblib.dump(variables_to_dump, os.path.join(path, ".feature_extraction_vars"))
 
+    def unload(self):
+        self.graph = None
+        self.session = None
+        self.resources = None
+        self.gaz_dimension = None
+        self.output_dimension = None
+        self.gaz_features = None
+        self.sequence_lengths = None
+        self.gaz_encoder = None
+        self.label_encoder = None
+
     def load(self, path):
         """
         Loads the Tensorflow model

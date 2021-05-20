@@ -76,7 +76,7 @@ class IntentClassifier(Classifier):
             cv (optional): Cross-validation settings.
         """
         logger.info("Fitting intent classifier: domain=%r", self.domain)
-        super().fit(*args, **kwargs)
+        return super().fit(*args, **kwargs)
 
     def dump(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Persists the trained intent classification model to disk.
@@ -86,6 +86,10 @@ class IntentClassifier(Classifier):
         """
         logger.info("Saving intent classifier: domain=%r", self.domain)
         super().dump(*args, **kwargs)
+
+    def unload(self):
+        logger.info("Unloading intent classifier: domain=%r", self.domain)
+        super().unload()
 
     def load(self, *args, **kwargs):
         """Loads the trained intent classification model from disk.
@@ -112,54 +116,20 @@ class IntentClassifier(Classifier):
             example=query, gold_label=intent, dynamic_resource=dynamic_resource
         )
 
-    def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
-
-        Returns:
-            (list): list of queries
-        """
-        if queries:
-            return self._build_query_tree(queries, domain=self.domain, raw=raw)
-
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, label_set=label_set, raw=raw
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            label_set=label_set
         )
 
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """Returns a set of queries and their labels based on the label set
+    def _get_examples_and_labels(self, queries):
+        return (queries.queries(), queries.intents())
 
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-        """
-        query_tree = self._get_query_tree(queries, label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-        if len(queries) < 1:
-            return [None, None]
-        return list(zip(*[(q.query, q.intent) for q in queries]))
-
-    def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
-        queries = []
-
-        for intent in query_tree.get(self.domain, []):
-            for query_text in query_tree[self.domain][intent]:
-                queries.append(
-                    self.domain + "###" + intent + "###" + mark_down(query_text)
-                )
-
-        queries.sort()
-        return self._resource_loader.hash_list(queries)
+    def _get_examples_and_labels_hash(self, queries):
+        raw_queries = []
+        for intent, raw_query in zip(queries.intents(), queries.raw_queries()):
+            raw_queries.append(
+                self.domain + "###" + intent + "###" + mark_down(raw_query)
+            )
+        raw_queries.sort()
+        return self._resource_loader.hash_list(raw_queries)

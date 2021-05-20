@@ -78,7 +78,8 @@ class EntityRecognizer(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         # Load labeled data
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        queries = self._resolve_queries(queries, label_set)
+        queries, labels = self._get_examples_and_labels(queries)
 
         # Build entity types set
         entity_types = set()
@@ -88,36 +89,34 @@ class EntityRecognizer(Classifier):
 
         return entity_types
 
-    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
-        """Trains the entity recognition model using the provided training queries.
-
-        Args:
-            queries (list[ProcessedQuery]): The labeled queries to use as training data.
-            label_set (list, optional): A label set to load. If not specified, use the default.
-            incremental_timestamp (str, optional): The timestamp folder to cache models in.
-        """
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True,
+            **kwargs):
         logger.info(
             "Fitting entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
 
-        if not label_set:
-            label_set = self._model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        label_set = label_set or self._model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
-        new_hash = self._get_model_hash(self._model_config, queries, label_set)
+        new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit.  Previous model is cached.")
+            if load_cached:
+                self.load(cached_model)
+                return True
+            return False
 
         # Load labeled data
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        examples, labels = self._get_examples_and_labels(queries)
 
         # Build entity types set
         self.entity_types = set()
@@ -125,14 +124,15 @@ class EntityRecognizer(Classifier):
             for entity in label:
                 self.entity_types.add(entity.entity.type)
 
-        model.initialize_resources(self._resource_loader, queries, labels)
-        model.fit(queries, labels)
+        model.initialize_resources(self._resource_loader, examples, labels)
+        model.fit(examples, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
         self.hash = new_hash
 
         self.ready = True
         self.dirty = True
+        return True
 
     def _data_dump_payload(self):
         return {
@@ -157,6 +157,15 @@ class EntityRecognizer(Classifier):
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
         super().dump(model_path, incremental_model_path)
+
+    def unload(self):
+        logger.info(
+            "Unloading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
+        )
+        self.entity_types = None
+        self._model_config = None
+        self._model = None
+        self.ready = False
 
     def load(self, model_path):
         """Loads the trained entity recognition model from disk.
@@ -278,53 +287,20 @@ class EntityRecognizer(Classifier):
         predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
-    def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
-
-        Returns:
-            List: list of queries
-        """
-        if queries:
-            return self._build_query_tree(
-                queries, domain=self.domain, intent=self.intent, raw=raw
-            )
-
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, intent=self.intent, label_set=label_set, raw=raw
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            intent=self.intent,
+            label_set=label_set
         )
 
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """Returns a set of queries and their labels based on the label set
+    def _get_examples_and_labels(self, queries):
+        return (queries.queries(), queries.entities())
 
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-        """
-        query_tree = self._get_query_tree(queries, label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-        raw_queries = [q.query for q in queries]
-        labels = [q.entities for q in queries]
-        return raw_queries, labels
-
-    def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
+    def _get_examples_and_labels_hash(self, queries):
         hashable_queries = [
             self.domain + "###" + self.intent + "###entity###"
-        ] + sorted(queries)
+        ] + sorted(list(queries.raw_queries()))
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
