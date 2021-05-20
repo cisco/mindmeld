@@ -16,9 +16,9 @@ import json
 import logging
 import os
 import re
-import nltk
 from tempfile import mkstemp
 
+import nltk
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer

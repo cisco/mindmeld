@@ -112,20 +112,21 @@ def extract_in_gaz_span_features(**kwargs):
                         feature_sequence[i][prefix + key] = value
 
             # End of span feature
-            if nested_gaz.end_token_index_plus_one < len(tokens):
-                feat_prefix = "in-gaz|type:{}|signal_entity_end".format(nested_gaz.gaz_name)
-                feature_sequence[nested_gaz.end_token_index_plus_one][feat_prefix] = 1
+            if current_gaz.end_token_index_plus_one < len(tokens):
+                feat_prefix = "in-gaz|type:{}|signal_entity_end".format(current_gaz.gaz_name)
+                feature_sequence[current_gaz.end_token_index_plus_one][feat_prefix] = 1
 
                 span_features = {
-                    "|log_char_len": math.log(len(nested_gaz.raw_ngram)),
-                    "|pct_char_len": len(nested_gaz.raw_ngram) / len(" ".join(tokens)),
+                    "|log_char_len": math.log(len(current_gaz.raw_ngram)),
+                    "|pct_char_len": len(current_gaz.raw_ngram) / len(" ".join(tokens)),
                     "|pmi": p_total + p_joint - p_entity_type - p_entity,
                     "|class_prob": p_total + p_joint - p_entity,
                     "|output_prob": p_total + p_joint - p_entity_type,
                 }
 
                 for key, value in span_features.items():
-                    feature_sequence[nested_gaz.end_token_index_plus_one][feat_prefix + key] = value
+                    feature_sequence[current_gaz.end_token_index_plus_one][
+                        feat_prefix + key] = value
 
             return feature_sequence
 
@@ -191,7 +192,7 @@ def extract_in_gaz_span_features(**kwargs):
             update_features_sequence(feat_seq, span_feat_seq)
 
             for other_nested_gaz in in_gaz_spans:
-                if nested_gaz.start_token_index >= nested_gaz.end_token_index_plus_one:
+                if other_nested_gaz.start_token_index >= nested_gaz.end_token_index_plus_one:
                     break
                 # For now, if two spans of the same type start at the same
                 # place, take the longer one.

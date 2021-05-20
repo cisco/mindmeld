@@ -13,7 +13,7 @@
 
 """This module contains feature extractors for entities"""
 from .helpers import GAZETTEER_RSC, get_ngram, register_entity_feature, requires
-from ..core import QueryEntity, Query
+from ..core import QueryEntity, Query, NestedEntity
 
 
 @register_entity_feature(feature_name="in-gaz")
@@ -30,7 +30,7 @@ def extract_in_gaz_features(**kwargs):
         domain_gazes = resources[GAZETTEER_RSC]
 
         for gaz_name, gaz in domain_gazes.items():
-            if isinstance(current_entity, QueryEntity):
+            if isinstance(current_entity, (QueryEntity, NestedEntity)):
                 normalized_tokens = tuple(current_entity.normalized_text.split())
             elif isinstance(current_entity, Query):
                 normalized_tokens = current_entity.normalized_tokens
