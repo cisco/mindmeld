@@ -227,7 +227,7 @@ As an alternative to building all entity resolvers required for an app, you can 
 
   dict_keys(['category', 'restaurant', 'option', 'sys_number', 'cuisine', 'dish'])
 
-Entity processors consist of both entity resolvers and role classifiers. In the output above, you can identify all the entity types present in the training files of the chosen domain-intent hierarchy. To access resolver of a particular entity type, follow:
+Entity processors consist of both - entity resolvers and role classifiers. In the output above, you can identify all the entity types present in the training files of the chosen domain-intent hierarchy. To access resolver of a particular entity type, follow:
 
 .. code-block:: python
 
