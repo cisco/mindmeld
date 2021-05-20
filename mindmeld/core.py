@@ -876,7 +876,7 @@ class Entity:
     @staticmethod
     def from_cache(obj):
         if "children" in obj:
-            obj["children"] = [Entity.from_cache_type(e) for e in obj["children"]]
+            obj["children"] = [Entity.from_cache_typed(e) for e in obj["children"]]
         return Entity(**obj)
 
     @staticmethod
