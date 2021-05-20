@@ -94,7 +94,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             len(self.init_train_data_bucket.unsampled_queries) / self.batch_size
         )
 
-    def _as_dict(self):
+    @property
+    def __dict__(self):
         """ Custom dictionary method used to save key experiment params. """
         return {
             "app_path": self.app_path,
@@ -120,7 +121,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         """Loads the initial data bucket and then trains on every strategy."""
         logger.info("Creating output folder and saving params.")
         self.results_manager.create_experiment_folder(
-            active_learning_params=self._as_dict(),
+            active_learning_params=self.__dict__,
             training_strategies=self.training_strategies,
         )
         logger.info("Creating training data bucket.")
