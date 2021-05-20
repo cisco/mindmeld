@@ -31,8 +31,8 @@ class LabelMap:
 
         self.domain2id = LabelMap._get_domain_mappings(domain_to_intents)
         self.id2domain = LabelMap._reverse_dict(self.domain2id)
-        self.intent2id = LabelMap._get_intent_mappings(domain_to_intents)
-        self.id2intent = LabelMap._reverse_nested_dict(self.intent2id)
+        self.domain_to_intent2id = LabelMap._get_intent_mappings(domain_to_intents)
+        self.id2intent = LabelMap._reverse_nested_dict(self.domain_to_intent2id)
 
     @staticmethod
     def get_domain_to_intents(query_tree: Dict) -> Dict:
@@ -73,15 +73,15 @@ class LabelMap:
             domain_to_intents (dict): Dict mapping domains to a list of intents.
 
         Returns:
-            intent2id (dict): dict with intent to id mappings.
+            domain_to_intent2id (dict): dict with intent to id mappings.
         """
-        intent2id = {}
+        domain_to_intent2id = {}
         for domain in domain_to_intents:
             intent_labels = {}
             for index, intent in enumerate(domain_to_intents[domain]):
                 intent_labels[intent] = index
-            intent2id[domain] = intent_labels
-        return intent2id
+            domain_to_intent2id[domain] = intent_labels
+        return domain_to_intent2id
 
     @staticmethod
     def _reverse_dict(dictionary: Dict[str, int]):

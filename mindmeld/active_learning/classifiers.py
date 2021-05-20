@@ -188,7 +188,7 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
             test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
             label_map LabelMap: Class that stores index mappings for a MindMeld app.
-                (Eg. Domain2Id, Intent2Id)
+                (Eg. domain2id, domain_to_intent2id)
             eval_stats (Dict): Evaluation metrics to be included in accuracies.json
         Returns:
             preds_single (List): 2D array with probability vectors for unsampled queries
@@ -215,8 +215,8 @@ class MindMeldALClassifier(ALClassifier):
                 sampled_queries=sampled_queries,
                 unsampled_queries=unsampled_queries,
                 test_queries=test_queries,
-                domain2id=label_map.domain2id,
-                intent2id=label_map.intent2id,
+                domain_list=list(label_map.domain2id.keys()),
+                domain_to_intent2id=label_map.domain_to_intent2id,
             )
             if eval_stats:
                 MindMeldALClassifier._update_eval_stats_intent_level(
@@ -254,7 +254,7 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
             test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
             label_map LabelMap: Class that stores index mappings for a MindMeld app.
-                (Eg. Domain2Id, Intent2Id)
+                (Eg. domain2Id, domain_to_intent2id)
         Returns:
             preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
@@ -324,16 +324,16 @@ class MindMeldALClassifier(ALClassifier):
         sampled_queries: List[ProcessedQuery],
         unsampled_queries: List[ProcessedQuery],
         test_queries: List[ProcessedQuery],
-        domain2id: Dict,
-        intent2id: Dict,
+        domain_list: Dict,
+        domain_to_intent2id: Dict,
     ):
         """Fit and evaluate the domain classifier.
         Args:
             sampled_queries (List[ProcessedQuery]): List of Sampled Queries
             unsampled_queries (List[ProcessedQuery]): List of Unsampled Queries
             test_queries (List[ProcessedQuery]): List of Test Queries
-            domain2id (Dict): Dictionary mapping domains to IDs
-            intent2id (Dict): Dictionary mapping intents to IDs
+            domain_list (List[str]): List of domains used by the application.
+            domain_to_intent2id (Dict): Dictionary mapping intents to IDs
 
         Returns:
             ic_queries_prob_vectors (List[List]): List of probability distributions
@@ -343,7 +343,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         ic_eval_test_dict = {}
         unsampled_idx_preds_pairs = []
-        for domain in domain2id:
+        for domain in domain_list:
             # Filter Queries
             _, filtered_sampled_queries = DataBucket.filter_queries(
                 sampled_queries, domain
@@ -369,7 +369,7 @@ class MindMeldALClassifier(ALClassifier):
             ic_queries_prob_vectors = MindMeldALClassifier._get_probs(
                 classifier=ic,
                 queries=filtered_unsampled_queries,
-                nlp_component_to_id=intent2id[domain],
+                nlp_component_to_id=domain_to_intent2id[domain],
             )
             intents = [
                 f"{domain}|{intent}"
