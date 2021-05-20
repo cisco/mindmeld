@@ -194,6 +194,9 @@ class WhiteSpaceTokenizer(Tokenizer):
         if token and token_text:
             token["text"] = token_text
             tokens.append(token)
+        
+        for token in tokens:
+            token["end"] = token["start"] + len(token["text"]) - 1
 
         return tokens
 
@@ -222,6 +225,7 @@ class SpacyTokenizer(Tokenizer):
             token = {
                 "start": start_index,
                 "text": token_text,
+                "end": start_index + len(token_text) - 1
             }
             tokens.append(token)
             start_index += len(token_text)
