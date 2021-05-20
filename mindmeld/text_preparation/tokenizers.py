@@ -58,11 +58,11 @@ class NoOpTokenizer(Tokenizer):
         return [text]
 
 
-class CharacterTokenizer(Tokenizer):
+class LetterTokenizer(Tokenizer):
     """A Tokenizer that splits text at the character level."""
 
     def __init__(self):
-        """Initializes the CharacterTokenizer."""
+        """Initializes the LetterTokenizer."""
         pass
 
     def tokenize(self, text):
@@ -75,9 +75,9 @@ class CharacterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), "end" (token ending index), and
                 "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
         """
-        actions_by_char = CharacterTokenizer.get_actions_by_char(text)
-        token_num_by_char = CharacterTokenizer.get_token_num_by_char(actions_by_char)
-        return CharacterTokenizer.create_tokens(text, token_num_by_char)
+        actions_by_char = LetterTokenizer.get_actions_by_char(text)
+        token_num_by_char = LetterTokenizer.get_token_num_by_char(actions_by_char)
+        return LetterTokenizer.create_tokens(text, token_num_by_char)
 
     @staticmethod
     def get_actions_by_char(text):
@@ -245,8 +245,8 @@ class TokenizerFactory:
         """
         if tokenizer == NoOpTokenizer.__name__:
             return NoOpTokenizer()
-        elif tokenizer == CharacterTokenizer.__name__:
-            return CharacterTokenizer()
+        elif tokenizer == LetterTokenizer.__name__:
+            return LetterTokenizer()
         elif tokenizer == WhiteSpaceTokenizer.__name__:
             return WhiteSpaceTokenizer()
         elif tokenizer == SpacyTokenizer.__name__:

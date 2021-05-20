@@ -11,7 +11,7 @@ import pytest
 
 
 from mindmeld.text_preparation.tokenizers import (
-    CharacterTokenizer,
+    LetterTokenizer,
     WhiteSpaceTokenizer,
     SpacyTokenizer,
 )
@@ -36,8 +36,8 @@ def spacy_tokenizer_ja():
 
 
 @pytest.fixture
-def character_tokenizer():
-    return CharacterTokenizer()
+def letter_tokenizer():
+    return LetterTokenizer()
 
 
 def test_white_space_tokenizer_en(white_space_tokenizer):
@@ -88,8 +88,8 @@ def test_white_space_tokenizer_de(white_space_tokenizer):
     assert tokenized_output == expected_output
 
 
-def test_character_tokenizer_ja(character_tokenizer):
-    tokenized_output = character_tokenizer.tokenize(JA_SENTENCE_ONE)
+def test_character_tokenizer_ja(letter_tokenizer):
+    tokenized_output = letter_tokenizer.tokenize(JA_SENTENCE_ONE)
     expected_output = [
         {"start": 0, "text": "紳", "end": 0},
         {"start": 1, "text": "士", "end": 1},
