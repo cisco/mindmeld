@@ -97,46 +97,49 @@ class PlotManager:
             plot_intents (bool): Whether to generate plots at the intent level.
             plot_entities (bool): Whether to generate plots at the entity level.
         """
-        if plot_domain:
-            function(self, y_keys=["overall"])
-            for domain in self.get_domain_list():
-                function(self, y_keys=[domain, "overall"])
-                if plot_intents:
-                    for intent in self.get_intent_list(domain):
-                        function(self, y_keys=[domain, intent, "overall"])
-                        if plot_entities:
-                            y_keys = [domain, intent, "entities", "overall"]
-                            function(self, y_keys=y_keys)
-                            for entity in self.get_entity_list(domain, intent):
-                                y_keys = [domain, intent, "entities", entity]
-                                function(self, y_keys=y_keys)
+        if not plot_domain:
+            return
+        function(self, y_keys=["overall"])
+        for domain in self.get_domain_list():
+            function(self, y_keys=[domain, "overall"])
+            if not plot_intents:
+                continue
+            for intent in self.get_intent_list(domain):
+                function(self, y_keys=[domain, intent, "overall"])
+                if not plot_entities:
+                    continue
+                y_keys = [domain, intent, "entities", "overall"]
+                function(self, y_keys=y_keys)
+                for entity in self.get_entity_list(domain, intent):
+                    y_keys = [domain, intent, "entities", entity]
+                    function(self, y_keys=y_keys)
 
     # Helper Methods
     @staticmethod
-    def get_nested(data_dict: Dict, keys: List):
-        """Get data from a nested dictionary using a series of keys.
+    def get_nested(data_dict: Dict, selected_keys: List):
+        """Filter data from a nested dictionary selecting from a set of keys.
         Args:
-            data_dict (dict): Dictionary containing data
-            keys (list): List of keys used to index the given dictionary.
+            data_dict (dict): Dictionary containing data to filter
+            selected_keys (list): List of keys used to filter the given dictionary.
 
         Returns:
-            data_dict (dict): Dictionary containing the nested data.
+            data_dict (dict): Dictionary containing the filtered nested data.
         """
-        for key in keys:
-            data_dict = data_dict[key]
+        for selected_key in selected_keys:
+            data_dict = data_dict[selected_key]
         return data_dict
 
     @staticmethod
-    def get_across_iterations(epoch_dict: Dict, keys: List):
-        """Gets data across all iterations in a single epoch as specified by a series of keys.
+    def get_across_iterations(epoch_dict: Dict, selected_keys: List):
+        """Filter data across all iterations in a single epoch as specified by a set of keys.
         Args:
             epoch_dict (dict): Dict containing accuracies across iterations for a single epoch.
-            keys (list): List of keys used to index the given dictionary.
+            selected_keys (list): List of keys used to filter the given dictionary.
         Return:
             data (list): List of the selected data across iterations.
         """
         return [
-            PlotManager.get_nested(epoch_dict[str(i)], keys)
+            PlotManager.get_nested(epoch_dict[str(i)], selected_keys)
             for i in range(len(epoch_dict))
         ]
 
