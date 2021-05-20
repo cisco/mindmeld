@@ -213,7 +213,7 @@ Upon building all the required resolvers, to access a particular resolver, adapt
 (Optional) Access & train specific entity resolvers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As an alternative to building all entity resolvers required for an app, you can also access and train resolvers of a particular domain-intent hierarchy. This might be useful in case you want to to run some simple tests for specific resolvers.
+As an alternative to building all entity resolvers required for an app, you can also access and train resolvers of a particular domain-intent hierarchy. This might be useful in case you want to run some simple tests for specific resolvers.
 
 .. code-block:: python
 
