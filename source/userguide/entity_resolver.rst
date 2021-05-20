@@ -245,7 +245,7 @@ Entity processors consist of both entity resolvers and role classifiers. In the 
 (Optional) Access & train an entity resolver as standalone component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate their performances on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
+Accessing entity resolvers and training them independent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate their performances on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
 
 .. code-block:: python
 
