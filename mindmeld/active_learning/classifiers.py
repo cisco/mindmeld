@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import List, Dict
 from sklearn.model_selection import StratifiedKFold
+import numpy as np
 
 from .data_loading import LabelMap, DataBucket
 from .heuristics import (
@@ -101,7 +102,7 @@ class MindMeldALClassifier(ALClassifier):
         if queries:
             classifier_eval = classifier.evaluate(queries=queries)
             for x in classifier_eval.results:
-                query_prob_vector = [None] * len(nlp_component_to_id)
+                query_prob_vector = np.zeros(len(nlp_component_to_id))
                 for nlp_component, index in x.probas.items():
                     query_prob_vector[nlp_component_to_id[nlp_component]] = index
                 queries_prob_vectors.append(query_prob_vector)
@@ -359,7 +360,7 @@ class MindMeldALClassifier(ALClassifier):
             ic_eval_test = ic.evaluate(queries=filtered_test_queries)
             if not ic_eval_test:
                 unsampled_idx_preds_pairs.extend(
-                    (i, self._get_zero_prob_vector())
+                    (i, np.zeros(len(self.intent2idx)))
                     for i in filtered_unsampled_queries_indices
                 )
                 continue
@@ -387,14 +388,6 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_idx_preds_pairs.sort(key=lambda x: x[0])
         padded_ic_queries_prob_vectors = [x[1] for x in unsampled_idx_preds_pairs]
         return padded_ic_queries_prob_vectors, ic_eval_test_dict
-
-    def _get_zero_prob_vector(self):
-        """
-        Returns:
-            zero_prob_vector (List): Array of zeroes with a length equal to the total number of
-                intents.
-        """
-        return [0] * len(self.intent2idx)
 
     @staticmethod
     def _update_eval_stats_intent_level(

@@ -252,22 +252,24 @@ class ActiveLearningPipelineFactory:
         """
         return ActiveLearningPipeline(
             app_path=config.get("app_path"),
-            train_pattern=config.get("pre_training").get("train_pattern"),
-            test_pattern=config.get("pre_training").get("test_pattern"),
-            load=config.get("pre_training").get("load"),
-            save=config.get("pre_training").get("save"),
-            train_seed_pct=config.get("pre_training").get("train_seed_pct"),
-            n_classifiers=config.get("training").get("n_classifiers"),
-            n_epochs=config.get("training").get("n_epochs"),
-            batch_size=config.get("training").get("batch_size"),
-            training_strategies=config.get("training").get("training_strategies"),
-            training_level=config.get("training").get("training_level"),
-            selection_strategy=config.get("selection").get("selection_strategy"),
-            save_sampled_queries=config.get("training_output").get(
+            train_pattern=config.get("pre_training", {}).get("train_pattern"),
+            test_pattern=config.get("pre_training", {}).get("test_pattern"),
+            load=config.get("pre_training", {}).get("load"),
+            save=config.get("pre_training", {}).get("save"),
+            train_seed_pct=config.get("pre_training", {}).get("train_seed_pct"),
+            n_classifiers=config.get("training", {}).get("n_classifiers"),
+            n_epochs=config.get("training", {}).get("n_epochs"),
+            batch_size=config.get("training", {}).get("batch_size"),
+            training_strategies=config.get("training", {}).get("training_strategies"),
+            training_level=config.get("training", {}).get("training_level"),
+            selection_strategy=config.get("selection", {}).get("selection_strategy"),
+            save_sampled_queries=config.get("training_output", {}).get(
                 "save_sampled_queries"
             ),
-            log_usage_pct=config.get("selection").get("log_usage_pct"),
-            labeled_logs_pattern=config.get("selection").get("labeled_logs_pattern"),
-            unlabeled_logs_path=config.get("selection").get("unlabeled_logs_path"),
+            log_usage_pct=config.get("selection", {}).get("log_usage_pct"),
+            labeled_logs_pattern=config.get("selection", {}).get(
+                "labeled_logs_pattern"
+            ),
+            unlabeled_logs_path=config.get("selection", {}).get("unlabeled_logs_path"),
             output_folder=config.get("output_folder"),
         )
