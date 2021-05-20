@@ -320,6 +320,15 @@ class DataBucket:
         sampled_queries: List[ProcessedQuery],
         newly_sampled_queries: List[ProcessedQuery] = None,
     ):
+        """
+        Args:
+            label_map (LabelMap): A label map object.
+            test_queries List[ProcessedQuery]: Queries to use for evaluation.
+            unsampled_queries List[ProcessedQuery]: Queries to sample from iteratively.
+            sampled_queries List[ProcessedQuery]: Queries currently included in the sample set.
+            newly_sampled_queries List[ProcessedQuery]: Queries added to the sample set in the
+                most recent iteration.
+        """
         self.label_map = label_map
         self.test_queries = test_queries
         self.unsampled_queries = unsampled_queries
@@ -357,6 +366,16 @@ class DataBucket:
         heuristic: Heuristic,
         confidence_segments: Dict = None,
     ):
+        """Method to sample a DataBucket's unsampled_queries and update its sampled_queries
+        and newly_sampled_queries.
+        Args:
+            sampling_size (int): Number of elements to sample in the next iteration.
+            confidences_2d (List[List[float]]): Confidence probabilities per element.
+            confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
+            heuristic (Heuristic): Selection strategy.
+            confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
+                segments to run KL Divergence.
+        """
 
         params_rank_3d = {"confidences_3d": confidences_3d}
         if confidence_segments:

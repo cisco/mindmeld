@@ -7,12 +7,10 @@ test Heuristics
 
 Tests for Heuristics in the `active_learning.heuristics` module.
 """
-import pytest
 
 from mindmeld.active_learning.heuristics import (
     stratified_random_sample,
-    _convert_to_sample_ranks,
-    _ordered_indices_list_to_final_rank,
+    Heuristic,
     LeastConfidenceSampling,
     MarginSampling,
     EntropySampling,
@@ -39,7 +37,7 @@ def test_stratified_random_sample():
 def test_convert_to_sample_ranks():
     ordered_indices = [3, 0, 2, 4, 1]
     expected_sample_ranks = [1, 4, 2, 0, 3]
-    predicted_sample_ranks = list(_convert_to_sample_ranks(ordered_indices))
+    predicted_sample_ranks = list(Heuristic._convert_to_sample_ranks(ordered_indices))
     assert expected_sample_ranks == predicted_sample_ranks
 
 
@@ -56,7 +54,9 @@ def test_ordered_indices_list_to_final_rank():
     argsort of above --> [3, 0, 2, 4, 1]
     """
     expected_sample_ranks = [3, 0, 2, 4, 1]
-    predicted_sample_ranks = _ordered_indices_list_to_final_rank(ordered_indices_list)
+    predicted_sample_ranks = Heuristic.ordered_indices_list_to_final_rank(
+        ordered_indices_list
+    )
     assert expected_sample_ranks == predicted_sample_ranks
 
 
@@ -81,7 +81,7 @@ def test_least_confidence_sampling():
     predicted_LC_sampling_3d_result = LeastConfidenceSampling.rank_3d(example)
 
     assert expected_LC_sampling_2d_result == predicted_LC_sampling_2d_result
-    assert expected_LC_sampling_3d_result == expected_LC_sampling_3d_result
+    assert expected_LC_sampling_3d_result == predicted_LC_sampling_3d_result
 
 
 def test_margin_sampling():
@@ -103,7 +103,7 @@ def test_margin_sampling():
     predicted_margin_sampling_3d_result = MarginSampling.rank_3d(example)
 
     assert expected_margin_sampling_2d_result == predicted_margin_sampling_2d_result
-    assert expected_margin_sampling_3d_result == expected_margin_sampling_3d_result
+    assert expected_margin_sampling_3d_result == predicted_margin_sampling_3d_result
 
 
 def test_entropy_sampling():
@@ -125,7 +125,7 @@ def test_entropy_sampling():
     predicted_entropy_sampling_3d_result = EntropySampling.rank_3d(example)
 
     assert expected_entropy_sampling_2d_result == predicted_entropy_sampling_2d_result
-    assert expected_entropy_sampling_3d_result == expected_entropy_sampling_3d_result
+    assert expected_entropy_sampling_3d_result == predicted_entropy_sampling_3d_result
 
 
 def test_disagreement_sampling():
@@ -137,7 +137,7 @@ def test_disagreement_sampling():
     predicted_disagreement_sampling_3d_result = DisagreementSampling.rank_3d(example)
     assert (
         expected_disagreement_sampling_3d_result
-        == expected_disagreement_sampling_3d_result
+        == predicted_disagreement_sampling_3d_result
     )
 
 
@@ -150,7 +150,7 @@ def test_kl_divergence_sampling():
     predicted_kl_divergence_sampling_3d_result = KLDivergenceSampling.rank_3d(example)
     assert (
         expected_kl_divergence_sampling_3d_result
-        == expected_kl_divergence_sampling_3d_result
+        == predicted_kl_divergence_sampling_3d_result
     )
 
 
@@ -169,4 +169,4 @@ def test_ensemble_sampling():
     predicted_ensemble_sampling_3d_result = EnsembleSampling.rank_3d(example)
 
     assert expected_ensemble_sampling_2d_result == predicted_ensemble_sampling_2d_result
-    assert expected_ensemble_sampling_3d_result == expected_ensemble_sampling_3d_result
+    assert expected_ensemble_sampling_3d_result == predicted_ensemble_sampling_3d_result

@@ -169,7 +169,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self._train_single_strategy(strategy)
 
     def _train_single_strategy(self, strategy: str, training_mode: bool = True):
-        """Helper function to traing a single strategy.
+        """Helper function to train a single strategy.
 
         Args:
             strategy (str): Single strategy to train
