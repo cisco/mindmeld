@@ -25,8 +25,20 @@ from concurrent.futures import ProcessPoolExecutor, wait
 from copy import deepcopy
 from multiprocessing import cpu_count
 from weakref import WeakValueDictionary
+
 from tqdm import tqdm
 
+from ._config import (
+    get_nlp_config,
+    get_language_config,
+)
+from .domain_classifier import DomainClassifier
+from .entity_recognizer import EntityRecognizer
+from .entity_resolver import EntityResolverFactory, EntityResolverConnectionError
+from .intent_classifier import IntentClassifier
+from .parser import Parser
+from .role_classifier import RoleClassifier
+from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 from .. import path
 from ..core import Bunch, ProcessedQuery
 from ..exceptions import (
@@ -39,17 +51,6 @@ from ..path import get_app
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
 from ..system_entity_recognizer import SystemEntityRecognizer
-from ._config import (
-    get_nlp_config,
-    get_language_config,
-)
-from .domain_classifier import DomainClassifier
-from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolverFactory, EntityResolverConnectionError
-from .intent_classifier import IntentClassifier
-from .parser import Parser
-from .role_classifier import RoleClassifier
-from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -1101,6 +1102,28 @@ class IntentProcessor(Processor):
     @nbest_transcripts_enabled.setter
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
+
+    def get_entity_processors(self, label_set=None):
+
+        # Create the entity processors
+        _processors = Bunch()
+        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        for entity_type in entity_types:
+
+            if entity_type in _processors:
+                continue
+
+            processor = EntityProcessor(
+                self._app_path,
+                self.domain,
+                self.name,
+                entity_type,
+                self.resource_loader,
+                self.progress_bar,
+            )
+            _processors[entity_type] = processor
+
+        return _processors
 
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
