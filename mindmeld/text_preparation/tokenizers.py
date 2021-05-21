@@ -101,7 +101,7 @@ class LetterTokenizer(Tokenizer):
             if category == UNICODE_SPACE_CATEGORY:
                 token_num_by_char.append(None)
                 continue
-            elif (
+            if (
                 category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous
             ):
                 token_num += 1
