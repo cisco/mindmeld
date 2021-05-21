@@ -80,10 +80,10 @@ class LetterTokenizer(Tokenizer):
 
     @staticmethod
     def get_token_num_by_char(text):
-        """ Determine the token number for each character.
-        More details about unicode categories can be found here:
-        https://www.compart.com/en/unicode/category.
+        """Determine the token number for each character.
 
+        More details about unicode categories can be found here:
+        http://www.unicode.org/reports/tr44/#General_Category_Values.
         Args:
             text (str): The text to process and get actions per character.
         Returns:
@@ -95,15 +95,21 @@ class LetterTokenizer(Tokenizer):
         token_num_by_char = []
         token_num = 0
         for index, category in enumerate(category_by_char):
-            same_category_as_previous = (
-                index > 0 and category[0] == category_by_char[index - 1][0]
-            )
+
             if category == UNICODE_SPACE_CATEGORY:
                 token_num_by_char.append(None)
                 continue
-            if (
-                category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous
-            ):
+
+            # General Category is represented by the first letter of a Unicode category.
+            general_category_current_char = category[0]
+            general_category_previous_char = (
+                category_by_char[index - 1][0] if index > 0 else None
+            )
+            same_category_as_previous = (
+                general_category_current_char == general_category_previous_char
+            )
+
+            if category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous:
                 token_num += 1
             token_num_by_char.append(token_num)
         return token_num_by_char
