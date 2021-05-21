@@ -156,7 +156,7 @@ class LetterTokenizer(Tokenizer):
             if is_last_char or (
                 not is_last_char and token_num != token_num_by_char[index + 1]
             ):
-                tokens.append({"start": start, "text": token_text, "end": index})
+                tokens.append({"start": start, "text": token_text})
                 token_text = ""
         return tokens
 
@@ -194,10 +194,6 @@ class WhiteSpaceTokenizer(Tokenizer):
         if token and token_text:
             token["text"] = token_text
             tokens.append(token)
-        
-        for token in tokens:
-            token["end"] = token["start"] + len(token["text"]) - 1
-
         return tokens
 
 
@@ -222,11 +218,7 @@ class SpacyTokenizer(Tokenizer):
         start_index = 0
         tokens = []
         for token_text in spacy_tokens:
-            token = {
-                "start": start_index,
-                "text": token_text,
-                "end": start_index + len(token_text) - 1
-            }
+            token = {"start": start_index, "text": token_text}
             tokens.append(token)
             start_index += len(token_text)
         return tokens
