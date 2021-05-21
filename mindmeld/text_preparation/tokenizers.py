@@ -179,7 +179,8 @@ class WhiteSpaceTokenizer(Tokenizer):
         tokens = []
         token = {}
         token_text = ""
-        for i, char in enumerate(text):
+        # Space added at the end of text to close off the last token
+        for i, char in enumerate(text + ' '):
             if char.isspace():
                 if token and token_text:
                     token["text"] = token_text
@@ -190,10 +191,6 @@ class WhiteSpaceTokenizer(Tokenizer):
             if not token_text:
                 token = {"start": i}
             token_text += char
-
-        if token and token_text:
-            token["text"] = token_text
-            tokens.append(token)
         return tokens
 
 
