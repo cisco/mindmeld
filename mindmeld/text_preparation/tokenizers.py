@@ -75,57 +75,35 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), "end" (token ending index), and
                 "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
         """
-        actions_by_char = LetterTokenizer.get_actions_by_char(text)
-        token_num_by_char = LetterTokenizer.get_token_num_by_char(actions_by_char)
+        token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
     @staticmethod
-    def get_actions_by_char(text):
-        """
-        Identify the appropriate action at each character ("separate", "skip", "no_action")
-        Actions are determined by the unicode category of each character. More details can be
-        found here: https://www.compart.com/en/unicode/category.
+    def get_token_num_by_char(text):
+        """ Determine the token number for each character.
+        More details about unicode categories can be found here:
+        https://www.compart.com/en/unicode/category.
+
         Args:
             text (str): The text to process and get actions per character.
         Returns:
-            actions_by_char (List[str]): List of actions corresponding to each character.
-                For example: ["separate", "separate", "skip", "no_action"]
+            token_num_by_char (List[str]): Token number that each character belongs to.
+                Spaces are represented as None. For example: [1,2,2,3,None,4,None,5,5,5]
         """
         category_by_char = [unicodedata.category(x) for x in text]
-        actions_by_char = []
+
+        token_num_by_char = []
+        token_num = 0
         for index, category in enumerate(category_by_char):
             same_category_as_previous = (
                 index > 0 and category[0] == category_by_char[index - 1][0]
             )
             if category == UNICODE_SPACE_CATEGORY:
-                action = "skip"
+                token_num_by_char.append(None)
+                continue
             elif (
                 category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous
             ):
-                action = "separate"
-            else:
-                action = "no_action"
-            actions_by_char.append(action)
-        return actions_by_char
-
-    @staticmethod
-    def get_token_num_by_char(actions_by_char):
-        """
-        Get the token number that each character belongs to.
-        Args:
-            actions_by_char (List[str]): List of actions corresponding to each character.
-                For example: ["separate", "separate", "skip", "no_action"]
-        Returns:
-            token_num_by_char (List[str]): Token number that each character belongs to.
-                Spaces are represented as -1. For example: [1,2,2,3,-1,4,-1,5,5,5]
-        """
-        token_num_by_char = []
-        token_num = 0
-        for action in actions_by_char:
-            if action == "skip":
-                token_num_by_char.append(-1)
-                continue
-            if action == "separate":
                 token_num += 1
             token_num_by_char.append(token_num)
         return token_num_by_char
@@ -137,7 +115,7 @@ class LetterTokenizer(Tokenizer):
         Args:
             text (str): The text to normalize
             token_num_by_char (List[str]): Token number that each character belongs to.
-                Spaces are represented as -1. For example: [1,2,2,3,-1,4,-1,5,5,5]
+                Spaces are represented as None. For example: [1,2,2,3,None,4,None,5,5,5]
         Returns:
             tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
                 Keys include "start" (token starting index), "end" (token ending index), and
@@ -146,7 +124,7 @@ class LetterTokenizer(Tokenizer):
         tokens = []
         token_text = ""
         for index, token_num in enumerate(token_num_by_char):
-            if token_num == -1:
+            if not token_num:
                 continue
             if not token_text:
                 start = index
@@ -180,7 +158,7 @@ class WhiteSpaceTokenizer(Tokenizer):
         token = {}
         token_text = ""
         # Space added at the end of text to close off the last token
-        for i, char in enumerate(text + ' '):
+        for i, char in enumerate(text + " "):
             if char.isspace():
                 if token and token_text:
                     token["text"] = token_text
