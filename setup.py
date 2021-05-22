@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc2",
+    version="4.3.5rc3",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -107,5 +107,8 @@ setup(
         "language_annotator": [
             "google-cloud-translate>=3.0.1",
         ],
+        "elasticsearch": [
+            "elasticsearch>=5.0",
+        ]
     },
 )

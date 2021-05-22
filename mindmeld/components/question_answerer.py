@@ -73,7 +73,7 @@ NON_ELASTICSEARCH_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), "
 
 class BaseQuestionAnswerer(ABC):
 
-    def __init__(self, app_path, **kwargs):
+    def __init__(self, **kwargs):
         """
         Args:
             app_path (str, optional): The path to the directory containing the app's data. If
@@ -85,28 +85,24 @@ class BaseQuestionAnswerer(ABC):
             resource_loader (ResourceLoader, optional): An object which can load resources for the
                 question answerer.
         """
-        self.app_path = app_path
-        self.app_namespace = kwargs.get("app_namespace")
-        self._resource_loader = kwargs.get("resource_loader")
-        self.__qa_config = kwargs.get("config")
 
-        # create app_namespace implicitly from app_path is not provided
-        if not self.app_namespace:
-            self.app_namespace = get_app_namespace(self.app_path) if self.app_path else None
-        if not self.app_path and not self.app_namespace:
-            msg = f"Atlease one of `app_path` or `app_namespace` must be inputted as arguments " \
-                  f"to {self.__class__.__name__} in order to distinctly " \
-                  "identify the indices being created from you data files. Setting `app_path` as " \
-                  "current working directory."
-            logger.error(msg)
-            self.app_path = os.getcwd()
-            self.app_namespace = get_app_namespace(self.app_path)
+        if not kwargs.get("app_path") and not kwargs.get("app_namespace"):
+            msg = f"At least one of `app_path` or `app_namespace` must be inputted as arguments " \
+                  f"while creating an instance of {self.__class__.__name__} in order to " \
+                  f"distinctly identify the KB indices being created. " \
+                  f"Setting `app_path` as current working directory."
+            logger.warning(msg)
 
-        # create resource loader and qa configs if not inputted already
-        if not self._resource_loader:
-            self._resource_loader = ResourceLoader.create_resource_loader(self.app_path)
-        if not self.__qa_config:
-            self.__qa_config = get_classifier_config("question_answering", app_path=app_path)
+        self._app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType
+        self.app_namespace = kwargs.get("app_namespace", get_app_namespace(self._app_path))
+        self._resource_loader = kwargs.get(
+            "resource_loader",
+            ResourceLoader.create_resource_loader(self._app_path)
+        )
+        self.__qa_config = kwargs.get(
+            "config",
+            get_classifier_config("question_answering", app_path=self._app_path)
+        )
 
     def __repr__(self):
         return f"<{self.__class__.__name__} model_type: {self._query_type}>"
@@ -140,7 +136,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     necessary functionality for interacting with the application's knowledge base.
     """
 
-    def __init__(self, app_path, **kwargs):
+    def __init__(self, **kwargs):
         """Initializes a question answerer
 
         Args:
@@ -149,15 +145,15 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             es_host (str): The Elasticsearch host server
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
-        super().__init__(app_path, **kwargs)
+        super().__init__(**kwargs)
         self._es_host = kwargs.get("es_host")
-        self.__es_client = None
+        self.__es_client = kwargs.get("es_client")
         self._es_field_info = {}
 
         # bug-fix: previously, `_embedder_model` is created only when `model_type` is `embedder`
         self._embedder_model = None
         if "embedder" in self._query_type:
-            self._embedder_model = create_embedder_model(self.app_path, self._query_settings)
+            self._embedder_model = create_embedder_model(self._app_path, self._query_settings)
 
     @property
     def _es_client(self):
@@ -210,9 +206,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 raise KnowledgeBaseError from e
             except _getattr("elasticsearch", "ElasticsearchException") as e:
                 raise KnowledgeBaseError from e
-
-    def save_embedder_model(self):
-        self._embedder_model.dump()
 
     def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
@@ -1343,23 +1336,6 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
     A question answerer class not using Elasticsearch
     """
 
-    def __init__(self, app_path, **kwargs):
-        """Initializes a question answerer
-
-        Args:
-            app_path (str): The path to the directory containing the app's data
-            resource_loader (ResourceLoader): An object which can load resources for the answerer
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-        super().__init__(app_path, **kwargs)
-
-        self._embedder_model = None
-        if "embedder" in self._query_type:
-            self._embedder_model = create_embedder_model(self.app_path, self._query_settings)
-
-    def save_embedder_model(self):
-        self._embedder_model.dump()
-
     def get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
 
         doc_id = kwargs.get("id")
@@ -2013,7 +1989,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return (target_date - origin_date).days
 
         @staticmethod
-        def location_scorer(some_location, origin_location):
+        def location_scorer(some_location, source_location):
             """
             Uses Haversine formula to find distance between two coordinates
             references: https://en.wikipedia.org/wiki/Haversine_formula and
@@ -2022,7 +1998,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             Args:
                 some_location (str): latitude and longitude supplied as
                     comma separated strings, eg. "37.77,122.41"
-                origin_location (str): latitude and longitude supplied as
+                source_location (str): latitude and longitude supplied as
                     comma separated strings, eg. "37.77,122.41"
 
             Returns:
@@ -2041,7 +2017,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
             R = 6373.0
             lat1, lon1 = [radians(float(ii.strip())) for ii in some_location.split(",")]
-            lat2, lon2 = [radians(float(ii.strip())) for ii in origin_location.split(",")]
+            lat2, lon2 = [radians(float(ii.strip())) for ii in source_location.split(",")]
             dlon, dlat = lon2 - lon1, lat2 - lat1
 
             a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
@@ -2327,21 +2303,22 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             this_field_scores = {}
             n_scores = 0
 
-            if ("text" in query_type or "keyword" in query_type) and self._text_resolver:
-                # get processor type, process the value and then obtain similarities
-                processor_type = "text" if "text" in query_type else "keyword"
-                if processor_type != self.processor_type:
-                    msg = f"Using different text processings during loading KB " \
-                          f"({self.processor_type}) vs inferencing ({processor_type}) for the " \
-                          f"field {self.field_name} in index {self.index_name}"
+            if "text" in query_type or "keyword" in query_type:
+                if self._text_resolver:
+                    # get processor type, process the value and then obtain similarities
+                    processor_type = "text" if "text" in query_type else "keyword"
+                    if processor_type != self.processor_type:
+                        msg = f"Using different text processing during loading KB " \
+                              f"({self.processor_type}) vs during inference ({processor_type}) " \
+                              f"for the field {self.field_name} in index {self.index_name}"
+                        logger.warning(msg)
+                    new_value = self.auto_string_processor(value, processor_type)
+                    this_field_scores, n_scores = \
+                        update_scores(self._text_resolver, new_value, this_field_scores, n_scores)
+                else:
+                    msg = f"No text based resolver configured for field {self.field_name} " \
+                          f"in index {self.index_name}."
                     logger.warning(msg)
-                new_value = self.auto_string_processor(value, processor_type)
-                this_field_scores, n_scores = \
-                    update_scores(self._text_resolver, new_value, this_field_scores, n_scores)
-            elif ("text" in query_type or "keyword" in query_type):
-                msg = f"No text based resolver configured for field {self.field_name} " \
-                      f"in index {self.index_name}."
-                logger.warning(msg)
 
             if "embedder" in query_type and self._embedding_resolver:
                 this_field_scores, n_scores = \
@@ -2523,10 +2500,10 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             curated_docs = validated_curated_docs
 
             if self.data_type == "location":
-                origin_location = self.validate_and_reformat_value(location)
+                source_location = self.validate_and_reformat_value(location)
                 sort_type = "asc"
                 field_values = [
-                    self.location_scorer(value, origin_location) for value in field_values
+                    self.location_scorer(value, source_location) for value in field_values
                 ]
             elif self.data_type == "number":
                 field_values = [self.number_scorer(value) for value in field_values]
@@ -2589,9 +2566,9 @@ class QuestionAnswerer:
         To keep the code base backwards compatible, we use a `__new__()` way of creating instances
         alongside using a factory approach. For cases wherein a question-answerer is instantiated
         from `QuestionAnswerer` class instead of  `QuestionAnswerer.create_question_answerer`,
-        this method is first hit and returns an instance of a question-answerer.
+        this method is called before __init__ and returns an instance of a question-answerer.
 
-        See that the input arguments are kept as-is wrt to the `__init__()` of
+        See that the input arguments are kept as-is with respect to the `__init__()` of
         `ElasticsearchQuestionAnswerer` class which was the `QuestionAnswerer` class in previous
         version of `question_answerer.py`
         """
@@ -2601,8 +2578,9 @@ class QuestionAnswerer:
             "resource_loader": resource_loader,
             "es_host": es_host,
             "config": config,
+            "app_path": app_path
         })
-        return cls._get_question_answerer(config)(app_path, **kwargs)
+        return cls._get_question_answerer(config)(**kwargs)
 
     @staticmethod
     def _get_config(config=None, app_path=None):
@@ -2614,7 +2592,7 @@ class QuestionAnswerer:
     def _get_question_answerer(config):
 
         # TODO: Both QA classes assume input text is in English.
-        #  Going forward, this should be configurable!
+        #  Going forward, this should be configurable and multilingual support should be added!
 
         use_elastic_search = config.get("use_elastic_search", True)
 
@@ -2656,7 +2634,7 @@ class QuestionAnswerer:
                 config=None,
                 **kwargs):
         """
-        Implemented to maintain backward compatability. Should be removed in future versions.
+        Implemented to maintain backward compatibility. Should be removed in future versions.
 
         Args:
             app_namespace (str): The namespace of the app. Used to prevent
@@ -2679,9 +2657,9 @@ class QuestionAnswerer:
         # As a way to reduce entropy in using `load_kb()` and it's related inconsistencies of not
         # exposing `app_namespace` argument in `.get()` and `.build_search()`, this reformatting
         # recommends that all these methods be used as instance methods and not as class methods
-        msg = "DeprecationWarning: Refer the `load_kb(...)` method from object of a " \
-              "QuestionAnswerer. Deprecated Usage: `QuestionAnswerer.load_kb(...)`. New usage: " \
-              "`qa = QuestionAnswerer(...)`, then `qa.load_kb(...)`. " \
+        msg = "DeprecationWarning: Calling the `load_kb(...)` method directly from object of a " \
+              "QuestionAnswerer as `QuestionAnswerer.load_kb(...)` will be deprecated. " \
+              "New usage: `qa = QuestionAnswerer(...)`, then `qa.load_kb(...)`. " \
               "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
         logger.warning(msg)
 
@@ -2692,11 +2670,11 @@ class QuestionAnswerer:
             "es_client": es_client,
             "connect_timeout": connect_timeout,
             "clean": clean,
-            "app_path": app_path,
-            "config": config,
         })
-        question_answerer = cls.create_question_answerer(**kwargs)
-        # if provided, the `question_answerer` now contains information about
-        # `app_path`, `app_namspace`, `configs` and would be used in `.load_kb` of individual
-        # classes as backups to None values.
+        config = cls._get_config(config, app_path)
+        kwargs.update({
+            "config": config,
+            "app_path": app_path,
+        })
+        question_answerer = cls._get_question_answerer(config)(**kwargs)
         question_answerer.load_kb(index_name, data_file, **kwargs)

@@ -93,7 +93,7 @@ class EntityResolverFactory:
         if not er_config.get("model_settings", {}).get("resolver_type"):
             model_type = er_config.get("model_type")
             if model_type == "resolver":
-                raise Exception(
+                raise ValueError(
                     "Could not find `resolver_type` in `model_settings` of entity resolver")
             else:
                 logger.warning(
@@ -111,8 +111,8 @@ class EntityResolverFactory:
     @staticmethod
     def _validate_resolver_type(name):
         if name not in ENTITY_RESOLVER_MODEL_TYPES:
-            raise Exception(f"Expected 'resolver_type' in ENTITY_RESOLVER_CONFIG "
-                            f"among {ENTITY_RESOLVER_MODEL_TYPES}")
+            raise ValueError(f"Expected 'resolver_type' in ENTITY_RESOLVER_CONFIG "
+                             f"among {ENTITY_RESOLVER_MODEL_TYPES}")
         if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
                 "Must install the extra [bert] by running `pip install mindmeld[bert]` "
@@ -258,6 +258,9 @@ class EntityResolverBase(ABC):
 
     @staticmethod
     def _format_entity_map(entity_map):
+        if not entity_map:
+            return {}
+
         if not entity_map.get("entities", []):
             return entity_map
 
@@ -372,11 +375,8 @@ class EntityResolverBase(ABC):
             self.ready = True
             return
 
-        if entity_map:
-            entity_map = self._format_entity_map(entity_map)
-
         # load data: list of canonical entities and their synonyms
-        entity_map = entity_map or self._load_entity_map()
+        entity_map = self._format_entity_map(entity_map) or self._load_entity_map()
         if not entity_map.get("entities", []):
             self._no_trainable_canonical_entity_map = True
             self.ready = True
@@ -949,7 +949,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
                     augment_lower_case: to augment lowercased synonyms as whitelist
                     augment_title_case: to augment titlecased synonyms as whitelist
                     augment_normalized: to augment text normalized synonyms as whitelist
-                    augment_average_synonyms_embeddings: to augment dummy synonyms whose embedding
+                    augment_average_synonyms_embeddings: to augment pooled synonyms whose embedding
                         is average of all whitelist's (including above alterations) encodings.
                     scores_normalizer: a normalizer that normalizes computed similarity scores
                         allowed choices are "min_max_scaler", "standard_scaler"
@@ -997,25 +997,25 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         # encode artificial synonyms if required
         if self._aug_avg_syn_embs:
             # obtain cnames to synonyms mapping
-            cnames2synonyms = {}
+            cname2synonyms = {}
             for syn, cnames in self._processed_entity_map["synonyms"].items():
                 for cname in cnames:
-                    cnames2synonyms[cname] = cnames2synonyms.get(cname, []) + [syn]
+                    cname2synonyms[cname] = cname2synonyms.get(cname, []) + [syn]
             # create and add superficial data
-            for cname, syns in cnames2synonyms.items():
+            for cname, syns in cname2synonyms.items():
                 syns = list(set(syns))
                 if len(syns) == 1:
                     continue
-                dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
+                pooled_cname = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
-                if dummy_synonym not in self._processed_entity_map["synonyms"]:
-                    self._processed_entity_map["synonyms"][dummy_synonym] = [cname]
+                if pooled_cname not in self._processed_entity_map["synonyms"]:
+                    self._processed_entity_map["synonyms"][pooled_cname] = [cname]
                 # obtain encoding and update cache
                 # TODO: asumption that embedding cache has __getitem__ can be addressed
-                if dummy_synonym in self._embedder_model.cache:
+                if pooled_cname in self._embedder_model.cache:
                     continue
-                dummy_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
-                self._embedder_model.add_to_cache({dummy_synonym: dummy_encoding})
+                pooled_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
+                self._embedder_model.add_to_cache({pooled_cname: pooled_encoding})
 
         self._embedder_model.dump_cache()
         self.dirty = False  # never True with the current logic, kept for consistency purpose
@@ -1032,7 +1032,6 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         """
 
         # encode input entity
-        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
 
         try:
@@ -1291,44 +1290,44 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         # encode artificial synonyms if required
         if self._aug_max_syn_embs:
             # obtain cnames to synonyms mapping
-            entity_mapping_synonyms = self._processed_entity_map["synonyms"]
-            cnames2synonyms = {}
-            for syn, cnames in entity_mapping_synonyms.items():
+            synonym2cnames = self._processed_entity_map["synonyms"]
+            cname2synonyms = {}
+            for syn, cnames in synonym2cnames.items():
                 for cname in cnames:
-                    items = cnames2synonyms.get(cname, [])
+                    items = cname2synonyms.get(cname, [])
                     items.append(syn)
-                    cnames2synonyms[cname] = items
-            dummy_new_synonyms_to_encode, dummy_new_synonyms_encodings = [], []
-            # assert dummy synonyms
-            for cname, syns in cnames2synonyms.items():
+                    cname2synonyms[cname] = items
+            pooled_cnames, pooled_cnames_encodings = [], []
+            # assert pooled synonyms
+            for cname, syns in cname2synonyms.items():
                 syns = list(set(syns))
                 if len(syns) == 1:
                     continue
-                dummy_synonym = f"{cname} - SYNONYMS AVERAGE"
+                pooled_cname = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
-                dummy_synonym_mappings = entity_mapping_synonyms.get(dummy_synonym, [])
-                dummy_synonym_mappings.append(cname)
-                entity_mapping_synonyms[dummy_synonym] = dummy_synonym_mappings
+                pooled_cname_aliases = synonym2cnames.get(pooled_cname, [])
+                pooled_cname_aliases.append(cname)
+                synonym2cnames[pooled_cname] = pooled_cname_aliases
                 # check if needs to be encoded
-                if dummy_synonym in synonyms:
+                if pooled_cname in synonyms:
                     continue
-                # if required, obtain dummy encoding and update collections
-                dummy_encoding = scipy.sparse.csr_matrix(
+                # if required, obtain pooled encoding and update collections
+                pooled_encoding = scipy.sparse.csr_matrix(
                     np.max([synonyms_embs[synonyms[syn]].toarray() for syn in syns], axis=0)
                 )
-                dummy_new_synonyms_to_encode.append(dummy_synonym)
-                dummy_new_synonyms_encodings.append(dummy_encoding)
-            if dummy_new_synonyms_encodings:
-                dummy_new_synonyms_encodings = scipy.sparse.vstack(dummy_new_synonyms_encodings)
-            if dummy_new_synonyms_to_encode:
+                pooled_cnames.append(pooled_cname)
+                pooled_cnames_encodings.append(pooled_encoding)
+            if pooled_cnames_encodings:
+                pooled_cnames_encodings = scipy.sparse.vstack(pooled_cnames_encodings)
+            if pooled_cnames:
                 synonyms_embs = (
-                    dummy_new_synonyms_encodings if not synonyms else scipy.sparse.vstack(
-                        [synonyms_embs, dummy_new_synonyms_encodings])
+                    pooled_cnames_encodings if not synonyms else scipy.sparse.vstack(
+                        [synonyms_embs, pooled_cnames_encodings])
                 )
                 synonyms.update(
                     OrderedDict(zip(
-                        dummy_new_synonyms_to_encode,
-                        np.arange(len(synonyms), len(synonyms) + len(dummy_new_synonyms_to_encode)))
+                        pooled_cnames,
+                        np.arange(len(synonyms), len(synonyms) + len(pooled_cnames)))
                     )
                 )
 
@@ -1348,7 +1347,6 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         """
 
         # encode input entity
-        # TODO: Use all provided entities (i.e all nbest_entities) like elastic search
         top_entity = nbest_entities[0]  # top_entity
 
         try:
@@ -1405,7 +1403,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
                         (eg. 'bert', 'glove', etc. )
                     pretrained_name_or_abspath: the pretrained model for 'bert' embedder
                     bert_output_type: if the output is a sentence mean pool or CLS output
-                    quantize_model: if the model needs to be qunatized for faster inference time
+                    quantize_model: if the model needs to be quantized for faster inference time
                         but at a possibly reduced accuracy
                     concat_last_n_layers: if some of the last layers of a BERT model are to be
                         concatenated for better accuracies
@@ -1471,6 +1469,9 @@ class EntityResolver:
 ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "exact_match": ExactMatchEntityResolver,
     "text_relevance": ElasticsearchEntityResolver,
+    # TODO: In the newly added resolvers, to support
+    #   (1) using all provided entities (i.e all nbest_entities) like elastic search
+    #   (2) using kb_index_name and kb_field_name as used by Elasticsearch resolver
     "sbert_cosine_similarity": SentenceBertCosSimEntityResolver,
     "tfidf_cosine_similarity": TfIdfSparseCosSimEntityResolver
 }

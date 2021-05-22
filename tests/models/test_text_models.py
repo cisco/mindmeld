@@ -16,7 +16,7 @@ from mindmeld import markup
 from mindmeld.models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE, ModelConfig
 from mindmeld.models.text_models import TextModel
 from mindmeld.query_factory import QueryFactory
-from mindmeld.resource_loader import ResourceLoader
+from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
 from mindmeld.tokenizer import Tokenizer
 
 APP_NAME = "kwik_e_mart"
@@ -77,7 +77,7 @@ class TestTextModel:
         for intent in data_dict:
             for text in data_dict[intent]:
                 labeled_data.append(markup.load_query(text, intent=intent))
-        cls.labeled_data = labeled_data
+        cls.labeled_data = ProcessedQueryList.from_in_memory_list(labeled_data)
 
     def test_fit(self, resource_loader):
         """Tests that a basic fit succeeds"""
@@ -96,8 +96,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -124,8 +124,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -148,8 +148,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -171,8 +171,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 

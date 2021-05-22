@@ -12,12 +12,18 @@
 # limitations under the License.
 
 """This module contains some helper functions for the models package"""
+import json
+import logging
+import os
 import re
+from tempfile import mkstemp
 
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
 from ..tokenizer import Tokenizer
+
+logger = logging.getLogger(__name__)
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -457,3 +463,62 @@ def requires(resource):
         return func
 
     return add_resource
+
+
+class FileBackedList:
+    """
+    FileBackedList implements an interface for simple list use cases
+    that is backed by a temporary file on disk.  This is useful for
+    simple list processing in a memory efficient way.
+    """
+
+    def __init__(self):
+        self.num_lines = 0
+        self.file_handle = None
+        fd, self.filename = mkstemp()
+        os.close(fd)
+
+    def __len__(self):
+        return self.num_lines
+
+    def append(self, line):
+        if self.file_handle is None:
+            self.file_handle = open(self.filename, "w")
+        self.file_handle.write(json.dumps(line))
+        self.file_handle.write("\n")
+        self.num_lines += 1
+
+    def __del__(self):
+        if self.file_handle:
+            self.file_handle.close()
+        os.unlink(self.filename)
+
+    def __iter__(self):
+        # Flush out any remaining data to be written
+        if self.file_handle:
+            self.file_handle.close()
+            self.file_handle = None
+        return FileBackedList.Iterator(self)
+
+    class Iterator:
+        def __init__(self, source):
+            self.source = source
+            self.file_handle = open(source.filename, "r")
+
+        def __len__(self):
+            return len(self.source)
+
+        def __next__(self):
+            try:
+                line = next(self.file_handle)
+                return json.loads(line)
+            except Exception as e:
+                self.file_handle.close()
+                self.file_handle = None
+                if not isinstance(e, StopIteration):
+                    logger.error("Error reading from FileBackedList")
+                raise
+
+        def __del__(self):
+            if self.file_handle:
+                self.file_handle.close()
