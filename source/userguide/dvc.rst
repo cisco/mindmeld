@@ -1,11 +1,16 @@
-DVC for Model Tracking
-======================
+DVC & DAGsHub for Model Tracking
+================================
 
 We use Data Version Control, or DVC, in MindMeld in order to track trained models in our applications. DVC is an
 open-source version control system for data science and machine learning projects that enables versioning of large
 files and directories in concert with Git without storing the data itself in Git.
 
+DAGsHub is a platform built on top of Git & DVC that enables users to host, manage and collaborate on their code,
+data, models and experiments. We use DAGsHub in MindMeld as a central model registry, to make our models accessible from anywhere and easily shareable.
+
 You can find more info about DVC in the `official documentation <https://dvc.org/doc>`_.
+
+You can find more info about DAGsHub in the `DAGsHub documentation <https://dagshub.com/docs>`_.
 
 Install DVC using the following command.
 
@@ -13,7 +18,7 @@ Install DVC using the following command.
 
    pip install 'mindmeld[dvc]'
 
-The functionality of the DVC command within MindMeld is shown in the table below.
+The functionality of the DVC & DAGsHub command within MindMeld is shown in the table below.
 
 Available Options in MindMeld
 -----------------------------
@@ -22,6 +27,8 @@ Available Options in MindMeld
 | **Option**      | **Description**                                                        |
 +-----------------+------------------------------------------------------------------------+
 | --init          | Initializes DVC within a repository. Must be run before other options. |
++-----------------+------------------------------------------------------------------------+
+| --setup_dagshub | Setup a central model registry with DAGsHub[1].                        |
 +-----------------+------------------------------------------------------------------------+
 | --save          | Saves models using DVC. Run after model building finishes.             |
 +-----------------+------------------------------------------------------------------------+
@@ -35,6 +42,7 @@ Available Options in MindMeld
 | --help          | Show the available options and their descriptions.                     |
 +-----------------+------------------------------------------------------------------------+
 
+[1] The DAGsHub central repository requires you `sign up to DAGsHub <https://dagshub.com/user/sign_up>`_ (it's completely free), and create a project – you can `connect an existing GitHub project <https://dagshub.com/repo/connect>`_ or `create a project from scratch <https://dagshub.com/repo/create>`_.
 
 We will use the Home Assistant blueprint to demonstrate the various command options.
 
@@ -83,8 +91,19 @@ This will create all the files necessary for DVC to operate.
         new file:   .dvc/plots/smooth.json
         new file:   .dvcignore
 
+4. **[Optional] Setup a central model registry with DAGsHub**
 
-4. **Build the models, save them using DVC, and commit the new files to Git.**
+.. code-block:: console
+
+   python -m home_assistant dvc --setup_dagshub
+
+You will be prompted to input the URL of the DAGsHub project `you created <https://dagshub.com/repo/create>`_, your user name, and your `password (access token) <https://dagshub.com/user/settings/tokens>`_.
+
+You're DVC remote will then point to your DAGsHub storage, with credentials set up for you to save your models directly to your project.
+
+We recommend committing your code to Git and pushing to your connected GitHub project/DAGsHub project using ``git push`` so that you can see your entire project in the DAGsHub UI.
+
+5. **Build the models, save them using DVC, and commit the new files to Git.**
 
 .. code-block:: console
 
@@ -102,7 +121,7 @@ The save command creates a file (.generated.dvc) that tracks the trained models.
 
         new file:   home_assistant/.generated.dvc
 
-5. **Add new training data and follow the same commands in Step 4.**
+6. **Add new training data and follow the same commands in Step 4.**
 
 .. code-block:: console
 
@@ -112,7 +131,7 @@ The save command creates a file (.generated.dvc) that tracks the trained models.
    git commit -m "Updated models with new training data"
 
 
-6. **Switch between different trained models and repo states using the 'checkout' flag.**
+7. **Switch between different trained models and repo states using the 'checkout' flag.**
 
 .. code-block:: console
 
