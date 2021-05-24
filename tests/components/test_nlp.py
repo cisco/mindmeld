@@ -782,3 +782,23 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
         assert response["entities"] == []
     else:
         assert expected_entity in [entity["text"] for entity in response["entities"]]
+
+
+def test_extract_entity_resolvers(kwik_e_mart_app_path):
+    """Tests extracting entity resolvers
+    """
+    nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
+    entity_processors = nlp.domains['banking'].intents['transfer_money'].get_entity_processors()
+    assert len(entity_processors.keys()) == 2
+    assert "account_type" in entity_processors.keys()
+    assert "sys_amount-of-money" in entity_processors.keys()
+    entity_processors = nlp.domains['store_info'].intents['get_store_hours'].get_entity_processors()
+    assert len(entity_processors.keys()) == 2
+    assert "store_name" in entity_processors.keys()
+    assert "sys_time" in entity_processors.keys()
+    er = entity_processors["store_name"].entity_resolver
+    er.fit()
+    expected = {"id": "2", "cname": "Pine and Market"}
+    predicted = er.predict("Pine and Market")[0]
+    assert predicted["id"] == expected["id"]
+    assert predicted["cname"] == expected["cname"]

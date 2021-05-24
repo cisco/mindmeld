@@ -210,10 +210,42 @@ Upon building all the required resolvers, to access a particular resolver, adapt
 
   <ElasticsearchEntityResolver ready: True, dirty: False>
 
-Access & train an entity resolver as standalone component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Optional) Access & train specific entity resolvers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Accessing entity resolvers and training them indepenedent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate their performances on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
+As an alternative to building all entity resolvers required for an app, you can also access and train resolvers of a particular domain-intent hierarchy. This might be useful in case you want to run some simple tests for specific resolvers.
+
+.. code-block:: python
+
+  from mindmeld import configure_logs; configure_logs()
+  from mindmeld.components.nlp import NaturalLanguageProcessor
+  nlp = NaturalLanguageProcessor(app_path='food_ordering')
+  entity_processors = nlp.domains['ordering'].intents['build_order'].get_entity_processors()
+  entity_processors.keys()
+
+.. code-block:: console
+
+  dict_keys(['category', 'restaurant', 'option', 'sys_number', 'cuisine', 'dish'])
+
+Entity processors consist of both - entity resolvers and role classifiers. In the output above, you can identify all the entity types present in the training files of the chosen domain-intent hierarchy. To access resolver of a particular entity type, follow:
+
+.. code-block:: python
+
+  er = entity_processors["dish"].entity_resolver
+  er.fit()
+  er.predict("sea weed")[0]
+
+.. code-block:: console
+
+  {'cname': 'Seaweed Salad',
+   'score': 30.910252,
+   'top_synonym': 'Seaweed Salad',
+   'id': 'B01MTUORTQ'}
+
+(Optional) Access & train an entity resolver as standalone component
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Accessing entity resolvers and training them independent of the :mod:`nlp` pipeline is sometimes required, for example, to evaluate their performances on your dataset(s). When you are ready to begin experimenting, import `EntityResolverFactory` as follows:
 
 .. code-block:: python
 

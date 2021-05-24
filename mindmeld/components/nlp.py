@@ -26,7 +26,6 @@ from copy import deepcopy
 from multiprocessing import cpu_count
 from weakref import WeakValueDictionary
 from tqdm import tqdm
-
 from .. import path
 from ..core import Bunch, ProcessedQuery, QueryEntity, Entity, NestedEntity
 from ..exceptions import (
@@ -1105,6 +1104,28 @@ class IntentProcessor(Processor):
     @nbest_transcripts_enabled.setter
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
+
+    def get_entity_processors(self, label_set=None):
+
+        # Create the entity processors
+        _processors = Bunch()
+        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        for entity_type in entity_types:
+
+            if entity_type in _processors:
+                continue
+
+            processor = EntityProcessor(
+                self._app_path,
+                self.domain,
+                self.name,
+                entity_type,
+                self.resource_loader,
+                self.progress_bar,
+            )
+            _processors[entity_type] = processor
+
+        return _processors
 
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
