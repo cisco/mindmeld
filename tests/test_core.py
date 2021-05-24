@@ -418,3 +418,33 @@ def test_system_entity_time_resolution(home_assistant_nlp):
 def test_get_language_stemmer(language_code, stemmer_class):
     stemmer = get_language_stemmer(language_code)
     assert isinstance(stemmer, stemmer_class)
+
+
+@pytest.mark.parametrize(
+    "raw_query,valid_spans,entity_type",
+    [
+        ("3456$", {(0, 0)}, 'sys_amount-of-money'),
+        ("ok 3456$ now", {(1, 1)}, 'sys_amount-of-money'),
+        ("skk 3456$", {(1, 1)}, 'sys_amount-of-money'),
+        ("$23.45", {(0, 0)}, 'sys_amount-of-money'),
+        ("ok $23.45 now", {(1, 1)}, 'sys_amount-of-money'),
+        ("skk $23.45", {(1, 1)}, 'sys_amount-of-money'),
+        ("7:30", {(0, 0)}, 'sys_time'),
+        ("ok 7:30 now", {(1, 1), (2, 2)}, 'sys_time'),
+        ("skk 7:30", {(1, 1)}, 'sys_time'),
+        ("2:30pm", {(0, 0)}, 'sys_time'),
+        ("ok 2:30pm now", {(1, 1), (2, 2)}, 'sys_time'),
+        ("skk 2:30pm", {(1, 1)}, 'sys_time'),
+        ("2.00 am", {(0, 0), (0, 1), (1, 1)}, 'sys_time'),
+        ("ok 2.00 am now", {(1, 1), (1, 2), (2, 2), (3, 3)}, 'sys_time'),
+        ("skk 2.00 am", {(1, 1), (1, 2), (2, 2)}, 'sys_time'),
+        ("$20 5", {(1, 1), (0, 0), (0, 1)}, 'sys_amount-of-money'),
+        ("ok cool $20 5", {(3, 3), (2, 2), (2, 3)}, 'sys_amount-of-money'),
+    ],
+)
+def test_sys_entities_normalized_token_span(query_factory, raw_query, valid_spans, entity_type):
+    query = query_factory.create_query(raw_query)
+    values = query.get_system_entity_candidates({entity_type})
+    for val in values:
+        span = val.normalized_token_span
+        assert (span.start, span.end) in valid_spans

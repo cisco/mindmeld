@@ -36,7 +36,7 @@ class Gazetteer:
       sys_types (set): The set of nested numeric types for this entity
     """
 
-    def __init__(self, name, exclude_ngrams=False):
+    def __init__(self, name, tokenizer, exclude_ngrams=False):
         """
         Args:
             domain (str): The domain that this gazetteer is used
@@ -52,6 +52,7 @@ class Gazetteer:
         self.index = defaultdict(set)
         self.entities = []
         self.sys_types = set()
+        self.tokenizer = tokenizer
 
     def to_dict(self):
         """
@@ -103,6 +104,7 @@ class Gazetteer:
 
         """
         gaz_data = joblib.load(gaz_path)
+
         self.name = gaz_data["name"]
         self.entity_count = gaz_data["total_entities"]
         self.pop_dict = gaz_data["pop_dict"]
@@ -123,7 +125,9 @@ class Gazetteer:
         """
         # Only update the relevant data structures when the entity isn't
         # already in the gazetteer. Update the popularity either way.
-        if self.pop_dict[entity] == 0:
+        tokenized_gaz_entry = tuple(token["entity"] for token in self.tokenizer.tokenize(entity))
+
+        if self.pop_dict[tokenized_gaz_entry] == 0:
             self.entities.append(entity)
             if not self.exclude_ngrams:
                 for ngram in iterate_ngrams(entity.split(), max_length=self.max_ngram):
@@ -131,17 +135,17 @@ class Gazetteer:
             self.entity_count += 1
 
         if keep_max:
-            old_value = self.pop_dict[entity]
-            self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
-            if self.pop_dict[entity] != old_value:
+            old_value = self.pop_dict[tokenized_gaz_entry]
+            self.pop_dict[tokenized_gaz_entry] = max(self.pop_dict[tokenized_gaz_entry], popularity)
+            if self.pop_dict[tokenized_gaz_entry] != old_value:
                 logger.debug(
                     "Updating gazetteer value of entity %s from %s to %s",
                     entity,
                     old_value,
-                    self.pop_dict[entity],
+                    self.pop_dict[tokenized_gaz_entry],
                 )
         else:
-            self.pop_dict[entity] = popularity
+            self.pop_dict[tokenized_gaz_entry] = popularity
 
     def update_with_entity_data_file(self, filename, popularity_cutoff, normalizer):
         """
@@ -212,23 +216,25 @@ class Gazetteer:
         if len(self.pop_dict) > 0:
             min_popularity = min(self.pop_dict.values())
         for item in mapping:
-            canonical = normalizer(item["cname"])
+            tokenized_canonical = tuple(
+                token["entity"] for token in self.tokenizer.tokenize(
+                    normalizer(item["cname"])))
 
             for syn in item["whitelist"]:
                 line_count += 1
                 synonym = normalizer(syn)
 
-                if update_if_missing_canonical or canonical in self.pop_dict:
+                if update_if_missing_canonical or tokenized_canonical in self.pop_dict:
                     self._update_entity(
-                        synonym, self.pop_dict.get(canonical, min_popularity)
+                        synonym, self.pop_dict.get(tokenized_canonical, min_popularity)
                     )
                     synonyms_added += 1
-                if canonical not in self.pop_dict:
+                if tokenized_canonical not in self.pop_dict:
                     missing_canonicals += 1
                     logger.debug(
                         "Synonym '%s' for entity '%s' not in gazetteer",
                         synonym,
-                        canonical,
+                        str(tokenized_canonical),
                     )
         logger.info(
             "Added %d/%d synonyms from file into gazetteer", synonyms_added, line_count
@@ -238,6 +244,43 @@ class Gazetteer:
                 "Loaded %d synonyms where the canonical name is not in the gazetteer",
                 missing_canonicals,
             )
+
+
+class NestedGazetteer:
+    """
+    This class represents a gazetteer entry corresponding to a Query object
+    """
+
+    def __init__(self, start_token_index, end_token_index_plus_one,
+                 gaz_name, token_ngram, raw_ngram):
+        self._start_token_index = start_token_index
+        self._end_token_index_plus_one = end_token_index_plus_one
+        self._gaz_name = gaz_name
+        self._token_ngram = token_ngram
+        self._raw_ngram = raw_ngram
+
+    @property
+    def start_token_index(self):
+        return self._start_token_index
+
+    @property
+    def end_token_index_plus_one(self):
+        return self._end_token_index_plus_one
+
+    @property
+    def gaz_name(self):
+        return self._gaz_name
+
+    @property
+    def token_ngram(self):
+        return self._token_ngram
+
+    @property
+    def raw_ngram(self):
+        return self._raw_ngram
+
+    def __gt__(self, other_gaz):
+        return self.start_token_index > other_gaz.start_token_index
 
 
 def iterate_ngrams(tokens, min_length=1, max_length=1):

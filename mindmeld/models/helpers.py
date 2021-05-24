@@ -12,12 +12,19 @@
 # limitations under the License.
 
 """This module contains some helper functions for the models package"""
+import json
+import logging
+import os
 import re
+from tempfile import mkstemp
 
+import nltk
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
 from ..tokenizer import Tokenizer
+
+logger = logging.getLogger(__name__)
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -293,6 +300,23 @@ def get_ngram(tokens, start, length):
     return " ".join(ngram_tokens)
 
 
+def get_ngrams_upto_n(tokens, n):
+    """This function returns a generator that returns ngram tuples with length upto n
+
+    Args:
+        tokens (list of str): Word tokens.
+        n (int): The length of n-gram upto which the ngram tokens are generated
+
+    Returns:
+        tuple: ngram, (token index start, token index end)
+    """
+    if n == 0:
+        return []
+    for length, i in enumerate(range(1, n + 1)):
+        for idx, j in enumerate(nltk.ngrams(tokens, i)):
+            yield j, (idx, idx + length)
+
+
 def get_seq_accuracy_scorer():
     """
     Returns a scorer that can be used by sklearn's GridSearchCV based on the
@@ -408,7 +432,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
             # If the entity type is in the dyn gaz, we merge the data. Else,
             # just pass by reference the original resource data
             if entity_type in dynamic_resource[key]:
-                new_gaz = Gazetteer(entity_type)
+                new_gaz = Gazetteer(entity_type, tokenizer)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
                 new_gaz.from_dict(resource[key][entity_type])
@@ -463,3 +487,62 @@ def requires(resource):
         return func
 
     return add_resource
+
+
+class FileBackedList:
+    """
+    FileBackedList implements an interface for simple list use cases
+    that is backed by a temporary file on disk.  This is useful for
+    simple list processing in a memory efficient way.
+    """
+
+    def __init__(self):
+        self.num_lines = 0
+        self.file_handle = None
+        fd, self.filename = mkstemp()
+        os.close(fd)
+
+    def __len__(self):
+        return self.num_lines
+
+    def append(self, line):
+        if self.file_handle is None:
+            self.file_handle = open(self.filename, "w")
+        self.file_handle.write(json.dumps(line))
+        self.file_handle.write("\n")
+        self.num_lines += 1
+
+    def __del__(self):
+        if self.file_handle:
+            self.file_handle.close()
+        os.unlink(self.filename)
+
+    def __iter__(self):
+        # Flush out any remaining data to be written
+        if self.file_handle:
+            self.file_handle.close()
+            self.file_handle = None
+        return FileBackedList.Iterator(self)
+
+    class Iterator:
+        def __init__(self, source):
+            self.source = source
+            self.file_handle = open(source.filename, "r")
+
+        def __len__(self):
+            return len(self.source)
+
+        def __next__(self):
+            try:
+                line = next(self.file_handle)
+                return json.loads(line)
+            except Exception as e:
+                self.file_handle.close()
+                self.file_handle = None
+                if not isinstance(e, StopIteration):
+                    logger.error("Error reading from FileBackedList")
+                raise
+
+        def __del__(self):
+            if self.file_handle:
+                self.file_handle.close()

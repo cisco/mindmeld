@@ -367,7 +367,9 @@ class MultiLingualParaphraser(Augmentor):
             **self.default_forward_params,
         )
 
-        template = lambda text: f">>{self.language_code}<< {text}"
+        def template(text):
+            return f">>{self.language_code}<< {text}"
+
         translated_queries = [template(query) for query in set(translated_queries)]
 
         reverse_translated_queries = self._translate(

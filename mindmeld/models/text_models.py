@@ -142,8 +142,8 @@ class TextModel(Model):
         training examples passed in.
 
         Args:
-            examples (list): A list of examples.
-            labels (list): A parallel list to examples. The gold labels
+            examples (ProcessedQueryList.*Iterator): A list of examples.
+            labels (ProcessedQueryList.*Iterator): A parallel list to examples. The gold labels
                 for each example.
             params (dict, optional): Parameters to use when training. Parameter
                 selection will be bypassed if this is provided
@@ -158,9 +158,8 @@ class TextModel(Model):
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
         random.shuffle(indices)
-        examples = [examples[i] for i in indices]
-        labels = [labels[i] for i in indices]
-
+        examples.reorder(indices)
+        labels.reorder(indices)
         distinct_labels = set(labels)
         if len(set(distinct_labels)) <= 1:
             return self

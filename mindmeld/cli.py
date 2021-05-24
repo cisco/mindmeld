@@ -54,8 +54,7 @@ from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMe
 from .models.helpers import create_annotator
 from .path import (
     MODEL_CACHE_PATH,
-    QUERY_CACHE_PATH,
-    QUERY_CACHE_TMP_PATH,
+    QUERY_CACHE_DB_PATH,
     get_generated_data_folder,
     get_dvc_local_remote_path,
 )
@@ -542,14 +541,9 @@ def clean(ctx, query_cache, model_cache, days):
         )
     if query_cache:
         try:
-            main_cache_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
-            tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=app.app_path)
-
+            main_cache_location = QUERY_CACHE_DB_PATH.format(app_path=app.app_path)
             if os.path.exists(main_cache_location):
                 os.remove(main_cache_location)
-
-            if os.path.exists(tmp_cache_location):
-                os.remove(tmp_cache_location)
 
             logger.info("Query cache deleted")
         except FileNotFoundError:
