@@ -125,7 +125,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         padded_ic_queries_prob_vectors = []
         for unordered_ic_query_prob_vector in ic_queries_prob_vectors:
-            ordered_ic_query_prob_vector = [0] * len(self.intent2idx)
+            ordered_ic_query_prob_vector = np.zeros(len(self.intent2idx))
             for i, intent in enumerate(intents):
                 ordered_ic_query_prob_vector[
                     self.intent2idx[intent]
