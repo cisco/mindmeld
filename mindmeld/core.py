@@ -457,8 +457,7 @@ class Query:
         last_raw_start = tokens[end_token_index]['raw_start']
         last_raw_entity = tokens[end_token_index]['entity']
         first_raw_start = tokens[start_token_index]['raw_start']
-        ngram_char_length = last_raw_start + len(last_raw_entity) - first_raw_start
-        result_span = Span(first_raw_start, first_raw_start + ngram_char_length - 1)
+        result_span = Span(first_raw_start, last_raw_start + len(last_raw_entity) - 1)
         raw_ngram = self.text[result_span.start: result_span.end + 1]
         return token_ngram, raw_ngram, result_span
 

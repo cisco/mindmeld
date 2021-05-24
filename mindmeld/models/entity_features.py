@@ -36,7 +36,8 @@ def extract_in_gaz_features(**kwargs):
                 normalized_tokens = current_entity.normalized_tokens
             else:
                 raise TypeError(
-                    f"{current_entity} is of unknown type, expected Query or QueryEntity type")
+                    f"{current_entity} is of unknown type, expected Query, "
+                    f"NestedEntity or QueryEntity type")
 
             if normalized_tokens in gaz["pop_dict"]:
                 feat_name = "in_gaz|type:{}".format(gaz_name)
