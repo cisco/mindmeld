@@ -299,6 +299,44 @@ def test_nlp_hierarchy_using_dynamic_gazetteer(
         assert expected_entity in [entity["text"] for entity in response["entities"]]
 
 
+def test_allowed_entities(kwik_e_mart_nlp):
+    res = kwik_e_mart_nlp.process("peanut",
+                                  allowed_intents=["store_info.get_store_number.store_name"])
+    assert res['entities'][0]['type'] == 'store_name'
+    assert res['entities'][0]['text'] == 'peanut'
+
+    res = kwik_e_mart_nlp.process("xyz",
+                                  allowed_intents=["store_info.get_store_number.store_name"])
+    assert res['entities'] == []
+
+    res = kwik_e_mart_nlp.process("xyz",
+                                  allowed_intents=["store_info.get_store_number.store_name"],
+                                  dynamic_resource={'gazetteers': {'store_name': {'xyz': 1.0}}})
+    assert res['entities'][0]['type'] == 'store_name'
+    assert res['entities'][0]['text'] == 'xyz'
+
+
+test_find_entities_in_text_data = [
+    ('20', None, {'sys_temperature': {}}),
+    ('2:30', None, {'sys_time': {}}),
+    # The below test case has overlapping entities
+    ('$20 5', None, {'sys_amount-of-money': {}}),
+    ('foyer', {"gazetteers": {"location": {"foyer": 10.0}}}, {'location': {}}),
+]
+
+
+@pytest.mark.parametrize(
+    "query_text,dyn_gaz,allowed_nlp", test_find_entities_in_text_data
+)
+def test_find_entities_in_text(home_assistant_nlp, query_factory, query_text, dyn_gaz, allowed_nlp):
+    # Duckling tests
+    query = (query_factory.create_query(text=query_text),)
+    res = home_assistant_nlp.domains['smart_home'].intents['set_thermostat']._find_entities_in_text(
+        query, dyn_gaz, allowed_nlp, 3)
+    assert res[0][0].text == query_text
+    assert res[0][0].entity.type == list(allowed_nlp.keys())[0]
+
+
 test_data_3 = [
     "what mythical scottish town appears for one day every 100 years",
     "lets run 818m",

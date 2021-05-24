@@ -18,6 +18,7 @@ import os
 import re
 from tempfile import mkstemp
 
+import nltk
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
@@ -299,6 +300,23 @@ def get_ngram(tokens, start, length):
     return " ".join(ngram_tokens)
 
 
+def get_ngrams_upto_n(tokens, n):
+    """This function returns a generator that returns ngram tuples with length upto n
+
+    Args:
+        tokens (list of str): Word tokens.
+        n (int): The length of n-gram upto which the ngram tokens are generated
+
+    Returns:
+        tuple: ngram, (token index start, token index end)
+    """
+    if n == 0:
+        return []
+    for length, i in enumerate(range(1, n + 1)):
+        for idx, j in enumerate(nltk.ngrams(tokens, i)):
+            yield j, (idx, idx + length)
+
+
 def get_seq_accuracy_scorer():
     """
     Returns a scorer that can be used by sklearn's GridSearchCV based on the
@@ -414,7 +432,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
             # If the entity type is in the dyn gaz, we merge the data. Else,
             # just pass by reference the original resource data
             if entity_type in dynamic_resource[key]:
-                new_gaz = Gazetteer(entity_type)
+                new_gaz = Gazetteer(entity_type, tokenizer)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
                 new_gaz.from_dict(resource[key][entity_type])

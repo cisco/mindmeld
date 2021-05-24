@@ -16,6 +16,9 @@ import logging
 from typing import Optional, List, Dict
 import immutables
 
+from .constants import SYSTEM_ENTITY_PREFIX
+
+
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
 TEXT_FORM_NORMALIZED = 2
@@ -137,6 +140,25 @@ class Span:
     def has_overlap(self, other):
         """Determines whether two spans overlap."""
         return self.end >= other.start and other.end >= self.start
+
+    @staticmethod
+    def get_largest_non_overlapping_candidates(spans):
+        """Finds the set of the largest non-overlapping candidates.
+
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+        Returns:
+            selected_spans (list): List of the largest non-overlapping spans.
+        """
+        spans.sort(reverse=True)
+        selected_spans = []
+        for span in spans:
+            has_overlaps = [
+                span.has_overlap(selected_span) for selected_span in selected_spans
+            ]
+            if not any(has_overlaps):
+                selected_spans.append(span)
+        return selected_spans
 
     def __iter__(self):
         for index in range(self.start, self.end + 1):
@@ -327,6 +349,12 @@ class Query:
         """
         return self._timestamp
 
+    def get_verbose_normalized_tokens(self):
+        """This function returns a list of dictionaries containing details of each normalized
+        token
+        """
+        return self._normalized_tokens
+
     def get_text_form(self, form):
         """Programmatically retrieves text by form
 
@@ -421,6 +449,17 @@ class Query:
             return mapping[index] if mapping else index
         except KeyError as e:
             raise ValueError("Invalid index {}".format(index)) from e
+
+    def get_token_ngram_raw_ngram_span(self, tokens, start_token_index, end_token_index):
+        token_ngram = tuple(
+            [token['entity'] for token in tokens[start_token_index:end_token_index + 1]]
+        )
+        last_raw_start = tokens[end_token_index]['raw_start']
+        last_raw_entity = tokens[end_token_index]['entity']
+        first_raw_start = tokens[start_token_index]['raw_start']
+        result_span = Span(first_raw_start, last_raw_start + len(last_raw_entity) - 1)
+        raw_ngram = self.text[result_span.start: result_span.end + 1]
+        return token_ngram, raw_ngram, result_span
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -711,6 +750,29 @@ class NestedEntity:
 
         return cls(texts, spans, tok_spans, entity, children)
 
+    @staticmethod
+    def get_largest_non_overlapping_entities(candidates, get_span_func):
+        """
+        This function filters out overlapping entity spans
+
+        Args:
+            candidates (iterable): A iterable of candidates to filter based on span
+            get_span_func (function): A function that accesses the span from each candidate
+
+        Returns:
+            list: A list of non-overlapping candidates
+        """
+        final_spans = Span.get_largest_non_overlapping_candidates(
+            [get_span_func(candidate) for candidate in candidates])
+
+        final_candidates = []
+        for span in final_spans:
+            for candidate in candidates:
+                if span == get_span_func(candidate):
+                    final_candidates.append(candidate)
+                    break
+        return final_candidates
+
     def to_dict(self):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
@@ -898,7 +960,7 @@ class Entity:
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith("sys_")
+        return entity_type.startswith(SYSTEM_ENTITY_PREFIX)
 
     def to_dict(self):
         """Converts the entity into a dictionary"""

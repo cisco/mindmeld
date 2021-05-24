@@ -294,3 +294,6 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 CURRENCY_SYMBOLS = u"".join(
     chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
 )
+
+
+SYSTEM_ENTITY_PREFIX = "sys_"
