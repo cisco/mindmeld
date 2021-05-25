@@ -2280,7 +2280,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     TfIdfSparseCosSimEntityResolver(
                         app_path=app_path,  # not required to supply, can be None!
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        er_config={"model_settings": {**resolver_settings}})
+                        config={"model_settings": {**resolver_settings}})
                 )
                 # format id2value data into an 'entity_map' format for resolvers
                 values = self.auto_string_processor([*self.id2value.values()], self.processor_type)
@@ -2302,7 +2302,7 @@ class NonElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                     EmbedderCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        er_config={"model_settings": {**resolver_settings}})
+                        config={"model_settings": {**resolver_settings}})
                 )
                 # use same data as text resolver but without any processing!
                 entity_map = get_entity_map(self.id2value)
