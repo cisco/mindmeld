@@ -67,7 +67,9 @@ if _is_module_available("elasticsearch"):
 logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
-ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
+ALL_QUERY_TYPES = ["keyword", "text", "embedder",
+                   "embedder_keyword", "keyword_embedder",
+                   "embedder_text", "text_embedder"]
 EMBEDDING_FIELD_STRING = "_embedding"
 NON_ELASTICSEARCH_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), ".cache/mindmeld")
 
@@ -95,13 +97,12 @@ class BaseQuestionAnswerer(ABC):
             logger.warning(msg)
 
         self._app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
-        self.app_namespace = kwargs.get("app_namespace", get_app_namespace(self._app_path))
-        self._resource_loader = kwargs.get(
-            "resource_loader",
-            ResourceLoader.create_resource_loader(self._app_path)
+        self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self._app_path)
+        self._resource_loader = (
+            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self._app_path)
         )
-        self.__qa_config = kwargs.get(
-            "config",
+        self.__qa_config = (
+            kwargs.get("config") or
             get_classifier_config("question_answering", app_path=self._app_path)
         )
 
@@ -504,7 +505,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 return any([re.match(pattern, string) for pattern in pattern_list])
 
             def transform(doc, embedder_model, embedding_fields):
-                if embedder_model:
+                if embedder_model and embedding_fields:
                     embed_fields = [
                         (key, str(val))
                         for key, val in doc.items()
@@ -590,7 +591,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # Saves the embedder model cache to disk
         if embedder_model:
-            embedder_model.dump()
+            embedder_model.dump_cache()
 
     class Search:
         """This class models a generic filtered search in knowledge base. It allows developers to
