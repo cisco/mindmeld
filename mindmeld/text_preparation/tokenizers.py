@@ -49,7 +49,7 @@ class NoOpTokenizer(Tokenizer):
         pass
 
     def tokenize(self, text):
-        """
+        """ Returns the original text as a list.
         Args:
             text (str): Input text.
         Returns:
@@ -67,11 +67,13 @@ class CharacterTokenizer(Tokenizer):
 
     def tokenize(self, text):
         """
-        Identify tokens in text and create tokens that contain the text and start index.
+        Split characters into separate tokens while skipping spaces.
         Args:
-            text (str): The text to normalize
+            text (str): the text to tokenize
         Returns:
-            tokens (List[str]): List of tokenized tokens.
+            tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                Keys include "start" (token starting index), and "text" (token text).
+                For example: [{"start": 0, "text":"hello"}]
         """
         tokens = []
         for idx, char in enumerate(text):
@@ -91,11 +93,11 @@ class LetterTokenizer(Tokenizer):
         """
         Identify tokens in text and create normalized tokens that contain the text and start index.
         Args:
-            text (str): The text to normalize
+            text (str): the text to tokenize
         Returns:
             tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
-                Keys include "start" (token starting index), "end" (token ending index), and
-                "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
+                Keys include "start" (token starting index), and "text" (token text).
+                For example: [{"start": 0, "text":"hello"}]
         """
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
@@ -141,13 +143,13 @@ class LetterTokenizer(Tokenizer):
         """
         Generate token dictionaries from the original text and the token numbers by character.
         Args:
-            text (str): The text to normalize
+            text (str): the text to tokenize
             token_num_by_char (List[str]): Token number that each character belongs to.
                 Spaces are represented as None. For example: [1,2,2,3,None,4,None,5,5,5]
         Returns:
             tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
-                Keys include "start" (token starting index), "end" (token ending index), and
-                "text" (token text). For example: [{"start": 0, "text":"hello", "end":4}]
+                Keys include "start" (token starting index), and "text" (token text).
+                For example: [{"start": 0, "text":"hello"}]
         """
         tokens = []
         token_text = ""
@@ -176,11 +178,13 @@ class WhiteSpaceTokenizer(Tokenizer):
 
     def tokenize(self, text):
         """
-        Identify tokens in text and create normalized tokens that contain the text and start index.
+        Identify tokens in text and token dictionaries that contain the text and start index.
         Args:
-            text (str): The text to normalize
+            text (str): the text to tokenize
         Returns:
-            tokens (List[str]): List of tokenized tokens.
+            tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                Keys include "start" (token starting index), and "text" (token text).
+                For example: [{"start": 0, "text":"hello"}]
         """
         tokens = []
         token = {}
@@ -214,7 +218,9 @@ class SpacyTokenizer(Tokenizer):
         Args:
             text (str): Input text.
         Returns:
-            tokens (List[str]): List of tokens created using a Spacy Language Model.
+            tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                Keys include "start" (token starting index), and "text" (token text).
+                For example: [{"start": 0, "text":"hello"}]
         """
         spacy_tokens = [token.text for token in self.spacy_model(text)]
 
