@@ -250,6 +250,8 @@ class TokenizerFactory:
         """
         if tokenizer == NoOpTokenizer.__name__:
             return NoOpTokenizer()
+        elif tokenizer == CharacterTokenizer.__name__:
+            return CharacterTokenizer()
         elif tokenizer == LetterTokenizer.__name__:
             return LetterTokenizer()
         elif tokenizer == WhiteSpaceTokenizer.__name__:

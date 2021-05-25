@@ -35,7 +35,7 @@ class Tokenizer:
         Args:
             exclude_from_norm (optional) - list of chars to exclude from normalization
         """
-
+        self.app_path = app_path
         self.exclude_from_norm = exclude_from_norm or []
         self.config = get_tokenizer_config(app_path, self.exclude_from_norm)
         self.language, _ = get_language_config(app_path)
@@ -156,7 +156,9 @@ class Tokenizer:
     # TODO investigate necessity of deepcopy in train-roles
     def __deepcopy__(self, memo):
         # TODO: optimize this
-        return Tokenizer(exclude_from_norm=self.exclude_from_norm)
+        return Tokenizer(
+            app_path=self.app_path, exclude_from_norm=self.exclude_from_norm
+        )
 
     def _one_xlat(self, match_object):
         """
@@ -271,6 +273,7 @@ class Tokenizer:
             # TODO: Move normalization out of the Tokenizer (Phase 2)
             norm_token_text = self._normalizer.normalize(norm_token_text)
 
+            # TODO: Make it optional to take the lowercase of text (Phase 2)
             norm_token_text = norm_token_text.lower()
 
             norm_token_count = 0
@@ -288,38 +291,6 @@ class Tokenizer:
             raw_token["norm_token_start"] = norm_token_start
             raw_token["norm_token_count"] = norm_token_count
         return norm_tokens
-
-    @staticmethod
-    def tokenize_raw(text):
-        """
-        Identify tokens in text and create normalized tokens that contain the text and start index.
-
-        Args:
-            text (str): The text to normalize
-
-        Returns:
-            list: A list of normalized tokens
-        """
-        tokens = []
-        token = {}
-        token_text = ""
-        for i, char in enumerate(text):
-            if char.isspace():
-                if token and token_text:
-                    token["text"] = token_text
-                    tokens.append(token)
-                token = {}
-                token_text = ""
-                continue
-            if not token_text:
-                token = {"start": i}
-            token_text += char
-
-        if token and token_text:
-            token["text"] = token_text
-            tokens.append(token)
-
-        return tokens
 
     def get_char_index_map(self, raw_text, normalized_text):  # pylint: disable=R0201
         """
