@@ -92,6 +92,29 @@ We see that the original text is split at the character level.
     ['背', 'の', '高', 'い', '男', '性']
 
 
+Letter Tokenizer
+^^^^^^^^^^^^^^^^^^^
+The :attr:`LetterTokenizer` splits text into a separate token if the character proceeds a space, is a
+non-latin character, or is a different unicode category than the previous character.
+
+This can be helpful to keep characters of the same type together. Let's look at an example with numbers in a Japanese sentence, "1年は365日". This sentence translates to "One year has 365 days". 
+
+.. code:: python
+
+    from mindmeld.text_preparation.tokenizers import LetterTokenizer
+
+    sentence_ja = "1年は365日"
+    letter_tokenizer = LetterTokenizer()
+    tokens = letter_tokenizer.tokenize(sentence_ja)
+    print([t['text'] for t in tokens])
+
+We see that the original text is split at the character level for non-latin characters but the number "365" remains as an unsegmented token.
+
+.. code:: python
+
+    ['1', '年', 'は', '365', '日']
+
+
 Spacy Tokenizer
 ^^^^^^^^^^^^^^^
 The :attr:`SpacyTokenizer` splits up a sentence using `Spacy's language models <https://spacy.io/models>`_.
@@ -106,32 +129,12 @@ Let's use the :attr:`SpacyTokenizer` to tokenize the Japanese translation of "Th
     sentence_ja = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
     spacy_tokenizer_ja = SpacyTokenizer(language="ja", spacy_model_size="lg")
     tokens = spacy_tokenizer_ja.tokenize(sentence_ja)
-    print([t['text'] for t in tokens])
 
 We see that the original text is split semantically and not simply by whitespace.
 
 .. code:: python
 
-    [{'start': 0, 'text': '紳士'},
-    {'start': 2, 'text': 'が'},
-    {'start': 3, 'text': '過ぎ'},
-    {'start': 5, 'text': '去っ'},
-    {'start': 7, 'text': 'た'},
-    {'start': 8, 'text': '、'},
-    {'start': 9, 'text': 'なぜ'},
-    {'start': 11, 'text': 'それ'},
-    {'start': 13, 'text': 'が'},
-    {'start': 14, 'text': '起こっ'},
-    {'start': 17, 'text': 'た'},
-    {'start': 18, 'text': 'の'},
-    {'start': 19, 'text': 'か'},
-    {'start': 20, 'text': '誰'},
-    {'start': 21, 'text': 'に'},
-    {'start': 22, 'text': 'も'},
-    {'start': 23, 'text': '分かり'},
-    {'start': 26, 'text': 'ませ'},
-    {'start': 28, 'text': 'ん'},
-    {'start': 29, 'text': '！'}]
+    ['紳士', 'が', '過ぎ', '去っ', 'た', '、', 'なぜ', 'それ', 'が', '起こっ', 'た', 'の', 'か', '誰', 'に', 'も', '分かり', 'ませ', 'ん', '！']
 
 
 Normalization Methods
@@ -183,26 +186,21 @@ Let's take a look at an example. Say we are trying to normalize the word :attr:`
     nfd_normalizer = NFKD()
     text = "quién"
     normalized_text = nfd_normalizer.normalize(text)
-    print(text, normalized_text)
-    print(text == normalized_text)
-
 
 Interestingly, we find that the normalized text looks identical with the original text, it is not quite the same.
 
 .. code:: python
 
-    quién quién
-    False
+    >>> print(text, normalized_text)
+    >>> quién quién
+    >>> print(text == normalized_text)
+    >>> False
 
 We can print the character values for each of the texts and observe the the normalization has actually changed the representaation for :attr:`é`.
 
 .. code:: python
     
-    print([ord(c) for c in text])
-    print([ord(c) for c in normalized_text])
-
-
-.. code:: python
-
-    [113, 117, 105, 233, 110]
-    [113, 117, 105, 101, 769, 110]
+    >>> print([ord(c) for c in text])
+    >>> [113, 117, 105, 233, 110]
+    >>> print([ord(c) for c in normalized_text])
+    >>> [113, 117, 105, 101, 769, 110]

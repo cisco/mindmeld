@@ -83,7 +83,9 @@ class CharacterTokenizer(Tokenizer):
 
 
 class LetterTokenizer(Tokenizer):
-    """A Tokenizer that splits text at the character level."""
+    """ A Tokenizer that splits text into a separate token if the character proceeds a space, is a
+        non-latin character, or is a different unicode category than the previous character.
+    """
 
     def __init__(self):
         """Initializes the LetterTokenizer."""
