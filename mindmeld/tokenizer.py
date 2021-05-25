@@ -264,22 +264,26 @@ class Tokenizer:
             norm_token_text = raw_token["text"]
 
             if keep_special_chars:
-                norm_token_text = self.multiple_replace(
+                regex_norm_token_text = self.multiple_replace(
                     norm_token_text, self.keep_special_compiled
                 )
             else:
-                norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
+                regex_norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
             # TODO: Move normalization out of the Tokenizer (Phase 2)
-            norm_token_text = self._normalizer.normalize(norm_token_text)
+            final_norm_token_text = []
+            for c in regex_norm_token_text:
+                c = c if c in self.exclude_from_norm else self._normalizer.normalize(c)
+                final_norm_token_text.append(c)
 
             # TODO: Make it optional to take the lowercase of text (Phase 2)
-            norm_token_text = norm_token_text.lower()
+            final_norm_token_text = "".join(final_norm_token_text)
+            final_norm_token_text = final_norm_token_text.lower()
 
             norm_token_count = 0
-            if len(norm_token_text) > 0:
+            if len(final_norm_token_text) > 0:
                 # remove diacritics and fold the character to equivalent ascii character if possible
-                for token in norm_token_text.split():
+                for token in final_norm_token_text.split():
                     norm_token = {}
                     norm_token["entity"] = token
                     norm_token["raw_entity"] = raw_token["text"]

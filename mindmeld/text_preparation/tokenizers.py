@@ -49,7 +49,7 @@ class NoOpTokenizer(Tokenizer):
         pass
 
     def tokenize(self, text):
-        """ Returns the original text as a list.
+        """Returns the original text as a list.
         Args:
             text (str): Input text.
         Returns:
