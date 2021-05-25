@@ -24,10 +24,10 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, wait
 from copy import deepcopy
 from multiprocessing import cpu_count
+from weakref import WeakValueDictionary
 from tqdm import tqdm
-
 from .. import path
-from ..core import Bunch, ProcessedQuery
+from ..core import Bunch, ProcessedQuery, QueryEntity, Entity, NestedEntity
 from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
@@ -44,11 +44,15 @@ from ._config import (
 )
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolver, EntityResolverConnectionError
+from .entity_resolver import EntityResolverFactory, EntityResolverConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
+from ..models.helpers import GAZETTEER_RSC
+from ..constants import SYSTEM_ENTITY_PREFIX
+from ..models.helpers import get_ngrams_upto_n
+
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -102,7 +106,7 @@ class Processor(ABC):
             messages.
     """
 
-    instance_map = {}
+    instance_map = WeakValueDictionary()
     """The map of identity to instance."""
 
     def __init__(self, app_path, resource_loader=None, config=None):
@@ -135,23 +139,27 @@ class Processor(ABC):
                 configuration has changed since the last build. Defaults to ``False``.
             label_set (string, optional): The label set from which to train all classifiers.
         """
-        self._build(incremental=incremental, label_set=label_set)
-        # Dumping the model when incremental builds are turned on
-        # allows for other models with identical data and configs
-        # to use a pre-existing model's results on the same run.
-        if incremental:
+        self._build_recursive(incremental=incremental, label_set=label_set)
+        self.load()
+
+    def _build_recursive(self, incremental=False, label_set=None):
+        """Builds all the natural language processing models for this processor and its children.
+
+        Args:
+            incremental (bool, optional): When ``True``, only build models whose training data or
+                configuration has changed since the last build. Defaults to ``False``.
+            label_set (string, optional): The label set from which to train all classifiers.
+        """
+        self._build(incremental=incremental, label_set=label_set, load_cached=False)
+        # We dump and unload the model to reduce memory consumption while training
+        if self.ready:
             self._dump()
+            self.unload()
 
         for child in self._children.values():
             # We pass the incremental_timestamp to children processors
             child.incremental_timestamp = self.incremental_timestamp
-            child.build(incremental=incremental, label_set=label_set)
-            if incremental:
-                child.dump()
-
-        self.resource_loader.query_cache.dump()
-        self.ready = True
-        self.dirty = True
+            child._build_recursive(incremental=incremental, label_set=label_set)
 
     @property
     def incremental_timestamp(self):
@@ -163,7 +171,7 @@ class Processor(ABC):
         self._incremental_timestamp = ts
 
     @abstractmethod
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         raise NotImplementedError
 
     def dump(self):
@@ -174,11 +182,13 @@ class Processor(ABC):
         for child in self._children.values():
             child.dump()
 
-        self.resource_loader.query_cache.dump()
         self.dirty = False
 
     @abstractmethod
     def _dump(self):
+        raise NotImplementedError
+
+    def unload(self):
         raise NotImplementedError
 
     def load(self, incremental_timestamp=None):
@@ -453,7 +463,7 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application."""
         return self._children
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
 
         # reset display for the progress bar. This is important for repeated use of the
         # progress bar
@@ -470,8 +480,10 @@ class NaturalLanguageProcessor(Processor):
         if len(self.domains) == 1:
             return
 
-        self.domain_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.domain_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
     def _dump(self):
@@ -483,6 +495,10 @@ class NaturalLanguageProcessor(Processor):
         )
 
         self.domain_classifier.dump(model_path, incremental_model_path)
+
+    def unload(self):
+        self.ready = False
+        self.domain_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.domains) == 1:
@@ -816,12 +832,14 @@ class DomainProcessor(Processor):
                 app_path, domain, intent, self.resource_loader, progress_bar
             )
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         if len(self.intents) == 1:
             return
         # train intent model
-        self.intent_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.intent_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if len(self._children) > 1 and self.progress_bar is not None:
@@ -839,6 +857,10 @@ class DomainProcessor(Processor):
         self.intent_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.intent_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         if len(self.intents) == 1:
@@ -1083,12 +1105,36 @@ class IntentProcessor(Processor):
     def nbest_transcripts_enabled(self, value):
         self._nbest_transcripts_enabled = value
 
-    def _build(self, incremental=False, label_set=None):
+    def get_entity_processors(self, label_set=None):
+
+        # Create the entity processors
+        _processors = Bunch()
+        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        for entity_type in entity_types:
+
+            if entity_type in _processors:
+                continue
+
+            processor = EntityProcessor(
+                self._app_path,
+                self.domain,
+                self.name,
+                entity_type,
+                self.resource_loader,
+                self.progress_bar,
+            )
+            _processors[entity_type] = processor
+
+        return _processors
+
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
 
         # train entity recognizer
-        self.entity_recognizer.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.entity_recognizer.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
 
         if isinstance(self.progress_bar, tqdm):
@@ -1120,6 +1166,10 @@ class IntentProcessor(Processor):
         self.entity_recognizer.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
         model_path, incremental_model_path = path.get_entity_model_paths(
@@ -1368,14 +1418,19 @@ class IntentProcessor(Processor):
             return entity_confidence, [_pred_entities]
         return entity_confidence, entities
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None,
+                      max_ngram_search=3, verbose=False):
         """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent.
 
         Args:
             query (Query, tuple): The user input query, or a list of the n-best transcripts \
                 query objects.
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
+            max_ngram_search (int, optional): The max n-gram number to process the query for search
             verbose (bool, optional): If ``True``, returns class as well as predict probabilities.
 
         Returns:
@@ -1392,13 +1447,21 @@ class IntentProcessor(Processor):
         else:
             query = (query,)
 
-        entity_confidence, entities = self._get_pred_entities(
+        entity_confidence, nbest_entities = self._get_pred_entities(
             query, dynamic_resource=dynamic_resource, verbose=verbose
         )
 
-        aligned_entities = self._align_entities(entities)
+        allowed_nlp_entity_exists_in_inference = allowed_nlp_classes and all(
+            query_entity.entity.type not in allowed_nlp_classes for entities in
+            nbest_entities for query_entity in entities)
+
+        if allowed_nlp_entity_exists_in_inference:
+            nbest_entities = self._find_entities_in_text(
+                query, dynamic_resource, allowed_nlp_classes, max_ngram_search)
+
+        aligned_entities = self._align_entities(nbest_entities)
         processed_entities, role_confidence = self._process_entities(
-            query, entities, aligned_entities, allowed_nlp_classes, verbose
+            query, nbest_entities, aligned_entities, allowed_nlp_classes, verbose
         )
 
         confidence = (
@@ -1411,13 +1474,82 @@ class IntentProcessor(Processor):
                 entities=processed_entities,
                 confidence=confidence,
                 nbest_transcripts_queries=query,
-                nbest_transcripts_entities=entities,
+                nbest_transcripts_entities=nbest_entities,
                 nbest_aligned_entities=aligned_entities,
             )
 
-        return ProcessedQuery(
-            query[0], entities=processed_entities, confidence=confidence
-        )
+        return ProcessedQuery(query[0], entities=processed_entities, confidence=confidence)
+
+    def _find_entities_in_text(self, query, dynamic_resource,
+                               allowed_nlp_classes, max_ngram_search):
+        """
+        This function finds all entities in the query using rule-based matching based on the user
+        provided allowed_nlp_classes dict. There are two matching criterion:
+        1. gazetteer based matching: We compare query ngrams to the gazetteers
+        2. duckling based matching: We compare query ngrams to the duckling candidates
+        Since this approach is rule-based, there are bound to be overlapping entity candidates.
+        So we find the largest non-overlapping set of candidates.
+
+        Args:
+            query (tuple of Query): The n-best queries
+            dynamic_resource (dict): gazetteer resources
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
+            max_ngram_search (int): The max ngram value we want to break the input query
+
+        Returns:
+            list: A list of lists of non-overlapping entities for each n-best transcript
+        """
+        # This code block implements allowed entities described here:
+        # https://github.com/cisco/mindmeld/pull/280
+
+        # We extract the `entity` key from each token since that represents the normalized text of
+        # each token which we will compare against the normalized text of the query
+        def tokenize_to_tuples(text):
+            return tuple([token["entity"] for token in
+                          self.resource_loader.query_factory.tokenizer.tokenize(text)])
+
+        dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
+        n_best_entities = [[] for _ in range(len(query))]
+
+        for entity in allowed_nlp_classes:
+            # check if entity is a system entity
+            if entity.startswith(SYSTEM_ENTITY_PREFIX):
+                for idx, n_best_query in enumerate(query):
+                    for sys_entity in n_best_query.system_entity_candidates:
+                        if sys_entity.entity.type == entity:
+                            n_best_entities[idx].append(sys_entity)
+                continue
+
+            # check if entity is in the gazetteers
+            consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
+            consolidated_set = consolidated_set.union(
+                {tokenize_to_tuples(key) for key in dynamic_gazetteer.get(entity, {})})
+
+            for idx, n_best_query in enumerate(query):
+                normalized_tokens = n_best_query.normalized_tokens
+                normalized_verbose_tokens = n_best_query.get_verbose_normalized_tokens()
+
+                for ngram, token_span in get_ngrams_upto_n(normalized_tokens,
+                                                           max_ngram_search):
+                    if ngram not in consolidated_set:
+                        continue
+
+                    _, raw_ngram, span = n_best_query.get_token_ngram_raw_ngram_span(
+                        normalized_verbose_tokens, token_span[0], token_span[1])
+
+                    entity_val = Entity(
+                        text=raw_ngram,
+                        entity_type=entity
+                    )
+                    query_entity = QueryEntity.from_query(
+                        query=n_best_query, span=span, entity=entity_val
+                    )
+                    n_best_entities[idx].append(query_entity)
+
+        return [tuple(NestedEntity.get_largest_non_overlapping_entities(
+            e, lambda candidate: candidate.span)) for e in n_best_entities]
 
 
 class EntityProcessor(Processor):
@@ -1461,18 +1593,22 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(
             self.resource_loader, domain, intent, entity_type
         )
-        self.entity_resolver = EntityResolver(
-            app_path, self.resource_loader, entity_type
+        self.entity_resolver = EntityResolverFactory.create_resolver(
+            app_path,
+            entity_type,
+            resource_loader=self.resource_loader
         )
 
         self.progress_bar = progress_bar
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.total += 1
 
-    def _build(self, incremental=False, label_set=None):
+    def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this entity type"""
-        self.role_classifier.fit(
-            label_set=label_set, incremental_timestamp=self.incremental_timestamp
+        self.ready = self.role_classifier.fit(
+            label_set=label_set,
+            incremental_timestamp=self.incremental_timestamp,
+            load_cached=load_cached
         )
         self.entity_resolver.fit()
         if isinstance(self.progress_bar, tqdm):
@@ -1490,6 +1626,10 @@ class EntityProcessor(Processor):
         self.role_classifier.dump(
             model_path, incremental_model_path=incremental_model_path
         )
+
+    def unload(self):
+        self.ready = False
+        self.role_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
         try:
@@ -1534,6 +1674,9 @@ class EntityProcessor(Processor):
             query (Query): The query the entity originated from.
             entities (list): All entities recognized in the query.
             entity_index (int): The index of the entity to process.
+            allowed_nlp_classes (dict): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+                where smart_home is the domain and close_door is the intent.
             verbose (bool): If set to True, returns confidence scores of classes.
 
         Returns:

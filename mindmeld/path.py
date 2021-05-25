@@ -32,8 +32,7 @@ APP_PATH = "{app_path}"
 # Generated folder structure for models
 GEN_FOLDER = os.path.join(APP_PATH, ".generated")
 MODEL_CACHE_PATH = os.path.join(GEN_FOLDER, "cached_models")
-QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, "query_cache.pkl")
-QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, "query_cache_tmp.pkl")
+QUERY_CACHE_DB_PATH = os.path.join(GEN_FOLDER, "query_cache.db")
 DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, "domain.pkl")
 GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, "domains")
 GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, "{timestamp}")
@@ -58,6 +57,8 @@ RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
 GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
 )
+GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
+GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -535,6 +536,20 @@ def get_embedder_cache_file_path(app_path, embedder_type, model_name):
         embedder_type=embedder_type,
         model_name=model_name,
     )
+
+
+@safe_path
+def get_entity_resolver_cache_file_path(app_path, uid):
+    """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.
+
+    Args:
+        app_path (str): The path to the app data.
+        uid (str): A unique filename for the .pkl file
+
+    Returns:
+        (str) The path for the .pkl cache.
+    """
+    return GEN_ENTITY_RESOLVER_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

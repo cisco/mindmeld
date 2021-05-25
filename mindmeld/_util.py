@@ -48,6 +48,7 @@ BLUEPRINTS = {
     "video_discovery": {},
     "hr_assistant": {},
     "banking_assistant": {},
+    "screening_app": {},
 }
 
 

@@ -28,7 +28,7 @@ from .system_entity_recognizer import (
     duckling_item_to_query_entity,
 )
 from .markup import load_query, dump_queries
-from .core import Entity, Span, QueryEntity, _get_overlap
+from .core import Entity, Span, QueryEntity, _get_overlap, NestedEntity
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
 from .constants import (
@@ -36,6 +36,7 @@ from .constants import (
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
     CURRENCY_SYMBOLS,
+    SYSTEM_ENTITY_PREFIX,
 )
 from .components import NaturalLanguageProcessor
 from .path import get_entity_types
@@ -503,7 +504,7 @@ class SpacyAnnotator(Annotator):
                     params["sentence"] = sentence
                 entity = entity_resolution_func_map[entity["dim"]](**params)
             else:
-                entity["dim"] = "sys_" + entity["dim"].replace("_", "-")
+                entity["dim"] = SYSTEM_ENTITY_PREFIX + entity["dim"].replace("_", "-")
 
             if entity:
                 entities.append(entity)
@@ -922,19 +923,8 @@ class NoTranslationDucklingAnnotator(Annotator):
         filtered_candidates = NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
             duckling_candidates
         )
-        spans = [
-            Span(candidate["start"], candidate["end"] - 1)
-            for candidate in filtered_candidates
-        ]
-        final_spans = NoTranslationDucklingAnnotator._get_largest_non_overlapping_candidates(
-            spans
-        )
-        final_candidates = []
-        for span in final_spans:
-            for candidate in filtered_candidates:
-                if span == Span(candidate["start"], candidate["end"] - 1):
-                    final_candidates.append(candidate)
-                    break
+        final_candidates = NestedEntity.get_largest_non_overlapping_entities(
+            filtered_candidates, lambda x: Span(x["start"], x["end"] - 1))
         if entity_types:
             final_candidates = [
                 e for e in final_candidates if e["entity_type"] in entity_types
@@ -952,25 +942,6 @@ class NoTranslationDucklingAnnotator(Annotator):
             supported_entity_types (list): List of supported entity types.
         """
         return DUCKLING_TO_SYS_ENTITY_MAPPINGS[self.language]
-
-    @staticmethod
-    def _get_largest_non_overlapping_candidates(spans):
-        """Finds the set of the largest non-overlapping candidates.
-
-        Args:
-            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
-        Returns:
-            selected_spans (list): List of the largest non-overlapping spans.
-        """
-        spans.sort(reverse=True)
-        selected_spans = []
-        for span in spans:
-            has_overlaps = [
-                span.has_overlap(selected_span) for selected_span in selected_spans
-            ]
-            if not any(has_overlaps):
-                selected_spans.append(span)
-        return selected_spans
 
     @staticmethod
     def _filter_out_bad_duckling_candidates(candidates):

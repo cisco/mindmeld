@@ -199,6 +199,10 @@ class Tagger:
         return config
 
     @staticmethod
+    def unload():
+        pass
+
+    @staticmethod
     def load(model_path):
         """
         Load the model state to memory. This is a no-op since we do not
