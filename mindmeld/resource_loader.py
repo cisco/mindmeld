@@ -368,7 +368,7 @@ class ResourceLoader:
         logger.info("Building gazetteer '%s'", gaz_name)
 
         # TODO: support role gazetteers
-        gaz = Gazetteer(gaz_name, exclude_ngrams)
+        gaz = Gazetteer(gaz_name, self.get_tokenizer(), exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         gaz.update_with_entity_data_file(
@@ -394,7 +394,7 @@ class ResourceLoader:
         Args:
             gaz_name (str): The name of the entity the gazetteer corresponds to
         """
-        gaz = Gazetteer(gaz_name)
+        gaz = Gazetteer(gaz_name, self.get_tokenizer())
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
         self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()
@@ -455,6 +455,11 @@ class ResourceLoader:
             build_time = self._entity_files[gaz_name]["gazetteer"]["modified"]
         except KeyError:
             # gazetteer hasn't been built
+            return True
+
+        # We changed the value type for the pop_dict dict, so we check to make sure its a tuple
+        pop_dict = self._entity_files[gaz_name]['gazetteer'].get('data', {}).get('pop_dict')
+        if pop_dict and not all(isinstance(elem, tuple) for elem in list(pop_dict.keys())):
             return True
 
         data_modified = self._entity_files[gaz_name]["entity_data"]["modified"]
