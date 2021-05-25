@@ -14,6 +14,7 @@ from mindmeld.text_preparation.tokenizers import (
     LetterTokenizer,
     WhiteSpaceTokenizer,
     SpacyTokenizer,
+    CharacterTokenizer,
 )
 
 JA_SENTENCE_ONE = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
@@ -38,6 +39,11 @@ def spacy_tokenizer_ja():
 @pytest.fixture
 def letter_tokenizer():
     return LetterTokenizer()
+
+
+@pytest.fixture
+def character_tokenizer():
+    return CharacterTokenizer()
 
 
 def test_white_space_tokenizer_en(white_space_tokenizer):
@@ -173,5 +179,61 @@ def test_spacy_tokenizer_ja_four(spacy_tokenizer_ja):
         {"start": 10, "text": "し"},
         {"start": 11, "text": "て"},
         {"start": 12, "text": "下さい"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_character_tokenizer_de_one(character_tokenizer):
+    tokenized_output = character_tokenizer.tokenize(DE_SENTENCE_ONE)
+    expected_output = [
+        {"start": 0, "text": "E"},
+        {"start": 1, "text": "i"},
+        {"start": 2, "text": "n"},
+        {"start": 4, "text": "G"},
+        {"start": 5, "text": "e"},
+        {"start": 6, "text": "n"},
+        {"start": 7, "text": "t"},
+        {"start": 8, "text": "l"},
+        {"start": 9, "text": "e"},
+        {"start": 10, "text": "m"},
+        {"start": 11, "text": "a"},
+        {"start": 12, "text": "n"},
+        {"start": 14, "text": "i"},
+        {"start": 15, "text": "s"},
+        {"start": 16, "text": "t"},
+        {"start": 18, "text": "v"},
+        {"start": 19, "text": "o"},
+        {"start": 20, "text": "r"},
+        {"start": 21, "text": "b"},
+        {"start": 22, "text": "e"},
+        {"start": 23, "text": "i"},
+        {"start": 24, "text": "g"},
+        {"start": 25, "text": "e"},
+        {"start": 26, "text": "k"},
+        {"start": 27, "text": "o"},
+        {"start": 28, "text": "m"},
+        {"start": 29, "text": "m"},
+        {"start": 30, "text": "e"},
+        {"start": 31, "text": "n"},
+        {"start": 32, "text": ","},
+        {"start": 34, "text": "d"},
+        {"start": 35, "text": "e"},
+        {"start": 36, "text": "r"},
+        {"start": 38, "text": "w"},
+        {"start": 39, "text": "e"},
+        {"start": 40, "text": "i"},
+        {"start": 41, "text": "ß"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_character_tokenizer_ja_three(character_tokenizer):
+    tokenized_output = character_tokenizer.tokenize(JA_SENTENCE_THREE)
+    expected_output = [
+        {"start": 0, "text": "パ"},
+        {"start": 1, "text": "ピ"},
+        {"start": 2, "text": "プ"},
+        {"start": 3, "text": "ペ"},
+        {"start": 4, "text": "ポ"},
     ]
     assert tokenized_output == expected_output
