@@ -27,16 +27,6 @@ def custom_tokenizer():
     return Tokenizer(app_path=APP_PATH)
 
 
-def test_tokenize_raw(tokenizer):
-    tokens = tokenizer.tokenize_raw("Test: Query for $500,000.")
-
-    assert len(tokens)
-    assert tokens[0]["text"] == "Test:"
-    assert tokens[0]["start"] == 0
-    assert tokens[3]["start"] == 16
-    assert tokens[3]["start"] == 16
-
-
 def test_tokenize(tokenizer):
     tokens = tokenizer.tokenize("Test: Query for $500,000. Chyea!")
 
