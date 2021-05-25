@@ -21,6 +21,7 @@ import logging
 import os
 import re
 import uuid
+import warnings
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from string import punctuation
@@ -96,10 +97,10 @@ class EntityResolverFactory:
                 raise ValueError(
                     "Could not find `resolver_type` in `model_settings` of entity resolver")
             else:
-                logger.warning(
-                    "DeprecationWarning: Use latest format of configs for entity resolver. "
-                    "See https://www.mindmeld.com/docs/userguide/entity_resolver.html "
-                    "for more details.")
+                msg = "Using deprecated format of 'config' for Entity Resolver. " \
+                      "See https://www.mindmeld.com/docs/userguide/entity_resolver.html " \
+                      "for more details."
+                warnings.warn(msg, DeprecationWarning)
                 er_config = copy.deepcopy(er_config)
                 model_settings = er_config.get("model_settings", {})
                 model_settings.update({"resolver_type": model_type})
@@ -139,7 +140,7 @@ class EntityResolverFactory:
         """
 
         er_config = (
-            kwargs.pop("er_config", {}) or
+            kwargs.pop("config", {}) or
             get_classifier_config("entity_resolution", app_path=app_path)
         )
         er_config = cls._correct_deprecated_er_config(er_config)
@@ -154,7 +155,7 @@ class EntityResolverFactory:
 
         kwargs.update({
             "entity_type": entity_type,
-            "er_config": er_config,
+            "config": er_config,
             "resource_loader": resource_loader,
         })
 
@@ -467,7 +468,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
         self._es_host = kwargs.get("es_host")
         self._es_config = {"client": kwargs.get("es_client"), "pid": os.getpid()}
         self._use_double_metaphone = "double_metaphone" in (
-            kwargs.pop("er_config", {}).get("model_settings", {}).get("phonetic_match_types", [])
+            kwargs.pop("config", {}).get("model_settings", {}).get("phonetic_match_types", [])
         )
 
         self._app_namespace = get_app_namespace(self.app_path)
@@ -874,7 +875,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
 
-        settings = kwargs.pop("er_config", {}).get("model_settings", {})
+        settings = kwargs.pop("config", {}).get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", False)
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
@@ -958,7 +959,7 @@ class EmbedderCosSimEntityResolver(EntityResolverBase):
         """
         super().__init__(app_path, **kwargs)
 
-        er_config = kwargs.pop("er_config", {})
+        er_config = kwargs.pop("config", {})
         settings = er_config.get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", False)
         self._aug_title_case = settings.get("augment_title_case", False)
@@ -1139,7 +1140,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
 
         self._processed_entity_map = None
 
-        settings = kwargs.pop("er_config", {}).get("model_settings", {})
+        settings = kwargs.pop("config", {}).get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", True)
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
@@ -1422,7 +1423,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
         }
 
         # determine cache path and pass it in `model_settings`
-        er_config = copy.deepcopy(kwargs.get("er_config", {}))
+        er_config = copy.deepcopy(kwargs.get("config", {}))
         model_settings = er_config.get("model_settings", {})
         for key, value in model_settings.items():
             if key in defaults:
@@ -1433,7 +1434,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
 
         model_settings.update(defaults)
         er_config.update({"model_settings": defaults})
-        kwargs.update({"er_config": er_config})
+        kwargs.update({"config": er_config})
         super().__init__(app_path, **kwargs)
 
 
@@ -1457,9 +1458,9 @@ class EntityResolver:
     """
 
     def __new__(cls, app_path, resource_loader, entity_type, es_host=None, es_client=None):
-        logger.warning(
-            "DeprecationWarning: Entity Resolver should now be loaded using EntityResolverFactory. "
-            "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details.")
+        msg = "Entity Resolver should now be loaded using EntityResolverFactory. " \
+              "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details."
+        warnings.warn(msg, DeprecationWarning)
         return EntityResolverFactory.create_resolver(
             app_path, entity_type, resource_loader=resource_loader,
             es_host=es_host, es_client=es_client

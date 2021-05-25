@@ -132,13 +132,31 @@ def get_label_encoder(config):
 
 
 def create_embedder_model(app_path, config):
-    """Creates and loads the embedder model."""
-    embedder_config = config.get("model_settings", {})
-    embedder_type = embedder_config.get("embedder_type", None)
+    """Creates and loads an embedder model
 
-    if not embedder_type:
-        # "No embedder type specified in the app config, continuing without embedder model."
-        return None
+    Args:
+        config (dict): Model settings passed in as a dictionary with
+            'embedder_type' being a required key
+
+    Returns:
+        Embedder: An instance of appropriate embedder class
+
+    Raises:
+        ValueError: When model configuration is invalid or required key is missing
+    """
+
+    # backwards compatability, when config = {"model_settings": {"embedder_type": ..., "..": ...}}
+    if "model_settings" in config and config["model_settings"]:
+        embedder_config = config["model_settings"]
+    else:
+        # when config = {"embedder_type": ..., "..": ...}}
+        embedder_config = config
+
+    if "embedder_type" not in embedder_config:
+        raise KeyError(
+            "Missing required argument in config supplied to create embedder model: 'embedder_type'"
+        )
+    embedder_type = embedder_config["embedder_type"]
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
