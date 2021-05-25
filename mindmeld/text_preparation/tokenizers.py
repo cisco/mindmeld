@@ -58,6 +58,28 @@ class NoOpTokenizer(Tokenizer):
         return [text]
 
 
+class CharacterTokenizer(Tokenizer):
+    """A Tokenizer that splits text at the character level."""
+
+    def __init__(self):
+        """Initializes the CharacterTokenizer."""
+        pass
+
+    def tokenize(self, text):
+        """
+        Identify tokens in text and create tokens that contain the text and start index.
+        Args:
+            text (str): The text to normalize
+        Returns:
+            tokens (List[str]): List of tokenized tokens.
+        """
+        tokens = []
+        for idx, char in enumerate(text):
+            if not char.isspace():
+                tokens.append({"start": idx, "text": char})
+        return tokens
+
+
 class LetterTokenizer(Tokenizer):
     """A Tokenizer that splits text at the character level."""
 
