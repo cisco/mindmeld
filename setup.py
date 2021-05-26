@@ -36,7 +36,7 @@ requirements = [
     "sklearn-crfsuite>=0.3.6,<1.0",
     "immutables~=0.9",
     "pyyaml>=5.1.1",
-    "spacy~=2.3.5",
+    "spacy>=2.3.1,<2.3.6",
     "mypy>=0.782",
     "marshmallow~=3.7.1",
     "matplotlib~=3.3.1",
@@ -55,7 +55,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc3",
+    version="4.3.5rc4",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
