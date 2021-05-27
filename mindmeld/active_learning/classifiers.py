@@ -193,6 +193,9 @@ class MindMeldALClassifier(ALClassifier):
         Returns:
             preds_single (List): 2D array with probability vectors for unsampled queries
         """
+        print("Train single")
+        print("sampled_queries", type(sampled_queries))
+
         # Domain_Level
         dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
             sampled_queries=sampled_queries,
@@ -259,6 +262,8 @@ class MindMeldALClassifier(ALClassifier):
             preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
         """
+        # TODO: Have this return ProcessedQueryList on the call to _train_single()
+        sampled_queries = list(sampled_queries.processed_queries())
         skf = StratifiedKFold(
             n_splits=self.n_classifiers, random_state=ACTIVE_LEARNING_RANDOM_SEED
         )

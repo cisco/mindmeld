@@ -135,7 +135,6 @@ BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, "blueprints")
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, "{name}")
 
 # Active Learning (AL)
-AL_QUERIES_CACHE_PATH = os.path.join(GEN_FOLDER, "{file_name}")
 AL_EXPERIMENT_FOLDER = "{experiment_folder}"
 AL_PARAMS_PATH = os.path.join(AL_EXPERIMENT_FOLDER, "params.json")
 AL_RESULTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "results")

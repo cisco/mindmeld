@@ -1,4 +1,3 @@
-from copy import deepcopy
 import logging
 import math
 
@@ -7,6 +6,8 @@ from .results_manager import ResultsManager
 from .plot_manager import PlotManager
 from .classifiers import MindMeldALClassifier
 from .heuristics import HeuristicsFactory
+
+from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         app_path: str,
         train_pattern: str,
         test_pattern: str,
-        load: bool,
-        save: bool,
         train_seed_pct: float,
         n_classifiers: int,
         n_epochs: int,
@@ -39,8 +38,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             app_path (str): Path to MindMeld application
             train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
-            load (bool): Whether to load pickled queries from a local folder
-            save (bool): Whether to save queries as a local pickle file
             train_seed_pct (float): Percentage of training data to use as the initial seed
             n_classifiers (int): Number of classifiers to be used by a subset of heuristics
             n_epochs (int): Number of epochs to run training
@@ -57,8 +54,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.app_path = app_path
         self.train_pattern = train_pattern
         self.test_pattern = test_pattern
-        self.load = load
-        self.save = save
         self.train_seed_pct = train_seed_pct
         self.n_classifiers = n_classifiers
         self.n_epochs = n_epochs
@@ -74,7 +69,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         self.results_manager = ResultsManager(output_folder)
         self.mindmeld_al_classifier = self._get_mindmeld_al_classifier()
-        self.init_train_data_bucket = None
+
+        self.init_unsampled_queries_ids = None
+        self.init_sampled_queries_ids = None
         self.data_bucket = None
 
     def _get_mindmeld_al_classifier(self):
@@ -91,7 +88,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         """
         # An additional iteration is added to save training data after the last sampling round.
         return 1 + math.ceil(
-            len(self.init_train_data_bucket.unsampled_queries) / self.batch_size
+            len(self.init_unsampled_queries_ids) / self.batch_size
         )
 
     @property
@@ -101,8 +98,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             "app_path": self.app_path,
             "train_pattern": self.train_pattern,
             "test_pattern": self.test_pattern,
-            "load": self.load,
-            "save": self.save,
             "train_seed_pct": self.train_seed_pct,
             "n_classifiers": self.n_classifiers,
             "n_epochs": self.n_epochs,
@@ -125,25 +120,23 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             training_strategies=self.training_strategies,
         )
         logger.info("Creating training data bucket.")
-        self.init_train_data_bucket = DataBucketFactory.get_data_bucket_for_training(
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_training(
             self.app_path,
-            self.load,
-            self.save,
             self.training_level,
             self.train_pattern,
             self.test_pattern,
             self.train_seed_pct,
         )
+        self.init_sampled_queries_ids = self.data_bucket.sampled_queries.elements
+        self.init_unsampled_queries_ids = self.data_bucket.unsampled_queries.elements
         logger.info("Starting training.")
         self._train_all_strategies()
 
     def select(self):
         """Selects the next batch of queries to label from a set of log queries."""
         logger.info("Loading queries for active learning.")
-        self.init_train_data_bucket = DataBucketFactory.get_data_bucket_for_selection(
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_selection(
             self.app_path,
-            self.load,
-            self.save,
             self.training_level,
             self.train_pattern,
             self.test_pattern,
@@ -151,11 +144,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.labeled_logs_pattern,
             self.log_usage_pct,
         )
+        self.init_unsampled_queries_ids = self.data_bucket.unsampled_queries.elements
         logger.info("Starting selection.")
-        self._run_strategy(strategy=self.selection_strategy, select_mode=True)
+        newly_sampled_queries = self._run_strategy(strategy=self.selection_strategy, select_mode=True)
         self.results_manager.write_log_selected_queries_json(
             strategy=self.selection_strategy,
-            queries=self.data_bucket.newly_sampled_queries,
+            queries=newly_sampled_queries,
         )
 
     def plot(self):
@@ -176,11 +170,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             select_mode (bool): If True, accuracies will not be recorded and run will
                 terminate after first iteration. If False, accuracies will be recorded.
         """
+        newly_sampled_queries_ids = []
         heuristic = HeuristicsFactory.get_heuristic(strategy)
         for epoch in range(self.n_epochs):
             self._reset_data_bucket()
             for iteration in range(self.num_iterations):
                 self._log_training_status(strategy, epoch, iteration)
+                if iteration == 0:
+                    newly_sampled_queries_ids = self.data_bucket.sampled_queries.elements
                 # Run training and obtain probability distributions for each query
                 (
                     eval_stats,
@@ -190,11 +187,11 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic)
 
                 if not select_mode:
-                    self._save_training_data(strategy, epoch, iteration, eval_stats)
+                    self._save_training_data(strategy, epoch, iteration, newly_sampled_queries_ids, eval_stats)
 
                 num_unsampled = len(self.data_bucket.unsampled_queries)
                 if num_unsampled > 0:
-                    self.data_bucket.sample_and_update(
+                    newly_sampled_queries_ids = self.data_bucket.sample_and_update(
                         sampling_size=self._get_sampling_size(num_unsampled),
                         confidences_2d=confidences_2d,
                         confidences_3d=confidences_3d,
@@ -203,18 +200,25 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     )
                 # Terminate on the first iteration if in selection mode.
                 if select_mode:
-                    return
+                    return self.data_bucket.get_queries(newly_sampled_queries_ids)
 
     def _reset_data_bucket(self):
         """ Reset the DataBucket to the initial DataBucket after every epoch."""
-        self.data_bucket = deepcopy(self.init_train_data_bucket)
+        self.data_bucket.unsampled_queries = ProcessedQueryList(
+            cache=self.data_bucket.resource_loader.query_cache,
+            elements=self.init_unsampled_queries_ids
+        )
+        self.data_bucket.sampled_queries = ProcessedQueryList(
+            cache=self.data_bucket.resource_loader.query_cache,
+            elements=self.init_sampled_queries_ids
+        )
 
     def _log_training_status(self, strategy, epoch, iteration):
         logger.info("Strategy: %s. Epoch: %s. Iter: %s.", strategy, epoch, iteration)
         logger.info("Sampled Elements: %s", len(self.data_bucket.sampled_queries))
         logger.info("Remaining Elements: %s", len(self.data_bucket.unsampled_queries))
 
-    def _save_training_data(self, strategy, epoch, iteration, eval_stats):
+    def _save_training_data(self, strategy, epoch, iteration, newly_sampled_queries_ids, eval_stats):
         """ Save training data if in training mode. """
         self.results_manager.update_accuracies_json(
             strategy, epoch, iteration, eval_stats
@@ -224,7 +228,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 strategy,
                 epoch,
                 iteration,
-                self.data_bucket.newly_sampled_queries,
+                self.data_bucket.get_queries(newly_sampled_queries_ids),
             )
 
     def _get_sampling_size(self, num_unsampled) -> int:
@@ -254,8 +258,6 @@ class ActiveLearningPipelineFactory:
             app_path=config.get("app_path"),
             train_pattern=config.get("pre_training", {}).get("train_pattern"),
             test_pattern=config.get("pre_training", {}).get("test_pattern"),
-            load=config.get("pre_training", {}).get("load"),
-            save=config.get("pre_training", {}).get("save"),
             train_seed_pct=config.get("pre_training", {}).get("train_seed_pct"),
             n_classifiers=config.get("training", {}).get("n_classifiers"),
             n_epochs=config.get("training", {}).get("n_epochs"),

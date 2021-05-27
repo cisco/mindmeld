@@ -509,8 +509,6 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     "pre_training": {
         "train_pattern": ".*train.*.txt",
         "test_pattern": ".*test.*.txt",
-        "load": False,
-        "save": True,
         "train_seed_pct": 0.20,
     },
     "training": {
