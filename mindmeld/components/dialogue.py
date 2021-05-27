@@ -17,6 +17,7 @@ import copy
 import json
 import logging
 import random
+import warnings
 from functools import cmp_to_key, partial
 from typing import List, Optional
 from marshmallow.exceptions import ValidationError
@@ -1268,7 +1269,8 @@ class DialogueResponder:
         Args:
             directive (dict): A directive.
         """
-        self._logger.warning("respond() is deprecated. Instead use direct().")
+        msg = "respond() is deprecated. Instead use direct()."
+        warnings.warn(msg)
         self.directives.append(directive)
 
     def prompt(self, text):
@@ -1277,9 +1279,8 @@ class DialogueResponder:
         Args:
             text (str): The text of the reply.
         """
-        self._logger.warning(
-            "prompt() is deprecated. Please use reply() and listen() instead"
-        )
+        msg = "prompt() is deprecated. Please use reply() and listen() instead"
+        warnings.warn(msg)
         self.reply(text)
 
     def sleep(self, delay=0):
