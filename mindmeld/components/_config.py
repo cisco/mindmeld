@@ -528,6 +528,8 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     },
     "training_output": {
         "save_sampled_queries": True,
+        "aggregate_statistic": "accuracy",
+        "class_level_statistic": "f_beta"
     },
     "selection": {
         "selection_strategy": "EntropySampling",

@@ -19,6 +19,8 @@ from ..components.nlp import NaturalLanguageProcessor
 from ..constants import TRAIN_LEVEL_INTENT, ACTIVE_LEARNING_RANDOM_SEED
 from ..core import ProcessedQuery
 
+from ..resource_loader import ProcessedQueryList
+
 logger = logging.getLogger(__name__)
 
 MULTI_MODEL_HEURISTICS = (KLDivergenceSampling, DisagreementSampling, EnsembleSampling)
@@ -72,7 +74,14 @@ class MindMeldALClassifier(ALClassifier):
     Handles the training of MindMeld components (Domain or Intent classifiers)
     and collecting performance statistics (eval_stats)."""
 
-    def __init__(self, app_path: str, training_level: str, n_classifiers: int):
+    def __init__(
+        self,
+        app_path: str,
+        training_level: str,
+        n_classifiers: int,
+        aggregate_statistic: str,
+        class_level_statistic: str,
+    ):
         """
         Args:
             app_path (str): Path to MindMeld application
@@ -82,6 +91,11 @@ class MindMeldALClassifier(ALClassifier):
         super().__init__(app_path=app_path, training_level=training_level)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.n_classifiers = n_classifiers
+        self.aggregate_statistic = aggregate_statistic or "accuracy"
+        self.class_level_statistic = class_level_statistic or "f_beta"
+        print("MAKING THE CLASSIFIER CLASS")
+        print(self.aggregate_statistic)
+        print(self.class_level_statistic)
 
     @staticmethod
     def _get_probs(
@@ -193,8 +207,6 @@ class MindMeldALClassifier(ALClassifier):
         Returns:
             preds_single (List): 2D array with probability vectors for unsampled queries
         """
-        print("Train single")
-        print("sampled_queries", type(sampled_queries))
 
         # Domain_Level
         dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
@@ -204,9 +216,7 @@ class MindMeldALClassifier(ALClassifier):
             domain2id=label_map.domain2id,
         )
         if eval_stats:
-            MindMeldALClassifier._update_eval_stats_domain_level(
-                eval_stats, dc_eval_test
-            )
+            self._update_eval_stats_domain_level(eval_stats, dc_eval_test)
         preds_single = dc_queries_prob_vectors
 
         # Intent_Level
@@ -222,9 +232,7 @@ class MindMeldALClassifier(ALClassifier):
                 domain_to_intent2id=label_map.domain_to_intent2id,
             )
             if eval_stats:
-                MindMeldALClassifier._update_eval_stats_intent_level(
-                    eval_stats, ic_eval_test_dict
-                )
+                self._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
             preds_single = ic_queries_prob_vectors
 
         return preds_single
@@ -262,21 +270,30 @@ class MindMeldALClassifier(ALClassifier):
             preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
         """
-        # TODO: Have this return ProcessedQueryList on the call to _train_single()
-        sampled_queries = list(sampled_queries.processed_queries())
+
+        sampled_queries_ids = sampled_queries.elements
         skf = StratifiedKFold(
-            n_splits=self.n_classifiers, random_state=ACTIVE_LEARNING_RANDOM_SEED
+            n_splits=self.n_classifiers,
+            shuffle=True,
+            random_state=ACTIVE_LEARNING_RANDOM_SEED,
         )
-        y = [f"{query.domain}|{query.intent}" for query in sampled_queries]
-        fold_sampled_queries = [
-            [sampled_queries[i] for i in fold]
-            for _, fold in skf.split(sampled_queries, y)
+        y = [
+            f"{domain}|{intent}"
+            for domain, intent in zip(sampled_queries.domains(), sampled_queries.intents())
+        ]
+        fold_sampled_queries_ids = [
+            [sampled_queries_ids[i] for i in fold]
+            for _, fold in skf.split(sampled_queries_ids, y)
+        ]
+        fold_sampled_queries_lists = [
+            ProcessedQueryList(sampled_queries.cache, fold)
+            for fold in fold_sampled_queries_ids
         ]
         preds_multi = []
-        for fold_i_queries in fold_sampled_queries:
+        for fold_sample_queries in fold_sampled_queries_lists:
             preds_multi.append(
                 self._train_single(
-                    fold_i_queries, unsampled_queries, test_queries, label_map
+                    fold_sample_queries, unsampled_queries, test_queries, label_map
                 )
             )
         return preds_multi
@@ -308,8 +325,7 @@ class MindMeldALClassifier(ALClassifier):
         )
         return dc_queries_prob_vectors, dc_eval_test
 
-    @staticmethod
-    def _update_eval_stats_domain_level(eval_stats: Dict, dc_eval_test):
+    def _update_eval_stats_domain_level(self, eval_stats: Dict, dc_eval_test):
         """Update the eval_stats dictionary with evaluation metrics from the domain
         classifier.
 
@@ -318,7 +334,7 @@ class MindMeldALClassifier(ALClassifier):
             dc_eval_test (): Mindmeld evaluation object for the domain classifier
         """
         eval_stats["accuracies"]["overall"] = dc_eval_test.get_stats()["stats_overall"][
-            "accuracy"
+            self.aggregate_statistic
         ]
         logger.info(
             "Overall Domain-level Accuracy: %s", eval_stats["accuracies"]["overall"]
@@ -394,9 +410,8 @@ class MindMeldALClassifier(ALClassifier):
         padded_ic_queries_prob_vectors = [x[1] for x in unsampled_idx_preds_pairs]
         return padded_ic_queries_prob_vectors, ic_eval_test_dict
 
-    @staticmethod
     def _update_eval_stats_intent_level(
-        eval_stats: defaultdict, ic_eval_test_dict: Dict
+        self, eval_stats: defaultdict, ic_eval_test_dict: Dict
     ):
         """Update the eval_stats dictionary with evaluation metrics from intent
         classifiers.
@@ -408,9 +423,13 @@ class MindMeldALClassifier(ALClassifier):
         """
         for domain, ic_eval_test in ic_eval_test_dict.items():
             eval_stats["accuracies"][domain] = {
-                "overall": ic_eval_test.get_stats()["stats_overall"]["accuracy"]
+                "overall": ic_eval_test.get_stats()["stats_overall"][
+                    self.aggregate_statistic
+                ]
             }
             for i, intent in enumerate(ic_eval_test.get_stats()["class_labels"]):
                 eval_stats["accuracies"][domain][intent] = {
-                    "overall": ic_eval_test.get_stats()["class_stats"]["f_beta"][i]
+                    "overall": ic_eval_test.get_stats()["class_stats"][
+                        self.class_level_statistic
+                    ][i]
                 }
