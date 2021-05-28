@@ -112,13 +112,40 @@ as follows:
 
 These NLP components are then never considered for NLP processing unless the dialogflow under which it
 is associated is activated. The NLP component will then be removed from the `disallowed_intents` until
-the dialogflow is de-scoped.
+the dialogflow is de-scoped. We will also merge any user defined `disallowed_intents` with the DM derived
+`disallowed_intents` as follows:
 
 ```python
-if dialogue_flow.name == 'find_restaurants':
-    nlp.process("the beatles")
-else:
-    nlp.process("the beatles", disallowed_intents=['restaurant.confirm_restaurant_name'])
+processed_query = self.nlp.process(query_text=text,
+                                   allowed_intents=params.allowed_intents,
+                                   disallowed_intents=merge(params.disallowed_intents, dm_derived_disallowed_intents),
+                                   locale=params.locale,
+                                   language=params.language,
+                                   time_zone=params.time_zone,
+                                   timestamp=params.timestamp,
+                                   dynamic_resource=params.dynamic_resource,
+                                   verbose=verbose)
+```
+
+The API for the `disallowed_intents` is similar to `allowed_intents` with the following pattern: `domain.intent.entity.role`.
+The API changes will be included in `nlp.process`.
+
+Due to the static nature of the DM, there will be applications where `disallowed_intents` will be used all the time.
+Since both `allowed_intents` and `disallowed_intents` need to use `predict_proba` for their processing, there is a
+concern of latency of inference going up. Due to this, we characterized the latency of SKLearn model's `predict` vs
+`predict_proba` calls. What we found surprisingly is that for intent classification, `predict_proba` was faster
+than `predict`:
+
+```bash
+With predict_proba:
+50th percentile: 5.55 ms
+50th percentile: 6.76 ms
+50th percentile: 7.50 ms
+
+With predict:
+50th percentile: 8.49 ms
+50th percentile: 10.76 ms
+50th percentile: 12.84 ms
 ```
 
 ## Alternate design 1:
