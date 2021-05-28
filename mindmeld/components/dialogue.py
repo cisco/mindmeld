@@ -1152,7 +1152,8 @@ class DialogueResponder:
             except ValidationError as err:
                 # TODO: Fix deserialization issues between workbench and mindmeld history payloads
                 logging.warning("Could not deserialize history properly due to error: %s, "
-                                "this might be due to version incompatibility. We set the history to what "
+                                "this might be due to version incompatibility. "
+                                "We set the history to what "
                                 "is passed in to provide backwards compatibility.", err.messages)
                 self._history = history
         else:
