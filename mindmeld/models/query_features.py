@@ -558,7 +558,7 @@ def extract_sys_candidate_features(start_positions=(0,), **kwargs):
                 if feature.endswith('log_len'):
                     token_features[feature] = math.log(float(sum(value)) / len(value))
                 else:
-                    token_features[feature] = math.log(value)
+                    token_features[feature] = math.log(value + 1) # Adjust value to be greater than 0
         return feat_seq
 
     return _extractor
