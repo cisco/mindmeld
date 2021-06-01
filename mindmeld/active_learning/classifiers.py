@@ -16,9 +16,15 @@ from .heuristics import (
 
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
-from ..constants import TRAIN_LEVEL_INTENT, ACTIVE_LEARNING_RANDOM_SEED
+from ..constants import (
+    TRAIN_LEVEL_INTENT,
+    ACTIVE_LEARNING_RANDOM_SEED,
+    AL_DEFAULT_AGGREGATE_STATISTIC,
+    AL_DEFAULT_CLASS_LEVEL_STATISTIC,
+    AL_SUPPORTED_AGGREGATE_STATISTICS,
+    AL_SUPPORTED_CLASS_LEVEL_STATISTICS,
+)
 from ..core import ProcessedQuery
-
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -91,11 +97,60 @@ class MindMeldALClassifier(ALClassifier):
         super().__init__(app_path=app_path, training_level=training_level)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.n_classifiers = n_classifiers
-        self.aggregate_statistic = aggregate_statistic or "accuracy"
-        self.class_level_statistic = class_level_statistic or "f_beta"
-        print("MAKING THE CLASSIFIER CLASS")
-        print(self.aggregate_statistic)
-        print(self.class_level_statistic)
+        self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
+            aggregate_statistic
+        )
+        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
+            class_level_statistic
+        )
+
+    @staticmethod
+    def _validate_aggregate_statistic(aggregate_statistic):
+        """ Method to validate the aggregate statistic. If an aggregate statistic is not provided
+        the default is used. (Options: "accuracy", "f1_weighted", "f1_macro", "f1_micro".)
+
+        Args:
+            aggregate_statistic (str): Aggregate statistic to record.
+        Returns:
+            aggregate_statistic (str): Aggregate statistic to record.
+        Raises:
+            ValueError: If an invalid value is provided.
+        """
+        if not aggregate_statistic:
+            logger.info(
+                "Aggregate statistic not defined, using default: %r.",
+                AL_DEFAULT_AGGREGATE_STATISTIC,
+            )
+            return AL_DEFAULT_AGGREGATE_STATISTIC
+        if aggregate_statistic not in AL_SUPPORTED_AGGREGATE_STATISTICS:
+            raise ValueError(
+                "Not a valid aggregate statistic: {!r}.".format(aggregate_statistic)
+            )
+        return aggregate_statistic
+
+    @staticmethod
+    def _validate_class_level_statistic(class_level_statistic):
+        """ Method to validate the class-level statistic. If an class-level statistic is not provided
+        the default is used. (Options: "f_beta", "percision", "recall")
+
+        Args:
+            class_level_statistic (str): Class_level statistic to record.
+        Returns:
+            class_level_statistic (str): Class_level statistic to record.
+        Raises:
+            ValueError: If an invalid value is provided.
+        """
+        if not class_level_statistic:
+            logger.info(
+                "Class-level statistic not defined, using default: %r.",
+                AL_DEFAULT_CLASS_LEVEL_STATISTIC,
+            )
+            return AL_DEFAULT_CLASS_LEVEL_STATISTIC
+        if class_level_statistic not in AL_SUPPORTED_CLASS_LEVEL_STATISTICS:
+            raise ValueError(
+                "Not a valid class-level statistic: {!r}.".format(class_level_statistic)
+            )
+        return class_level_statistic
 
     @staticmethod
     def _get_probs(
@@ -156,21 +211,23 @@ class MindMeldALClassifier(ALClassifier):
 
         Returns:
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
-            preds_single (List[List]): 2D array with probability vectors for unsampled queries
-            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+            confidences_2d (List[List]): 2D array with probability vectors for unsampled queries
+            confidences_3d (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
             domain_indices (Dict): Maps domains to a tuple containing the start and
                 ending indexes of intents with the given domain.
         """
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
-        preds_single = self.train_single(data_bucket, eval_stats)
-        return_preds_multi = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
-        preds_multi = self.train_multi(data_bucket) if return_preds_multi else None
+        confidences_2d = self.train_single(data_bucket, eval_stats)
+        return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
+        confidences_3d = (
+            self.train_multi(data_bucket) if return_confidences_3d else None
+        )
         domain_indices = (
             self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
         )
-        return eval_stats, preds_single, preds_multi, domain_indices
+        return eval_stats, confidences_2d, confidences_3d, domain_indices
 
     def train_single(self, data_bucket: DataBucket, eval_stats: defaultdict = None):
         """Trains a single model to get a 2D probability array for single-model selection strategies.
@@ -178,7 +235,7 @@ class MindMeldALClassifier(ALClassifier):
             data_bucket (DataBucket): Databucket for current iteration
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
         Returns:
-            preds_single (List): 2D array with probability vectors for unsampled queries
+            confidences_2d (List): 2D array with probability vectors for unsampled queries
         """
         return self._train_single(
             sampled_queries=data_bucket.sampled_queries,
@@ -198,14 +255,14 @@ class MindMeldALClassifier(ALClassifier):
     ):
         """Helper function to train a single model and obtain a 2D probability array.
         Args:
-            sampled_queries List[ProcessedQuery]: Current set of sampled queries in DataBucket.
-            unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
-            test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
+            sampled_queries (ProcessedQueryList): Current set of sampled queries in DataBucket.
+            unsampled_queries (ProcessedQueryList): Current set of unsampled queries in DataBucket.
+            test_queries (ProcessedQueryList): Set of test queries in DataBucket.
             label_map LabelMap: Class that stores index mappings for a MindMeld app.
                 (Eg. domain2id, domain_to_intent2id)
             eval_stats (Dict): Evaluation metrics to be included in accuracies.json
         Returns:
-            preds_single (List): 2D array with probability vectors for unsampled queries
+            confidences_2d (List): 2D array with probability vectors for unsampled queries
         """
 
         # Domain_Level
@@ -217,7 +274,7 @@ class MindMeldALClassifier(ALClassifier):
         )
         if eval_stats:
             self._update_eval_stats_domain_level(eval_stats, dc_eval_test)
-        preds_single = dc_queries_prob_vectors
+        confidences_2d = dc_queries_prob_vectors
 
         # Intent_Level
         if self.training_level == TRAIN_LEVEL_INTENT:
@@ -233,16 +290,16 @@ class MindMeldALClassifier(ALClassifier):
             )
             if eval_stats:
                 self._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
-            preds_single = ic_queries_prob_vectors
+            confidences_2d = ic_queries_prob_vectors
 
-        return preds_single
+        return confidences_2d
 
     def train_multi(self, data_bucket: DataBucket):
         """Trains multiple models to get a 3D probability array for multi-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration
         Returns:
-            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+            confidences_3d (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
         """
         return self._train_multi(
@@ -261,13 +318,13 @@ class MindMeldALClassifier(ALClassifier):
     ):
         """Helper function to train multiple models and obtain a 3D probability array.
         Args:
-            sampled_queries List[ProcessedQuery]: Current set of sampled queries in DataBucket.
-            unsampled_queries List[ProcessedQuery]: Current set of unsampled queries in DataBucket.
-            test_queries List[ProcessedQuery]: Set of test queries in DataBucket.
+            sampled_queries (ProcessedQueryList): Current set of sampled queries in DataBucket.
+            unsampled_queries (ProcessedQueryList): Current set of unsampled queries in DataBucket.
+            test_queries (ProcessedQueryList): Set of test queries in DataBucket.
             label_map LabelMap: Class that stores index mappings for a MindMeld app.
                 (Eg. domain2Id, domain_to_intent2id)
         Returns:
-            preds_multi (List[List[List]]]): 3D array with probability vectors for unsampled
+            confidences_3d (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
         """
 
@@ -279,7 +336,9 @@ class MindMeldALClassifier(ALClassifier):
         )
         y = [
             f"{domain}|{intent}"
-            for domain, intent in zip(sampled_queries.domains(), sampled_queries.intents())
+            for domain, intent in zip(
+                sampled_queries.domains(), sampled_queries.intents()
+            )
         ]
         fold_sampled_queries_ids = [
             [sampled_queries_ids[i] for i in fold]
@@ -289,14 +348,14 @@ class MindMeldALClassifier(ALClassifier):
             ProcessedQueryList(sampled_queries.cache, fold)
             for fold in fold_sampled_queries_ids
         ]
-        preds_multi = []
+        confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            preds_multi.append(
+            confidences_3d.append(
                 self._train_single(
                     fold_sample_queries, unsampled_queries, test_queries, label_map
                 )
             )
-        return preds_multi
+        return confidences_3d
 
     def domain_classifier_fit_eval(
         self,
@@ -307,15 +366,16 @@ class MindMeldALClassifier(ALClassifier):
     ):
         """Fit and evaluate the domain classifier.
         Args:
-            sampled_queries (List[ProcessedQuery]): List of Sampled Queries
-            unsampled_queries (List[ProcessedQuery]): List of Unsampled Queries
-            test_queries (List[ProcessedQuery]): List of Test Queries
+            sampled_queries (ProcessedQueryList): List of Sampled Queries
+            unsampled_queries (ProcessedQueryList): List of Unsampled Queries
+            test_queries (ProcessedQueryList): List of Test Queries
             domain2id (Dict): Dictionary mapping domains to IDs
 
         Returns:
             dc_queries_prob_vectors (List[List]): List of probability distributions
-                for unsampled queries
-            dc_eval_test (): Mindmeld evaluation object for the domain classifier
+                for unsampled queries.
+            dc_eval_test (mindmeld.models.model.StandardModelEvaluation): Mindmeld evaluation
+                object for the domain classifier.
         """
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
@@ -331,7 +391,8 @@ class MindMeldALClassifier(ALClassifier):
 
         Args:
             eval_stats (Dict): Evaluation metrics to be included in accuracies.json
-            dc_eval_test (): Mindmeld evaluation object for the domain classifier
+            dc_eval_test (mindmeld.models.model.StandardModelEvaluation): Mindmeld evaluation
+                object for the domain classifier.
         """
         eval_stats["accuracies"]["overall"] = dc_eval_test.get_stats()["stats_overall"][
             self.aggregate_statistic
@@ -350,17 +411,17 @@ class MindMeldALClassifier(ALClassifier):
     ):
         """Fit and evaluate the domain classifier.
         Args:
-            sampled_queries (List[ProcessedQuery]): List of Sampled Queries
-            unsampled_queries (List[ProcessedQuery]): List of Unsampled Queries
-            test_queries (List[ProcessedQuery]): List of Test Queries
+            sampled_queries (ProcessedQueryList): List of Sampled Queries.
+            unsampled_queries (ProcessedQueryList): List of Unsampled Queries.
+            test_queries (ProcessedQueryList): List of Test Queries.
             domain_list (List[str]): List of domains used by the application.
-            domain_to_intent2id (Dict): Dictionary mapping intents to IDs
+            domain_to_intent2id (Dict): Dictionary mapping intents to IDs.
 
         Returns:
             ic_queries_prob_vectors (List[List]): List of probability distributions
-                for unsampled queries
+                for unsampled queries.
             ic_eval_test_dict (Dict): Dictionary mapping a domain (str) to the
-                associated ic_eval_test object
+                associated ic_eval_test object.
         """
         ic_eval_test_dict = {}
         unsampled_idx_preds_pairs = []
@@ -417,7 +478,7 @@ class MindMeldALClassifier(ALClassifier):
         classifiers.
 
         Args:
-            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
+            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json.
             ic_eval_test_dict (Dict): Dictionary mapping a domain (str) to the
                 associated ic_eval_test object.
         """

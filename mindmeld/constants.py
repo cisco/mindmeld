@@ -34,6 +34,19 @@ STRATEGY_ABRIDGED = {
     "EnsembleSampling": "ens",
     "KLDivergenceSampling": "kld",
 }
+AL_DEFAULT_AGGREGATE_STATISTIC = "accuracy"
+AL_SUPPORTED_AGGREGATE_STATISTICS = [
+    "f1_weighted",
+    "f1_macro",
+    "f1_micro",
+    AL_DEFAULT_AGGREGATE_STATISTIC,
+]
+AL_DEFAULT_CLASS_LEVEL_STATISTIC = "f_beta"
+AL_SUPPORTED_CLASS_LEVEL_STATISTICS = [
+    "percision",
+    "recall",
+    AL_DEFAULT_CLASS_LEVEL_STATISTIC,
+]
 
 # AUTO ANNOTATOR CONSTANTS
 SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]
@@ -58,12 +71,7 @@ SPACY_ANNOTATOR_SUPPORTED_LANGUAGES = (
 SPACY_ANNOTATOR_MODEL_SIZES = ["sm", "md", "lg"]
 
 UNANNOTATE_ALL_RULE = [
-    {
-        "domains": ".*",
-        "intents": ".*",
-        "files": ".*",
-        "entities": ".*",
-    }
+    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
 ]
 
 ANNOTATOR_TO_SYS_ENTITY_MAPPINGS = {

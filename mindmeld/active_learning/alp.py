@@ -158,8 +158,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             strategy=self.selection_strategy, select_mode=True
         )
         self.results_manager.write_log_selected_queries_json(
-            strategy=self.selection_strategy,
-            queries=newly_sampled_queries,
+            strategy=self.selection_strategy, queries=newly_sampled_queries,
         )
 
     def plot(self):

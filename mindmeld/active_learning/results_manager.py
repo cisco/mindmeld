@@ -32,8 +32,7 @@ class ResultsManager:
     results."""
 
     def __init__(
-        self,
-        output_folder: str,
+        self, output_folder: str,
     ):
         """
         Args:
@@ -85,7 +84,7 @@ class ResultsManager:
         Args:
             unformatted_path (str): Unformatted path to JSON file.
         """
-        os.makedirs(self.format_path(unformatted_path))
+        create_dir_if_absent(self.format_path(unformatted_path))
 
     def format_path(self, unformatted_path):
         """

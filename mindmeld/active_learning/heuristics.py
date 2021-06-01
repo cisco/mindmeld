@@ -326,10 +326,8 @@ class KLDivergenceSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         if confidence_segments:
-            divergences = (
-                KLDivergenceSampling.get_divergences_per_element_with_segments(
-                    confidences_3d, confidence_segments
-                )
+            divergences = KLDivergenceSampling.get_divergences_per_element_with_segments(
+                confidences_3d, confidence_segments
             )
         else:
             divergences = KLDivergenceSampling.get_divergences_per_element_no_segments(

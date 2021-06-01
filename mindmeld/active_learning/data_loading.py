@@ -207,11 +207,9 @@ class DataBucket:
         """
         Args:
             app_path (str): Path to MindMeld application
-            test_queries List[ProcessedQuery]: Queries to use for evaluation.
-            unsampled_queries List[ProcessedQuery]: Queries to sample from iteratively.
-            sampled_queries List[ProcessedQuery]: Queries currently included in the sample set.
-            newly_sampled_queries List[ProcessedQuery]: Queries added to the sample set in the
-                most recent iteration.
+            test_queries (ProcessedQueryList): Queries to use for evaluation.
+            unsampled_queries (ProcessedQueryList): Queries to sample from iteratively.
+            sampled_queries (ProcessedQueryList): Queries currently included in the sample set.
         """
         self.label_map = label_map
         self.resource_loader = resource_loader
@@ -220,20 +218,38 @@ class DataBucket:
         self.sampled_queries = sampled_queries
 
     def get_queries(self, query_ids):
-        # TODO: Add documentation
+        """ Method to get multiple queries from the QueryCache given a list of query ids.
+
+        Args:
+            query_ids (List[int]): List of ids corresponding to queries in the QueryCache.
+        Returns:
+            queries (List[ProcessedQuery]): List of processed queries from the cache.
+        """
         return [
             self.resource_loader.query_cache.get(query_id) for query_id in query_ids
         ]
 
     def update_sampled_queries(self, newly_sampled_queries_ids):
-        # TODO: Add documentation
+        """ Update the current set of sampled queries by adding the set of newly sampled
+        queries. A new PrcoessedQueryList object is created with the updated set of query ids.
+
+        Args:
+            newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
+                queries in the QueryCache.
+        """
         sampled_queries_ids = self.sampled_queries.elements + newly_sampled_queries_ids
         self.sampled_queries = ProcessedQueryList(
             cache=self.resource_loader.query_cache, elements=sampled_queries_ids
         )
 
     def update_unsampled_queries(self, newly_sampled_queries_ids):
-        # TODO: Add documentation
+        """ Update the current set of unsampled queries by removing the set of newly sampled
+        queries. A new PrcoessedQueryList object is created with the updated set of query ids.
+
+        Args:
+            newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
+                queries in the QueryCache.
+        """
         remaining_queries_ids = [
             i
             for i in self.unsampled_queries.elements
@@ -261,7 +277,8 @@ class DataBucket:
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
         Returns:
-            newly_sampled_queries_ids (List[int]): TODO
+            newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
+                queries in the QueryCache.
         """
 
         params_rank_3d = {"confidences_3d": confidences_3d}
