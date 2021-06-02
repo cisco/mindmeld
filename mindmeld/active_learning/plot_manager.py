@@ -6,6 +6,7 @@ from typing import Dict, List
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .classifiers import MindMeldALClassifier
 from .results_manager import create_dir_if_absent
 from ..path import (
     AL_ACCURACIES_PATH,
@@ -13,6 +14,13 @@ from ..path import (
 )
 
 logger = logging.getLogger(__name__)
+
+FIRST_EPOCH = "0"
+FIRST_ITERATION = "0"
+
+
+class MissingDataError(Exception):
+    pass
 
 
 class PlotManager:
@@ -25,12 +33,27 @@ class PlotManager:
         1. Plot Stacked Bar (Compares Selection Distributions across Iterations)
     """
 
-    def __init__(self, experiment_dir_path: str):
+    def __init__(
+        self,
+        experiment_dir_path: str,
+        aggregate_statistic: str,
+        class_level_statistic: str,
+    ):
         """
         Args:
-            experiment_dir_path (str): Path to the experiment directory
+            experiment_dir_path (str): Path to the experiment directory.
+            aggregate_statistic (str): Aggregate statistic to record.
+                (Options: "accuracy", "f1_weighted", "f1_macro", "f1_micro".)
+            class_level_statistic (str): Class_level statistic to record.
+                (Options: "f_beta", "percision", "recall")
         """
         self.experiment_dir_path = experiment_dir_path
+        self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
+            aggregate_statistic
+        )
+        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
+            class_level_statistic
+        )
         self.accuracies_data = self.get_accuracies_json_data()
         self.queries_data = self.get_queries_json_data()
 
@@ -97,6 +120,7 @@ class PlotManager:
             plot_intents (bool): Whether to generate plots at the intent level.
             plot_entities (bool): Whether to generate plots at the entity level.
         """
+        self._check_first_epoch_and_iter_exist()
         if not plot_domain:
             return
         function(self, y_keys=["overall"])
@@ -105,7 +129,11 @@ class PlotManager:
             if not plot_intents:
                 continue
             for intent in self.get_intent_list(domain):
-                function(self, y_keys=[domain, intent, "overall"])
+                function(
+                    self,
+                    y_keys=[domain, intent, "overall"],
+                    use_aggregate_statistic=False,
+                )
                 if not plot_entities:
                     continue
                 y_keys = [domain, intent, "entities", "overall"]
@@ -149,47 +177,73 @@ class PlotManager:
         Returns:
             strategies (list): List of selection strategies for the given experiment.
         """
-        return list(self.accuracies_data.keys())
+        strategies = list(self.accuracies_data.keys())
+        if len(strategies) == 0:
+            raise MissingDataError("Did not find data in accuracies.json.")
+        return strategies
+
+    def _check_first_epoch_and_iter_exist(self):
+        """ Check whether data for the first iteration in the first epoch exists.
+        Data from the first epoch and iteration is used to determine the domains, intents,
+        and entities included in training.
+        Raises:
+            MissingDataError: Throws an error if the anticipated data is not found.
+        """
+        first_strategy = self.strategies[0]
+        if FIRST_EPOCH not in self.accuracies_data[first_strategy]:
+            raise MissingDataError("Did not find data for the first epoch.")
+        if FIRST_ITERATION not in self.accuracies_data[first_strategy][FIRST_EPOCH]:
+            raise MissingDataError(
+                "Did not find data for the first iteration in the first epoch."
+            )
 
     def get_domain_list(self) -> List:
-        """
+        """ Method to get a list of domains included in training from the first epoch and iteration.
         Returns:
             domain_list (list): List of domains for the current experiment.
         """
+        first_strategy = self.strategies[0]
         domain_list = list(
-            self.accuracies_data[self.strategies[0]]["0"]["0"]["accuracies"].keys()
+            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+                "accuracies"
+            ].keys()
         )
+        # The 'overall' score across domains is removed as it is not a domain
         domain_list.remove("overall")
         return domain_list
 
     def get_intent_list(self, domain: str) -> List:
-        """
+        """ Method to get a list of intents included in training from the first epoch and iteration.
         Args:
             domain (str): The domain to get retrieve intents for.
         Returns:
             intent_list (list): List of intent for a given domain in the current experiment.
         """
+        first_strategy = self.strategies[0]
         intent_list = list(
-            self.accuracies_data[self.strategies[0]]["0"]["0"]["accuracies"][
-                domain
-            ].keys()
+            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+                "accuracies"
+            ][domain].keys()
         )
+        # The 'overall' score across intents is removed as it is not an intent
         intent_list.remove("overall")
         return intent_list
 
     def get_entity_list(self, domain: str, intent: str) -> List:
-        """
+        """ Method to get a list of entities included in training from the first epoch and iteration.
         Args:
             domain (str): The domain containing the intent to retreive entities from.
             intent (str): The intent to retreive entities from.
         Returns:
             entity_list (list): List of entities in the given intent.
         """
+        first_strategy = self.strategies[0]
         entity_list = list(
-            self.accuracies_data[self.strategies[0]]["0"]["0"]["accuracies"][domain][
-                intent
-            ]["entities"].keys()
+            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+                "accuracies"
+            ][domain][intent]["entities"].keys()
         )
+        # The 'overall' score across entities is removed as it is not an entity
         entity_list.remove("overall")
         return entity_list
 
@@ -214,7 +268,12 @@ class PlotManager:
 
     # Plotting Functions
     def plot_single_epoch(
-        self, y_keys: List, epoch: int = 0, display: bool = False, save: bool = True,
+        self,
+        y_keys: List,
+        epoch: int = 0,
+        display: bool = False,
+        save: bool = True,
+        use_aggregate_statistic: bool = True,
     ):
         """Plot accuracies across a single epoch for each strategy.
         Args:
@@ -222,6 +281,8 @@ class PlotManager:
             epoch (int): The epoch to plot.
             display (bool): Whether to show the plot.
             save (bool): Whether to save the plot.
+            use_aggregate_statistic (bool): If True, the aggregate_statistic will be used as the
+                label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
         for strategy in self.strategies:
@@ -233,7 +294,12 @@ class PlotManager:
             plt.plot(x_values, y_values)
 
         plt.xlabel("Number of selected queries")
-        plt.ylabel("Accuracy")
+        y_label = (
+            self.aggregate_statistic
+            if use_aggregate_statistic
+            else self.class_level_statistic
+        )
+        plt.ylabel(y_label.capitalize())
         title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
         plt.title(title)
         plt.legend(self.strategies, loc="lower right")
@@ -247,13 +313,19 @@ class PlotManager:
             plt.clf()
 
     def plot_avg_across_epochs(
-        self, y_keys: List, display: bool = False, save: bool = True
+        self,
+        y_keys: List,
+        display: bool = False,
+        save: bool = True,
+        use_aggregate_statistic: bool = True,
     ):
         """Plot average accuracies across all epochs for each strategy.
         Args:
             y_keys (list): Keys to access the data from a epoch to be used as y values for plotting.
             display (bool): Whether to show the plot.
             save (bool): Whether to save the plot.
+            use_aggregate_statistic (bool): If True, the aggregate_statistic will be used as the
+                label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
         for strategy in self.strategies:
@@ -280,7 +352,12 @@ class PlotManager:
             plt.plot(x_values, y_avg_values)
 
         plt.xlabel("Number of selected queries")
-        plt.ylabel("Accuracy")
+        y_label = (
+            self.aggregate_statistic
+            if use_aggregate_statistic
+            else self.class_level_statistic
+        )
+        plt.ylabel(y_label.capitalize())
         title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
         plt.title(title)
         plt.legend(self.strategies, loc="lower right")
@@ -293,12 +370,20 @@ class PlotManager:
             fig.savefig(self.get_img_path(y_keys, title))
             plt.clf()
 
-    def plot_all_epochs(self, y_keys: List, display: bool = False, save: bool = True):
+    def plot_all_epochs(
+        self,
+        y_keys: List,
+        display: bool = False,
+        save: bool = True,
+        use_aggregate_statistic: bool = True,
+    ):
         """Plot all epochs. Creates a plot for each strategy.
         Args:
             y_keys (list): Keys to access the data from a epoch to be used as y values for plotting.
             display (bool): Whether to show the plot.
             save (bool): Whether to save the plot.
+            use_aggregate_statistic (bool): If True, the aggregate_statistic will be used as the
+                label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
         for strategy in self.strategies:
@@ -326,7 +411,12 @@ class PlotManager:
             plt.plot(x_values, y_avg_values)
 
             plt.xlabel("Number of selected queries")
-            plt.ylabel("Accuracy")
+            y_label = (
+                self.aggregate_statistic
+                if use_aggregate_statistic
+                else self.class_level_statistic
+            )
+            plt.ylabel(y_label.capitalize())
             title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
             plt.title(title)
             plt.legend(
@@ -386,8 +476,13 @@ class PlotManager:
                 label_set_counter[label][iteration] += counter[label]
         return label_set_counter
 
+    # pylint: disable=W0613
     def plot_stacked_bar(
-        self, epoch: int = 0, plot_domains: bool = True, plot_intents: bool = True
+        self,
+        epoch: int = 0,
+        plot_domains: bool = True,
+        plot_intents: bool = True,
+        **kwargs,
     ):
         """Plots a stacked bar graph of selection distributions across iterations for an epoch.
         Args:

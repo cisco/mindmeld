@@ -48,8 +48,10 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             training_strategies (List[str]): List of strategies to use for training
             selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
-            aggregate_statistic (str): TODO
-            class_level_statistic (str): TODO
+            aggregate_statistic (str): Aggregate statistic to record.
+                (Options: "accuracy", "f1_weighted", "f1_macro", "f1_micro".)
+            class_level_statistic (str): Class_level statistic to record.
+                (Options: "f_beta", "percision", "recall")
             log_usage_pct (float): Percentage of the log data to use for selection
             labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
@@ -66,8 +68,12 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.training_strategies = training_strategies
         self.selection_strategy = selection_strategy
         self.save_sampled_queries = save_sampled_queries
-        self.aggregate_statistic = aggregate_statistic
-        self.class_level_statistic = class_level_statistic
+        self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
+            aggregate_statistic
+        )
+        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
+            class_level_statistic
+        )
         self.log_usage_pct = log_usage_pct
         self.labeled_logs_pattern = labeled_logs_pattern
         self.unlabeled_logs_path = unlabeled_logs_path
@@ -163,7 +169,11 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     def plot(self):
         """Creates the generated folder and its subfolders if they do not already exist."""
-        plot_manager = PlotManager(self.results_manager.experiment_folder)
+        plot_manager = PlotManager(
+            experiment_dir_path=self.results_manager.experiment_folder,
+            aggregate_statistic=self.aggregate_statistic,
+            class_level_statistic=self.class_level_statistic,
+        )
         plot_manager.generate_plots()
 
     def _train_all_strategies(self):
