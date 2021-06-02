@@ -11,16 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Need to import the following so models and features are registered. See helpers module
+# Need to import the following so models, label encoders, features are registered.
+# See helpers module
 from . import (
     tagger_models,
     text_models,
-    embedder_models,
+    labels
 )
-from .features import (
-    entity_features,
-    query_features
-)
+from .dense_features import embedder_models
+from .dense_features.embedder_models import Embedder
 from .helpers import (
     CLASS_LABEL_TYPE,
     ENTITIES_LABEL_TYPE,
@@ -31,13 +30,17 @@ from .helpers import (
     register_embedder,
 )
 from .model import ModelConfig
-from .embedder_models import Embedder
+from .sparse_features import (
+    entity_features,
+    query_features
+)
 
 __all__ = [
     "ModelConfig",
     "text_models",
     "tagger_models",
     "embedder_models",
+    "labels",
     "query_features",
     "entity_features",
     "create_model",

@@ -19,8 +19,8 @@ from urllib.request import urlretrieve
 import numpy as np
 from tqdm import tqdm
 
-from ...exceptions import EmbeddingDownloadError
-from ...path import (
+from mindmeld.exceptions import EmbeddingDownloadError
+from mindmeld.path import (
     EMBEDDINGS_FILE_PATH,
     EMBEDDINGS_FOLDER_PATH,
     PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,

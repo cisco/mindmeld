@@ -16,12 +16,12 @@ import os
 import re
 
 import numpy as np
+import tensorflow as tf
 from sklearn.externals import joblib
 from sklearn.preprocessing import LabelBinarizer
-import tensorflow as tf
 
-from .embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 from .taggers import Tagger, extract_sequence_features
+from ..dense_features.embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = r"in-gaz\|type:(\w+)\|pos:(\w+)\|"
@@ -223,7 +223,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
             start_index = 0
             for label_sequence in padded_y:
                 encoded_labels.append(
-                    encoded_labels_flat[start_index : start_index + len(label_sequence)]
+                    encoded_labels_flat[start_index: start_index + len(label_sequence)]
                 )
                 start_index += len(label_sequence)
 

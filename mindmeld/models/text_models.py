@@ -37,12 +37,12 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
     register_model,
 )
-from .model import Model, ModelConfig
+from .model import ModelConfig, Model, PytorchModel
 
 logger = logging.getLogger(__name__)
 
 
-class SklearnTextModel(Model):
+class TextModel(Model):
     _NEG_INF = -1e10
 
     # classifier types
@@ -89,100 +89,14 @@ class SklearnTextModel(Model):
         classifier_type = self.config.model_settings["classifier_type"]
         try:
             return {
-                SklearnTextModel.LOG_REG_TYPE: LogisticRegression,
-                SklearnTextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
-                SklearnTextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
-                SklearnTextModel.SVM_TYPE: SVC,
+                TextModel.LOG_REG_TYPE: LogisticRegression,
+                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
+                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
+                TextModel.SVM_TYPE: SVC,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
             raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
-
-    def _get_cv_scorer(self, selection_settings):
-        """
-        Returns the scorer to use based on the selection settings and classifier type,
-        defaulting to accuracy.
-        """
-        return selection_settings.get("scoring", SklearnTextModel.ACCURACY_SCORING)
-
-    def evaluate(self, examples, labels):
-        """Evaluates a model against the given examples and labels
-
-        Args:
-            examples: A list of examples to predict
-            labels: A list of expected labels
-
-        Returns:
-            ModelEvaluation: an object containing information about the \
-                evaluation
-        """
-        # TODO: also expose feature weights?
-        predictions = self.predict_proba(examples)
-
-        # Create a model config object for the current effective config (after param selection)
-        config = self._get_effective_config()
-
-        evaluations = [
-            EvaluatedExample(
-                e, labels[i], predictions[i][0], predictions[i][1], config.label_type
-            )
-            for i, e in enumerate(examples)
-        ]
-
-        model_eval = StandardModelEvaluation(config, evaluations)
-        return model_eval
-
-    def fit(self, examples, labels, params=None):
-        """Trains this model.
-
-        This method inspects instance attributes to determine the classifier
-        object and cross-validation strategy, and then fits the model to the
-        training examples passed in.
-
-        Args:
-            examples (ProcessedQueryList.*Iterator): A list of examples.
-            labels (ProcessedQueryList.*Iterator): A parallel list to examples. The gold labels
-                for each example.
-            params (dict, optional): Parameters to use when training. Parameter
-                selection will be bypassed if this is provided
-
-        Returns:
-            (SklearnTextModel): Returns self to match classifier scikit-learn \
-                interfaces.
-        """
-        params = params or self.config.params
-        skip_param_selection = params is not None or self.config.param_selection is None
-
-        # Shuffle to prevent order effects
-        indices = list(range(len(labels)))
-        random.shuffle(indices)
-        examples.reorder(indices)
-        labels.reorder(indices)
-        distinct_labels = set(labels)
-        if len(set(distinct_labels)) <= 1:
-            return self
-
-        # Extract features and classes
-        y = self._label_encoder.encode(labels)
-        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-
-        if skip_param_selection:
-            self._clf = self._fit(X, y, params)
-            self._current_params = params
-        else:
-            # run cross validation to select params
-            best_clf, best_params = self._fit_cv(X, y, groups)
-            self._clf = best_clf
-            self._current_params = best_params
-
-        return self
-
-    def select_params(self, examples, labels, selection_settings=None):
-        y = self._label_encoder.encode(labels)
-        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-        clf, params = self._fit_cv(X, y, groups, selection_settings)
-        self._clf = clf
-        return params
 
     def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
@@ -198,32 +112,59 @@ class SklearnTextModel(Model):
         params = self._clean_params(model_class, params)
         return model_class(**params).fit(examples, labels)
 
-    def predict(self, examples, dynamic_resource=None):
-        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
-        y = self._clf.predict(X)
-        predictions = self._class_encoder.inverse_transform(y)
-        return self._label_encoder.decode(predictions)
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type,
+        defaulting to accuracy.
+        """
+        return selection_settings.get("scoring", TextModel.ACCURACY_SCORING)
 
-    def predict_proba(self, examples, dynamic_resource=None):
-        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
-        return self._predict_proba(X, self._clf.predict_proba)
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
 
-    def predict_log_proba(self, examples, dynamic_resource=None):
-        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
-        predictions = self._predict_proba(X, self._clf.predict_log_proba)
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
 
-        # JSON can't reliably encode infinity, so replace it with large number
-        for row in predictions:
-            _, probas = row
-            for label, proba in probas.items():
-                if proba == -np.Infinity:
-                    probas[label] = SklearnTextModel._NEG_INF
-        return predictions
+        Returns:
+            (dict): revised param_grid
+        """
+        if "class_weight" in param_grid:
+            raw_weights = (
+                param_grid["class_weight"] if is_grid else [param_grid["class_weight"]]
+            )
+            weights = [
+                {
+                    k
+                    if isinstance(k, int)
+                    else self._class_encoder.transform((k,))[0]: v
+                    for k, v in cw_dict.items()
+                }
+                for cw_dict in raw_weights
+            ]
+            param_grid["class_weight"] = weights if is_grid else weights[0]
+        elif "class_bias" in param_grid:
+            # interpolate between class_bias=0 => class_weight=None
+            # and class_bias=1 => class_weight='balanced'
+            class_count = np.bincount(y)
+            classes = self._class_encoder.classes_
+            weights = []
+            raw_bias = (
+                param_grid["class_bias"] if is_grid else [param_grid["class_bias"]]
+            )
+            for class_bias in raw_bias:
+                # these weights are same as sklearn's class_weight='balanced'
+                balanced_w = [(len(y) / len(classes) / c) for c in class_count]
+                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
-    def view_extracted_features(self, example, dynamic_resource=None):
-        return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
-        )
+                weights.append(
+                    {c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples}
+                )
+            param_grid["class_weight"] = weights if is_grid else weights[0]
+            del param_grid["class_bias"]
+
+        return param_grid
 
     def _get_feature_weight(self, feat_name, label_class):
         """Retrieves the feature weight from the coefficient matrix. If there are only two
@@ -243,6 +184,111 @@ class SklearnTextModel(Model):
             return self._clf.coef_[
                 label_class, self._feat_vectorizer.vocabulary_[feat_name]
             ]
+
+    def _predict_proba(self, X, predictor):
+        predictions = []
+        for row in predictor(X):
+            probabilities = {}
+            top_class = None
+            for class_index, proba in enumerate(row):
+                raw_class = self._class_encoder.inverse_transform([class_index])[0]
+                decoded_class = self._label_encoder.decode([raw_class])[0]
+                probabilities[decoded_class] = proba
+                if proba > probabilities.get(top_class, -1.0):
+                    top_class = decoded_class
+            predictions.append((top_class, probabilities))
+
+        return predictions
+
+    def _preprocess_data(self, X, y=None, fit=False):
+
+        if fit:
+            y = self._class_encoder.fit_transform(y)
+            X = self._feat_vectorizer.fit_transform(X)
+            if self._feat_scaler is not None:
+                X = self._feat_scaler.fit_transform(X)
+            if self._feat_selector is not None:
+                X = self._feat_selector.fit_transform(X, y)
+        else:
+            X = self._feat_vectorizer.transform(X)
+            if self._feat_scaler is not None:
+                X = self._feat_scaler.transform(X)
+            if self._feat_selector is not None:
+                X = self._feat_selector.transform(X)
+
+        return X, y
+
+    def _get_feature_selector(self):
+        """Get a feature selector instance based on the feature_selector model
+        parameter
+
+        Returns:
+            (Object): a feature selector which returns a reduced feature matrix, \
+                given the full feature matrix, X and the class labels, y
+        """
+        if self.config.model_settings is None:
+            selector_type = None
+        else:
+            selector_type = self.config.model_settings.get("feature_selector")
+        selector = {
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "f": SelectPercentile(),
+        }.get(selector_type)
+        return selector
+
+    def _get_feature_scaler(self):
+        """Get a feature value scaler based on the model settings"""
+        if self.config.model_settings is None:
+            scale_type = None
+        else:
+            scale_type = self.config.model_settings.get("feature_scaler")
+        scaler = {
+            "std-dev": StandardScaler(with_mean=False),
+            "max-abs": MaxAbsScaler(),
+        }.get(scale_type)
+        return scaler
+
+    def select_params(self, examples, labels, selection_settings=None):
+        y = self._label_encoder.encode(labels)
+        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
+        clf, params = self._fit_cv(X, y, groups, selection_settings)
+        self._clf = clf
+        return params
+
+    def get_feature_matrix(self, examples, y=None, fit=False, dynamic_resource=None):
+        """Transforms a list of examples into a feature matrix.
+
+        Args:
+            examples (list): The examples.
+
+        Returns:
+            (tuple): tuple containing:
+
+                * (numpy.matrix): The feature matrix.
+                * (numpy.array): The group labels for examples.
+        """
+        groups = []
+        feats = []
+        for idx, example in enumerate(examples):
+            feats.append(
+                self._extract_features(example, dynamic_resource, self.tokenizer)
+            )
+            groups.append(idx)
+
+        X, y = self._preprocess_data(feats, y, fit=fit)
+        return X, y, groups
+
+    def predict_log_proba(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
+        predictions = self._predict_proba(X, self._clf.predict_log_proba)
+
+        # JSON can't reliably encode infinity, so replace it with large number
+        for row in predictions:
+            _, probas = row
+            for label, proba in probas.items():
+                if proba == -np.Infinity:
+                    probas[label] = TextModel._NEG_INF
+        return predictions
 
     def inspect(self, example, gold_label=None, dynamic_resource=None):
         """This class takes an example and returns a 2D list for every feature with feature
@@ -337,147 +383,105 @@ class SklearnTextModel(Model):
 
         return inspect_table
 
-    def _predict_proba(self, X, predictor):
-        predictions = []
-        for row in predictor(X):
-            probabilities = {}
-            top_class = None
-            for class_index, proba in enumerate(row):
-                raw_class = self._class_encoder.inverse_transform([class_index])[0]
-                decoded_class = self._label_encoder.decode([raw_class])[0]
-                probabilities[decoded_class] = proba
-                if proba > probabilities.get(top_class, -1.0):
-                    top_class = decoded_class
-            predictions.append((top_class, probabilities))
+    ##################
+    # abstract methods
+    ##################
 
-        return predictions
+    def fit(self, examples, labels, params=None):
+        """Trains this model.
 
-    def get_feature_matrix(self, examples, y=None, fit=False, dynamic_resource=None):
-        """Transforms a list of examples into a feature matrix.
+        This method inspects instance attributes to determine the classifier
+        object and cross-validation strategy, and then fits the model to the
+        training examples passed in.
 
         Args:
-            examples (list): The examples.
+            examples (ProcessedQueryList.*Iterator): A list of examples.
+            labels (ProcessedQueryList.*Iterator): A parallel list to examples. The gold labels
+                for each example.
+            params (dict, optional): Parameters to use when training. Parameter
+                selection will be bypassed if this is provided
 
         Returns:
-            (tuple): tuple containing:
-
-                * (numpy.matrix): The feature matrix.
-                * (numpy.array): The group labels for examples.
+            (TextModel): Returns self to match classifier scikit-learn \
+                interfaces.
         """
-        groups = []
-        feats = []
-        for idx, example in enumerate(examples):
-            feats.append(
-                self._extract_features(example, dynamic_resource, self.tokenizer)
-            )
-            groups.append(idx)
+        params = params or self.config.params
+        skip_param_selection = params is not None or self.config.param_selection is None
 
-        X, y = self._preprocess_data(feats, y, fit=fit)
-        return X, y, groups
+        # Shuffle to prevent order effects
+        indices = list(range(len(labels)))
+        random.shuffle(indices)
+        examples.reorder(indices)
+        labels.reorder(indices)
+        distinct_labels = set(labels)
+        if len(set(distinct_labels)) <= 1:
+            return self
 
-    def _preprocess_data(self, X, y=None, fit=False):
+        # Extract features and classes
+        y = self._label_encoder.encode(labels)
+        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
 
-        if fit:
-            y = self._class_encoder.fit_transform(y)
-            X = self._feat_vectorizer.fit_transform(X)
-            if self._feat_scaler is not None:
-                X = self._feat_scaler.fit_transform(X)
-            if self._feat_selector is not None:
-                X = self._feat_selector.fit_transform(X, y)
+        if skip_param_selection:
+            self._clf = self._fit(X, y, params)
+            self._current_params = params
         else:
-            X = self._feat_vectorizer.transform(X)
-            if self._feat_scaler is not None:
-                X = self._feat_scaler.transform(X)
-            if self._feat_selector is not None:
-                X = self._feat_selector.transform(X)
+            # run cross validation to select params
+            best_clf, best_params = self._fit_cv(X, y, groups)
+            self._clf = best_clf
+            self._current_params = best_params
 
-        return X, y
+        return self
 
-    def _convert_params(self, param_grid, y, is_grid=True):
-        """
-        Convert the params from the style given by the config to the style
-        passed in to the actual classifier.
+    def predict(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
+        y = self._clf.predict(X)
+        predictions = self._class_encoder.inverse_transform(y)
+        return self._label_encoder.decode(predictions)
+
+    def predict_proba(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
+        return self._predict_proba(X, self._clf.predict_proba)
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
 
         Args:
-            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+            examples: A list of examples to predict
+            labels: A list of expected labels
 
         Returns:
-            (dict): revised param_grid
+            ModelEvaluation: an object containing information about the \
+                evaluation
         """
-        if "class_weight" in param_grid:
-            raw_weights = (
-                param_grid["class_weight"] if is_grid else [param_grid["class_weight"]]
+        # TODO: also expose feature weights?
+        predictions = self.predict_proba(examples)
+
+        # Create a model config object for the current effective config (after param selection)
+        config = self._get_effective_config()
+
+        evaluations = [
+            EvaluatedExample(
+                e, labels[i], predictions[i][0], predictions[i][1], config.label_type
             )
-            weights = [
-                {
-                    k
-                    if isinstance(k, int)
-                    else self._class_encoder.transform((k,))[0]: v
-                    for k, v in cw_dict.items()
-                }
-                for cw_dict in raw_weights
-            ]
-            param_grid["class_weight"] = weights if is_grid else weights[0]
-        elif "class_bias" in param_grid:
-            # interpolate between class_bias=0 => class_weight=None
-            # and class_bias=1 => class_weight='balanced'
-            class_count = np.bincount(y)
-            classes = self._class_encoder.classes_
-            weights = []
-            raw_bias = (
-                param_grid["class_bias"] if is_grid else [param_grid["class_bias"]]
-            )
-            for class_bias in raw_bias:
-                # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [(len(y) / len(classes) / c) for c in class_count]
-                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
+            for i, e in enumerate(examples)
+        ]
 
-                weights.append(
-                    {c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples}
-                )
-            param_grid["class_weight"] = weights if is_grid else weights[0]
-            del param_grid["class_bias"]
+        model_eval = StandardModelEvaluation(config, evaluations)
+        return model_eval
 
-        return param_grid
-
-    def _get_feature_selector(self):
-        """Get a feature selector instance based on the feature_selector model
-        parameter
-
-        Returns:
-            (Object): a feature selector which returns a reduced feature matrix, \
-                given the full feature matrix, X and the class labels, y
-        """
-        if self.config.model_settings is None:
-            selector_type = None
-        else:
-            selector_type = self.config.model_settings.get("feature_selector")
-        selector = {
-            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
-            "f": SelectPercentile(),
-        }.get(selector_type)
-        return selector
-
-    def _get_feature_scaler(self):
-        """Get a feature value scaler based on the model settings"""
-        if self.config.model_settings is None:
-            scale_type = None
-        else:
-            scale_type = self.config.model_settings.get("feature_scaler")
-        scaler = {
-            "std-dev": StandardScaler(with_mean=False),
-            "max-abs": MaxAbsScaler(),
-        }.get(scale_type)
-        return scaler
+    def view_extracted_features(self, example, dynamic_resource=None):
+        return self._extract_features(
+            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
 
 
-class PytorchTextModel(Model):
+class PytorchTextModel(PytorchModel):
 
     def __init__(self, config):
         raise NotImplementedError
 
 
-class HuggingfaceTextModel(Model):
+class HuggingfaceTextModel(PytorchModel):
 
     def __init__(self, config):
         raise NotImplementedError
@@ -487,10 +491,10 @@ class AutoTextModel:
     # backwards compatable class that resolves and returns an appropriate XxxTextModel class
 
     CLASSIFIER_TYPE_TO_MODEL_CLASS = {
-        "logreg": SklearnTextModel,
-        "dtree": SklearnTextModel,
-        "rforest": SklearnTextModel,
-        "svm": SklearnTextModel,
+        "logreg": TextModel,
+        "dtree": TextModel,
+        "rforest": TextModel,
+        "svm": TextModel,
         "word-cnn": PytorchTextModel,
         "bert": HuggingfaceTextModel,
     }

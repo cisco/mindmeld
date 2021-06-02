@@ -16,6 +16,7 @@ import copy
 import json
 import logging
 import math
+from abc import ABC, abstractmethod
 from inspect import signature
 
 from sklearn.model_selection import (
@@ -223,7 +224,71 @@ class ModelConfig:
         return required_resources
 
 
-class Model:
+class MinimalisticModel(ABC):
+    """
+    A minimalistic abstract class upon which all models are based.
+    """
+
+    def __init__(self, config: ModelConfig):
+        self.config = config
+
+    @abstractmethod
+    def fit(self, examples, labels, params=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict(self, examples, dynamic_resource=None):
+        """Predicts a list of class labels for the given list of queries using the trained
+            classification model
+
+        Args:
+            examples (list): A list of queries to predict
+            dynamic_resource (dict): A dictionary containing dynamic resource keys like
+                dynamic gazetteers that is used to bias the NLP classifier
+
+        Returns:
+            list: A list of predicted labels per query
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict_proba(self, examples):
+        """Runs prediction on each of the given queries and generates multiple hypotheses with their
+        associated probabilities using the trained classification model
+
+        Args:
+            examples (list of mindmeld.core.Query): a list of queries to train on
+
+        Returns:
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
+                with confidence scores
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def evaluate(self, examples, labels):
+        """Evaluates the predictions of each query against the labels provided.
+
+        Args:
+            examples (list): A list of queries to predict
+            labels (list): A list of labels corresponding to each query
+
+        Returns:
+            list(ModelEvaluation): an list containing ModelEvaluation information about the \
+                evaluation for each query
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def view_extracted_features(self, example, dynamic_resource=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
+        raise NotImplementedError
+
+
+class Model(MinimalisticModel):
     """An abstract class upon which all models are based.
 
     Attributes:
@@ -231,7 +296,7 @@ class Model:
     """
 
     def __init__(self, config):
-        self.config = config
+        super().__init__(config)
         self.mindmeld_version = get_mm_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
@@ -239,25 +304,30 @@ class Model:
         self._clf = None
         self.cv_loss_ = None
 
-    def _fit(self, examples, labels, params=None):
-        raise NotImplementedError
-
-    def fit(self, examples, labels, params=None):
-        raise NotImplementedError
-
     def _get_model_constructor(self):
         raise NotImplementedError
 
-    @property
-    def tokenizer(self):
-        tokenizer = self._resources.get("tokenizer")
-        if not tokenizer:
-            logger.error(
-                "The tokenizer resource has not been registered "
-                "to the model. Using default tokenizer."
-            )
-            tokenizer = Tokenizer()
-        return tokenizer
+    def _fit(self, examples, labels, params=None):
+        raise NotImplementedError
+
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type.
+        """
+        raise NotImplementedError
+
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by \
+                parameter name
+            y (list): A list of labels
+            is_grid (bool, optional): Indicates whether param_grid is actually a grid \
+                or a params dict.
+        """
+        raise NotImplementedError
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
@@ -335,12 +405,6 @@ class Model:
 
         return model.best_estimator_, model.best_params_
 
-    def _get_cv_scorer(self, selection_settings):
-        """
-        Returns the scorer to use based on the selection settings and classifier type.
-        """
-        raise NotImplementedError
-
     @staticmethod
     def _clean_params(model_class, params):
         """
@@ -376,73 +440,6 @@ class Model:
     def _process_cv_best_params(best_params):
         return best_params
 
-    def select_params(self, examples, labels, selection_settings=None):
-        """Selects the best set of hyper-parameters for a given set of examples and true labels
-            through cross-validation
-
-        Args:
-            examples: A list of example queries
-            labels: A list of labels associated with the queries
-            selection_settings: A dictionary of parameter lists to select from
-
-        Returns:
-            dict: A dictionary of optimized parameters to use
-        """
-        raise NotImplementedError
-
-    def _convert_params(self, param_grid, y, is_grid=True):
-        """Convert the params from the style given by the config to the style
-        passed in to the actual classifier.
-
-        Args:
-            param_grid (dict): lists of classifier parameter values, keyed by \
-                parameter name
-            y (list): A list of labels
-            is_grid (bool, optional): Indicates whether param_grid is actually a grid \
-                or a params dict.
-        """
-        raise NotImplementedError
-
-    def predict(self, examples, dynamic_resource=None):
-        """Predicts a list of class labels for the given list of queries using the trained
-            classification model
-
-        Args:
-            examples (list): A list of queries to predict
-            dynamic_resource (dict): A dictionary containing dynamic resource keys like
-                dynamic gazetteers that is used to bias the NLP classifier
-
-        Returns:
-            list: A list of predicted labels per query
-        """
-        raise NotImplementedError
-
-    def predict_proba(self, examples):
-        """Runs prediction on each of the given queries and generates multiple hypotheses with their
-        associated probabilities using the trained classification model
-
-        Args:
-            examples (list of mindmeld.core.Query): a list of queries to train on
-
-        Returns:
-            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
-                with confidence scores
-        """
-        raise NotImplementedError
-
-    def evaluate(self, examples, labels):
-        """Evaluates the predictions of each query against the labels provided.
-
-        Args:
-            examples (list): A list of queries to predict
-            labels (list): A list of labels corresponding to each query
-
-        Returns:
-            list(ModelEvaluation): an list containing ModelEvaluation information about the \
-                evaluation for each query
-        """
-        raise NotImplementedError
-
     def _get_effective_config(self):
         """Create a model config object for the current effective config (after \
         param selection)
@@ -454,18 +451,6 @@ class Model:
         config_dict.pop("param_selection")
         config_dict["params"] = self._current_params
         return ModelConfig(**config_dict)
-
-    def register_resources(self, **kwargs):
-        """Registers resources which are accessible to feature extractors
-
-        Args:
-            **kwargs: dictionary of resources to register
-
-        """
-        self._resources.update(kwargs)
-
-    def get_feature_matrix(self, examples, y=None, fit=False):
-        raise NotImplementedError
 
     def _extract_features(self, example, dynamic_resource=None, tokenizer=None):
         """Gets all features from an example.
@@ -495,9 +480,6 @@ class Model:
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
             feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
-
-    def view_extracted_features(self, example, dynamic_resource=None):
-        raise NotImplementedError
 
     def _get_cv_iterator(self, settings):
         if not settings:
@@ -553,6 +535,17 @@ class Model:
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
+    @property
+    def tokenizer(self):
+        tokenizer = self._resources.get("tokenizer")
+        if not tokenizer:
+            logger.error(
+                "The tokenizer resource has not been registered "
+                "to the model. Using default tokenizer."
+            )
+            tokenizer = Tokenizer()
+        return tokenizer
+
     def get_resource(self, name):
         return self._resources.get(name)
 
@@ -570,6 +563,32 @@ class Model:
             ):
                 return True
         return False
+
+    def select_params(self, examples, labels, selection_settings=None):
+        """Selects the best set of hyper-parameters for a given set of examples and true labels
+            through cross-validation
+
+        Args:
+            examples: A list of example queries
+            labels: A list of labels associated with the queries
+            selection_settings: A dictionary of parameter lists to select from
+
+        Returns:
+            dict: A dictionary of optimized parameters to use
+        """
+        raise NotImplementedError
+
+    def get_feature_matrix(self, examples, y=None, fit=False):
+        raise NotImplementedError
+
+    def register_resources(self, **kwargs):
+        """Registers resources which are accessible to feature extractors
+
+        Args:
+            **kwargs: dictionary of resources to register
+
+        """
+        self._resources.update(kwargs)
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses \
@@ -618,3 +637,10 @@ class Model:
         # Always initialize the global resource for tokenization, which is not a
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
+
+
+class PytorchModel(MinimalisticModel):
+
+    def __init__(self, config):
+        super().__init__(config)
+        raise NotImplementedError
