@@ -29,6 +29,7 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from .evaluation import EvaluatedExample, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     QUERY_FREQ_RSC,
@@ -36,26 +37,23 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
     register_model,
 )
-from .model import EvaluatedExample, Model, StandardModelEvaluation
-
-_NEG_INF = -1e10
-
-# classifier types
-LOG_REG_TYPE = "logreg"
-DECISION_TREE_TYPE = "dtree"
-RANDOM_FOREST_TYPE = "rforest"
-SVM_TYPE = "svm"
-SUPER_LEARNER_TYPE = "super-learner"
-BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
-
-# default model scoring type
-ACCURACY_SCORING = "accuracy"
-
+from .model import Model, ModelConfig
 
 logger = logging.getLogger(__name__)
 
 
-class TextModel(Model):
+class SklearnTextModel(Model):
+    _NEG_INF = -1e10
+
+    # classifier types
+    LOG_REG_TYPE = "logreg"
+    DECISION_TREE_TYPE = "dtree"
+    RANDOM_FOREST_TYPE = "rforest"
+    SVM_TYPE = "svm"
+
+    # default model scoring type
+    ACCURACY_SCORING = "accuracy"
+
     def __init__(self, config):
         super().__init__(config)
         self._class_encoder = SKLabelEncoder()
@@ -91,10 +89,10 @@ class TextModel(Model):
         classifier_type = self.config.model_settings["classifier_type"]
         try:
             return {
-                LOG_REG_TYPE: LogisticRegression,
-                DECISION_TREE_TYPE: DecisionTreeClassifier,
-                RANDOM_FOREST_TYPE: RandomForestClassifier,
-                SVM_TYPE: SVC,
+                SklearnTextModel.LOG_REG_TYPE: LogisticRegression,
+                SklearnTextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
+                SklearnTextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
+                SklearnTextModel.SVM_TYPE: SVC,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
@@ -105,7 +103,7 @@ class TextModel(Model):
         Returns the scorer to use based on the selection settings and classifier type,
         defaulting to accuracy.
         """
-        return selection_settings.get("scoring", ACCURACY_SCORING)
+        return selection_settings.get("scoring", SklearnTextModel.ACCURACY_SCORING)
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -149,7 +147,7 @@ class TextModel(Model):
                 selection will be bypassed if this is provided
 
         Returns:
-            (TextModel): Returns self to match classifier scikit-learn \
+            (SklearnTextModel): Returns self to match classifier scikit-learn \
                 interfaces.
         """
         params = params or self.config.params
@@ -219,7 +217,7 @@ class TextModel(Model):
             _, probas = row
             for label, proba in probas.items():
                 if proba == -np.Infinity:
-                    probas[label] = _NEG_INF
+                    probas[label] = SklearnTextModel._NEG_INF
         return predictions
 
     def view_extracted_features(self, example, dynamic_resource=None):
@@ -473,4 +471,33 @@ class TextModel(Model):
         return scaler
 
 
-register_model("text", TextModel)
+class PytorchTextModel(Model):
+
+    def __init__(self, config):
+        raise NotImplementedError
+
+
+class HuggingfaceTextModel(Model):
+
+    def __init__(self, config):
+        raise NotImplementedError
+
+
+class AutoTextModel:
+    # backwards compatable class that resolves and returns an appropriate XxxTextModel class
+
+    CLASSIFIER_TYPE_TO_MODEL_CLASS = {
+        "logreg": SklearnTextModel,
+        "dtree": SklearnTextModel,
+        "rforest": SklearnTextModel,
+        "svm": SklearnTextModel,
+        "word-cnn": PytorchTextModel,
+        "bert": HuggingfaceTextModel,
+    }
+
+    def __new__(cls, config: ModelConfig):
+        classifier_type = config.model_settings["classifier_type"]
+        return AutoTextModel.CLASSIFIER_TYPE_TO_MODEL_CLASS[classifier_type](config)
+
+
+register_model("text", AutoTextModel)

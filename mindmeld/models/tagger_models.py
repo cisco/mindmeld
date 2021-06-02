@@ -18,7 +18,7 @@ import random
 
 from sklearn.externals import joblib
 
-from ..exceptions import MindMeldError
+from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (
     get_label_encoder,
     get_seq_accuracy_scorer,
@@ -26,15 +26,15 @@ from .helpers import (
     ingest_dynamic_gazetteer,
     register_model,
 )
-from .model import EntityModelEvaluation, EvaluatedExample, Model, ModelConfig
+from .model import Model, ModelConfig
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
+from ..exceptions import MindMeldError
 
 try:
     from .taggers.lstm import LstmModel
 except ImportError:
     LstmModel = None
-
 
 logger = logging.getLogger(__name__)
 
@@ -256,9 +256,9 @@ class TaggerModel(Model):
         entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
         for entity in entities:
             entity_proba = probas[
-                entity.normalized_token_span.start : entity.normalized_token_span.end
-                + 1
-            ]
+                           entity.normalized_token_span.start: entity.normalized_token_span.end
+                                                               + 1
+                           ]
             # We assume that the score of the least likely tag in the sequence as the confidence
             # score of the entire entity sequence
             entity_confidence.append(min(entity_proba))

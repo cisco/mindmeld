@@ -13,11 +13,13 @@
 
 # Need to import the following so models and features are registered. See helpers module
 from . import (
-    entity_features,
-    query_features,
     tagger_models,
     text_models,
     embedder_models,
+)
+from .features import (
+    entity_features,
+    query_features
 )
 from .helpers import (
     CLASS_LABEL_TYPE,
