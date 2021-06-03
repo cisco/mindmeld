@@ -19,6 +19,7 @@ import logging
 import random
 from functools import cmp_to_key, partial
 from typing import List, Optional
+from marshmallow.exceptions import ValidationError
 import immutables
 
 from .. import path
@@ -1144,8 +1145,15 @@ class DialogueResponder:
         # with the attributes of a DialogueResponder object
         if isinstance(history, (list, tuple)) and \
                 any(isinstance(item, (dict, immutables.Map)) for item in history):
-            self._history = [dict(DialogueResponder(**DEFAULT_RESPONSE_SCHEMA.load(item)))
-                             for item in history]
+            try:
+                self._history = [dict(DialogueResponder(**DEFAULT_RESPONSE_SCHEMA.load(item)))
+                                 for item in history]
+            except ValidationError as err:
+                # TODO: Fix deserialization issues between workbench and mindmeld history payloads
+                logging.warning("Could not deserialize history properly due to error: %s, "
+                                "this might be due to version incompatibility. We set the history to what "
+                                "is passed in to provide backwards compatibility.", err.messages)
+                self._history = history
         else:
             self._history = history or []
 
