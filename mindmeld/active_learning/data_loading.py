@@ -242,18 +242,16 @@ class DataBucket:
             cache=self.resource_loader.query_cache, elements=sampled_queries_ids
         )
 
-    def update_unsampled_queries(self, newly_sampled_queries_ids):
+    def update_unsampled_queries(self, remaining_indices):
         """ Update the current set of unsampled queries by removing the set of newly sampled
         queries. A new PrcoessedQueryList object is created with the updated set of query ids.
 
         Args:
-            newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
-                queries in the QueryCache.
+            remaining_indices (List[int]): List of ids corresponding the reamining queries
+                queries in self.unsampled_queries.
         """
         remaining_queries_ids = [
-            i
-            for i in self.unsampled_queries.elements
-            if i not in newly_sampled_queries_ids
+            self.unsampled_queries.elements[i] for i in remaining_indices
         ]
         self.unsampled_queries = ProcessedQueryList(
             cache=self.resource_loader.query_cache, elements=remaining_queries_ids
@@ -291,11 +289,13 @@ class DataBucket:
             else heuristic.rank_2d(confidences_2d)
         )
         newly_sampled_indices = ranked_indices[:sampling_size]
+        remaining_indices = ranked_indices[sampling_size:]
+
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices
         ]
         self.update_sampled_queries(newly_sampled_queries_ids)
-        self.update_unsampled_queries(newly_sampled_queries_ids)
+        self.update_unsampled_queries(remaining_indices)
         return newly_sampled_queries_ids
 
     @staticmethod

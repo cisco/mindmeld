@@ -433,19 +433,6 @@ class PlotManager:
                 plt.clf()
 
     @staticmethod
-    def get_counter(labels: List):
-        """Makes a counter with counts from a given set of labels.
-        Args:
-            labels (list): List of labels to count
-        Returns:
-            counter (Counter): Updated counter
-        """
-        counter = Counter()
-        for label in labels:
-            counter[label] += 1
-        return counter
-
-    @staticmethod
     def get_unique_labels(all_counters: List) -> List:
         """
         Args:
@@ -497,10 +484,10 @@ class PlotManager:
                 query_list = epoch_dict[iteration]
                 if plot_domains:
                     domains = [q["domain"] for q in query_list]
-                    domain_counters.append(PlotManager.get_counter(domains))
+                    domain_counters.append(Counter(domains))
                 if plot_intents:
                     intents = [f"{q['intent']}|{q['domain']}" for q in query_list]
-                    intent_counters.append(PlotManager.get_counter(intents))
+                    intent_counters.append(Counter(intents))
 
             for level, all_counters in zip(
                 ["domain", "intent"], [domain_counters, intent_counters]

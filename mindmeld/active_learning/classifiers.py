@@ -85,8 +85,8 @@ class MindMeldALClassifier(ALClassifier):
         app_path: str,
         training_level: str,
         n_classifiers: int,
-        aggregate_statistic: str,
-        class_level_statistic: str,
+        aggregate_statistic: str = None,
+        class_level_statistic: str = None,
     ):
         """
         Args:
@@ -179,16 +179,16 @@ class MindMeldALClassifier(ALClassifier):
         return queries_prob_vectors
 
     def _pad_intent_probs(
-        self, ic_queries_prob_vectors: List[ProcessedQuery], intents: List
+        self, ic_queries_prob_vectors: List[List[float]], intents: List
     ):
         """Pads the intent probability array with zeroes for out-of-domain intents.
         Args:
-            ic_queries_prob_vectors (List[List]]): 2D Array containing the probability distribution
-                for a single query across intents in the query's domain.
+            ic_queries_prob_vectors (List[List[float]]]): 2D Array containing the probability
+                distribution for a single query across intents in the query's domain.
             intents (List): List intents in the order that corresponds with the intent
                 probabities for the queries. Intents are in the form "domain|intent".
         Returns:
-            padded_ic_queries_prob_vectors (List[List]]): 2D Array containing the probability
+            padded_ic_queries_prob_vectors (List[List[float]]]): 2D Array containing the probability
                 distribution for a single query across all intents (including out-of-domain
                 intents).
         """
@@ -220,12 +220,12 @@ class MindMeldALClassifier(ALClassifier):
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
         confidences_2d = self.train_single(data_bucket, eval_stats)
-        return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
+        return_confidences_3d = heuristic in MULTI_MODEL_HEURISTICS
         confidences_3d = (
             self.train_multi(data_bucket) if return_confidences_3d else None
         )
         domain_indices = (
-            self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
+            self.domain_indices if heuristic == KLDivergenceSampling else None
         )
         return eval_stats, confidences_2d, confidences_3d, domain_indices
 

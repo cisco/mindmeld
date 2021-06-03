@@ -34,6 +34,7 @@ STRATEGY_ABRIDGED = {
     "EnsembleSampling": "ens",
     "KLDivergenceSampling": "kld",
 }
+
 AL_DEFAULT_AGGREGATE_STATISTIC = "accuracy"
 AL_SUPPORTED_AGGREGATE_STATISTICS = [
     "f1_weighted",
