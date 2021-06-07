@@ -19,7 +19,7 @@ class LabelMap:
     def __init__(self, query_tree: Dict):
         """
         Args:
-            query_tree (list): query_tree (dict): Nested Dictionary containing queries.
+            query_tree (dict): Nested Dictionary containing queries.
                 Has the format: {"domain":{"intent":[Query List]}}.
         """
         domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
@@ -33,15 +33,15 @@ class LabelMap:
     def get_domain_to_intents(query_tree: Dict) -> Dict:
         """
         Args:
-            query_tree (list): query_tree (dict): Nested Dictionary containing queries.
+            query_tree (dict): Nested Dictionary containing queries.
                 Has the format: {"domain":{"intent":[Query List]}}
 
         Returns:
             domain_to_intents (dict): Dict mapping domains to a list of intents.
         """
         domain_to_intents = {}
-        for domain in query_tree.keys():
-            domain_to_intents[domain] = list(query_tree[domain].keys())
+        for domain in query_tree:
+            domain_to_intents[domain] = list(query_tree[domain])
         return domain_to_intents
 
     @staticmethod

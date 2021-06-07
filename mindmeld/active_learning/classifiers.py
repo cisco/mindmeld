@@ -285,7 +285,7 @@ class MindMeldALClassifier(ALClassifier):
                 sampled_queries=sampled_queries,
                 unsampled_queries=unsampled_queries,
                 test_queries=test_queries,
-                domain_list=list(label_map.domain2id.keys()),
+                domain_list=list(label_map.domain2id),
                 domain_to_intent2id=label_map.domain_to_intent2id,
             )
             if eval_stats:
