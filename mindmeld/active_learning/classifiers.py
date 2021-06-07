@@ -220,12 +220,12 @@ class MindMeldALClassifier(ALClassifier):
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
         confidences_2d = self.train_single(data_bucket, eval_stats)
-        return_confidences_3d = heuristic in MULTI_MODEL_HEURISTICS
+        return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
         confidences_3d = (
             self.train_multi(data_bucket) if return_confidences_3d else None
         )
         domain_indices = (
-            self.domain_indices if heuristic == KLDivergenceSampling else None
+            self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
         )
         return eval_stats, confidences_2d, confidences_3d, domain_indices
 

@@ -426,5 +426,5 @@ class DataBucketFactory:
         test_queries = resource_loader.get_flattened_label_set(label_set=test_pattern)
 
         return DataBucket(
-            label_map, resource_loader, test_queries, log_queries, sampled_queries
+            label_map, resource_loader, test_queries, log_query_list, sampled_queries
         )

@@ -69,7 +69,7 @@ def test_validate_class_level_statistic(mindmeld_al_classifier):
 def test_single_model_classification(mindmeld_al_classifier, train_data_bucket):
 
     _, confidences_2d, confidences_3d, domain_indices = mindmeld_al_classifier.train(
-        train_data_bucket, LeastConfidenceSampling
+        train_data_bucket, LeastConfidenceSampling()
     )
     assert len(confidences_2d) == len(train_data_bucket.unsampled_queries)
     assert confidences_3d is None
@@ -80,7 +80,7 @@ def test_single_model_classification(mindmeld_al_classifier, train_data_bucket):
 def test_multi_model_classification(mindmeld_al_classifier, train_data_bucket):
 
     _, confidences_2d, confidences_3d, domain_indices = mindmeld_al_classifier.train(
-        train_data_bucket, KLDivergenceSampling
+        train_data_bucket, KLDivergenceSampling()
     )
     assert len(confidences_2d) == len(train_data_bucket.unsampled_queries)
     assert len(confidences_3d[0]) == len(train_data_bucket.unsampled_queries)

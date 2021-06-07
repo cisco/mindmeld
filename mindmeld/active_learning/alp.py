@@ -206,7 +206,6 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     confidences_3d,
                     confidence_segments,
                 ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic)
-
                 if not select_mode:
                     self._save_training_data(
                         strategy,
