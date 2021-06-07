@@ -87,7 +87,7 @@ class PlotManager:
         Returns:
             has_data (bool): Whether queries.json has data.
         """
-        return {} != self.get_queries_json_data()
+        return self.get_queries_json_data() != {}
 
     # Plotting Meta Functions
     def generate_plots(self):
@@ -177,7 +177,7 @@ class PlotManager:
         Returns:
             strategies (list): List of selection strategies for the given experiment.
         """
-        strategies = list(self.accuracies_data.keys())
+        strategies = list(self.accuracies_data)
         if len(strategies) == 0:
             raise MissingDataError("Did not find data in accuracies.json.")
         return strategies

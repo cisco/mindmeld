@@ -156,7 +156,7 @@ class MindMeldALClassifier(ALClassifier):
     def _get_probs(
         classifier: Classifier, queries: List[ProcessedQuery], nlp_component_to_id: Dict
     ):
-        """Get the probability distribution for for a query across domains or intents.
+        """Get the probability distribution for a query across domains or intents.
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
@@ -427,14 +427,14 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_idx_preds_pairs = []
         for domain in domain_list:
             # Filter Queries
-            _, filtered_sampled_queries = DataBucket.filter_queries(
+            _, filtered_sampled_queries = DataBucket.filter_queries_by_domain(
                 sampled_queries, domain
             )
             (
                 filtered_unsampled_queries_indices,
                 filtered_unsampled_queries,
-            ) = DataBucket.filter_queries(unsampled_queries, domain)
-            _, filtered_test_queries = DataBucket.filter_queries(test_queries, domain)
+            ) = DataBucket.filter_queries_by_domain(unsampled_queries, domain)
+            _, filtered_test_queries = DataBucket.filter_queries_by_domain(test_queries, domain)
             # Train
             ic = self.nlp.domains[domain].intent_classifier
             ic.fit(queries=filtered_sampled_queries)

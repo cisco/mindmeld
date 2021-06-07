@@ -126,9 +126,9 @@ def test_data_bucket_factory(kwik_e_mart_app_path, train_data_bucket):
 
 
 # Test Filter Queries
-def test_filter_queries(kwik_e_mart_nlp, all_train_queries):
+def test_filter_queries_by_domain(all_train_queries):
     domain_to_filter_by = "banking"
-    filtered_ids, filtered_queries = DataBucket.filter_queries(
+    filtered_ids, filtered_queries = DataBucket.filter_queries_by_domain(
         query_list=all_train_queries, domain=domain_to_filter_by
     )
     assert len(filtered_ids) == len(filtered_queries)

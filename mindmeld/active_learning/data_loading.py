@@ -55,7 +55,7 @@ class LabelMap:
             domain2id (dict): dict with domain to id mappings.
         """
         domain2id = {}
-        domains = list(domain_to_intents.keys())
+        domains = list(domain_to_intents)
         for index, domain in enumerate(domains):
             domain2id[domain] = index
         return domain2id
@@ -95,8 +95,8 @@ class LabelMap:
         """
         reversed_dict = {}
 
-        for parent_key in dictionary:
-            reversed_dict[parent_key] = LabelMap._reverse_dict(dictionary[parent_key])
+        for parent_key, parent_value in dictionary.items():
+            reversed_dict[parent_key] = LabelMap._reverse_dict(parent_value)
         return reversed_dict
 
     @staticmethod
@@ -154,7 +154,7 @@ class LogQueriesLoader:
         self.log_file_path = log_file_path
 
     @staticmethod
-    def filter_raw_text_queries(log_queries_iter) -> List[str]:
+    def deduplicate_raw_text_queries(log_queries_iter) -> List[str]:
         """Removes duplicates in the text queries.
 
         Args:
@@ -185,7 +185,7 @@ class LogQueriesLoader:
     @property
     def queries(self):
         log_queries_iter = read_query_file(self.log_file_path)
-        filtered_text_queries = LogQueriesLoader.filter_raw_text_queries(
+        filtered_text_queries = LogQueriesLoader.deduplicate_raw_text_queries(
             log_queries_iter
         )
         return self.convert_text_queries_to_processed(filtered_text_queries)
@@ -299,7 +299,7 @@ class DataBucket:
         return newly_sampled_queries_ids
 
     @staticmethod
-    def filter_queries(query_list: ProcessedQueryList, domain: str):
+    def filter_queries_by_domain(query_list: ProcessedQueryList, domain: str):
         """Filter queries for training preperation.
 
         Args:

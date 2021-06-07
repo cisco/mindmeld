@@ -15,6 +15,7 @@ import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import List
 from tqdm import tqdm
 from .resource_loader import ResourceLoader
 from .components._config import (
