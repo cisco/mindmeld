@@ -78,7 +78,7 @@ class ConditionalRandomFields(Tagger):
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
-    def extract_features(self, examples, config, resources, y=None, fit=True, in_memory=False):
+    def extract_features(self, examples, config, resources, y=None, fit=False, in_memory=False):
         """Transforms a list of examples into a feature matrix.
 
         Args:

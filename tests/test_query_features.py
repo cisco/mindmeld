@@ -254,7 +254,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(37 / 3), math.log(2)],
+            [math.log((37 / 3) + 1), math.log(2 + 1)],
             -1,
         ),
         # Test for sys_candidate features for normalized text
@@ -264,7 +264,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(37 / 3), math.log(2)],
+            [math.log((37 / 3) + 1), math.log(2 + 1)],
             -1,
         ),
     ],
@@ -440,8 +440,8 @@ def test_entity_query_features(
                 "00",
                 "el",
                 "lm",
-                0.0,
                 0.6931471805599453,
+                1.0986122886681098,
             ],
             4,
         ),
@@ -545,21 +545,21 @@ def test_query_token_span_features(kwik_e_mart_nlp):
     for feat in unexpected_features:
         assert feat not in output_features[0]
 
-    assert output_features[0][expected_features[1]] == math.log(len('$2'))
-    assert math.isclose(output_features[0][expected_features[0]], math.log(1.5), rel_tol=1e-04)
+    assert output_features[0][expected_features[1]] == math.log(len('$2') + 1)
+    assert math.isclose(output_features[0][expected_features[0]], math.log(1.5 + 1), rel_tol=1e-04)
 
     output_features = er.view_extracted_features('$20 5')
 
-    assert output_features[0][f'{feature_name}:0'] == math.log(6)
+    assert output_features[0][f'{feature_name}:0'] == math.log(6 + 1)
     assert math.isclose(output_features[0][f'{feature_name}:0|log_len'],
-                        math.log(3.833), rel_tol=1e-04)
-    assert output_features[0][f'{feature_name}:1'] == math.log(5)
+                        math.log(3.833 + 1), rel_tol=1e-04)
+    assert output_features[0][f'{feature_name}:1'] == math.log(5 + 1)
     assert math.isclose(output_features[0][f'{feature_name}:1|log_len'],
-                        math.log(3.8), rel_tol=1e-04)
+                        math.log(3.8 + 1), rel_tol=1e-04)
 
-    assert output_features[1][f'{feature_name}:-1'] == math.log(6)
+    assert output_features[1][f'{feature_name}:-1'] == math.log(6 + 1)
     assert math.isclose(output_features[1][f'{feature_name}:-1|log_len'],
-                        math.log(3.833), rel_tol=1e-04)
-    assert output_features[1][f'{feature_name}:0'] == math.log(5)
+                        math.log(3.833 + 1), rel_tol=1e-04)
+    assert output_features[1][f'{feature_name}:0'] == math.log(5 + 1)
     assert math.isclose(output_features[1][f'{feature_name}:0|log_len'],
-                        math.log(3.8), rel_tol=1e-04)
+                        math.log(3.8 + 1), rel_tol=1e-04)
