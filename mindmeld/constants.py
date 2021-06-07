@@ -19,6 +19,7 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
+
 # ACTIVE LEARNING CONSTANTS
 TRAIN_LEVEL_DOMAIN = "domain"
 TRAIN_LEVEL_INTENT = "intent"
@@ -66,10 +67,9 @@ SPACY_ANNOTATOR_NEWS_LANGUAGES = [
     "ro",
     "es",
 ]
-SPACY_ANNOTATOR_SUPPORTED_LANGUAGES = (
-    SPACY_ANNOTATOR_WEB_LANGUAGES + SPACY_ANNOTATOR_NEWS_LANGUAGES
-)
-SPACY_ANNOTATOR_MODEL_SIZES = ["sm", "md", "lg"]
+SPACY_SUPPORTED_LANGUAGES = SPACY_WEB_TRAINED_LANGUAGES + SPACY_NEWS_TRAINED_LANGUAGES
+
+SPACY_MODEL_SIZES = ["sm", "md", "lg"]
 
 UNANNOTATE_ALL_RULE = [
     {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
@@ -321,6 +321,9 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 CURRENCY_SYMBOLS = u"".join(
     chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
 )
+ASCII_CUTOFF = ord("\u0080")
+UNICODE_NON_LATIN_CATEGORY = "Lo"
+UNICODE_SPACE_CATEGORY = "Zs"
 
 
 SYSTEM_ENTITY_PREFIX = "sys_"

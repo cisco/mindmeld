@@ -501,6 +501,8 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
 DEFAULT_TOKENIZER_CONFIG = {
     # populated in the `get_tokenizer_config` func
     "allowed_patterns": [],
+    "tokenizer": "WhiteSpaceTokenizer",
+    "normalizer": "ASCIIFold",
 }
 
 
@@ -1143,6 +1145,12 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
         tokenizer_config = getattr(
             _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
         )
+        if not tokenizer_config.get("allowed_patterns"):
+            # If allowed_patterns are not provided, use default
+            tokenizer_config["allowed_patterns"] = []
+            tokenizer_config["default_allowed_patterns"] = _get_default_regex(
+                exclude_from_norm
+            )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
