@@ -820,21 +820,21 @@ def augment(app_path, language):
     "--batch_size", type=int, help="Number of queries to select each iteration."
 )
 @click.option(
-    "--training_level",
+    "--tuning_level",
     type=str,
-    help="The hierarchy level to train ('domain' or 'intent').",
+    help="The hierarchy level to run tuning ('domain' or 'intent').",
 )
 @click.option(
     "--output_folder",
     type=str,
     help="Folder to store output.",
 )
-# Params Specific to Training
+# Params Specific to Tune Selection Strategy
 @click.option(
-    "--train",
+    "--tune",
     is_flag=True,
     default=False,
-    help="Execute active learning training.",
+    help="Execute active learning tuning.",
 )
 @click.option(
     "--train_seed_pct",
@@ -871,9 +871,9 @@ def augment(app_path, language):
 def active_learning(  # pylint: disable=R0913
     app_path,
     batch_size,
-    training_level,
+    tuning_level,
     output_folder,
-    train,
+    tune,
     train_seed_pct,
     n_epochs,
     plot,
@@ -884,39 +884,42 @@ def active_learning(  # pylint: disable=R0913
     labeled_logs_pattern,
 ):
     """Command to run active learning training or selection."""
-    if not (train or select):
-        raise AssertionError("'train' or 'select' must be passed in as a paramter.")
+    if not (tune or select):
+        raise AssertionError("'tune' or 'select' must be passed in as a paramter.")
     config = get_active_learning_config(app_path=app_path)
-
     config["app_path"] = app_path or config.get("app_path")
     if batch_size:
-        config["training"]["batch_size"] = batch_size
-    if training_level:
-        config["training"]["training_level"] = training_level
+        config["tuning"]["batch_size"] = batch_size
+    if tuning_level:
+        config["tuning"]["tuning_level"] = tuning_level
     config["output_folder"] = output_folder or config.get("output_folder")
+    if not output_folder:
+        raise AssertionError(
+            "An 'output_folder' must be defined in either the CLI command or the config."
+        )
     if train_seed_pct:
-        config["pre_training"]["train_seed_pct"] = train_seed_pct
+        config["pre_tuning"]["train_seed_pct"] = train_seed_pct
     if n_epochs:
-        config["training"]["n_epochs"] = n_epochs
+        config["tuning"]["n_epochs"] = n_epochs
     if strategy:
-        if train:
-            config["training"]["training_strategies"] = [strategy]
+        if tune:
+            config["tuning"]["tuning_strategies"] = [strategy]
         elif select:
-            config["selection"]["selection_strategy"] = strategy
+            config["query_selection"]["selection_strategy"] = strategy
     if unlabeled_logs_path:
-        config["selection"]["unlabeled_logs_path"] = unlabeled_logs_path
+        config["query_selection"]["unlabeled_logs_path"] = unlabeled_logs_path
     if log_usage_pct:
-        config["selection"]["log_usage_pct"] = log_usage_pct
+        config["query_selection"]["log_usage_pct"] = log_usage_pct
     if labeled_logs_pattern:
-        config["selection"]["labeled_logs_pattern"] = labeled_logs_pattern
+        config["query_selection"]["labeled_logs_pattern"] = labeled_logs_pattern
 
     alp = ActiveLearningPipelineFactory.create_from_config(config)
-    if train:
-        alp.train()
+    if tune:
+        alp.tune_strategies()
         if plot:
             alp.plot()
     elif select:
-        alp.select()
+        alp.select_queries()
 
 
 #

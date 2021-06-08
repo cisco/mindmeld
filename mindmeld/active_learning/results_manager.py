@@ -66,14 +66,14 @@ class ResultsManager:
         return os.path.join(self.output_folder, self.experiment_folder_name)
 
     def create_experiment_folder(
-        self, active_learning_params: Dict, training_strategies: List
+        self, active_learning_params: Dict, tuning_strategies: List
     ):
         """Creates the active learning experiment folder.
         Args:
             active_learning_params (Dict): Dictionary representation of the params to store.
-            training_strategies (list): List of strategies used for the experiment.
+            tuning_strategies (list): List of strategies used for the experiment.
         """
-        self.set_experiment_folder_name(training_strategies)
+        self.set_experiment_folder_name(tuning_strategies)
         create_dir_if_absent(self.experiment_folder)
         self.dump_json(AL_PARAMS_PATH, active_learning_params)
         self.create_folder(AL_RESULTS_FOLDER)

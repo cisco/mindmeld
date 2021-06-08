@@ -17,8 +17,8 @@ from mindmeld.active_learning.data_loading import (
 from mindmeld.constants import (
     DEFAULT_TRAIN_SET_REGEX,
     DEFAULT_TEST_SET_REGEX,
-    TRAIN_LEVEL_DOMAIN,
-    TRAIN_LEVEL_INTENT,
+    TUNE_LEVEL_DOMAIN,
+    TUNE_LEVEL_INTENT,
 )
 from mindmeld.core import ProcessedQuery
 
@@ -31,10 +31,10 @@ def all_train_queries(kwik_e_mart_nlp):
 
 
 @pytest.fixture(scope="module")
-def train_data_bucket(kwik_e_mart_app_path):
-    return DataBucketFactory.get_data_bucket_for_training(
+def tuning_data_bucket(kwik_e_mart_app_path):
+    return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        training_level=TRAIN_LEVEL_INTENT,
+        tuning_level=TUNE_LEVEL_INTENT,
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -63,7 +63,7 @@ def test_label_map_intents(kwik_e_mart_nlp):
 def test_get_class_labels_domains(kwik_e_mart_nlp, all_train_queries):
     app_domains = list(kwik_e_mart_nlp.domains.keys())
     unique_domain_labels = list(
-        set(LabelMap.get_class_labels(TRAIN_LEVEL_DOMAIN, all_train_queries))
+        set(LabelMap.get_class_labels(TUNE_LEVEL_DOMAIN, all_train_queries))
     )
     assert all(domain in app_domains for domain in unique_domain_labels)
 
@@ -76,7 +76,7 @@ def test_get_class_labels_domains_intents(kwik_e_mart_nlp, all_train_queries):
             label = f"{domain}|{intent}"
             nlp_domain_intent_labels.append(label)
     unique_domain_intent_labels = list(
-        set(LabelMap.get_class_labels(TRAIN_LEVEL_INTENT, all_train_queries))
+        set(LabelMap.get_class_labels(TUNE_LEVEL_INTENT, all_train_queries))
     )
     assert all(
         label in nlp_domain_intent_labels for label in unique_domain_intent_labels
@@ -91,7 +91,7 @@ def test_log_queries_loader(kwik_e_mart_nlp, kwik_e_mart_app_path):
     first_ten_queries_raw = [q.query.text for q in first_ten_queries]
     log_queries_loader = LogQueriesLoader(
         app_path=kwik_e_mart_app_path,
-        training_level=TRAIN_LEVEL_INTENT,
+        tuning_level=TUNE_LEVEL_INTENT,
         log_file_path="",
     )
     text_to_processed_queries = log_queries_loader.convert_text_queries_to_processed(
@@ -104,23 +104,23 @@ def test_log_queries_loader(kwik_e_mart_nlp, kwik_e_mart_app_path):
 
 
 # Test the DataBucketFactory and DataBucket
-def test_data_bucket_factory(kwik_e_mart_app_path, train_data_bucket):
-    len_sampled_queries = len(train_data_bucket.sampled_queries)
-    len_unsampled_queries = len(train_data_bucket.unsampled_queries)
+def test_data_bucket_factory(kwik_e_mart_app_path, tuning_data_bucket):
+    len_sampled_queries = len(tuning_data_bucket.sampled_queries)
+    len_unsampled_queries = len(tuning_data_bucket.unsampled_queries)
 
     # Simulating sampling by simply selecting the first 10 queries
-    newly_sampled_queries_ids = train_data_bucket.unsampled_queries.elements[:10]
-    remaining_queries = train_data_bucket.unsampled_queries.elements[10:]
+    newly_sampled_queries_ids = tuning_data_bucket.unsampled_queries.elements[:10]
+    remaining_queries = tuning_data_bucket.unsampled_queries.elements[10:]
 
     # Update Sampled Queries
-    train_data_bucket.update_sampled_queries(newly_sampled_queries_ids)
-    assert len(train_data_bucket.sampled_queries) == len_sampled_queries + len(
+    tuning_data_bucket.update_sampled_queries(newly_sampled_queries_ids)
+    assert len(tuning_data_bucket.sampled_queries) == len_sampled_queries + len(
         newly_sampled_queries_ids
     )
 
     # Update Unsampled Queries
-    train_data_bucket.update_unsampled_queries(remaining_queries)
-    assert len(train_data_bucket.unsampled_queries) == (
+    tuning_data_bucket.update_unsampled_queries(remaining_queries)
+    assert len(tuning_data_bucket.unsampled_queries) == (
         len_unsampled_queries - len(newly_sampled_queries_ids)
     )
 

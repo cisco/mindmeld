@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ActiveLearningPipeline:  # pylint: disable=R0902
-    """Class that executes the training and selection process for the Active Learning Pipeline"""
+    """Class that executes the tuning and selection process for the Active Learning Pipeline"""
 
     def __init__(  # pylint: disable=R0913
         self,
@@ -24,8 +24,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         n_classifiers: int,
         n_epochs: int,
         batch_size: int,
-        training_strategies: list,
-        training_level: str,
+        tuning_strategies: list,
+        tuning_level: str,
         selection_strategy: str,
         save_sampled_queries: bool,
         aggregate_statistic: str,
@@ -42,10 +42,10 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             train_seed_pct (float): Percentage of training data to use as the initial seed
             n_classifiers (int): Number of classifiers to be used by a subset of heuristics
-            n_epochs (int): Number of epochs to run training
+            n_epochs (int): Number of epochs to run tuning
             batch_size (int): Number of queries to select at each iteration
-            training_level (str): The hierarchy level to train ("domain" or "intent")
-            training_strategies (List[str]): List of strategies to use for training
+            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_strategies (List[str]): List of strategies to use for tuning
             selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
             aggregate_statistic (str): Aggregate statistic to record.
@@ -64,8 +64,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.n_classifiers = n_classifiers
         self.n_epochs = n_epochs
         self.batch_size = batch_size
-        self.training_level = training_level
-        self.training_strategies = training_strategies
+        self.tuning_level = tuning_level
+        self.tuning_strategies = tuning_strategies
         self.selection_strategy = selection_strategy
         self.save_sampled_queries = save_sampled_queries
         self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
@@ -90,7 +90,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         """ Creates an instance of a MindMeld Active Learning Classifier. """
         return MindMeldALClassifier(
             self.app_path,
-            self.training_level,
+            self.tuning_level,
             self.n_classifiers,
             self.aggregate_statistic,
             self.class_level_statistic,
@@ -98,9 +98,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     @property
     def num_iterations(self) -> int:
-        """Calculates the number of iterations needed for training.
+        """Calculates the number of iterations needed for tuning.
         Returns:
-            num_iterations (int): Number of iterations needed for training.
+            num_iterations (int): Number of iterations needed for tuning.
         """
         # An additional iteration is added to save training data after the last sampling round.
         return 1 + math.ceil(len(self.init_unsampled_queries_ids) / self.batch_size)
@@ -116,8 +116,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             "n_classifiers": self.n_classifiers,
             "n_epochs": self.n_epochs,
             "batch_size": self.batch_size,
-            "training_level": self.training_level,
-            "training_strategies": self.training_strategies,
+            "tuning_level": self.tuning_level,
+            "tuning_strategies": self.tuning_strategies,
             "selection_strategy": self.selection_strategy,
             "save_sampled_queries": self.save_sampled_queries,
             "log_usage_pct": self.log_usage_pct,
@@ -126,40 +126,41 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             "output_folder": self.output_folder,
         }
 
-    def train(self):
+    def tune_strategies(self):
         """Loads the initial data bucket and then trains on every strategy."""
         logger.info("Creating output folder and saving params.")
         self.results_manager.create_experiment_folder(
             active_learning_params=self.__dict__,
-            training_strategies=self.training_strategies,
+            tuning_strategies=self.tuning_strategies,
         )
-        logger.info("Creating training data bucket.")
-        self.data_bucket = DataBucketFactory.get_data_bucket_for_training(
+        logger.info("Creating strategy tuning data bucket.")
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_strategy_tuning(
             self.app_path,
-            self.training_level,
+            self.tuning_level,
             self.train_pattern,
             self.test_pattern,
             self.train_seed_pct,
         )
         self.init_sampled_queries_ids = self.data_bucket.sampled_queries.elements
         self.init_unsampled_queries_ids = self.data_bucket.unsampled_queries.elements
-        logger.info("Starting training.")
+        logger.info("Starting tuning.")
         self._train_all_strategies()
 
-    def select(self):
+    def select_queries(self):
         """Selects the next batch of queries to label from a set of log queries."""
-        logger.info("Loading queries for active learning.")
-        self.data_bucket = DataBucketFactory.get_data_bucket_for_selection(
+        logger.info("Loading queries for active-learning selection.")
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(
             self.app_path,
-            self.training_level,
+            self.tuning_level,
             self.train_pattern,
             self.test_pattern,
             self.unlabeled_logs_path,
             self.labeled_logs_pattern,
             self.log_usage_pct,
         )
+        self.init_sampled_queries_ids = self.data_bucket.sampled_queries.elements
         self.init_unsampled_queries_ids = self.data_bucket.unsampled_queries.elements
-        logger.info("Starting selection.")
+        logger.info("Starting selection of log queries.")
         newly_sampled_queries = self._run_strategy(
             strategy=self.selection_strategy, select_mode=True
         )
@@ -178,7 +179,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
     def _train_all_strategies(self):
         """ Train with all active learning strategies."""
-        for strategy in self.training_strategies:
+        for strategy in self.tuning_strategies:
             self._run_strategy(strategy)
 
     def _run_strategy(self, strategy: str, select_mode: bool = False):
@@ -194,7 +195,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         for epoch in range(self.n_epochs):
             self._reset_data_bucket()
             for iteration in range(self.num_iterations):
-                self._log_training_status(strategy, epoch, iteration)
+                self._log_tuning_status(strategy, epoch, iteration)
                 if iteration == 0:
                     newly_sampled_queries_ids = (
                         self.data_bucket.sampled_queries.elements
@@ -239,7 +240,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             elements=self.init_sampled_queries_ids,
         )
 
-    def _log_training_status(self, strategy, epoch, iteration):
+    def _log_tuning_status(self, strategy, epoch, iteration):
         logger.info("Strategy: %s. Epoch: %s. Iter: %s.", strategy, epoch, iteration)
         logger.info("Sampled Elements: %s", len(self.data_bucket.sampled_queries))
         logger.info("Remaining Elements: %s", len(self.data_bucket.unsampled_queries))
@@ -247,7 +248,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def _save_training_data(
         self, strategy, epoch, iteration, newly_sampled_queries_ids, eval_stats
     ):
-        """ Save training data if in training mode. """
+        """ Save training data if in tuning mode. """
         self.results_manager.update_accuracies_json(
             strategy, epoch, iteration, eval_stats
         )
@@ -284,28 +285,32 @@ class ActiveLearningPipelineFactory:
         """
         return ActiveLearningPipeline(
             app_path=config.get("app_path"),
-            train_pattern=config.get("pre_training", {}).get("train_pattern"),
-            test_pattern=config.get("pre_training", {}).get("test_pattern"),
-            train_seed_pct=config.get("pre_training", {}).get("train_seed_pct"),
-            n_classifiers=config.get("training", {}).get("n_classifiers"),
-            n_epochs=config.get("training", {}).get("n_epochs"),
-            batch_size=config.get("training", {}).get("batch_size"),
-            training_strategies=config.get("training", {}).get("training_strategies"),
-            training_level=config.get("training", {}).get("training_level"),
-            selection_strategy=config.get("selection", {}).get("selection_strategy"),
-            save_sampled_queries=config.get("training_output", {}).get(
+            train_pattern=config.get("pre_tuning", {}).get("train_pattern"),
+            test_pattern=config.get("pre_tuning", {}).get("test_pattern"),
+            train_seed_pct=config.get("pre_tuning", {}).get("train_seed_pct"),
+            n_classifiers=config.get("tuning", {}).get("n_classifiers"),
+            n_epochs=config.get("tuning", {}).get("n_epochs"),
+            batch_size=config.get("tuning", {}).get("batch_size"),
+            tuning_strategies=config.get("tuning", {}).get("tuning_strategies"),
+            tuning_level=config.get("tuning", {}).get("tuning_level"),
+            selection_strategy=config.get("query_selection", {}).get(
+                "selection_strategy"
+            ),
+            save_sampled_queries=config.get("tuning_output", {}).get(
                 "save_sampled_queries"
             ),
-            aggregate_statistic=config.get("training_output", {}).get(
+            aggregate_statistic=config.get("tuning_output", {}).get(
                 "aggregate_statistic"
             ),
-            class_level_statistic=config.get("training_output", {}).get(
+            class_level_statistic=config.get("tuning_output", {}).get(
                 "class_level_statistic"
             ),
-            log_usage_pct=config.get("selection", {}).get("log_usage_pct"),
-            labeled_logs_pattern=config.get("selection", {}).get(
+            log_usage_pct=config.get("query_selection", {}).get("log_usage_pct"),
+            labeled_logs_pattern=config.get("query_selection", {}).get(
                 "labeled_logs_pattern"
             ),
-            unlabeled_logs_path=config.get("selection", {}).get("unlabeled_logs_path"),
+            unlabeled_logs_path=config.get("query_selection", {}).get(
+                "unlabeled_logs_path"
+            ),
             output_folder=config.get("output_folder"),
         )

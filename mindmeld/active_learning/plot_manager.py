@@ -183,7 +183,7 @@ class PlotManager:
         return strategies
 
     def _check_first_epoch_and_iter_exist(self):
-        """ Check whether data for the first iteration in the first epoch exists.
+        """Check whether data for the first iteration in the first epoch exists.
         Data from the first epoch and iteration is used to determine the domains, intents,
         and entities included in training.
         Raises:
@@ -198,7 +198,7 @@ class PlotManager:
             )
 
     def get_domain_list(self) -> List:
-        """ Method to get a list of domains included in training from the first epoch and iteration.
+        """Method to get a list of domains included in training from the first epoch and iteration.
         Returns:
             domain_list (list): List of domains for the current experiment.
         """
@@ -213,7 +213,7 @@ class PlotManager:
         return domain_list
 
     def get_intent_list(self, domain: str) -> List:
-        """ Method to get a list of intents included in training from the first epoch and iteration.
+        """Method to get a list of intents included in training from the first epoch and iteration.
         Args:
             domain (str): The domain to get retrieve intents for.
         Returns:
@@ -230,7 +230,7 @@ class PlotManager:
         return intent_list
 
     def get_entity_list(self, domain: str, intent: str) -> List:
-        """ Method to get a list of entities included in training from the first epoch and iteration.
+        """Method to get a list of entities included in training from the first epoch and iteration.
         Args:
             domain (str): The domain containing the intent to retreive entities from.
             intent (str): The intent to retreive entities from.

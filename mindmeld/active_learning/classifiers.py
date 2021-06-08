@@ -17,14 +17,13 @@ from .heuristics import (
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import (
-    TRAIN_LEVEL_INTENT,
+    TUNE_LEVEL_INTENT,
     ACTIVE_LEARNING_RANDOM_SEED,
     AL_DEFAULT_AGGREGATE_STATISTIC,
     AL_DEFAULT_CLASS_LEVEL_STATISTIC,
     AL_SUPPORTED_AGGREGATE_STATISTICS,
     AL_SUPPORTED_CLASS_LEVEL_STATISTICS,
 )
-from ..core import ProcessedQuery
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -35,14 +34,14 @@ MULTI_MODEL_HEURISTICS = (KLDivergenceSampling, DisagreementSampling, EnsembleSa
 class ALClassifier(ABC):
     """ Abstract class for Active Learning Classifiers."""
 
-    def __init__(self, app_path: str, training_level: str):
+    def __init__(self, app_path: str, tuning_level: str):
         """
         Args:
             app_path (str): Path to MindMeld application
-            training_level (str): The hierarchy level to train ("domain" or "intent")
+            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
         """
         self.app_path = app_path
-        self.training_level = training_level
+        self.tuning_level = tuning_level
         self.intent2idx, self.idx2intent, self.domain_indices = self._get_mappings()
 
     def _get_mappings(self):
@@ -83,7 +82,7 @@ class MindMeldALClassifier(ALClassifier):
     def __init__(
         self,
         app_path: str,
-        training_level: str,
+        tuning_level: str,
         n_classifiers: int,
         aggregate_statistic: str = None,
         class_level_statistic: str = None,
@@ -91,22 +90,22 @@ class MindMeldALClassifier(ALClassifier):
         """
         Args:
             app_path (str): Path to MindMeld application
-            training_level (str): The hierarchy level to train ("domain" or "intent")
+            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
             n_classifiers (int): Number of classifiers to be used by multi-model strategies.
         """
-        super().__init__(app_path=app_path, training_level=training_level)
+        super().__init__(app_path=app_path, tuning_level=tuning_level)
         self.nlp = NaturalLanguageProcessor(self.app_path)
         self.n_classifiers = n_classifiers
         self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
             aggregate_statistic
         )
-        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
-            class_level_statistic
+        self.class_level_statistic = (
+            MindMeldALClassifier._validate_class_level_statistic(class_level_statistic)
         )
 
     @staticmethod
     def _validate_aggregate_statistic(aggregate_statistic):
-        """ Method to validate the aggregate statistic. If an aggregate statistic is not provided
+        """Method to validate the aggregate statistic. If an aggregate statistic is not provided
         the default is used. (Options: "accuracy", "f1_weighted", "f1_macro", "f1_micro".)
 
         Args:
@@ -130,7 +129,7 @@ class MindMeldALClassifier(ALClassifier):
 
     @staticmethod
     def _validate_class_level_statistic(class_level_statistic):
-        """ Method to validate the class-level statistic. If an class-level statistic is not provided
+        """Method to validate the class-level statistic. If an class-level statistic is not provided
         the default is used. (Options: "f_beta", "percision", "recall")
 
         Args:
@@ -154,13 +153,13 @@ class MindMeldALClassifier(ALClassifier):
 
     @staticmethod
     def _get_probs(
-        classifier: Classifier, queries: List[ProcessedQuery], nlp_component_to_id: Dict
+        classifier: Classifier, queries: ProcessedQueryList, nlp_component_to_id: Dict
     ):
         """Get the probability distribution for a query across domains or intents.
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
-            queries (List of ProcessedQuery): List of MindMeld queries
+            queries (ProcessedQueryList): List of MindMeld queries
             nlp_component_to_id (Dict): Dictionary mapping domain or intent names to vector index
                 positions.
 
@@ -247,9 +246,9 @@ class MindMeldALClassifier(ALClassifier):
 
     def _train_single(
         self,
-        sampled_queries: List[ProcessedQuery],
-        unsampled_queries: List[ProcessedQuery],
-        test_queries: List[ProcessedQuery],
+        sampled_queries: ProcessedQueryList,
+        unsampled_queries: ProcessedQueryList,
+        test_queries: ProcessedQueryList,
         label_map: LabelMap,
         eval_stats: Dict = None,
     ):
@@ -277,7 +276,7 @@ class MindMeldALClassifier(ALClassifier):
         confidences_2d = dc_queries_prob_vectors
 
         # Intent_Level
-        if self.training_level == TRAIN_LEVEL_INTENT:
+        if self.tuning_level == TUNE_LEVEL_INTENT:
             (
                 ic_queries_prob_vectors,
                 ic_eval_test_dict,
@@ -311,9 +310,9 @@ class MindMeldALClassifier(ALClassifier):
 
     def _train_multi(
         self,
-        sampled_queries: List[ProcessedQuery],
-        unsampled_queries: List[ProcessedQuery],
-        test_queries: List[ProcessedQuery],
+        sampled_queries: ProcessedQueryList,
+        unsampled_queries: ProcessedQueryList,
+        test_queries: ProcessedQueryList,
         label_map: LabelMap,
     ):
         """Helper function to train multiple models and obtain a 3D probability array.
@@ -359,9 +358,9 @@ class MindMeldALClassifier(ALClassifier):
 
     def domain_classifier_fit_eval(
         self,
-        sampled_queries: List[ProcessedQuery],
-        unsampled_queries: List[ProcessedQuery],
-        test_queries: List[ProcessedQuery],
+        sampled_queries: ProcessedQueryList,
+        unsampled_queries: ProcessedQueryList,
+        test_queries: ProcessedQueryList,
         domain2id: Dict,
     ):
         """Fit and evaluate the domain classifier.
@@ -403,9 +402,9 @@ class MindMeldALClassifier(ALClassifier):
 
     def intent_classifiers_fit_eval(
         self,
-        sampled_queries: List[ProcessedQuery],
-        unsampled_queries: List[ProcessedQuery],
-        test_queries: List[ProcessedQuery],
+        sampled_queries: ProcessedQueryList,
+        unsampled_queries: ProcessedQueryList,
+        test_queries: ProcessedQueryList,
         domain_list: Dict,
         domain_to_intent2id: Dict,
     ):
@@ -434,7 +433,9 @@ class MindMeldALClassifier(ALClassifier):
                 filtered_unsampled_queries_indices,
                 filtered_unsampled_queries,
             ) = DataBucket.filter_queries_by_domain(unsampled_queries, domain)
-            _, filtered_test_queries = DataBucket.filter_queries_by_domain(test_queries, domain)
+            _, filtered_test_queries = DataBucket.filter_queries_by_domain(
+                test_queries, domain
+            )
             # Train
             ic = self.nlp.domains[domain].intent_classifier
             ic.fit(queries=filtered_sampled_queries)
