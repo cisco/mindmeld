@@ -21,7 +21,7 @@ from sklearn.externals import joblib
 from sklearn.preprocessing import LabelBinarizer
 
 from .taggers import Tagger, extract_sequence_features
-from ..dense_features.embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
+from ..dense_featurizers.embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = r"in-gaz\|type:(\w+)\|pos:(\w+)\|"
@@ -954,25 +954,28 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
 
         return decoded_queries
 
-    def dump(self, path, config):
+    @property
+    def is_serializable(self):
+        return False
+
+    def dump(self, path):
         """
         Saves the Tensorflow model
 
         Args:
             path (str): the folder path for the entity model folder
-            config (dict): The model config
+
+        Returns:
+            path (str): entity model folder
         """
         path = path.split(".pkl")[0] + "_model_files"
-        config["model"] = path
-        config["serializable"] = False
 
         if not os.path.isdir(path):
             os.makedirs(path)
 
         if not self.saver:
-            # This conditional happens when there are not entities for the associated
-            # model
-            return
+            # This conditional happens when there are not entities for the associated model
+            return path
 
         self.saver.save(self.session, os.path.join(path, "lstm_model"))
 
@@ -988,6 +991,8 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         }
 
         joblib.dump(variables_to_dump, os.path.join(path, ".feature_extraction_vars"))
+
+        return path
 
     def unload(self):
         self.graph = None

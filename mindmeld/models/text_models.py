@@ -17,7 +17,9 @@ of text.
 """
 import logging
 import operator
+import os
 import random
+from typing import Union
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -432,6 +434,36 @@ class TextModel(Model):
 
         return self
 
+    def dump(self, path, config=None):
+
+        config = config or {}
+        config.update({"model": self, "serializable": True})
+
+        # dump model metadata
+        super().dump(path, config)
+
+    @classmethod
+    def load(cls, path):
+        """
+        Load the model state to memory.
+
+        Args:
+            path (str): The path to dump the model to
+        """
+        config = super().load(path)
+
+        if isinstance(config, dict):
+            # When model saved along with some other config or in a dictionary
+            if not "model" in config:
+                msg = f"Missing 'model' key in file loaded from model path " \
+                      f"'{path}'. Please run a clean build to retrain models. "
+                raise KeyError(msg)
+            return config
+        else:
+            # backwards compatability
+            #   When a serializable model model saved as-is & not as part of a dictionary
+            return {"model": config}
+
     def predict(self, examples, dynamic_resource=None):
         X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         y = self._clf.predict(X)
@@ -478,30 +510,45 @@ class TextModel(Model):
 class PytorchTextModel(PytorchModel):
 
     def __init__(self, config):
-        raise NotImplementedError
-
-
-class HuggingfaceTextModel(PytorchModel):
-
-    def __init__(self, config):
-        raise NotImplementedError
+        super().__init__(config)
 
 
 class AutoTextModel:
-    # backwards compatable class that resolves and returns an appropriate XxxTextModel class
+    """
+    backwards compatable class that resolves and returns an appropriate XxxTextModel class
 
-    CLASSIFIER_TYPE_TO_MODEL_CLASS = {
-        "logreg": TextModel,
-        "dtree": TextModel,
-        "rforest": TextModel,
-        "svm": TextModel,
-        "word-cnn": PytorchTextModel,
-        "bert": HuggingfaceTextModel,
-    }
+    additionally, this class also loads models based on the path specified, on the assumption that
+    model paths ending with .pkl belong to sklearn based models
+    """
 
-    def __new__(cls, config: ModelConfig):
-        classifier_type = config.model_settings["classifier_type"]
-        return AutoTextModel.CLASSIFIER_TYPE_TO_MODEL_CLASS[classifier_type](config)
+    def __new__(cls, config_or_model_path: Union[ModelConfig, str]):
+
+        if not config_or_model_path:
+            msg = f"Need a valid model config or model path to create/load " \
+                  f"a text model in '{self.__class__.__name__}'."
+            raise ValueError(msg)
+
+        if isinstance(config_or_model_path, str):
+            # load from a model_path
+            model_path1 = str(config_or_model_path)
+            model_path2 = str(PytorchTextModel.get_model_folder_from_model_path(model_path1))
+
+            if os.path.exists(model_path1):
+                # implies a `TextModel` class based model, saved as .pkl
+                return TextModel.load(model_path1)
+            elif os.path.exists(model_path2):
+                # implies a `PytorchTextModel` class based model, not saved as .pkl
+                #   but saved in a folder derived from the model_path string
+                return PytorchTextModel.load(model_path2)
+
+        else:
+            # load from config dict
+            config = config_or_model_path
+            classifier_type = config.model_settings["classifier_type"]
+            if classifier_type in ["logreg", "dtree", "rforest", "svm"]:
+                return TextModel(config)
+            else:
+                return PytorchTextModel(config)
 
 
 register_model("text", AutoTextModel)

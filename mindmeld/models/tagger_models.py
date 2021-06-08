@@ -15,10 +15,12 @@
 import logging
 import os
 import random
+from typing import Union
 
 from sklearn.externals import joblib
 
 from .evaluation import EntityModelEvaluation, EvaluatedExample
+from .helpers import create_model
 from .helpers import (
     get_label_encoder,
     get_seq_accuracy_scorer,
@@ -193,53 +195,11 @@ class TaggerModel(Model):
         """
         return param_grid
 
-    def dump(self, path, config):
-        """
-        Dumps the model using joblib for the config and call's the underlying model
-        to dump its state.
-
-        Args:
-            path (str): The path to dump the model to
-            config (dict): The config containing the model configuration
-        """
-        self._clf.dump(path, config)
-
-        if "model" not in config:
-            # If the model path is not populated, the model is serializable, so
-            # we just pass the entire model to the dictionary
-            config["model"] = self
-        else:
-            variables_to_dump = {
-                "current_params": self._current_params,
-                "label_encoder": self._label_encoder,
-                "no_entities": self._no_entities,
-            }
-            joblib.dump(
-                variables_to_dump, os.path.join(config["model"], ".tagger_vars")
-            )
-
-        joblib.dump(config, path)
-
     def unload(self):
         self._clf = None
         self._current_params = None
         self._label_encoder = None
         self._no_entities = None
-
-    def load(self, path, config):
-        """
-        Load the model state to memory. This method is strictly for non-serializable models
-        like tensorflow models
-
-        Args:
-            path (str): The path to dump the model to
-            config (dict): The config containing the model configuration
-        """
-        self._clf.load(path)
-        variables_to_load = joblib.load(os.path.join(config["model"], ".tagger_vars"))
-        self._current_params = variables_to_load["current_params"]
-        self._label_encoder = variables_to_load["label_encoder"]
-        self._no_entities = variables_to_load["no_entities"]
 
     ##################
     # abstract methods
@@ -293,6 +253,77 @@ class TaggerModel(Model):
             self._current_params = best_params
 
         return self
+
+    def dump(self, path, config):
+        """
+        Dumps the model and call's the underlying model to dump its state.
+
+        Args:
+            path (str): The path to dump the model to
+            config (dict): The config containing the model configuration
+        """
+
+        # In tagger models, unlike text models, two dumps happen,
+        # one the underneath classifier and second the model metadata
+
+        if self._clf.is_serializable:
+            config["model"] = self
+            config["serializable"] = self._clf.is_serializable
+        else:
+            # underneath tagger dump
+            model_dir = self._clf.dump(path)
+            config["model"] = model_dir
+            config["serializable"] = self._clf.is_serializable
+
+            # misc resources dump
+            tagger_vars = {
+                "current_params": self._current_params,
+                "label_encoder": self._label_encoder,
+                "no_entities": self._no_entities,
+            }
+            joblib.dump(
+                tagger_vars, os.path.join(model_dir, ".tagger_vars")
+            )
+
+        # dump model metadata
+        super().dump(path, config)
+
+    @classmethodqq
+    def load(cls, path):
+        """
+        Load the model state to memory.
+
+        Args:
+            path (str): The path to dump the model to
+        """
+
+        # Note that we load in reverse chronological order in which they are dumped by .dump()
+
+        config = super().load(path)
+
+        # The default is True since < MM 3.2.0 models are serializable by default
+        is_serializable = config.get("serializable", True)
+
+        # If model is serializable, it can be loaded and used as-is. But if not serializable,
+        #   it means we need to create an instance and load necessary details for it to be used.
+        if not is_serializable:
+            model_config = config.get("model_config")
+            model_dir = config["model"]
+
+            model = create_model(model_config)
+
+            # misc resources load
+            tagger_vars = joblib.load(model_dir, ".tagger_vars")
+            model._current_params = tagger_vars["current_params"]
+            model._label_encoder = tagger_vars["label_encoder"]
+            model._no_entities = tagger_vars["no_entities"]
+
+            # underneath tagger load
+            model._clf.load(model_dir)
+
+            config["model"] = model
+
+        return config
 
     def predict(self, examples, dynamic_resource=None):
         """
@@ -400,29 +431,45 @@ class TaggerModel(Model):
 class PytorchTaggerModel(PytorchModel):
 
     def __init__(self, config):
-        raise NotImplementedError
-
-
-class HuggingfaceTaggerModel(PytorchModel):
-
-    def __init__(self, config):
-        raise NotImplementedError
+        super().__init__(config)
 
 
 class AutoTaggerModel:
-    # backwards compatable class that resolves and returns an appropriate XxxTextModel class
+    """
+    backwards compatable class that resolves and returns an appropriate XxxTaggerModel class
 
-    CLASSIFIER_TYPE_TO_MODEL_CLASS = {
-        "crf": TaggerModel,
-        "memm": TaggerModel,
-        "lstm": TaggerModel,
-        "word-cnn": PytorchTaggerModel,
-        "bert": HuggingfaceTaggerModel,
-    }
+    additionally, this class also loads models based on the path specified, on the assumption that
+    model paths ending with .pkl belong to sklearn-based plus tf-lstm tagger models
+    """
 
-    def __new__(cls, config: ModelConfig):
-        classifier_type = config.model_settings["classifier_type"]
-        return AutoTaggerModel.CLASSIFIER_TYPE_TO_MODEL_CLASS[classifier_type](config)
+    def __new__(cls, config_or_model_path: Union[ModelConfig, str]):
+
+        if not config_or_model_path:
+            msg = f"Need a valid model config or model path to create/load " \
+                  f"a tagger model in '{self.__class__.__name__}'."
+            raise ValueError(msg)
+
+        if isinstance(config_or_model_path, str):
+            # load from a model_path
+            model_path1 = str(config_or_model_path)
+            model_path2 = str(PytorchTaggerModel.get_model_folder_from_model_path(model_path1))
+
+            if os.path.exists(model_path1):
+                # implies a `TaggerModel` class based model, saved as .pkl
+                return TaggerModel.load(model_path1)
+            elif os.path.exists(model_path2):
+                # implies a `PytorchTaggerModel` class based model, not saved as .pkl
+                #   but saved in a folder derived from the model_path string
+                return PytorchTaggerModel.load(model_path2)
+
+        else:
+            # load from config dict
+            config = config_or_model_path
+            classifier_type = config.model_settings["classifier_type"]
+            if classifier_type in ["crf", "memm", "lstm"]:
+                return TaggerModel(config)
+            else:
+                return PytorchTaggerModel(config)
 
 
 register_model("tagger", AutoTaggerModel)

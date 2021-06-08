@@ -16,9 +16,12 @@ import copy
 import json
 import logging
 import math
+import os
 from abc import ABC, abstractmethod
 from inspect import signature
+from typing import Any, Dict
 
+from sklearn.externals import joblib
 from sklearn.model_selection import (
     GridSearchCV,
     GroupKFold,
@@ -224,71 +227,62 @@ class ModelConfig:
         return required_resources
 
 
-class MinimalisticModel(ABC):
+class AbstractModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
     """
 
     def __init__(self, config: ModelConfig):
         self.config = config
+        self.mindmeld_version = get_mm_version()
+        self._resources = {}
+
+    @abstractmethod
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
+        raise NotImplementedError
 
     @abstractmethod
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
     @abstractmethod
+    def dump(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def load(cls, *args, **kwargs) -> Dict[str, Any]:
+        raise NotImplementedError
+
+    @abstractmethod
     def predict(self, examples, dynamic_resource=None):
-        """Predicts a list of class labels for the given list of queries using the trained
-            classification model
-
-        Args:
-            examples (list): A list of queries to predict
-            dynamic_resource (dict): A dictionary containing dynamic resource keys like
-                dynamic gazetteers that is used to bias the NLP classifier
-
-        Returns:
-            list: A list of predicted labels per query
-        """
         raise NotImplementedError
 
     @abstractmethod
     def predict_proba(self, examples):
-        """Runs prediction on each of the given queries and generates multiple hypotheses with their
-        associated probabilities using the trained classification model
-
-        Args:
-            examples (list of mindmeld.core.Query): a list of queries to train on
-
-        Returns:
-            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
-                with confidence scores
-        """
         raise NotImplementedError
 
     @abstractmethod
     def evaluate(self, examples, labels):
-        """Evaluates the predictions of each query against the labels provided.
-
-        Args:
-            examples (list): A list of queries to predict
-            labels (list): A list of labels corresponding to each query
-
-        Returns:
-            list(ModelEvaluation): an list containing ModelEvaluation information about the \
-                evaluation for each query
-        """
         raise NotImplementedError
 
     @abstractmethod
     def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
 
-    @abstractmethod
-    def initialize_resources(self, resource_loader, examples=None, labels=None):
-        raise NotImplementedError
+    def register_resources(self, **kwargs):
+        """Registers resources which are accessible to feature extractors
+
+        Args:
+            **kwargs: dictionary of resources to register
+        """
+        self._resources.update(kwargs)
+
+    def get_resource(self, name):
+        return self._resources.get(name)
 
 
-class Model(MinimalisticModel):
+class Model(AbstractModel):
     """An abstract class upon which all models are based.
 
     Attributes:
@@ -297,10 +291,8 @@ class Model(MinimalisticModel):
 
     def __init__(self, config):
         super().__init__(config)
-        self.mindmeld_version = get_mm_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
-        self._resources = {}
         self._clf = None
         self.cv_loss_ = None
 
@@ -546,9 +538,6 @@ class Model(MinimalisticModel):
             tokenizer = Tokenizer()
         return tokenizer
 
-    def get_resource(self, name):
-        return self._resources.get(name)
-
     def requires_resource(self, resource):
         example_type = self.config.example_type
         for name, kwargs in self.config.features.items():
@@ -581,14 +570,9 @@ class Model(MinimalisticModel):
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def register_resources(self, **kwargs):
-        """Registers resources which are accessible to feature extractors
-
-        Args:
-            **kwargs: dictionary of resources to register
-
-        """
-        self._resources.update(kwargs)
+    ##################
+    # abstract methods
+    ##################
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses \
@@ -638,9 +622,70 @@ class Model(MinimalisticModel):
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
+    def dump(self, path, config):
 
-class PytorchModel(MinimalisticModel):
+        # make directory if necessary
+        folder = os.path.dirname(path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        joblib.dump(config, path)
+
+    @classmethod
+    def load(cls, path):
+
+        try:
+            config = joblib.load(path)
+            return config
+        except (OSError, IOError) as e:
+            msg = "Unable to load {}. Pickle at {!r} cannot be read."
+            raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
+
+
+class PytorchModel(AbstractModel):
 
     def __init__(self, config):
         super().__init__(config)
+        # self._featurizer = AutoFeaturizer.from_config(config)
+
+    def initialize_resources(self, resource_loader, examples, labels):
+        # self._featurizer.initialize_resources(examples, labels, params)
         raise NotImplementedError
+
+    def fit(self, examples, labels, params=None):
+        # self._featurizer.train()  # this loads an optimizer, batches inputs, finds loss and backwards gradients and updates gradients and saves best checkpoint
+        raise NotImplementedError
+
+    def dump(self, dump_path):
+        raise NotImplementedError
+
+    @classmethod
+    def load(cls, load_path):
+        raise NotImplementedError
+
+    def predict(self, examples, dynamic_resource=None):
+        # self._featurizer.predict()  # batches and runs prediction and returns results in labels format
+        raise NotImplementedError
+
+    def evaluate(self, examples, labels):
+        """Evaluates the predictions of each query against the labels provided.
+
+        Args:
+            examples (list): A list of queries to predict
+            labels (list): A list of labels corresponding to each query
+
+        Returns:
+            list(ModelEvaluation): an list containing ModelEvaluation information about the \
+                evaluation for each query
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def get_model_folder_from_model_path(model_path: str):
+        if not model_path.endswith(".pkl"):
+            msg = "Unsupported model_path provided to create a folder name in featurizers. " \
+                  "The supplied model path must end with '.pkl'. "
+            raise ValueError(msg)
+        model_folder = model_path.split(".pkl")[0]
+        os.makedirs(model_folder, exist_ok=True)
+        return model_folder

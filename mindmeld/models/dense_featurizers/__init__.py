@@ -10,3 +10,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""
+This module consists of dense featurizers, which are created using
+(i) an encoder (to encode text into ids or embeddings)
+(ii) a featurizer (which returns a sequence as well as token level features as output);
+        the featurizer module then has wrappers for text/tagger type training
+"""
