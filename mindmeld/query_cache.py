@@ -53,13 +53,12 @@ class QueryCache:
         # Create table to store queries
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS queries
-        (hash_id TEXT PRIMARY KEY, query TEXT, raw_query TEXT, domain TEXT, intent TEXT)
+        (hash_id TEXT PRIMARY KEY, query TEXT, raw_query TEXT, domain TEXT, intent TEXT);
         """)
         # Create table to store the data version
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS version
-        (version_number INTEGER PRIMARY KEY)
-        WITHOUT ROWID;
+        (version_number INTEGER PRIMARY KEY);
         """)
         cursor.execute("""
         INSERT OR IGNORE INTO version values (?);
