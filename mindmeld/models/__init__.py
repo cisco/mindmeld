@@ -14,12 +14,16 @@
 # Need to import the following so models, label encoders, features are registered.
 # See helpers module
 from . import (
+    embedder_models,
     tagger_models,
     text_models,
     labels
 )
-from .dense_features import embedder_models
-from .dense_features.embedder_models import Embedder
+from .embedder_models import Embedder
+from .features import (
+    entity_features,
+    query_features
+)
 from .helpers import (
     CLASS_LABEL_TYPE,
     ENTITIES_LABEL_TYPE,
@@ -30,10 +34,6 @@ from .helpers import (
     register_embedder,
 )
 from .model import ModelConfig
-from .sparse_features import (
-    entity_features,
-    query_features
-)
 
 __all__ = [
     "ModelConfig",

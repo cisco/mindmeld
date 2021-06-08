@@ -66,11 +66,12 @@ DEFAULT_SYS_ENTITIES = [
 ]
 
 
-def create_model(config):
+def create_model(config_or_model_path, model_type=None):
     """Creates a model instance using the provided configuration
 
     Args:
-        config (ModelConfig): A model configuration
+        config_or_model_path (Union[ModelConfig, str]): Either a model configuration or a path
+            where the model is saved. AutoXxxModel creates/loads the models accordingly.
 
     Returns:
         Model: a configured model
@@ -78,11 +79,12 @@ def create_model(config):
     Raises:
         ValueError: When model configuration is invalid
     """
+    model_type = model_type or config_or_model_path.model_type
     try:
-        return MODEL_MAP[config.model_type](config)
+        return MODEL_MAP[model_type](config_or_model_path)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(config.model_type)) from e
+        raise ValueError(msg.format(model_type)) from e
 
 
 def create_annotator(config):

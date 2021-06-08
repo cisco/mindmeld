@@ -16,14 +16,12 @@ This module contains the role classifier component of the MindMeld natural langu
 """
 import logging
 
-from sklearn.externals import joblib
-
+from ._config import get_classifier_config
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
 from ..resource_loader import ProcessedQueryList
-from ._config import get_classifier_config
-from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -127,15 +125,20 @@ class RoleClassifier(Classifier):
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
+        else:
+            # This _else_ conditional is created to support moving .dump() and .load()
+            # to self._model.dump() and self._model.load() respectively.
+            #
+            # Any calls to abstract methods other than .fit(), .load(), .unload(), and .dump() are
+            # to be carefully used by identifying if role classification is valid or not with the
+            # conditional`if len(self.role_classifier.roles) > 1: ...; else: ...`
+            self._model = model
 
         self.hash = new_hash
 
         self.ready = True
         self.dirty = True
         return True
-
-    def _data_dump_payload(self):
-        return {"model": self._model, "roles": self.roles}
 
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained role classification model to disk.
@@ -151,7 +154,10 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
-        super().dump(model_path, incremental_model_path)
+        config = {
+            "roles": self.roles
+        }
+        super().dump(model_path, incremental_model_path, config=config)
 
     def unload(self):
         self._model = None
@@ -171,7 +177,7 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         try:
-            rc_data = joblib.load(model_path)
+            rc_data = create_model(model_path, model_type="text") # always type `text`
             self._model = rc_data["model"]
             self.roles = rc_data["roles"]
         except (OSError, IOError):
@@ -205,6 +211,12 @@ class RoleClassifier(Classifier):
 
         self.ready = True
         self.dirty = False
+
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        del gold_label
+        del dynamic_resource
+        del query
+        logger.warning("method not implemented")
 
     def predict(
         self, query, entities, entity_index
@@ -327,12 +339,6 @@ class RoleClassifier(Classifier):
 
     def _get_examples_and_labels_hash(self, queries):
         hashable_queries = [
-            self.domain + "###" + self.intent + "###" + self.entity_type + "###"
-        ] + sorted(list(queries.raw_queries()))
+                               self.domain + "###" + self.intent + "###" + self.entity_type + "###"
+                           ] + sorted(list(queries.raw_queries()))
         return self._resource_loader.hash_list(hashable_queries)
-
-    def inspect(self, query, gold_label=None, dynamic_resource=None):
-        del gold_label
-        del dynamic_resource
-        del query
-        logger.warning("method not implemented")

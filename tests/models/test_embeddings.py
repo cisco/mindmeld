@@ -2,7 +2,7 @@ import os
 import pytest
 from numpy import ndarray
 
-from mindmeld.models.dense_features.embeddings import GloVeEmbeddingsContainer
+from mindmeld.models.dense_featurizers.embeddings import GloVeEmbeddingsContainer
 from mindmeld.models.embedder_models import BertEmbedder, GloveEmbedder
 
 APP_NAME = "kwik_e_mart"

@@ -19,8 +19,6 @@ import logging
 import os
 from abc import ABC, abstractmethod
 
-from sklearn.externals import joblib
-
 from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..exceptions import ClassifierLoadError
@@ -150,6 +148,35 @@ class Classifier(ABC):
         self.config = None
         self.hash = ""
 
+    def __repr__(self):
+        msg = "<{} ready: {!r}, dirty: {!r}>"
+        return msg.format(self.__class__.__name__, self.ready, self.dirty)
+
+    @staticmethod
+    def _get_model_config(loaded_config=None, **kwargs):
+        """Updates the loaded configuration with runtime specified options, and creates a model
+        configuration object with the final configuration dictionary. If an application config
+        exists it should be passed in, if not the default config should be passed in.
+
+        Returns:
+            ModelConfig: The model configuration corresponding to the provided config name
+        """
+        try:
+            # If all params required for model config were passed in, use kwargs
+            return ModelConfig(**kwargs)
+        except (TypeError, ValueError):
+            # Use application specified or default config, customizing with provided kwargs
+            if not loaded_config:
+                logger.warning("loaded_config is not passed in")
+            model_config = loaded_config or {}
+            model_config.update(kwargs)
+
+            # If a parameter selection grid was passed in at runtime, override params set in the
+            # application specified or default config
+            if kwargs.get("param_selection") and not kwargs.get("params"):
+                model_config.pop("params", None)
+        return ModelConfig(**model_config)
+
     def fit(self,
             queries=None,
             label_set=None,
@@ -263,24 +290,72 @@ class Classifier(ABC):
         self.dirty = True
         return True
 
-    def _resolve_queries(self, queries=None, label_set=None):
-        """
-        Resolve queries and/or label_set into a ProcessedQueryList.
-        queries is preferred over label_set.
+    def dump(self, model_path, incremental_model_path=None, **kwargs):
+        """Persists the trained classification model to disk.
 
         Args:
-            queries (ProcessedQueryList or list(ProcessedQuery): A set of queries to use for
-                the operation.
-            label_set (str): The label set to load queries from
-
-        Returns:
-            ProcessedQueryList: The set of queries
+            model_path (str): The location on disk where the model should be stored.
+            incremental_model_path (str, optional): The timestamp folder where the cached
+                models are stored.
         """
-        if not queries:
-            queries = self._get_queries_from_label_set(label_set)
-        elif not isinstance(queries, ProcessedQueryList):
-            queries = ProcessedQueryList.from_in_memory_list(queries)
-        return queries
+        for path in [model_path, incremental_model_path]:
+            if not path:
+                continue
+
+            self._model.dump(path, **kwargs)
+
+            hash_path = path + ".hash"
+            with open(hash_path, "w") as hash_file:
+                hash_file.write(self.hash)
+
+            if path == model_path:
+                self.dirty = False
+
+    def unload(self):
+        """
+        Unloads the model from memory. This helps reduce memory requirements while
+        training other models.
+        """
+        self._model = None
+        self.config = None
+        self.ready = False
+
+    def load(self, model_path):
+        """Loads the trained classification model from disk
+
+        Args:
+            model_path (str): The location on disk where the model is stored
+        """
+
+        # default model_type is `text` when loading from a model path
+        # entity_recognizer.py overrides this and passes model_type="tagger" when loading from path
+        metadata = create_model(model_path, model_type="text")
+        self._model = metadata.pop("model")
+
+        if self._model is not None:
+            if not hasattr(self._model, "mindmeld_version"):
+                msg = (
+                    "Your trained models are incompatible with this version of MindMeld. "
+                    "Please run a clean build to retrain models"
+                )
+                raise ClassifierLoadError(msg)
+
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
+            self._model.initialize_resources(self._resource_loader)
+            self.config = ClassifierConfig.from_model_config(self._model.config)
+
+        self.hash = self._load_hash(model_path)
+
+        self.ready = True
+        self.dirty = False
+
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        raise NotImplementedError
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
@@ -337,6 +412,31 @@ class Classifier(ABC):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
+    def view_extracted_features(
+        self, query, time_zone=None, timestamp=None, dynamic_resource=None
+    ):
+        """Extracts features for the given input based on the model config.
+
+        Args:
+            query (Query or str): The input query
+            time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict): Dynamic gazetteer to be included for feature extraction.
+
+        Returns:
+            dict: The extracted features from the given input
+        """
+        if not self._model:
+            logger.error("You must fit or load the model to initialize resources")
+            return None
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
+        return self._model.view_extracted_features(query, dynamic_resource)
+
     def evaluate(self, queries=None, label_set=None):
         """Evaluates the trained classification model on the given test data
 
@@ -369,132 +469,24 @@ class Classifier(ABC):
         evaluation = self._model.evaluate(examples, labels)
         return evaluation
 
-    def inspect(self, query, gold_label=None, dynamic_resource=None):
-        raise NotImplementedError
-
-    def view_extracted_features(
-        self, query, time_zone=None, timestamp=None, dynamic_resource=None
-    ):
-        """Extracts features for the given input based on the model config.
+    def _resolve_queries(self, queries=None, label_set=None):
+        """
+        Resolve queries and/or label_set into a ProcessedQueryList.
+        queries is preferred over label_set.
 
         Args:
-            query (Query or str): The input query
-            time_zone (str, optional): The name of an IANA time zone, such as \
-                'America/Los_Angeles', or 'Asia/Kolkata' \
-                See the [tz database](https://www.iana.org/time-zones) for more information.
-            timestamp (long, optional): A unix time stamp for the request (in seconds).
-            dynamic_resource (dict): Dynamic gazetteer to be included for feature extraction.
+            queries (ProcessedQueryList or list(ProcessedQuery): A set of queries to use for
+                the operation.
+            label_set (str): The label set to load queries from
 
         Returns:
-            dict: The extracted features from the given input
+            ProcessedQueryList: The set of queries
         """
-        if not self._model:
-            logger.error("You must fit or load the model to initialize resources")
-            return None
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(
-                query, time_zone=time_zone, timestamp=timestamp
-            )
-        return self._model.view_extracted_features(query, dynamic_resource)
-
-    @staticmethod
-    def _get_model_config(loaded_config=None, **kwargs):
-        """Updates the loaded configuration with runtime specified options, and creates a model
-        configuration object with the final configuration dictionary. If an application config
-        exists it should be passed in, if not the default config should be passed in.
-
-        Returns:
-            ModelConfig: The model configuration corresponding to the provided config name
-        """
-        try:
-            # If all params required for model config were passed in, use kwargs
-            return ModelConfig(**kwargs)
-        except (TypeError, ValueError):
-            # Use application specified or default config, customizing with provided kwargs
-            if not loaded_config:
-                logger.warning("loaded_config is not passed in")
-            model_config = loaded_config or {}
-            model_config.update(kwargs)
-
-            # If a parameter selection grid was passed in at runtime, override params set in the
-            # application specified or default config
-            if kwargs.get("param_selection") and not kwargs.get("params"):
-                model_config.pop("params", None)
-        return ModelConfig(**model_config)
-
-    def _data_dump_payload(self):
-        return self._model
-
-    def _create_and_dump_payload(self, path):
-        joblib.dump(self._data_dump_payload(), path)
-
-    def dump(self, model_path, incremental_model_path=None):
-        """Persists the trained classification model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored.
-            incremental_model_path (str, optional): The timestamp folder where the cached
-                models are stored.
-        """
-        for path in [model_path, incremental_model_path]:
-            if not path:
-                continue
-
-            # make directory if necessary
-            folder = os.path.dirname(path)
-            if not os.path.isdir(folder):
-                os.makedirs(folder)
-
-            self._create_and_dump_payload(path)
-
-            hash_path = path + ".hash"
-            with open(hash_path, "w") as hash_file:
-                hash_file.write(self.hash)
-
-            if path == model_path:
-                self.dirty = False
-
-    def unload(self):
-        """
-        Unloads the model from memory. This helps reduce memory requirements while
-        training other models.
-        """
-        self._model = None
-        self.config = None
-        self.ready = False
-
-    def load(self, model_path):
-        """Loads the trained classification model from disk
-
-        Args:
-            model_path (str): The location on disk where the model is stored
-        """
-        try:
-            self._model = joblib.load(model_path)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
-        if self._model is not None:
-            if not hasattr(self._model, "mindmeld_version"):
-                msg = (
-                    "Your trained models are incompatible with this version of MindMeld. "
-                    "Please run a clean build to retrain models"
-                )
-                raise ClassifierLoadError(msg)
-
-            try:
-                self._model.config.to_dict()
-            except AttributeError:
-                # Loaded model config is incompatible with app config.
-                self._model.config.resolve_config(self._get_model_config())
-
-            self._model.initialize_resources(self._resource_loader)
-            self.config = ClassifierConfig.from_model_config(self._model.config)
-
-        self.hash = self._load_hash(model_path)
-
-        self.ready = True
-        self.dirty = False
+        if not queries:
+            queries = self._get_queries_from_label_set(label_set)
+        elif not isinstance(queries, ProcessedQueryList):
+            queries = ProcessedQueryList.from_in_memory_list(queries)
+        return queries
 
     @staticmethod
     def _load_hash(model_path):
@@ -504,6 +496,31 @@ class Classifier(ABC):
         with open(hash_path, "r") as hash_file:
             model_hash = hash_file.read()
         return model_hash
+
+    def _get_model_hash(self, model_config, queries):
+        """Returns a hash representing the inputs into the model
+
+        Args:
+            model_config (ModelConfig): The model configuration
+            queries (ProcessedQueryList): The queries used to fit this model
+
+        Returns:
+            str: The hash
+        """
+
+        # Hash queries
+        queries_hash = self._get_examples_and_labels_hash(queries)
+
+        # Hash config
+        config_hash = self._resource_loader.hash_string(model_config.to_json())
+
+        # Hash resources
+        rsc_strings = []
+        for resource in sorted(model_config.required_resources()):
+            rsc_strings.append(self._resource_loader.hash_feature_resource(resource))
+        rsc_hash = self._resource_loader.hash_list(rsc_strings)
+
+        return self._resource_loader.hash_list([queries_hash, config_hash, rsc_hash])
 
     @abstractmethod
     def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
@@ -538,32 +555,4 @@ class Classifier(ABC):
                   ProcessedQueryList.Iterator(Any)): A tuple of iterators
                 [0]: the examples, [1]: the labels
         """
-
-    def _get_model_hash(self, model_config, queries):
-        """Returns a hash representing the inputs into the model
-
-        Args:
-            model_config (ModelConfig): The model configuration
-            queries (ProcessedQueryList): The queries used to fit this model
-
-        Returns:
-            str: The hash
-        """
-
-        # Hash queries
-        queries_hash = self._get_examples_and_labels_hash(queries)
-
-        # Hash config
-        config_hash = self._resource_loader.hash_string(model_config.to_json())
-
-        # Hash resources
-        rsc_strings = []
-        for resource in sorted(model_config.required_resources()):
-            rsc_strings.append(self._resource_loader.hash_feature_resource(resource))
-        rsc_hash = self._resource_loader.hash_list(rsc_strings)
-
-        return self._resource_loader.hash_list([queries_hash, config_hash, rsc_hash])
-
-    def __repr__(self):
-        msg = "<{} ready: {!r}, dirty: {!r}>"
-        return msg.format(self.__class__.__name__, self.ready, self.dirty)
+        raise NotImplementedError("Subclasses must implement this method")
