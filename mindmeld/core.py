@@ -494,7 +494,7 @@ class ProcessedQuery:
 
     # version the cached data.  Bump this if any changes are made
     # to the to_cache() and from_cache() functions for the core classes.
-    version = 3
+    version = 4
 
     def __init__(
         self,
