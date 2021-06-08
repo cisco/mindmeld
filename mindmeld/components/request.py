@@ -40,6 +40,7 @@ class Params:
     """
 
     allowed_intents = attr.ib(default=attr.Factory(tuple))
+    disallowed_intents = attr.ib(default=attr.Factory(tuple))
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=None)
@@ -74,6 +75,7 @@ class FrozenParams(Params):
     """
 
     allowed_intents = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    disallowed_intents = attr.ib(default=attr.Factory(tuple), converter=tuple)
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=None)

@@ -646,7 +646,7 @@ class NaturalLanguageProcessor(Processor):
             for nlp_role in valid_roles:
                 nlp_components[domain][intent][nlp_entity][nlp_role] = {}
 
-    def extract_allowed_nlp_components_list(self, allowed_nlp_components_list):
+    def extract_allowed_nlp_components_list(self, allowed_nlp_components_list=None):
         """This function validates a user inputted list of allowed nlp components against the NLP
         hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
         the validation of list of allowed nlp components has passed.
@@ -675,6 +675,53 @@ class NaturalLanguageProcessor(Processor):
             else:
                 self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
 
+        return nlp_components
+
+    def extract_disallowed_nlp_components_list(self, disallowed_nlp_components_list=None):
+        """This function validates a user inputted list of disallowed nlp components against the NLP
+        hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
+        the validation of list of disallowed nlp components has passed.
+
+        Args:
+            disallowed_nlp_components_list (list): A list of allowable intents in the
+                format "domain.intent". If all intents need to be included, the
+                syntax is "domain.*".
+
+        Returns:
+            (dict): A dictionary of NLP hierarchy.
+        """
+        disallowed_nlp_components_list = self.extract_allowed_nlp_components_list(
+            disallowed_nlp_components_list)
+        nlp_components = {}
+        for domain in self.domains:
+            if disallowed_nlp_components_list.get(domain) == {}:
+                continue
+            if not self.domains[domain].intents:
+                nlp_components[domain] = {}
+            for intent in self.domains[domain].intents:
+                if disallowed_nlp_components_list.get(domain, {}).get(intent) == {}:
+                    continue
+                entities = self.domains[domain].intents[intent].entities
+                if not entities:
+                    if domain not in nlp_components:
+                        nlp_components[domain] = {intent: {}}
+                for entity in entities:
+                    if disallowed_nlp_components_list.get(domain, {}).get(intent, {}).get(entity) == {}:
+                        continue
+                    if not entities[entity].role_classifier.roles:
+                        if domain not in nlp_components:
+                            nlp_components[domain] = {intent: {entity: {}}}
+                        elif intent not in nlp_components[domain]:
+                            nlp_components[domain][intent] = {entity: {}}
+                    for role in entities[entity].role_classifier.roles:
+                        if disallowed_nlp_components_list.get(domain, {}).get(intent, {}).get(entity, {}).get(role) == {}:
+                            continue
+                        if domain not in nlp_components:
+                            nlp_components[domain] = {intent: {entity: {role: {}}}}
+                        elif intent not in nlp_components[domain]:
+                            nlp_components[domain][intent] = {entity: {role: {}}}
+                        elif entity not in nlp_components[domain][intent]:
+                            nlp_components[domain][intent][entity] = {role: {}}
         return nlp_components
 
     @staticmethod
@@ -726,6 +773,7 @@ class NaturalLanguageProcessor(Processor):
         query_text,  # pylint: disable=arguments-differ
         allowed_nlp_classes=None,
         allowed_intents=None,
+        disallowed_intents=None,
         locale=None,
         language=None,
         time_zone=None,
@@ -743,6 +791,8 @@ class NaturalLanguageProcessor(Processor):
                 selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
             allowed_intents (list, optional): A list of allowed intents to use for \
+                the NLP processing.
+            disallowed_intents (list, optional): A list of disallowed intents to use for \
                 the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
@@ -764,10 +814,16 @@ class NaturalLanguageProcessor(Processor):
         # TODO: Deprecate language argument
         del language
 
-        if allowed_intents is not None and allowed_nlp_classes is not None:
+        if allowed_intents and disallowed_intents:
             raise TypeError(
-                "'allowed_intents' and 'allowed_nlp_classes' cannot be used together"
+                "'allowed_intents' and 'disallowed_intents' cannot be used together"
             )
+
+        if (allowed_intents is not None or disallowed_intents is not None) and allowed_nlp_classes is not None:
+            raise TypeError(
+                "'allowed_intents/disallowed_intents' and 'allowed_nlp_classes' cannot be used together"
+            )
+
         if allowed_intents:
             try:
                 allowed_nlp_classes = self.extract_allowed_nlp_components_list(allowed_intents)
@@ -776,6 +832,16 @@ class NaturalLanguageProcessor(Processor):
                 logger.error("Caught exception %s when extracting nlp components from the "
                              "allowed_intents field", e.message)
                 allowed_nlp_classes = {}
+
+        if disallowed_intents:
+            try:
+                allowed_nlp_classes = self.extract_disallowed_nlp_components_list(disallowed_intents)
+            except AllowedNlpClassesKeyError as e:
+                # We catch and fail open here since this uncaught exception can fail the API call
+                logger.error("Caught exception %s when extracting nlp components from the "
+                             "allowed_intents field", e.message)
+                allowed_nlp_classes = {}
+
         return super().process(
             query_text,
             allowed_nlp_classes=allowed_nlp_classes,
@@ -1354,6 +1420,7 @@ class IntentProcessor(Processor):
         self, idx, query, processed_entities, aligned_entities, allowed_nlp_classes, verbose=False
     ):
         entity = processed_entities[idx]
+
         # Run the role classification
         if allowed_nlp_classes and entity.entity.type in allowed_nlp_classes:
             entity_allowed_nlp_classes = allowed_nlp_classes[entity.entity.type]
@@ -1385,7 +1452,13 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             query = query[0]
 
-        processed_entities = [deepcopy(e) for e in entities[0]]
+        processed_entities = []
+        for entity in entities[0]:
+            if not allowed_nlp_classes:
+                processed_entities.append(deepcopy(entity))
+                continue
+            if entity.entity.type in allowed_nlp_classes:
+                processed_entities.append(deepcopy(entity))
         processed_entities_conf = self._process_list(
             list(range(len(processed_entities))),
             "_classify_and_resolve_entities",
