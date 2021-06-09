@@ -822,14 +822,14 @@ def augment(app_path, language):
 @click.option(
     "--tuning_level",
     type=str,
-    help="The hierarchy level to run tuning ('domain' or 'intent').",
+    help="The hierarchy level to run strategy tuning ('domain' or 'intent').",
 )
 @click.option(
     "--output_folder",
     type=str,
     help="Folder to store output.",
 )
-# Params Specific to Tune Selection Strategy
+# Params Specific to Strategy Tuning
 @click.option(
     "--tune",
     is_flag=True,

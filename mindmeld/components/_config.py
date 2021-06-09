@@ -44,7 +44,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {"classifier_type": "logreg",},
+    "model_settings": {"classifier_type": "logreg"},
     "param_selection": {
         "type": "k-fold",
         "k": 10,

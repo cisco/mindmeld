@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ActiveLearningPipeline:  # pylint: disable=R0902
-    """Class that executes the tuning and selection process for the Active Learning Pipeline"""
+    """Class that executes the strategy tuning and query selection process for the Active Learning Pipeline"""
 
     def __init__(  # pylint: disable=R0913
         self,
@@ -41,7 +41,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             train_seed_pct (float): Percentage of training data to use as the initial seed
-            n_classifiers (int): Number of classifiers to be used by a subset of heuristics
+            n_classifiers (int): Number of classifiers to be used by multi-model heuristics
             n_epochs (int): Number of epochs to run tuning
             batch_size (int): Number of queries to select at each iteration
             tuning_level (str): The hierarchy level to tune ("domain" or "intent")
@@ -54,7 +54,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 (Options: "f_beta", "percision", "recall")
             log_usage_pct (float): Percentage of the log data to use for selection
             labeled_logs_pattern (str): Pattern to obtain logs already labeled in a MindMeld app
-            unlabeled_logs_path (str): Path a logs text file with unlabeled queries
+            unlabeled_logs_path (str): Path to a log text file with unlabeled queries
             output_folder (str): Folder to store active learning results.
         """
         self.app_path = app_path
@@ -122,7 +122,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             "save_sampled_queries": self.save_sampled_queries,
             "log_usage_pct": self.log_usage_pct,
             "labeled_logs_pattern": self.labeled_logs_pattern,
-            "unlabled_logs_path": self.unlabeled_logs_path,
+            "unlabeled_logs_path": self.unlabeled_logs_path,
             "output_folder": self.output_folder,
         }
 
