@@ -169,7 +169,7 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-        metadata = create_model(model_path, model_type="tagger")  # always type `tagger`
+        metadata = create_model(model_path)
 
         self.entity_types = metadata["entity_types"]
         self._model_config = metadata.get("model_config")

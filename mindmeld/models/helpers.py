@@ -41,7 +41,6 @@ ENTITY_EXAMPLE_TYPE = "entity"
 CLASS_LABEL_TYPE = "class"
 ENTITIES_LABEL_TYPE = "entities"
 
-
 # resource/requirements names
 GAZETTEER_RSC = "gazetteers"
 QUERY_FREQ_RSC = "q_freq"
@@ -66,25 +65,26 @@ DEFAULT_SYS_ENTITIES = [
 ]
 
 
-def create_model(config_or_model_path, model_type=None):
+def create_model(config_or_path):
     """Creates a model instance using the provided configuration
 
     Args:
-        config_or_model_path (Union[ModelConfig, str]): Either a model configuration or a path
-            where the model is saved. AutoXxxModel creates/loads the models accordingly.
+        config_or_path (Union[str, dict, ModelConfig]): Either a model configuration or a path
+            where the model configuration is pickled. AutoModel creates/loads the models
+            accordingly. If created, a configured model is returned, if loaded by submitting a path,
+            metadata thats loaded is returned
 
     Returns:
-        Model: a configured model
+        Union[
+            Model: a configured model,
+            dict: metadata loaded from the path, which contains the configured model in 'model' key
+                    along with other keys
+        ]
 
     Raises:
         ValueError: When model configuration is invalid
     """
-    model_type = model_type or config_or_model_path.model_type
-    try:
-        return MODEL_MAP[model_type](config_or_model_path)
-    except KeyError as e:
-        msg = "Invalid model configuration: Unknown model type {!r}"
-        raise ValueError(msg.format(model_type)) from e
+    return MODEL_MAP["auto"](config_or_path)
 
 
 def create_annotator(config):

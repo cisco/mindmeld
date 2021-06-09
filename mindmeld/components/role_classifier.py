@@ -174,7 +174,7 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         try:
-            metadata = create_model(model_path, model_type="text")  # always type `text`
+            metadata = create_model(model_path)
             self._model = metadata["model"]
             self.roles = metadata["roles"]
         except (OSError, IOError):

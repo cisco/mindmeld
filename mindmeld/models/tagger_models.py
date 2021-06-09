@@ -15,18 +15,16 @@
 import logging
 import os
 import random
-from typing import Union
 
 from sklearn.externals import joblib
 
 from .evaluation import EntityModelEvaluation, EvaluatedExample
-from .helpers import create_model
 from .helpers import (
+    create_model,
     get_label_encoder,
     get_seq_accuracy_scorer,
     get_seq_tag_accuracy_scorer,
     ingest_dynamic_gazetteer,
-    register_model,
 )
 from .model import ModelConfig, Model, PytorchModel
 from .taggers.crf import ConditionalRandomFields
@@ -374,17 +372,15 @@ class TaggerModel(Model):
         # In TaggerModel, unlike TextModel, two dumps happen,
         # one, the underneath classifier and second, the model metadata
 
-        is_serializable = self._clf.is_serializable
-
         metadata = metadata or {}
-        metadata.update({"model_config": self.config, "serializable": is_serializable})
+        metadata.update({"model_config": self.config, "serializable": self._clf.is_serializable})
 
-        if is_serializable:
-            metadata["model"] = self
+        if self._clf.is_serializable:
+            metadata.update({"model": self})
         else:
             # underneath tagger dump
             model_dir = self._clf.dump(path)
-            metadata["model"] = model_dir
+            metadata.update({"model": model_dir})
 
             # misc resources dump
             tagger_vars = {
@@ -432,6 +428,7 @@ class TaggerModel(Model):
             # underneath tagger load
             model._clf.load(model_dir)
 
+            # replace model dump directory with actual model
             metadata["model"] = model
 
         return metadata
@@ -442,41 +439,16 @@ class PytorchTaggerModel(PytorchModel):
 
 
 class AutoTaggerModel:
-    """
-    backwards compatable class that resolves and returns an appropriate XxxTaggerModel class
 
-    additionally, this class also loads models based on the path specified, on the assumption that
-    model paths ending with .pkl belong to sklearn-based plus tf-lstm tagger models
-    """
+    @staticmethod
+    def get_model_class(config: ModelConfig):
+        classifier_type = config.model_settings["classifier_type"]
 
-    def __new__(cls, config_or_model_path: Union[ModelConfig, str]):
+        if classifier_type in ["crf", "memm", "lstm"]:
+            return TaggerModel
 
-        if not config_or_model_path:
-            msg = "Need a valid model config or model path to create/load " \
-                  "a tagger model in AutoTaggerModel."
-            raise ValueError(msg)
+        return PytorchTaggerModel
 
-        if isinstance(config_or_model_path, str):
-            # load from a model_path
-            model_path1 = str(config_or_model_path)
-            model_path2 = str(PytorchTaggerModel.get_model_folder_from_model_path(model_path1))
-
-            if os.path.exists(model_path1):
-                # implies a `TaggerModel` class based model, saved as .pkl
-                return TaggerModel.load(model_path1)
-            elif os.path.exists(model_path2):
-                # implies a `PytorchTaggerModel` class based model, not saved as .pkl
-                #   but saved in a folder derived from the model_path string
-                return PytorchTaggerModel.load(model_path2)
-
-        else:
-            # load from config dict
-            config = config_or_model_path
-            classifier_type = config.model_settings["classifier_type"]
-            if classifier_type in ["crf", "memm", "lstm"]:
-                return TaggerModel(config)
-            else:
-                return PytorchTaggerModel(config)
-
-
-register_model("tagger", AutoTaggerModel)
+    @classmethod
+    def from_config(cls, config: ModelConfig):
+        return cls.get_model_class(config)(config)

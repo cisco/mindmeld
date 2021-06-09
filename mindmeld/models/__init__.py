@@ -15,10 +15,10 @@
 # See helpers module
 from . import (
     embedder_models,
-    tagger_models,
-    text_models,
+    auto_models,
     labels
 )
+from .auto_models import AutoModel
 from .embedder_models import Embedder
 from .features import (
     entity_features,
@@ -37,8 +37,7 @@ from .model import ModelConfig
 
 __all__ = [
     "ModelConfig",
-    "text_models",
-    "tagger_models",
+    "auto_models",
     "embedder_models",
     "labels",
     "query_features",
@@ -51,4 +50,5 @@ __all__ = [
     "create_embedder_model",
     "Embedder",
     "register_embedder",
+    "AutoModel"
 ]

@@ -247,15 +247,6 @@ class AbstractModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def dump(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def load(cls, *args, **kwargs) -> Dict[str, Any]:
-        raise NotImplementedError
-
-    @abstractmethod
     def predict(self, examples, dynamic_resource=None):
         raise NotImplementedError
 
@@ -267,9 +258,48 @@ class AbstractModel(ABC):
     def evaluate(self, examples, labels):
         raise NotImplementedError
 
-    @abstractmethod
     def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
+
+    def dump(self, path, metadata=None):
+
+        metadata = metadata or {}
+
+        # going forward, any model has one default .pkl dump file that contains a dictionary
+        #   with at least the key 'model_config'
+        if 'model_config' not in metadata:
+            metadata.update({'model_config': self.config})
+
+        # make directory if necessary
+        folder = os.path.dirname(path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        joblib.dump(metadata, path)
+
+    @classmethod
+    def load(cls, path):
+
+        try:
+            metadata = joblib.load(path)
+        except (OSError, IOError) as e:
+            msg = "Unable to load {}. Pickle at {!r} cannot be read."
+            raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
+
+        if not isinstance(metadata, dict):
+            # backwards compatability
+            #   when a serializable model is saved as-is & now has to be retrieved
+            #   the serialized model also consists of the model config
+            # model = metadata
+            model_config = metadata.config
+            metadata = {"model": metadata, "model_config": model_config}
+
+        if 'model_config' not in metadata:
+            msg = f"Unable to obtain model_config from dump location- {path}." \
+                  f"Please re-build the models."
+            raise KeyError(msg)
+
+        return metadata
 
     def register_resources(self, **kwargs):
         """Registers resources which are accessible to feature extractors
@@ -623,25 +653,6 @@ class Model(AbstractModel):
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
-    def dump(self, path, metadata):
-
-        # make directory if necessary
-        folder = os.path.dirname(path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        joblib.dump(metadata, path)
-
-    @classmethod
-    def load(cls, path):
-
-        try:
-            metadata = joblib.load(path)
-            return metadata
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
-
 
 class PytorchModel(AbstractModel):
 
@@ -659,11 +670,19 @@ class PytorchModel(AbstractModel):
         # finds loss and backwards gradients and updates gradients and saves best checkpoint
         raise NotImplementedError
 
-    def dump(self, *args, **kwargs):
+    def dump(self, path, metadata=None):
+        # do featurizer specific dumping
+
+        # dump model configs
+        # metadata = metadata or {}
+        # metadata.update({'model_config': self.featurizer.config})
+        super().dump(path)
+
         raise NotImplementedError
 
     @classmethod
     def load(cls, *args, **kwargs) -> Dict[str, Any]:
+        # load featurizer
         raise NotImplementedError
 
     def predict(self, examples, dynamic_resource=None):
@@ -675,9 +694,6 @@ class PytorchModel(AbstractModel):
         raise NotImplementedError
 
     def evaluate(self, examples, labels):
-        raise NotImplementedError
-
-    def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
 
     @staticmethod

@@ -457,9 +457,7 @@ class Classifier(ABC):
             model_path (str): The location on disk where the model is stored
         """
 
-        # default model_type is `text` when loading from a model path
-        # entity_recognizer.py overrides this and passes model_type="tagger" when loading from path
-        metadata = create_model(model_path, model_type="text")
+        metadata = create_model(model_path)
         self._model = metadata.pop("model")
 
         if self._model is not None:
