@@ -117,7 +117,7 @@ class LabelMap:
             return [f"{d}" for d in query_list.domains()]
         elif tuning_level == TUNE_LEVEL_INTENT:
             return [
-                f"{d}|{i}" for d, i in zip(query_list.domains(), query_list.intents())
+                f"{d}.{i}" for d, i in zip(query_list.domains(), query_list.intents())
             ]
         else:
             raise ValueError(
