@@ -46,6 +46,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .._version import get_mm_version
+from ..exceptions import ClassifierLoadError
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
@@ -296,30 +297,22 @@ class Model(AbstractModel):
         self._clf = None
         self.cv_loss_ = None
 
-    def _get_model_constructor(self):
-        raise NotImplementedError
-
     def _fit(self, examples, labels, params=None):
         raise NotImplementedError
 
-    def _get_cv_scorer(self, selection_settings):
-        """
-        Returns the scorer to use based on the selection settings and classifier type.
-        """
+    def _get_model_constructor(self):
         raise NotImplementedError
 
-    def _convert_params(self, param_grid, y, is_grid=True):
-        """Convert the params from the style given by the config to the style
-        passed in to the actual classifier.
-
-        Args:
-            param_grid (dict): lists of classifier parameter values, keyed by \
-                parameter name
-            y (list): A list of labels
-            is_grid (bool, optional): Indicates whether param_grid is actually a grid \
-                or a params dict.
-        """
-        raise NotImplementedError
+    @property
+    def tokenizer(self):
+        tokenizer = self._resources.get("tokenizer")
+        if not tokenizer:
+            logger.error(
+                "The tokenizer resource has not been registered "
+                "to the model. Using default tokenizer."
+            )
+            tokenizer = Tokenizer()
+        return tokenizer
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
@@ -397,6 +390,12 @@ class Model(AbstractModel):
 
         return model.best_estimator_, model.best_params_
 
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type.
+        """
+        raise NotImplementedError
+
     @staticmethod
     def _clean_params(model_class, params):
         """
@@ -432,6 +431,33 @@ class Model(AbstractModel):
     def _process_cv_best_params(best_params):
         return best_params
 
+    def select_params(self, examples, labels, selection_settings=None):
+        """Selects the best set of hyper-parameters for a given set of examples and true labels
+            through cross-validation
+
+        Args:
+            examples: A list of example queries
+            labels: A list of labels associated with the queries
+            selection_settings: A dictionary of parameter lists to select from
+
+        Returns:
+            dict: A dictionary of optimized parameters to use
+        """
+        raise NotImplementedError
+
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by \
+                parameter name
+            y (list): A list of labels
+            is_grid (bool, optional): Indicates whether param_grid is actually a grid \
+                or a params dict.
+        """
+        raise NotImplementedError
+
     def _get_effective_config(self):
         """Create a model config object for the current effective config (after \
         param selection)
@@ -443,6 +469,9 @@ class Model(AbstractModel):
         config_dict.pop("param_selection")
         config_dict["params"] = self._current_params
         return ModelConfig(**config_dict)
+
+    def get_feature_matrix(self, examples, y=None, fit=False):
+        raise NotImplementedError
 
     def _extract_features(self, example, dynamic_resource=None, tokenizer=None):
         """Gets all features from an example.
@@ -527,17 +556,6 @@ class Model(AbstractModel):
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
-    @property
-    def tokenizer(self):
-        tokenizer = self._resources.get("tokenizer")
-        if not tokenizer:
-            logger.error(
-                "The tokenizer resource has not been registered "
-                "to the model. Using default tokenizer."
-            )
-            tokenizer = Tokenizer()
-        return tokenizer
-
     def requires_resource(self, resource):
         example_type = self.config.example_type
         for name, kwargs in self.config.features.items():
@@ -552,23 +570,6 @@ class Model(AbstractModel):
             ):
                 return True
         return False
-
-    def select_params(self, examples, labels, selection_settings=None):
-        """Selects the best set of hyper-parameters for a given set of examples and true labels
-            through cross-validation
-
-        Args:
-            examples: A list of example queries
-            labels: A list of labels associated with the queries
-            selection_settings: A dictionary of parameter lists to select from
-
-        Returns:
-            dict: A dictionary of optimized parameters to use
-        """
-        raise NotImplementedError
-
-    def get_feature_matrix(self, examples, y=None, fit=False):
-        raise NotImplementedError
 
     ##################
     # abstract methods
@@ -622,21 +623,21 @@ class Model(AbstractModel):
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
-    def dump(self, path, config):
+    def dump(self, path, metadata):
 
         # make directory if necessary
         folder = os.path.dirname(path)
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        joblib.dump(config, path)
+        joblib.dump(metadata, path)
 
     @classmethod
     def load(cls, path):
 
         try:
-            config = joblib.load(path)
-            return config
+            metadata = joblib.load(path)
+            return metadata
         except (OSError, IOError) as e:
             msg = "Unable to load {}. Pickle at {!r} cannot be read."
             raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
@@ -646,38 +647,37 @@ class PytorchModel(AbstractModel):
 
     def __init__(self, config):
         super().__init__(config)
+        config = self.config
         # self._featurizer = AutoFeaturizer.from_config(config)
 
-    def initialize_resources(self, resource_loader, examples, labels):
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
         # self._featurizer.initialize_resources(examples, labels, params)
         raise NotImplementedError
 
     def fit(self, examples, labels, params=None):
-        # self._featurizer.train()  # this loads an optimizer, batches inputs, finds loss and backwards gradients and updates gradients and saves best checkpoint
+        # self._featurizer.train()  # this loads an optimizer, batches inputs,
+        # finds loss and backwards gradients and updates gradients and saves best checkpoint
         raise NotImplementedError
 
-    def dump(self, dump_path):
+    def dump(self, *args, **kwargs):
         raise NotImplementedError
 
     @classmethod
-    def load(cls, load_path):
+    def load(cls, *args, **kwargs) -> Dict[str, Any]:
         raise NotImplementedError
 
     def predict(self, examples, dynamic_resource=None):
-        # self._featurizer.predict()  # batches and runs prediction and returns results in labels format
+        # self._featurizer.predict()  # batches and runs prediction and returns
+        #                             # results in labels format
+        raise NotImplementedError
+
+    def predict_proba(self, examples):
         raise NotImplementedError
 
     def evaluate(self, examples, labels):
-        """Evaluates the predictions of each query against the labels provided.
+        raise NotImplementedError
 
-        Args:
-            examples (list): A list of queries to predict
-            labels (list): A list of labels corresponding to each query
-
-        Returns:
-            list(ModelEvaluation): an list containing ModelEvaluation information about the \
-                evaluation for each query
-        """
+    def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
 
     @staticmethod

@@ -17,14 +17,14 @@ import zipfile
 from urllib.request import urlretrieve
 
 import numpy as np
-from ...exceptions import EmbeddingDownloadError
-from ...path import (
+from tqdm import tqdm
+from mindmeld.exceptions import EmbeddingDownloadError
+from mindmeld.path import (
     EMBEDDINGS_FILE_PATH,
     EMBEDDINGS_FOLDER_PATH,
     PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,
     PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH,
 )
-from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +68,62 @@ class GloVeEmbeddingsContainer:
             )
             self.token_dimension = 300
 
-        self._word_to_embedding = {}
+        self.word_to_embedding = {}
         self._extract_embeddings()
+
+    def get_pretrained_word_to_embeddings_dict(self):
+        """Returns the word to embedding dict.
+
+        Returns:
+            (dict): word to embedding mapping.
+        """
+        return self.word_to_embedding
+
+    def _download_embeddings_and_return_zip_handle(self):
+
+        logger.info("Downloading embedding from %s", GLOVE_DOWNLOAD_LINK)
+
+        # Make the folder that will contain the embeddings
+        if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
+            os.makedirs(EMBEDDINGS_FOLDER_PATH)
+
+        with GloVeEmbeddingsContainer.TqdmUpTo(
+            unit="B", unit_scale=True, miniters=1, desc=GLOVE_DOWNLOAD_LINK
+        ) as t:
+
+            try:
+                urlretrieve(
+                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to
+                )
+
+            except ConnectionError as e:
+                logger.error(
+                    "There was an issue downloading from this "
+                    "link %s with the following error: "
+                    "%s",
+                    GLOVE_DOWNLOAD_LINK,
+                    e,
+                )
+                return
+
+            file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
+            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
+
+            if file_name not in zip_file_object.namelist():
+                logger.info(
+                    "Embedding file with %s dimensions " "not found",
+                    self.token_dimension,
+                )
+                return
+
+            return zip_file_object
+
+    def _extract_and_map(self, glove_file):
+        for line in glove_file:
+            values = line.split()
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype="float32")
+            self.word_to_embedding[word] = coefs
 
     def _extract_embeddings(self):
         file_location = self.token_pretrained_embedding_filepath
@@ -124,60 +178,6 @@ class GloVeEmbeddingsContainer:
         with zip_file_object.open(file_name) as embedding_file:
             self._extract_and_map(embedding_file)
         return
-
-    def _download_embeddings_and_return_zip_handle(self):
-
-        logger.info("Downloading embedding from %s", GLOVE_DOWNLOAD_LINK)
-
-        # Make the folder that will contain the embeddings
-        if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
-            os.makedirs(EMBEDDINGS_FOLDER_PATH)
-
-        with GloVeEmbeddingsContainer.TqdmUpTo(
-            unit="B", unit_scale=True, miniters=1, desc=GLOVE_DOWNLOAD_LINK
-        ) as t:
-
-            try:
-                urlretrieve(
-                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to
-                )
-
-            except ConnectionError as e:
-                logger.error(
-                    "There was an issue downloading from this "
-                    "link %s with the following error: "
-                    "%s",
-                    GLOVE_DOWNLOAD_LINK,
-                    e,
-                )
-                return
-
-            file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
-            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
-
-            if file_name not in zip_file_object.namelist():
-                logger.info(
-                    "Embedding file with %s dimensions " "not found",
-                    self.token_dimension,
-                )
-                return
-
-            return zip_file_object
-
-    def _extract_and_map(self, glove_file):
-        for line in glove_file:
-            values = line.split()
-            word = values[0]
-            coefs = np.asarray(values[1:], dtype="float32")
-            self._word_to_embedding[word] = coefs
-
-    def get_pretrained_word_to_embeddings_dict(self):
-        """Returns the word to embedding dict.
-
-        Returns:
-            (dict): word to embedding mapping.
-        """
-        return self._word_to_embedding
 
 
 class WordSequenceEmbedding:

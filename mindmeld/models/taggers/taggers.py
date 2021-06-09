@@ -189,14 +189,14 @@ class Tagger:
     @staticmethod
     def dump(model_path):
         """
-        Since traditional SKLearn models are easily serializable, we can
-        use JobLib to serialize them. So we alter the context object to make
-        this explicit.
+        Dumps the model to memory. This is a no-op since we do not
+        have to do anything special to dump default serializable models
+        for SKLearn.
 
         Args:
             model_path (str): The path to dump the model to
         """
-        pass
+        return model_path
 
     @staticmethod
     def unload():

@@ -69,6 +69,24 @@ class EntityRecognizer(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
+    def get_entity_types(self, queries=None, label_set=None, **kwargs):
+
+        if not label_set:
+            label_set = self._get_model_config(**kwargs).train_label_set
+            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+
+        # Load labeled data
+        queries = self._resolve_queries(queries, label_set)
+        queries, labels = self._get_examples_and_labels(queries)
+
+        # Build entity types set
+        entity_types = set()
+        for label in labels:
+            for entity in label:
+                entity_types.add(entity.entity.type)
+
+        return entity_types
+
     def fit(self,
             queries=None,
             label_set=None,
@@ -125,13 +143,13 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
-        config = {
+        metadata = {
             "entity_types": self.entity_types,
             "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
             "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
             "model_config": self._model_config,
         }
-        super().dump(model_path, incremental_model_path, config=config)
+        super().dump(model_path, incremental_model_path, metadata=metadata)
 
     def unload(self):
         logger.info(
@@ -151,11 +169,11 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-        er_data = create_model(model_path, model_type="tagger") # always type `tagger`
+        metadata = create_model(model_path, model_type="tagger")  # always type `tagger`
 
-        self.entity_types = er_data["entity_types"]
-        self._model_config = er_data.get("model_config")
-        self._model = er_data["model"]
+        self.entity_types = metadata["entity_types"]
+        self._model_config = metadata.get("model_config")
+        self._model = metadata["model"]
 
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
@@ -177,8 +195,8 @@ class EntityRecognizer(Classifier):
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
 
-            w_ngram_freq = er_data.get("w_ngram_freq")
-            c_ngram_freq = er_data.get("c_ngram_freq")
+            w_ngram_freq = metadata.get("w_ngram_freq")
+            c_ngram_freq = metadata.get("c_ngram_freq")
 
             self._model.register_resources(
                 gazetteers=gazetteers,
@@ -193,12 +211,6 @@ class EntityRecognizer(Classifier):
 
         self.ready = True
         self.dirty = False
-
-    def inspect(self, query, gold_label=None, dynamic_resource=None):
-        del query
-        del gold_label
-        del dynamic_resource
-        logger.warning("method not implemented")
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts entities for the given query using the trained recognition model.
@@ -266,25 +278,14 @@ class EntityRecognizer(Classifier):
         return (queries.queries(), queries.entities())
 
     def _get_examples_and_labels_hash(self, queries):
-        hashable_queries = [
-                               self.domain + "###" + self.intent + "###entity###"
-                           ] + sorted(list(queries.raw_queries()))
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###entity###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
 
-    def get_entity_types(self, queries=None, label_set=None, **kwargs):
-
-        if not label_set:
-            label_set = self._get_model_config(**kwargs).train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
-
-        # Load labeled data
-        queries = self._resolve_queries(queries, label_set)
-        queries, labels = self._get_examples_and_labels(queries)
-
-        # Build entity types set
-        entity_types = set()
-        for label in labels:
-            for entity in label:
-                entity_types.add(entity.entity.type)
-
-        return entity_types
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        del query
+        del gold_label
+        del dynamic_resource
+        logger.warning("method not implemented")

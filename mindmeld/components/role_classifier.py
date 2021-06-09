@@ -154,10 +154,7 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
-        config = {
-            "roles": self.roles
-        }
-        super().dump(model_path, incremental_model_path, config=config)
+        super().dump(model_path, incremental_model_path, metadata={"roles": self.roles})
 
     def unload(self):
         self._model = None
@@ -177,9 +174,9 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         try:
-            rc_data = create_model(model_path, model_type="text") # always type `text`
-            self._model = rc_data["model"]
-            self.roles = rc_data["roles"]
+            metadata = create_model(model_path, model_type="text")  # always type `text`
+            self._model = metadata["model"]
+            self.roles = metadata["roles"]
         except (OSError, IOError):
             logger.error(
                 "Unable to load %s. Pickle file cannot be read from %r",
@@ -211,12 +208,6 @@ class RoleClassifier(Classifier):
 
         self.ready = True
         self.dirty = False
-
-    def inspect(self, query, gold_label=None, dynamic_resource=None):
-        del gold_label
-        del dynamic_resource
-        del query
-        logger.warning("method not implemented")
 
     def predict(
         self, query, entities, entity_index
@@ -338,7 +329,14 @@ class RoleClassifier(Classifier):
                 ProcessedQueryList.ListIterator(labels))
 
     def _get_examples_and_labels_hash(self, queries):
-        hashable_queries = [
-                               self.domain + "###" + self.intent + "###" + self.entity_type + "###"
-                           ] + sorted(list(queries.raw_queries()))
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###" + self.entity_type + "###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
+
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        del gold_label
+        del dynamic_resource
+        del query
+        logger.warning("method not implemented")

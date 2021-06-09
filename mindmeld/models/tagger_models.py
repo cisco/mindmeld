@@ -149,6 +149,19 @@ class TaggerModel(Model):
         self._clf.set_params(**params)
         return self._clf.fit(examples, labels)
 
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+        return param_grid
+
     def _get_cv_scorer(self, selection_settings):
         """
         Returns the scorer to use based on the selection settings and classifier type,
@@ -182,24 +195,17 @@ class TaggerModel(Model):
         else:
             return scorer
 
-    def _convert_params(self, param_grid, y, is_grid=True):
-        """
-        Convert the params from the style given by the config to the style
-        passed in to the actual classifier.
-
-        Args:
-            param_grid (dict): lists of classifier parameter values, keyed by parameter name
-
-        Returns:
-            (dict): revised param_grid
-        """
-        return param_grid
-
     def unload(self):
         self._clf = None
         self._current_params = None
         self._label_encoder = None
         self._no_entities = None
+
+    def get_feature_matrix(self, examples, y=None, fit=False):
+        raise NotImplementedError
+
+    def select_params(self, examples, labels, selection_settings=None):
+        raise NotImplementedError
 
     ##################
     # abstract methods
@@ -254,76 +260,22 @@ class TaggerModel(Model):
 
         return self
 
-    def dump(self, path, config):
-        """
-        Dumps the model and call's the underlying model to dump its state.
+    def view_extracted_features(self, query, dynamic_resource=None):
+        """Returns a dictionary of extracted features and their weights for a given query
 
         Args:
-            path (str): The path to dump the model to
-            config (dict): The config containing the model configuration
+            query (mindmeld.core.Query): The query to extract features from
+            dynamic_resource (dict): The dynamic resource used along with the query
+
+        Returns:
+            list: A list of dictionaries of extracted features and their weights
         """
-
-        # In tagger models, unlike text models, two dumps happen,
-        # one the underneath classifier and second the model metadata
-
-        if self._clf.is_serializable:
-            config["model"] = self
-            config["serializable"] = self._clf.is_serializable
-        else:
-            # underneath tagger dump
-            model_dir = self._clf.dump(path)
-            config["model"] = model_dir
-            config["serializable"] = self._clf.is_serializable
-
-            # misc resources dump
-            tagger_vars = {
-                "current_params": self._current_params,
-                "label_encoder": self._label_encoder,
-                "no_entities": self._no_entities,
-            }
-            joblib.dump(
-                tagger_vars, os.path.join(model_dir, ".tagger_vars")
-            )
-
-        # dump model metadata
-        super().dump(path, config)
-
-    @classmethodqq
-    def load(cls, path):
-        """
-        Load the model state to memory.
-
-        Args:
-            path (str): The path to dump the model to
-        """
-
-        # Note that we load in reverse chronological order in which they are dumped by .dump()
-
-        config = super().load(path)
-
-        # The default is True since < MM 3.2.0 models are serializable by default
-        is_serializable = config.get("serializable", True)
-
-        # If model is serializable, it can be loaded and used as-is. But if not serializable,
-        #   it means we need to create an instance and load necessary details for it to be used.
-        if not is_serializable:
-            model_config = config.get("model_config")
-            model_dir = config["model"]
-
-            model = create_model(model_config)
-
-            # misc resources load
-            tagger_vars = joblib.load(model_dir, ".tagger_vars")
-            model._current_params = tagger_vars["current_params"]
-            model._label_encoder = tagger_vars["label_encoder"]
-            model._no_entities = tagger_vars["no_entities"]
-
-            # underneath tagger load
-            model._clf.load(model_dir)
-
-            config["model"] = model
-
-        return config
+        workspace_resource = ingest_dynamic_gazetteer(
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
+        return self._clf.extract_example_features(
+            query, self.config, workspace_resource
+        )
 
     def predict(self, examples, dynamic_resource=None):
         """
@@ -410,28 +362,83 @@ class TaggerModel(Model):
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
-    def view_extracted_features(self, query, dynamic_resource=None):
-        """Returns a dictionary of extracted features and their weights for a given query
+    def dump(self, path, metadata=None):
+        """
+        Dumps the model and call's the underlying model to dump its state.
 
         Args:
-            query (mindmeld.core.Query): The query to extract features from
-            dynamic_resource (dict): The dynamic resource used along with the query
-
-        Returns:
-            list: A list of dictionaries of extracted features and their weights
+            path (str): The path to dump the model to
+            config (dict): The config containing the model configuration
         """
-        workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
-        )
-        return self._clf.extract_example_features(
-            query, self.config, workspace_resource
-        )
+
+        # In TaggerModel, unlike TextModel, two dumps happen,
+        # one, the underneath classifier and second, the model metadata
+
+        is_serializable = self._clf.is_serializable
+
+        metadata = metadata or {}
+        metadata.update({"model_config": self.config, "serializable": is_serializable})
+
+        if is_serializable:
+            metadata["model"] = self
+        else:
+            # underneath tagger dump
+            model_dir = self._clf.dump(path)
+            metadata["model"] = model_dir
+
+            # misc resources dump
+            tagger_vars = {
+                "current_params": self._current_params,
+                "label_encoder": self._label_encoder,
+                "no_entities": self._no_entities,
+            }
+            joblib.dump(
+                tagger_vars, os.path.join(model_dir, ".tagger_vars")
+            )
+
+        # dump model metadata
+        super().dump(path, metadata)
+
+    @classmethod
+    def load(cls, path):
+        """
+        Load the model state to memory.
+
+        Args:
+            path (str): The path to dump the model to
+        """
+
+        # Note that we load in reverse chronological order in which they are dumped by .dump()
+
+        metadata = super().load(path)
+
+        # The default is True since < MM 3.2.0 models are serializable by default
+        is_serializable = metadata.get("serializable", True)
+
+        # If model is serializable, it can be loaded and used as-is. But if not serializable,
+        #   it means we need to create an instance and load necessary details for it to be used.
+        if not is_serializable:
+            model_config = metadata.get("model_config")
+            model_dir = metadata["model"]
+
+            model = create_model(model_config)
+
+            # misc resources load
+            tagger_vars = joblib.load(model_dir, ".tagger_vars")
+            model._current_params = tagger_vars["current_params"]
+            model._label_encoder = tagger_vars["label_encoder"]
+            model._no_entities = tagger_vars["no_entities"]
+
+            # underneath tagger load
+            model._clf.load(model_dir)
+
+            metadata["model"] = model
+
+        return metadata
 
 
 class PytorchTaggerModel(PytorchModel):
-
-    def __init__(self, config):
-        super().__init__(config)
+    pass
 
 
 class AutoTaggerModel:
@@ -445,8 +452,8 @@ class AutoTaggerModel:
     def __new__(cls, config_or_model_path: Union[ModelConfig, str]):
 
         if not config_or_model_path:
-            msg = f"Need a valid model config or model path to create/load " \
-                  f"a tagger model in '{self.__class__.__name__}'."
+            msg = "Need a valid model config or model path to create/load " \
+                  "a tagger model in AutoTaggerModel."
             raise ValueError(msg)
 
         if isinstance(config_or_model_path, str):
