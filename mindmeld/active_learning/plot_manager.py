@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+This module plots the results from the Active Learning Pipeline.
+"""
+
 import os
 import json
 import logging
@@ -7,7 +24,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .classifiers import MindMeldALClassifier
-from .results_manager import create_dir_if_absent
 from ..path import (
     AL_ACCURACIES_PATH,
     AL_SELECTED_QUERIES_PATH,
@@ -51,8 +67,8 @@ class PlotManager:
         self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
             aggregate_statistic
         )
-        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
-            class_level_statistic
+        self.class_level_statistic = (
+            MindMeldALClassifier._validate_class_level_statistic(class_level_statistic)
         )
         self.accuracies_data = self.get_accuracies_json_data()
         self.queries_data = self.get_queries_json_data()
@@ -253,7 +269,7 @@ class PlotManager:
             y_keys (list): Keys to access the data from a epoch to be used as y values for plotting.
         """
         path_list = [self.experiment_dir_path, "plots"] + y_keys
-        create_dir_if_absent(os.path.join(*path_list))
+        os.makedirs(os.path.join(*path_list), exist_ok=True)
 
     def get_img_path(self, y_keys: List, file_name: str):
         """
@@ -546,7 +562,7 @@ class PlotManager:
             plt.show()
         if save:
             img_dir_path = os.path.join(*[self.experiment_dir_path, "plots", "overall"])
-            create_dir_if_absent(img_dir_path)
+            os.makedirs(img_dir_path, exist_ok=True)
             img_path = os.path.join(img_dir_path, f"{title}.png")
             fig.savefig(img_path, bbox_inches="tight")
             plt.clf()

@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+This module contains classifiers for the Active Learning Pipeline.
+"""
+
 import os
 import logging
 from abc import ABC, abstractmethod
@@ -60,8 +77,8 @@ class ALClassifier(ABC):
             for intent in sorted(
                 os.listdir(os.path.join(self.app_path, "domains", domain))
             ):
-                intent2idx[f"{domain}|{intent}"] = idx
-                idx2intent[idx] = f"{domain}|{intent}"
+                intent2idx[f"{domain}.{intent}"] = idx
+                idx2intent[idx] = f"{domain}.{intent}"
                 idx += 1
             end_idx = idx - 1
             domain_indices[domain] = (start_idx, end_idx)
@@ -185,7 +202,7 @@ class MindMeldALClassifier(ALClassifier):
             ic_queries_prob_vectors (List[List[float]]]): 2D Array containing the probability
                 distribution for a single query across intents in the query's domain.
             intents (List): List intents in the order that corresponds with the intent
-                probabities for the queries. Intents are in the form "domain|intent".
+                probabities for the queries. Intents are in the form "domain.intent".
         Returns:
             padded_ic_queries_prob_vectors (List[List[float]]]): 2D Array containing the probability
                 distribution for a single query across all intents (including out-of-domain
@@ -334,7 +351,7 @@ class MindMeldALClassifier(ALClassifier):
             random_state=ACTIVE_LEARNING_RANDOM_SEED,
         )
         y = [
-            f"{domain}|{intent}"
+            f"{domain}.{intent}"
             for domain, intent in zip(
                 sampled_queries.domains(), sampled_queries.intents()
             )
@@ -455,7 +472,7 @@ class MindMeldALClassifier(ALClassifier):
                 nlp_component_to_id=domain_to_intent2id[domain],
             )
             intents = [
-                f"{domain}|{intent}"
+                f"{domain}.{intent}"
                 for intent in ic_eval_test.get_stats()["class_labels"]
             ]
             padded_ic_queries_prob_vectors = self._pad_intent_probs(

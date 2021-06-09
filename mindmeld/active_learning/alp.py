@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+This module contains the ActiveLearningPipeline class.
+"""
+
 import logging
 import math
 
@@ -13,7 +30,8 @@ logger = logging.getLogger(__name__)
 
 
 class ActiveLearningPipeline:  # pylint: disable=R0902
-    """Class that executes the strategy tuning and query selection process for the Active Learning Pipeline"""
+    """Class that executes the strategy tuning and query selection process for the Active
+    Learning Pipeline. """
 
     def __init__(  # pylint: disable=R0913
         self,
@@ -71,8 +89,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.aggregate_statistic = MindMeldALClassifier._validate_aggregate_statistic(
             aggregate_statistic
         )
-        self.class_level_statistic = MindMeldALClassifier._validate_class_level_statistic(
-            class_level_statistic
+        self.class_level_statistic = (
+            MindMeldALClassifier._validate_class_level_statistic(class_level_statistic)
         )
         self.log_usage_pct = log_usage_pct
         self.labeled_logs_pattern = labeled_logs_pattern
@@ -165,7 +183,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             strategy=self.selection_strategy, select_mode=True
         )
         self.results_manager.write_log_selected_queries_json(
-            strategy=self.selection_strategy, queries=newly_sampled_queries,
+            strategy=self.selection_strategy,
+            queries=newly_sampled_queries,
         )
 
     def plot(self):

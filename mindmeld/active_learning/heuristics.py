@@ -1,3 +1,19 @@
+#
+# Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+This module contains query selection heuristics for the Active Learning Pipeline.
+"""
+
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from collections import defaultdict
@@ -326,8 +342,10 @@ class KLDivergenceSampling(ABC):
             ranked_indices (List[int]): Indices corresponding to elements ranked by the heuristic.
         """
         if confidence_segments:
-            divergences = KLDivergenceSampling.get_divergences_per_element_with_segments(
-                confidences_3d, confidence_segments
+            divergences = (
+                KLDivergenceSampling.get_divergences_per_element_with_segments(
+                    confidences_3d, confidence_segments
+                )
             )
         else:
             divergences = KLDivergenceSampling.get_divergences_per_element_no_segments(
