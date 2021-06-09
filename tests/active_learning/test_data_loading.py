@@ -73,7 +73,7 @@ def test_get_class_labels_domains_intents(kwik_e_mart_nlp, all_train_queries):
     nlp_domain_intent_labels = []
     for domain in kwik_e_mart_nlp.domains:
         for intent in kwik_e_mart_nlp.domains[domain].intents:
-            label = f"{domain}|{intent}"
+            label = f"{domain}.{intent}"
             nlp_domain_intent_labels.append(label)
     unique_domain_intent_labels = list(
         set(LabelMap.get_class_labels(TUNE_LEVEL_INTENT, all_train_queries))
