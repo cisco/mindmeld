@@ -17,16 +17,6 @@ from ..constants import STRATEGY_ABRIDGED
 logger = logging.getLogger(__name__)
 
 
-def create_dir_if_absent(base_path: str):
-    """Create a directory if one doesn't already exist at the given path.
-    Args:
-        base_path (str): Path to create directory."""
-    try:
-        os.makedirs(base_path)
-    except FileExistsError:
-        pass
-
-
 class ResultsManager:
     """Handles the initialization of generated folder and its contents. Keeps record of experiment
     results."""
@@ -74,7 +64,7 @@ class ResultsManager:
             tuning_strategies (list): List of strategies used for the experiment.
         """
         self.set_experiment_folder_name(tuning_strategies)
-        create_dir_if_absent(self.experiment_folder)
+        os.makedirs(self.experiment_folder, exist_ok=True)
         self.dump_json(AL_PARAMS_PATH, active_learning_params)
         self.create_folder(AL_RESULTS_FOLDER)
         self.create_folder(AL_PLOTS_FOLDER)
@@ -84,7 +74,7 @@ class ResultsManager:
         Args:
             unformatted_path (str): Unformatted path to JSON file.
         """
-        create_dir_if_absent(self.format_path(unformatted_path))
+        os.makedirs(self.format_path(unformatted_path), exist_ok=True)
 
     def format_path(self, unformatted_path):
         """
