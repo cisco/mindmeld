@@ -216,15 +216,15 @@ class MarginSampling(ABC):
         """
         _, element_size = np.array(confidences_2d).shape
         descending_confidences_per_element = np.partition(
-            confidences_2d, kth=(element_size - 1)
+            confidences_2d, kth=(element_size - 2)
         )
         highest_val_per_element = descending_confidences_per_element[:, -1]
         second_highest_val_per_element = descending_confidences_per_element[:, -2]
         margin_per_element = np.abs(
             highest_val_per_element - second_highest_val_per_element
         )
-        ranked_indices_high_to_low_margin = np.argsort(margin_per_element)[::-1]
-        return list(ranked_indices_high_to_low_margin)
+        ranked_indices_low_to_high_margin = np.argsort(margin_per_element)
+        return list(ranked_indices_low_to_high_margin)
 
     @staticmethod
     def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:

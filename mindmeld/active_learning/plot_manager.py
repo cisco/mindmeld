@@ -345,7 +345,7 @@ class PlotManager:
         """
         self.create_plot_dir(y_keys)
         for strategy in self.strategies:
-            n_epochs = len(self.accuracies_data[strategy].keys())
+            n_epochs = len(self.accuracies_data[strategy])
             all_y_values = []
             for epoch in range(n_epochs):
                 epoch_dict = self.accuracies_data[strategy][str(epoch)]
@@ -356,15 +356,8 @@ class PlotManager:
                     epoch_dict, ["accuracies"] + y_keys
                 )
                 all_y_values.append(y_values)
-            max_len = max([len(i) for i in all_y_values])
-            for y_values in all_y_values:
-                y_values = np.pad(
-                    y_values,
-                    (0, max_len - len(y_values)),
-                    "constant",
-                    constant_values=(0, y_values[-1]),
-                )
-            y_avg_values = np.array(all_y_values).mean(axis=0)
+            all_y_values = np.array(all_y_values)
+            y_avg_values = all_y_values.mean(axis=0)
             plt.plot(x_values, y_avg_values)
 
         plt.xlabel("Number of selected queries")

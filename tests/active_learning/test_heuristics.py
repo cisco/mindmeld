@@ -87,18 +87,18 @@ def test_least_confidence_sampling():
 def test_margin_sampling():
     """
     margin for each sample --> [[0.8,0,0.6],[0.8,0.2,0.5],[0.6,0.2,0.8]]
-    argsort of highest to lowest margin -->[[0,2,1],[0,2,1],[2,0,1]]
+    argsort of lowest to highest margin -->[[1,2,0],[1,2,0],[1,0,2]]
     """
-    expected_margin_sampling_2d_result = [[0, 2, 1], [0, 2, 1], [2, 0, 1]]
+    expected_margin_sampling_2d_result = [[1, 2, 0], [1, 2, 0], [1, 0, 2]]
     """
     Sum of ranks for each example:
-    0th example (0+0+1) = 1
-    1st example (2+2+2) = 6
-    2nd example (1+1+0) = 2
+    0th example (2+2+1) = 5
+    1st example (0+0+0) = 0
+    2nd example (1+1+2) = 4
 
-    argsort of above --> [0,2,1]
+    argsort of above --> [1,2,0]
     """
-    expected_margin_sampling_3d_result = [0, 2, 1]
+    expected_margin_sampling_3d_result = [1, 2, 0]
     predicted_margin_sampling_2d_result = [MarginSampling.rank_2d(c) for c in example]
     predicted_margin_sampling_3d_result = MarginSampling.rank_3d(example)
 
@@ -162,7 +162,7 @@ def test_ensemble_sampling():
     ]
 
     expected_ensemble_sampling_2d_result = [[1, 2, 0], [1, 2, 0], [1, 0, 2]]
-    expected_ensemble_sampling_3d_result = [2, 1, 0]
+    expected_ensemble_sampling_3d_result = [1, 2, 0]
     predicted_ensemble_sampling_2d_result = [
         EnsembleSampling.rank_2d(c) for c in example
     ]
