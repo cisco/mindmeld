@@ -100,6 +100,83 @@ NLP biasing is complicated since we need to agree on hyperparams to judge the cl
 to prefer a lower ranked NLP component prediction to a higher ranked one.
 
 
+## API Design
+
+We have to standardize and refactor the existing `allowed_intents` field since its being used for different purposes like
+masking roles. Here are some design proposals on that:
+
+
+```python
+nlp.process('I want to move $190 to checkings',
+            allow_nlp={'domain.intent', 'domain2', 'domain.intent2.entity'},
+            deny_nlp={'domain.intent3', 'domain4', 'domain.intent1.entity'},
+        )
+```
+
+The design collapses the allow and deny lists, so that the developer can specify arbitrary nlp representations.
+
+```python
+nlp.process('I want to move $190 to checkings',
+            allow_intents=['domain.intent'],
+            allow_entities=['domain.intent.entity'],
+            allow_domains=['domain'],
+            allow_roles=['domain.intent.entity.roles'],
+            deny_intents=[],
+            deny_entities=[],
+            deny_domains=[],
+            deny_roles=[]
+        )
+```
+
+This design makes it explicit what NLP components are being masked. However, its very verbose.
+
+Other designs:
+
+```python
+nlp.process('I want to move $190 to checkings',
+              mask_nlp={
+                'allow': {
+                    'domain': ['domain'],
+                    'intents': ['domain.intent'],
+                    'entities': ['domain.intent.entity'],
+                    'roles': ['domain.intent.entity.roles']
+                },
+                'deny': {
+                    'domain': [],
+                    'intents': [],
+                    'entities': [],
+                    'roles': []
+                }
+              }
+            )
+```
+
+
+```python
+nlp.process('I want to move $190 to checkings',
+            mask_nlp={
+                'intents': {
+                  'allowed': ['domain.intent'],
+                  'deny': []
+                },
+                'domains': {
+                  'allowed': ['domain'],
+                  'deny': []
+                },
+                'entities': {
+                  'allowed': [],
+                  'deny': []
+                },
+                'roles': {
+                  'allowed': [],
+                  'deny': []
+                }
+            }
+        )
+```
+
+
+
 #### Implementation details:
 
 To maintain a clear separation of concerns between the dialogue management system and the NLP components,
