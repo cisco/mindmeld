@@ -27,6 +27,7 @@ import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
 from math import sin, cos, sqrt, atan2, radians
+from typing import List, Union
 
 import nltk
 import numpy as np
@@ -562,6 +563,9 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
         def _get_date(value: str):
             value_date = None
 
+            if not isinstance(value, str):
+                return value_date
+
             # check if value can be resolved as-is
             for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
                 try:
@@ -581,6 +585,24 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                             pass
 
             return value_date
+
+        @staticmethod
+        def _get_location(value: Union[dict, str, List]):
+
+            # convert it into standard format, e.g. "37.77,122.41"
+
+            if isinstance(value, dict) and "lat" in value and "lon" in value:
+                # eg. {"lat": 37.77, "lon": 122.41}
+                return ",".join([str(value["lat"]), str(value["lon"])])
+            elif isinstance(value, str) and "," in value and len(value.split(",")) == 2:
+                # eg. "37.77,122.41"
+                return value.strip()
+            elif (isinstance(value, list) and len(value) == 2 and
+                  isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number)):
+                # eg. [37.77, 122.41]
+                return ",".join([str(_value) for _value in value])
+
+            return None
 
         @staticmethod
         def is_bool(value):
@@ -608,12 +630,9 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
         @staticmethod
         def is_location(value):
-            return (
-                (isinstance(value, dict) and "lat" in value and "lon" in value)
-                or (isinstance(value, list) and len(value) == 2 and
-                    isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number))
-                or (isinstance(value, str) and "," in value and len(value.split(",")) == 2)
-            )
+            if ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(value):
+                return True
+            return False
 
         @staticmethod
         def number_scorer(some_number):
@@ -659,7 +678,12 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 >>> # 278.54 kms
             """
 
-            R = 6373.0
+            some_location = \
+                ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(some_location)
+            source_location = \
+                ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(source_location)
+
+            R = 6373.0  # constant based on Haversine formula
             lat1, lon1 = [radians(float(ii.strip())) for ii in some_location.split(",")]
             lat2, lon2 = [radians(float(ii.strip())) for ii in source_location.split(",")]
             dlon, dlat = lon2 - lon1, lat2 - lat1
@@ -788,7 +812,9 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             except AttributeError:
                 pass
 
-            if self.is_bool(value):
+            if self.is_location(value):
+                self.data_type = "location"
+            elif self.is_bool(value):
                 self.data_type = "bool"
             elif self.is_number(value):
                 self.data_type = "number"
@@ -796,8 +822,6 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 self.data_type = "string"
             elif self.is_date(value):
                 self.data_type = "date"
-            elif self.is_location(value):
-                self.data_type = "location"
             else:
                 self.data_type = "unknown"
 
@@ -811,7 +835,10 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 logger.error(errmsg)
                 raise TypeError(errmsg)
 
-            if self.data_type == "bool":
+            if self.data_type == "location":
+                if not self.is_location(value):
+                    _raise_error()
+            elif self.data_type == "bool":
                 if not self.is_bool(value):
                     _raise_error()
             elif self.data_type == "number":
@@ -828,16 +855,6 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 value = value.strip()
                 if not self.is_date(value):
                     _raise_error()
-            elif self.data_type == "location":
-                if not self.is_location(value):
-                    _raise_error()
-                # convert it into standard format "37.77,122.41"
-                if isinstance(value, list):  # eg. [37.77, 122.41]
-                    value = ",".join([str(_value) for _value in value])
-                elif isinstance(value, dict):  # eg. {"lat": 37.77, "lon": 122.41}
-                    value = ",".join([str(value["lat"]), str(value["lon"])])
-                elif isinstance(value, str):  # eg. "37.77,122.41"
-                    value = value.strip()
 
             return value
 
@@ -1266,10 +1283,9 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             curated_docs = validated_curated_docs
 
             if self.data_type == "location":
-                source_location = self._validate_and_reformat_value(location)
                 sort_type = "asc"
                 field_values = [
-                    self.location_scorer(value, source_location) for value in field_values
+                    self.location_scorer(value, location) for value in field_values
                 ]
             elif self.data_type == "number":
                 field_values = [self.number_scorer(value) for value in field_values]
