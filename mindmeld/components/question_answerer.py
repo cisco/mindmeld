@@ -15,7 +15,6 @@
 This module contains the question answerer component of MindMeld.
 """
 import copy
-import datetime
 import json
 import logging
 import numbers
@@ -26,6 +25,7 @@ import unicodedata
 import uuid
 import warnings
 from abc import ABC, abstractmethod
+from datetime import datetime
 from math import sin, cos, sqrt, atan2, radians
 
 import nltk
@@ -222,6 +222,10 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
     """
     The question answerer is primarily an information retrieval system that provides all the
     necessary functionality for interacting with the application's knowledge base.
+
+    This class uses Entity Resolvers in the backend to implement various underlying functionalities
+    of question answerer.
+
     """
 
     def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
@@ -420,8 +424,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
         )
 
     class Indices:
-        """
-        An object that hold all the indices for an app_path
+        """ An object that hold all the indices for an app_path
 
         'self._indices' has the following dictionary format, with keys as the index name and
         the value as the metadata of that index
@@ -439,6 +442,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
         to that specific field in the KB (across all ids in the KB) along with information such as
         what data-type that field belongs to (number, date, etc.), field name, & hash of the stored
         data. See `FieldResource` class docstrings for more details.
+
         """
 
         def __init__(self, indices_cache_path=None):
@@ -541,15 +545,42 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
 
     class FieldResourceDataHelper:
-        """
-        A class that holds methods to aid validating, formatting and scoring different data types
-        in a FieldResource object.
+        """ A class that holds methods to aid validating, formatting and scoring different data
+        types in a FieldResource object.
         """
 
         DATA_TYPES = ["bool", "number", "string", "date", "location", "unknown"]
 
-        DATE_FORMATS = ('%Y', '%d %b', '%d %B', '%b %d, %Y', '%b %d, %Y', '%B %d, %Y',
-                        '%B %d %Y', '%m/%d/%Y', '%m/%d/%y', '%b %Y', '%B %Y', '%b %d,%Y')
+        DATE_FORMATS = (
+            '%Y', '%d %b', '%d %B', '%b %d', '%B %d', '%b %Y', '%B %Y', '%b, %Y', '%B, %Y',
+            '%b %d, %Y', '%B %d, %Y', '%b %d %Y', '%B %d %Y', '%b %d,%Y', '%B %d,%Y',
+            '%d %b, %Y', '%d %B, %Y', '%d %b %Y', '%d %B %Y', '%d %b,%Y', '%d %B,%Y',
+            '%m/%d/%Y', '%m/%d/%y', '%d/%m/%Y', '%d/%m/%y'
+        )
+
+        @staticmethod
+        def _get_date(value: str):
+            value_date = None
+
+            # check if value can be resolved as-is
+            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+                try:
+                    value_date = datetime.strptime(value, fmt)
+                    return value_date
+                except (ValueError, TypeError):
+                    pass
+
+            # check if value can be resolved with some modifications
+            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+                for val in [value.replace("/", " "), value.replace("-", " ")]:
+                    if val != value:
+                        try:
+                            value_date = datetime.strptime(val, fmt)
+                            return value_date
+                        except (ValueError, TypeError):
+                            pass
+
+            return value_date
 
         @staticmethod
         def is_bool(value):
@@ -571,12 +602,8 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
         @staticmethod
         def is_date(value):
-            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
-                try:
-                    datetime.datetime.strptime(value, fmt)
-                    return True
-                except (ValueError, TypeError):
-                    pass
+            if ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_date(value):
+                return True
             return False
 
         @staticmethod
@@ -593,18 +620,16 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             return some_number
 
         @staticmethod
-        def date_scorer(some_date, origin_date=datetime.datetime.now()):
+        def date_scorer(value):
             """
             ascertains a suitable date format for input and
             returns number of days from origin date as score
             """
-            target_date = origin_date
-            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
-                try:
-                    target_date = datetime.datetime.strptime(some_date, fmt)
-                    break
-                except ValueError:
-                    pass
+            origin_date = datetime.now()
+            target_date = ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_date(value)
+            if not target_date:
+                target_date = origin_date
+            # TODO: should this be configurable to days or seconds based on the app?
             return (target_date - origin_date).days
 
         @staticmethod
@@ -955,8 +980,8 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 processor_type (str, optional, "text" or "keyword"): processor for tfidf resolver
             """
 
-            if not id2value and not self.data_type:
-                return  # else, if required, update resolvers
+            if not id2value and not self.data_type:  # else, if required, update resolvers
+                return
 
             # update id2cname and compute hash
             for _id, value in id2value.items():
@@ -1193,7 +1218,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             elif self.data_type in ["date"]:
 
                 def is_valid(value):
-                    return _is_valid(abs(self.date_scorer(value)))  # returns no. of days
+                    return _is_valid(abs(self.date_scorer(value)))  # returns number of days
 
             elif self.data_type in ["bool"]:
 
@@ -1325,8 +1350,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             return cache_object
 
     class Search:
-        """
-        Search class enabling functionality to query, filter and sort.
+        """ Search class enabling functionality to query, filter and sort.
         Utilizes various methods from Indices and FiledResource to compute results.
 
         Currently, the following are supported data types for each clause type:
@@ -1339,6 +1363,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                     'location' parameter)
 
         Note: This Search class supports more items than Elasticsearch based QA
+
         """
 
         def __init__(self, index):
@@ -1507,6 +1532,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
     This class uses Elasticsearch in the backend to implement various underlying functionalities
     of question answerer.
+
     """
 
     def __init__(self, **kwargs):

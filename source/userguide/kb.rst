@@ -20,7 +20,7 @@ Not every MindMeld application needs these two components. An app always has eit
 
 .. warning::
 
-   The QuestionAnswerer requires Elasticsearch. Make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer.
+   The QuestionAnswerer by default uses `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval, unless explicitly specified in configs to not to use it. In which case, make sure that Elasticsearch is running in a separate shell before invoking the QuestionAnswerer. If you do not wish to use Elasticsearch, you can disable it following the :ref:`QuestionAnswerer without Elasticsearch backend <non_elasticsearch_question_answerer>` section below.
 
 Decide Whether your App Needs a Knowledge Base
 ----------------------------------------------
@@ -629,7 +629,7 @@ The ``field`` parameter specifies the knowledge base field for sort, the ``sort_
 
 The custom sort can be applied to any number or date fields desirable and the score for ranking will be a optimized blend of sort score with other scoring factors including text relevance scores when available.
 
-In the example below, we search for ``menu_item`` objects that best match the text query ``fish and chips``, priced from lowest to highest. TO do this, we combining the text relevance and sort scores on the ``price`` field:
+In the example below, we search for ``menu_item`` objects that best match the text query ``fish and chips``, priced from lowest to highest. To do this, we combine the text relevance and sort scores on the ``price`` field:
 
 .. code:: python
 
@@ -714,6 +714,38 @@ In the example below, we search for restaurants whose names best match ``firetra
 .. note::
 
    We can set the ``size`` parameter of the :meth:`execute()` method to specify the maximum number of records.
+
+
+.. _question_answerer_config:
+
+QuestionAnswerer Configurations
+-------------------------------
+
+To override MindMeld's default QuestionAnswerer configuration with custom settings, you can edit the app configuration file by adding a dictionary of custom setting named :data:`QUESTION_ANSWERER_CONFIG`. If no such dictionary is present in the ``config.py`` file, MindMeld loads a QuestionAnswerer with default settings. The following are the default settings:
+
+.. code-block:: python
+
+  QUESTION_ANSWERER_CONFIG = {
+      'model_type': 'keyword'
+  }
+
+The ``model_type`` can be one of 'keyword' or 'text'. While specifying the former optimizes your QuestionAnswerer search for keywords or short spans of text, the latter optimizes for searching on larger paragraphs or passages of unstructured text. In order to leverage embeddings based semantic matching along with surface-level text features, you can specify one of three model types- 'embedder', 'embedder_text' and 'embedder_keyword'. For leveraging appropriate embeddings, you can specify embedder configurations in the :data:`QUESTION_ANSWERER_CONFIG` with an additional key 'model_settings'. For full details on using embedders in QuestionAnswerer, check the :ref:`Leveraging semantic embeddings <semantic_embeddings>` section below. Note that the specified ``model_type`` is also the default ``query_type`` for all QuestionAnswerer calls in your application, but you can always pass in a different query type to your ``qa.get()`` command as desired.
+
+.. _non_elasticsearch_question_answerer:
+
+QuestionAnswerer without Elasticsearch backend
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Search operations of QuestionAnswerer are by default backed by Elasticsearch. While it is recommended to keep using Elasticsearch backend for QuestionAnswerer, it might not always be feasible to use it due to some or the other constraints. In such cases, one can easily disable Elasticsearch usage by setting a disable-key ``"use_elastic_search": False`` in the ``QUESTION_ANSWERER_CONFIG`` as follows.
+
+.. code-block:: python
+
+  QUESTION_ANSWERER_CONFIG = {
+      'model_type': 'keyword',
+      'use_elastic_search': False
+  }
+
+You can set this key irrespective of leveraging embedders or not. If unspecified, this key will be set to ``True``. It is noteworthy that the search results obtained with and without Elasticsearch might have minor differences between them.
 
 
 .. _unstructured_data:
@@ -820,7 +852,7 @@ Leveraging semantic embeddings
 
 .. note::
 
-    In order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.
+    If you are working with QuestionAnswerer's default Elasticsearch backend, in order to use the embedding features, you must be on ElasticSearch 7 or above. If you are upgrading to ES7 from an older version, we recommend you delete and recreate all of your indexes.
 
 .. note::
 
@@ -862,7 +894,7 @@ There are three available model types which leverage semantic embedders. The spe
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 
-The two included embedder types are `Sentence-BERT <https://github.com/UKPLab/sentence-transformers>`_ and `GloVe <https://nlp.stanford.edu/projects/glove/>`_. 
+The two included embedder types are `Sentence-BERT <https://github.com/UKPLab/sentence-transformers>`_ and `GloVe <https://nlp.stanford.edu/projects/glove/>`_.
 
 Sentence-BERT is a modification of the pretrained BERT network that uses siamese and triplet network structures to derive semantically meaningful sentence embeddings that can be compared using cosine-similarity. To use this embedder type, specify ``bert`` as the ``embedder_type`` in the ``model_settings``.
 
@@ -870,7 +902,7 @@ Multiple models fine-tuned on BERT / RoBERTa / DistilBERT / ALBERT / XLNet are p
 
 The provided GloVe embeddings are word vectors trained on the `Wikipedia <https://dumps.wikimedia.org/>`_ and `Gigaword 5 <https://catalog.ldc.upenn.edu/LDC2011T07>`_ datasets. To use this embedder type, specify ``glove`` as the ``embedder_type`` in the ``model_settings``.
 
-The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the ``token_embedding_dimension`` in the ``model_settings`` section of the config (defaults to 300). For fields with more than one token, word vector averaging is used. 
+The 50, 100, 200, and 300 dimension word embeddings are supported. The desired dimension can be specified via the ``token_embedding_dimension`` in the ``model_settings`` section of the config (defaults to 300). For fields with more than one token, word vector averaging is used.
 
 Once your config file is specified, you can load the Knowledge Base and the embeddings will automatically be generated as specified in the config and stored in your index as dense vectors. Note that you must pass the application path in order for the config to be processed. This can be done via the CLI command with the ``--app-path`` option or via the ``app_path`` parameter for the ``load_kb`` method.
 
@@ -879,7 +911,7 @@ Once your config file is specified, you can load the Knowledge Base and the embe
 
   mindmeld load-kb hr_assistant faq_data data/hr_faq_data.json --app-path .
 
-All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache. 
+All of the vectors generated at load time will be cached for faster retrieval at inference time and for future loads. It is stored with other generated data in the generated folder under the provided model name. It’s important to update the mode name when updating the model settings to maintain consistency with the cache.
 
 .. code-block:: console
 
@@ -889,15 +921,15 @@ If our built-in embedders don't fit your use case and you would like to use your
 
 .. code-block:: python
 
-  from mindmeld.models import Embedder, register_embedder 
-  
-  class MyEmbedder(Embedder): 
-      def load(self, **kwargs): 
-          # return the loaded model 
-      def encode(self, text_list): 
-          # encodes each query in the list  
+  from mindmeld.models import Embedder, register_embedder
 
-  register_embedder('my_embedder_name', MyEmbedder) 
+  class MyEmbedder(Embedder):
+      def load(self, **kwargs):
+          # return the loaded model
+      def encode(self, text_list):
+          # encodes each query in the list
+
+  register_embedder('my_embedder_name', MyEmbedder)
 
 
 .. code-block:: python
@@ -910,14 +942,14 @@ In many cases, you may like to provide some parameters to your ``load`` method t
 
 .. code-block:: python
 
-  QUESTION_ANSWERER_CONFIG = { 
-      "model_type": "embedder", 
-      "model_settings": { 
-          "embedder_type": "my_embedder_name", 
-          "some_model_param": "my_model_param", 
-          "embedding_fields": {"faq": ['question', 'answer']} 
-      } 
-  } 
+  QUESTION_ANSWERER_CONFIG = {
+      "model_type": "embedder",
+      "model_settings": {
+          "embedder_type": "my_embedder_name",
+          "some_model_param": "my_model_param",
+          "embedding_fields": {"faq": ['question', 'answer']}
+      }
+  }
 
 
 Once your knowledge base has been created, to search it while leveraging vector similarity, we will use the :meth:`get()` API as before with one small modification. We set the ``query_type`` parameter to ``embedder``, ``embedder_keyword``, or ``embedder_text``. This will automatically find results for which the embedded search fields are close in cosine similarity to the embedded query.

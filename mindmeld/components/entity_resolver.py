@@ -352,18 +352,20 @@ class EntityResolverBase(ABC):
             entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
                                                         loading from a file path
 
-        Example for entity_map:
-        >>> entity_map = {
-                "some_optional_key": "value",
-                "entities": [
-                    {
-                        "id": "B01MTUORTQ",
-                        "cname": "Seaweed Salad",
-                        "whitelist": [...],
-                    },
-                    ...
-                ],
-            }
+        Example for entity_map.json:
+        ---------------------------
+        entity_map = {
+            "some_optional_key": "value",
+            "entities": [
+                {
+                    "id": "B01MTUORTQ",
+                    "cname": "Seaweed Salad",
+                    "whitelist": [...],
+                },
+                ...
+            ],
+        }
+
         """
 
         msg = f"Fitting {self.__class__.__name__} entity resolver for entity_type {self.type}"
@@ -1032,6 +1034,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
             Union[dict, list[tuple]]: if _return_as_dict, returns a dictionary of tgt_texts and
                 their scores, else a list of sorted synonym names paired with their
                 similarity scores (descending order)
+
         """
 
         is_single = False
