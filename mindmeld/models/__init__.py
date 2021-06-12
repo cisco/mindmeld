@@ -14,8 +14,8 @@
 # Need to import the following so models, label encoders, features are registered.
 # See helpers module
 from . import (
-    embedder_models,
     auto_models,
+    embedder_models,
     labels
 )
 from .auto_models import AutoModel
@@ -30,25 +30,27 @@ from .helpers import (
     ENTITY_EXAMPLE_TYPE,
     QUERY_EXAMPLE_TYPE,
     create_model,
+    load_model,
     create_embedder_model,
     register_embedder,
 )
 from .model import ModelConfig
 
 __all__ = [
-    "ModelConfig",
     "auto_models",
     "embedder_models",
     "labels",
+    "AutoModel",
+    "Embedder",
     "query_features",
     "entity_features",
-    "create_model",
-    "QUERY_EXAMPLE_TYPE",
-    "ENTITY_EXAMPLE_TYPE",
     "CLASS_LABEL_TYPE",
     "ENTITIES_LABEL_TYPE",
+    "ENTITY_EXAMPLE_TYPE",
+    "QUERY_EXAMPLE_TYPE",
+    "create_model",
+    "load_model",
     "create_embedder_model",
-    "Embedder",
     "register_embedder",
-    "AutoModel"
+    "ModelConfig",
 ]

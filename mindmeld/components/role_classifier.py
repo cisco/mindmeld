@@ -20,7 +20,7 @@ from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
-from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
+from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model, load_model
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -174,7 +174,7 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         try:
-            metadata = create_model(model_path)
+            metadata = load_model(model_path)
             self._model = metadata["model"]
             self.roles = metadata["roles"]
         except (OSError, IOError):

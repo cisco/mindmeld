@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..exceptions import ClassifierLoadError
-from ..models import ModelConfig, create_model
+from ..models import ModelConfig, create_model, load_model
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -457,7 +457,7 @@ class Classifier(ABC):
             model_path (str): The location on disk where the model is stored
         """
 
-        metadata = create_model(model_path)
+        metadata = load_model(model_path)
         self._model = metadata.pop("model")
 
         if self._model is not None:

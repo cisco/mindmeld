@@ -20,7 +20,7 @@ from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 from ..core import Entity, Query
-from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
+from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model, load_model
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-        metadata = create_model(model_path)
+        metadata = load_model(model_path)
 
         self.entity_types = metadata["entity_types"]
         self._model_config = metadata.get("model_config")

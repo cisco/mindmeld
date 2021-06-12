@@ -228,7 +228,7 @@ class ModelConfig:
         return required_resources
 
 
-class AbstractModel(ABC):
+class BaseModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
     """
@@ -313,7 +313,7 @@ class AbstractModel(ABC):
         return self._resources.get(name)
 
 
-class Model(AbstractModel):
+class Model(BaseModel):
     """An abstract class upon which all models are based.
 
     Attributes:
@@ -654,7 +654,7 @@ class Model(AbstractModel):
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
 
-class PytorchModel(AbstractModel):
+class PytorchModel(BaseModel):
 
     def __init__(self, config):
         super().__init__(config)
