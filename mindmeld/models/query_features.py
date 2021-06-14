@@ -382,6 +382,26 @@ def extract_bag_of_words_features(
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
 
+    def remove_excess_out_of_bounds(n_gram):
+        """
+        In our frequency dictionaries, we only add a single OOB token to the start and end of a query.
+        This function takes care to remove excess OOB tokens and retains only 1, so we can look up their counts and
+        uphold the thresholding feature.
+        Eg., '<$> <$> what' --> '<$> what'
+             '<$> what' --> '<$> what'
+             'help <$> <$>' --> 'help <$>'
+             '<$> <$>' --> '<$>'
+        """
+        shortened_ngram = n_gram
+        if OUT_OF_BOUNDS_TOKEN in n_gram:
+            oob_last = n_gram.rfind(OUT_OF_BOUNDS_TOKEN)
+            oob_first = n_gram.find(OUT_OF_BOUNDS_TOKEN)
+            if oob_last + len(OUT_OF_BOUNDS_TOKEN) == len(n_gram):
+                shortened_ngram = n_gram[:oob_first + len(OUT_OF_BOUNDS_TOKEN)]
+            else:
+                shortened_ngram = n_gram[oob_last:]
+        return shortened_ngram
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         tokens = [re.sub(r"\d", "0", t) for t in tokens]
@@ -400,8 +420,8 @@ def extract_bag_of_words_features(
                     feat_name = "bag_of_words|length:{}|word_pos:{}".format(
                         length, start
                     )
-
-                    if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 0) > threshold:
+                    short_ngram = remove_excess_out_of_bounds(n_gram)
+                    if resources[WORD_NGRAM_FREQ_RSC].get(short_ngram, 0) >= threshold:
                         feat_seq[i][feat_name] = n_gram
                     else:
                         feat_seq[i][feat_name] = "OOV"
@@ -410,14 +430,15 @@ def extract_bag_of_words_features(
                         stemmed_n_gram = get_ngram(
                             stemmed_tokens, i + int(start), int(length)
                         )
+                        short_stemmed_ngram = remove_excess_out_of_bounds(stemmed_n_gram)
                         stemmed_feat_name = (
                             "bag_of_words_stemmed|length:{}|word_pos:{}".format(
                                 length, start
                             )
                         )
                         if (
-                            resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1)
-                            > threshold
+                            resources[WORD_NGRAM_FREQ_RSC].get(short_stemmed_ngram, 0)
+                            >= threshold
                         ):
                             feat_seq[i][stemmed_feat_name] = stemmed_n_gram
                         else:
@@ -507,7 +528,7 @@ def extract_char_ngrams_features(
                         # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) > threshold:
+                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) >= threshold:
                             feat_name = (
                                 "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
                                     length, start, j
@@ -606,14 +627,14 @@ def extract_char_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
 
                 freq = resources[CHAR_NGRAM_FREQ_RSC].get("".join(char_ngram), 0)
 
-                if freq >= threshold:
-                    ngram_counter.update(
-                        [
-                            "char_ngram|length:{}|ngram:{}".format(
-                                len(char_ngram), " ".join(char_ngram)
-                            )
-                        ]
-                    )
+                joined_char_ngram = " ".join(char_ngram) if freq >= threshold else "OOV"
+                ngram_counter.update(
+                    [
+                        "char_ngram|length:{}|ngram:{}".format(
+                            len(char_ngram), joined_char_ngram
+                        )
+                    ]
+                )
         return ngram_counter
 
     return _extractor
@@ -666,6 +687,7 @@ def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
                     ]
                 )
                 if kwargs.get(ENABLE_STEMMING, False):
+                    freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(stemmed_ngram), 0)
                     joined_stemmed_ngram = " ".join(stemmed_ngram) if freq>=threshold else "OOV"
                     ngram_counter.update(
                         [

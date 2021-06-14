@@ -33,7 +33,7 @@ from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
 from .models.helpers import (CHAR_NGRAM_FREQ_RSC, ENABLE_STEMMING, GAZETTEER_RSC, QUERY_FREQ_RSC,
                              SENTIMENT_ANALYZER, SYS_TYPES_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
-                             mask_numerics)
+                             OUT_OF_BOUNDS_TOKEN, mask_numerics)
 from .path import MODEL_CACHE_PATH
 from .query_cache import QueryCache
 from .query_factory import QueryFactory
@@ -744,10 +744,12 @@ class ResourceLoader:
 
         def add(self, query):
             for length, threshold in zip(self.lengths, self.thresholds):
+                # Minimum value of thresholds must be one to include all ngrams in train files
+                # i.e, no ngram in our dictionary can occur less than once in our training data
                 if threshold < 1:
                     logger.warning(
-                        "Threshold value of ngrams is less than 1."
-                        "Resetting to 1 to extract valid char ngrams",
+                        "Threshold value of n-grams cannot be less than 1."
+                        "Resetting to 1 to extract all character ngrams in the domain",
                     )
                 character_tokens = [
                     query.normalized_text[i : i + length]
@@ -771,20 +773,25 @@ class ResourceLoader:
 
         def add(self, query):
             for length, threshold in zip(self.lengths, self.thresholds):
+                # Minimum value of thresholds must be one to include all ngrams in train files
+                # i.e, no ngram in our dictionary can occur less than once in our training data
                 if threshold < 1:
                     logger.warning(
-                        "Threshold value of ngrams is less than 1."
-                        "Resetting to 1 to extract valid ngrams",
+                        "Threshold value of n-grams cannot be less than 1."
+                        "Resetting to 1 to extract all ngrams in the domain",
                         )
 
                 ngram_tokens = []
-                for i in range(len(query.normalized_tokens)):
-                    ngram_query = " ".join(query.normalized_tokens[i : i + length])
+                # Adding OOB token for entity bow feature extractor
+                normalized_tokens = [OUT_OF_BOUNDS_TOKEN] + list(query.normalized_tokens) + [OUT_OF_BOUNDS_TOKEN]
+                if self.enable_stemming:
+                    stemmed_tokens = [OUT_OF_BOUNDS_TOKEN] + query.stemmed_tokens + [OUT_OF_BOUNDS_TOKEN]
+
+                for i in range(len(normalized_tokens)):
+                    ngram_query = " ".join(normalized_tokens[i : i + length])
                     ngram_tokens.append(ngram_query)
                     if self.enable_stemming:
-                        stemmed_ngram_query = " ".join(
-                            query.stemmed_tokens[i : i + length]
-                        )
+                        stemmed_ngram_query = " ".join(stemmed_tokens[i : i + length])
                         if stemmed_ngram_query != ngram_query:
                             ngram_tokens.append(stemmed_ngram_query)
                 self.word_freq_dict.update(ngram_tokens)
