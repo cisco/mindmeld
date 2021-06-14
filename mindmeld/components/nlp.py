@@ -225,8 +225,6 @@ class Processor(ABC):
         for child in self._children.values():
             child.evaluate(print_stats, label_set=label_set)
 
-        self.resource_loader.query_cache.dump()
-
     @abstractmethod
     def _evaluate(self, print_stats, label_set="test"):
         raise NotImplementedError

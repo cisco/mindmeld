@@ -744,13 +744,17 @@ class ResourceLoader:
 
         def add(self, query):
             for length, threshold in zip(self.lengths, self.thresholds):
-                if threshold > 0:
-                    character_tokens = [
-                        query.normalized_text[i : i + length]
-                        for i in range(len(query.normalized_text))
-                        if len(query.normalized_text[i : i + length]) == length
-                    ]
-                    self.char_freq_dict.update(character_tokens)
+                if threshold < 1:
+                    logger.warning(
+                        "Threshold value of ngrams is less than 1."
+                        "Resetting to 1 to extract valid char ngrams",
+                    )
+                character_tokens = [
+                    query.normalized_text[i : i + length]
+                    for i in range(len(query.normalized_text))
+                    if len(query.normalized_text[i : i + length]) == length
+                ]
+                self.char_freq_dict.update(character_tokens)
 
         def get_resource(self):
             return self.char_freq_dict
@@ -767,18 +771,23 @@ class ResourceLoader:
 
         def add(self, query):
             for length, threshold in zip(self.lengths, self.thresholds):
-                if threshold > 0:
-                    ngram_tokens = []
-                    for i in range(len(query.normalized_tokens)):
-                        ngram_query = " ".join(query.normalized_tokens[i : i + length])
-                        ngram_tokens.append(ngram_query)
-                        if self.enable_stemming:
-                            stemmed_ngram_query = " ".join(
-                                query.stemmed_tokens[i : i + length]
-                            )
-                            if stemmed_ngram_query != ngram_query:
-                                ngram_tokens.append(stemmed_ngram_query)
-                    self.word_freq_dict.update(ngram_tokens)
+                if threshold < 1:
+                    logger.warning(
+                        "Threshold value of ngrams is less than 1."
+                        "Resetting to 1 to extract valid ngrams",
+                        )
+
+                ngram_tokens = []
+                for i in range(len(query.normalized_tokens)):
+                    ngram_query = " ".join(query.normalized_tokens[i : i + length])
+                    ngram_tokens.append(ngram_query)
+                    if self.enable_stemming:
+                        stemmed_ngram_query = " ".join(
+                            query.stemmed_tokens[i : i + length]
+                        )
+                        if stemmed_ngram_query != ngram_query:
+                            ngram_tokens.append(stemmed_ngram_query)
+                self.word_freq_dict.update(ngram_tokens)
 
         def get_resource(self):
             return self.word_freq_dict

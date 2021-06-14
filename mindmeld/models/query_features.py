@@ -366,7 +366,7 @@ def extract_in_gaz_ngram_features(**kwargs):
 @register_query_feature(feature_name="bag-of-words-seq")
 @requires(WORD_NGRAM_FREQ_RSC)
 def extract_bag_of_words_features(
-    ngram_lengths_to_start_positions, thresholds=(0,), **kwargs
+    ngram_lengths_to_start_positions, thresholds=(1,), **kwargs
 ):
     """Returns a bag-of-words feature extractor.
 
@@ -378,7 +378,7 @@ def extract_bag_of_words_features(
         (function) The feature extractor.
     """
     threshold_list = list(thresholds)
-    word_thresholds = threshold_list + [0] * (
+    word_thresholds = threshold_list + [1] * (
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
 
@@ -401,7 +401,7 @@ def extract_bag_of_words_features(
                         length, start
                     )
 
-                    if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
+                    if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 0) > threshold:
                         feat_seq[i][feat_name] = n_gram
                     else:
                         feat_seq[i][feat_name] = "OOV"
@@ -470,7 +470,7 @@ def enabled_stemming(**kwargs):
 @register_query_feature(feature_name="char-ngrams-seq")
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams_features(
-    ngram_lengths_to_start_positions, thresholds=(0,), **kwargs
+    ngram_lengths_to_start_positions, thresholds=(1,), **kwargs
 ):
     """Returns a character n-gram feature extractor.
 
@@ -485,7 +485,7 @@ def extract_char_ngrams_features(
     """
     del kwargs
     threshold_list = list(thresholds)
-    char_thresholds = threshold_list + [0] * (
+    char_thresholds = threshold_list + [1] * (
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
 
@@ -507,7 +507,7 @@ def extract_char_ngrams_features(
                         # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 1) > threshold:
+                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) > threshold:
                             feat_name = (
                                 "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
                                     length, start, j
@@ -579,7 +579,7 @@ def update_features_sequence(feat_seq, update_feat_seq, **kwargs):
 
 @register_query_feature(feature_name="char-ngrams")
 @requires(CHAR_NGRAM_FREQ_RSC)
-def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
+def extract_char_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
     """Extract character ngrams of specified lengths.
 
     Args:
@@ -592,7 +592,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
     """
     del kwargs
     threshold_list = list(thresholds)
-    char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+    char_thresholds = threshold_list + [1] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
         query_text = query.normalized_text
@@ -603,10 +603,10 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
                 char_ngram = []
                 for token in query_text[i : i + length]:
                     char_ngram.append(token)
-                if (
-                    resources[CHAR_NGRAM_FREQ_RSC].get("".join(char_ngram), 1)
-                    > threshold
-                ):
+
+                freq = resources[CHAR_NGRAM_FREQ_RSC].get("".join(char_ngram), 0)
+
+                if freq >= threshold:
                     ngram_counter.update(
                         [
                             "char_ngram|length:{}|ngram:{}".format(
@@ -621,7 +621,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
 
 @register_query_feature(feature_name="bag-of-words")
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
+def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
     """
     Extract ngrams of some specified lengths.
 
@@ -634,7 +634,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
             returns ngrams of the specified lengths.
     """
     threshold_list = list(thresholds)
-    word_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+    word_thresholds = threshold_list + [1] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -657,30 +657,20 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
                         tok_stemmed = mask_numerics(stemmed_tokens[index])
                         stemmed_ngram.append(tok_stemmed)
 
-                freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(ngram), 1)
+                freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(ngram), 0)
 
-                if freq > threshold:
-                    joined_ngram = " ".join(ngram)
+                joined_ngram = " ".join(ngram) if freq >= threshold else "OOV"
+                ngram_counter.update(
+                    [
+                        "bag_of_words|length:{}|ngram:{}".format(len(ngram), joined_ngram)
+                    ]
+                )
+                if kwargs.get(ENABLE_STEMMING, False):
+                    joined_stemmed_ngram = " ".join(stemmed_ngram) if freq>=threshold else "OOV"
                     ngram_counter.update(
                         [
-                            "bag_of_words|length:{}|ngram:{}".format(
-                                len(ngram), joined_ngram
-                            )
+                            "bag_of_words_stemmed|length:{}|ngram:{}".format(len(stemmed_ngram), joined_stemmed_ngram)
                         ]
-                    )
-
-                    if kwargs.get(ENABLE_STEMMING, False):
-                        joined_stemmed_ngram = " ".join(stemmed_ngram)
-                        ngram_counter.update(
-                            [
-                                "bag_of_words_stemmed|length:{}|ngram:{}".format(
-                                    len(stemmed_ngram), joined_stemmed_ngram
-                                )
-                            ]
-                        )
-                else:
-                    ngram_counter.update(
-                        ["bag_of_words|length:{}|ngram:{}".format(len(ngram), "OOV")]
                     )
 
         return ngram_counter
@@ -786,8 +776,9 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         feats = {}
+
         for length in lengths:
-            if length < len(tokens):
+            if length <= len(tokens):
                 left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
                 left_tokens = [
                     tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
@@ -812,6 +803,8 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
                         ): 1
                     }
                 )
+
+
 
         return feats
 
