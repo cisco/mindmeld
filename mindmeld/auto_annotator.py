@@ -10,21 +10,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import importlib
 import logging
 import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-import spacy
 from tqdm import tqdm
-from ._util import get_pattern
 from .resource_loader import ResourceLoader
 from .components._config import (
     ENGLISH_LANGUAGE_CODE,
     ENGLISH_US_LOCALE,
 )
 from .components.translators import NoOpTranslator, TranslatorFactory
+from .text_preparation.spacy_model_factory import SpacyModelFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
     duckling_item_to_query_entity,
@@ -34,9 +32,6 @@ from .core import Entity, Span, QueryEntity, _get_overlap, NestedEntity
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
 from .constants import (
-    SPACY_ANNOTATOR_WEB_LANGUAGES,
-    SPACY_ANNOTATOR_SUPPORTED_LANGUAGES,
-    SPACY_ANNOTATOR_MODEL_SIZES,
     DUCKLING_TO_SYS_ENTITY_MAPPINGS,
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
@@ -117,7 +112,7 @@ class Annotator(ABC):
             raise AssertionError(f"{action} is an invalid Annotator action.")
 
         for rule in rules:
-            pattern = get_pattern(rule)
+            pattern = Annotator._get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
                 compiled_pattern=compiled_pattern, file_paths=all_file_paths
@@ -126,6 +121,20 @@ class Annotator(ABC):
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
         return file_entities_map
+
+    @staticmethod
+    def _get_pattern(rule):
+        """Convert a rule represented as a dictionary with the keys "domains", "intents",
+        "entities" into a regex pattern.
+
+        Args:
+            rule (dict): Annotation/Unannotation rule.
+
+        Returns:
+            pattern (str): Regex pattern specifying allowed file paths.
+        """
+        pattern = [rule[x] for x in ["domains", "intents", "files"]]
+        return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
         """Process the entities specified in a rule dictionary. Check if they are valid
@@ -392,49 +401,10 @@ class SpacyAnnotator(Annotator):
             unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(*args, **kwargs)
-        if self.language not in SPACY_ANNOTATOR_SUPPORTED_LANGUAGES:
-            raise ValueError(
-                "Spacy does not currently support: {!r}.".format(self.language)
-            )
         self.spacy_model_size = kwargs.get("spacy_model_size", "lg")
-        if self.spacy_model_size not in SPACY_ANNOTATOR_MODEL_SIZES:
-            raise ValueError(
-                "{!r} is not a valid model size. Select from: {!r}.".format(
-                    self.language, " ".join(SPACY_ANNOTATOR_MODEL_SIZES)
-                )
-            )
-        self.nlp = self._load_model()
-
-    def _get_spacy_model_name(self):
-        """Get the name of a Spacy Model.
-
-        Returns:
-            spacy_model_name (str): Name of the Spacy NER model
-        """
-        model_type = "web" if self.language in SPACY_ANNOTATOR_WEB_LANGUAGES else "news"
-        return f"{self.language}_core_{model_type}_{self.spacy_model_size}"
-
-    def _load_model(self):
-        """Load Spacy English model. Download if needed.
-
-        Args:
-            model (str): Spacy model (Ex: "en_core_web_sm", "zh_core_web_md", etc.)
-
-        Returns:
-            nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
-        """
-        model = self._get_spacy_model_name()
-        logger.info("Loading Spacy model %s.", model)
-        try:
-            return spacy.load(model)
-        except OSError:
-            logger.warning("%s not found on disk. Downloading the model.", model)
-            os.system("python -m spacy download " + model)
-            try:
-                language_module = importlib.import_module(model)
-            except ModuleNotFoundError as e:
-                raise ValueError("Unknown Spacy model name: {!r}.".format(model)) from e
-            return language_module.load()
+        self.nlp = SpacyModelFactory.get_spacy_language_model(
+            self.language, self.spacy_model_size
+        )
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
