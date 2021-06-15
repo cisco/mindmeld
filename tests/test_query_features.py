@@ -36,8 +36,8 @@ EPSILON = math.pow(10, -5)
             [
                 "bag_of_words|edge:left|length:1|ngram:set",
                 "bag_of_words|edge:left|length:2|ngram:set temperature",
-                "bag_of_words|edge:right|length:1|ngram:00",
-                "bag_of_words|edge:right|length:2|ngram:to 00",
+                "bag_of_words|edge:right|length:1|ngram:#NUM",
+                "bag_of_words|edge:right|length:2|ngram:to #NUM",
             ],
             [1, 1, 1, 1],
             None,
@@ -142,8 +142,8 @@ def test_domain_query_features(
     extracted_features = domain_classifier.view_extracted_features(
         query, dynamic_resource=dynamic_resource
     )
-    for feature_key, expected_value in zip(feature_keys, expected_feature_values):
 
+    for feature_key, expected_value in zip(feature_keys, expected_feature_values):
         if isinstance(expected_value, float):
             assert abs(expected_value - extracted_features[feature_key]) < EPSILON
         else:

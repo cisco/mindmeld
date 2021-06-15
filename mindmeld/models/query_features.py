@@ -802,12 +802,12 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
 
         for length in lengths:
             if length <= len(tokens):
-                left_tokens = [re.sub('\d','0',tok) for tok in tokens[:length]]
+                left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
                 left_tokens = [
                     tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
                     for tok in left_tokens
                 ]
-                right_tokens = [re.sub('\d','0',tok) for tok in tokens[-length:]]
+                right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
                 right_tokens = [
                     tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
                     for tok in right_tokens
