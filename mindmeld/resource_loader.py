@@ -739,7 +739,7 @@ class ResourceLoader:
         """
         def __init__(self, lengths, thresholds):
             self.lengths = lengths
-            self.thresholds = thresholds
+            self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
             self.char_freq_dict = Counter()
 
         def add(self, query):
@@ -751,10 +751,11 @@ class ResourceLoader:
                         "Threshold value of n-grams cannot be less than 1."
                         "Resetting to 1 to extract all character ngrams in the domain",
                     )
+                query_text = re.sub(r"\d", "0", query.normalized_text)
                 character_tokens = [
-                    query.normalized_text[i : i + length]
-                    for i in range(len(query.normalized_text))
-                    if len(query.normalized_text[i : i + length]) == length
+                    query_text[i : i + length]
+                    for i in range(len(query_text))
+                    if len(query_text[i : i + length]) == length
                 ]
                 self.char_freq_dict.update(character_tokens)
 
@@ -767,7 +768,7 @@ class ResourceLoader:
         """
         def __init__(self, lengths, thresholds, enable_stemming=False):
             self.lengths = lengths
-            self.thresholds = thresholds
+            self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
             self.enable_stemming = enable_stemming
             self.word_freq_dict = Counter()
 
@@ -783,9 +784,13 @@ class ResourceLoader:
 
                 ngram_tokens = []
                 # Adding OOB token for entity bow feature extractor
-                normalized_tokens = [OUT_OF_BOUNDS_TOKEN] + list(query.normalized_tokens) + [OUT_OF_BOUNDS_TOKEN]
+                normalized_tokens = [OUT_OF_BOUNDS_TOKEN] + \
+                                    [re.sub(r"\d", "0", tok) for tok in query.normalized_tokens] + \
+                                    [OUT_OF_BOUNDS_TOKEN]
                 if self.enable_stemming:
-                    stemmed_tokens = [OUT_OF_BOUNDS_TOKEN] + query.stemmed_tokens + [OUT_OF_BOUNDS_TOKEN]
+                    stemmed_tokens = [OUT_OF_BOUNDS_TOKEN] + \
+                                     [re.sub(r"\d", "0", tok) for tok in query.stemmed_tokens] + \
+                                     [OUT_OF_BOUNDS_TOKEN]
 
                 for i in range(len(normalized_tokens)):
                     ngram_query = " ".join(normalized_tokens[i : i + length])

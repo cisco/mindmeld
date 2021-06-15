@@ -122,7 +122,7 @@ def test_domain_query_features(
             "C": 10,
         },
         "features": {
-            "char-ngrams": {"lengths": [1, 2], "thresholds": [0]},
+            "char-ngrams": {"lengths": [1, 2], "thresholds": [1]},
             "bag-of-words": {"lengths": [1, 2]},
             "sys-candidates": {},
             "word-shape": {},
@@ -295,11 +295,11 @@ def test_entity_query_features(
             "in-gaz-ngram-seq": {},
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "char-ngrams-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "sys-candidates-seq": {"start_positions": [0]},
         },
@@ -427,7 +427,7 @@ def test_entity_query_features(
                 "00",
                 "elm",
                 "on 00",
-                "00 elm",
+                "OOV",
                 "elm street",
                 "o",
                 "n",
@@ -472,11 +472,11 @@ def test_entity_gaz_query_features(
             "in-gaz-ngram-seq": {},
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "char-ngrams-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "sys-candidates-seq": {"start_positions": [0]},
         },

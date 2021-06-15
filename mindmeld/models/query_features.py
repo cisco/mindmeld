@@ -616,9 +616,10 @@ def extract_char_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
     char_thresholds = threshold_list + [1] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
-        query_text = query.normalized_text
-        ngram_counter = Counter()
 
+        query_text = re.sub(r"\d", "0", query.normalized_text)
+
+        ngram_counter = Counter()
         for length, threshold in zip(lengths, char_thresholds):
             for i in range(len(query_text) - length + 1):
                 char_ngram = []
