@@ -15,6 +15,7 @@ import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import List
 from tqdm import tqdm
 from .resource_loader import ResourceLoader
 from .components._config import (
@@ -217,11 +218,13 @@ class Annotator(ABC):
                 entity_types = file_entities_map[path]
                 if action == AnnotatorAction.ANNOTATE:
                     self._annotate_query(
-                        processed_query=processed_query, entity_types=entity_types,
+                        processed_query=processed_query,
+                        entity_types=entity_types,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
-                        processed_query=processed_query, remove_entities=entity_types,
+                        processed_query=processed_query,
+                        remove_entities=entity_types,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -842,12 +845,12 @@ class BootstrapAnnotator(Annotator):
                 if entity_confidence >= self.confidence_threshold:
                     entities.append(
                         {
-                            "body": entity["text"],
-                            "start": entity["span"]["start"],
-                            "end": entity["span"]["end"] + 1,
-                            "dim": entity["type"],
-                            "value": entity["value"],
-                            "role": entity["role"],
+                            "body": entity.get("text"),
+                            "start": entity.get("span", {}).get("start"),
+                            "end": entity.get("span", {}).get("end") + 1,
+                            "dim": entity.get("type"),
+                            "value": entity.get("value"),
+                            "role": entity.get("role"),
                         }
                     )
         processed_query = load_query(
@@ -859,6 +862,18 @@ class BootstrapAnnotator(Annotator):
         return [
             Annotator._item_to_query_entity(entity, processed_query)
             for entity in entities
+        ]
+
+    def text_queries_to_processed_queries(self, text_queries: List[str]):
+        """Converts text queries into processed queries.
+
+        Args:
+            text_queries (List[str]): List of raw text queries.
+        Returns:
+            processed_queries (List[ProcessedQuery]): List of processed queries.
+        """
+        return [
+            self.nlp.process_query(query=self.nlp.create_query(q)) for q in text_queries
         ]
 
     @property
@@ -920,8 +935,10 @@ class NoTranslationDucklingAnnotator(Annotator):
             language=self.language,
             locale=self.locale,
         )
-        filtered_candidates = NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
-            duckling_candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
+                duckling_candidates
+            )
         )
         final_candidates = NestedEntity.get_largest_non_overlapping_entities(
             filtered_candidates, lambda x: Span(x["start"], x["end"] - 1))
@@ -952,8 +969,10 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
-            candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
+                candidates
+            )
         )
         return filtered_candidates
 
@@ -973,7 +992,7 @@ class NoTranslationDucklingAnnotator(Annotator):
 
 
 class TranslationDucklingAnnotator(Annotator):
-    """ The TranslationDucklingAnnotator detects entities in non-English sentences using
+    """The TranslationDucklingAnnotator detects entities in non-English sentences using
     a translation service and Duckling by following these steps:
         1. The non-English sentence is translated to English.
         2. Spacy detects entities in the translated English sentence.
@@ -1020,7 +1039,7 @@ class TranslationDucklingAnnotator(Annotator):
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):
-        """ Implements a heuristic to match English entities detected by Spacy on the
+        """Implements a heuristic to match English entities detected by Spacy on the
         translated non-English sentence against the non-English entities detected by
         Duckling on the non-English sentence.
 
@@ -1091,7 +1110,7 @@ class TranslationDucklingAnnotator(Annotator):
 
 
 class MultiLingualAnnotator(Annotator):
-    """ The MultiLingualAnnotator detects entities in English and non-English sentences.
+    """The MultiLingualAnnotator detects entities in English and non-English sentences.
 
     1. If the 'language' is English, this annotator solely uses the Spacy's English NER model to
         detect entities.
@@ -1130,7 +1149,9 @@ class MultiLingualAnnotator(Annotator):
         if self.language != ENGLISH_LANGUAGE_CODE:
             self.duckling_annotator = self._get_duckling_annotator()
             self.non_en_annotator = SpacyAnnotator(
-                app_path=self.app_path, language=self.language, locale=self.locale,
+                app_path=self.app_path,
+                language=self.language,
+                locale=self.locale,
             )
 
     def _get_duckling_annotator(self):
@@ -1143,7 +1164,9 @@ class MultiLingualAnnotator(Annotator):
                 translator=self.translator,
             )
         return NoTranslationDucklingAnnotator(
-            app_path=self.app_path, language=self.language, locale=self.locale,
+            app_path=self.app_path,
+            language=self.language,
+            locale=self.locale,
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):

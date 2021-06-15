@@ -44,9 +44,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {
-        "classifier_type": "logreg",
-    },
+    "model_settings": {"classifier_type": "logreg"},
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -106,9 +104,7 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
-    "model_settings": {
-        "resolver_type": "text_relevance",
-    }
+    "model_settings": {"resolver_type": "text_relevance",},
 }
 
 DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
@@ -189,10 +185,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {
-                        "type": "text",
-                        "analyzer": "char_ngram_analyzer",
-                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -278,10 +271,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {
-                                "type": "text",
-                                "analyzer": "english",
-                            },
+                            "processed_text": {"type": "text", "analyzer": "english",},
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -472,13 +462,7 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUGMENTATION_CONFIG = {
     "augmentor_class": "EnglishParaphraser",
     "batch_size": 8,
-    "paths": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-        }
-    ],
+    "paths": [{"domains": ".*", "intents": ".*", "files": ".*",}],
     "path_suffix": "-augment.txt",
 }
 
@@ -486,12 +470,7 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotation_rules": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-            "entities": ".*",
-        }
+        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
@@ -503,6 +482,42 @@ DEFAULT_TOKENIZER_CONFIG = {
     "allowed_patterns": [],
     "tokenizer": "WhiteSpaceTokenizer",
     "normalizer": "ASCIIFold",
+}
+
+
+DEFAULT_ACTIVE_LEARNING_CONFIG = {
+    "output_folder": None,
+    "pre_tuning": {
+        "train_pattern": ".*train.*.txt",
+        "test_pattern": ".*test.*.txt",
+        "train_seed_pct": 0.20,
+    },
+    "tuning": {
+        "n_classifiers": 3,
+        "n_epochs": 5,
+        "batch_size": 100,
+        "tuning_level": "domain",
+        "tuning_strategies": [
+            "LeastConfidenceSampling",
+            "MarginSampling",
+            "EntropySampling",
+            "RandomSampling",
+            "DisagreementSampling",
+            "EnsembleSampling",
+            "KLDivergenceSampling",
+        ],
+    },
+    "tuning_output": {
+        "save_sampled_queries": True,
+        "aggregate_statistic": "accuracy",
+        "class_level_statistic": "f_beta",
+    },
+    "query_selection": {
+        "selection_strategy": "EntropySampling",
+        "log_usage_pct": 1.00,
+        "labeled_logs_pattern": None,
+        "unlabeled_logs_path": "logs.txt",
+    },
 }
 
 
@@ -1119,3 +1134,27 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
         return DEFAULT_TOKENIZER_CONFIG
+
+
+def get_active_learning_config(app_path=None):
+    """Gets the active learning configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The active learning configuration.
+    """
+
+    if not app_path:
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+    try:
+        active_learning_config = getattr(
+            _get_config_module(app_path),
+            "ACTIVE_LEARNING_CONFIG",
+            DEFAULT_ACTIVE_LEARNING_CONFIG,
+        )
+        return active_learning_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_ACTIVE_LEARNING_CONFIG

@@ -134,6 +134,14 @@ USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, "config")
 BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, "blueprints")
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, "{name}")
 
+# Active Learning (AL)
+AL_EXPERIMENT_FOLDER = "{experiment_folder}"
+AL_PARAMS_PATH = os.path.join(AL_EXPERIMENT_FOLDER, "params.json")
+AL_RESULTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "results")
+AL_ACCURACIES_PATH = os.path.join(AL_RESULTS_FOLDER, "accuracies.json")
+AL_SELECTED_QUERIES_PATH = os.path.join(AL_RESULTS_FOLDER, "selected_queries.json")
+AL_PLOTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "plots")
+
 logger = logging.getLogger(__name__)
 
 
