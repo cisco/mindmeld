@@ -36,8 +36,8 @@ EPSILON = math.pow(10, -5)
             [
                 "bag_of_words|edge:left|length:1|ngram:set",
                 "bag_of_words|edge:left|length:2|ngram:set temperature",
-                "bag_of_words|edge:right|length:1|ngram:#NUM",
-                "bag_of_words|edge:right|length:2|ngram:to #NUM",
+                "bag_of_words|edge:right|length:1|ngram:00",
+                "bag_of_words|edge:right|length:2|ngram:to 00",
             ],
             [1, 1, 1, 1],
             None,
