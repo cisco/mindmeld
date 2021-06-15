@@ -672,11 +672,11 @@ def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
                     token = tokens[index]
-                    tok = mask_numerics(token)
+                    tok = re.sub('\d','0',token)
                     ngram.append(tok)
 
                     if kwargs.get(ENABLE_STEMMING, False):
-                        tok_stemmed = mask_numerics(stemmed_tokens[index])
+                        tok_stemmed = re.sub('\d','0',stemmed_tokens[index])
                         stemmed_ngram.append(tok_stemmed)
 
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(ngram), 0)
@@ -802,12 +802,12 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
 
         for length in lengths:
             if length <= len(tokens):
-                left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
+                left_tokens = [re.sub('\d','0',tok) for tok in tokens[:length]]
                 left_tokens = [
                     tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
                     for tok in left_tokens
                 ]
-                right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
+                right_tokens = [re.sub('\d','0',tok) for tok in tokens[-length:]]
                 right_tokens = [
                     tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
                     for tok in right_tokens
