@@ -127,7 +127,7 @@ class NFD(Normalizer):
     """Unicode NFD Normalizer Class."""
 
     def __init__(self):
-        """Creates a NFDNormalizer instance."""
+        """Creates a NFD Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFD"
 
@@ -145,7 +145,7 @@ class NFC(Normalizer):
     """Unicode NFC Normalizer Class."""
 
     def __init__(self):
-        """Creates a NFCNormalizer instance."""
+        """Creates a NFC Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFC"
 
@@ -163,7 +163,7 @@ class NFKD(Normalizer):
     """Unicode NFKD Normalizer Class."""
 
     def __init__(self):
-        """Creates a NFKDNormalizer instance."""
+        """Creates a NFKD Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFKD"
 
@@ -181,7 +181,7 @@ class NFKC(Normalizer):
     """Unicode NFKC Normalizer Class."""
 
     def __init__(self):
-        """Creates a NFKCNormalizer instance."""
+        """Creates a NFKC Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFKC"
 
@@ -193,6 +193,19 @@ class NFKC(Normalizer):
             normalized_text (str): Normalized Text.
         """
         return unicodedata.normalize(self.normalization_type, text)
+
+
+class Lowercase(Normalizer):
+    """Lowercase Normalizer Class."""
+
+    def normalize(self, text):
+        """
+        Args:
+            text (str): Input text.
+        Returns:
+            normalized_text (str): Normalized Text.
+        """
+        return text.lower()
 
 
 class NormalizerFactory:
@@ -207,16 +220,16 @@ class NormalizerFactory:
         Returns:
             (Normalizer): Normalizer Class
         """
-        if normalizer == NoOpNormalizer.__name__:
-            return NoOpNormalizer()
-        elif normalizer == ASCIIFold.__name__:
-            return ASCIIFold()
-        elif normalizer == NFC.__name__:
-            return NFC()
-        elif normalizer == NFD.__name__:
-            return NFD()
-        elif normalizer == NFKC.__name__:
-            return NFKC()
-        elif normalizer == NFKD.__name__:
-            return NFKD()
-        raise AssertionError(f" {normalizer} is not a valid Normalizer.")
+        normalizer_classes = [
+            NoOpNormalizer,
+            ASCIIFold,
+            NFC,
+            NFD,
+            NFKC,
+            NFKD,
+            Lowercase,
+        ]
+        for normalizer_class in normalizer_classes:
+            if normalizer == normalizer_class.__name__:
+                return normalizer_class()
+        raise AssertionError(f" {normalizer} is not a valid normalizer.")

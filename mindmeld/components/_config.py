@@ -477,14 +477,6 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "translator": "NoOpTranslator",
 }
 
-DEFAULT_TOKENIZER_CONFIG = {
-    # populated in the `get_tokenizer_config` func
-    "allowed_patterns": [],
-    "tokenizer": "WhiteSpaceTokenizer",
-    "normalizer": "ASCIIFold",
-}
-
-
 DEFAULT_ACTIVE_LEARNING_CONFIG = {
     "output_folder": None,
     "pre_tuning": {
@@ -518,6 +510,21 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "labeled_logs_pattern": None,
         "unlabeled_logs_path": "logs.txt",
     },
+}
+
+
+DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
+    "preprocessors": [],
+    "normalizers": [
+        "ASCIIFold",
+        "Lowercase"
+    ],
+    "tokenizer": "SpacyTokenizer",
+    "stemmer": "EnglishNLTKStemmer"
+}
+
+DEFAULT_TEXT_PREPARATION_CONFIG = {
+    "en": DEFAULT_EN_TEXT_PREPARATION_CONFIG
 }
 
 
@@ -1026,6 +1033,64 @@ def get_auto_annotator_config(app_path=None):
         return DEFAULT_AUTO_ANNOTATOR_CONFIG
 
 
+def get_active_learning_config(app_path=None):
+    """Gets the active learning configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The active learning configuration.
+    """
+
+    if not app_path:
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+    try:
+        active_learning_config = getattr(
+            _get_config_module(app_path),
+            "ACTIVE_LEARNING_CONFIG",
+            DEFAULT_ACTIVE_LEARNING_CONFIG,
+        )
+        return active_learning_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+
+
+def get_text_preparation_config(app_path=None):
+    """Gets the text preparation configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The tokenizer configuration.
+    """
+    if not app_path:
+        return DEFAULT_TEXT_PREPARATION_CONFIG[ENGLISH_LANGUAGE_CODE]
+    try:
+        tokenizer_config = getattr(
+            _get_config_module(app_path), "TEXT_PREPARATION_CONFIG"
+        )
+        return tokenizer_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        language, _ = get_language_config(app_path)
+        if language in DEFAULT_TEXT_PREPARATION_CONFIG:
+            return DEFAULT_TEXT_PREPARATION_CONFIG[language]
+        else:
+            return DEFAULT_TEXT_PREPARATION_CONFIG[ENGLISH_LANGUAGE_CODE]
+
+
+# TODO: Remove After Text Preparation Pipeline Update
+
+DEFAULT_TOKENIZER_CONFIG = {
+    # populated in the `get_tokenizer_config` func
+    "allowed_patterns": [],
+    "tokenizer": "WhiteSpaceTokenizer",
+    "normalizer": "ASCIIFold",
+}
+
 def _get_default_regex(exclude_from_norm):
     """Gets the default special character regex for the Tokenizer config.
 
@@ -1135,26 +1200,3 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
         logger.info("No app configuration file found.")
         return DEFAULT_TOKENIZER_CONFIG
 
-
-def get_active_learning_config(app_path=None):
-    """Gets the active learning configuration for the app at the specified path.
-
-    Args:
-        app_path (str, optional): The location of the MindMeld app
-
-    Returns:
-        dict: The active learning configuration.
-    """
-
-    if not app_path:
-        return DEFAULT_ACTIVE_LEARNING_CONFIG
-    try:
-        active_learning_config = getattr(
-            _get_config_module(app_path),
-            "ACTIVE_LEARNING_CONFIG",
-            DEFAULT_ACTIVE_LEARNING_CONFIG,
-        )
-        return active_learning_config
-    except (OSError, IOError, AttributeError):
-        logger.info("No app configuration file found.")
-        return DEFAULT_ACTIVE_LEARNING_CONFIG

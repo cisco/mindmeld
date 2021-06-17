@@ -30,6 +30,15 @@ class Stemmer(ABC):
         raise NotImplementedError
 
 
+class NoOpStemmer(Stemmer):
+    @property
+    def _stemmer(self):
+        return
+
+    def stem_word(self, word):
+        return word
+
+
 class EnglishNLTKStemmer(Stemmer):
     @property
     def _stemmer(self):
@@ -74,46 +83,59 @@ class SnowballNLTKStemmer(Stemmer):
         return word if stem == "" else stem
 
 
-class NoOpStemmer(Stemmer):
-    @property
-    def _stemmer(self):
-        return
+class StemmerFactory:
+    """Stemmer Factory Class"""
 
-    def stem_word(self, word):
-        return word
+    @staticmethod
+    def get_stemmer(stemmer):
+        """A static method to get a stemmer.
 
+        Args:
+            translator (str): Name of the desired translator class
+        Returns:
+            (Translator): Translator Class
+        """
+        if stemmer == EnglishNLTKStemmer.__name__:
+            return EnglishNLTKStemmer()
+        if stemmer == SnowballNLTKStemmer.__name__:
+            return SnowballNLTKStemmer()
+        raise AssertionError(f" {stemmer} is not a valid 'stemmer'.")
 
-def get_language_stemmer(language_code):
+    @staticmethod
+    def get_stemmer_by_language(language_code):
 
-    if not language_code:
-        return NoOpStemmer()
+        if not language_code:
+            return NoOpStemmer()
 
-    language_code = language_code.lower()
+        language_code = language_code.lower()
 
-    if language_code == "en":
-        return EnglishNLTKStemmer()
+        if language_code == "en":
+            return EnglishNLTKStemmer()
 
-    language = None
-    if len(language_code) == 2:
-        language = pycountry.languages.get(alpha_2=language_code)
-    elif len(language_code) == 3:
-        language = pycountry.languages.get(alpha_3=language_code)
+        language = None
+        if len(language_code) == 2:
+            language = pycountry.languages.get(alpha_2=language_code)
+        elif len(language_code) == 3:
+            language = pycountry.languages.get(alpha_3=language_code)
 
-    if not language:
+        if not language:
+            logger.warning(
+                'Language code "%s" is not supported for stemming. If stemming is '
+                "enabled in config.py, consider disabling it.",
+                language_code,
+            )
+            return NoOpStemmer()
+
+        language_name = language.name.lower()
+        if language_name in nltk.stem.SnowballStemmer.languages:
+            return SnowballNLTKStemmer(language_name)
+
         logger.warning(
-            'Language code "%s" is not supported for stemming. If stemming is '
-            "enabled in config.py, consider disabling it.",
+            'Language code "%s" is not supported for stemming. If stemming is enabled in '
+            "config.py, consider disabling it.",
             language_code,
         )
         return NoOpStemmer()
 
-    language_name = language.name.lower()
-    if language_name in nltk.stem.SnowballStemmer.languages:
-        return SnowballNLTKStemmer(language_name)
 
-    logger.warning(
-        'Language code "%s" is not supported for stemming. If stemming is enabled in '
-        "config.py, consider disabling it.",
-        language_code,
-    )
-    return NoOpStemmer()
+# TODO: Use ENGLISH_LANGUAGE_CODE instead of 'en'

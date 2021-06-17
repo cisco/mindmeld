@@ -48,3 +48,58 @@ class Preprocessor(ABC):
             (dict, dict): A tuple consisting of two maps, forward and backward
         """
         pass
+
+
+class NoOpPreprocessor(Preprocessor):
+    """
+    NoOpPreprocessor object
+    """
+
+    def process(self, text):
+        """
+        Args:
+            text (str)
+
+        Returns:
+            (str)
+        """
+        return text
+
+    def get_char_index_map(self, raw_text, processed_text):
+        """
+        Generates character index mapping from processed query to raw query.
+
+        See the Tokenizer class for a similar implementation.
+
+        Args:
+            raw_text (str)
+            processed_text (str)
+
+        Returns:
+            (dict, dict): A tuple consisting of two maps, forward and backward
+        """
+        # TODO: Give a direct mapping back to the original text
+        pass
+
+
+class PreprocessorFactory:
+    """Preprocessor Factory Class"""
+
+    @staticmethod
+    def get_preprocessor(preprocessor):
+        """A static method to get a Preprocessor
+
+        Args:
+            perprocessor (str): Name of the desired Preprocessor class
+        Returns:
+            (Preprocessor): Preprocessor Class
+        """
+        if preprocessor == NoOpPreprocessor.__name__:
+            return NoOpPreprocessor()
+        raise AssertionError(f" {preprocessor} is not a valid Preprocssor.")
+
+
+# TODO: Look into how get_char_index_map is currently being used.
+
+# TODO: Look at HuggingFace or Spacy to include some common types of Preprocessors
+# This would help with Testing

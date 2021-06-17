@@ -251,7 +251,7 @@ class Query:
                 processed and normalized text
         """
         self._normalized_tokens = normalized_tokens
-        norm_text = " ".join([t["entity"] for t in self._normalized_tokens])
+        norm_text = " ".join([t["text"] for t in self._normalized_tokens])
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
         self.system_entity_candidates = ()

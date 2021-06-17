@@ -10,8 +10,8 @@ Tests for `core` module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mindmeld.stemmers import (
-    get_language_stemmer,
+from mindmeld.text_preparation.stemmers import (
+    StemmerFactory,
     EnglishNLTKStemmer,
     NoOpStemmer,
     SnowballNLTKStemmer,
@@ -415,8 +415,8 @@ def test_system_entity_time_resolution(home_assistant_nlp):
         ("INVALID_CODE", NoOpStemmer),
     ],
 )
-def test_get_language_stemmer(language_code, stemmer_class):
-    stemmer = get_language_stemmer(language_code)
+def test_get_stemmer_by_language(language_code, stemmer_class):
+    stemmer = StemmerFactory.get_stemmer_by_language(language_code)
     assert isinstance(stemmer, stemmer_class)
 
 

@@ -18,10 +18,9 @@ import logging
 
 from .components._config import get_language_config
 from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
-from .stemmers import get_language_stemmer
 from .system_entity_recognizer import (DucklingRecognizer, NoOpSystemEntityRecognizer,
                                        SystemEntityRecognizer)
-from .tokenizer import Tokenizer
+from .text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +29,7 @@ class QueryFactory:
     """An object which encapsulates the components required to create a Query object.
 
     Attributes:
-        preprocessor (Preprocessor): the object responsible for processing raw text
-        tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
-            text
-        stemmer (Stemmer): the object responsible for stemming the text
+        text_preparation_pipeline (TextPreparationPipeline): Pipeline class responsible for preprocessing queries.
         language (str): the language of the text
         locale (str): the locale of the text
         system_entity_recognizer (SystemEntityRecognizer): default to NoOpSystemEntityRecognizer
@@ -43,17 +39,13 @@ class QueryFactory:
 
     def __init__(
         self,
-        tokenizer,
-        preprocessor=None,
-        stemmer=None,
+        text_preparation_pipeline=None,
         locale=None,
         language=None,
         system_entity_recognizer=None,
         duckling=False,
-    ):
-        self.tokenizer = tokenizer
-        self.preprocessor = preprocessor
-        self.stemmer = stemmer
+    ):        
+        self.text_preparation_pipeline = text_preparation_pipeline
         self.locale = locale
         self.language = language
 
@@ -84,6 +76,7 @@ class QueryFactory:
         Returns:
             Query: A newly constructed query
         """
+        # TODO: Should a text_preparation_pipeline be recreated based on the entered language?
         if not language and not locale:
             language = self.language
             locale = self.locale
@@ -91,30 +84,29 @@ class QueryFactory:
         raw_text = text
         char_maps = {}
 
-        # create raw, processed maps
-        if self.preprocessor:
-            processed_text = self.preprocessor.process(raw_text)
-            maps = self.preprocessor.get_char_index_map(raw_text, processed_text)
-            forward, backward = maps
-            char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
-            char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
+        # Step 1: Preprocessing
+        if len(self.text_preparation_pipeline.preprocessors) > 0:
+            processed_text, forward_map, backward_map = self.text_preparation_pipeline.preprocess(raw_text)
+            char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward_map
+            char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward_map
         else:
             processed_text = raw_text
 
-        normalized_tokens = self.tokenizer.tokenize(processed_text)
-        normalized_text = " ".join([t["entity"] for t in normalized_tokens])
+        # Step 2: Normalization
+        # TODO: Should normalizer return text without annotation?
+        # TODO: Should these maps map from annotated or unannotated text?
+        annotated_normalized_text, _, _ = self.text_preparation_pipeline.normalize(processed_text)
 
-        # stemmed tokens
-        stemmed_tokens = [
-            self.stemmer.stem_word(t["entity"]) for t in normalized_tokens
-        ]
+        # Step 3: Tokenization
+        # TODO: Rejoining entities may not be as simple as rejoining by space, need some more advanced rejoining method
+        normalized_tokens, normalization_forward_map, normalization_backward_map = self.text_preparation_pipeline.tokenize(annotated_normalized_text)
+        normalized_word_list = [t["text"] for t in normalized_tokens]
+        #normalized_text = " ".join(normalized_word_list)
+        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = normalization_forward_map
+        char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = normalization_backward_map
 
-        # create normalized maps
-        maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
-        forward, backward = maps
-
-        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
-        char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
+        # Step 4: Stemming
+        stemmed_tokens = self.text_preparation_pipeline.stem_words(normalized_word_list)
 
         query = Query(
             raw_text,
@@ -141,17 +133,16 @@ class QueryFactory:
         Returns:
             str: Normalized text
         """
-        return self.tokenizer.normalize(text)
+        normalized_text, _, _ = self.text_preparation_pipeline.normalize(text)
+        return normalized_text
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
 
     @staticmethod
     def create_query_factory(
-        app_path=None,
-        tokenizer=None,
-        preprocessor=None,
-        stemmer=None,
+        app_path,
+        text_preparation_pipeline=None,
         system_entity_recognizer=None,
         duckling=False,
     ):
@@ -161,10 +152,7 @@ class QueryFactory:
             app_path (str, optional): The path to the directory containing the
                 app's data. If None is passed, a default query factory will be
                 returned.
-            tokenizer (Tokenizer, optional): The app's tokenizer. One will be
-                created if none is provided
-            preprocessor (Processor, optional): The app's preprocessor.
-            stemmer (Stemmer, optional): The stemmer to use for stemming
+            text_preparation_pipeline (TextPreparationPipeline, optional): Pipeline class responsible for preprocessing queries.
             system_entity_recognizer (SystemEntityRecognizer): If not passed, we use either the one
                 from the application's configuration or NoOpSystemEntityRecognizer.
             duckling (bool, optional): if no system entity recognizer is provided,
@@ -174,8 +162,8 @@ class QueryFactory:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
         language, locale = get_language_config(app_path)
-        tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
-        stemmer = stemmer or get_language_stemmer(language_code=language)
+
+        text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline_from_app_path(app_path)
         if system_entity_recognizer:
             sys_entity_recognizer = system_entity_recognizer
         elif app_path:
@@ -188,9 +176,7 @@ class QueryFactory:
             )
             sys_entity_recognizer = NoOpSystemEntityRecognizer.get_instance()
         return QueryFactory(
-            tokenizer,
-            preprocessor,
-            stemmer,
+            text_preparation_pipeline=text_preparation_pipeline,
             language=language,
             locale=locale,
             system_entity_recognizer=sys_entity_recognizer,
