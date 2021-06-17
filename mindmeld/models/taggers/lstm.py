@@ -20,8 +20,8 @@ import tensorflow as tf
 from sklearn.externals import joblib
 from sklearn.preprocessing import LabelBinarizer
 
+from .embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 from .taggers import Tagger, extract_sequence_features
-from ..dense_featurizers.embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = r"in-gaz\|type:(\w+)\|pos:(\w+)\|"

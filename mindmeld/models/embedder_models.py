@@ -21,8 +21,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from .dense_featurizers.embeddings import WordSequenceEmbedding
 from .helpers import register_embedder
+from .taggers.embeddings import WordSequenceEmbedding
 from .. import path
 from ..tokenizer import Tokenizer
 
