@@ -14,17 +14,17 @@
 """
 This module contains the embedder model class.
 """
+from abc import ABC, abstractmethod
+import pickle
 import logging
 import os
-import pickle
-from abc import ABC, abstractmethod
-
 import numpy as np
 
+from .. import path
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
-from .. import path
 from ..tokenizer import Tokenizer
+
 
 logger = logging.getLogger(__name__)
 
