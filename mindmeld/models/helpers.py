@@ -79,7 +79,7 @@ def create_model(config):
         ValueError: When model configuration is invalid
     """
     try:
-        return MODEL_MAP[config.model_type](config)
+        return MODEL_MAP["auto"].from_config(config)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type)) from e

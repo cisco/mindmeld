@@ -134,6 +134,12 @@ class ModelConfig:
         self.train_label_set = train_label_set
         self.test_label_set = test_label_set
 
+    def __repr__(self):
+        args_str = ", ".join(
+            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
+        )
+        return "{}({})".format(self.__class__.__name__, args_str)
+
     def to_dict(self):
         """Converts the model config object into a dict
 
@@ -144,12 +150,6 @@ class ModelConfig:
         for attr in self.__slots__:
             result[attr] = getattr(self, attr)
         return result
-
-    def __repr__(self):
-        args_str = ", ".join(
-            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
-        )
-        return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_json(self):
         """Converts the model config object to JSON
@@ -258,15 +258,13 @@ class BaseModel(ABC):
     def evaluate(self, examples, labels):
         raise NotImplementedError
 
-    def view_extracted_features(self, example, dynamic_resource=None):
-        raise NotImplementedError
-
     def dump(self, path, metadata=None):
 
         metadata = metadata or {}
 
-        # going forward, any model has one default .pkl dump file that contains a dictionary
-        #   with at least the key 'model_config'
+        # every XxxModel derived from baseModel has one default .pkl dump file that contains a
+        #   dictionary with at least the key 'model_config' whose value is a dictionary of the
+        #   model configs
         if 'model_config' not in metadata:
             metadata.update({'model_config': self.config})
 
@@ -288,11 +286,10 @@ class BaseModel(ABC):
 
         if not isinstance(metadata, dict):
             # backwards compatability
-            #   when a serializable model is saved as-is & now has to be retrieved
-            #   the serialized model also consists of the model config
-            # model = metadata
-            model_config = metadata.config
-            metadata = {"model": metadata, "model_config": model_config}
+            #   when a serializable model is saved as-is & now has to be retrieved;
+            #   notably, the serialized model also consists of the model config;
+            #   in this case, metadata = model
+            metadata = {"model": metadata, "model_config": metadata.config}
 
         if 'model_config' not in metadata:
             msg = f"Unable to obtain model_config from dump location- {path}." \
@@ -300,6 +297,9 @@ class BaseModel(ABC):
             raise KeyError(msg)
 
         return metadata
+
+    def view_extracted_features(self, example, dynamic_resource=None):
+        raise NotImplementedError
 
     def register_resources(self, **kwargs):
         """Registers resources which are accessible to feature extractors

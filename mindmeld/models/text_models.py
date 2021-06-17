@@ -475,14 +475,12 @@ class TextModel(Model):
 
     def dump(self, path, metadata=None):
         metadata = metadata or {}
-        metadata.update({"model": self, "model_config": self.config, "serializable": True})
-
-        # dump model metadata
+        metadata.update({
+            "model": self,
+            "model_config": self.config,
+            "serializable": True}
+        )
         super().dump(path, metadata)
-
-    @classmethod
-    def load(cls, path):
-        return super().load(path)
 
 
 class PytorchTextModel(PytorchModel):
