@@ -207,7 +207,7 @@ class MarginSampling(ABC):
     @staticmethod
     def rank_2d(confidences_2d: List[List[float]]) -> List[int]:
         """Calculates the "margin" or difference between the highest and second highest
-        confidence score per element. Elements are ranked from highest to lowest margin.
+        confidence score per element. Elements are ranked from lowest to highest margin.
 
         Args:
             confidences_2d (List[List[float]]): Confidence probabilities per element.
@@ -229,7 +229,7 @@ class MarginSampling(ABC):
     @staticmethod
     def rank_3d(confidences_3d: List[List[List[float]]]) -> List[int]:
         """Calculates the "margin" or difference between the highest and second highest
-        confidence score per element. Elements are ranked from highest to lowest margin.
+        confidence score per element. Elements are ranked from lowest to highest margin.
         This is done for each confidence_2d in a confidence_3d. The rankings are added
         to generate a final ranking.
 
