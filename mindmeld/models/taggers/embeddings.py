@@ -18,8 +18,9 @@ from urllib.request import urlretrieve
 
 import numpy as np
 from tqdm import tqdm
-from mindmeld.exceptions import EmbeddingDownloadError
-from mindmeld.path import (
+
+from ...exceptions import EmbeddingDownloadError
+from ...path import (
     EMBEDDINGS_FILE_PATH,
     EMBEDDINGS_FOLDER_PATH,
     PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,
@@ -33,24 +34,25 @@ EMBEDDING_FILE_PATH_TEMPLATE = "glove.6B.{}d.txt"
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 
 
+class TqdmUpTo(tqdm):
+    """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
+
+    def update_to(self, b=1, bsize=1, tsize=None):
+        """Reports update statistics on the download progress.
+
+        Args:
+            b (int): Number of blocks transferred so far [default: 1].
+            bsize (int): Size of each block (in tqdm units) [default: 1].
+            tsize (int): Total size (in tqdm units). If [default: None] remains unchanged.
+        """
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)  # will also set self.n = b * bsize
+
+
 class GloVeEmbeddingsContainer:
     """This class is responsible for the downloading, extraction and storing of
     word embeddings based on the GloVe format."""
-
-    class TqdmUpTo(tqdm):
-        """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
-
-        def update_to(self, b=1, bsize=1, tsize=None):
-            """Reports update statistics on the download progress.
-
-            Args:
-                b (int): Number of blocks transferred so far [default: 1].
-                bsize (int): Size of each block (in tqdm units) [default: 1].
-                tsize (int): Total size (in tqdm units). If [default: None] remains unchanged.
-            """
-            if tsize is not None:
-                self.total = tsize
-            self.update(b * bsize - self.n)  # will also set self.n = b * bsize
 
     def __init__(self, token_dimension=300, token_pretrained_embedding_filepath=None):
 
@@ -87,7 +89,7 @@ class GloVeEmbeddingsContainer:
         if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
             os.makedirs(EMBEDDINGS_FOLDER_PATH)
 
-        with GloVeEmbeddingsContainer.TqdmUpTo(
+        with TqdmUpTo(
             unit="B", unit_scale=True, miniters=1, desc=GLOVE_DOWNLOAD_LINK
         ) as t:
 
