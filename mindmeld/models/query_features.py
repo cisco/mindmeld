@@ -22,6 +22,7 @@ from .helpers import (
     ENABLE_STEMMING,
     GAZETTEER_RSC,
     OUT_OF_BOUNDS_TOKEN,
+    OUT_OF_VOCABULARY,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
@@ -382,7 +383,7 @@ def extract_bag_of_words_features(
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
 
-    def remove_excess_out_of_bounds(n_gram):
+    def remove_excess_out_of_bounds(n_gram: str) -> str:
         """
         In our frequency dictionaries, we only add a single OOB token to the start and end of a query.
         This function takes care to remove excess OOB tokens and retains only 1, so we can look up their counts and
@@ -424,7 +425,7 @@ def extract_bag_of_words_features(
                     if resources[WORD_NGRAM_FREQ_RSC].get(short_ngram, 0) >= threshold:
                         feat_seq[i][feat_name] = n_gram
                     else:
-                        feat_seq[i][feat_name] = "OOV"
+                        feat_seq[i][feat_name] = OUT_OF_VOCABULARY
 
                     if kwargs.get(ENABLE_STEMMING, False):
                         stemmed_n_gram = get_ngram(
@@ -442,7 +443,7 @@ def extract_bag_of_words_features(
                         ):
                             feat_seq[i][stemmed_feat_name] = stemmed_n_gram
                         else:
-                            feat_seq[i][stemmed_feat_name] = "OOV"
+                            feat_seq[i][stemmed_feat_name] = OUT_OF_VOCABULARY
 
                 threshold_index += 1
         return feat_seq
@@ -528,13 +529,14 @@ def extract_char_ngrams_features(
                         # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) >= threshold:
-                            feat_name = (
-                                "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
-                                    length, start, j
-                                )
+                        feat_name = (
+                            "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
+                                length, start, j
                             )
-                            feat_seq[i][feat_name] = c_gram
+                        )
+                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) < threshold:
+                            c_gram = OUT_OF_VOCABULARY
+                        feat_seq[i][feat_name] = c_gram
                 threshold_index += 1
         return feat_seq
 
@@ -626,9 +628,10 @@ def extract_char_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
                 for token in query_text[i : i + length]:
                     char_ngram.append(token)
 
-                freq = resources[CHAR_NGRAM_FREQ_RSC].get("".join(char_ngram), 0)
-
-                joined_char_ngram = " ".join(char_ngram) if freq >= threshold else "OOV"
+                joined_char_ngram = "".join(char_ngram)
+                freq = resources[CHAR_NGRAM_FREQ_RSC].get(joined_char_ngram, 0)
+                if freq < threshold:
+                    joined_char_ngram = OUT_OF_VOCABULARY
                 ngram_counter.update(
                     [
                         "char_ngram|length:{}|ngram:{}".format(
@@ -679,17 +682,20 @@ def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
                         tok_stemmed = re.sub('\d','0',stemmed_tokens[index])
                         stemmed_ngram.append(tok_stemmed)
 
-                freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(ngram), 0)
-
-                joined_ngram = " ".join(ngram) if freq >= threshold else "OOV"
+                joined_ngram = " ".join(ngram)
+                freq = resources[WORD_NGRAM_FREQ_RSC].get(joined_ngram, 0)
+                if freq < threshold:
+                    joined_ngram = OUT_OF_VOCABULARY
                 ngram_counter.update(
                     [
                         "bag_of_words|length:{}|ngram:{}".format(len(ngram), joined_ngram)
                     ]
                 )
                 if kwargs.get(ENABLE_STEMMING, False):
-                    freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(stemmed_ngram), 0)
-                    joined_stemmed_ngram = " ".join(stemmed_ngram) if freq>=threshold else "OOV"
+                    joined_stemmed_ngram = " ".join(stemmed_ngram)
+                    freq = resources[WORD_NGRAM_FREQ_RSC].get(joined_stemmed_ngram, 0)
+                    if freq < threshold:
+                        joined_stemmed_ngram = OUT_OF_VOCABULARY
                     ngram_counter.update(
                         [
                             "bag_of_words_stemmed|length:{}|ngram:{}".format(len(stemmed_ngram), joined_stemmed_ngram)
@@ -804,12 +810,12 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
             if length <= len(tokens):
                 left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
                 left_tokens = [
-                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
+                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else OUT_OF_VOCABULARY
                     for tok in left_tokens
                 ]
                 right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
                 right_tokens = [
-                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
+                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else OUT_OF_VOCABULARY
                     for tok in right_tokens
                 ]
                 feats.update(
@@ -907,7 +913,7 @@ def extract_gaz_freq(**kwargs):
         freq_features = defaultdict(int)
 
         for tok in tokens:
-            query_freq = "OOV" if resources[WORD_FREQ_RSC].get(tok) is None else "IV"
+            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None else "IV"
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz["index"].get(tok, []))
                 if freq > 0:

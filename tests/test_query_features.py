@@ -55,8 +55,8 @@ EPSILON = math.pow(10, -5)
             [
                 "char_ngram|length:1|ngram:e",
                 "char_ngram|length:1|ngram:t",
-                "char_ngram|length:2|ngram:s e",
-                "char_ngram|length:2|ngram:e t",
+                "char_ngram|length:2|ngram:se",
+                "char_ngram|length:2|ngram:et",
             ],
             [2, 2, 1, 1],
             None,
