@@ -21,7 +21,11 @@ from .normalizers import Normalizer, NormalizerFactory
 from .tokenizers import Tokenizer, TokenizerFactory
 from .stemmers import Stemmer, StemmerFactory
 
-from ..components._config import get_text_preparation_config, get_language_config
+from ..components._config import (
+    get_text_preparation_config,
+    get_language_config,
+    ENGLISH_LANGUAGE_CODE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +122,8 @@ class TextPreparationPipeline:
     def find_mindmeld_annotation_re_matches(text):
         """
         Args:
-            text (str): The string to find mindmeld annotation instances (" {entity_text|entity_type} ")
+            text (str): The string to find mindmeld annotation instances
+                (" {entity_text|entity_type} ")
         Returns:
             matches (List[sre.SRE_Match object]): Regex match objects.
         """
@@ -129,7 +134,8 @@ class TextPreparationPipeline:
     def modify_around_mindmeld_annotations(text, function):
         """Applied a function around the mindmeld annotation.
 
-        function(pre_entity_text) + { + function(entity_text) + |entity_name} + function(post_entity_text)
+        function(pre_entity_text) + { + function(entity_text) + |entity_name}
+            + function(post_entity_text)
 
         Args:
             text (str): Original sentence with markup to modify.
@@ -175,7 +181,8 @@ class TextPreparationPipeline:
     def tokenize_around_mindmeld_annotations(text, function):
         """Applied a function around the mindmeld annotation.
 
-        tokenize(pre_entity_text) + { + tokenize(entity_text) + |entity_name} + tokenize(post_entity_text)
+        tokenize(pre_entity_text) + { + tokenize(entity_text) + |entity_name}
+            + tokenize(post_entity_text)
 
         Args:
             text (str): Original sentence with markup to modify.
@@ -333,8 +340,11 @@ class TextPreparationPipelineFactory:
     """Creates a TextPreparationPipeline object."""
 
     @staticmethod
-    def create_text_preparation_pipeline_from_app_path(app_path):
+    def create_from_app_path(app_path):
         """Static method to create a TextPreparationPipeline instance from an app_path.
+
+        Args:
+            app_path (str): The application path.
 
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
@@ -352,13 +362,18 @@ class TextPreparationPipelineFactory:
 
     @staticmethod
     def create_text_preparation_pipeline(
-        language: str,
-        preprocessors: List[Preprocessor],
-        normalizers: List[Normalizer],
         tokenizer: Tokenizer,
-        stemmer: Stemmer,
+        preprocessors: List[Preprocessor] = None,
+        normalizers: List[Normalizer] = None,
+        stemmer: Stemmer = None,
+        language: str = ENGLISH_LANGUAGE_CODE,
     ):
         """Static method to create a TextPreparationPipeline instance.
+
+        Args:
+        Args:
+            language (str, optional): Language as specified using a 639-1/2 code.
+            preprocessors (List[Preprocessors]):
 
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.

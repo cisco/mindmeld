@@ -304,7 +304,7 @@ class ResourceLoader:
         Returns:
             tokenizer (Tokenizer): The resource loaders tokenizer
         """
-        return self.query_factory.tokenizer
+        return self.query_factory.text_preparation_pipeline.tokenizer
 
     @staticmethod
     def get_sentiment_analyzer():

@@ -23,7 +23,7 @@ import numpy as np
 from .. import path
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
-from ..tokenizer import Tokenizer
+from ..text_preparation.tokenizers import Tokenizer
 
 
 logger = logging.getLogger(__name__)

@@ -22,7 +22,7 @@ import nltk
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
-from ..tokenizer import Tokenizer
+from ..text_preparation.tokenizers import Tokenizer
 
 logger = logging.getLogger(__name__)
 

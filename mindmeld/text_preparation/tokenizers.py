@@ -216,7 +216,12 @@ class SpacyTokenizer(Tokenizer):
     """A Tokenizer that splits text at spaces."""
 
     def __init__(self, language, spacy_model_size):
-        """Initializes a SpacyTokenizer."""
+        """Initializes a SpacyTokenizer.
+
+        Args:
+            language (str, optional): Language as specified using a 639-1/2 code.
+            spacy_model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
+        """
         self.spacy_model = SpacyModelFactory.get_spacy_language_model(
             language, spacy_model_size
         )

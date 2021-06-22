@@ -15,7 +15,6 @@
 This module contains a preprocessor base class.
 """
 from abc import ABC, abstractmethod
-from .text_preparation_pipeline import TextPreparationPipeline
 
 
 class Preprocessor(ABC):
@@ -79,7 +78,7 @@ class NoOpPreprocessor(Preprocessor):
         Returns:
             (dict, dict): A tuple consisting of two maps, forward and backward
         """
-        # TODO: Give a direct mapping back to the original text
+        # TODO: Give a direct mapping back to the original text, consider removing entirely
         pass
 
 
