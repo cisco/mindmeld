@@ -103,8 +103,10 @@ class QueryFactory:
             processed_text = raw_text
 
         # Step 2: Normalization
-        annotated_normalized_text = self.text_preparation_pipeline.normalize(
-            processed_text
+        annotated_normalized_text = (
+            self.text_preparation_pipeline.normalize(processed_text)
+            if self.text_preparation_pipeline.normalizers
+            else processed_text
         )
 
         # Step 3: Tokenization

@@ -395,12 +395,17 @@ class TextPreparationPipelineFactory:
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-        if preprocessors:
-            preprocessors = [
-                PreprocessorFactory.get_preprocessor(p) for p in preprocessors
-            ]
-        if normalizers:
-            normalizers = [NormalizerFactory.get_normalizer(n) for n in normalizers]
+        preprocessors = (
+            [PreprocessorFactory.get_preprocessor(p) for p in preprocessors]
+            if preprocessors
+            else []
+        )
+
+        normalizers = (
+            [NormalizerFactory.get_normalizer(n) for n in normalizers]
+            if normalizers
+            else []
+        )
 
         if regex_norm_rules:
             regex_normalizer = NormalizerFactory.get_normalizer(
