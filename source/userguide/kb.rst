@@ -726,26 +726,31 @@ To override MindMeld's default QuestionAnswerer configuration with custom settin
 .. code-block:: python
 
   QUESTION_ANSWERER_CONFIG = {
-      'model_type': 'keyword'
+      'model_type': 'elasticsearch',
+      'model_settings': {
+          'query_type': 'keyword'
+      }
   }
 
-The ``model_type`` can be one of 'keyword' or 'text'. While specifying the former optimizes your QuestionAnswerer search for keywords or short spans of text, the latter optimizes for searching on larger paragraphs or passages of unstructured text. In order to leverage embeddings based semantic matching along with surface-level text features, you can specify one of three model types- 'embedder', 'embedder_text' and 'embedder_keyword'. For leveraging appropriate embeddings, you can specify embedder configurations in the :data:`QUESTION_ANSWERER_CONFIG` with an additional key 'model_settings'. For full details on using embedders in QuestionAnswerer, check the :ref:`Leveraging semantic embeddings <semantic_embeddings>` section below. Note that the specified ``model_type`` is also the default ``query_type`` for all QuestionAnswerer calls in your application, but you can always pass in a different query type to your ``qa.get()`` command as desired.
+The ``query_type`` can be one of ``keyword`` or ``text``. While specifying the former optimizes your QuestionAnswerer search for keywords or short spans of text, the latter optimizes for searching on larger paragraphs or passages of unstructured text. In order to leverage embeddings-based semantic matching along with surface-level text features matching, you can specify one of the three embedder query types- ``embedder``, ``embedder_text``, or ``embedder_keyword``. For using embeddings of your choice, you can specify embedder configurations in the :data:`QUESTION_ANSWERER_CONFIG` within the key 'model_settings'. For full details about using embedders in QuestionAnswerer, check the :ref:`Leveraging semantic embeddings <semantic_embeddings>` section below. Note that the specified ``query_type`` is also the default ``query_type`` for all QuestionAnswerer calls in your application, but you can always pass in a different query type to your ``qa.get(query_type=...)`` command as desired.
 
 .. _non_elasticsearch_question_answerer:
 
-QuestionAnswerer without Elasticsearch backend
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+QuestionAnswerer without Elasticsearch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Search operations of QuestionAnswerer are by default backed by Elasticsearch. While it is recommended to keep using Elasticsearch backend for QuestionAnswerer, it might not always be feasible to use it due to some or the other constraints. In such cases, one can easily disable Elasticsearch usage by setting a disable-key ``"use_elastic_search": False`` in the ``QUESTION_ANSWERER_CONFIG`` as follows.
+Search operations of QuestionAnswerer are by default backed by Elasticsearch. While it is recommended to use the Elasticsearch based for QuestionAnswerer, it might not always be feasible to use it due to some or the other constraints. In such cases, one can easily use a non-Elasticsearch backend by setting `"model_type": "native"` in the ``QUESTION_ANSWERER_CONFIG`` as follows.
 
 .. code-block:: python
 
   QUESTION_ANSWERER_CONFIG = {
-      'model_type': 'keyword',
-      'use_elastic_search': False
+      'model_type': 'native',
+      'model_settings': {
+          'query_type': 'keyword'
+      }
   }
 
-You can set this key irrespective of leveraging embedders or not. If unspecified, this key will be set to ``True``. It is noteworthy that the search results obtained with and without Elasticsearch might have minor differences between them.
+You can set this key irrespective of leveraging embedders or not. If unspecified, this key will be set to ``elasticsearch``. It is noteworthy that the search results obtained with and without Elasticsearch might have minor differences between them.
 
 
 .. _unstructured_data:
@@ -862,15 +867,16 @@ The question answerer capabilities described so far rely purely on text-based re
 
 To leverage semantic embeddings in search, the first step is to generate the embeddings for your desired knowledge base fields. You can use one of the provided embedders or use your own. If your app mainly consists of standard English vocabulary, one of the provided embedders may work well enough, but if the text you are searching against has quite a bit of domain-specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
 
-The settings for semantic embeddings are part of the ``QUESTION_ANSWERER_CONFIG`` in the app configuration file, ``config.py``. To use semantic embeddings, you need to specify a supported ``model_type``,  the ``model_settings``, and the fields you would like to generate embeddings for in ``embedding_fields``. The ``embedding_fields`` parameter takes a dictionary where the key is the name of your index, and the value is a list of field names or regexes to match against the field names for that index.
+The settings for semantic embeddings are part of the ``QUESTION_ANSWERER_CONFIG`` in the app configuration file, ``config.py``. To use semantic embeddings, you need to specify a supported ``query_type``,  the ``model_settings``, and the fields you would like to generate embeddings for in ``embedding_fields``. The ``embedding_fields`` parameter takes a dictionary where the key is the name of your index, and the value is a list of field names or regexes to match against the field names for that index.
 
 Using the HR Assistant blueprint as an example, here is what the question answerer config could look like.
 
 .. code:: python
 
   QUESTION_ANSWERER_CONFIG = {
-      "model_type": "embedder",
+      "model_type": "elasticsearch",
       "model_settings": {
+          "query_type": "embedder",
           "embedder_type": "bert",
           "embedding_fields": {
               "faq_data": ["question", "answer"]
@@ -878,10 +884,10 @@ Using the HR Assistant blueprint as an example, here is what the question answer
       }
   }
 
-There are three available model types which leverage semantic embedders. The specified ``model_type`` is also the default ``query_type`` for all question answering calls for your application, but you can always pass in a different query type to your ``qa.get()`` command as desired.
+There are three available query types which leverage semantic embedders. The specified ``query_type`` is also the default ``query_type`` for all question answering calls for your application, but you can always pass in a different query type to your ``qa.get()`` command as desired.
 
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | Model type            | Description                                                                                                |
+  | Query type            | Description                                                                                                |
   +=======================+============================================================================================================+
   | embedder              | Only leverage deep semantic embedders. This option allows for using deep semantic embedders like           |
   |                       | Sentence-BERT or GloVe for doing vector-based retrieval.                                                   |
@@ -943,8 +949,9 @@ In many cases, you may like to provide some parameters to your ``load`` method t
 .. code-block:: python
 
   QUESTION_ANSWERER_CONFIG = {
-      "model_type": "embedder",
+      "model_type": "elasticsearch",
       "model_settings": {
+          "query_type": "embedder",
           "embedder_type": "my_embedder_name",
           "some_model_param": "my_model_param",
           "embedding_fields": {"faq": ['question', 'answer']}

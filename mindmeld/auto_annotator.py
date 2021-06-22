@@ -10,21 +10,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import importlib
 import logging
 import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-import spacy
+from typing import List
 from tqdm import tqdm
-from ._util import get_pattern
 from .resource_loader import ResourceLoader
 from .components._config import (
     ENGLISH_LANGUAGE_CODE,
     ENGLISH_US_LOCALE,
 )
 from .components.translators import NoOpTranslator, TranslatorFactory
+from .text_preparation.spacy_model_factory import SpacyModelFactory
 from .system_entity_recognizer import (
     DucklingRecognizer,
     duckling_item_to_query_entity,
@@ -34,9 +33,6 @@ from .core import Entity, Span, QueryEntity, _get_overlap, NestedEntity
 from .exceptions import MarkupError
 from .models.helpers import register_annotator
 from .constants import (
-    SPACY_ANNOTATOR_WEB_LANGUAGES,
-    SPACY_ANNOTATOR_SUPPORTED_LANGUAGES,
-    SPACY_ANNOTATOR_MODEL_SIZES,
     DUCKLING_TO_SYS_ENTITY_MAPPINGS,
     ANNOTATOR_TO_SYS_ENTITY_MAPPINGS,
     SPACY_SYS_ENTITIES_NOT_IN_DUCKLING,
@@ -117,7 +113,7 @@ class Annotator(ABC):
             raise AssertionError(f"{action} is an invalid Annotator action.")
 
         for rule in rules:
-            pattern = get_pattern(rule)
+            pattern = Annotator._get_pattern(rule)
             compiled_pattern = re.compile(pattern)
             filtered_paths = self._resource_loader.filter_file_paths(
                 compiled_pattern=compiled_pattern, file_paths=all_file_paths
@@ -126,6 +122,20 @@ class Annotator(ABC):
                 entities = self._get_entities(rule)
                 file_entities_map[path] = entities
         return file_entities_map
+
+    @staticmethod
+    def _get_pattern(rule):
+        """Convert a rule represented as a dictionary with the keys "domains", "intents",
+        "entities" into a regex pattern.
+
+        Args:
+            rule (dict): Annotation/Unannotation rule.
+
+        Returns:
+            pattern (str): Regex pattern specifying allowed file paths.
+        """
+        pattern = [rule[x] for x in ["domains", "intents", "files"]]
+        return ".*/" + "/".join(pattern)
 
     def _get_entities(self, rule):
         """Process the entities specified in a rule dictionary. Check if they are valid
@@ -208,11 +218,13 @@ class Annotator(ABC):
                 entity_types = file_entities_map[path]
                 if action == AnnotatorAction.ANNOTATE:
                     self._annotate_query(
-                        processed_query=processed_query, entity_types=entity_types,
+                        processed_query=processed_query,
+                        entity_types=entity_types,
                     )
                 elif action == AnnotatorAction.UNANNOTATE:
                     self._unannotate_query(
-                        processed_query=processed_query, remove_entities=entity_types,
+                        processed_query=processed_query,
+                        remove_entities=entity_types,
                     )
             with open(path, "w") as outfile:
                 outfile.write("".join(list(dump_queries(processed_queries))))
@@ -392,49 +404,10 @@ class SpacyAnnotator(Annotator):
             unannotation_rules (list): List of Annotation rules.
         """
         super().__init__(*args, **kwargs)
-        if self.language not in SPACY_ANNOTATOR_SUPPORTED_LANGUAGES:
-            raise ValueError(
-                "Spacy does not currently support: {!r}.".format(self.language)
-            )
         self.spacy_model_size = kwargs.get("spacy_model_size", "lg")
-        if self.spacy_model_size not in SPACY_ANNOTATOR_MODEL_SIZES:
-            raise ValueError(
-                "{!r} is not a valid model size. Select from: {!r}.".format(
-                    self.language, " ".join(SPACY_ANNOTATOR_MODEL_SIZES)
-                )
-            )
-        self.nlp = self._load_model()
-
-    def _get_spacy_model_name(self):
-        """Get the name of a Spacy Model.
-
-        Returns:
-            spacy_model_name (str): Name of the Spacy NER model
-        """
-        model_type = "web" if self.language in SPACY_ANNOTATOR_WEB_LANGUAGES else "news"
-        return f"{self.language}_core_{model_type}_{self.spacy_model_size}"
-
-    def _load_model(self):
-        """Load Spacy English model. Download if needed.
-
-        Args:
-            model (str): Spacy model (Ex: "en_core_web_sm", "zh_core_web_md", etc.)
-
-        Returns:
-            nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
-        """
-        model = self._get_spacy_model_name()
-        logger.info("Loading Spacy model %s.", model)
-        try:
-            return spacy.load(model)
-        except OSError:
-            logger.warning("%s not found on disk. Downloading the model.", model)
-            os.system("python -m spacy download " + model)
-            try:
-                language_module = importlib.import_module(model)
-            except ModuleNotFoundError as e:
-                raise ValueError("Unknown Spacy model name: {!r}.".format(model)) from e
-            return language_module.load()
+        self.nlp = SpacyModelFactory.get_spacy_language_model(
+            self.language, self.spacy_model_size
+        )
 
     @property
     def supported_entity_types(self):  # pylint: disable=W0236
@@ -872,12 +845,12 @@ class BootstrapAnnotator(Annotator):
                 if entity_confidence >= self.confidence_threshold:
                     entities.append(
                         {
-                            "body": entity["text"],
-                            "start": entity["span"]["start"],
-                            "end": entity["span"]["end"] + 1,
-                            "dim": entity["type"],
-                            "value": entity["value"],
-                            "role": entity["role"],
+                            "body": entity.get("text"),
+                            "start": entity.get("span", {}).get("start"),
+                            "end": entity.get("span", {}).get("end") + 1,
+                            "dim": entity.get("type"),
+                            "value": entity.get("value"),
+                            "role": entity.get("role"),
                         }
                     )
         processed_query = load_query(
@@ -889,6 +862,18 @@ class BootstrapAnnotator(Annotator):
         return [
             Annotator._item_to_query_entity(entity, processed_query)
             for entity in entities
+        ]
+
+    def text_queries_to_processed_queries(self, text_queries: List[str]):
+        """Converts text queries into processed queries.
+
+        Args:
+            text_queries (List[str]): List of raw text queries.
+        Returns:
+            processed_queries (List[ProcessedQuery]): List of processed queries.
+        """
+        return [
+            self.nlp.process_query(query=self.nlp.create_query(q)) for q in text_queries
         ]
 
     @property
@@ -950,8 +935,10 @@ class NoTranslationDucklingAnnotator(Annotator):
             language=self.language,
             locale=self.locale,
         )
-        filtered_candidates = NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
-            duckling_candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._filter_out_bad_duckling_candidates(
+                duckling_candidates
+            )
         )
         final_candidates = NestedEntity.get_largest_non_overlapping_entities(
             filtered_candidates, lambda x: Span(x["start"], x["end"] - 1))
@@ -982,8 +969,10 @@ class NoTranslationDucklingAnnotator(Annotator):
         Returns:
             filtered_candidates (list): List of filtered duckling candidates.
         """
-        filtered_candidates = NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
-            candidates
+        filtered_candidates = (
+            NoTranslationDucklingAnnotator._remove_unresolved_sys_amount_of_money(
+                candidates
+            )
         )
         return filtered_candidates
 
@@ -1003,7 +992,7 @@ class NoTranslationDucklingAnnotator(Annotator):
 
 
 class TranslationDucklingAnnotator(Annotator):
-    """ The TranslationDucklingAnnotator detects entities in non-English sentences using
+    """The TranslationDucklingAnnotator detects entities in non-English sentences using
     a translation service and Duckling by following these steps:
         1. The non-English sentence is translated to English.
         2. Spacy detects entities in the translated English sentence.
@@ -1050,7 +1039,7 @@ class TranslationDucklingAnnotator(Annotator):
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):
-        """ Implements a heuristic to match English entities detected by Spacy on the
+        """Implements a heuristic to match English entities detected by Spacy on the
         translated non-English sentence against the non-English entities detected by
         Duckling on the non-English sentence.
 
@@ -1121,7 +1110,7 @@ class TranslationDucklingAnnotator(Annotator):
 
 
 class MultiLingualAnnotator(Annotator):
-    """ The MultiLingualAnnotator detects entities in English and non-English sentences.
+    """The MultiLingualAnnotator detects entities in English and non-English sentences.
 
     1. If the 'language' is English, this annotator solely uses the Spacy's English NER model to
         detect entities.
@@ -1160,7 +1149,9 @@ class MultiLingualAnnotator(Annotator):
         if self.language != ENGLISH_LANGUAGE_CODE:
             self.duckling_annotator = self._get_duckling_annotator()
             self.non_en_annotator = SpacyAnnotator(
-                app_path=self.app_path, language=self.language, locale=self.locale,
+                app_path=self.app_path,
+                language=self.language,
+                locale=self.locale,
             )
 
     def _get_duckling_annotator(self):
@@ -1173,7 +1164,9 @@ class MultiLingualAnnotator(Annotator):
                 translator=self.translator,
             )
         return NoTranslationDucklingAnnotator(
-            app_path=self.app_path, language=self.language, locale=self.locale,
+            app_path=self.app_path,
+            language=self.language,
+            locale=self.locale,
         )
 
     def parse(self, sentence, entity_types=None, **kwargs):

@@ -115,27 +115,6 @@ def test_parse_endpoint_multiple_requests(client):
             "error {'params': {'time_zone': ['Invalid time_zone param:  "
             "is not a valid time zone.']}}"
         ),
-        (
-            {
-                "text": "hello",
-                "history": [
-                    {
-                        "dialogue_state": "transfer_money_handler",
-                        "directives": [],
-                        "form": {},
-                        "frame": {},
-                        "history": [],
-                        "params": {},
-                        "request": {},
-                        "slots": {}
-                    }
-                ],
-            },
-            "Bad request {'text': 'hello', 'history': [{'dialogue_state': "
-            "'transfer_money_handler', 'directives': [], 'form': {}, 'frame': {}, "
-            "'history': [], 'params': {}, 'request': {}, 'slots': {}}]} "
-            "caused error {'request': {'text': ['Missing data for required field.']}}"
-        )
     ],
 )
 def test_invalid_requests(client, request_body, error_message):

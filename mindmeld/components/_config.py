@@ -44,9 +44,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {
-        "classifier_type": "logreg",
-    },
+    "model_settings": {"classifier_type": "logreg"},
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -106,9 +104,7 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
-    "model_settings": {
-        "resolver_type": "text_relevance",
-    }
+    "model_settings": {"resolver_type": "text_relevance", },
 }
 
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {
@@ -140,6 +136,281 @@ DEFAULT_LANGUAGE_CONFIG = {
     "locale": ENGLISH_US_LOCALE,
 }
 
+# ElasticSearch mapping to define text analysis settings for text fields.
+# It defines specific index configuration for synonym indices. The common index configuration
+# is in default index template.
+DEFAULT_ES_SYNONYM_MAPPING = {
+    "mappings": {
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+        }
+    }
+}
+
+PHONETIC_ES_SYNONYM_MAPPING = {
+    "mappings": {
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                            "double_metaphone": {
+                                "type": "text",
+                                "analyzer": "phonetic_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+            "cname": {
+                "type": "text",
+                "analyzer": "default_analyzer",
+                "fields": {
+                    "raw": {"type": "keyword", "ignore_above": 256},
+                    "normalized_keyword": {
+                        "type": "text",
+                        "analyzer": "keyword_match_analyzer",
+                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer", },
+                    "double_metaphone": {
+                        "type": "text",
+                        "analyzer": "phonetic_analyzer",
+                    },
+                },
+            },
+        }
+    },
+    "settings": {
+        "analysis": {
+            "filter": {
+                "phonetic_filter": {
+                    "type": "phonetic",
+                    "encoder": "doublemetaphone",
+                    "replace": True,
+                    "max_code_len": 7,
+                }
+            },
+            "analyzer": {
+                "phonetic_analyzer": {
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "token_shingle",
+                        "phonetic_filter",
+                    ],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                        "remove_dot",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                }
+            },
+        }
+    },
+}
+
+DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
+
+# Default ES index template that contains the base index configuration shared across different
+# types of indices. Currently all ES indices will be created using this template.
+# - custom text analysis settings such as custom analyzers, token filters and character filters.
+# - dynamic field mapping template for text fields
+# - common fields, e.g. id.
+DEFAULT_ES_INDEX_TEMPLATE = {
+    "template": "*",
+    "mappings": {
+        "dynamic_templates": [
+            {
+                "default_text": {
+                    "match": "*",
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "text",
+                        "analyzer": "default_analyzer",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "processed_text": {"type": "text", "analyzer": "english", },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                    },
+                }
+            }
+        ],
+        "properties": {"id": {"type": "keyword"}},
+    },
+    "settings": {
+        "analysis": {
+            "char_filter": {
+                "remove_loose_apostrophes": {
+                    "pattern": " '|' ",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "space_possessive_apostrophes": {
+                    "pattern": "([^\\p{N}\\s]+)'s ",
+                    "type": "pattern_replace",
+                    "replacement": "$1 's ",
+                },
+                "remove_special_beginning": {
+                    "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_special_end": {
+                    "pattern": "[^\\p{L}\\p{N}&']+$",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_special1": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_special2": {
+                    "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_special3": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_comma": {
+                    "pattern": ",",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_tm_and_r": {
+                    "pattern": "™|®",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_dot": {
+                    "pattern": "([\\p{L}]+)[.]+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1",
+                },
+            },
+            "filter": {
+                "token_shingle": {
+                    "max_shingle_size": "4",
+                    "min_shingle_size": "2",
+                    "output_unigrams": "true",
+                    "type": "shingle",
+                },
+                "ngram_filter": {"type": "ngram", "min_gram": "3", "max_gram": "3"},
+            },
+            "analyzer": {
+                "default_analyzer": {
+                    "filter": ["lowercase", "asciifolding", "token_shingle"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                },
+                "keyword_match_analyzer": {
+                    "filter": ["lowercase", "asciifolding"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                },
+                "char_ngram_analyzer": {
+                    "filter": ["lowercase", "asciifolding", "ngram_filter"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                },
+            },
+        }
+    },
+}
+
+ENGLISH_LANGUAGE_CODE = "en"
+ENGLISH_US_LOCALE = "en_US"
+DEFAULT_LANGUAGE_CONFIG = {
+    "language": ENGLISH_LANGUAGE_CODE,
+    "locale": ENGLISH_US_LOCALE,
+}
+
 DEFAULT_PARSER_DEPENDENT_CONFIG = {
     "left": True,
     "right": True,
@@ -160,26 +431,15 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUGMENTATION_CONFIG = {
     "augmentor_class": "EnglishParaphraser",
     "batch_size": 8,
-    "paths": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-        }
-    ],
-    "path_suffix": "-augment.txt"
+    "paths": [{"domains": ".*", "intents": ".*", "files": ".*", }],
+    "path_suffix": "-augment.txt",
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotation_rules": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-            "entities": ".*",
-        }
+        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*", }
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
@@ -189,6 +449,43 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
 DEFAULT_TOKENIZER_CONFIG = {
     # populated in the `get_tokenizer_config` func
     "allowed_patterns": [],
+    "tokenizer": "WhiteSpaceTokenizer",
+    "normalizer": "ASCIIFold",
+}
+
+DEFAULT_ACTIVE_LEARNING_CONFIG = {
+    "output_folder": None,
+    "pre_tuning": {
+        "train_pattern": ".*train.*.txt",
+        "test_pattern": ".*test.*.txt",
+        "train_seed_pct": 0.20,
+    },
+    "tuning": {
+        "n_classifiers": 3,
+        "n_epochs": 5,
+        "batch_size": 100,
+        "tuning_level": "domain",
+        "tuning_strategies": [
+            "LeastConfidenceSampling",
+            "MarginSampling",
+            "EntropySampling",
+            "RandomSampling",
+            "DisagreementSampling",
+            "EnsembleSampling",
+            "KLDivergenceSampling",
+        ],
+    },
+    "tuning_output": {
+        "save_sampled_queries": True,
+        "aggregate_statistic": "accuracy",
+        "class_level_statistic": "f_beta",
+    },
+    "query_selection": {
+        "selection_strategy": "EntropySampling",
+        "log_usage_pct": 1.00,
+        "labeled_logs_pattern": None,
+        "unlabeled_logs_path": "logs.txt",
+    },
 }
 
 
@@ -795,7 +1092,37 @@ def get_tokenizer_config(app_path=None, exclude_from_norm=None):
         tokenizer_config = getattr(
             _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
         )
+        if not tokenizer_config.get("allowed_patterns"):
+            # If allowed_patterns are not provided, use default
+            tokenizer_config["allowed_patterns"] = []
+            tokenizer_config["default_allowed_patterns"] = _get_default_regex(
+                exclude_from_norm
+            )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found. Using default tokenizer config.")
         return DEFAULT_TOKENIZER_CONFIG
+
+
+def get_active_learning_config(app_path=None):
+    """Gets the active learning configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The active learning configuration.
+    """
+
+    if not app_path:
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+    try:
+        active_learning_config = getattr(
+            _get_config_module(app_path),
+            "ACTIVE_LEARNING_CONFIG",
+            DEFAULT_ACTIVE_LEARNING_CONFIG,
+        )
+        return active_learning_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
