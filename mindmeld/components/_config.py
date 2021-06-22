@@ -126,7 +126,12 @@ DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     },
 }
 
-DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
+DEFAULT_QUESTION_ANSWERER_CONFIG = {
+    "model_type": "elasticsearch",
+    "model_settings": {
+        "query_type": "keyword"
+    }
+}
 
 ENGLISH_LANGUAGE_CODE = "en"
 ENGLISH_US_LOCALE = "en_US"

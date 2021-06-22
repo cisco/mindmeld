@@ -98,29 +98,36 @@ class BaseQuestionAnswerer(ABC):
                   f"default 'app_path' as the current working directory path: '{os.getcwd()}'."
             logger.warning(msg)
 
-        self._app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
-        self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self._app_path)
-        self._resource_loader = (
-            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self._app_path)
+        app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
+        self.app_path = os.path.abspath(app_path)
+        self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self.app_path)
+        self.resource_loader = (
+            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self.app_path)
         )
         self._qa_config = (
             kwargs.get("config") or
-            get_classifier_config("question_answering", app_path=self._app_path)
+            get_classifier_config("question_answering", app_path=self.app_path)
         )
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} model_type: {self.query_type}>"
+        return f"<{self.__class__.__name__} query_type: {self.query_type} " \
+               f"app_path: {self.app_path} app_namespace: {self.app_namespace}>"
+
+    @property
+    def model_type(self) -> str:
+        return self._qa_config.get("model_type")
 
     @property
     def query_type(self) -> str:
-        if self._qa_config.get("model_type") in ALL_QUERY_TYPES:
-            return self._qa_config.get("model_type")
+        _query_type = self._qa_config.get("model_settings", {}).get("query_type")
+        if _query_type in ALL_QUERY_TYPES:
+            return _query_type
         else:
             return DEFAULT_QUERY_TYPE
 
     @property
-    def query_settings(self) -> dict:
-        return {"model_settings": self._qa_config.get("model_settings", {})}
+    def model_settings(self) -> dict:
+        return self._qa_config.get("model_settings", {})
 
     @abstractmethod
     def _get(self, *args, **kwargs):
@@ -212,14 +219,14 @@ class BaseQuestionAnswerer(ABC):
             ("config" in kwargs and kwargs["config"]) or
             ("app_path" in kwargs and kwargs["app_path"])
         ):
-            msg = f"Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
-                  f"supported. Create a {self.__class__.__name__} instance with the required " \
-                  f"configurations and/or app path before calling '.load_kb()'."
+            msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
+                  "supported. Create a Question Answerer instance with the required " \
+                  "configurations and/or app path before calling '.load_kb()'."
             raise ValueError(msg)
         self._load_kb(index_name, data_file, **kwargs)
 
 
-class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
+class NativeQuestionAnswerer(BaseQuestionAnswerer):
     """
     The question answerer is primarily an information retrieval system that provides all the
     necessary functionality for interacting with the application's knowledge base.
@@ -245,7 +252,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             )
             s = self.build_search(index, app_namespace=app_namespace)
 
-            if ResolverBasedQuestionAnswerer.FieldResource.is_number(doc_id):
+            if NativeQuestionAnswerer.FieldResource.is_number(doc_id):
                 # if a number, look for that exact doc_id; no fuzzy match like in Elasticsearch QA
                 s = s.filter(query_type=query_type, field="id", et=doc_id)  # et == equals to
             else:
@@ -290,10 +297,10 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
         # get index name with app scope
         scoped_index_name = get_scoped_index_name(app_namespace, index)
 
-        if scoped_index_name not in ResolverBasedQuestionAnswerer.ALL_INDICES:
+        if scoped_index_name not in NativeQuestionAnswerer.ALL_INDICES:
             raise ValueError("Knowledge base index '{}' does not exist.".format(index))
 
-        return ResolverBasedQuestionAnswerer.Search(index=scoped_index_name)
+        return NativeQuestionAnswerer.Search(index=scoped_index_name)
 
     def _load_kb(self,
                  index_name,
@@ -323,17 +330,17 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
         app_namespace = app_namespace or self.app_namespace
 
         query_type = self.query_type
-        query_settings = self.query_settings
+        model_settings = self.model_settings
 
         # obtain a scoped index name using app_namespace and index_name
         scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
         # clean by deleting
         if clean:
-            if ResolverBasedQuestionAnswerer.ALL_INDICES.is_available(scoped_index_name):
+            if NativeQuestionAnswerer.ALL_INDICES.is_available(scoped_index_name):
                 msg = f"Index '{index_name}' exists for app '{app_namespace}', deleting index."
                 logger.info(msg)
-                ResolverBasedQuestionAnswerer.ALL_INDICES.delete_index(scoped_index_name)
+                NativeQuestionAnswerer.ALL_INDICES.delete_index(scoped_index_name)
             else:
                 msg = f"Index '{index_name}' does not exist for app '{app_namespace}', " \
                       f"creating a new index."
@@ -341,8 +348,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
         # determine embedding fields
         embedding_fields = (
-            embedding_fields or
-            query_settings.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            embedding_fields or model_settings.get("embedding_fields", {}).get(index_name, [])
         )
         if embedding_fields:
             if "embedder" not in query_type:
@@ -403,24 +409,24 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
         # for each key/field in doc, reuse an already existing FieldResource metadata or create one
         index_resources = \
-            ResolverBasedQuestionAnswerer.ALL_INDICES.get_index_metadata(scoped_index_name)
+            NativeQuestionAnswerer.ALL_INDICES.get_index_metadata(scoped_index_name)
         for key, id2value in all_id2value.items():
             field_resource = index_resources.get(key)
             if not field_resource:
-                field_resource = ResolverBasedQuestionAnswerer.FieldResource(
+                field_resource = NativeQuestionAnswerer.FieldResource(
                     index_name=scoped_index_name, field_name=key)
             field_resource.update_resource(
                 id2value,
                 has_text_resolver=("text" in query_type or "keyword" in query_type),
                 has_embedding_resolver=match_regex(key, embedding_fields),
-                resolver_settings=query_settings.get("model_settings", {}),
+                resolver_settings=model_settings,
                 lazy_clean=clean,
                 processor_type="text" if "text" in query_type else "keyword",
             )
             index_resources.update({key: field_resource})
 
         # update and dump
-        ResolverBasedQuestionAnswerer.ALL_INDICES.update_and_dump_index(
+        NativeQuestionAnswerer.ALL_INDICES.update_and_dump_index(
             scoped_index_name, index_resources, [*all_ids.keys()]
         )
 
@@ -506,7 +512,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             index_resources = {}
             for field, cache_object in metadata_dump.items():
                 field_resource = (
-                    ResolverBasedQuestionAnswerer.FieldResource.from_metadata(cache_object)
+                    NativeQuestionAnswerer.FieldResource.from_metadata(cache_object)
                 )
                 index_resources.update({field: field_resource})
             return index_resources
@@ -567,7 +573,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 return value_date
 
             # check if value can be resolved as-is
-            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
                 try:
                     value_date = datetime.strptime(value, fmt)
                     return value_date
@@ -575,7 +581,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                     pass
 
             # check if value can be resolved with some modifications
-            for fmt in ResolverBasedQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
                 for val in [value.replace("/", " "), value.replace("-", " ")]:
                     if val != value:
                         try:
@@ -624,13 +630,13 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
         @staticmethod
         def is_date(value):
-            if ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_date(value):
+            if NativeQuestionAnswerer.FieldResourceDataHelper._get_date(value):
                 return True
             return False
 
         @staticmethod
         def is_location(value):
-            if ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(value):
+            if NativeQuestionAnswerer.FieldResourceDataHelper._get_location(value):
                 return True
             return False
 
@@ -645,7 +651,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             returns number of days from origin date as score
             """
             origin_date = datetime.now()
-            target_date = ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_date(value)
+            target_date = NativeQuestionAnswerer.FieldResourceDataHelper._get_date(value)
             if not target_date:
                 target_date = origin_date
             # TODO: should this be configurable to days or seconds based on the app?
@@ -679,9 +685,9 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
             """
 
             some_location = \
-                ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(some_location)
+                NativeQuestionAnswerer.FieldResourceDataHelper._get_location(some_location)
             source_location = \
-                ResolverBasedQuestionAnswerer.FieldResourceDataHelper._get_location(source_location)
+                NativeQuestionAnswerer.FieldResourceDataHelper._get_location(source_location)
 
             R = 6373.0  # constant based on Haversine formula
             lat1, lon1 = [radians(float(ii.strip())) for ii in some_location.split(",")]
@@ -1452,10 +1458,10 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
 
             try:
                 # fetch all indexes
-                index_resources = ResolverBasedQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                index_resources = NativeQuestionAnswerer.ALL_INDICES.get(self.index_name)
                 # obtain all doc ids in the order they were present in the KB
                 index_all_ids = (
-                    ResolverBasedQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)
+                    NativeQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)
                 )
             except KeyError:
                 msg = f"The index '{self.index_name}' looks unavailable. " \
@@ -1505,7 +1511,7 @@ class ResolverBasedQuestionAnswerer(BaseQuestionAnswerer):
                 _ids, _scores = allowed_ids or index_all_ids, None
             has_similarity_scores = _scores is not None
             curated_docs = (
-                ResolverBasedQuestionAnswerer.FieldResource.curate_docs_to_return(
+                NativeQuestionAnswerer.FieldResource.curate_docs_to_return(
                     index_resources, _ids=_ids, _scores=_scores)
             )
 
@@ -1568,7 +1574,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            self._embedder_model = create_embedder_model(self._app_path, self.query_settings)
+            self._embedder_model = create_embedder_model(self.app_path, self.model_settings)
 
     @property
     def _es_client(self):
@@ -1698,7 +1704,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # build Search object with overriding ranking setting to require all query clauses are
         # matched.
-        s = self.build_search(index, {"query_clauses_operator": "and"})
+        s = self.build_search(index, app_namespace=app_namespace,
+                              ranking_config={"query_clauses_operator": "and"})
 
         # add query clauses to Search object.
         for clause in query_clauses:
@@ -1783,7 +1790,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         es_client = es_client or self._es_client
 
         query_type = self.query_type
-        query_settings = self.query_settings
+        model_settings = self.model_settings
         embedder_model = self._embedder_model
 
         # clean by deleting
@@ -1797,8 +1804,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # determine embedding fields
         embedding_fields = (
-            embedding_fields or
-            query_settings.get("model_settings", {}).get("embedding_fields", {}).get(index_name, [])
+            embedding_fields or model_settings.get("embedding_fields", {}).get(index_name, [])
         )
         if embedding_fields:
             if "embedder" not in query_type:
@@ -2732,10 +2738,24 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
 
 class QuestionAnswerer:
+    """
+    Factory class with backwards compatability
+
+    deprecated usages
+        >>> QuestionAnswerer.load_kb(...)
+
+    new usages
+        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
+        # or ...
+        >>> question_answerer = QuestionAnswerer.create_question_answerer(**kwargs)
+        # And then ...
+        >>> question_answerer.load_kb(...)
+        >>> question_answerer.get(...) # .get(...), .build_search(...)
+    """
 
     def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
         """
-        This method is used to initialize a XxxQuestionAnswerer based on model_type
+        This method is used to initialize a XxxQuestionAnswerer based on the model_type
 
         To keep the code base backwards compatible, we use a '__new__()' way of creating instances
         alongside using a factory approach. For cases wherein a question-answerer is instantiated
@@ -2747,38 +2767,13 @@ class QuestionAnswerer:
         version of 'question_answerer.py'
         """
 
-        config = cls._get_config(config, app_path)
         kwargs.update({
             "app_path": app_path,
             "resource_loader": resource_loader,
             "es_host": es_host,
             "config": config,
         })
-        return cls._get_question_answerer(config)(**kwargs)
-
-    @staticmethod
-    def _get_config(config=None, app_path=None):
-        if not config:
-            return get_classifier_config("question_answering", app_path=app_path)
-        return config
-
-    @staticmethod
-    def _get_question_answerer(config):
-
-        # TODO: Both QA classes assume input text is in English.
-        #  Going forward, this should be configurable and multilingual support should be added!
-
-        use_elastic_search = config.get("use_elastic_search", True)
-
-        if not use_elastic_search:
-            return ResolverBasedQuestionAnswerer
-        else:
-            if not _is_module_available("elasticsearch"):
-                raise ImportError(
-                    "Must install the extra [elasticsearch] by running "
-                    "'pip install mindmeld[elasticsearch]' "
-                    "to use Elasticsearch for question answering.")
-            return ElasticsearchQuestionAnswerer
+        return cls.create_question_answerer(**kwargs)
 
     @classmethod
     def create_question_answerer(cls, **kwargs):
@@ -2793,7 +2788,11 @@ class QuestionAnswerer:
             resource_loader (ResourceLoader, optional): An object which can load resources for the
                 question answerer.
         """
-        return cls(**kwargs)
+
+        config = cls._get_config(kwargs.get("config"), kwargs.get("app_path"))
+        config = cls._correct_deprecated_qa_config(config)
+        kwargs.update({"config": config})
+        return cls._get_question_answerer_class(config.get("model_type"))(**kwargs)
 
     @classmethod
     def load_kb(cls,
@@ -2847,11 +2846,12 @@ class QuestionAnswerer:
             "clean": clean,
         })
         config = cls._get_config(config, app_path)
+        config = cls._correct_deprecated_qa_config(config)
         kwargs.update({
             "config": config,
             "app_path": app_path,
         })
-        question_answerer = cls._get_question_answerer(config)(**kwargs)
+        question_answerer = cls._get_question_answerer_class(config.get("model_type"))(**kwargs)
 
         # only retain 'connection_timeout', 'clean' information as everything else is already
         #   absorbed during initialization; the recommended way of passing configs to QA is by
@@ -2863,3 +2863,74 @@ class QuestionAnswerer:
         kwargs.pop("config")
         kwargs.pop("app_path")
         question_answerer.load_kb(index_name, data_file, **kwargs)
+
+    @staticmethod
+    def _get_config(config=None, app_path=None):
+        if not config:
+            return get_classifier_config("question_answering", app_path=app_path)
+        return config
+
+    @staticmethod
+    def _correct_deprecated_qa_config(config):
+        """
+        for backwards compatability
+          if the config is supplied in deprecated format, its format is corrected and returned,
+          else it is not modified and returned as-is
+
+        deprecated usage
+            >>> config = {
+                    "model_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
+                    "model_settings": {
+                        ...
+                    }
+                }
+
+        new usage
+            >>> config = {
+                    "model_type": "elasticsearch",  # or "native"
+                    "model_settings": {
+                        "query_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
+                        ...
+                    }
+                }
+        """
+
+        if not config.get("model_settings", {}).get("query_type"):
+            model_type = config.pop("model_type")
+            if model_type in QUESTION_ANSWERER_MODEL_MAPPINGS:
+                raise ValueError(
+                    "Could not find `query_type` in `model_settings` of question answerer")
+            else:
+                msg = "Using deprecated config format for Question Answerer. " \
+                      "See https://www.mindmeld.com/docs/userguide/kb.html for more details."
+                warnings.warn(msg, DeprecationWarning)
+                config = copy.deepcopy(config)
+                model_settings = config.get("model_settings", {})
+                model_settings.update({"query_type": model_type})
+                config["model_settings"] = model_settings
+                config["model_type"] = "elasticsearch"
+
+        return config
+
+    @staticmethod
+    def _get_question_answerer_class(model_type):
+
+        if model_type not in QUESTION_ANSWERER_MODEL_MAPPINGS:
+            msg = f"Expected 'model_type' in config of Question Answerer among " \
+                  f"{[*QUESTION_ANSWERER_MODEL_MAPPINGS]} but found {model_type}"
+            raise ValueError(msg)
+
+        if model_type == "elasticsearch" and not _is_module_available("elasticsearch"):
+            raise ImportError("Must install the extra [elasticsearch] by running "
+                              "'pip install mindmeld[elasticsearch]' "
+                              "to use Elasticsearch for question answering.")
+
+        return QUESTION_ANSWERER_MODEL_MAPPINGS[model_type]
+
+
+QUESTION_ANSWERER_MODEL_MAPPINGS = {
+    # TODO: Both QA classes assume input text is in English.
+    #  Going forward, this should be configurable and multilingual support should be added!
+    "native": NativeQuestionAnswerer,
+    "elasticsearch": ElasticsearchQuestionAnswerer
+}

@@ -97,7 +97,7 @@ class EntityResolverFactory:
                 raise ValueError(
                     "Could not find `resolver_type` in `model_settings` of entity resolver")
             else:
-                msg = "Using deprecated format of 'config' for Entity Resolver. " \
+                msg = "Using deprecated config format for Entity Resolver. " \
                       "See https://www.mindmeld.com/docs/userguide/entity_resolver.html " \
                       "for more details."
                 warnings.warn(msg, DeprecationWarning)
@@ -111,9 +111,9 @@ class EntityResolverFactory:
 
     @staticmethod
     def _validate_resolver_type(name):
-        if name not in ENTITY_RESOLVER_MODEL_TYPES:
-            raise ValueError(f"Expected 'resolver_type' in ENTITY_RESOLVER_CONFIG "
-                             f"among {ENTITY_RESOLVER_MODEL_TYPES}")
+        if name not in ENTITY_RESOLVER_MODEL_MAPPINGS:
+            raise ValueError(f"Expected 'resolver_type' in config of Entity Resolver "
+                             f"among {[*ENTITY_RESOLVER_MODEL_MAPPINGS]} but found {name}")
         if name == "sbert_cosine_similarity" and not _is_module_available("sentence_transformers"):
             raise ImportError(
                 "Must install the extra [bert] by running `pip install mindmeld[bert]` "
@@ -162,7 +162,7 @@ class EntityResolverFactory:
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(app_path, **kwargs)
 
 
-class EntityResolverBase(ABC):
+class BaseEntityResolver(ABC):
     """
     Base class for Entity Resolvers
     """
@@ -265,12 +265,13 @@ class EntityResolverBase(ABC):
         # sort as per top_n requirement using the score field
         results = [*best_results.values()]
         n_scores = len(results)
-        if n_scores < top_n:
+        if top_n != 20 and n_scores < top_n:
+            # log only if a value different from default value is specified
             msg = f"Retrieved only {len(results)} entity resolutions instead of asked " \
                   f"number {top_n} for entity type {self.type}"
             logger.info(msg)
             return results
-        #  n_scores >= top_n
+        # else, n_scores >= top_n
         _sim_scores = np.asarray([val["score"] for val in results])
         _top_inds = _sim_scores.argpartition(n_scores - top_n)[-top_n:]
         results = [results[ind] for ind in _top_inds]  # narrowed list of top_n docs
@@ -474,7 +475,7 @@ class EntityResolverBase(ABC):
         raise NotImplementedError
 
 
-class ExactMatchEntityResolver(EntityResolverBase):
+class ExactMatchEntityResolver(BaseEntityResolver):
     """
     Resolver class based on exact matching
     """
@@ -541,7 +542,7 @@ class ExactMatchEntityResolver(EntityResolverBase):
         self.fit()
 
 
-class ElasticsearchEntityResolver(EntityResolverBase):
+class ElasticsearchEntityResolver(BaseEntityResolver):
     """
     Resolver class based on Elastic Search
     """
@@ -959,7 +960,7 @@ class ElasticsearchEntityResolver(EntityResolverBase):
             raise EntityResolverError from e
 
 
-class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
+class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
     """
     a tf-idf based entity resolver using sparse matrices. ref:
     scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
@@ -1203,7 +1204,7 @@ class TfIdfSparseCosSimEntityResolver(EntityResolverBase):
         self.fit()
 
 
-class EmbedderCosSimEntityResolver(EntityResolverBase):
+class EmbedderCosSimEntityResolver(BaseEntityResolver):
     """
     Resolver class for embedder models that create dense embeddings
     """
@@ -1461,7 +1462,7 @@ class EntityResolver:
 
     deprecated usage
         >>> entity_resolver = EntityResolver(
-                app_path, self.resource_loader, entity_type
+                app_path, resource_loader, entity_type
             )
 
     new usage
@@ -1470,7 +1471,7 @@ class EntityResolver:
             )
         # or ...
         >>> entity_resolver = EntityResolverFactory.create_resolver(
-                app_path, entity_type, resource_loader=self.resource_loader
+                app_path, entity_type, resource_loader=resource_loader
             )
     """
 
@@ -1493,4 +1494,3 @@ ENTITY_RESOLVER_MODEL_MAPPINGS = {
     "sbert_cosine_similarity": SentenceBertCosSimEntityResolver,
     "tfidf_cosine_similarity": TfIdfSparseCosSimEntityResolver
 }
-ENTITY_RESOLVER_MODEL_TYPES = [*ENTITY_RESOLVER_MODEL_MAPPINGS]

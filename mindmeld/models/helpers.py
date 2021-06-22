@@ -146,18 +146,18 @@ def create_embedder_model(app_path, config):
         ValueError: When model configuration is invalid or required key is missing
     """
 
-    # backwards compatability, when config = {"model_settings": {"embedder_type": ..., "..": ...}}
     if "model_settings" in config and config["model_settings"]:
+        # when config = {"model_settings": {"embedder_type": ..., "..": ...}}
         embedder_config = config["model_settings"]
     else:
         # when config = {"embedder_type": ..., "..": ...}}
         embedder_config = config
 
-    if "embedder_type" not in embedder_config:
+    embedder_type = embedder_config.get("embedder_type")
+    if not embedder_type:
         raise KeyError(
             "Missing required argument in config supplied to create embedder model: 'embedder_type'"
         )
-    embedder_type = embedder_config["embedder_type"]
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
