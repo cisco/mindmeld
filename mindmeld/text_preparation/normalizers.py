@@ -12,10 +12,11 @@
 # limitations under the License.
 
 """This module contains Normalizers."""
-import unicodedata
-import codecs
 from abc import ABC, abstractmethod
+import codecs
 import logging
+import re
+import unicodedata
 
 from ..constants import ASCII_CUTOFF
 from ..path import ASCII_FOLDING_DICT_PATH
@@ -208,15 +209,55 @@ class Lowercase(Normalizer):
         return text.lower()
 
 
+class RegexNormalizer(Normalizer):
+    """Normalization class that substitutes regex matches with either an empty string or a
+    replacement string."""
+
+    def __init__(self, regex_norm_rules):
+        """Creates a Regex Normalizer instance.
+
+        Args:
+            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
+                dictionaries. The example rule below removes any text in parentheses.
+                {
+                    "description": "remove_text_in_parantheses",
+                    "pattern": "\(.+?\)",
+                    "replacement": ""
+                }
+        """
+        super().__init__()
+        self.regex_norm_rules = regex_norm_rules
+
+    def normalize(self, text):
+        """Apply Regex substitutions to the given text.
+        Args:
+            text (str): Input text.
+        Returns:
+            normalized_text (str): Normalized Text.
+        """
+        for regex_norm_rule in self.regex_norm_rules:
+            pattern = regex_norm_rule.get("pattern")
+            replacement = regex_norm_rule.get("replacement")
+            text = re.sub(pattern, replacement, text)
+        return text
+
+
 class NormalizerFactory:
     """Normalizer Factory Class"""
 
     @staticmethod
-    def get_normalizer(normalizer):
+    def get_normalizer(normalizer, regex_norm_rules=None):
         """A static method to get a Normalizer
 
         Args:
             normalizer (str): Name of the desired Normalizer class
+            regex_norm_rules (List[Dict], optional): List of regex normalization rules represented as
+            dictionaries. The example rule below removes any text in parentheses.
+            {
+                "description": "remove_text_in_parantheses",
+                "pattern": "\(.+?\)",
+                "replacement": ""
+            }
         Returns:
             (Normalizer): Normalizer Class
         """
@@ -232,4 +273,6 @@ class NormalizerFactory:
         for normalizer_class in normalizer_classes:
             if normalizer == normalizer_class.__name__:
                 return normalizer_class()
+        if normalizer == RegexNormalizer.__name__:
+            return RegexNormalizer(regex_norm_rules)
         raise AssertionError(f" {normalizer} is not a valid normalizer.")

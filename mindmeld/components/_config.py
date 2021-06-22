@@ -515,6 +515,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
 DEFAULT_TEXT_PREPARATION_CONFIG = {
     "preprocessors": [],
     "normalizers": ["NFC"],
+    "regex_norm_rules": None,
     "tokenizer": None,
     "stemmer": None
 }

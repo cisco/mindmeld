@@ -13,11 +13,11 @@
 
 """This module contains a text Processing Pipeline."""
 import logging
-from typing import List
+from typing import List, Dict
 import re
 
 from .preprocessor import Preprocessor, PreprocessorFactory
-from .normalizers import Normalizer, NormalizerFactory
+from .normalizers import Normalizer, NormalizerFactory, RegexNormalizer
 from .tokenizers import Tokenizer, TokenizerFactory
 from .stemmers import Stemmer, StemmerFactory
 
@@ -43,11 +43,12 @@ class TextPreparationPipeline:
 
     def __init__(
         self,
-        language: str,
-        preprocessors: List[Preprocessor],
-        normalizers: List[Normalizer],
         tokenizer: Tokenizer,
         stemmer: Stemmer,
+        preprocessors: List[Preprocessor] = None,
+        normalizers: List[Normalizer] = None,
+        language: str = ENGLISH_LANGUAGE_CODE,
+
     ):
         """Creates a Pipeline instance."""
         self.language = language
@@ -68,6 +69,13 @@ class TextPreparationPipeline:
             forward_map (Dict): Mapping from raw text to modified text.
             backward_map (Dict): Reverse mapping from modified text to raw text.
         """
+        if not self.preprocessors:
+            logger.warning(
+                "This instance of TextPreparationPipeline does not have preprocessors."
+                "Returning the original text."
+            )
+            return text
+
         preprocessed_text = text
         for preprocessor in self.preprocessors:
             preprocessed_text = (
@@ -86,6 +94,13 @@ class TextPreparationPipeline:
             forward_map (Dict): Mapping from raw text to modified text
             backward_map (Dict): Reverse mapping from modified text to raw text
         """
+        if not self.normalizers:
+            logger.warning(
+                "This instance of TextPreparationPipeline does not have normalizers."
+                "Returning the original text."
+            )
+            return text
+
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = (
@@ -354,19 +369,21 @@ class TextPreparationPipelineFactory:
 
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=language,
-            preprocessors=text_preparation_config.get("preprocessors", []),
-            normalizers=text_preparation_config.get("normalizers", []),
+            preprocessors=text_preparation_config.get("preprocessors"),
+            normalizers=text_preparation_config.get("normalizers"),
+            regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
             tokenizer=text_preparation_config.get("tokenizer"),
             stemmer=text_preparation_config.get("stemmer"),
         )
 
     @staticmethod
     def create_text_preparation_pipeline(
-        tokenizer: Tokenizer,
+        language: str = ENGLISH_LANGUAGE_CODE,
         preprocessors: List[Preprocessor] = None,
         normalizers: List[Normalizer] = None,
+        regex_norm_rules: List[Dict] = None,
+        tokenizer: Tokenizer = None,
         stemmer: Stemmer = None,
-        language: str = ENGLISH_LANGUAGE_CODE,
     ):
         """Static method to create a TextPreparationPipeline instance.
 
@@ -378,8 +395,20 @@ class TextPreparationPipelineFactory:
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-        preprocessors = [PreprocessorFactory.get_preprocessor(p) for p in preprocessors]
-        normalizers = [NormalizerFactory.get_normalizer(n) for n in normalizers]
+        if preprocessors:
+            preprocessors = [
+                PreprocessorFactory.get_preprocessor(p) for p in preprocessors
+            ]
+        if normalizers:
+            normalizers = [NormalizerFactory.get_normalizer(n) for n in normalizers]
+
+        if regex_norm_rules:
+            regex_normalizer = NormalizerFactory.get_normalizer(
+                normalizer=RegexNormalizer.__name__, regex_norm_rules=regex_norm_rules
+            )
+            # Add the Regex Normalizer as the First Normalizer by Default
+            normalizers.insert(0, regex_normalizer)
+
         tokenizer = (
             TokenizerFactory.get_tokenizer(tokenizer, language)
             if tokenizer

@@ -89,7 +89,7 @@ class QueryFactory:
         char_maps = {}
 
         # Step 1: Preprocessing
-        if len(self.text_preparation_pipeline.preprocessors) > 0:
+        if self.text_preparation_pipeline.preprocessors:
             processed_text = self.text_preparation_pipeline.preprocess(raw_text)
             (
                 forward_map,

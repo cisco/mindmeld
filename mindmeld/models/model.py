@@ -33,7 +33,7 @@ from sklearn.model_selection import (
 )
 
 from .._version import get_mm_version
-from ..text_preparation.tokenizer import Tokenizer
+from ..text_preparation.tokenizers import Tokenizer
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
