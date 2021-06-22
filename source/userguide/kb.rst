@@ -752,6 +752,8 @@ Search operations of QuestionAnswerer are by default backed by Elasticsearch. Wh
 
 You can set this key irrespective of leveraging embedders or not. If unspecified, this key will be set to ``elasticsearch``. It is noteworthy that the search results obtained with and without Elasticsearch might have minor differences between them.
 
+The native QuestionAnswerer, similar to the Elasticsearch backed QuestionAnswerer, is capable of doing both surface-level text features matching as well as semantic matching based on embeddings. Upon loading a Knowledge Base, the native QuestionAnswerer stores the KB data at the location '/Users/<username>/.cache/mindmeld/.generated/question_answerer/<indexname>.pkl'. If using an embedder, the embeddings of the required data fields will also be saved under the same '.generated' folder. Note that the matching scores of the Elasticsearch backed QuestionAnswerer are larger in magnitude whereas the scores from the native backend are generally fractions less than 1.
+
 
 .. _unstructured_data:
 
