@@ -18,7 +18,13 @@ import logging
 import unicodedata
 
 from .spacy_model_factory import SpacyModelFactory
-from ..constants import UNICODE_NON_LATIN_CATEGORY, UNICODE_SPACE_CATEGORY
+from ..constants import (
+    UNICODE_NON_LATIN_CATEGORY,
+    UNICODE_SPACE_CATEGORY,
+    SPACY_SUPPORTED_LANGUAGES,
+)
+from ..components._config import ENGLISH_LANGUAGE_CODE
+
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +245,7 @@ class TokenizerFactory:
     """Tokenizer Factory Class"""
 
     @staticmethod
-    def get_tokenizer(tokenizer, language=None, spacy_model_size="sm"):
+    def get_tokenizer(tokenizer, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="sm"):
         """A static method to get a tokenizer
 
         Args:
@@ -261,3 +267,19 @@ class TokenizerFactory:
         elif tokenizer == SpacyTokenizer.__name__:
             return SpacyTokenizer(language, spacy_model_size)
         raise AssertionError(f" {tokenizer} is not a valid Tokenizer.")
+
+    @staticmethod
+    def get_tokenizer_by_language(language):
+        """Creates a tokenizer based on the language. If the language is supported by Spacy a SpacyTokenizer
+        will be initialized, otherwise a WhiteSpaceTokenizer will be initialized.
+
+        Args:
+            language (str, optional): Language as specified using a 639-1/2 code.
+
+        Returns:
+            (Tokenizer): Tokenizer Class
+        """
+        if language in SPACY_SUPPORTED_LANGUAGES:
+            return SpacyTokenizer(language, spacy_model_size="sm")
+        else:
+            return WhiteSpaceTokenizer()

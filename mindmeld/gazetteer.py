@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Gazetteer:
     """
-    This class holds the following  fields, which are extracted and exported to file.
+    This class holds the following fields, which are extracted and exported to file.
 
     Attributes:
       entity_count (int): Total entities in the file

@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 import nltk
 import pycountry
 
+from ..components._config import ENGLISH_LANGUAGE_CODE
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,20 +111,14 @@ class StemmerFactory:
 
         language_code = language_code.lower()
 
-        if language_code == "en":
+        if language_code == ENGLISH_LANGUAGE_CODE:
             return EnglishNLTKStemmer()
 
-        language = None
-        if len(language_code) == 2:
-            language = pycountry.languages.get(alpha_2=language_code)
-        elif len(language_code) == 3:
-            language = pycountry.languages.get(alpha_3=language_code)
+        language = StemmerFactory.get_language_from_language_code(language_code)
 
         if not language:
             logger.warning(
-                'Language code "%s" is not supported for stemming. If stemming is '
-                "enabled in config.py, consider disabling it.",
-                language_code,
+                'Language code "%s" is not supported for stemming.', language_code
             )
             return NoOpStemmer()
 
@@ -131,11 +127,15 @@ class StemmerFactory:
             return SnowballNLTKStemmer(language_name)
 
         logger.warning(
-            'Language code "%s" is not supported for stemming. If stemming is enabled in '
-            "config.py, consider disabling it.",
-            language_code,
+            'Language code "%s" is not supported for stemming.', language_code
         )
         return NoOpStemmer()
 
-
-# TODO: Use ENGLISH_LANGUAGE_CODE instead of 'en'
+    @staticmethod
+    def get_language_from_language_code(language_code):
+        language = None
+        if len(language_code) == 2:
+            language = pycountry.languages.get(alpha_2=language_code)
+        elif len(language_code) == 3:
+            language = pycountry.languages.get(alpha_3=language_code)
+        return language

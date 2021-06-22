@@ -86,27 +86,29 @@ class QueryFactory:
 
         # Step 1: Preprocessing
         if len(self.text_preparation_pipeline.preprocessors) > 0:
-            processed_text, forward_map, backward_map = self.text_preparation_pipeline.preprocess(raw_text)
+            processed_text = self.text_preparation_pipeline.preprocess(raw_text)
+            forward_map, backward_map = self.text_preparation_pipeline.get_char_index_map(raw_text, processed_text)
             char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward_map
             char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward_map
         else:
             processed_text = raw_text
 
         # Step 2: Normalization
-        # TODO: Should normalizer return text without annotation?
-        # TODO: Should these maps map from annotated or unannotated text?
-        annotated_normalized_text, _, _ = self.text_preparation_pipeline.normalize(processed_text)
+        annotated_normalized_text = self.text_preparation_pipeline.normalize(processed_text)
 
         # Step 3: Tokenization
-        # TODO: Rejoining entities may not be as simple as rejoining by space, need some more advanced rejoining method
-        normalized_tokens, normalization_forward_map, normalization_backward_map = self.text_preparation_pipeline.tokenize(annotated_normalized_text)
+        # TODO: Should space tokens be removed automatically?
+        normalized_tokens = self.text_preparation_pipeline.tokenize(annotated_normalized_text)
         normalized_word_list = [t["text"] for t in normalized_tokens]
-        #normalized_text = " ".join(normalized_word_list)
-        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = normalization_forward_map
-        char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = normalization_backward_map
+        normalized_text = " ".join(normalized_word_list)
 
         # Step 4: Stemming
         stemmed_tokens = self.text_preparation_pipeline.stem_words(normalized_word_list)
+
+        # Create Normalized Maps
+        normalization_forward_map, normalization_backward_map = self.text_preparation_pipeline.get_char_index_map(processed_text, normalized_text)
+        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = normalization_forward_map
+        char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = normalization_backward_map
 
         query = Query(
             raw_text,
@@ -133,8 +135,7 @@ class QueryFactory:
         Returns:
             str: Normalized text
         """
-        normalized_text, _, _ = self.text_preparation_pipeline.normalize(text)
-        return normalized_text
+        return self.text_preparation_pipeline.normalize(text)
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
@@ -163,7 +164,8 @@ class QueryFactory:
         """
         language, locale = get_language_config(app_path)
 
-        text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline_from_app_path(app_path)
+        if text_preparation_pipeline is None:
+            text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline_from_app_path(app_path)
         if system_entity_recognizer:
             sys_entity_recognizer = system_entity_recognizer
         elif app_path:

@@ -15,6 +15,7 @@
 This module contains a preprocessor base class.
 """
 from abc import ABC, abstractmethod
+from .text_preparation_pipeline import TextPreparationPipeline
 
 
 class Preprocessor(ABC):
@@ -97,9 +98,3 @@ class PreprocessorFactory:
         if preprocessor == NoOpPreprocessor.__name__:
             return NoOpPreprocessor()
         raise AssertionError(f" {preprocessor} is not a valid Preprocssor.")
-
-
-# TODO: Look into how get_char_index_map is currently being used.
-
-# TODO: Look at HuggingFace or Spacy to include some common types of Preprocessors
-# This would help with Testing

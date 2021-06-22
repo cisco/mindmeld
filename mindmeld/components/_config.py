@@ -512,19 +512,12 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     },
 }
 
-
-DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
-    "preprocessors": [],
-    "normalizers": [
-        "ASCIIFold",
-        "Lowercase"
-    ],
-    "tokenizer": "SpacyTokenizer",
-    "stemmer": "EnglishNLTKStemmer"
-}
-
+# A language-specific stemmer and tokenizer will be selected during runtime.
 DEFAULT_TEXT_PREPARATION_CONFIG = {
-    "en": DEFAULT_EN_TEXT_PREPARATION_CONFIG
+    "preprocessors": [],
+    "normalizers": ["NFC"],
+    "tokenizer": None,
+    "stemmer": None
 }
 
 
@@ -1075,11 +1068,7 @@ def get_text_preparation_config(app_path=None):
         return tokenizer_config
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
-        language, _ = get_language_config(app_path)
-        if language in DEFAULT_TEXT_PREPARATION_CONFIG:
-            return DEFAULT_TEXT_PREPARATION_CONFIG[language]
-        else:
-            return DEFAULT_TEXT_PREPARATION_CONFIG[ENGLISH_LANGUAGE_CODE]
+        return DEFAULT_TEXT_PREPARATION_CONFIG
 
 
 # TODO: Remove After Text Preparation Pipeline Update
