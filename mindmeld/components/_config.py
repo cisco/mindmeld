@@ -404,11 +404,43 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
 }
 
-ENGLISH_LANGUAGE_CODE = "en"
-ENGLISH_US_LOCALE = "en_US"
-DEFAULT_LANGUAGE_CONFIG = {
-    "language": ENGLISH_LANGUAGE_CODE,
-    "locale": ENGLISH_US_LOCALE,
+# Elasticsearch mapping to define knowledge base index specific configuration:
+# - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
+# - location field
+#
+# The common configuration is defined in default index template
+DEFAULT_ES_QA_MAPPING = {
+    "mappings": {
+        "dynamic_templates": [
+            {
+                "synonym_whitelist_text": {
+                    "match": "*$whitelist",
+                    "match_mapping_type": "object",
+                    "mapping": {
+                        "type": "nested",
+                        "properties": {
+                            "name": {
+                                "type": "text",
+                                "fields": {
+                                    "raw": {"type": "keyword", "ignore_above": 256},
+                                    "normalized_keyword": {
+                                        "type": "text",
+                                        "analyzer": "keyword_match_analyzer",
+                                    },
+                                    "char_ngram": {
+                                        "type": "text",
+                                        "analyzer": "char_ngram_analyzer",
+                                    },
+                                },
+                                "analyzer": "default_analyzer",
+                            }
+                        },
+                    },
+                }
+            }
+        ],
+        "properties": {"location": {"type": "geo_point"}},
+    }
 }
 
 DEFAULT_PARSER_DEPENDENT_CONFIG = {
