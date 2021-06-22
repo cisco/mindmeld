@@ -48,7 +48,10 @@ from ..exceptions import (
     ElasticsearchVersionError,
 )
 from ..models import create_embedder_model
-from ..path import get_question_answerer_index_cache_file_path
+from ..path import (
+    get_question_answerer_index_cache_file_path,
+    NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH
+)
 from ..resource_loader import Hasher, ResourceLoader
 
 if _is_module_available("elasticsearch"):
@@ -73,7 +76,6 @@ ALL_QUERY_TYPES = ["keyword", "text", "embedder",
                    "embedder_keyword", "keyword_embedder",
                    "embedder_text", "text_embedder"]
 EMBEDDING_FIELD_STRING = "_embedding"
-NON_ELASTICSEARCH_INDICES_STORAGE_PATH = os.path.join(os.path.expanduser("~"), ".cache/mindmeld")
 
 
 class BaseQuestionAnswerer(ABC):
@@ -455,7 +457,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
         def __init__(self, indices_cache_path=None):
             self._indices = {}
             self._indices_all_ids = {}  # maintained to keep a record of all doc ids of each KB
-            self.indices_cache_path = indices_cache_path or NON_ELASTICSEARCH_INDICES_STORAGE_PATH
+            self.indices_cache_path = (
+                indices_cache_path or NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH
+            )
 
         def __contains__(self, item):
             return item in self._indices
@@ -986,7 +990,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         def update_resource(self, id2value, has_text_resolver, has_embedding_resolver,
                             resolver_settings, lazy_clean=False,
-                            app_path=NON_ELASTICSEARCH_INDICES_STORAGE_PATH,
+                            app_path=NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH,
                             processor_type="keyword"):
             """
             Updates a field resource by augmenting/updating latest data and resolvers
