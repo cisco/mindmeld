@@ -327,8 +327,10 @@ def test_embedder_search_glove(food_ordering_with_glove):
 @pytest.fixture
 def answerer_without_elasticsearch(kwik_e_mart_app_path):
     QA_CONFIG = {
-        "model_type": "keyword",
-        "use_elastic_search": False,
+        "model_type": "native",
+        "model_settings": {
+            "query_type": "keyword"
+        }
     }
     QuestionAnswerer.load_kb(
         app_namespace="kwik_e_mart",
@@ -344,8 +346,10 @@ def answerer_without_elasticsearch(kwik_e_mart_app_path):
 @pytest.fixture
 def relative_answerer_without_elasticsearch(kwik_e_mart_app_path):
     QA_CONFIG = {
-        "model_type": "keyword",
-        "use_elastic_search": False,
+        "model_type": "native",
+        "model_settings": {
+            "query_type": "keyword"
+        }
     }
     QuestionAnswerer.load_kb(
         app_namespace="kwik_e_mart",
@@ -363,8 +367,10 @@ def relative_answerer_without_elasticsearch(kwik_e_mart_app_path):
 @pytest.fixture
 def food_ordering_answerer_without_elasticsearch(food_ordering_app_path):
     QA_CONFIG = {
-        "model_type": "keyword",
-        "use_elastic_search": False,
+        "model_type": "native",
+        "model_settings": {
+            "query_type": "keyword"
+        }
     }
     QuestionAnswerer.load_kb(
         app_namespace="food_ordering",
@@ -381,12 +387,12 @@ def food_ordering_answerer_without_elasticsearch(food_ordering_app_path):
 @pytest.fixture
 def food_ordering_with_bert_without_elasticsearch(food_ordering_app_path):
     bert_qa_config = {
-        "model_type": "embedder",
+        "model_type": "native",
         "model_settings": {
+            "query_type": "embedder",
             "embedder_type": "bert",
             "embedding_fields": {"menu_items_bert": ["name"]},
-        },
-        "use_elastic_search": False,
+        }
     }
     QuestionAnswerer.load_kb(
         app_namespace="food_ordering",
@@ -403,12 +409,12 @@ def food_ordering_with_bert_without_elasticsearch(food_ordering_app_path):
 @pytest.fixture
 def food_ordering_with_glove_without_elasticsearch(food_ordering_app_path):
     glove_qa_config = {
-        "model_type": "embedder",
+        "model_type": "native",
         "model_settings": {
+            "query_type": "embedder",
             "embedder_type": "glove",
-            "embedding_fields": {"menu_items_glove": ["name"]},
-        },
-        "use_elastic_search": False,
+            "embedding_fields": {"menu_items_bert": ["name"]},
+        }
     }
     QuestionAnswerer.load_kb(
         app_namespace="food_ordering",

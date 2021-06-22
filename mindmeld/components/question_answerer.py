@@ -2844,14 +2844,10 @@ class QuestionAnswerer:
             "es_client": es_client,
             "connect_timeout": connect_timeout,
             "clean": clean,
-        })
-        config = cls._get_config(config, app_path)
-        config = cls._correct_deprecated_qa_config(config)
-        kwargs.update({
             "config": config,
             "app_path": app_path,
         })
-        question_answerer = cls._get_question_answerer_class(config.get("model_type"))(**kwargs)
+        question_answerer = cls.create_question_answerer(**kwargs)
 
         # only retain 'connection_timeout', 'clean' information as everything else is already
         #   absorbed during initialization; the recommended way of passing configs to QA is by
@@ -2896,7 +2892,10 @@ class QuestionAnswerer:
         """
 
         if not config.get("model_settings", {}).get("query_type"):
-            model_type = config.pop("model_type")
+            model_type = config.get("model_type")
+            if not model_type:
+                msg = f"Invalid 'model_type': {model_type} found while creating a QuestionAnswerer"
+                raise ValueError(msg)
             if model_type in QUESTION_ANSWERER_MODEL_MAPPINGS:
                 raise ValueError(
                     "Could not find `query_type` in `model_settings` of question answerer")
