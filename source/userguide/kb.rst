@@ -739,7 +739,7 @@ The ``query_type`` can be one of ``keyword`` or ``text``. While specifying the f
 QuestionAnswerer without Elasticsearch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Search operations of QuestionAnswerer are by default backed by Elasticsearch. While it is recommended to use the Elasticsearch based for QuestionAnswerer, it might not always be feasible to use it due to some or the other constraints. In such cases, one can easily use a non-Elasticsearch backend by setting `"model_type": "native"` in the ``QUESTION_ANSWERER_CONFIG`` as follows.
+Search operations of QuestionAnswerer are by default backed by Elasticsearch. While it is recommended to use the Elasticsearch based QuestionAnswerer, it might not always be feasible to use it due to various constraints. In such cases, one can easily disable Elasticsearch and perform the search natively by setting `"model_type": "native"` in the ``QUESTION_ANSWERER_CONFIG`` as follows.
 
 .. code-block:: python
 
