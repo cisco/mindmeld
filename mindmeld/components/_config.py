@@ -452,6 +452,8 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
     "linking_words": frozenset(),
 }
 
+DEFAULT_RANKING_CONFIG = {"query_clauses_operator": "or"}
+
 DEFAULT_NLP_CONFIG = {
     "resolve_entities_using_nbest_transcripts": [],
     "system_entity_recognizer": {
