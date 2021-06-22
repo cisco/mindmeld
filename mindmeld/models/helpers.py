@@ -53,6 +53,7 @@ CHAR_NGRAM_FREQ_RSC = "c_ngram_freq"
 SENTIMENT_ANALYZER = "vader_classifier"
 OUT_OF_BOUNDS_TOKEN = "<$>"
 OUT_OF_VOCABULARY = "OOV"
+IN_VOCABULARY = "IV"
 DEFAULT_SYS_ENTITIES = [
     "sys_time",
     "sys_temperature",

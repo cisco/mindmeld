@@ -23,6 +23,7 @@ from .helpers import (
     GAZETTEER_RSC,
     OUT_OF_BOUNDS_TOKEN,
     OUT_OF_VOCABULARY,
+    IN_VOCABULARY,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
@@ -913,7 +914,7 @@ def extract_gaz_freq(**kwargs):
         freq_features = defaultdict(int)
 
         for tok in tokens:
-            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None else "IV"
+            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None else IN_VOCABULARY
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz["index"].get(tok, []))
                 if freq > 0:
