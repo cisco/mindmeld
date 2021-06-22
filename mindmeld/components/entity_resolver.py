@@ -265,11 +265,12 @@ class BaseEntityResolver(ABC):
         # sort as per top_n requirement using the score field
         results = [*best_results.values()]
         n_scores = len(results)
-        if top_n != 20 and n_scores < top_n:
-            # log only if a value different from default value is specified
-            msg = f"Retrieved only {len(results)} entity resolutions instead of asked " \
-                  f"number {top_n} for entity type {self.type}"
-            logger.info(msg)
+        if n_scores < top_n:
+            if top_n != 20:
+                # log only if a value different from default value is specified
+                msg = f"Retrieved only {len(results)} entity resolutions instead of asked " \
+                      f"number {top_n} for entity type {self.type}"
+                logger.info(msg)
             return results
         # else, n_scores >= top_n
         _sim_scores = np.asarray([val["score"] for val in results])
