@@ -54,11 +54,19 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
-GEN_EMBEDDER_MODEL_PATH = os.path.join(
+DEPRECATED_GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
+)
+GEN_EMBEDDER_MODEL_PATH = os.path.join(
+    GEN_INDEXES_FOLDER, "{model_id}_cache.pkl"
 )
 GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
 GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
+GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
+GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
+NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
+    os.path.expanduser("~"), ".cache/mindmeld"
+)
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -528,22 +536,42 @@ def get_ranking_file_path(app_path, index):
 
 
 @safe_path
-def get_embedder_cache_file_path(app_path, embedder_type, model_name):
+def get_embedder_cache_file_path(app_path, embedder_type, model_name=None):
     """Gets the path to the model_cache.json file for a given embedder model.
 
     Args:
         app_path (str): The path to the app data.
         embedder_type (str): The name of the embedder type.
-        model_name (str): The name of the specific trained model.
+        model_name (str, optional): The name of the specific trained model.
 
     Returns:
         (str) The path for the json cached of the embedded values.
     """
-    return GEN_EMBEDDER_MODEL_PATH.format(
-        app_path=app_path,
-        embedder_type=embedder_type,
-        model_name=model_name,
-    )
+    if model_name:
+        return DEPRECATED_GEN_EMBEDDER_MODEL_PATH.format(
+            app_path=app_path,
+            embedder_type=embedder_type,
+            model_name=model_name,
+        )
+    else:
+        return GEN_EMBEDDER_MODEL_PATH.format(
+            app_path=app_path,
+            model_id=embedder_type
+        )
+
+
+@safe_path
+def get_question_answerer_index_cache_file_path(app_path, uid):
+    """Gets the path to the question answerer index cache file.
+
+    Args:
+        app_path (str): The path to the app data.
+        uid (str): A unique filename for the .pkl file
+
+    Returns:
+        (str) The path for the .pkl cache.
+    """
+    return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

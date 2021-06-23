@@ -108,5 +108,8 @@ setup(
         "language_annotator": [
             "google-cloud-translate>=3.0.1",
         ],
+        "elasticsearch": [
+            "elasticsearch>=5.0",
+        ]
     },
 )

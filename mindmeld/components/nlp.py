@@ -44,7 +44,7 @@ from ._config import (
 )
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolverFactory, EntityResolverConnectionError
+from .entity_resolver import EntityResolverFactory, ElasticsearchConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
@@ -1642,7 +1642,7 @@ class EntityProcessor(Processor):
                 incremental_model_path if incremental_timestamp else model_path
             )
             self.entity_resolver.load()
-        except EntityResolverConnectionError:
+        except ElasticsearchConnectionError:
             logger.warning("Cannot connect to ES, so Entity Resolver is not loaded.")
 
     def _evaluate(self, print_stats, label_set="test"):

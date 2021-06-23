@@ -41,7 +41,6 @@ ENTITY_EXAMPLE_TYPE = "entity"
 CLASS_LABEL_TYPE = "class"
 ENTITIES_LABEL_TYPE = "entities"
 
-
 # resource/requirements names
 GAZETTEER_RSC = "gazetteers"
 QUERY_FREQ_RSC = "q_freq"
@@ -136,18 +135,31 @@ def get_label_encoder(config):
 
 
 def create_embedder_model(app_path, config):
-    """Creates and loads the embedder model."""
-    embedder_config = config.get("model_settings", {})
-    embedding_fields = embedder_config.get("embedding_fields", [])
-    if len(embedding_fields) == 0:
-        # No embedding fields specified in the app config, continuing without embedder model.
-        return None
-    try:
-        embedder_type = embedder_config["embedder_type"]
-    except KeyError as e:
-        raise ValueError(
-            "Invalid model configuration: No provided embedder type."
-        ) from e
+    """Creates and loads an embedder model
+
+    Args:
+        config (dict): Model settings passed in as a dictionary with
+            'embedder_type' being a required key
+
+    Returns:
+        Embedder: An instance of appropriate embedder class
+
+    Raises:
+        ValueError: When model configuration is invalid or required key is missing
+    """
+
+    if "model_settings" in config and config["model_settings"]:
+        # when config = {"model_settings": {"embedder_type": ..., "..": ...}}
+        embedder_config = config["model_settings"]
+    else:
+        # when config = {"embedder_type": ..., "..": ...}}
+        embedder_config = config
+
+    embedder_type = embedder_config.get("embedder_type")
+    if not embedder_type:
+        raise KeyError(
+            "Missing required argument in config supplied to create embedder model: 'embedder_type'"
+        )
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
