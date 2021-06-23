@@ -73,6 +73,7 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
@@ -435,6 +436,7 @@ class TaggerModel(Model):
 
 
 class PytorchTaggerModel(PytorchModel):
+    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
     pass
 
 
@@ -442,13 +444,14 @@ class AutoTaggerModel:
 
     @staticmethod
     def get_model_class(config: ModelConfig):
+
+        CLASSES = [TaggerModel, PytorchTaggerModel]
         classifier_type = config.model_settings["classifier_type"]
 
-        if classifier_type in ["crf", "memm", "lstm"]:
-            return TaggerModel
+        for _class in CLASSES:
+            if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
+                return _class
 
-        return PytorchTaggerModel
-
-    @classmethod
-    def from_config(cls, config: ModelConfig):
-        return cls.get_model_class(config)(config)
+        msg = f"Invalid 'classifier_type': {classifier_type}. " \
+              f"Allowed types are: {[_class.ALLOWED_CLASSIFIER_TYPES for _class in CLASSES]}"
+        raise ValueError(msg)
