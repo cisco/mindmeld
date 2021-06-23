@@ -42,16 +42,17 @@ logger = logging.getLogger(__name__)
 
 
 class TextModel(Model):
-    _NEG_INF = -1e10
-
     # classifier types
     LOG_REG_TYPE = "logreg"
     DECISION_TREE_TYPE = "dtree"
     RANDOM_FOREST_TYPE = "rforest"
     SVM_TYPE = "svm"
+    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
     # default model scoring type
     ACCURACY_SCORING = "accuracy"
+
+    _NEG_INF = -1e10
 
     def __init__(self, config):
         super().__init__(config)
@@ -484,6 +485,7 @@ class TextModel(Model):
 
 
 class PytorchTextModel(PytorchModel):
+    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
     pass
 
 
@@ -491,13 +493,14 @@ class AutoTextModel:
 
     @staticmethod
     def get_model_class(config: ModelConfig):
+
+        CLASSES = [TextModel, PytorchTextModel]
         classifier_type = config.model_settings["classifier_type"]
 
-        if classifier_type in ["logreg", "dtree", "rforest", "svm"]:
-            return TextModel
+        for _class in CLASSES:
+            if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
+                return _class
 
-        return PytorchTextModel
-
-    @classmethod
-    def from_config(cls, config: ModelConfig):
-        return cls.get_model_class(config)(config)
+        msg = f"Invalid 'classifier_type': {classifier_type}. " \
+              f"Allowed types are: {[_class.ALLOWED_CLASSIFIER_TYPES for _class in CLASSES]}"
+        raise ValueError(msg)

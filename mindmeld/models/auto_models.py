@@ -28,7 +28,15 @@ logger = logging.getLogger(__name__)
 
 
 class AutoModel:
-    KNOWN_MODELS_TYPES = ["text", "tagger"]
+    """Auto class that identifies appropriate text/tagger model from text_models.py/tagger_models.py
+    to load based on the inputted configs or from the loaded configs file.
+
+    The .from_config() methods allows to load the appropriate model when passed in with ModelConfig.
+    The .from_path() method uses BaseModel's load method to load a dumped config, which is them used
+    to load appropriate model and return it through a metadata dictionary object.
+
+    """
+    ALLOWED_MODEL_TYPES = ["text", "tagger"]
 
     # method kept for backwards compatability
     def __new__(cls, config: Union[dict, ModelConfig]):
@@ -46,13 +54,13 @@ class AutoModel:
         model_config = cls._get_model_config(model_config)
         model_type = cls._get_model_type(model_config)
 
-        # create the model and return it
+        # load metadata and return
         if model_type == "text":
-            model = AutoTextModel.from_config(model_config)
+            model_class = AutoTextModel.get_model_class(model_config)
         elif model_type == "tagger":
-            model = AutoTaggerModel.from_config(model_config)
+            model_class = AutoTaggerModel.get_model_class(model_config)
 
-        return model
+        return model_class(model_config)
 
     @classmethod
     def from_path(cls, path: str):
@@ -110,14 +118,14 @@ class AutoModel:
             model_type = model_config.model_type
         except KeyError as e:
             msg = f"Invalid model configuration: Unknown model type {model_type}. " \
-                  f"Known types are: {AutoModel.KNOWN_MODELS_TYPES}"
+                  f"Known types are: {AutoModel.ALLOWED_MODEL_TYPES}"
             raise ValueError(msg) from e
 
         return model_type
 
     @classmethod
     def register_models(cls):
-        for model_type in AutoModel.KNOWN_MODELS_TYPES:
+        for model_type in AutoModel.ALLOWED_MODEL_TYPES:
             register_model(model_type, AutoModel)
         register_model("auto", AutoModel)
 
