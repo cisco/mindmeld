@@ -371,11 +371,11 @@ Here's an example from a ``config.py`` file where custom settings optimized for 
       }
   }
 
-Alternatively, you can also specify the type of resolver through the `er_config` argument while creating a resolver as below.
+Alternatively, you can also specify the type of resolver through the `config` argument while creating a resolver as below.
 
 .. code-block:: python
 
-  er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish', er_config=ENTITY_RESOLVER_CONFIG)
+  er = EntityResolverFactory.create_resolver(app_path='food_ordering', entity_type='dish', config=ENTITY_RESOLVER_CONFIG)
   er
 
 .. code-block:: console

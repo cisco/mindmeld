@@ -456,7 +456,7 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
     tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer.tokenize_raw(text)]
+    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
     normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
 
     assert raw_tokens == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
@@ -476,7 +476,7 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
     tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer.tokenize_raw(text)]
+    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
     normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
 
     assert raw_tokens == ["when", "**", "open", "--", "tomorrow?"]
@@ -760,7 +760,6 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
         dynamic_resource=dyn_gaz,
         allowed_nlp_classes={"store_info": {"get_store_hours": {}}},
     )
-
     if dyn_gaz:
         assert (
             query

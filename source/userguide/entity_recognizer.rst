@@ -284,7 +284,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                           |                                                                                                            |
   |                           | Additionally, you can also limit the n-grams considered while extracting the feature by setting a          |
   |                           | threshold on their frequency. These frequencies are computed over the entire training set. This prevents   |
-  |                           | infrequent n-grams from being used as features. By default, the threshold is set to 0.                     |
+  |                           | infrequent n-grams from being used as features. By default, the threshold is set to 1.                     |
   |                           |                                                                                                            |
   |                           | Example:                                                                                                   |
   |                           |                                                                                                            |

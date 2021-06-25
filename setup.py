@@ -39,6 +39,7 @@ requirements = [
     "spacy~=2.3,!=2.3.6",  # avoid 2.3.6 because it was yanked from PyPI
     "mypy>=0.782",
     "marshmallow~=3.7.1",
+    "matplotlib~=3.3.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -54,7 +55,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc6",
+    version="4.3.5rc9",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -107,5 +108,8 @@ setup(
         "language_annotator": [
             "google-cloud-translate>=3.0.1",
         ],
+        "elasticsearch": [
+            "elasticsearch>=5.0",
+        ]
     },
 )
