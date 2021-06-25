@@ -16,7 +16,7 @@ DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
-DUCKLING_VERSION = "20200701"
+DUCKLING_VERSION = "20210625"
 
 SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]
 SPACY_ANNOTATOR_NEWS_LANGUAGES = [
