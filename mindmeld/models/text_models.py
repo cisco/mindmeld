@@ -29,6 +29,7 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from ._util import _is_module_available
 from .evaluation import EvaluatedExample, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
@@ -37,6 +38,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
+from .pytorch_utils import modules as pyt_modules
 
 logger = logging.getLogger(__name__)
 
@@ -47,12 +49,14 @@ class TextModel(Model):
     DECISION_TREE_TYPE = "dtree"
     RANDOM_FOREST_TYPE = "rforest"
     SVM_TYPE = "svm"
-    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
     # default model scoring type
     ACCURACY_SCORING = "accuracy"
 
     _NEG_INF = -1e10
+
+    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
+    REQUIRES_EXTRAS_INSTALLS = []
 
     def __init__(self, config):
         super().__init__(config)
@@ -486,7 +490,20 @@ class TextModel(Model):
 
 class PytorchTextModel(PytorchModel):
     ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
-    pass
+    REQUIRES_EXTRAS_INSTALLS = ["torch"]
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            return {
+                "embedder": pyt_modules.EmbeddingForSequenceClassification,
+                "cnn": pyt_modules.SequenceCnnForSequenceClassification,
+                "lstm": pyt_modules.SequenceLstmForSequenceClassification,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
 
 class AutoTextModel:
@@ -499,6 +516,9 @@ class AutoTextModel:
 
         for _class in CLASSES:
             if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
+                for _module in _class.REQUIRES_EXTRAS_INSTALLS:
+                    if not _is_module_available(_module):
+                        raise ImportError("Install 'torch' library to use this classifier type")
                 return _class
 
         msg = f"Invalid 'classifier_type': {classifier_type}. " \

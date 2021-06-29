@@ -27,6 +27,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
+from .pytorch_utils import modules as pyt_modules
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -73,7 +74,6 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
-    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
@@ -87,6 +87,9 @@ class TaggerModel(Model):
         "in-gaz-span-seq": {},
         "sys-candidates-seq": {"start_positions": [-1, 0, 1]},
     }
+
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
+    REQUIRES_EXTRAS_INSTALLS = []
 
     def __init__(self, config):
         if not config.features:
@@ -436,8 +439,22 @@ class TaggerModel(Model):
 
 
 class PytorchTaggerModel(PytorchModel):
-    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
-    pass
+    ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm", "cnn-lstm", "lstm-lstm"]
+    REQUIRES_EXTRAS_INSTALLS = ["torch"]
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            return {
+                "embedder": pyt_modules.EmbeddingForTokenClassification,
+                "lstm": pyt_modules.SequenceLstmForTokenClassification,
+                "cnn-lstm": pyt_modules.TokenCnnSequenceLstmForTokenClassification,
+                "lstm-lstm": pyt_modules.TokenLstmSequenceLstmForTokenClassification,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
 
 class AutoTaggerModel:
@@ -450,6 +467,9 @@ class AutoTaggerModel:
 
         for _class in CLASSES:
             if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
+                for _module in _class.REQUIRES_EXTRAS_INSTALLS:
+                    if not _is_module_available(_module):
+                        raise ImportError("Install 'torch' library to use this classifier type")
                 return _class
 
         msg = f"Invalid 'classifier_type': {classifier_type}. " \

@@ -19,7 +19,6 @@ import math
 import os
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Any, Dict
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -31,8 +30,10 @@ from sklearn.model_selection import (
     StratifiedKFold,
     StratifiedShuffleSplit,
 )
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 
 from .helpers import (
+    create_model,
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
     GAZETTEER_RSC,
@@ -45,14 +46,12 @@ from .helpers import (
     get_label_encoder,
     ingest_dynamic_gazetteer,
 )
+from .pytorch_utils import encoders as pyt_encoders
 from .._version import get_mm_version
 from ..exceptions import ClassifierLoadError
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
-
-# model scoring type
-LIKELIHOOD_SCORING = "log_loss"
 
 
 class ModelConfig:
@@ -320,6 +319,9 @@ class Model(BaseModel):
         config (ModelConfig): The configuration for the model
     """
 
+    # model scoring type
+    LIKELIHOOD_SCORING = "log_loss"
+
     def __init__(self, config):
         super().__init__(config)
         self._label_encoder = get_label_encoder(self.config)
@@ -400,14 +402,14 @@ class Model(BaseModel):
                 * model.cv_results_["std_test_score"][idx]
                 / math.sqrt(model.n_splits_)
             )
-            if scoring == LIKELIHOOD_SCORING:
+            if scoring == Model.LIKELIHOOD_SCORING:
                 msg = "Candidate average log likelihood: {:.4} ± {:.4}"
             else:
                 msg = "Candidate average accuracy: {:.2%} ± {:.2%}"
             # pylint: disable=logging-format-interpolation
             logger.debug(msg.format(model.cv_results_["mean_test_score"][idx], std_err))
 
-        if scoring == LIKELIHOOD_SCORING:
+        if scoring == Model.LIKELIHOOD_SCORING:
             msg = "Best log likelihood: {:.4}, params: {}"
             self.cv_loss_ = -model.best_score_
         else:
@@ -658,40 +660,101 @@ class PytorchModel(BaseModel):
 
     def __init__(self, config):
         super().__init__(config)
-        config = self.config
-        # self._featurizer = AutoFeaturizer.from_config(config)
+        self._label_encoder = get_label_encoder(self.config)
+        self._class_encoder = SKLabelEncoder()
+        self._clf = None  # need to edit this
+
+    def _get_model_constructor(self):
+        raise NotImplementedError
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        # self._featurizer.initialize_resources(examples, labels, params)
-        raise NotImplementedError
+
+        # Always initialize the global resource for tokenization, which is not a
+        # feature-specific resource
+        self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
     def fit(self, examples, labels, params=None):
-        # self._featurizer.train()  # this loads an optimizer, batches inputs,
-        # finds loss and backwards gradients and updates gradients and saves best checkpoint
-        raise NotImplementedError
+        params = params or self.config.params
+
+        if len(set(labels)) <= 1:
+            return self
+
+        # Encode classes
+        y = self._label_encoder.encode(labels)
+        try:
+            # runs without Error for tagger models
+            flat_y = sum(y, [])
+            is_flattened = True
+        except TypeError:
+            # meaning it is a text model
+            flat_y = y
+            is_flattened = False
+        encoded_flat_y = self._class_encoder.fit_transform(flat_y)
+        if is_flattened:
+            seq_lengths = [len(_y) for _y in y]
+            y = []
+            start_idx = 0
+            for seq_length in seq_lengths:
+                y.append(encoded_flat_y[start_idx: start_idx + seq_length])
+                start_idx += seq_length
+        else:
+            y = list(encoded_flat_y)
+
+        self._clf = self._get_model_constructor()()  # gets the class name only
+        self._clf.fit([ex.text for ex in examples], y, **params)
+
+        return self
 
     def dump(self, path, metadata=None):
-        # do featurizer specific dumping
 
-        # dump model configs
-        # metadata = metadata or {}
-        # metadata.update({'model_config': self.featurizer.config})
-        super().dump(path)
+        metadata = metadata or {}
+        metadata.update({
+            "model": self,
+            "model_config": self.config,
+            "serializable": False}
+        )
 
-        raise NotImplementedError
+        # dump clf
+        self._clf.dump(path)
+
+        # dump metadata
+        super().dump(path, metadata)
 
     @classmethod
-    def load(cls, *args, **kwargs) -> Dict[str, Any]:
-        # load featurizer
-        raise NotImplementedError
+    def load(cls, path):
+
+        # load metadata
+        metadata = super().load(path)
+        model_config = metadata.get("model_config")
+        model = create_model(model_config)
+
+        # gets the class name and then loads
+        model._clf = self._get_model_constructor().load(path)  # .load() is a classmethod
+        metadata["model"] = model
+
+        return metadata
 
     def predict(self, examples, dynamic_resource=None):
-        # self._featurizer.predict()  # batches and runs prediction and returns
-        #                             # results in labels format
-        raise NotImplementedError
+        y = self._clf.predict(examples)
+        predictions = self._class_encoder.inverse_transform(y)
+        return self._label_encoder.decode(predictions)
 
     def predict_proba(self, examples):
-        raise NotImplementedError
+
+        # snippet mostly re-used from text_model.py/TextModel/_predict_proba()
+        predictions = []
+        for row in self._clf.predict_proba(examples):
+            probabilities = {}
+            top_class = None
+            for class_index, proba in enumerate(row):
+                raw_class = self._class_encoder.inverse_transform([class_index])[0]
+                decoded_class = self._label_encoder.decode([raw_class])[0]
+                probabilities[decoded_class] = proba
+                if proba > probabilities.get(top_class, -1.0):
+                    top_class = decoded_class
+            predictions.append((top_class, probabilities))
+
+        return predictions
 
     def evaluate(self, examples, labels):
         raise NotImplementedError
@@ -705,3 +768,15 @@ class PytorchModel(BaseModel):
         model_folder = model_path.split(".pkl")[0]
         os.makedirs(model_folder, exist_ok=True)
         return model_folder
+
+    def _get_encoder_constructor(self):
+        """Returns the class of the actual underlying model"""
+        model_type = self.config.model_type
+        try:
+            return {
+                "text": pyt_encoders.xxx,
+                "tagger": pyt_encoders.xxx,
+            }[model_type]
+        except KeyError as e:
+            msg = "{}: Model type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, model_type)) from e

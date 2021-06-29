@@ -14,41 +14,62 @@
 import json
 import logging
 import os
-from abc import abstractmethod
+import shutil
+import uuid
 from typing import Dict
 
-import nn.functional as F
-import torch
-import torch.nn as nn
-from nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import numpy as np
+
+from .encoders import SequenceClassificationEncoder
+from .helpers import progress_bar
+from ...path import USER_CONFIG_DIR
+
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
+except ImportError:
+    pass
+
+SEED = 7246
 
 logger = logging.getLogger(__name__)
 
 
-# Different nn layers
+# Various nn layers
 
 
 class EmbeddingLayer(nn.Module):
+    """A pytorch wrapper layer for embeddings that takes input as a batched sequence of ids
+    and outputs embeddings correponding to those ids
+    """
 
-    def __init__(self, num_embs, emb_dim, padding_idx=None,
+    def __init__(self, num_tokens, emb_dim, padding_idx=None,
                  embedding_weights=None, update_embeddings=True,
-                 weightages=None, update_weightages=True):
+                 coefficients=None, update_coefficients=True):
         super().__init__()
 
-        self.embeddings = nn.Embedding(num_embs, emb_dim, padding_idx=padding_idx)
-        if embedding_weights:
-            self.embeddings.load_state_dict({'weight': embedding_weights})
+        self.embeddings = nn.Embedding(num_tokens, emb_dim, padding_idx=padding_idx)
+        if embedding_weights is not None:
+            if isinstance(embedding_weights, dict):
+                # when weights are passed as dict with keys as indices and values as embeddings
+                for idx, emb in embedding_weights.items():
+                    self.embeddings.weight.data[idx] = torch.as_tensor(emb)
+            else:
+                # when weights are passed as an array or tensor
+                self.embeddings.load_state_dict({'weight': torch.as_tensor(embedding_weights)})
         self.embeddings.weight.requires_grad = update_embeddings
 
-        self.embedding_weightages = None
-        if weightages:
-            if not len(weightages) == num_embs:
-                msg = f"Length of weightages ({len(weightages)}) must match the number of " \
-                      f"embeddings ({num_embs})"
+        self.embedding_for_coefficients = None
+        if coefficients is not None:
+            if not len(coefficients) == num_tokens:
+                msg = f"Length of coefficients ({len(coefficients)}) must match the number of " \
+                      f"embeddings ({num_tokens})"
                 raise ValueError(msg)
-            self.embedding_weightages = nn.Embedding(num_embs, 1, padding_idx=padding_idx)
-            self.embedding_weightages.load_state_dict({'weight': weightages})
-            self.embedding_weightages.weight.requires_grad = update_weightages
+            self.embedding_for_coefficients = nn.Embedding(num_tokens, 1, padding_idx=padding_idx)
+            self.embedding_for_coefficients.load_state_dict({'weight': coefficients})
+            self.embedding_for_coefficients.weight.requires_grad = update_coefficients
 
     def forward(self, padded_token_ids):
         # padded_token_ids: dim: [BS, SEQ_LEN]
@@ -56,41 +77,17 @@ class EmbeddingLayer(nn.Module):
         # [BS, SEQ_LEN] -> [BS, SEQ_LEN, EMB_DIM]
         outputs = self.embeddings(padded_token_ids)
 
-        if self.embedding_weightages:
+        if self.embedding_for_coefficients:
             # [BS, SEQ_LEN] -> [BS, SEQ_LEN, 1]
-            weightages = self.embedding_weightages(padded_token_ids)
+            coefficients = self.embedding_for_coefficients(padded_token_ids)
             # [BS, SEQ_LEN, EMB_DIM] -> [BS, SEQ_LEN, EMB_DIM]
-            outputs = torch.mul(outputs, weightages)
-
-        return outputs
-
-
-class EmbeddingLayerPooling(nn.Module):
-
-    def __init__(self, embedder_output_pooling_type):
-        super().__init__()
-
-        self.embedder_output_pooling_type = embedder_output_pooling_type
-
-    def forward(self, padded_token_embs, lengths):
-        # padded_token_ids: dim: [BS, SEQ_LEN, EMD_DIM]
-        # lengths:          dim: [BS]
-
-        # [BS, SEQ_LEN, EMD_DIM] -> [BS, EMD_DIM]
-        if self.embedder_output_pooling_type.lower() == "max":
-            outputs, _ = torch.max(padded_token_embs, dim=1)
-        elif self.embedder_output_pooling_type.lower() == "mean":
-            sum_ = torch.sum(padded_token_embs, dim=1)
-            lens_ = lengths.unsqueeze(dim=1).expand(batch_size, self.lstm_model_outdim)
-            assert sum_.size() == lens_.size()
-            outputs = torch.div(sum_, lens_)
-        else:
-            raise NotImplementedError
+            outputs = torch.mul(outputs, coefficients)
 
         return outputs
 
 
 class CnnLayer(nn.Module):
+    """"""
 
     def __init__(self, emb_dim, kernel_sizes, num_kernels):
         super().__init__()
@@ -155,170 +152,318 @@ class LstmLayer(nn.Module):
         return outputs
 
 
-class LstmLayerPooling(nn.Module):
+class PoolingLayer(nn.Module):
 
-    def __init__(self, lstm_output_pooling_type):
+    def __init__(self, pooling_type):
         super().__init__()
 
-        self.lstm_output_pooling_type = lstm_output_pooling_type
+        ALLOWED_TYPES = ["cls", "max", "mean", "mean_sqrt"]
+        assert pooling_type in ALLOWED_TYPES
+
+        self.pooling_type = pooling_type
 
     def forward(self, padded_token_embs, lengths):
         # padded_token_ids: dim: [BS, SEQ_LEN, EMD_DIM]
         # lengths:          dim: [BS]
+        # outputs:          dim: [BS, EMD_DIM]
 
-        # [BS, SEQ_LEN, EMD_DIM] -> [BS, EMD_DIM]
-        if self.lstm_output_pooling_type.lower() == "end":
+        if self.pooling_type.lower() == "cls":
             last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
-        elif self.lstm_output_pooling_type.lower() == "max":
-            outputs, _ = torch.max(padded_token_embs, dim=1)
-        elif self.lstm_output_pooling_type.lower() == "mean":
-            sum_ = torch.sum(padded_token_embs, dim=1)
-            lens_ = lengths.unsqueeze(dim=1).expand(batch_size, self.lstm_model_outdim)
-            assert sum_.size() == lens_.size()
-            outputs = torch.div(sum_, lens_)
         else:
-            raise NotImplementedError
+            mask = pad_sequence([torch.tensor([1] * length_) for length_ in lengths],
+                                batch_first=True)
+            mask = mask.unsqueeze(-1).expand(padded_token_embs.size()).float()
+            if self.pooling_type.lower() == "max":
+                padded_token_embs[mask == 0] = -1e9  # set to a large negative value
+                outputs, _ = torch.max(padded_token_embs, dim=1)[0]
+            elif self.pooling_type.lower() == "mean":
+                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
+                expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
+                outputs = torch.div(summed_padded_token_embs, expanded_lengths)
+            elif self.pooling_type.lower() == "mean_sqrt":
+                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
+                expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
+                outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
 
         return outputs
 
 
-# Custom modules built on top of the nn layers that also hold params, dumps/loads models
+# Custom modules built on top of above nn layers that can do sequence classification
 
 
-class ModuleForIndividualClassification(nn.Module):
+class BaseForSequenceClassification(nn.Module):
     """Base Module class that defines all the necessary elements to succesfully train/infer,
      dump/load custom pytorch modules wrapped on top of this base class. Classes derived from
-     this base can either be trained for sequence classification or token classification, but
-     not both, meaning this class does not entertain joint modeling. The output of a class
-     derived from this base contains either `seq_embs` or `token_embs` in its output which
-     facilitates single-head training only.
+     this base can be trained for sequence classification. The output of a class derived from
+     this base must contain `seq_embs` in its output dictionary.
     """
 
-    # TODO:
-    #  1) See if all derived classes of nn.Module in ModuleForIndividualClassification are moved
-    #       to GPU if we do ModuleForIndividualClassification.to("cuda")
-    #  2) Similar to above, see if ModuleForIndividualClassification.state_dict of gives out
-    #       state_dict of all involved nn.Module state_dicts
-
-    def __init__(self, **params):
+    def __init__(self):
         super().__init__()
+        self.name = self.__class__.__name__
+        self.encoder = SequenceClassificationEncoder()
+        self.params_keys = set(["name"])
+
+        self.ready = False  # True when .fit() is called or loaded from a checkpoint
+        self.dirty = False  # True when weights saved in a temp folder & to be moved to dump_folder
+
+    def __repr__(self):
+        return f"<{self.name}> ready: {self.ready} dirty: {self.dirty}"
+
+    ####################################
+    # methods for training and inference
+    ####################################
+
+    def fit(self, examples, labels, **params):
+
+        if self.ready:
+            msg = "The model is already fitted or loaded from a file. Aborting fitting again."
+            logger.error(msg)
+
+        # fit an encoder
+        self.encoder.fit(examples=examples, **params)
+
+        # update params
+        params.update({
+            "num_tokens": self.encoder.get_num_tokens(),
+            "emb_dim": self.encoder.get_emb_dim(),
+            "padding_idx": self.encoder.pad_token_idx,
+            "embedding_weights": self.encoder.get_embedding_weights(),
+            "num_labels": len(set(labels)),
+        })
+
+        # init the graph
+        self.init_graph(**params)
+
+        # load required vars from params for fitting
+        self.batch_size = params.get("batch_size", 32)
+        self.optimizer = params.get("optimizer", "Adam")
+        self.device = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        self.n_epochs = params.get("n_epochs", 100)
+        self.patience = params.get("patience", 6)
+        self.params_keys.update(["batch_size", "optimizer", "device", "n_epochs", "patience"])
+
+        # cretae temp folder and save path
+        # dumping into a temp folder instead of keeping in memory to reduce memory usage
+        temp_folder = os.path.join(USER_CONFIG_DIR, "pytorch_models", str(uuid.uuid4()))
+        os.makedirs(temp_folder, exist_ok=True)
+        temp_save_path = os.path.join(temp_folder, "pytorch_model.bin")
+
+        # split into train, dev splits and get data loaders
+        indices = np.arange(len(examples))
+        np.random.seed(SEED)
+        np.random.shuffle(indices)
+        train_examples, train_labels = \
+            zip(*[(examples[i], labels[i]) for i in indices[:int(0.8 * len(indices))]])
+        dev_examples, dev_labels = \
+            zip(*[(examples[i], labels[i]) for i in indices[int(0.8 * len(indices)):]])
+
+        # move model to device
+        self.to(self.device)
+
+        # create an optimizer and attach all model params to it
+        optimizer = getattr(torch.optim, self.optimizer)(self.parameters(), lr=0.001)
+
+        # training and dev validation
+        best_dev_acc, best_dev_epoch = -np.inf, -1
+        for epoch in range(1, self.n_epochs + 1):
+            # patience before terminating due to no dev accuracy improvements
+            if epoch - best_dev_epoch > self.patience:
+                logger.info(f"Set patience of {self.patience} epochs reached")
+                break
+            # set modules to train phase, reset gradients, do forward-backward propogations
+            self.train()
+            self.zero_grad()
+            train_loss, train_batches = 0.0, 0.0
+            for start_idx in range(0, len(train_examples), self.batch_size):
+                this_examples = train_examples[start_idx:start_idx + self.batch_size]
+                this_labels = train_labels[start_idx:start_idx + self.batch_size]
+                batch_data_dict = self.encoder.batch_encode(this_examples, this_labels)
+                batch_data_dict = self.forward(batch_data_dict)
+                loss = batch_data_dict["loss"]
+                train_loss += loss.cpu().detach().numpy()
+                train_batches += 1
+                loss.backward()
+                optimizer.step()
+                self.zero_grad()
+                progress_bar(start_idx, len(train_examples), ["avg. loss per batch", "epoch"],
+                             [train_loss / (start_idx / self.batch_size + 1), epoch])
+            train_loss = train_loss / train_batches
+            print()
+            # dev evaluation
+            dev_acc = 0.0
+            for start_idx in range(0, len(dev_examples), self.batch_size):
+                this_examples = dev_examples[start_idx:start_idx + self.batch_size]
+                this_labels = dev_labels[start_idx:start_idx + self.batch_size]
+                this_labels_predicted = self.predict(this_examples)
+                assert len(this_labels_predicted) == len(this_labels), \
+                    print(len(this_labels_predicted), len(this_labels))
+                dev_acc += sum([x == y for x, y in zip(this_labels_predicted, this_labels)])
+                progress_bar(start_idx, len(dev_examples), ["avg. acc on dev", "epoch"],
+                             [dev_acc / max(start_idx, 1), epoch])
+            dev_acc /= max(1, len(dev_examples))
+            print()
+            if dev_acc >= best_dev_acc:
+                # save model weights in a temp folder; later move it to folder passed through dump()
+                torch.save(self.state_dict(), temp_save_path)
+                logger.info(f"Model weights saved in epoch: {epoch} when dev accuracy improved "
+                            f"from '{best_dev_acc:.4f}' to '{dev_acc:.4f}'")
+                best_dev_acc, best_dev_epoch = dev_acc, epoch
+
+        # load the best model, delete the temp folder and return
+        self.load_state_dict(torch.load(temp_save_path))
+        shutil.rmtree(temp_folder)
+
+        self.ready = True
+        self.dirty = True
+        return
+
+    def predict(self, examples):
+        logits = self.forward_with_no_grad(examples)
+        if self.num_labels == 2:
+            preds = (logits >= 0.5).long()
+        elif self.num_labels > 2:
+            preds = torch.argmax(logits, dim=-1)
+        return preds.cpu().detach().numpy().tolist()
+
+    def predict_proba(self, examples):
+        logits = self.forward_with_no_grad(examples)
+        if self.num_labels == 2:
+            probs = F.sigmoid(logits)
+            # extending the results from shape [N,1] to [N,2] to give out class probs distinctly
+            probs = torch.cat((1 - probs, probs), dim=-1)
+        elif self.num_labels > 2:
+            probs = F.softmax(logits, dim=-1)
+        return probs.cpu().detach().numpy().tolist()
+
+    def forward_with_no_grad(self, examples):
+        logits = None
+        was_training = self.training
+        self.eval()
+        with torch.no_grad():
+            for start_idx in range(0, len(examples), self.batch_size):
+                this_examples = examples[start_idx:start_idx + self.batch_size]
+                batch_data_dict = self.encoder.batch_encode(this_examples)
+                _logits = self.forward(batch_data_dict)["logits"]
+                logits = torch.cat((logits, _logits)) if logits else _logits
+        if was_training:
+            self.train()
+        return logits
+
+    def forward(self, batch_data_dict):
+
+        for k, v in batch_data_dict.items():
+            if v is not None and isinstance(v, torch.Tensor):
+                batch_data_dict[k] = v.to(self.device)
+
+        batch_data_dict = self._forward_core(batch_data_dict)
+
+        seq_embs = batch_data_dict["seq_embs"]
+        seq_embs = self.dropout(seq_embs)
+        logits = self.classifier_head(seq_embs)
+        batch_data_dict.update({"logits": logits})
+
+        targets = batch_data_dict.get("labels")
+        if targets is not None:
+            loss = self.criterion(logits, targets)
+            batch_data_dict.update({"loss": loss})
+
+        return batch_data_dict
+
+    def _forward_core(self, batch_data_dict: Dict) -> Dict:
+        pass
+
+    ####################################
+    # methods to load and dump resources
+    ####################################
+
+    def dump(self, path):
+        os.makedirs(path, exist_ok=True)
+        # save weights
+        torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
+        # save encoder
+        self.encoder.dump(path)
+        # save params
+        with open(os.path.join(path, "params.json"), "w") as fp:
+            params_dict = {k: getattr(self, k) for k in self.params_keys}
+            json.dump(params_dict, fp)
+            fp.close()
+        logger.info(f"{cls.__name__} model weights are dumped successfully")
+
+        self.dirty = False
+        return
+
+    @classmethod
+    def load(cls, path):
+        module = cls()
+        # load params
+        with open(os.path.join(path, "params.json"), "r") as fp:
+            params = json.load(fp)
+            fp.close()
+        for k, v in params.items():
+            setattr(module, k, v)
+        module.init_graph(**params)
+        # load encoder
+        module.encoder = module.encoder.load()
+        # load weights
+        module.load_state_dict(torch.load(os.path.join(path, "pytorch_model.bin")))
+        logger.info(f"{cls.__name__} model weights are loaded successfully")
+
+        self.ready = True
+        self.dirty = False
+        return self
+
+    ####################################
+    # methods for creating pytorch graph
+    ####################################
+
+    def init_graph(self, **params):
+
+        self._init_core(**params)
 
         # params
-        self.name = self.__class__.__name__
-        self.hidden_dropout_prob = params.get("hidden_dropout_prob", 0.3)
         self.num_labels = params.get("num_labels")
-        self.label_pad_idx = params.get("label_pad_idx")
+        self.hidden_dropout_prob = params.get("hidden_dropout_prob", 0.3)
+        self.params_keys.update(["num_labels", "hidden_dropout_prob"])
 
-        self.params_keys = set(["name", "hidden_dropout_prob", "num_labels", "label_pad_idx"])
-
-        # init derived class' layers
-        self._init(**params)
+        # init the underlying params and architectural components
         try:
             self.hidden_size = self.out_dim
             assert self.hidden_size
         except (AttributeError, AssertionError) as e:
             msg = f"Derived class '{self.name}' must indicate its hidden size for dense layer " \
-                  f"classification by having an attribute 'self.out_dim' and must be a positive " \
-                  f"integer"
+                  f"classification by having an attribute 'self.out_dim', which must be a " \
+                  f"positive integer"
             raise ValueError(msg) from e
         self.params_keys.update(["hidden_size"])
 
-        # obtain number of labels and create output dense layer accordingly
+        # init the peripheral architecture params and architectural components
         if not self.num_labels:
             msg = f"Invalid number of labels ({self.num_labels}) inputted for '{self.name}' class"
             raise ValueError(msg)
         self.dropout = nn.Dropout(p=self.hidden_dropout_prob)
         self.classifier_head = nn.Linear(self.hidden_size, self.num_labels)
 
-        # Decide the criterion type based on the num_labels
-        #   nn.CrossEntropy or nn.SigmoidWithLogits
-        self.criterion = None  # with label_pad_idx?
-
-    def forward(self, inputs):
-
-        # TODO: should the labels be moved to device? or is it not required due to long type?
-        for k, v in inputs.items():
-            if "lengths" not in k and isinstance(v, torch.Tensor):
-                inputs[k] = v.to(self.device)
-
-        outputs = self._forward(inputs)
-
-        # validations
-        if "seq_embs" in outputs and "token_embs" in outputs:
-            msg = f"This class ({self.name}) can only perform single head training"
-            raise ValueError(msg)
-        elif "token_embs" in outputs and not self.label_pad_idx:
-            msg = f"Invalid label_pad_idx ({label_pad_idx}) provided for token classification"
+        # init the criterion to compute loss
+        if self.num_labels == 2:
+            # sigmoid criterion
+            self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
+        elif self.num_labels > 2:
+            # cross-entropy criterion
+            self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        else:
+            msg = f"Invalid number of labels specified: {self.num_labels}. " \
+                  f"Valid number is either 2 or more."
             raise ValueError(msg)
 
-        # 'seq_embs' would be of shape [BS, self.hidden_size] whereas 'token_embs' would be
-        # of shape [BS, SEQ_LEN, self.hidden_size]. The 'labels' in the input are however always
-        # be a 1D shaped [BS/FLATTENED_BS] tensor.
+        print(f"{self.name} is initialized")
 
-        if not 'labels' in inputs:
-            msg = f"If using '{self.name}' class for inference, must use .predict() method. " \
-                  f"If using to train, must input labels for computing loss"
-            raise ValueError(msg)
-        labels = inputs["labels"]
-        loss = self.criterion(flattened_outputs, labels)
-        return loss
-
-    def predict(self, inputs):
-
-        # functionality similar to `forward` but does not input 'labels' key in the input
-        # and additionaly computes the argmax-es
-        # TODO: Implement
-        raise NotImplementedError
-
-    def predict_probal(self, inputs):
-        # TODO: Implement
-        raise NotImplementedError
-
-    @abstractmethod
-    def _init(self, **params) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _forward(self, inputs: Dict) -> Dict:
-        raise NotImplementedError
-
-    @property
-    def device(self) -> torch.device:
-        return next(self.parameters()).device
-
-    @property
-    def get_params_dict(self):
-        return {k: getattr(self, k) for k in self.params_keys}
-
-    @staticmethod
-    def _get_model_path(path):
-        return os.path.join(path, "pytorch_model.bin")
-
-    @staticmethod
-    def _get_params_path(path):
-        return os.path.join(path, "config.json")
-
-    @classmethod
-    def load(cls, ckpt_folder):
-        with open(self._get_params_path(ckpt_folder), "r") as fp:
-            params_dict = json.load(fp)
-            fp.close()
-        model = cls(**params_dict)
-        model.load_state_dict(torch.load(cls._get_model_path(ckpt_folder)))
-        print(f"{cls.__name__} model loaded")
-        return model
-
-    def dump(self, ckpt_folder):
-        os.makedirs(ckpt_folder, exist_ok=True)
-        with open(self._get_params_path(ckpt_folder), "w") as fp:
-            json.dump(self.get_params_dict, fp)
-            fp.close()
-        torch.save(self.state_dict(), self._get_model_path(ckpt_folder))
-        return
+    def _init_core(self, **params):
+        pass
 
 
-class PooledEmbeddingForSequenceClassification(ModuleForIndividualClassification):
+class EmbeddingForSequenceClassification(BaseForSequenceClassification):
     """An embedder pooling module that operates on a batched sequence of token ids. The
     tokens could be characters or words or sub-words. This module finally outputs one 1D
     representation for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -326,54 +471,42 @@ class PooledEmbeddingForSequenceClassification(ModuleForIndividualClassification
     The `forward` method of this module expects padded token ids along with numer of tokens
     per instance in the batch.
 
-    Additionally, one can set different weightages for different tokens of the embedding
+    Additionally, one can set different coefficients for different tokens of the embedding
     matrix (e.g. tf-idf weights).
     """
 
-    def _init(self, **params):
-
+    def _init_core(self, **params):
         # params
-        embedding_weights = params.get("embedding_weights")
-        self.num_embs = params.get("num_embs")
-        self.emb_dim = params.get("emb_dim")
-        self.padding_idx = params.get("padding_idx")
+        self.num_tokens = params["num_tokens"]
+        self.emb_dim = params["emb_dim"]
+        self.padding_idx = params.get("padding_idx", None)
+        embedding_weights = params.get("embedding_weights", None)
         self.update_embeddings = params.get("update_embeddings", True)
-        weightages = params.get("weightages")
-        self.update_weightages = params.get("update_weightages", True)
         self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "mean")
-
         self.params_keys.update([
-            "num_embs", "emb_dim", "padding_idx", "update_embeddings", "update_weightages"
+            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
+            "embedder_output_pooling_type"
         ])
 
-        # embedding layer
-        if embedding_weights:
-            if self.num_embs or self.emb_dim:
-                logger.warning("Cannot use both 'embedding_weights' and {'num_embs', 'emb_dim'}")
-            self.num_embs, self.emb_dim = embedding_weights.shape
-        else:
-            if not (self.num_embs and self.emb_dim):
-                logger.warning("Must input 'num_embs' and 'emb_dim' to initialize embeddings")
-        self.emb_layer = EmbeddingLayer(self.num_embs, self.emb_dim, self.padding_idx,
-                                        embedding_weights, self.update_embeddings,
-                                        weightages, self.update_weightages)
-        self.emb_layer_pooling = EmbeddingLayerPooling(self.embedder_output_pooling_type)
+        # core layers
+        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
+                                        embedding_weights, self.update_embeddings)
+        self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
         self.out_dim = self.emb_dim
 
-    def _forward(self, inputs):
-
-        seq_ids = inputs["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = inputs["seq_lengths"]  # [BS]
+    def _forward_core(self, batch_data_dict):
+        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.emb_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
 
-        inputs.update({"seq_embs": encodings})
+        batch_data_dict.update({"seq_embs": encodings})
 
-        return inputs
+        return batch_data_dict
 
 
-class SequenceCnnForSequenceClassification(ModuleForIndividualClassification):
+class SequenceCnnForSequenceClassification(BaseForSequenceClassification):
     """A CNN module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -381,52 +514,39 @@ class SequenceCnnForSequenceClassification(ModuleForIndividualClassification):
     The `forward` method of this module expects only padded token ids as input.
     """
 
-    def _init(self, **params):
-
+    def _init_core(self, **params):
         # params
-        embedding_weights = params.get("embedding_weights")
-        self.num_embs = params.get("num_embs")
-        self.emb_dim = params.get("emb_dim")
-        self.padding_idx = params.get("padding_idx")
+        self.num_tokens = params["num_tokens"]
+        self.emb_dim = params["emb_dim"]
+        self.padding_idx = params.get("padding_idx", None)
+        embedding_weights = params.get("embedding_weights", None)
         self.update_embeddings = params.get("update_embeddings", True)
         self.cnn_kernel_sizes = params.get("cnn_kernel_sizes", [1, 3, 5])
         self.cnn_num_kernels = params.get("cnn_num_kernels", [50] * len(self.cnn_kernel_sizes))
 
         self.params_keys.update([
-            "num_embs", "emb_dim", "padding_idx", "update_embeddings",
+            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
             "cnn_kernel_sizes", "cnn_num_kernels"
         ])
 
-        # embedding layer
-        if embedding_weights:
-            if self.num_embs or self.emb_dim:
-                logger.warning("Cannot use both 'embedding_weights' and {'num_embs', 'emb_dim'}")
-            self.num_embs, self.emb_dim = embedding_weights.shape
-        else:
-            if not (self.num_embs and self.emb_dim):
-                logger.warning("Must input 'num_embs' and 'emb_dim' to initialize embeddings")
-        self.emb_layer = EmbeddingLayer(self.num_embs, self.emb_dim, self.padding_idx,
+        # core layers
+        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         embedding_weights, self.update_embeddings)
-
-        # cnn layer
         self.conv_layer = CnnLayer(self.emb_dim, self.cnn_kernel_sizes, self.cnn_num_kernels)
         self.out_dim = sum(num_kernels)
 
-        logger.info("SequenceCnnForSequenceClassification initialized")
-
-    def _forward(self, inputs):
-
-        seq_ids = inputs["seq_ids"]  # [BS, SEQ_LEN]
+    def _forward_core(self, batch_data_dict):
+        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.conv_layer(encodings)  # [BS, self.out_dim]
 
-        inputs.update({"seq_embs": encodings})
+        batch_data_dict.update({"seq_embs": encodings})
 
-        return inputs
+        return batch_data_dict
 
 
-class SequenceLstmForSequenceClassification(ModuleForIndividualClassification):
+class SequenceLstmForSequenceClassification(BaseForSequenceClassification):
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -435,104 +555,94 @@ class SequenceLstmForSequenceClassification(ModuleForIndividualClassification):
     per instance in the batch.
     """
 
-    def _init(self, **params):
-
+    def _init_core(self, **params):
         # params
-        embedding_weights = params.get("embedding_weights")
-        self.num_embs = params.get("num_embs")
-        self.emb_dim = params.get("emb_dim")
-        self.padding_idx = params.get("padding_idx")
+        self.num_tokens = params["num_tokens"]
+        self.emb_dim = params["emb_dim"]
+        self.padding_idx = params.get("padding_idx", None)
+        embedding_weights = params.get("embedding_weights", None)
         self.update_embeddings = params.get("update_embeddings", True)
         self.lstm_hidden_dim = params.get("lstm_hidden_dim", 128)
         self.lstm_num_layers = params.get("lstm_num_layers", 2)
         self.lstm_dropout = params.get("lstm_dropout", 0.3)
         self.lstm_bidirectional = params.get("lstm_bidirectional", True)
-        self.lstm_output_pooling_type = params.get("lstm_output_pooling_type", "end")
-
+        self.lstm_output_pooling_type = params.get("lstm_output_pooling_type", "cls")
         self.params_keys.update([
-            "num_embs", "emb_dim", "padding_idx", "update_embeddings",
+            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
             "lstm_hidden_dim", "lstm_num_layers", "lstm_dropout", "lstm_bidirectional"
         ])
 
-        # embedding layer
-        if embedding_weights:
-            if self.num_embs or self.emb_dim:
-                logger.warning("Cannot use both 'embedding_weights' and {'num_embs', 'emb_dim'}")
-            self.num_embs, self.emb_dim = embedding_weights.shape
-        else:
-            if not (self.num_embs and self.emb_dim):
-                logger.warning("Must input 'num_embs' and 'emb_dim' to initialize embeddings")
-        self.emb_layer = EmbeddingLayer(self.num_embs, self.emb_dim, self.padding_idx,
+        # core layers
+        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         embedding_weights, self.update_embeddings)
-
-        # lstm layer
         self.lstm_layer = LstmLayer(self.emb_dim, self.lstm_hidden_dim, self.lstm_num_layers,
                                     self.lstm_dropout, self.lstm_bidirectional)
-        self.lstm_layer_pooling = LstmLayerPooling(self.lstm_output_pooling_type)
+        self.lstm_layer_pooling = PoolingLayer(self.lstm_output_pooling_type)
         self.out_dim = self.emb_dim * 2 if self.lstm_bidirectional else self.emb_dim
 
-        logger.info("SequenceLstmForSequenceClassification initialized")
-
-    def _forward(self, inputs):
-
-        seq_ids = inputs["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = inputs["seq_lengths"]  # [BS]
+    def _forward_core(self, batch_data_dict):
+        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.lstm_layer(encodings, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
         encodings = self.lstm_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
 
-        inputs.update({"seq_embs": encodings})
+        batch_data_dict.update({"seq_embs": encodings})
 
-        return inputs
+        return batch_data_dict
 
 
-class SequenceSplittedCnnForTokenClassification(ModuleForIndividualClassification):
-    """A CNN module that operates on a batched sequence of token ids. The tokens could be
-    characters or words or sub-words. This module uses an additional input that determines
-    how the sequence of embeddings obtained after the embedding layer for each instance
-    in the batch, needs to be split. Once split, the sub-groups of embeddings (each sub-group
-    corresponding to a word or a phrase) can be collapsed to 1D representation per sub-group
-    through through CNN layers. Finally, this module outputs a 2D representation for each
-    instance in the batch (i.e. [BS, SEQ_LEN, EMB_DIM]).
-    """
+# Custom modules built on top of above nn layers that can do token classification
 
-    def _init(self, **params):
-        # TODO: Implement
-        raise NotImplementedError
 
-    def _forward(self, inputs):
-        # TODO: Implement
+class BaseForTokenClassification(nn.Module):
+
+    def __init__(self, **params):
         raise NotImplementedError
 
 
-class LstmSequenceSplittedForTokenClassification(ModuleForIndividualClassification):
+class EmbeddingForTokenClassification(BaseForTokenClassification):
+
+    def __init__(self, **params):
+        raise NotImplementedError
+
+
+class SequenceLstmForTokenClassification(BaseForTokenClassification):
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module uses an additional input that determines
     how the sequence of embeddings obtained after the LSTM layers for each instance in the
     batch, needs to be split. Once split, the sub-groups of embeddings (each sub-group
     corresponding to a word or a phrase) can be collapsed to 1D representation per sub-group
     through pooling operations. Finally, this module outputs a 2D representation for each
-    instance in the batch (i.e. [BS, SEQ_LEN, EMB_DIM]).
-    """
-
-    def _init(self, **params):
-        # TODO: Implement
-        raise NotImplementedError
-
-    def _forward(self, inputs):
-        # TODO: Implement
-        raise NotImplementedError
-
-
-class ModuleForJointClassification(ModuleForIndividualClassification):
-    """This base class is wrapped around ModuleForIndividualClassification but entertains
-    joint modeling, meaning multiple heads can be trained for models derived on top of this
-    base class. Unlike classes derive on top of ModuleForIndividualClassification, the ones
-    derived on this base output both `seq_embs` as well as `token_embs` in their output
-    which facilitates multi-head training.
+    instance in the batch (i.e. [BS, SEQ_LEN', EMB_DIM]).
     """
 
     def __init__(self, **params):
-        # TODO: Implement
+        raise NotImplementedError
+
+
+class TokenLstmSequenceLstmForTokenClassification(BaseForTokenClassification):
+
+    def __init__(self, **params):
+        raise NotImplementedError
+
+
+class TokenCnnSequenceLstmForTokenClassification(BaseForTokenClassification):
+
+    def __init__(self, **params):
+        raise NotImplementedError
+
+
+# Custom modules built on top of above nn layers that can do joint classification
+
+class BaseForJointSequenceTokenClassification(nn.Module):
+    """This base class is wrapped around nn.Module and supports joint modeling, meaning
+    multiple heads can be trained for models derived on top of this base class. Unlike classes
+    derive on top of BaseForSequenceClassification or BaseForTokenClassification, the ones derived
+    on this base output both `seq_embs` as well as `token_embs` in their output which facilitates
+    multi-head training.
+    """
+
+    def __init__(self, **params):
         raise NotImplementedError
