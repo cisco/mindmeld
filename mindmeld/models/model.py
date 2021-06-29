@@ -199,7 +199,7 @@ class ModelConfig:
             if feature_name in self.features:
                 lengths = self.features[feature_name]["lengths"]
                 thresholds = self.features[feature_name].get(
-                    "thresholds", [0] * len(lengths)
+                    "thresholds", [1] * len(lengths)
                 )
         elif self.model_type == "tagger":
             feature_name = feature_name + "-seq"
@@ -208,7 +208,7 @@ class ModelConfig:
                     "ngram_lengths_to_start_positions"
                 ].keys()
                 thresholds = self.features[feature_name].get(
-                    "thresholds", [0] * len(lengths)
+                    "thresholds", [1] * len(lengths)
                 )
 
         return lengths, thresholds

@@ -760,7 +760,6 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
         dynamic_resource=dyn_gaz,
         allowed_nlp_classes={"store_info": {"get_store_hours": {}}},
     )
-
     if dyn_gaz:
         assert (
             query
