@@ -214,11 +214,12 @@ def _validate_mask_nlp(list_of_allow_nlp: List[str],
                     f"Entity: {entity} is not in the NLP component hierarchy"
                 )
 
-            nlp_entity = nlp.domains[domain].intents[intent].entities[entity]
-            if role and role not in nlp_entity.role_classifier.roles:
-                raise ValidationError(
-                    f"Role: {role} is not in the NLP component hierarchy"
-                )
+            if role:
+                entities = nlp.domains[domain].intents[intent].entities
+                if role not in entities[entity].role_classifier.roles:
+                    raise ValidationError(
+                        f"Role: {role} is not in the NLP component hierarchy"
+                    )
 
     return list_of_allow_nlp, list_of_deny_nlp
 

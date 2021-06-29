@@ -339,6 +339,26 @@ def test_disallowed_entities(kwik_e_mart_nlp):
     assert res['intent'] == 'transfer_money'
     assert 'account_type' not in {entity['type'] for entity in res['entities']}
 
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info"])
+    assert res['intent'] == 'get_store_hours'
+    assert 'sys_time' in {entity['type'] for entity in res['entities']}
+
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info"],
+                                  deny_nlp=["store_info.get_store_hours.sys_time"])
+    assert res['intent'] == 'get_store_hours'
+    assert 'sys_time' not in {entity['type'] for entity in res['entities']}
+
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info", "banking.transfer_money"],
+                                  deny_nlp=["store_info.get_store_hours"])
+    assert res['domain'] == 'store_info'
+    assert res['intent'] != 'get_store_hours'
+
 
 test_find_entities_in_text_data = [
     ('20', None, {'sys_temperature': {}}),
