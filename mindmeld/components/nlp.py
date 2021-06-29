@@ -48,7 +48,8 @@ from .entity_resolver import EntityResolverFactory, EntityResolverConnectionErro
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from .schemas import _validate_allowed_intents, validate_locale_code_with_ref_language_code
+from .schemas import validate_locale_code_with_ref_language_code, \
+    _validate_allowed_intents, _validate_mask_nlp
 from ..models.helpers import GAZETTEER_RSC
 from ..constants import SYSTEM_ENTITY_PREFIX
 from ..models.helpers import get_ngrams_upto_n
@@ -646,6 +647,40 @@ class NaturalLanguageProcessor(Processor):
             for nlp_role in valid_roles:
                 nlp_components[domain][intent][nlp_entity][nlp_role] = {}
 
+    def _update_nlp_hierarchy_mask(self, nlp_components, domain, intent,
+                                   entity=None, role=None, deny=False):
+        # We assume that the intent is a correct child of the domain
+        if domain not in nlp_components:
+            nlp_components[domain] = {}
+
+        if intent not in nlp_components[domain]:
+            nlp_components[domain][intent] = {}
+
+        all_entities_intent = self.domains[domain].intents[intent].entities
+        valid_entities = []
+        for all_entity in all_entities_intent:
+            if not deny and not entity:
+                valid_entities.append(all_entity)
+            else:
+                if all_entity == entity:
+                    valid_entities.append(all_entity)
+
+        for nlp_entity in valid_entities:
+            if nlp_entity not in nlp_components[domain][intent]:
+                nlp_components[domain][intent][nlp_entity] = {}
+
+            all_roles_in_entity = all_entities_intent[nlp_entity].role_classifier.roles
+            valid_roles = []
+            for all_entity in all_roles_in_entity:
+                if not deny and not role:
+                    valid_roles.append(all_entity)
+                else:
+                    if all_entity == role:
+                        valid_roles.append(all_entity)
+
+            for nlp_role in valid_roles:
+                nlp_components[domain][intent][nlp_entity][nlp_role] = {}
+
     def extract_allowed_nlp_components_list(self, allowed_nlp_components_list=None):
         """This function validates a user inputted list of allowed nlp components against the NLP
         hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
@@ -660,69 +695,118 @@ class NaturalLanguageProcessor(Processor):
             (dict): A dictionary of NLP hierarchy.
         """
         allowed_nlp_components_list = _validate_allowed_intents(allowed_nlp_components_list, self)
-
         nlp_components = {}
         for allowed_nlp_component in allowed_nlp_components_list:
             nlp_entries = [None, None, None, None]
             entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
             for idx, entry in enumerate(entries):
                 nlp_entries[idx] = entry
-
             domain, intent, entity, role = nlp_entries
             if intent == "*":
                 for intent in self.domains[domain].intents:
                     self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
             else:
                 self._update_nlp_hierarchy(nlp_components, domain, intent, entity, role)
-
         return nlp_components
 
-    def extract_disallowed_nlp_components_list(self, disallowed_nlp_components_list=None):
-        """This function validates a user inputted list of disallowed nlp components against the NLP
+    def extract_nlp_masked_components_list(self, allow_nlp_components_list=None,
+                                           deny_nlp_components_list=None):
+        """This function validates a user inputted list of allowed nlp components against the NLP
         hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
-        the validation of list of disallowed nlp components has passed.
+        the validation of list of allowed nlp components has passed.
 
         Args:
-            disallowed_nlp_components_list (list): A list of allowable intents in the
-                format "domain.intent". If all intents need to be included, the
-                syntax is "domain.*".
+            allow_nlp_components_list (list): A list of allow NLP classes in the
+                format "domain.intent.entity.role".
+            deny_nlp_components_list (list): A list of deny NLP classes in the
+                format "domain.intent.entity.role".
 
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
-        disallowed_nlp_components_list = self.extract_allowed_nlp_components_list(
-            disallowed_nlp_components_list)
-        nlp_components = {}
-        for domain in self.domains:
-            if disallowed_nlp_components_list.get(domain) == {}:
+        # If there is only a deny NLP list and no allow NLP list, we populate
+        # the allow NLP list with all NLP components.
+        if not allow_nlp_components_list and deny_nlp_components_list:
+            allow_nlp_components_list = [domain for domain in self.domains]
+
+        allow_nlp_components_list, deny_nlp_components_list = _validate_mask_nlp(
+            allow_nlp_components_list, deny_nlp_components_list, self)
+
+        nlp_components = [[allow_nlp_components_list, {}, False],
+                          [deny_nlp_components_list, {}, True]]
+
+        for nlp_components_list, mask_nlp_component, deny in nlp_components:
+            for allowed_nlp_component in nlp_components_list:
+                nlp_entries = [None, None, None, None]
+                entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
+                for idx, entry in enumerate(entries):
+                    nlp_entries[idx] = entry
+                domain, intent, entity, role = nlp_entries
+                if intent:
+                    self._update_nlp_hierarchy_mask(
+                        mask_nlp_component, domain,
+                        intent, entity, role, deny=deny)
+                else:
+                    if deny:
+                        mask_nlp_component[domain] = {}
+                    else:
+                        for intent in self.domains[domain].intents:
+                            self._update_nlp_hierarchy_mask(
+                                mask_nlp_component, domain,
+                                intent, entity, role, deny=deny)
+
+        allow_nlp_components = nlp_components[0][1]
+        deny_nlp_components = nlp_components[1][1]
+        # merge allow and deny components
+        for domain in deny_nlp_components:
+            if domain not in allow_nlp_components:
                 continue
-            if not self.domains[domain].intents:
-                nlp_components[domain] = {}
-            for intent in self.domains[domain].intents:
-                if disallowed_nlp_components_list.get(domain, {}).get(intent) == {}:
-                    continue
-                entities = self.domains[domain].intents[intent].entities
-                if not entities:
-                    if domain not in nlp_components:
-                        nlp_components[domain] = {intent: {}}
-                for entity in entities:
-                    if disallowed_nlp_components_list.get(domain, {}).get(intent, {}).get(entity) == {}:
+            intents = deny_nlp_components[domain]
+            is_leaf = intents == {}
+            if is_leaf:
+                del allow_nlp_components[domain]
+            else:
+                for intent in intents:
+                    if intent not in allow_nlp_components[domain]:
                         continue
-                    if not entities[entity].role_classifier.roles:
-                        if domain not in nlp_components:
-                            nlp_components[domain] = {intent: {entity: {}}}
-                        elif intent not in nlp_components[domain]:
-                            nlp_components[domain][intent] = {entity: {}}
-                    for role in entities[entity].role_classifier.roles:
-                        if disallowed_nlp_components_list.get(domain, {}).get(intent, {}).get(entity, {}).get(role) == {}:
-                            continue
-                        if domain not in nlp_components:
-                            nlp_components[domain] = {intent: {entity: {role: {}}}}
-                        elif intent not in nlp_components[domain]:
-                            nlp_components[domain][intent] = {entity: {role: {}}}
-                        elif entity not in nlp_components[domain][intent]:
-                            nlp_components[domain][intent][entity] = {role: {}}
-        return nlp_components
+                    entities = deny_nlp_components[domain][intent]
+                    is_leaf = entities == {}
+                    if is_leaf:
+                        # prune
+                        del allow_nlp_components[domain][intent]
+                        if not allow_nlp_components[domain]:
+                            del allow_nlp_components[domain]
+                    else:
+                        for entity in entities:
+                            if entity not in allow_nlp_components[domain][intent]:
+                                continue
+                            roles = deny_nlp_components[domain][intent][entity]
+                            is_leaf = roles == {}
+                            if is_leaf:
+                                # prune
+                                del allow_nlp_components[domain][intent][entity]
+                                if not allow_nlp_components[domain][intent]:
+                                    del allow_nlp_components[domain][intent]
+                                if not allow_nlp_components[domain]:
+                                    del allow_nlp_components[domain]
+                            else:
+                                for role in roles:
+                                    if role not in allow_nlp_components[domain][intent][entity]:
+                                        continue
+                                    # prune
+                                    del allow_nlp_components[domain][intent][entity][role]
+                                    if not allow_nlp_components[domain][intent][entity]:
+                                        del allow_nlp_components[domain][intent][entity]
+                                    if not allow_nlp_components[domain][intent]:
+                                        del allow_nlp_components[domain][intent]
+                                    if not allow_nlp_components[domain]:
+                                        del allow_nlp_components[domain]
+
+        if not allow_nlp_components:
+            logger.warning(f"Since {deny_nlp_components_list} masks more NLP components than "
+                           f"{allow_nlp_components_list} allows, we unmask all NLP components.")
+
+        return allow_nlp_components
 
     @staticmethod
     def print_inspect_stats(stats):
@@ -773,7 +857,8 @@ class NaturalLanguageProcessor(Processor):
         query_text,  # pylint: disable=arguments-differ
         allowed_nlp_classes=None,
         allowed_intents=None,
-        disallowed_intents=None,
+        allow_nlp=None,
+        deny_nlp=None,
         locale=None,
         language=None,
         time_zone=None,
@@ -791,8 +876,6 @@ class NaturalLanguageProcessor(Processor):
                 selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
             allowed_intents (list, optional): A list of allowed intents to use for \
-                the NLP processing.
-            disallowed_intents (list, optional): A list of disallowed intents to use for \
                 the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
@@ -814,14 +897,9 @@ class NaturalLanguageProcessor(Processor):
         # TODO: Deprecate language argument
         del language
 
-        if allowed_intents and disallowed_intents:
+        if allowed_intents and (allow_nlp or deny_nlp):
             raise TypeError(
-                "'allowed_intents' and 'disallowed_intents' cannot be used together"
-            )
-
-        if (allowed_intents is not None or disallowed_intents is not None) and allowed_nlp_classes is not None:
-            raise TypeError(
-                "'allowed_intents/disallowed_intents' and 'allowed_nlp_classes' cannot be used together"
+                "'allowed_intents' and 'allow_nlp/deny_nlp' cannot be used together"
             )
 
         if allowed_intents:
@@ -833,9 +911,9 @@ class NaturalLanguageProcessor(Processor):
                              "allowed_intents field", e.message)
                 allowed_nlp_classes = {}
 
-        if disallowed_intents:
+        if allow_nlp or deny_nlp:
             try:
-                allowed_nlp_classes = self.extract_disallowed_nlp_components_list(disallowed_intents)
+                allowed_nlp_classes = self.extract_nlp_masked_components_list(allow_nlp, deny_nlp)
             except AllowedNlpClassesKeyError as e:
                 # We catch and fail open here since this uncaught exception can fail the API call
                 logger.error("Caught exception %s when extracting nlp components from the "

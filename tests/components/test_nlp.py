@@ -319,7 +319,7 @@ def test_allowed_entities(kwik_e_mart_nlp):
 def test_disallowed_entities(kwik_e_mart_nlp):
     res = kwik_e_mart_nlp.process("hello")
     assert res['intent'] == 'greet'
-    res = kwik_e_mart_nlp.process("hello", disallowed_intents=["store_info.greet"])
+    res = kwik_e_mart_nlp.process("hello", deny_nlp=["store_info.greet"])
     assert res['intent'] != 'greet'
 
     res = kwik_e_mart_nlp.process("transfer $200 from checking to savings")
@@ -331,11 +331,12 @@ def test_disallowed_entities(kwik_e_mart_nlp):
     assert res['entities'][2]['role'] == 'dest'
 
     res = kwik_e_mart_nlp.process("transfer $200 from checking to savings",
-                                  disallowed_intents=["banking.transfer_money"])
+                                  deny_nlp=["banking.transfer_money"])
     assert res['intent'] != 'transfer_money'
 
     res = kwik_e_mart_nlp.process("transfer $200 from checking to savings",
-                                  disallowed_intents=["banking.transfer_money.account_type"])
+                                  deny_nlp=["banking.transfer_money.account_type"])
+    assert res['intent'] == 'transfer_money'
     assert 'account_type' not in {entity['type'] for entity in res['entities']}
 
 

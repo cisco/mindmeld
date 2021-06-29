@@ -12,7 +12,7 @@
 # limitations under the License.
 import logging
 import math
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 import immutables
 from marshmallow import EXCLUDE, Schema, fields, ValidationError
@@ -174,6 +174,53 @@ def _validate_allowed_intents(list_of_allowed_intents: List[str],
                 f"Intent: {intent} is not in the NLP component hierarchy"
             )
     return list_of_allowed_intents
+
+
+def _validate_mask_nlp(list_of_allow_nlp: List[str],
+                       list_of_deny_nlp: List[str], nlp: Any) -> Tuple[List[str], List[str]]:
+
+    if not nlp or not (list_of_allow_nlp or list_of_deny_nlp):
+        return list_of_allow_nlp, list_of_deny_nlp
+
+    for list_of_masked_nlp in [list_of_allow_nlp, list_of_deny_nlp]:
+        if not list_of_masked_nlp:
+            continue
+
+        for allowed_nlp_component in list_of_masked_nlp:
+            if not isinstance(allowed_nlp_component, str):
+                raise ValidationError(
+                    f"Invalid allow_nlp param: {allowed_nlp_component} is not of type str"
+                )
+
+            nlp_entries = [None, None, None, None]
+            entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
+            for idx, entry in enumerate(entries):
+                nlp_entries[idx] = entry
+
+            domain, intent, entity, role = nlp_entries
+
+            if not domain or domain not in nlp.domains:
+                raise ValidationError(
+                    f"Domain: {domain} is not in the NLP component hierarchy"
+                )
+
+            if intent and intent not in nlp.domains[domain].intents:
+                raise ValidationError(
+                    f"Intent: {intent} is not in the NLP component hierarchy"
+                )
+
+            if entity and entity not in nlp.domains[domain].intents[intent].entities:
+                raise ValidationError(
+                    f"Entity: {entity} is not in the NLP component hierarchy"
+                )
+
+            nlp_entity = nlp.domains[domain].intents[intent].entities[entity]
+            if role and role not in nlp_entity.role_classifier.roles:
+                raise ValidationError(
+                    f"Role: {role} is not in the NLP component hierarchy"
+                )
+
+    return list_of_allow_nlp, list_of_deny_nlp
 
 
 def _validate_target_dialogue_state(target_dialogue_state: Optional[str],
