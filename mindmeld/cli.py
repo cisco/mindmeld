@@ -673,7 +673,7 @@ def num_parser(start, port):
         # Download the binary from the cloud if the binary does not already exist OR
         # the binary is out of date.
         if os.path.exists(exec_path):
-            hash_digest = hashlib.sha1(open(exec_path, "rb").read()).hexdigest()
+            hash_digest = hashlib.sha256(open(exec_path, "rb").read()).hexdigest()
             if hash_digest != path.DUCKLING_PATH_TO_SHA_MAPPINGS[exec_path]:
                 os.remove(exec_path)
 
