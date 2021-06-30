@@ -40,6 +40,7 @@ requirements = [
     "mypy>=0.782",
     "marshmallow~=3.7.1",
     "matplotlib~=3.3.1",
+    "torch~=1.7.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]

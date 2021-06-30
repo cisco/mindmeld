@@ -40,18 +40,18 @@ logger = logging.getLogger(__name__)
 
 # utils
 
-def get_disk_space_of_model(nn_model: nn.Module):
+def get_disk_space_of_model(nn_module: nn.Module):
     filename = "temp.bin"
-    torch.save(nn_model.state_dict(), filename)
+    torch.save(nn_module.state_dict(), filename)
     size = os.path.getsize(filename) / 1e6
     os.remove(filename)
     return size
 
 
-def get_num_params_of_model(nn_model: nn.Module):
+def get_num_params_of_model(nn_module: nn.Module):
     n_total = 0
     n_requires_grad = 0
-    for param in list(nn_model.parameters()):
+    for param in list(nn_module.parameters()):
         t = 1
         for sz in list(param.size()):
             t *= sz
