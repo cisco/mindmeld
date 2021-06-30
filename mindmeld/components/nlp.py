@@ -687,8 +687,7 @@ class NaturalLanguageProcessor(Processor):
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
-        if not allow_nlp_components_list:
-            allow_nlp_components_list = [domain for domain in self.domains]
+        allow_nlp_components_list = allow_nlp_components_list or list(self.domains.keys())
         deny_nlp_components_list = deny_nlp_components_list or []
         nlp_tree = TreeNlp(self, None)
         allow_nlp_components_list, deny_nlp_components_list = _validate_mask_nlp(
@@ -756,7 +755,7 @@ class NaturalLanguageProcessor(Processor):
             )
             self.print_inspect_stats(intent_inspection)
 
-    def process(
+    def process(  # pylint: disable=too-many-arguments
         self,
         query_text,  # pylint: disable=arguments-differ
         allowed_nlp_classes=None,
@@ -780,6 +779,10 @@ class NaturalLanguageProcessor(Processor):
                 selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
             allowed_intents (list, optional): A list of allowed intents to use for \
+                the NLP processing.
+            allow_nlp (list, optional): A list of allow NLP components to use for \
+                the NLP processing.
+            deny_nlp (list, optional): A list of denied NLP components to use for \
                 the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
