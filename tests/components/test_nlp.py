@@ -352,12 +352,29 @@ def test_disallowed_entities(kwik_e_mart_nlp):
     assert res['intent'] == 'get_store_hours'
     assert 'sys_time' not in {entity['type'] for entity in res['entities']}
 
+    # If all entities in an intent are denied, that intent is also denied.
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info"],
+                                  deny_nlp=["store_info.get_store_hours.sys_time",
+                                            "store_info.get_store_hours.store_name"])
+    assert res['intent'] != 'get_store_hours'
+    assert 'sys_time' not in {entity['type'] for entity in res['entities']}
+    assert 'store_name' not in {entity['type'] for entity in res['entities']}
+
     res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
                                   "possibly open at this time on friday",
                                   allow_nlp=["store_info", "banking.transfer_money"],
                                   deny_nlp=["store_info.get_store_hours"])
     assert res['domain'] == 'store_info'
     assert res['intent'] != 'get_store_hours'
+
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info", "banking.transfer_money"],
+                                  deny_nlp=["store_info", "banking.transfer_money"])
+    assert res['domain'] == 'store_info'
+    assert 'sys_time' in {entity['type'] for entity in res['entities']}
 
 
 test_find_entities_in_text_data = [

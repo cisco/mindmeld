@@ -14,6 +14,7 @@
 """A module containing various utility functions for MindMeld NLP Components.
 """
 import importlib
+from typing import Union, Optional
 
 
 def _is_module_available(module_name: str):
@@ -41,7 +42,7 @@ def _get_module_or_attr(module_name: str, func_name: str = None):
 
 
 class TreeNode:
-    def __init__(self, value: str, parent=None, children=None, allow=False):
+    def __init__(self, value: str, parent=None, children=None, allow=None):
         self.value = value
         self.allow = allow
         self.parent = parent
@@ -70,78 +71,156 @@ class TreeNlp:
     def get_domains(self):
         return self.root.children or []
 
-    def get_intents(self, domain:str):
+    def get_intents(self, domain: Union[str, TreeNode]):
+        if isinstance(domain, TreeNode):
+            domain = domain.value
+
         for domain_node in self.root.children:
             if domain_node.value == domain:
                 return domain_node.children
         return []
 
-    def get_entities(self, domain:str, intent:str):
+    def get_entities(self, domain: Union[str, TreeNode],
+                     intent: Union[str, TreeNode]):
+
+        if isinstance(domain, TreeNode):
+            domain = domain.value
+
+        if isinstance(intent, TreeNode):
+            intent = intent.value
+
         for intent_node in self.get_intents(domain):
             if intent_node.value == intent:
                 return intent_node.children
         return []
 
-    def get_roles(self, domain:str, intent:str, entity:str):
+    def get_roles(self, domain: Union[str, TreeNode],
+                  intent: Union[str, TreeNode],
+                  entity: Union[str, TreeNode]):
+        if isinstance(domain, TreeNode):
+            domain = domain.value
+
+        if isinstance(intent, TreeNode):
+            intent = intent.value
+
+        if isinstance(entity, TreeNode):
+            entity = entity.value
+
         for entity_node in self.get_entities(domain, intent):
             if entity_node.value == entity:
                 return entity_node.children
         return []
 
-    def update(self, domain, intent=None, entity=None, role=None, allow=True):
+    def update(self, allow: bool, domain: Union[str, TreeNode],
+               intent: Optional[Union[str, TreeNode]] = None,
+               entity: Optional[Union[str, TreeNode]] = None,
+               role: Optional[Union[str, TreeNode]] = None):
+        """
+        This function updates the NLP tree with mask values
+        Args:
+            allow: True is mask off, False is mask on
+            domain: domain of NLP
+            intent: intent of NLP
+            entity: entity of NLP
+            role: role of NLP
+        """
+
+        if isinstance(domain, TreeNode):
+            domain = domain.value
+
+        if isinstance(intent, TreeNode):
+            intent = intent.value
+
+        if isinstance(entity, TreeNode):
+            entity = entity.value
+
+        if isinstance(role, TreeNode):
+            role = role.value
+
         for domain_node in self.get_domains():
             if domain_node.value != domain:
                 continue
-            if intent:
-                for intent_node in self.get_intents(domain):
-                    if intent_node.value != intent:
-                        continue
-                    if entity:
-                        for entity_node in self.get_entities(domain, intent):
-                            if entity_node.value != entity:
-                                continue
-                            if role:
-                                for role_node in self.get_roles(domain, intent, entity):
-                                    if role_node.value != role:
-                                        continue
-                                    role_node.allow = allow
-                            else:
-                                entity_node.allow = allow
-                    else:
-                        intent_node.allow = allow
-            else:
+
+            if not intent:
                 domain_node.allow = allow
+                return
+
+            for intent_node in self.get_intents(domain):
+                if intent_node.value != intent:
+                    continue
+
+                if not entity:
+                    intent_node.allow = allow
+                    return
+
+                for entity_node in self.get_entities(domain, intent):
+                    if entity_node.value != entity:
+                        continue
+
+                    if not role:
+                        entity_node.allow = allow
+                        return
+
+                    for role_node in self.get_roles(domain, intent, entity):
+                        if role_node.value != role:
+                            continue
+
+                        role_node.allow = allow
+                        return
 
     def _sync_nodes(self):
+        """
+        This function does two actions sequentially:
+            1. down-flow: flow mask decisions down the tree
+            2. up-flow: flow mask decisions up the tree
+
+        Each node has three allow states: True, False and None. True and False
+        are explicitly set by the user while None is the default state.
+
+        For 1., if a parent is allowed, then all it's "eligible" descendant components
+        are allowed as well. An "eligible" component is a node set to None (ie non-user defined),
+        since a user might have explicitly set a child.
+
+        For 2., if all children of a NLP component are not allowed, then the parent
+        will not be allowed as well. When we do an up-flow, we update nodes regardless of being
+        explicitly set or not. This is because of the rule that if all the descendants are masked,
+        the parent should be masked as well, even if it's explicitly set to the contrary.
+        """
         for domain in self.get_domains():
-            intents = self.get_intents(domain.value)
+            intents = self.get_intents(domain)
+
             # sync down
             if domain.allow is not None:
                 for intent in intents:
                     if intent.allow is None:
                         intent.allow = domain.allow
+
             for intent in intents:
-                entities = self.get_entities(domain.value, intent.value)
+                entities = self.get_entities(domain, intent)
                 # sync down
                 if intent.allow is not None:
                     for entity in entities:
                         if entity.allow is None:
                             entity.allow = intent.allow
+
                 for entity in entities:
-                    roles = self.get_roles(domain.value, intent.value, entity.value)
+                    roles = self.get_roles(domain, intent, entity)
                     # sync down
                     if entity.allow is not None:
                         for role in roles:
                             if role.allow is None:
                                 role.allow = entity.allow
+
                     # sync up
-                    if roles and all(not role.allow for role in roles):
+                    if roles and all(role.allow is False for role in roles):
                         entity.allow = False
+
                 # sync up
-                if entities and all(not entity.allow for entity in entities):
+                if entities and all(entity.allow is False for entity in entities):
                     intent.allow = False
+
             # sync up
-            if intents and all(not intent.allow for intent in intents):
+            if intents and all(intent.allow is False for intent in intents):
                 domain.allow = False
 
     def to_dict(self):

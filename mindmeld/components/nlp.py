@@ -701,7 +701,7 @@ class NaturalLanguageProcessor(Processor):
                 for idx, entry in enumerate(entries):
                     nlp_entries[idx] = entry
                 domain, intent, entity, role = nlp_entries
-                nlp_tree.update(domain, intent, entity, role, action)
+                nlp_tree.update(action, domain, intent, entity, role)
 
         allow_nlp_components = nlp_tree.to_dict()
         if not allow_nlp_components:
