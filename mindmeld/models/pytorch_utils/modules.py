@@ -16,12 +16,13 @@ import logging
 import os
 import shutil
 import uuid
+from abc import abstractmethod
 from typing import Dict
 
 import numpy as np
+from tqdm import tqdm
 
 from .encoders import SequenceClassificationEncoder
-from .helpers import progress_bar
 from ...path import USER_CONFIG_DIR
 
 try:
@@ -35,6 +36,29 @@ except ImportError:
 SEED = 7246
 
 logger = logging.getLogger(__name__)
+
+
+# utils
+
+def get_disk_space_of_model(nn_model: nn.Module):
+    filename = "temp.bin"
+    torch.save(nn_model.state_dict(), filename)
+    size = os.path.getsize(filename) / 1e6
+    os.remove(filename)
+    return size
+
+
+def get_num_params_of_model(nn_model: nn.Module):
+    n_total = 0
+    n_requires_grad = 0
+    for param in list(nn_model.parameters()):
+        t = 1
+        for sz in list(param.size()):
+            t *= sz
+        n_total += t
+        if param.requires_grad:
+            n_requires_grad += t
+    return n_total, n_requires_grad
 
 
 # Various nn layers
@@ -56,6 +80,9 @@ class EmbeddingLayer(nn.Module):
                 # when weights are passed as dict with keys as indices and values as embeddings
                 for idx, emb in embedding_weights.items():
                     self.embeddings.weight.data[idx] = torch.as_tensor(emb)
+                msg = f"Initialized {len(embedding_weights)} number of embedding weights " \
+                      f"from the embedder model"
+                logger.info(msg)
             else:
                 # when weights are passed as an array or tensor
                 self.embeddings.load_state_dict({'weight': torch.as_tensor(embedding_weights)})
@@ -87,19 +114,20 @@ class EmbeddingLayer(nn.Module):
 
 
 class CnnLayer(nn.Module):
-    """"""
 
     def __init__(self, emb_dim, kernel_sizes, num_kernels):
         super().__init__()
 
-        if not num_kernels:
-            num_kernels = [50] * len(kernel_sizes)
-        elif isinstance(num_kernels, list) and len(num_kernels) != len(kernel_sizes):
+        if isinstance(num_kernels, list) and len(num_kernels) != len(kernel_sizes):
+            # incorrect length of num_kernels list specified
             num_kernels = [num_kernels[0]] * len(kernel_sizes)
         elif isinstance(num_kernels, int) and num_kernels > 0:
+            # num_kernels is a single integer value
             num_kernels = [num_kernels] * len(kernel_sizes)
-        else:
-            raise ValueError(f"Invalid value for num_kernels: {num_kernels}")
+        elif not isinstance(num_kernels, list):
+            msg = f"Invalid value for num_kernels: {num_kernels}. " \
+                  f"Expected a list of same length as emb_dim ({len(emb_dim)})"
+            raise ValueError(msg)
 
         self.convs = nn.ModuleList()
         # Unsqueeze input dim [BS, SEQ_LEN, EMD_DIM] to [BS, 1, SEQ_LEN, EMDDIM] and send as input
@@ -117,7 +145,7 @@ class CnnLayer(nn.Module):
         # padded_token_ids: dim: [BS, SEQ_LEN, EMD_DIM]
 
         # [BS, SEQ_LEN, EMD_DIM] -> [BS, 1, SEQ_LEN, EMD_DIM]
-        embs_unsqueezed = torch.unsqueeze(embs, dim=1)
+        embs_unsqueezed = torch.unsqueeze(padded_token_embs, dim=1)
 
         # [BS, 1, SEQ_LEN, EMD_DIM] -> list([BS, n, SEQ_LEN])
         conv_outputs = [conv(embs_unsqueezed).squeeze(3) for conv in self.convs]
@@ -146,7 +174,7 @@ class LstmLayer(nn.Module):
         # [BS, SEQ_LEN, EMD_DIM] -> [BS, SEQ_LEN, EMD_DIM*(2 if bidirectional else 1)]
         packed = pack_padded_sequence(padded_token_embs, lengths,
                                       batch_first=True, enforce_sorted=False)
-        lstm_outputs, (last_hidden_states, last_cell_states) = self.lstm(packed)
+        lstm_outputs, _ = self.lstm(packed)
         outputs = pad_packed_sequence(lstm_outputs, batch_first=True)[0]
 
         return outputs
@@ -171,7 +199,7 @@ class PoolingLayer(nn.Module):
             last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
         else:
-            mask = pad_sequence([torch.tensor([1] * length_) for length_ in lengths],
+            mask = pad_sequence([torch.as_tensor([1] * length_) for length_ in lengths],
                                 batch_first=True)
             mask = mask.unsqueeze(-1).expand(padded_token_embs.size()).float()
             if self.pooling_type.lower() == "max":
@@ -192,7 +220,7 @@ class PoolingLayer(nn.Module):
 # Custom modules built on top of above nn layers that can do sequence classification
 
 
-class BaseForSequenceClassification(nn.Module):
+class SequenceClassification(nn.Module):  # pylint: disable=too-many-instance-attributes
     """Base Module class that defines all the necessary elements to succesfully train/infer,
      dump/load custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence classification. The output of a class derived from
@@ -202,7 +230,7 @@ class BaseForSequenceClassification(nn.Module):
     def __init__(self):
         super().__init__()
         self.name = self.__class__.__name__
-        self.encoder = SequenceClassificationEncoder()
+        self.encoder = SequenceClassificationEncoder()  # have to either fit ot load to use it
         self.params_keys = set(["name"])
 
         self.ready = False  # True when .fit() is called or loaded from a checkpoint
@@ -211,11 +239,22 @@ class BaseForSequenceClassification(nn.Module):
     def __repr__(self):
         return f"<{self.name}> ready: {self.ready} dirty: {self.dirty}"
 
+    def model_description(self, print_it=True, log_it=True, return_it=False):
+        msg = f"Who Am I: <{self.name}> ready: {self.ready} dirty: {self.dirty} \n" \
+              f"\tNumber of weights (all, trainable): {get_num_params_of_model(self)} \n" \
+              f"\tDisk Size (in MB): {get_disk_space_of_model(self):.4f}"
+        if print_it:
+            print(msg)
+        if log_it:
+            logger.info(msg)
+        if return_it:
+            return msg
+
     ####################################
     # methods for training and inference
     ####################################
 
-    def fit(self, examples, labels, **params):
+    def fit(self, examples, labels, **params):  # pylint: disable=too-many-locals
 
         if self.ready:
             msg = "The model is already fitted or loaded from a file. Aborting fitting again."
@@ -242,9 +281,11 @@ class BaseForSequenceClassification(nn.Module):
         self.device = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
         self.n_epochs = params.get("n_epochs", 100)
         self.patience = params.get("patience", 6)
-        self.params_keys.update(["batch_size", "optimizer", "device", "n_epochs", "patience"])
+        self.verbose = params.get("verbose", True)
+        self.params_keys.update(["batch_size", "optimizer", "device", "n_epochs", "patience",
+                                 "verbose"])
 
-        # cretae temp folder and save path
+        # create temp folder and a save path
         # dumping into a temp folder instead of keeping in memory to reduce memory usage
         temp_folder = os.path.join(USER_CONFIG_DIR, "pytorch_models", str(uuid.uuid4()))
         os.makedirs(temp_folder, exist_ok=True)
@@ -265,18 +306,23 @@ class BaseForSequenceClassification(nn.Module):
         # create an optimizer and attach all model params to it
         optimizer = getattr(torch.optim, self.optimizer)(self.parameters(), lr=0.001)
 
+        # print model stats
+        self.model_description(print_it=self.verbose)
+
         # training and dev validation
         best_dev_acc, best_dev_epoch = -np.inf, -1
         for epoch in range(1, self.n_epochs + 1):
             # patience before terminating due to no dev accuracy improvements
             if epoch - best_dev_epoch > self.patience:
-                logger.info(f"Set patience of {self.patience} epochs reached")
+                msg = f"Set patience of {self.patience} epochs reached"
+                logger.info(msg)
                 break
             # set modules to train phase, reset gradients, do forward-backward propogations
             self.train()
             self.zero_grad()
             train_loss, train_batches = 0.0, 0.0
-            for start_idx in range(0, len(train_examples), self.batch_size):
+            t = tqdm(range(0, len(train_examples), self.batch_size), disable=not self.verbose)
+            for start_idx in t:
                 this_examples = train_examples[start_idx:start_idx + self.batch_size]
                 this_labels = train_labels[start_idx:start_idx + self.batch_size]
                 batch_data_dict = self.encoder.batch_encode(this_examples, this_labels)
@@ -287,28 +333,30 @@ class BaseForSequenceClassification(nn.Module):
                 loss.backward()
                 optimizer.step()
                 self.zero_grad()
-                progress_bar(start_idx, len(train_examples), ["avg. loss per batch", "epoch"],
-                             [train_loss / (start_idx / self.batch_size + 1), epoch])
+                progress_bar_msg = f"Epoch: {epoch} | Mean loss: " \
+                                   f"{train_loss / (start_idx / self.batch_size + 1):.4f}"
+                t.set_description(progress_bar_msg, refresh=True)
             train_loss = train_loss / train_batches
-            print()
             # dev evaluation
             dev_acc = 0.0
-            for start_idx in range(0, len(dev_examples), self.batch_size):
+            t = tqdm(range(0, len(dev_examples), self.batch_size), disable=not self.verbose)
+            for start_idx in t:
                 this_examples = dev_examples[start_idx:start_idx + self.batch_size]
                 this_labels = dev_labels[start_idx:start_idx + self.batch_size]
                 this_labels_predicted = self.predict(this_examples)
                 assert len(this_labels_predicted) == len(this_labels), \
                     print(len(this_labels_predicted), len(this_labels))
                 dev_acc += sum([x == y for x, y in zip(this_labels_predicted, this_labels)])
-                progress_bar(start_idx, len(dev_examples), ["avg. acc on dev", "epoch"],
-                             [dev_acc / max(start_idx, 1), epoch])
+                progress_bar_msg = f"Epoch: {epoch} | Mean Validation Accuracy: " \
+                                   f"{dev_acc / max(start_idx, 1):.4f}"
+                t.set_description(progress_bar_msg, refresh=True)
             dev_acc /= max(1, len(dev_examples))
-            print()
             if dev_acc >= best_dev_acc:
                 # save model weights in a temp folder; later move it to folder passed through dump()
                 torch.save(self.state_dict(), temp_save_path)
-                logger.info(f"Model weights saved in epoch: {epoch} when dev accuracy improved "
-                            f"from '{best_dev_acc:.4f}' to '{dev_acc:.4f}'")
+                msg = f"Model weights saved in epoch: {epoch} when dev accuracy improved " \
+                      f"from '{best_dev_acc:.4f}' to '{dev_acc:.4f}'"
+                logger.info(msg)
                 best_dev_acc, best_dev_epoch = dev_acc, epoch
 
         # load the best model, delete the temp folder and return
@@ -317,10 +365,9 @@ class BaseForSequenceClassification(nn.Module):
 
         self.ready = True
         self.dirty = True
-        return
 
     def predict(self, examples):
-        logits = self.forward_with_no_grad(examples)
+        logits = self.forward_with_batching_and_no_grad(examples)
         if self.num_labels == 2:
             preds = (logits >= 0.5).long()
         elif self.num_labels > 2:
@@ -328,7 +375,7 @@ class BaseForSequenceClassification(nn.Module):
         return preds.cpu().detach().numpy().tolist()
 
     def predict_proba(self, examples):
-        logits = self.forward_with_no_grad(examples)
+        logits = self.forward_with_batching_and_no_grad(examples)
         if self.num_labels == 2:
             probs = F.sigmoid(logits)
             # extending the results from shape [N,1] to [N,2] to give out class probs distinctly
@@ -337,7 +384,7 @@ class BaseForSequenceClassification(nn.Module):
             probs = F.softmax(logits, dim=-1)
         return probs.cpu().detach().numpy().tolist()
 
-    def forward_with_no_grad(self, examples):
+    def forward_with_batching_and_no_grad(self, examples):
         logits = None
         was_training = self.training
         self.eval()
@@ -346,7 +393,7 @@ class BaseForSequenceClassification(nn.Module):
                 this_examples = examples[start_idx:start_idx + self.batch_size]
                 batch_data_dict = self.encoder.batch_encode(this_examples)
                 _logits = self.forward(batch_data_dict)["logits"]
-                logits = torch.cat((logits, _logits)) if logits else _logits
+                logits = torch.cat((logits, _logits)) if logits is not None else _logits
         if was_training:
             self.train()
         return logits
@@ -371,14 +418,17 @@ class BaseForSequenceClassification(nn.Module):
 
         return batch_data_dict
 
+    @abstractmethod
     def _forward_core(self, batch_data_dict: Dict) -> Dict:
-        pass
+        raise NotImplementedError
 
     ####################################
     # methods to load and dump resources
     ####################################
 
     def dump(self, path):
+        # resolve path and create associated folder if required
+        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
         os.makedirs(path, exist_ok=True)
         # save weights
         torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
@@ -387,32 +437,37 @@ class BaseForSequenceClassification(nn.Module):
         # save params
         with open(os.path.join(path, "params.json"), "w") as fp:
             params_dict = {k: getattr(self, k) for k in self.params_keys}
-            json.dump(params_dict, fp)
+            json.dump(params_dict, fp, indent=4)
             fp.close()
-        logger.info(f"{cls.__name__} model weights are dumped successfully")
+        msg = f"{self.name} model weights are dumped successfully"
+        logger.info(msg)
 
         self.dirty = False
-        return
 
     @classmethod
     def load(cls, path):
+        # resolve path
+        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
+        # create instance and populate
         module = cls()
         # load params
         with open(os.path.join(path, "params.json"), "r") as fp:
             params = json.load(fp)
+            for k, v in params.items():
+                setattr(module, k, v)
+            setattr(module, "params_keys", set(params.keys()))
             fp.close()
-        for k, v in params.items():
-            setattr(module, k, v)
         module.init_graph(**params)
         # load encoder
-        module.encoder = module.encoder.load()
+        module.encoder = module.encoder.load(path)  # .load() is a classmethod
         # load weights
         module.load_state_dict(torch.load(os.path.join(path, "pytorch_model.bin")))
-        logger.info(f"{cls.__name__} model weights are loaded successfully")
+        msg = f"{module.name} model weights are loaded successfully"
+        logger.info(msg)
 
-        self.ready = True
-        self.dirty = False
-        return self
+        module.ready = True
+        module.dirty = False
+        return module
 
     ####################################
     # methods for creating pytorch graph
@@ -454,16 +509,17 @@ class BaseForSequenceClassification(nn.Module):
             self.criterion = nn.CrossEntropyLoss(reduction='mean')
         else:
             msg = f"Invalid number of labels specified: {self.num_labels}. " \
-                  f"Valid number is either 2 or more."
+                  f"Valid number is equal to or greater than 2"
             raise ValueError(msg)
 
         print(f"{self.name} is initialized")
 
+    @abstractmethod
     def _init_core(self, **params):
-        pass
+        raise NotImplementedError
 
 
-class EmbeddingForSequenceClassification(BaseForSequenceClassification):
+class EmbeddingForSequenceClassification(SequenceClassification):
     """An embedder pooling module that operates on a batched sequence of token ids. The
     tokens could be characters or words or sub-words. This module finally outputs one 1D
     representation for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -506,7 +562,7 @@ class EmbeddingForSequenceClassification(BaseForSequenceClassification):
         return batch_data_dict
 
 
-class SequenceCnnForSequenceClassification(BaseForSequenceClassification):
+class SequenceCnnForSequenceClassification(SequenceClassification):
     """A CNN module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -522,7 +578,7 @@ class SequenceCnnForSequenceClassification(BaseForSequenceClassification):
         embedding_weights = params.get("embedding_weights", None)
         self.update_embeddings = params.get("update_embeddings", True)
         self.cnn_kernel_sizes = params.get("cnn_kernel_sizes", [1, 3, 5])
-        self.cnn_num_kernels = params.get("cnn_num_kernels", [50] * len(self.cnn_kernel_sizes))
+        self.cnn_num_kernels = params.get("cnn_num_kernels", [100] * len(self.cnn_kernel_sizes))
 
         self.params_keys.update([
             "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
@@ -533,7 +589,7 @@ class SequenceCnnForSequenceClassification(BaseForSequenceClassification):
         self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         embedding_weights, self.update_embeddings)
         self.conv_layer = CnnLayer(self.emb_dim, self.cnn_kernel_sizes, self.cnn_num_kernels)
-        self.out_dim = sum(num_kernels)
+        self.out_dim = sum(self.cnn_num_kernels)
 
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -546,7 +602,8 @@ class SequenceCnnForSequenceClassification(BaseForSequenceClassification):
         return batch_data_dict
 
 
-class SequenceLstmForSequenceClassification(BaseForSequenceClassification):
+class SequenceLstmForSequenceClassification(SequenceClassification):
+    # pylint: disable=too-many-instance-attributes
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -578,7 +635,7 @@ class SequenceLstmForSequenceClassification(BaseForSequenceClassification):
         self.lstm_layer = LstmLayer(self.emb_dim, self.lstm_hidden_dim, self.lstm_num_layers,
                                     self.lstm_dropout, self.lstm_bidirectional)
         self.lstm_layer_pooling = PoolingLayer(self.lstm_output_pooling_type)
-        self.out_dim = self.emb_dim * 2 if self.lstm_bidirectional else self.emb_dim
+        self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
 
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -639,7 +696,7 @@ class TokenCnnSequenceLstmForTokenClassification(BaseForTokenClassification):
 class BaseForJointSequenceTokenClassification(nn.Module):
     """This base class is wrapped around nn.Module and supports joint modeling, meaning
     multiple heads can be trained for models derived on top of this base class. Unlike classes
-    derive on top of BaseForSequenceClassification or BaseForTokenClassification, the ones derived
+    derive on top of SequenceClassification or BaseForTokenClassification, the ones derived
     on this base output both `seq_embs` as well as `token_embs` in their output which facilitates
     multi-head training.
     """

@@ -18,6 +18,7 @@ import random
 
 from sklearn.externals import joblib
 
+from ._util import _is_module_available
 from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (
     create_model,
@@ -455,6 +456,49 @@ class PytorchTaggerModel(PytorchModel):
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
             raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
+
+    def fit(self, examples, labels, params=None):
+
+        params = params or self.config.params
+        examples = [ex.normalized_text for ex in examples]
+
+        if len(set(labels)) <= 1:
+            return self
+
+        # Encode classes
+        y = self._label_encoder.encode(labels)
+        try:
+            # runs without Error for tagger models
+            flat_y = sum(y, [])
+            is_flattened = True
+        except TypeError:
+            # meaning it is a text model
+            flat_y = y
+            is_flattened = False
+        encoded_flat_y = self._class_encoder.fit_transform(flat_y)
+        if is_flattened:
+            seq_lengths = [len(_y) for _y in y]
+            y = []
+            start_idx = 0
+            for seq_length in seq_lengths:
+                y.append(encoded_flat_y[start_idx: start_idx + seq_length])
+                start_idx += seq_length
+        else:
+            y = list(encoded_flat_y)
+
+        self._clf = self._get_model_constructor()()  # gets the class name only
+        self._clf.fit(examples, y, **params)
+
+        return self
+
+    def predict(self, examples, dynamic_resource=None):
+        raise NotImplementedError
+
+    def predict_proba(self, examples):
+        raise NotImplementedError
+
+    def evaluate(self, examples, labels):
+        raise NotImplementedError
 
 
 class AutoTaggerModel:

@@ -27,13 +27,16 @@ try:
 except ImportError:
     pass
 
-from ..taggers.embeddings import GloVeEmbeddingsContainer
+try:
+    import transformers
+except ImportError:
+    pass
 
-# from mindmeld.models.taggers.embeddings import GloVeEmbeddingsContainer
+from ..taggers.embeddings import GloVeEmbeddingsContainer
 
 logger = logging.getLogger(__name__)
 
-LABEL_PAD_TOKEN_IDX = -1
+LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 
 class ClassificationEncoder:
@@ -51,10 +54,11 @@ class ClassificationEncoder:
     in the .batch_encode() method of the derived class.
     """
 
-    ALLOWED_TOKENIZER_TYPES = ["whitespace-tokenizer", "char-tokenizer"]
+    ALLOWED_BASIC_TOKENIZERS = ["whitespace-tokenizer", "char-tokenizer"]
     ALLOWED_EMBEDDER_TYPES = [
-        "glove",  # only word level embedders are allowed in this encoder
-        # "fastext",  # to implement
+        "glove",
+        # "fastext",  # TODO: implement
+        "bert"
     ]
 
     BASIC_SPECIAL_VOCAB_DICT = {
@@ -67,42 +71,58 @@ class ClassificationEncoder:
 
     def fit(
         self,
+        # input data stream
         examples: List[str] = None,
         # params
-        tokenizer_type=None,
         embedder_type=None,
         special_vocab_dict=None,
         max_seq_length=None,
-        emb_dim=None,
+        # non-params
+        _disable_loading_glove_data=False,
+        # other params
+        **params
     ):
-        self.tokenizer_type = tokenizer_type
         self.embedder_type = embedder_type
         self.special_vocab_dict = special_vocab_dict
         self.max_seq_length = max_seq_length
-        self.emb_dim = emb_dim
+        self.params_keys = set(["embedder_type", "special_vocab_dict", "max_seq_length"])
 
         self.token2idx = {}
         self.token2emb = {}
 
-        # get tokenizer
-        self.tokenizer = self._get_tokenizer(self.tokenizer_type)
-
-        # get embedder if required
-        if self.embedder_type:
-            if self.embedder_type == "glove":
+        # load tokenizer and embedder
+        if not self.embedder_type:
+            self.tokenizer_type = params.get("tokenizer_type")
+            self._tokenizer = self._get_basic_tokenizer(self.tokenizer_type)
+            self.emb_dim = params.get("emb_dim")
+            self.params_keys.update(["tokenizer_type", "emb_dim"])
+        elif self.embedder_type == "glove":
+            self.tokenizer_type = params.get("tokenizer_type")
+            self._tokenizer = self._get_basic_tokenizer(self.tokenizer_type)
+            self.emb_dim = params.get("emb_dim")
+            self.params_keys.update(["tokenizer_type", "emb_dim"])
+            if not _disable_loading_glove_data:
                 glove_container = GloVeEmbeddingsContainer()
                 self.token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
-                emb_dim = glove_container.token_dimension
-                if self.emb_dim and self.emb_dim != emb_dim:
-                    msg = f"Overwriting 'emb_dim' from {self.emb_dim} dim to " \
-                          f"{emb_dim} dim while using 'embedder_type'='glove'"
-                    logger.error(msg)
-                self.emb_dim = emb_dim
-            else:
-                msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
-                      f"found. Supported names are only " \
-                      f"{ClassificationEncoder.ALLOWED_EMBEDDER_TYPES}."
+                self.emb_dim = glove_container.token_dimension
+        elif self.embedder_type == "bert":
+            self.pretrained_model_name_or_path = params.get("pretrained_model_name_or_path")
+            if not self.pretrained_model_name_or_path:
+                msg = "Must include a valid 'pretrained_model_name_or_path' param when using " \
+                      "embedder_type: 'bert'"
                 raise ValueError(msg)
+            self.params_keys.update(["pretrained_model_name_or_path"])
+            self._tokenizer = transformers.AutoTokenizer.from_pretrained(
+                self.pretrained_model_name_or_path).tokenize
+            self.emb_dim = transformers.AutoConfig.from_pretrained(
+                self.pretrained_model_name_or_path).hidden_size
+            # TODO: Add snippet to load bert model
+            raise NotImplementedError
+        else:
+            msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
+                  f"found. Supported names are only " \
+                  f"{ClassificationEncoder.ALLOWED_EMBEDDER_TYPES}."
+            raise ValueError(msg)
 
         # Add special vocab before actual vocab
         special_vocab_dict_ = self.__class__.BASIC_SPECIAL_VOCAB_DICT
@@ -113,13 +133,14 @@ class ClassificationEncoder:
 
         # add vocab from examples upon tokenizing each text item
         if examples:
-            all_tokens = set(sum([self.tokenizer(text) for text in examples], []))
+            all_tokens = set(sum([self._tokenizer(text) for text in examples], []))
             self._add_vocab(all_tokens)
 
         # some validations
         if not self.emb_dim:
-            msg = "Need a valid 'emb_dim' to initialize encoder resource. " \
-                  "Either pass-in the argument or load an embedder."
+            msg = "Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
+                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
+                  "valid 'embedder_type' param."
             raise ValueError(msg)
 
     def dump(self, dump_folder):
@@ -134,14 +155,8 @@ class ClassificationEncoder:
                 fp.write(token + "\n")
             fp.close()
         with open(os.path.join(dump_folder, "text_encoder_config.json"), "w") as fp:
-            encoder_config = {
-                "tokenizer_type": self.tokenizer_type,
-                "embedder_type": self.embedder_type,
-                "special_vocab_dict": self.special_vocab_dict,
-                "max_seq_length": self.max_seq_length,
-                "emb_dim": self.emb_dim
-            }
-            json.dump(encoder_config, fp, indent=4)
+            params = {k: getattr(self, k) for k in self.params_keys}
+            json.dump(params, fp, indent=4)
             fp.close()
 
     @classmethod
@@ -151,11 +166,12 @@ class ClassificationEncoder:
                   f"not a file ({load_folder})"
             raise ValueError(msg)
 
-        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
-            encoder_config = json.load(fp)
-            fp.close()
         encoder = cls()
-        encoder.fit(**encoder_config)
+        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
+            params = json.load(fp)
+            setattr(encoder, "params_keys", set(params.keys()))
+            fp.close()
+        encoder.fit(**params, _disable_loading_glove_data=True)
         with open(os.path.join(load_folder, "text_encoder_vocab.txt"), "r") as fp:
             for line in fp:
                 encoder._add_vocab([line.strip()])
@@ -176,14 +192,18 @@ class ClassificationEncoder:
 
     def get_embedding_weights(self):
         if not self.token2emb:
+            msg = f"The created encoder ({self.__class__.__name__}) does not contain " \
+                  f"token-to-embeddings mapping."
+            logger.error(msg)
             return None
         embedding_weights = {}
         for token, idx in self.token2idx.items():
             if token in self.token2emb:
-                embedding_weights[token] = self.token2emb[token]
+                embedding_weights[idx] = self.token2emb[token]
         return embedding_weights
 
-    def _get_tokenizer(self, tokenizer_type):
+    @staticmethod
+    def _get_basic_tokenizer(tokenizer_type):
 
         def whitespace_tokenizer(text: str) -> List[str]:
             return text.strip().split()
@@ -199,7 +219,7 @@ class ClassificationEncoder:
             return char_tokenizer
         else:
             msg = f"Unknown tokenizer type specified ('{tokenizer_type}'). Expected to be " \
-                  f"among {ClassificationEncoder.ALLOWED_TOKENIZER_TYPES}. "
+                  f"among {ClassificationEncoder.ALLOWED_BASIC_TOKENIZERS}. "
             raise ValueError(msg)
 
     def _add_special_vocab(self, special_tokens: Dict[str, str]):
@@ -265,7 +285,7 @@ class SequenceClassificationEncoder(ClassificationEncoder):
                 raise AssertionError(msg)
 
         # convert to tokens and obtain sequence lengths
-        tokenized_sequences = [self.tokenizer(text) for text in examples]
+        tokenized_sequences = [self._tokenizer(text) for text in examples]
         sequence_lengths = [len(seq) for seq in tokenized_sequences]
 
         # if max_seq_length is None, it is computed as max(length of all seqs from inputted text)
@@ -318,7 +338,7 @@ class SequenceClassificationEncoder(ClassificationEncoder):
 
             # batchify by truncating or padding for each example
             for i in range(len(examples)):
-                seq, seq_length = input_ids[i], sequence_lengths[i]
+                seq = input_ids[i]
                 new_seq = seq[:max_seq_length - 2] if add_terminals else seq[:max_seq_length]
                 new_seq = ([start_token_idx] + new_seq + [end_token_idx]) \
                     if add_terminals else new_seq
@@ -329,8 +349,8 @@ class SequenceClassificationEncoder(ClassificationEncoder):
             # create output dict
             if return_as_tensors:
                 return_dict = {
-                    "seq_ids": torch.tensor(input_ids, dtype=torch.long),
-                    "seq_lengths": torch.tensor(sequence_lengths, dtype=torch.long)
+                    "seq_ids": torch.as_tensor(input_ids, dtype=torch.long),
+                    "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
                 }
             else:
                 return_dict = {
@@ -340,7 +360,7 @@ class SequenceClassificationEncoder(ClassificationEncoder):
 
         if labels:
             if return_as_tensors:
-                return_dict.update({"labels": torch.tensor(labels, dtype=torch.long)})
+                return_dict.update({"labels": torch.as_tensor(labels, dtype=torch.long)})
             else:
                 return_dict.update({"labels": labels})
 
@@ -349,7 +369,7 @@ class SequenceClassificationEncoder(ClassificationEncoder):
 
 class TokenClassificationEncoder(ClassificationEncoder):
 
-    def batch_encode(
+    def batch_encode(  # pylint: disable=too-many-locals
         self,
         examples: Union[str, List[str]],
         labels: Union[List[int], List[List[int]]] = None,
@@ -391,11 +411,11 @@ class TokenClassificationEncoder(ClassificationEncoder):
                 if len(ex_tokens) != len(label_tokens):
                     msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
                           f"number of tokens in the corresponding token labels " \
-                          f"({len(label_tokens)}) for sentence '{ex}' with labels '{label}'"
+                          f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
                     raise AssertionError(msg)
 
         # convert to tokens and obtain sequence lengths
-        tokenized_sequences = [self.tokenizer(text) for text in examples]
+        tokenized_sequences = [self._tokenizer(text) for text in examples]
         sequence_lengths = [len(seq) for seq in tokenized_sequences]
 
         # if max_seq_length is None, it is computed as max(length of all seqs from inputted text)
@@ -449,7 +469,7 @@ class TokenClassificationEncoder(ClassificationEncoder):
             # batchify by truncating or padding for each example
             for i in range(len(examples)):
                 # batchify sequences of text
-                seq, seq_length = input_ids[i], sequence_lengths[i]
+                seq = input_ids[i]
                 new_seq = seq[:max_seq_length - 2] if add_terminals else seq[:max_seq_length]
                 new_seq = ([start_token_idx] + new_seq + [end_token_idx]) \
                     if add_terminals else new_seq
@@ -463,9 +483,8 @@ class TokenClassificationEncoder(ClassificationEncoder):
                         label_seq[:max_seq_length - 2] if add_terminals else
                         label_seq[:max_seq_length]
                     )
-                    new_label_seq = \
-                        ([LABEL_PAD_TOKEN_IDX] + new_label_seq + [LABEL_PAD_TOKEN_IDX]) \
-                            if add_terminals else new_label_seq
+                    new_label_seq = ([LABEL_PAD_TOKEN_IDX] + new_label_seq + [
+                        LABEL_PAD_TOKEN_IDX]) if add_terminals else new_label_seq
                     assert len(new_label_seq) == new_seq_length
                     labels[i] = (
                         new_label_seq + [LABEL_PAD_TOKEN_IDX] * (max_seq_length - new_seq_length)
@@ -474,8 +493,8 @@ class TokenClassificationEncoder(ClassificationEncoder):
             # create output dict
             if return_as_tensors:
                 return_dict = {
-                    "seq_ids": torch.tensor(input_ids, dtype=torch.long),
-                    "seq_lengths": torch.tensor(sequence_lengths, dtype=torch.long)
+                    "seq_ids": torch.as_tensor(input_ids, dtype=torch.long),
+                    "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
                 }
             else:
                 return_dict = {
@@ -485,7 +504,7 @@ class TokenClassificationEncoder(ClassificationEncoder):
 
         if labels:
             if return_as_tensors:
-                return_dict.update({"labels": torch.tensor(labels, dtype=torch.long)})
+                return_dict.update({"labels": torch.as_tensor(labels, dtype=torch.long)})
             else:
                 return_dict.update({"labels": labels})
 

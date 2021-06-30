@@ -46,7 +46,6 @@ from .helpers import (
     get_label_encoder,
     ingest_dynamic_gazetteer,
 )
-from .pytorch_utils import encoders as pyt_encoders
 from .._version import get_mm_version
 from ..exceptions import ClassifierLoadError
 from ..tokenizer import Tokenizer
@@ -668,51 +667,17 @@ class PytorchModel(BaseModel):
         raise NotImplementedError
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-
         # Always initialize the global resource for tokenization, which is not a
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
-    def fit(self, examples, labels, params=None):
-        params = params or self.config.params
-
-        if len(set(labels)) <= 1:
-            return self
-
-        # Encode classes
-        y = self._label_encoder.encode(labels)
-        try:
-            # runs without Error for tagger models
-            flat_y = sum(y, [])
-            is_flattened = True
-        except TypeError:
-            # meaning it is a text model
-            flat_y = y
-            is_flattened = False
-        encoded_flat_y = self._class_encoder.fit_transform(flat_y)
-        if is_flattened:
-            seq_lengths = [len(_y) for _y in y]
-            y = []
-            start_idx = 0
-            for seq_length in seq_lengths:
-                y.append(encoded_flat_y[start_idx: start_idx + seq_length])
-                start_idx += seq_length
-        else:
-            y = list(encoded_flat_y)
-
-        self._clf = self._get_model_constructor()()  # gets the class name only
-        self._clf.fit([ex.text for ex in examples], y, **params)
-
-        return self
-
     def dump(self, path, metadata=None):
-
         metadata = metadata or {}
         metadata.update({
-            "model": self,
             "model_config": self.config,
-            "serializable": False}
-        )
+            "serializable": False,
+            "sklearn_class_encoder": self._class_encoder,
+        })
 
         # dump clf
         self._clf.dump(path)
@@ -722,61 +687,14 @@ class PytorchModel(BaseModel):
 
     @classmethod
     def load(cls, path):
-
         # load metadata
         metadata = super().load(path)
         model_config = metadata.get("model_config")
         model = create_model(model_config)
 
         # gets the class name and then loads
-        model._clf = self._get_model_constructor().load(path)  # .load() is a classmethod
+        model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+        model._class_encoder = metadata["sklearn_class_encoder"]
         metadata["model"] = model
 
         return metadata
-
-    def predict(self, examples, dynamic_resource=None):
-        y = self._clf.predict(examples)
-        predictions = self._class_encoder.inverse_transform(y)
-        return self._label_encoder.decode(predictions)
-
-    def predict_proba(self, examples):
-
-        # snippet mostly re-used from text_model.py/TextModel/_predict_proba()
-        predictions = []
-        for row in self._clf.predict_proba(examples):
-            probabilities = {}
-            top_class = None
-            for class_index, proba in enumerate(row):
-                raw_class = self._class_encoder.inverse_transform([class_index])[0]
-                decoded_class = self._label_encoder.decode([raw_class])[0]
-                probabilities[decoded_class] = proba
-                if proba > probabilities.get(top_class, -1.0):
-                    top_class = decoded_class
-            predictions.append((top_class, probabilities))
-
-        return predictions
-
-    def evaluate(self, examples, labels):
-        raise NotImplementedError
-
-    @staticmethod
-    def get_model_folder_from_model_path(model_path: str):
-        if not model_path.endswith(".pkl"):
-            msg = "Unsupported model_path provided to create a folder name in featurizers. " \
-                  "The supplied model path must end with '.pkl'. "
-            raise ValueError(msg)
-        model_folder = model_path.split(".pkl")[0]
-        os.makedirs(model_folder, exist_ok=True)
-        return model_folder
-
-    def _get_encoder_constructor(self):
-        """Returns the class of the actual underlying model"""
-        model_type = self.config.model_type
-        try:
-            return {
-                "text": pyt_encoders.xxx,
-                "tagger": pyt_encoders.xxx,
-            }[model_type]
-        except KeyError as e:
-            msg = "{}: Model type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, model_type)) from e

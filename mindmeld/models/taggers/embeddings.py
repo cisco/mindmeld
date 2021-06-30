@@ -86,8 +86,7 @@ class GloVeEmbeddingsContainer:
         """
         return self._word_to_embedding
 
-    @staticmethod
-    def _download_embeddings_and_return_zip_handle(token_dimension):
+    def _download_embeddings_and_return_zip_handle(self):
 
         logger.info("Downloading embedding from %s", GLOVE_DOWNLOAD_LINK)
 
@@ -114,13 +113,13 @@ class GloVeEmbeddingsContainer:
                 )
                 return
 
-            file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(token_dimension)
+            file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
             zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
 
             if file_name not in zip_file_object.namelist():
                 logger.info(
                     "Embedding file with %s dimensions " "not found",
-                    token_dimension,
+                    self.token_dimension,
                 )
                 return
 
@@ -132,6 +131,8 @@ class GloVeEmbeddingsContainer:
         for line in glove_file:
             values = line.split()
             word = values[0]
+            if not isinstance(word, str):  # can be encoded as byte type
+                word = word.decode()
             coefs = np.asarray(values[1:], dtype="float32")
             word_to_embedding[word] = coefs
         return word_to_embedding
@@ -139,9 +140,9 @@ class GloVeEmbeddingsContainer:
     def _extract_embeddings(self):
 
         string_to_hash = json.dumps({"token_dimension": self.token_dimension})
-        hash = Hasher(algorithm="sha1").hash(string=string_to_hash)
+        hash_ = Hasher(algorithm="sha1").hash(string=string_to_hash)
 
-        if hash not in GloVeEmbeddingsContainer.EMB_MAPS:
+        if hash_ not in GloVeEmbeddingsContainer.EMB_MAPS:
 
             file_location = self.token_pretrained_embedding_filepath
 
@@ -151,10 +152,12 @@ class GloVeEmbeddingsContainer:
                 with open(file_location, "r") as embedding_file:
                     word_to_embedding = self._extract_and_map(embedding_file)
             else:
-                logger.info("Provided file location %s does not exist.", str(file_location))
+                if file_location:
+                    logger.info("Provided file location %s does not exist.", str(file_location))
                 file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
                 if os.path.isfile(EMBEDDINGS_FILE_PATH):
-                    msg = f"Extracting embeddings from default folder location {EMBEDDINGS_FILE_PATH}."
+                    msg = f"Extracting embeddings from default folder location " \
+                          f"{EMBEDDINGS_FILE_PATH}."
                     logger.info(msg)
                     try:
                         zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
@@ -168,14 +171,14 @@ class GloVeEmbeddingsContainer:
                         )
                         os.remove(EMBEDDINGS_FILE_PATH)
                         self._extract_embeddings()
-                    except IOError:
+                    except IOError as e:
                         logger.error(
                             "An error occurred when reading %s zip file. The file might"
                             " be corrupt, so try deleting the file and running the program "
                             "again",
                             EMBEDDINGS_FILE_PATH,
                         )
-                        raise IOError("Failed to load embeddings.")
+                        raise IOError("Failed to load embeddings.") from e
                 else:
                     logger.info("Default folder location %s does not exist.", EMBEDDINGS_FILE_PATH)
                     zip_file_object = self._download_embeddings_and_return_zip_handle()
@@ -184,9 +187,9 @@ class GloVeEmbeddingsContainer:
                     with zip_file_object.open(file_name) as embedding_file:
                         word_to_embedding = self._extract_and_map(embedding_file)
 
-            GloVeEmbeddingsContainer.EMB_MAPS[hash] = word_to_embedding
+            GloVeEmbeddingsContainer.EMB_MAPS[hash_] = word_to_embedding
 
-        return GloVeEmbeddingsContainer.EMB_MAPS[hash]
+        return GloVeEmbeddingsContainer.EMB_MAPS[hash_]
 
 
 class WordSequenceEmbedding:
