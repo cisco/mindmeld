@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unicodedata
 
 DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
@@ -18,8 +19,40 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20200701"
 
-SPACY_ANNOTATOR_WEB_LANGUAGES = ["en", "zh"]
-SPACY_ANNOTATOR_NEWS_LANGUAGES = [
+
+# ACTIVE LEARNING CONSTANTS
+TUNE_LEVEL_DOMAIN = "domain"
+TUNE_LEVEL_INTENT = "intent"
+ENTROPY_LOG_BASE = 2
+ACTIVE_LEARNING_RANDOM_SEED = os.environ.get("ACTIVE_LEARNING_RANDOM_SEED") or 2020
+AL_MAX_LOG_USAGE_PCT = 1.0
+STRATEGY_ABRIDGED = {
+    "LeastConfidenceSampling": "lcs",
+    "MarginSampling": "ms",
+    "EntropySampling": "es",
+    "RandomSampling": "rs",
+    "DisagreementSampling": "ds",
+    "EnsembleSampling": "ens",
+    "KLDivergenceSampling": "kld",
+}
+
+AL_DEFAULT_AGGREGATE_STATISTIC = "accuracy"
+AL_SUPPORTED_AGGREGATE_STATISTICS = [
+    "f1_weighted",
+    "f1_macro",
+    "f1_micro",
+    AL_DEFAULT_AGGREGATE_STATISTIC,
+]
+AL_DEFAULT_CLASS_LEVEL_STATISTIC = "f_beta"
+AL_SUPPORTED_CLASS_LEVEL_STATISTICS = [
+    "percision",
+    "recall",
+    AL_DEFAULT_CLASS_LEVEL_STATISTIC,
+]
+
+# AUTO ANNOTATOR CONSTANTS
+SPACY_WEB_TRAINED_LANGUAGES = ["en", "zh"]
+SPACY_NEWS_TRAINED_LANGUAGES = [
     "da",
     "nl",
     "fr",
@@ -34,18 +67,12 @@ SPACY_ANNOTATOR_NEWS_LANGUAGES = [
     "ro",
     "es",
 ]
-SPACY_ANNOTATOR_SUPPORTED_LANGUAGES = (
-    SPACY_ANNOTATOR_WEB_LANGUAGES + SPACY_ANNOTATOR_NEWS_LANGUAGES
-)
-SPACY_ANNOTATOR_MODEL_SIZES = ["sm", "md", "lg"]
+SPACY_SUPPORTED_LANGUAGES = SPACY_WEB_TRAINED_LANGUAGES + SPACY_NEWS_TRAINED_LANGUAGES
+
+SPACY_MODEL_SIZES = ["sm", "md", "lg"]
 
 UNANNOTATE_ALL_RULE = [
-    {
-        "domains": ".*",
-        "intents": ".*",
-        "files": ".*",
-        "entities": ".*",
-    }
+    {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
 ]
 
 ANNOTATOR_TO_SYS_ENTITY_MAPPINGS = {
@@ -294,6 +321,9 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 CURRENCY_SYMBOLS = u"".join(
     chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
 )
+ASCII_CUTOFF = ord("\u0080")
+UNICODE_NON_LATIN_CATEGORY = "Lo"
+UNICODE_SPACE_CATEGORY = "Zs"
 
 
 SYSTEM_ENTITY_PREFIX = "sys_"

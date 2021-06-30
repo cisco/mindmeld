@@ -167,7 +167,11 @@ def test_max_history_len_config(food_ordering_app_path):
 def test_tokenizer_config(food_ordering_app_path):
     actual = get_tokenizer_config(food_ordering_app_path)
 
-    expected = {"allowed_patterns": ['\w+\.', '\{.*\|.*\}']}  # noqa: W605
+    expected = {
+        "allowed_patterns": ['\w+\.', '\{.*\|.*\}'],  # noqa: W605
+        "tokenizer": "WhiteSpaceTokenizer",
+        "normalizer": "ASCIIFold",
+    }
 
     assert "allowed_patterns" in actual
     assert actual == expected
