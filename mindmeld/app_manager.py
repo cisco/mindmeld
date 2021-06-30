@@ -149,7 +149,7 @@ class ApplicationManager:
 
         # We reset the current turn's responder's params
         response = self.responder_class(
-            frame=frame,
+            frame=dict(frame),
             form={},
             params=Params(),
             slots={},

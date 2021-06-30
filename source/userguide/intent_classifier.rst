@@ -209,7 +209,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |                                                                                                            |
   |                       | Additionally, you can also limit the n-grams considered while extracting the feature by setting a          |
   |                       | threshold on their frequency. These frequencies are computed over the entire training set. This prevents   |
-  |                       | infrequent n-grams from being used as features. By default, this frequency is set to 0.                    |
+  |                       | infrequent n-grams from being used as features. By default, this frequency is set to 1.                    |
   |                       |                                                                                                            |
   |                       | Examples:                                                                                                  |
   |                       |                                                                                                            |
@@ -335,7 +335,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |                                                                                                            |
   |                       | Additionally, you can also limit the character n-grams considered while extracting the feature by setting  |
   |                       | a threshold on their frequency. These frequencies are computed over the entire training set. This prevents |
-  |                       | infrequent n-grams from being used as features. By default, this frequency is set to 0.                    |
+  |                       | infrequent n-grams from being used as features. By default, this frequency is set to 1.                    |
   |                       |                                                                                                            |
   |                       | Examples:                                                                                                  |
   |                       |                                                                                                            |

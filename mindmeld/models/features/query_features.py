@@ -24,6 +24,8 @@ from ..helpers import (
     ENABLE_STEMMING,
     GAZETTEER_RSC,
     OUT_OF_BOUNDS_TOKEN,
+    OUT_OF_VOCABULARY,
+    IN_VOCABULARY,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
@@ -366,7 +368,7 @@ def extract_in_gaz_ngram_features(**kwargs):
 @register_query_feature(feature_name="bag-of-words-seq")
 @requires(WORD_NGRAM_FREQ_RSC)
 def extract_bag_of_words_features(
-    ngram_lengths_to_start_positions, thresholds=(0,), **kwargs
+    ngram_lengths_to_start_positions, thresholds=(1,), **kwargs
 ):
     """Returns a bag-of-words feature extractor.
 
@@ -378,9 +380,29 @@ def extract_bag_of_words_features(
         (function) The feature extractor.
     """
     threshold_list = list(thresholds)
-    word_thresholds = threshold_list + [0] * (
+    word_thresholds = threshold_list + [1] * (
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
+
+    def remove_excess_out_of_bounds(n_gram: str) -> str:
+        """
+        In our frequency dictionaries, we only add a single OOB token to the start and end of a query.
+        This function takes care to remove excess OOB tokens and retains only 1, so we can look up their counts and
+        uphold the thresholding feature.
+        Eg., '<$> <$> what' --> '<$> what'
+             '<$> what' --> '<$> what'
+             'help <$> <$>' --> 'help <$>'
+             '<$> <$>' --> '<$>'
+        """
+        shortened_ngram = n_gram
+        if OUT_OF_BOUNDS_TOKEN in n_gram:
+            oob_last = n_gram.rfind(OUT_OF_BOUNDS_TOKEN)
+            oob_first = n_gram.find(OUT_OF_BOUNDS_TOKEN)
+            if oob_last + len(OUT_OF_BOUNDS_TOKEN) == len(n_gram):
+                shortened_ngram = n_gram[:oob_first + len(OUT_OF_BOUNDS_TOKEN)]
+            else:
+                shortened_ngram = n_gram[oob_last:]
+        return shortened_ngram
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -400,28 +422,29 @@ def extract_bag_of_words_features(
                     feat_name = "bag_of_words|length:{}|word_pos:{}".format(
                         length, start
                     )
-
-                    if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
+                    short_ngram = remove_excess_out_of_bounds(n_gram)
+                    if resources[WORD_NGRAM_FREQ_RSC].get(short_ngram, 0) >= threshold:
                         feat_seq[i][feat_name] = n_gram
                     else:
-                        feat_seq[i][feat_name] = "OOV"
+                        feat_seq[i][feat_name] = OUT_OF_VOCABULARY
 
                     if kwargs.get(ENABLE_STEMMING, False):
                         stemmed_n_gram = get_ngram(
                             stemmed_tokens, i + int(start), int(length)
                         )
+                        short_stemmed_ngram = remove_excess_out_of_bounds(stemmed_n_gram)
                         stemmed_feat_name = (
                             "bag_of_words_stemmed|length:{}|word_pos:{}".format(
                                 length, start
                             )
                         )
                         if (
-                            resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1)
-                            > threshold
+                            resources[WORD_NGRAM_FREQ_RSC].get(short_stemmed_ngram, 0)
+                            >= threshold
                         ):
                             feat_seq[i][stemmed_feat_name] = stemmed_n_gram
                         else:
-                            feat_seq[i][stemmed_feat_name] = "OOV"
+                            feat_seq[i][stemmed_feat_name] = OUT_OF_VOCABULARY
 
                 threshold_index += 1
         return feat_seq
@@ -470,7 +493,7 @@ def enabled_stemming(**kwargs):
 @register_query_feature(feature_name="char-ngrams-seq")
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams_features(
-    ngram_lengths_to_start_positions, thresholds=(0,), **kwargs
+    ngram_lengths_to_start_positions, thresholds=(1,), **kwargs
 ):
     """Returns a character n-gram feature extractor.
 
@@ -485,7 +508,7 @@ def extract_char_ngrams_features(
     """
     del kwargs
     threshold_list = list(thresholds)
-    char_thresholds = threshold_list + [0] * (
+    char_thresholds = threshold_list + [1] * (
         len(ngram_lengths_to_start_positions.keys()) - len(threshold_list)
     )
 
@@ -507,13 +530,14 @@ def extract_char_ngrams_features(
                         # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 1) > threshold:
-                            feat_name = (
-                                "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
-                                    length, start, j
-                                )
+                        feat_name = (
+                            "char_ngrams|length:{}|word_pos:{}|char_pos:{}".format(
+                                length, start, j
                             )
-                            feat_seq[i][feat_name] = c_gram
+                        )
+                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 0) < threshold:
+                            c_gram = OUT_OF_VOCABULARY
+                        feat_seq[i][feat_name] = c_gram
                 threshold_index += 1
         return feat_seq
 
@@ -580,7 +604,7 @@ def update_features_sequence(feat_seq, update_feat_seq, **kwargs):
 
 @register_query_feature(feature_name="char-ngrams")
 @requires(CHAR_NGRAM_FREQ_RSC)
-def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
+def extract_char_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
     """Extract character ngrams of specified lengths.
 
     Args:
@@ -593,28 +617,30 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
     """
     del kwargs
     threshold_list = list(thresholds)
-    char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+    char_thresholds = threshold_list + [1] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
-        query_text = query.normalized_text
-        ngram_counter = Counter()
 
+        query_text = re.sub(r"\d", "0", query.normalized_text)
+
+        ngram_counter = Counter()
         for length, threshold in zip(lengths, char_thresholds):
             for i in range(len(query_text) - length + 1):
                 char_ngram = []
                 for token in query_text[i : i + length]:
                     char_ngram.append(token)
-                if (
-                    resources[CHAR_NGRAM_FREQ_RSC].get("".join(char_ngram), 1)
-                    > threshold
-                ):
-                    ngram_counter.update(
-                        [
-                            "char_ngram|length:{}|ngram:{}".format(
-                                len(char_ngram), " ".join(char_ngram)
-                            )
-                        ]
-                    )
+
+                joined_char_ngram = "".join(char_ngram)
+                freq = resources[CHAR_NGRAM_FREQ_RSC].get(joined_char_ngram, 0)
+                if freq < threshold:
+                    joined_char_ngram = OUT_OF_VOCABULARY
+                ngram_counter.update(
+                    [
+                        "char_ngram|length:{}|ngram:{}".format(
+                            len(char_ngram), joined_char_ngram
+                        )
+                    ]
+                )
         return ngram_counter
 
     return _extractor
@@ -622,7 +648,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
 
 @register_query_feature(feature_name="bag-of-words")
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
+def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
     """
     Extract ngrams of some specified lengths.
 
@@ -635,7 +661,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
             returns ngrams of the specified lengths.
     """
     threshold_list = list(thresholds)
-    word_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+    word_thresholds = threshold_list + [1] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -651,37 +677,31 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **kwargs):
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
                     token = tokens[index]
-                    tok = mask_numerics(token)
+                    tok = re.sub('\d','0',token)
                     ngram.append(tok)
 
                     if kwargs.get(ENABLE_STEMMING, False):
-                        tok_stemmed = mask_numerics(stemmed_tokens[index])
+                        tok_stemmed = re.sub('\d','0',stemmed_tokens[index])
                         stemmed_ngram.append(tok_stemmed)
 
-                freq = resources[WORD_NGRAM_FREQ_RSC].get(" ".join(ngram), 1)
-
-                if freq > threshold:
-                    joined_ngram = " ".join(ngram)
+                joined_ngram = " ".join(ngram)
+                freq = resources[WORD_NGRAM_FREQ_RSC].get(joined_ngram, 0)
+                if freq < threshold:
+                    joined_ngram = OUT_OF_VOCABULARY
+                ngram_counter.update(
+                    [
+                        "bag_of_words|length:{}|ngram:{}".format(len(ngram), joined_ngram)
+                    ]
+                )
+                if kwargs.get(ENABLE_STEMMING, False):
+                    joined_stemmed_ngram = " ".join(stemmed_ngram)
+                    freq = resources[WORD_NGRAM_FREQ_RSC].get(joined_stemmed_ngram, 0)
+                    if freq < threshold:
+                        joined_stemmed_ngram = OUT_OF_VOCABULARY
                     ngram_counter.update(
                         [
-                            "bag_of_words|length:{}|ngram:{}".format(
-                                len(ngram), joined_ngram
-                            )
+                            "bag_of_words_stemmed|length:{}|ngram:{}".format(len(stemmed_ngram), joined_stemmed_ngram)
                         ]
-                    )
-
-                    if kwargs.get(ENABLE_STEMMING, False):
-                        joined_stemmed_ngram = " ".join(stemmed_ngram)
-                        ngram_counter.update(
-                            [
-                                "bag_of_words_stemmed|length:{}|ngram:{}".format(
-                                    len(stemmed_ngram), joined_stemmed_ngram
-                                )
-                            ]
-                        )
-                else:
-                    ngram_counter.update(
-                        ["bag_of_words|length:{}|ngram:{}".format(len(ngram), "OOV")]
                     )
 
         return ngram_counter
@@ -787,16 +807,17 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         feats = {}
+
         for length in lengths:
-            if length < len(tokens):
+            if length <= len(tokens):
                 left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
                 left_tokens = [
-                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
+                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else OUT_OF_VOCABULARY
                     for tok in left_tokens
                 ]
                 right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
                 right_tokens = [
-                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else "OOV"
+                    tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else OUT_OF_VOCABULARY
                     for tok in right_tokens
                 ]
                 feats.update(
@@ -813,6 +834,8 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
                         ): 1
                     }
                 )
+
+
 
         return feats
 
@@ -892,7 +915,7 @@ def extract_gaz_freq(**kwargs):
         freq_features = defaultdict(int)
 
         for tok in tokens:
-            query_freq = "OOV" if resources[WORD_FREQ_RSC].get(tok) is None else "IV"
+            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None else IN_VOCABULARY
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz["index"].get(tok, []))
                 if freq > 0:

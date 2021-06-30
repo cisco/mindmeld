@@ -91,7 +91,7 @@ class ElasticsearchVersionError(MindMeldError):
     pass
 
 
-class KnowledgeBaseConnectionError(KnowledgeBaseError):
+class ElasticsearchKnowledgeBaseConnectionError(KnowledgeBaseError):
     """An exception for problem connecting to knowledge base."""
 
     def __init__(self, es_host):
@@ -117,7 +117,7 @@ class EntityResolverError(MindMeldError):
     pass
 
 
-class EntityResolverConnectionError(EntityResolverError):
+class ElasticsearchConnectionError(EntityResolverError):
     """An exception for connection error to Elasticsearch for entity resolver"""
 
     def __init__(self, es_host):

@@ -74,6 +74,7 @@ class AugmentorFactory:
                 ],
             )
             path_suffix = self.config.get("path_suffix", "-augment.txt")
+            register_all_augmentors()
             return AUGMENTATION_MAP[self.config["augmentor_class"]](
                 batch_size=batch_size,
                 language=self.language,
@@ -388,5 +389,6 @@ class MultiLingualParaphraser(Augmentor):
         return augmented_queries
 
 
-register_augmentor("EnglishParaphraser", EnglishParaphraser)
-register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)
+def register_all_augmentors():
+    register_augmentor("EnglishParaphraser", EnglishParaphraser)
+    register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)
