@@ -16,17 +16,17 @@ import warnings
 
 import pytest
 
-from mindmeld.text_preparation.preprocessor import Preprocessor
+from mindmeld.converter.rasa import RasaConverter
+from mindmeld.converter.dialogflow import DialogflowConverter
 from mindmeld.components import NaturalLanguageProcessor, QuestionAnswerer
 from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
-from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 from mindmeld.system_entity_recognizer import DucklingRecognizer
-from mindmeld.tokenizer import Tokenizer
-from mindmeld.converter.rasa import RasaConverter
-from mindmeld.converter.dialogflow import DialogflowConverter
-
+from mindmeld.text_preparation.preprocessor import Preprocessor
+from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
@@ -174,14 +174,11 @@ class GhostPreprocessor(Preprocessor):
             text = text.replace("ghost", "")
         return text
 
-    def get_char_index_map(self, raw_text, processed_text):
-        return {}, {}
-
 
 @pytest.fixture
 def tokenizer():
     """A tokenizer for normalizing text"""
-    return Tokenizer()
+    return WhiteSpaceTokenizer()
 
 
 @pytest.fixture
@@ -202,12 +199,21 @@ def duckling():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer):
+def text_preparation_pipeline(preprocessor, tokenizer, stemmer):
+    """The Text Preparation Pipeline Object"""
+    return TextPreparationPipeline(
+        preprocessors=[preprocessor],
+        #normalizers=[], TODO: Consider default normalization
+        tokenizer=tokenizer,
+        stemmer=stemmer
+    )
+
+
+@pytest.fixture
+def query_factory(text_preparation_pipeline):
     """For creating queries"""
     return QueryFactory(
-        tokenizer=tokenizer,
-        preprocessor=preprocessor,
-        stemmer=stemmer,
+        text_preparation_pipeline=text_preparation_pipeline,
         system_entity_recognizer=None,
         duckling=True,
     )

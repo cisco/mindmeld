@@ -515,9 +515,6 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
 DEFAULT_TEXT_PREPARATION_CONFIG = {
     "preprocessors": [],
     "normalizers": ["NFC"],
-    "regex_norm_rules": None,
-    "tokenizer": None,
-    "stemmer": None
 }
 
 
@@ -1060,7 +1057,7 @@ def get_text_preparation_config(app_path=None):
         dict: The tokenizer configuration.
     """
     if not app_path:
-        return DEFAULT_TEXT_PREPARATION_CONFIG[ENGLISH_LANGUAGE_CODE]
+        return DEFAULT_TEXT_PREPARATION_CONFIG
     try:
         tokenizer_config = getattr(
             _get_config_module(app_path), "TEXT_PREPARATION_CONFIG"

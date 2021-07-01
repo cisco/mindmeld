@@ -15,6 +15,7 @@
 import logging
 from typing import List, Dict
 import re
+import unicodedata
 
 from .preprocessor import Preprocessor, PreprocessorFactory
 from .normalizers import Normalizer, NormalizerFactory, RegexNormalizer
@@ -26,6 +27,7 @@ from ..components._config import (
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
+from ..constants import UNICODE_SPACE_CATEGORY
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,6 @@ class TextPreparationPipeline:
         preprocessors: List[Preprocessor] = None,
         normalizers: List[Normalizer] = None,
         language: str = ENGLISH_LANGUAGE_CODE,
-
     ):
         """Creates a Pipeline instance."""
         self.language = language
@@ -217,7 +218,7 @@ class TextPreparationPipeline:
             # Adds tokens from text before the current entity and after the last entity
             tokens_before_entity = function(text[prev_entity_end:entity_start])
             TextPreparationPipeline.offset_token_start_values(
-                token_list=tokens_before_entity, offset=prev_entity_end
+                tokens=tokens_before_entity, offset=prev_entity_end
             )
             tokens.extend(tokens_before_entity)
 
@@ -226,7 +227,7 @@ class TextPreparationPipeline:
             entity_text = match.group(1)
             tokens_within_entity_text = function(entity_text)
             TextPreparationPipeline.offset_token_start_values(
-                token_list=tokens_within_entity_text, offset=entity_text_start
+                tokens=tokens_within_entity_text, offset=entity_text_start
             )
             tokens.extend(tokens_within_entity_text)
 
@@ -237,21 +238,41 @@ class TextPreparationPipeline:
             # Add tokens from the text after the last MindMeld entity
             tokens_after_last_entity = function(text[prev_entity_end : len(text)])
             TextPreparationPipeline.offset_token_start_values(
-                token_list=tokens_after_last_entity, offset=prev_entity_end
+                tokens=tokens_after_last_entity, offset=prev_entity_end
             )
             tokens.extend(tokens_after_last_entity)
 
+        tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
         return tokens
 
     @staticmethod
-    def offset_token_start_values(token_list, offset):
+    def offset_token_start_values(tokens: List[Dict], offset: int):
         """
         Args:
-            token_list (List(Dict)): List of tokens represented as dictionaries.
+            tokens (List(Dict)): List of tokens represented as dictionaries.
             offset (int): Amount to offset for the start value of each token
         """
-        for token in token_list:
+        for token in tokens:
             token["start"] = token["start"] + offset
+
+    @staticmethod
+    def filter_out_space_text_tokens(tokens: List[Dict]):
+        """Filter out any tokens where the text of the token only consists of space characters.
+
+        Args:
+            tokens (List[Dict]): List of tokens represented as dictionaries
+        Returns:
+            filtered_tokens (List[Dict]): List of filtered tokens.
+        """
+        filtered_tokens = []
+        for token in tokens:
+            category_by_char = [unicodedata.category(x) for x in token["text"]]
+            all_characters_are_space = all(
+                [c == UNICODE_SPACE_CATEGORY for c in category_by_char]
+            )
+            if not all_characters_are_space:
+                filtered_tokens.append(token)
+        return filtered_tokens
 
     @staticmethod
     def get_char_index_map(raw_text, normalized_text):

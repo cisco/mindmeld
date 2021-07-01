@@ -33,22 +33,6 @@ class Preprocessor(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_char_index_map(self, raw_text, processed_text):
-        """
-        Generates character index mapping from processed query to raw query.
-
-        See the Tokenizer class for a similar implementation.
-
-        Args:
-            raw_text (str)
-            processed_text (str)
-
-        Returns:
-            (dict, dict): A tuple consisting of two maps, forward and backward
-        """
-        pass
-
 
 class NoOpPreprocessor(Preprocessor):
     """
@@ -65,22 +49,6 @@ class NoOpPreprocessor(Preprocessor):
         """
         return text
 
-    def get_char_index_map(self, raw_text, processed_text):
-        """
-        Generates character index mapping from processed query to raw query.
-
-        See the Tokenizer class for a similar implementation.
-
-        Args:
-            raw_text (str)
-            processed_text (str)
-
-        Returns:
-            (dict, dict): A tuple consisting of two maps, forward and backward
-        """
-        # TODO: Give a direct mapping back to the original text, consider removing entirely
-        pass
-
 
 class PreprocessorFactory:
     """Preprocessor Factory Class"""
@@ -96,4 +64,4 @@ class PreprocessorFactory:
         """
         if preprocessor == NoOpPreprocessor.__name__:
             return NoOpPreprocessor()
-        raise AssertionError(f" {preprocessor} is not a valid Preprocssor.")
+        raise AssertionError(f" {preprocessor} is not a valid Preprocessor.")
