@@ -131,6 +131,14 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: Walk-Throughs
+   :name: walkthroughs
+
+   walkthroughs/wt_active_learning
+
+
+.. toctree::
+   :maxdepth: 2
    :caption: API
    :name: internal
 
