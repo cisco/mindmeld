@@ -10,7 +10,7 @@ Step 1: Setup a MindMeld App with Log Resources
 
 The first step for running active learning is to set up your MindMeld app with log data configured for the app. This log data can either be in the form of labelled text files (similar to the train and test files in the app), or an unlabelled text file containing raw text queries across all domains and intents.
 
-For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld paraphraser. This means additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the paraphraser logs. Adding these queries to the train files of the assistant should improve performance of the classifers.
+For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld Data Augmentation pipeline. This means additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the data augmentation logs (files with the patter ``.*augment.txt``. Adding these queries to the train files of the assistant should improve performance of the classifers.
 
 Step 2: Define Active Learning Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,7 +49,7 @@ This section shows the customized active learning part of the configuration file
         "query_selection": {
             "selection_strategy": "EntropySampling",
             "log_usage_pct": 1.00,
-            "labeled_logs_pattern": ,
+            "labeled_logs_pattern": .*augment.*.txt,
             "unlabeled_logs_path": None,
         },
     }
