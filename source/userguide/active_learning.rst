@@ -132,11 +132,11 @@ The goal of the strategy tuning phase in the active learning pipeline is to dete
     :align: center
     :name: strategy_tuning_flow
 
-We partition the existing training data in the app into a `sampled` seed set and `unsampled` set according to the  ``train_seed_pct`` value mentioned in the config file. Note that the pipeline only uses the data from files that match the ``train_pattern`` regex in the config file in this step. The classifiers are trained on this sampled seed data (and evaluated on the existing test data, i.e. files matching ``test_pattern``).
+The existing training data in the app is partitioned into a `sampled` seed set and `unsampled` set according to the  ``train_seed_pct`` value mentioned in the config file. Note that the pipeline only uses the data from files that match the ``train_pattern`` regex in the config file in this step. The classifiers are trained on this sampled seed data (and evaluated on the existing test data, i.e. files matching ``test_pattern``).
 
 Next, the trained classifiers are used to generate a prediction for queries in the unsampled set. This prediction is output in the form of a class probability distribution. This distribution is passed through the sampling or ``tuning_strategies`` to obtain a ranked list of unsampled queries. Based on this ranked list, the top-k queries (k = ``batch_size``) are extracted from the unsampled set and added to the sampled set. Thereby increasing the size of the latter while reducing that of the former.
 
-The classifier models are now retrained with the expanded sampled set and evaluated against the same test set. This process is repeted till all the unsampled training data has been consumed by the sampled set and the final iteration of classifier training is done on this exhaustive sampled set. This tuning process is repeated for ``n_epochs`` (as defined in the config) to obtain average active learning performance.
+The classifier models are now retrained with the expanded sampled set and evaluated against the same test set. This process is repeated until all the unsampled training data has been consumed by the sampled set and the final iteration of classifier training is done on this exhaustive sampled set. This tuning process is repeated for ``n_epochs`` (as defined in the config) to obtain average active learning performance.
 
 Information about unsampled queries selected at each iteration, and the performance of classifiers for each tuning strategy is stored iteratively in the ``output_folder`` directory. For every tuning command run, a new experiment folder is generated in this directory with the performance results and corresponding plots for a better visual understanding of the results.
 
@@ -149,7 +149,6 @@ The following command can be used to run tuning using the settings defined in th
 Flags for application path and output folder are required and overwrite the default configuration settings for active learning. In addition to the aforementioned required flags, the following optional flags can be used - tuning_level, batch_size, n_epochs, train_seed_pct, and plot (default ``True``). These are described in detail in AL config section above.
 
 At the end of the tuning process, results are stored in the ``output_folder``. The ``accuracy.json`` file in the directory ``output_folder/results`` consist of strategy performance on the application's test/evaluation data for every iteration and epoch. ``selected_queries.json`` consists of the same information but instead of evaluation performance, this file records the queries selected at that iteration. the ``output_folder/plots`` directory consists of this quantitative information in a  visual format. The plots record performance of all chosen strategies across data iterations and gives a sense of which strategy is best suited for your application. The same information can be gauged from these results and plots about the best ``tuning_level`` for your application.
-
 
 Now, let us take a look at the different tuning strategies and levels. These hyperparameters are studied at the strategy tuning level with the best ones chosen for query selection based on the quantitative results and plots.
 
@@ -205,9 +204,9 @@ Having obtained optimized hyperparameters through the tuning step, the pipeline 
     :align: center
     :name: query_selection_flow
 
-We get two sets of data inputs for the query selection step, application (train and test) data and user logs. The user logs can either be additionally annotated log files within the MindMeld application hierarchy (see ``labeled_logs_pattern`` in config) or an external text file consisting of log queries (``unlabeled_logs_path``). After processing the data through the active learning data loader, we obtain the train data and log data. Additionally, ``log_usage_pct`` is a configuration setting that can be used to determine what amount of the user logs should be considered for selection. By default we consider all of it.
+Two sets of data inputs are needed for the query selection step, application (train and test) data and user logs. The user logs can either be additionally annotated log files within the MindMeld application hierarchy (see ``labeled_logs_pattern`` in config) or an external text file consisting of log queries (``unlabeled_logs_path``). After processing the data through the active learning data loader, the train data and log data are obtained. Additionally, ``log_usage_pct`` is a configuration setting that can be used to determine what amount of the user logs should be considered for selection. By default all log data is considered available for selection.
 
-At this point, we train our MindMeld NLP model once using the train data. This model is then used to infer predictions on the log data and generate classifier probability distributions for all queries. Note that the classification model used at this step is the ``tuning_level`` determined to be the best performing one at the tuning step.
+At this point, the MindMeld NLP model is trained once using the train data. This model is then used to infer predictions on the log data and generate classifier probability distributions for all queries. Note that the classification model used at this step is the ``tuning_level`` determined to be the best performing one at the tuning step.
 
 The probability distributions for log queries are then passed to the optimized sampling strategy decided at the tuning step. This sampling strategy then ranks and picks the most informative queries from the logs to complete the query selection process. The number of selected queries is determined through the ``batch_size`` flag or configuration parameter (default 100). 
 
