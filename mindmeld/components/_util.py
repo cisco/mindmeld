@@ -14,7 +14,11 @@
 """A module containing various utility functions for MindMeld NLP Components.
 """
 import importlib
+import logging
 from typing import Union, Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 def _is_module_available(module_name: str):
@@ -42,11 +46,22 @@ def _get_module_or_attr(module_name: str, func_name: str = None):
 
 
 class TreeNode:
-    def __init__(self, value: str, parent=None, children=None, allow=None):
-        self.value = value
+    def __init__(self, nlp_name: str, parent=None, children=None, allow=None):
+        """
+        Constructor for the tree node
+        Args:
+            nlp_name: The name of the NLP component
+            parent: The parent of the NLP component. eg. parent of
+                an intent is a domain
+            children: The children of the NLP component. eg.
+                children of an intent are entities
+            allow: If True, the NLP component will be considered for inference,
+                if False, the component will not be considered for inference
+        """
+        self.nlp_name = nlp_name
         self.allow = allow
         self.parent = parent
-        self.children = children
+        self.children = children or []
 
 
 class TreeNlp:
@@ -68,46 +83,40 @@ class TreeNlp:
                         role_node = TreeNode(role, parent=intent_node, allow=allow, children=None)
                         entity_node.children.append(role_node)
 
-    def get_domains(self):
+    @staticmethod
+    def _convert_tree_node_to_values(*nlp_components):
+        result = [None for _ in ['domain', 'intent', 'entity', 'role']]
+        for idx, component in enumerate(nlp_components):
+            component_name = component.nlp_name if isinstance(
+                component, TreeNode) else component
+            result[idx] = component_name
+        return result
+
+    def get_domain_nodes(self):
         return self.root.children or []
 
-    def get_intents(self, domain: Union[str, TreeNode]):
-        if isinstance(domain, TreeNode):
-            domain = domain.value
-
+    def get_intent_nodes(self, domain: Union[str, TreeNode]):
+        domain, _, _, _ = self._convert_tree_node_to_values(domain)
         for domain_node in self.root.children:
-            if domain_node.value == domain:
+            if domain_node.nlp_name == domain:
                 return domain_node.children
         return []
 
-    def get_entities(self, domain: Union[str, TreeNode],
-                     intent: Union[str, TreeNode]):
-
-        if isinstance(domain, TreeNode):
-            domain = domain.value
-
-        if isinstance(intent, TreeNode):
-            intent = intent.value
-
-        for intent_node in self.get_intents(domain):
-            if intent_node.value == intent:
+    def get_entity_nodes(self, domain: Union[str, TreeNode],
+                         intent: Union[str, TreeNode]):
+        domain, intent, _, _ = self._convert_tree_node_to_values(domain, intent)
+        for intent_node in self.get_intent_nodes(domain):
+            if intent_node.nlp_name == intent:
                 return intent_node.children
         return []
 
-    def get_roles(self, domain: Union[str, TreeNode],
-                  intent: Union[str, TreeNode],
-                  entity: Union[str, TreeNode]):
-        if isinstance(domain, TreeNode):
-            domain = domain.value
-
-        if isinstance(intent, TreeNode):
-            intent = intent.value
-
-        if isinstance(entity, TreeNode):
-            entity = entity.value
-
-        for entity_node in self.get_entities(domain, intent):
-            if entity_node.value == entity:
+    def get_role_nodes(self, domain: Union[str, TreeNode],
+                       intent: Union[str, TreeNode],
+                       entity: Union[str, TreeNode]):
+        domain, intent, entity, _ = self._convert_tree_node_to_values(
+            domain, intent, entity)
+        for entity_node in self.get_entity_nodes(domain, intent):
+            if entity_node.nlp_name == entity:
                 return entity_node.children
         return []
 
@@ -116,7 +125,7 @@ class TreeNlp:
                entity: Optional[Union[str, TreeNode]] = None,
                role: Optional[Union[str, TreeNode]] = None):
         """
-        This function updates the NLP tree with mask values
+        This function updates the NLP tree with mask values. Note:
         Args:
             allow: True is mask off, False is mask on
             domain: domain of NLP
@@ -124,45 +133,41 @@ class TreeNlp:
             entity: entity of NLP
             role: role of NLP
         """
+        domain, intent, entity, role = self._convert_tree_node_to_values(
+            domain, intent, entity, role)
+        nlp_components = [domain, intent, entity, role]
+        for i in range(1, len(nlp_components)):
+            if any(not component for component in nlp_components[:i]) and nlp_components[i]:
+                logger.error("Unable to resolve NLP hierarchy since "
+                             "%s does not have an valid ancestor", str(nlp_components[i]))
+                return
 
-        if isinstance(domain, TreeNode):
-            domain = domain.value
-
-        if isinstance(intent, TreeNode):
-            intent = intent.value
-
-        if isinstance(entity, TreeNode):
-            entity = entity.value
-
-        if isinstance(role, TreeNode):
-            role = role.value
-
-        for domain_node in self.get_domains():
-            if domain_node.value != domain:
+        for domain_node in self.get_domain_nodes():
+            if domain_node.nlp_name != domain:
                 continue
 
             if not intent:
                 domain_node.allow = allow
                 return
 
-            for intent_node in self.get_intents(domain):
-                if intent_node.value != intent:
+            for intent_node in self.get_intent_nodes(domain):
+                if intent_node.nlp_name != intent:
                     continue
 
                 if not entity:
                     intent_node.allow = allow
                     return
 
-                for entity_node in self.get_entities(domain, intent):
-                    if entity_node.value != entity:
+                for entity_node in self.get_entity_nodes(domain, intent):
+                    if entity_node.nlp_name != entity:
                         continue
 
                     if not role:
                         entity_node.allow = allow
                         return
 
-                    for role_node in self.get_roles(domain, intent, entity):
-                        if role_node.value != role:
+                    for role_node in self.get_role_nodes(domain, intent, entity):
+                        if role_node.nlp_name != role:
                             continue
 
                         role_node.allow = allow
@@ -186,8 +191,8 @@ class TreeNlp:
         explicitly set or not. This is because of the rule that if all the descendants are masked,
         the parent should be masked as well, even if it's explicitly set to the contrary.
         """
-        for domain in self.get_domains():
-            intents = self.get_intents(domain)
+        for domain in self.get_domain_nodes():
+            intents = self.get_intent_nodes(domain)
 
             # sync down
             if domain.allow is not None:
@@ -196,7 +201,7 @@ class TreeNlp:
                         intent.allow = domain.allow
 
             for intent in intents:
-                entities = self.get_entities(domain, intent)
+                entities = self.get_entity_nodes(domain, intent)
                 # sync down
                 if intent.allow is not None:
                     for entity in entities:
@@ -204,7 +209,7 @@ class TreeNlp:
                             entity.allow = intent.allow
 
                 for entity in entities:
-                    roles = self.get_roles(domain, intent, entity)
+                    roles = self.get_role_nodes(domain, intent, entity)
                     # sync down
                     if entity.allow is not None:
                         for role in roles:
@@ -226,20 +231,23 @@ class TreeNlp:
     def to_dict(self):
         self._sync_nodes()
         result = {}
-        for domain in self.get_domains():
+        for domain in self.get_domain_nodes():
             if not domain.allow:
                 continue
-            result[domain.value] = {}
-            for intent in self.get_intents(domain.value):
+            result[domain.nlp_name] = {}
+            for intent in self.get_intent_nodes(domain.nlp_name):
                 if not intent.allow:
                     continue
-                result[domain.value][intent.value] = {}
-                for entity in self.get_entities(domain.value, intent.value):
+                result[domain.nlp_name][intent.nlp_name] = {}
+                for entity in self.get_entity_nodes(domain.nlp_name,
+                                                    intent.nlp_name):
                     if not entity.allow:
                         continue
-                    result[domain.value][intent.value][entity.value] = {}
-                    for role in self.get_roles(domain.value, intent.value, entity.value):
+                    result[domain.nlp_name][intent.nlp_name][entity.nlp_name] = {}
+                    for role in self.get_role_nodes(domain.nlp_name,
+                                                    intent.nlp_name,
+                                                    entity.nlp_name):
                         if not role.allow:
                             continue
-                        result[domain.value][intent.value][entity.value][role.value] = {}
+                        result[domain.nlp_name][intent.nlp_name][entity.nlp_name][role.nlp_name] = {}
         return result
