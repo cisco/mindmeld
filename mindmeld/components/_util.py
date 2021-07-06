@@ -249,5 +249,6 @@ class TreeNlp:
                                                     entity.nlp_name):
                         if not role.allow:
                             continue
-                        result[domain.nlp_name][intent.nlp_name][entity.nlp_name][role.nlp_name] = {}
+                        result[domain.nlp_name][intent.nlp_name][
+                            entity.nlp_name][role.nlp_name] = {}
         return result

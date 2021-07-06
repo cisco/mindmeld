@@ -13,6 +13,7 @@
 
 """This module contains the system entity recognizer."""
 import logging
+import warnings
 
 from .system_entity_recognizer import DucklingRecognizer
 
@@ -39,9 +40,8 @@ def get_candidates(
     Returns:
         list of QueryEntity: The system entities found in the query
     """
-    logger.warning(
-        "get_candidates is deprecated in favor of DucklingRecognizer.get_candidates."
-    )
+    msg = "get_candidates is deprecated in favor of DucklingRecognizer.get_candidates."
+    warnings.warn(msg)
     return DucklingRecognizer.get_instance().get_candidates(
         query,
         entity_types=entity_types,
@@ -63,10 +63,9 @@ def get_candidates_for_text(text, entity_types=None, language=None, locale=None)
     Returns:
         list of dict: The system entities found in the text
     """
-    logger.warning(
-        "get_candiates_for_text is deprecated in favor of"
-        " DucklingRecognizer.get_candidates_for_text."
-    )
+    msg = "get_candiates_for_text is deprecated in favor of" \
+          " DucklingRecognizer.get_candidates_for_text."
+    warnings.warn(msg)
     return DucklingRecognizer.get_instance().get_candidates_for_text(
         text, entity_types=entity_types, language=language, locale=locale
     )
@@ -104,7 +103,8 @@ def parse_numerics(
             dict, corresponding to a single prediction.
             - response_code (int): http status code.
     """
-    logger.warning("parse_numerics is deprecated in favor of DucklingRecognizer.parse.")
+    msg = "parse_numerics is deprecated in favor of DucklingRecognizer.parse."
+    warnings.warn(msg)
     return DucklingRecognizer.get_instance().parse(
         sentence,
         dimensions=dimensions,
@@ -129,7 +129,7 @@ def resolve_system_entity(query, entity_type, span):
     Raises:
         SystemEntityResolutionError
     """
-    logger.warning(
-        "resolve_system_entity is deprecated in favor of DucklingRecognizer.resolve_system_entity."
-    )
+    msg = "resolve_system_entity is deprecated in favor " \
+          "of DucklingRecognizer.resolve_system_entity."
+    warnings.warn(msg)
     return DucklingRecognizer.get_instance().resolve_system_entity(query, entity_type, span)
