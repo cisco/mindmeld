@@ -14,6 +14,7 @@
 """
 This module contains the query cache implementation.
 """
+from distutils.util import strtobool
 from functools import lru_cache
 from hashlib import sha256
 import json
@@ -40,8 +41,9 @@ class QueryCache:
             os.makedirs(gen_folder)
 
         db_file_location = QUERY_CACHE_DB_PATH.format(app_path=app_path)
-        self.connection = sqlite3.connect(db_file_location)
-        cursor = self.connection.cursor()
+        self.disk_connection = sqlite3.connect(db_file_location)
+
+        cursor = self.disk_connection.cursor()
 
         if not self.compatible_version():
             cursor.execute("""
@@ -63,7 +65,15 @@ class QueryCache:
         cursor.execute("""
         INSERT OR IGNORE INTO version values (?);
         """, (ProcessedQuery.version,))
-        self.connection.commit()
+        self.disk_connection.commit()
+
+        in_memory = bool(strtobool(os.environ.get("MM_IN_MEMORY_QUERY_CACHE", "1").lower()))
+
+        if in_memory:
+            self.memory_connection = sqlite3.connect(":memory:")
+            self.disk_connection.backup(self.memory_connection)
+        else:
+            self.memory_connection = None
 
     def compatible_version(self):
         """
@@ -71,7 +81,7 @@ class QueryCache:
         matches the current data version.
         """
 
-        cursor = self.connection.cursor()
+        cursor = self.disk_connection.cursor()
         try:
             cursor.execute("""
             SELECT version_number FROM version WHERE version_number=(?)
@@ -104,6 +114,10 @@ class QueryCache:
         h.update(query_text.encode())
         return h.hexdigest()
 
+    @property
+    def connection(self):
+        return self.memory_connection or self.disk_connection
+
     def key_to_row_id(self, key):
         """
         Args:
@@ -130,16 +144,24 @@ class QueryCache:
             integer: The unique id of the query in the cache.
         """
 
-        cursor = self.connection.cursor()
-        cursor.execute("""
-        INSERT OR IGNORE into queries values (?, ?, ?, ?, ?)
-        """, (key,
-              json.dumps(processed_query.to_cache()),
-              processed_query.query.text,
-              processed_query.domain,
-              processed_query.intent,
-              ))
-        self.connection.commit()
+        data = json.dumps(processed_query.to_cache())
+
+        def commit_to_db(connection):
+            if connection:
+                cursor = connection.cursor()
+                cursor.execute("""
+                INSERT OR IGNORE into queries values (?, ?, ?, ?, ?)
+                """, (key,
+                      data,
+                      processed_query.query.text,
+                      processed_query.domain,
+                      processed_query.intent,
+                      ))
+                connection.commit()
+
+        commit_to_db(self.disk_connection)
+        commit_to_db(self.memory_connection)
+
         return self.key_to_row_id(key)
 
     @lru_cache(maxsize=1)
