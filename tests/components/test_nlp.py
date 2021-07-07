@@ -352,13 +352,14 @@ def test_disallowed_entities(kwik_e_mart_nlp):
     assert res['intent'] == 'get_store_hours'
     assert 'sys_time' not in {entity['type'] for entity in res['entities']}
 
-    # If all entities in an intent are denied, that intent is also denied.
+    # If all entities in an intent are denied, the intent is NOT denied but
+    # the entities are denied
     res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
                                   "possibly open at this time on friday",
                                   allow_nlp=["store_info"],
                                   deny_nlp=["store_info.get_store_hours.sys_time",
                                             "store_info.get_store_hours.store_name"])
-    assert res['intent'] != 'get_store_hours'
+    assert res['intent'] == 'get_store_hours'
     assert 'sys_time' not in {entity['type'] for entity in res['entities']}
     assert 'store_name' not in {entity['type'] for entity in res['entities']}
 
@@ -369,10 +370,19 @@ def test_disallowed_entities(kwik_e_mart_nlp):
     assert res['domain'] == 'store_info'
     assert res['intent'] != 'get_store_hours'
 
+    # We fail open here since allow_nlp and deny_nlp are the same
     res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
                                   "possibly open at this time on friday",
                                   allow_nlp=["store_info", "banking.transfer_money"],
                                   deny_nlp=["store_info", "banking.transfer_money"])
+    assert res['domain'] == 'store_info'
+    assert 'sys_time' in {entity['type'] for entity in res['entities']}
+
+    # We fail open here since allow_nlp is a subset of deny_nlp
+    res = kwik_e_mart_nlp.process("please can you tell me if springfield is "
+                                  "possibly open at this time on friday",
+                                  allow_nlp=["store_info.get_store_hours"],
+                                  deny_nlp=["store_info"])
     assert res['domain'] == 'store_info'
     assert 'sys_time' in {entity['type'] for entity in res['entities']}
 
@@ -819,7 +829,7 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
     response = kwik_e_mart_nlp.process(
         query,
         dynamic_resource=dyn_gaz,
-        allowed_nlp_classes={"store_info": {"get_store_hours": {}}},
+        allowed_nlp_classes={"store_info": {"get_store_hours": {"store_name": {}, "sys_time": {}}}},
     )
     if dyn_gaz:
         assert (

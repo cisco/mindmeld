@@ -15,8 +15,9 @@
 """
 import importlib
 import logging
-from typing import Union, Optional
-
+import enum
+from typing import Union, Optional, List
+from ..exceptions import InvalidMaskError
 
 logger = logging.getLogger(__name__)
 
@@ -45,42 +46,54 @@ def _get_module_or_attr(module_name: str, func_name: str = None):
     return getattr(m, func_name)
 
 
+class MaskState(enum.Enum):
+    unset = enum.auto()
+    allow = enum.auto()
+    deny = enum.auto()
+
+    def __bool__(self):
+        return self == self.allow
+
+
 class TreeNode:
-    def __init__(self, nlp_name: str, parent=None, children=None, allow=None):
+    def __init__(self, nlp_name: str,
+                 parent: Optional['TreeNode'] = None,
+                 children: Optional[List['TreeNode']] = None,
+                 mask_state: Optional[MaskState] = None):
         """
         Constructor for the tree node
         Args:
-            nlp_name: The name of the NLP component
+            nlp_name: The name of the NLP component. eg. "weather"
+                is a name for a domain
             parent: The parent of the NLP component. eg. parent of
                 an intent is a domain
             children: The children of the NLP component. eg.
                 children of an intent are entities
-            allow: If True, the NLP component will be considered for inference,
-                if False, the component will not be considered for inference
+            mask_state: The mask state of the NLP component
         """
         self.nlp_name = nlp_name
-        self.allow = allow
+        self.mask_state = mask_state
         self.parent = parent
         self.children = children or []
 
 
 class TreeNlp:
-    def __init__(self, nlp, allow=None):
+    def __init__(self, nlp, mask_state=MaskState.unset):
         # root
-        self.root = TreeNode('root', allow=allow, children=[])
+        self.root = TreeNode('root', mask_state=mask_state)
         # construct NLP tree
         for domain in nlp.domains:
-            domain_node = TreeNode(domain, parent=self.root, allow=allow, children=[])
+            domain_node = TreeNode(domain, parent=self.root, mask_state=mask_state)
             self.root.children.append(domain_node)
             for intent in nlp.domains[domain].intents:
-                intent_node = TreeNode(intent, parent=domain_node, allow=allow, children=[])
+                intent_node = TreeNode(intent, parent=domain_node, mask_state=mask_state)
                 domain_node.children.append(intent_node)
                 entities = nlp.domains[domain].intents[intent].entities
                 for entity in entities:
-                    entity_node = TreeNode(entity, parent=intent_node, allow=allow, children=[])
+                    entity_node = TreeNode(entity, parent=intent_node, mask_state=mask_state)
                     intent_node.children.append(entity_node)
                     for role in entities[entity].role_classifier.roles:
-                        role_node = TreeNode(role, parent=intent_node, allow=allow, children=None)
+                        role_node = TreeNode(role, parent=intent_node, mask_state=mask_state)
                         entity_node.children.append(role_node)
 
     @staticmethod
@@ -120,57 +133,60 @@ class TreeNlp:
                 return entity_node.children
         return []
 
-    def update(self, allow: bool, domain: Union[str, TreeNode],
+    def update(self, mask_state: bool,
+               domain: Union[str, TreeNode],
                intent: Optional[Union[str, TreeNode]] = None,
                entity: Optional[Union[str, TreeNode]] = None,
                role: Optional[Union[str, TreeNode]] = None):
         """
         This function updates the NLP tree with mask values. Note:
         Args:
-            allow: True is mask off, False is mask on
+            mask_state: True is mask off, False is mask on
             domain: domain of NLP
             intent: intent of NLP
             entity: entity of NLP
             role: role of NLP
         """
-        domain, intent, entity, role = self._convert_tree_node_to_values(
+        domain_name, intent_name, entity_name, role_name = self._convert_tree_node_to_values(
             domain, intent, entity, role)
-        nlp_components = [domain, intent, entity, role]
+
+        # validation check
+        nlp_components = [domain_name, intent_name, entity_name, role_name]
         for i in range(1, len(nlp_components)):
             if any(not component for component in nlp_components[:i]) and nlp_components[i]:
-                logger.error("Unable to resolve NLP hierarchy since "
-                             "%s does not have an valid ancestor", str(nlp_components[i]))
-                return
+                raise InvalidMaskError(
+                    f"Unable to resolve NLP hierarchy since "
+                    f"{str(nlp_components[i])} does not have an valid ancestor")
 
         for domain_node in self.get_domain_nodes():
-            if domain_node.nlp_name != domain:
+            if domain_node.nlp_name != domain_name:
                 continue
 
-            if not intent:
-                domain_node.allow = allow
+            if not intent_name:
+                domain_node.mask_state = mask_state
                 return
 
-            for intent_node in self.get_intent_nodes(domain):
-                if intent_node.nlp_name != intent:
+            for intent_node in self.get_intent_nodes(domain_name):
+                if intent_node.nlp_name != intent_name:
                     continue
 
-                if not entity:
-                    intent_node.allow = allow
+                if not entity_name:
+                    intent_node.mask_state = mask_state
                     return
 
-                for entity_node in self.get_entity_nodes(domain, intent):
-                    if entity_node.nlp_name != entity:
+                for entity_node in self.get_entity_nodes(domain_name, intent_name):
+                    if entity_node.nlp_name != entity_name:
                         continue
 
-                    if not role:
-                        entity_node.allow = allow
+                    if not role_name:
+                        entity_node.mask_state = mask_state
                         return
 
-                    for role_node in self.get_role_nodes(domain, intent, entity):
-                        if role_node.nlp_name != role:
+                    for role_node in self.get_role_nodes(domain_name, intent_name, entity_name):
+                        if role_node.nlp_name != role_name:
                             continue
 
-                        role_node.allow = allow
+                        role_node.mask_state = mask_state
                         return
 
     def _sync_nodes(self):
@@ -195,59 +211,60 @@ class TreeNlp:
             intents = self.get_intent_nodes(domain)
 
             # sync down
-            if domain.allow is not None:
+            if domain.mask_state != MaskState.unset:
                 for intent in intents:
-                    if intent.allow is None:
-                        intent.allow = domain.allow
+                    if intent.mask_state == MaskState.unset:
+                        intent.mask_state = domain.mask_state
 
             for intent in intents:
                 entities = self.get_entity_nodes(domain, intent)
                 # sync down
-                if intent.allow is not None:
+                if intent.mask_state != MaskState.unset:
                     for entity in entities:
-                        if entity.allow is None:
-                            entity.allow = intent.allow
+                        if entity.mask_state == MaskState.unset:
+                            entity.mask_state = intent.mask_state
 
                 for entity in entities:
                     roles = self.get_role_nodes(domain, intent, entity)
                     # sync down
-                    if entity.allow is not None:
+                    if entity.mask_state != MaskState.unset:
                         for role in roles:
-                            if role.allow is None:
-                                role.allow = entity.allow
+                            if role.mask_state == MaskState.unset:
+                                role.mask_state = entity.mask_state
 
-                    # sync up
-                    if roles and all(role.allow is False for role in roles):
-                        entity.allow = False
+                    # sync up entity-role
+                    if roles and all(role.mask_state == MaskState.deny for role in roles):
+                        entity.mask_state = MaskState.deny
 
-                # sync up
-                if entities and all(entity.allow is False for entity in entities):
-                    intent.allow = False
+                # We do not perform sync ups for entities since tagger models cannot
+                # deny their parent text classification models. For example,
+                # just because the developer wants to deny all the entities in a particular
+                # intent, doesn't mean the intent should be denied as well.
 
-            # sync up
-            if intents and all(intent.allow is False for intent in intents):
-                domain.allow = False
+            # sync up domain-intent
+            if intents and all(intent.mask_state == MaskState.deny for intent in intents):
+                domain.mask_state = MaskState.deny
 
     def to_dict(self):
         self._sync_nodes()
         result = {}
         for domain in self.get_domain_nodes():
-            if not domain.allow:
+            if not domain.mask_state:
                 continue
             result[domain.nlp_name] = {}
             for intent in self.get_intent_nodes(domain.nlp_name):
-                if not intent.allow:
+                if not intent.mask_state:
                     continue
                 result[domain.nlp_name][intent.nlp_name] = {}
                 for entity in self.get_entity_nodes(domain.nlp_name,
                                                     intent.nlp_name):
-                    if not entity.allow:
+                    if not entity.mask_state:
                         continue
                     result[domain.nlp_name][intent.nlp_name][entity.nlp_name] = {}
                     for role in self.get_role_nodes(domain.nlp_name,
                                                     intent.nlp_name,
                                                     entity.nlp_name):
-                        if not role.allow:
+                        if not role.mask_state:
                             continue
                         result[domain.nlp_name][intent.nlp_name][
                             entity.nlp_name][role.nlp_name] = {}

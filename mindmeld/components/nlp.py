@@ -32,6 +32,8 @@ from ..exceptions import (
     AllowedNlpClassesKeyError,
     MindMeldImportError,
     ProcessorError,
+    UnconstrainedMaskError,
+    InvalidMaskError,
 )
 from ..markup import TIME_FORMAT, process_markup
 from ..path import get_app
@@ -47,7 +49,7 @@ from .entity_recognizer import EntityRecognizer
 from .entity_resolver import EntityResolverFactory, ElasticsearchConnectionError
 from .intent_classifier import IntentClassifier
 from .parser import Parser
-from ._util import TreeNlp
+from ._util import TreeNlp, MaskState
 from .role_classifier import RoleClassifier
 from .schemas import validate_locale_code_with_ref_language_code, \
     _validate_allowed_intents, _validate_mask_nlp
@@ -687,15 +689,17 @@ class NaturalLanguageProcessor(Processor):
         Returns:
             (dict): A dictionary of NLP hierarchy.
         """
+        # If no allowed nlp component list is provided, we default to allowing
+        # ALL nlp components
         allow_nlp_components_list = allow_nlp_components_list or list(self.domains.keys())
         deny_nlp_components_list = deny_nlp_components_list or []
-        nlp_tree = TreeNlp(self, None)
+        nlp_tree = TreeNlp(self, MaskState.unset)
         allow_nlp_components_list, deny_nlp_components_list = _validate_mask_nlp(
             allow_nlp_components_list, deny_nlp_components_list, self)
-        allow_deny_nlp_components = [[allow_nlp_components_list, True],
-                                     [deny_nlp_components_list, False]]
-        for nlp_components_list, action in allow_deny_nlp_components:
-            for nlp_components in nlp_components_list:
+        user_defined_masks = [[allow_nlp_components_list, MaskState.allow],
+                              [deny_nlp_components_list, MaskState.deny]]
+        for user_defined_mask, action in user_defined_masks:
+            for nlp_components in user_defined_mask:
                 nlp_entries = [None, None, None, None]
                 entries = nlp_components.split(".")[:len(nlp_entries)]
                 for idx, entry in enumerate(entries):
@@ -705,9 +709,10 @@ class NaturalLanguageProcessor(Processor):
 
         allow_nlp_components = nlp_tree.to_dict()
         if not allow_nlp_components:
-            logger.warning("Since %s masks more NLP components than %s "
-                           "allows, we unmask all NLP components",
-                           deny_nlp_components_list, allow_nlp_components_list)
+            raise UnconstrainedMaskError(
+                f"Since {deny_nlp_components_list} masks more "
+                f"NLP components than {allow_nlp_components_list} "
+                "allows, we unmask all NLP components")
 
         return allow_nlp_components
 
@@ -831,10 +836,10 @@ class NaturalLanguageProcessor(Processor):
         if allow_nlp or deny_nlp:
             try:
                 allowed_nlp_classes = self.extract_nlp_masked_components_list(allow_nlp, deny_nlp)
-            except AllowedNlpClassesKeyError as e:
+            except (AllowedNlpClassesKeyError, UnconstrainedMaskError, InvalidMaskError) as e:
                 # We catch and fail open here since this uncaught exception can fail the API call
                 logger.error("Caught exception %s when extracting nlp components from the "
-                             "allowed_intents field", e.message)
+                             "allow/deny nlp field", e.message)
                 allowed_nlp_classes = {}
 
         return super().process(
@@ -1449,7 +1454,10 @@ class IntentProcessor(Processor):
 
         processed_entities = []
         for entity in entities[0]:
-            if not allowed_nlp_classes or entity.entity.type in allowed_nlp_classes:
+            # allowed_nlp_classes is None when user defined masks are not used, in which
+            # case all entities are allowed. However, if user defined masks are used and
+            # the entity is not included, we mask off that entity
+            if allowed_nlp_classes is None or entity.entity.type in allowed_nlp_classes:
                 processed_entities.append(deepcopy(entity))
         processed_entities_conf = self._process_list(
             list(range(len(processed_entities))),
