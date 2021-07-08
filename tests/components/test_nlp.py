@@ -206,6 +206,29 @@ test_data_10 = [
         ["times_and_dates.change_alarm.sys_time"],
         {'times_and_dates': {'change_alarm': {'sys_time': {'old_time': {}, 'new_time': {}}}}},
     ),
+    (
+        ["times_and_dates.*"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}},
+                                              'sys_interval': {'old_time': {}}}}}
+    ),
+    (
+        ["smart_home.*"],
+        {'smart_home': {'set_thermostat': {'all': {}, 'sys_time': {}, 'sys_interval': {},
+                                           'location': {}, 'sys_temperature':
+                                               {'room_temperature': {}}}}}
+    ),
+    (
+        ["smart_home.*.sys_temperature", "times_and_dates.change_alarm.*"],
+        {'times_and_dates': {'change_alarm': {'sys_interval': {'old_time': {}},
+                                              'sys_time': {'old_time': {}, 'new_time': {}}}},
+         'smart_home': {'set_thermostat': {'sys_temperature': {'room_temperature': {}}}}},
+    ),
+    (
+        ["feedback.compliment", "times_and_dates.change_alarm.*"],
+        {'times_and_dates': {'change_alarm': {'sys_interval': {'old_time': {}},
+                                              'sys_time': {'old_time': {}, 'new_time': {}}}},
+         'feedback': {'compliment': {}}},
+    ),
 ]
 
 
@@ -218,6 +241,45 @@ def test_nlp_hierarchy_for_allowed_intents(
     """Tests user specified domain and intent biases"""
     extracted_intents = home_assistant_nlp.extract_nlp_masked_components_list(allowed_intents)
     assert extracted_intents == expected_nlp_hierarchy
+
+
+test_data_110 = [
+    (
+        ["times_and_dates.change_alarm"], ["times_and_dates.change_alarm.sys_time.new_time"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'old_time': {}},
+                                              'sys_interval': {'old_time': {}}}}},
+    ),
+    (
+        ["smart_home.set_thermostat"], ["smart_home.set_thermostat.sys_temperature",
+                                        "smart_home.set_thermostat.location"],
+        {'smart_home': {'set_thermostat': {'sys_interval': {}, 'all': {}, 'sys_time': {}}}},
+    ),
+    (
+        [], ["smart_home.set_thermostat"],
+        {'times_and_dates': {'change_alarm': {'sys_time': {'new_time': {}, 'old_time': {}},
+                                              'sys_interval': {'old_time': {}}}},
+         'feedback': {'insult': {}, 'compliment': {}}},
+    ),
+    (
+        [], ["smart_home.set_thermostat.sys_temperature"],
+        {'smart_home': {'set_thermostat': {'location': {}, 'all': {}, 'sys_interval': {},
+                                           'sys_time': {}}},
+         'feedback': {'insult': {}, 'compliment': {}},
+         'times_and_dates': {'change_alarm': {'sys_interval': {'old_time': {}},
+                                              'sys_time': {'new_time': {}, 'old_time': {}}}}},
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "allow_nlp,deny_nlp,expected_nlp_hierarchy", test_data_110
+)
+def test_nlp_hierarchy_for_allow_deny_nlp(
+    home_assistant_nlp, allow_nlp, deny_nlp, expected_nlp_hierarchy
+):
+    """Tests user specified domain and intent biases"""
+    extracted_nlp = home_assistant_nlp.extract_nlp_masked_components_list(allow_nlp, deny_nlp)
+    assert extracted_nlp == expected_nlp_hierarchy
 
 
 test_data_2 = [
