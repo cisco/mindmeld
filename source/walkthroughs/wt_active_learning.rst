@@ -87,6 +87,8 @@ For this experiment, we show results across the domain tuning level. For changin
                     "overall": 0.8872727272727273
                 }
             },
+        }
+
 
 .. code-block:: json
 
@@ -114,6 +116,9 @@ For this experiment, we show results across the domain tuning level. For changin
                     "intent": "get_info"
                 },
                 ...
+                ]
+            }
+        }
 
 The selected queries are stored both with the entity annotations and just as raw text, along with the domain and intent classification labels.
 
