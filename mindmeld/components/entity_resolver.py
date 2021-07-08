@@ -145,9 +145,16 @@ class EntityResolverFactory:
         resolver_type = er_config["model_settings"]["resolver_type"]
         cls._validate_resolver_type(resolver_type)
 
-        resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path=app_path)
+        resource_loader = (
+            resource_loader or ResourceLoader.create_resource_loader(app_path=app_path)
+        )
 
-        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(app_path, entity_type=entity_type, config=er_config, resource_loader=resource_loader, **kwargs)
+        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
+            app_path,
+            entity_type=entity_type,
+            config=er_config,
+            resource_loader=resource_loader,
+            **kwargs)
 
 
 class BaseEntityResolver(ABC):
