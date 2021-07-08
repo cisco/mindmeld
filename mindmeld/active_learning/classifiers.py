@@ -458,7 +458,19 @@ class MindMeldALClassifier(ALClassifier):
             ic.fit(queries=filtered_sampled_queries)
             # Evaluate Test Queries
             ic_eval_test = ic.evaluate(queries=filtered_test_queries)
+
             if not ic_eval_test:
+                # Check for intent classifier edge cases
+                if len(domain_to_intent2id[domain]) == 1:
+                    logger.warning(
+                        "Only one intent in domain '%s', use domain level tuning instead.",
+                        domain,
+                    )
+                else:
+                    logger.warning(
+                        "Missing test files in domain '%s', use domain level tuning instead.",
+                        domain,
+                    )
                 unsampled_idx_preds_pairs.extend(
                     (i, np.zeros(len(self.intent2idx)))
                     for i in filtered_unsampled_queries_indices
@@ -485,6 +497,7 @@ class MindMeldALClassifier(ALClassifier):
                         padded_ic_queries_prob_vectors[i],
                     )
                 )
+
         unsampled_idx_preds_pairs.sort(key=lambda x: x[0])
         padded_ic_queries_prob_vectors = [x[1] for x in unsampled_idx_preds_pairs]
         return padded_ic_queries_prob_vectors, ic_eval_test_dict

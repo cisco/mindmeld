@@ -132,7 +132,7 @@ The goal of the strategy tuning phase in the active learning pipeline is to dete
     :align: center
     :name: strategy_tuning_flow
 
-The existing training data in the app is partitioned into a `sampled` seed set and `unsampled` set according to the  ``train_seed_pct`` value mentioned in the config file. Note that the pipeline only uses the data from files that match the ``train_pattern`` regex in the config file in this step. The classifiers are trained on this sampled seed data (and evaluated on the existing test data, i.e. files matching ``test_pattern``).
+The existing training data in the app is partitioned into a `sampled` seed set and `unsampled` set according to the  ``train_seed_pct`` value mentioned in the config file. Data is evenly sampled at the ``train_seed_pct`` value across the domains to maintain class balance in the seed dataset. Note that the pipeline only uses the data from files that match the ``train_pattern`` regex in the config file in this step. The classifiers are trained on this sampled seed data (and evaluated on the existing test data, i.e. files matching ``test_pattern``).
 
 Next, the trained classifiers are used to generate a prediction for queries in the unsampled set. This prediction is output in the form of a class probability distribution. This distribution is passed through the sampling or ``tuning_strategies`` to obtain a ranked list of unsampled queries. Based on this ranked list, the top-k queries (k = ``batch_size``) are extracted from the unsampled set and added to the sampled set. Thereby increasing the size of the latter while reducing that of the former.
 
@@ -260,4 +260,4 @@ Query selection
     
     * Running these commands without defining a custom active learning configuration in ``config.py`` would result in the use of a default configuration. The custom configuration settings and MindMeld's default active learning configuration are explained in the next section.
     
-    * Accuracy and query selection results can be found in the directory ``<output_folder>/<experiment_folder>/results`` in files ``accuracies.json`` and ``selected_queries.json`` respectively. Plots for the tuning results are saved in ``<output_folder>/<experiment_folder>/plots``. The experiment directory is unique to every tuning command run.
+    * The results include two files for every tuning run, one to store the evaluation results across iterations and epochs against the test data and another file indicating the queries that were selected at each iteration. These evaluation and query selection results can be found in the directory ``hr_assistant_active_learning/<experiment_folder>/results`` in files ``accuracies.json`` and ``selected_queries.json`` respectively. Plots for the tuning results are saved in ``hr_assistant_active_learning/<experiment_folder>/plots``. The experiment directory is unique to every tuning command run.
