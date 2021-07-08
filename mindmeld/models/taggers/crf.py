@@ -14,7 +14,9 @@
 """
 This module contains the CRF entity recognizer.
 """
+from distutils.util import strtobool
 import logging
+import os
 
 import numpy as np
 from sklearn_crfsuite import CRF
@@ -25,6 +27,10 @@ from ..helpers import FileBackedList
 logger = logging.getLogger(__name__)
 
 ZERO = 1e-20
+
+IN_MEMORY_FEATURES = bool(
+    strtobool(os.environ.get("MM_CRF_FEATURES_IN_MEMORY", "1").lower())
+)
 
 
 class ConditionalRandomFields(Tagger):
@@ -78,7 +84,13 @@ class ConditionalRandomFields(Tagger):
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
-    def extract_features(self, examples, config, resources, y=None, fit=False, in_memory=False):
+    def extract_features(self,
+                         examples,
+                         config,
+                         resources,
+                         y=None,
+                         fit=False,
+                         in_memory=IN_MEMORY_FEATURES):
         """Transforms a list of examples into a feature matrix.
 
         Args:
