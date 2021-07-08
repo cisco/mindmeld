@@ -393,6 +393,11 @@ class MindMeldALClassifier(ALClassifier):
             dc_eval_test (mindmeld.models.model.StandardModelEvaluation): Mindmeld evaluation
                 object for the domain classifier.
         """
+        # Check for domain classifier edge case
+        if len(domain2id) == 1:
+            raise ValueError(
+                "Only one domain present, use intent level tuning instead.",
+            )
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
         dc_eval_test = dc.evaluate(queries=test_queries)
@@ -462,20 +467,18 @@ class MindMeldALClassifier(ALClassifier):
             if not ic_eval_test:
                 # Check for intent classifier edge cases
                 if len(domain_to_intent2id[domain]) == 1:
-                    logger.warning(
-                        "Only one intent in domain '%s', use domain level tuning instead.",
-                        domain,
+                    raise ValueError(
+                        "Only one intent in domain '{!s}', use domain level tuning instead.".format(
+                            domain
+                        )
                     )
                 else:
-                    logger.warning(
-                        "Missing test files in domain '%s', use domain level tuning instead.",
-                        domain,
+                    raise ValueError(
+                        "Missing test files in domain '{!s}', use domain level tuning instead.".format(
+                            domain
+                        )
                     )
-                unsampled_idx_preds_pairs.extend(
-                    (i, np.zeros(len(self.intent2idx)))
-                    for i in filtered_unsampled_queries_indices
-                )
-                continue
+
             ic_eval_test_dict[domain] = ic_eval_test
             # Get Probability Vectors
             ic_queries_prob_vectors = MindMeldALClassifier._get_probs(
