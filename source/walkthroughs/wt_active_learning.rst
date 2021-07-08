@@ -3,19 +3,19 @@ Step-by-Step Guide to Active Learning with Log Data in MindMeld
 
 Active Learning is an approach to continuously and iteratively pick data that is most informative for the models to train on from a pool of unlabelled data-points. By picking such data-points, active learning provides a higher chance of improving the accuracy of the model with fewer training examples. It also greatly reduces the number of queries to be annotated by humans. MindMeld provides this inbuilt functionality to select these must-have queries from existing data or additional logs and datasets to get the best out of your conversational applications.
 
-The following step-by-step guide will use the HR Assistant blueprint for showcasing MindMeld's active learning functionality and the different customizations involved.
+The following step-by-step guide will use the :doc:`HR Assistant <../blueprints/hr_assistant>` blueprint for showcasing MindMeld's active learning functionality and the different customizations involved.
 
 Step 1: Setup a MindMeld App with Log Resources
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first step for running active learning is to set up your MindMeld app with log data configured for the app. This log data can either be in the form of labelled text files (similar to the train and test files in the app), or an unlabelled text file containing raw text queries across all domains and intents.
 
-For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld Data Augmentation pipeline. This means additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the data augmentation logs (files with the pattern ``train-augmented.txt``. Adding these queries to the train files of the assistant can improve performance of the classifers.
+For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld :doc:`Data Augmentation <../userguide/augmentation>` pipeline. This means additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the data augmentation logs (files with the pattern ``train-augmented.txt``). Adding these queries to the train files of the assistant can improve performance of the classifers.
 
 Step 2: Define Active Learning Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This section shows the customized active learning part of the configuration file ``config.py`` for the HR Assistant app.
+This section shows the customized active learning configuration setting in ``config.py`` for the HR Assistant app. A detailed description for each of the components can be found :ref:`here <al_config>`.
 
 .. code-block:: python
 
@@ -56,24 +56,24 @@ This section shows the customized active learning part of the configuration file
 
 We will breakdown the different components of this config in their respective steps.
 
-The ``"output_folder"`` here refers to a directory that will house all saved results from the active learning tuning and selection steps.
+The ``"output_folder"`` refers to a directory that will house all saved results from the active learning tuning and selection steps.
 
 Step 3: Run Strategy Tuning and Evaluate Hyperparameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before we jump into tuning, let's discuss the ``pre_tuning`` configurations. This section covers the data patterns that the active lerning pipeline ingests. The ``train_pattern`` is a regex field to provide the set of files across domains and intents that can be chosen as training files for the classifier. The ``test_pattern`` similarly represents the test files for the classfier that are used for iterative model evaluation and performance comparisons. The ``train_seed_pct`` is the percentage of training data that is used as the seed for training the initial model. This data is evenly sampled across domains and the rest is unsampled, to be used in the tuning process.
 
-For the tuning step (add link), the following command is run:
+For the :ref:`al_strategy_tuning` step, the following command is run:
 
 .. code-block:: console
     
     mindmeld active_learning --tune --app-path "hr_assistant" --output_folder "hr_assistant_active_learning"
 
-This runs the tuning process for all the sampling strategies specified under ``tuning_strategies`` subconfig in the ``tuning`` configuration. It repeats the process for ``n_epochs`` and generates results and plots in a folder within the output directory. 
+This runs the tuning process for all the :ref:`sampling strategies <sampling_strategies>` specified under ``tuning_strategies`` subconfig in the ``tuning`` configuration. It repeats the process for ``n_epochs`` and generates results and plots in a folder within the output directory. 
 
 The results include two files for every tuning run, one to store the evaluation results across iterations and epochs against the test data and another file indicating the queries that were selected at each iteration. These evaluation and query selection results can be found in the directory ``hr_assistant_active_learning/<experiment_folder>/results`` in files ``accuracies.json`` and ``selected_queries.json`` respectively. Plots for the tuning results are saved in ``hr_assistant_active_learning/<experiment_folder>/plots``. The experiment directory is unique to every tuning command run.
 
-For this experiment, we show results across the domain tuning level. For changing to intent level active learning, the ``tuning_level`` can be set to 'intent' in the config while keeping the rest of the experiment the same. The next couple of blocks show how results for a single iteration of the Least Confidence Sampling heuristic are stored in the ``accuracies.json`` and ``selected_queries.json`` respectively.
+Next, one of two :ref:`tuning levels <tuning_levels>` need to be set for the pipeline. For this experiment, we show results across the domain tuning level. For changing to intent level active learning, the ``tuning_level`` can be set to 'intent' in the config while keeping the rest of the experiment the same. The next couple of blocks show how results for a single iteration of the Least Confidence Sampling heuristic are stored in the ``accuracies.json`` and ``selected_queries.json`` respectively.
 
 .. code-block:: json
 
@@ -141,7 +141,7 @@ Looking at these results, one can decide on the best strategy for the 'Query Sel
 Step 4: Select Best Queries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once the hyperparamters are set, we can use the active learning pipeline to select best queries from user logs. To generate synthetic logs for the HR assistant blueprint application, we use MindMeld's data augmentation capabilities. First we add the following config:
+Once the hyperparamters are set, the :ref:`query_selection` step of the active learning pipeline is used to select best queries from user logs. To generate synthetic logs for the HR assistant blueprint application, we use MindMeld's data augmentation capabilities. First we add the following config:
 
 
 .. code-block:: python

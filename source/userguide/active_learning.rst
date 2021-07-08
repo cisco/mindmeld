@@ -16,6 +16,7 @@ Say for a query A from the logs, the selected class (or the highest probability 
 
 There are two phases in MindMeld's active learning pipeline. One for configuring the best hyperparamters (such as optimal strategy) for the pipeline and the other for selecting the most important subset of queries from logs given the configured pipeline. These phases are referred to as ``Strategy Tuning`` and ``Query Selection``. Before diving deeper into these phases, let us take a look at the configuration for setting up MindMeld's active learning pipeline.
 
+.. _al_config:
 
 Defining the AL config
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -124,6 +125,8 @@ If there is no configuration defined in the ``config.py`` file or if fields are 
     The default batch size is 100. For large applications, this number may be too small and we should encourage developers to update it accordingly. We recommend setting 1-2% of total training data size as the batch size.
 
 
+.. _al_strategy_tuning:
+
 Strategy Tuning
 ^^^^^^^^^^^^^^^
 The goal of the strategy tuning phase in the active learning pipeline is to determine the best tuning strategies and tuning level for your application. We will talk about the different possible tuning strategies and levels later in this section. 
@@ -152,6 +155,7 @@ At the end of the tuning process, results are stored in the ``output_folder``. T
 
 Now, let us take a look at the different tuning strategies and levels. These hyperparameters are studied at the strategy tuning level with the best ones chosen for query selection based on the quantitative results and plots.
 
+.. _sampling_strategies:
 
 Strategies
 ----------
@@ -184,10 +188,11 @@ The tuning step allows the application to run 7 possible strategies (``tuning_st
 | Ensemble Sampling         | Combines ranks from all the above heuristics and samples in order.                            |
 +---------------------------+-----------------------------------------------------------------------------------------------+
 
+.. _tuning_levels:
 
 Tuning Levels
 -------------
-Since MindMeld defines a hierarchy of domains and intents, the various heuristics can be computed by using the confidence scores or probabilities of either the domain or intent classifiers or both. This level is indicated by the ``tuning_level`` in the config. 
+Since MindMeld defines a hierarchy of domains and intents, the various heuristics can be computed by using the confidence scores or probabilities of either the domain or intent classifiers. This level is indicated by the ``tuning_level`` in the config. 
 
 * For the domain level, the domain classifier is run and the probability scores of the classifier are passed to the strategies.
 * For the intent level, the intent classifier probability scores across all domains are combined into a single vector and passed on to the strategies.
@@ -195,6 +200,7 @@ Since MindMeld defines a hierarchy of domains and intents, the various heuristic
 
 Once the tuning step has been completed and the results observed, a decision can be made on the best performing hyperparameters, strategy and tuning level, for the query selection step. We explore this step next.
 
+.. _query_selection:
 
 Query Selection
 ^^^^^^^^^^^^^^^
