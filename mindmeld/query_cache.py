@@ -70,8 +70,12 @@ class QueryCache:
         in_memory = bool(strtobool(os.environ.get("MM_IN_MEMORY_QUERY_CACHE", "1").lower()))
 
         if in_memory:
+            logger.info("Loading query cache into memory")
             self.memory_connection = sqlite3.connect(":memory:")
-            self.disk_connection.backup(self.memory_connection)
+            mem_cursor = self.memory_connection.cursor()
+            for statement in self.disk_connection.iterdump():
+                mem_cursor.execute(statement)
+            self.memory_connection.commit()
         else:
             self.memory_connection = None
 
