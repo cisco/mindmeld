@@ -780,7 +780,7 @@ class ResourceLoader:
                     logger.warning(
                         "Threshold value of n-grams cannot be less than 1."
                         "Resetting to 1 to extract all ngrams in the domain",
-                        )
+                    )
 
                 ngram_tokens = []
                 # Adding OOB token for entity bow feature extractor
