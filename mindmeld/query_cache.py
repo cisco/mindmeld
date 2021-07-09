@@ -93,10 +93,10 @@ class QueryCache:
         logger.info("Flushing %s queries from in-memory cache to disk", len(self.batch_writes))
         rows = self.memory_connection.execute(f"""
         SELECT hash_id, query, raw_query, domain, intent FROM queries
-        WHERE rowid IN ({",".join(self.batch_writes)})
+        WHERE rowid IN ({",".join(self.batch_writes)});
         """)
         self.disk_connection.executemany("""
-        INSERT OR IGNORE into queries values (?, ?, ?, ?, ?)
+        INSERT OR IGNORE into queries values (?, ?, ?, ?, ?);
         """, rows)
         self.disk_connection.commit()
         self.batch_writes = []
@@ -117,7 +117,7 @@ class QueryCache:
         cursor = self.disk_connection.cursor()
         try:
             cursor.execute("""
-            SELECT version_number FROM version WHERE version_number=(?)
+            SELECT version_number FROM version WHERE version_number=(?);
             """, (ProcessedQuery.version,))
             if len(cursor.fetchall()) == 0:
                 # version does not match
@@ -181,7 +181,7 @@ class QueryCache:
         def commit_to_db(connection):
             cursor = connection.cursor()
             cursor.execute("""
-            INSERT OR IGNORE into queries values (?, ?, ?, ?, ?)
+            INSERT OR IGNORE into queries values (?, ?, ?, ?, ?);
             """, (key,
                   data,
                   processed_query.query.text,
