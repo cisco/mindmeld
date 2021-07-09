@@ -33,7 +33,7 @@ if not _is_module_available("matplotlib"):
         "Library not found: 'matplotlib'. Run 'pip install mindmeld[active_learning]' to install."
     )
 
-pyplot = _get_module_or_attr("matplotlib", "pyplot")
+plt = _get_module_or_attr("matplotlib.pyplot")
 
 logger = logging.getLogger(__name__)
 
