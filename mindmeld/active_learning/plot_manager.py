@@ -21,13 +21,19 @@ import logging
 from collections import Counter
 from typing import Dict, List
 import numpy as np
-import matplotlib.pyplot as plt
-
+from mindmeld.components._util import _is_module_available, _get_module_or_attr
 from .classifiers import MindMeldALClassifier
 from ..path import (
     AL_ACCURACIES_PATH,
     AL_SELECTED_QUERIES_PATH,
 )
+
+if not _is_module_available("matplotlib"):
+    raise ModuleNotFoundError(
+        "Library not found: 'matplotlib'. Run 'pip install mindmeld[active_learning]' to install."
+    )
+
+pyplot = _get_module_or_attr("matplotlib", "pyplot")
 
 logger = logging.getLogger(__name__)
 

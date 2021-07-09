@@ -39,7 +39,6 @@ requirements = [
     "spacy~=2.3,!=2.3.6",  # avoid 2.3.6 because it was yanked from PyPI
     "mypy>=0.782",
     "marshmallow~=3.7.1",
-    "matplotlib~=3.3.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -110,6 +109,9 @@ setup(
         ],
         "elasticsearch": [
             "elasticsearch>=5.0",
+        ],
+        "active_learning": [
+            "matplotlib~=3.3.1",
         ]
     },
 )

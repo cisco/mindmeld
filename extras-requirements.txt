@@ -4,3 +4,4 @@
 -e .[examples]
 -e .[augment]
 -e .[language_annotator]
+-e .[active_learning]
