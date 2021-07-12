@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 ZERO = 1e-20
 
-IN_MEMORY_FEATURES = bool(
+STORE_CRF_FEATURES_IN_MEMORY = bool(
     strtobool(os.environ.get("MM_CRF_FEATURES_IN_MEMORY", "1").lower())
 )
 
@@ -90,7 +90,7 @@ class ConditionalRandomFields(Tagger):
                          resources,
                          y=None,
                          fit=False,
-                         in_memory=IN_MEMORY_FEATURES):
+                         in_memory=STORE_CRF_FEATURES_IN_MEMORY):
         """Transforms a list of examples into a feature matrix.
 
         Args:
