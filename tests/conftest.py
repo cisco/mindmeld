@@ -18,6 +18,7 @@ import pytest
 
 from mindmeld.components import NaturalLanguageProcessor, Preprocessor, QuestionAnswerer
 from mindmeld.components._elasticsearch_helpers import create_es_client
+from mindmeld.markup import load_query
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
@@ -271,3 +272,36 @@ def pytest_collection_modifyitems(config, items):
         for marker in skip_markers:
             if marker in item.keywords:
                 item.add_marker(skip)
+
+
+test_queries = [
+    ("domain1", "intent1", "Testing query1"),
+    ("domain2", "intent2", "I'd like a processed query please1"),
+    ("domain1", "intent1", "Testing query2"),
+    ("domain2", "intent2", "I'd like a processed query please2"),
+    ("domain1", "intent1", "Testing query3"),
+    ("domain2", "intent2", "I'd like a processed query please3"),
+    ("domain1", "intent1", "Testing query4"),
+    ("domain2", "intent2", "I'd like a processed query please4"),
+    ("domain1", "intent1", "Testing query5"),
+    ("domain2", "intent2", "I'd like a processed query please5"),
+    ("domain1", "intent1", "Testing query6"),
+    ("domain2", "intent2", "I'd like a processed query please6"),
+    ("domain1", "intent1", "Testing query7"),
+    ("domain2", "intent2", "I'd like a processed query please7"),
+    ("domain1", "intent1", "Testing query8"),
+    ("domain2", "intent2", "I'd like a processed query please8"),
+    ("domain1", "intent1", "Testing query9"),
+    ("domain2", "intent2", "I'd like a processed query please9"),
+    ("domain1", "intent1", "Testing query10"),
+    ("domain2", "intent2", "I'd like a processed query please10"),
+]
+
+@pytest.fixture
+def processed_queries(query_factory):
+    pq_list = []
+    for domain, intent, text in test_queries:
+        pq_list.append(
+            load_query(text, query_factory, domain=domain, intent=intent)
+        )
+    return pq_list

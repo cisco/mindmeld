@@ -14,6 +14,7 @@
 """
 This module contains the query cache implementation.
 """
+from distutils.util import strtobool
 from functools import lru_cache
 from hashlib import sha256
 import json
@@ -33,6 +34,13 @@ class QueryCache:
     cache to save processing time on reloading the examples later.
     """
 
+    @staticmethod
+    def copy_db(source, dest):
+        cursor = dest.cursor()
+        for statement in source.iterdump():
+            cursor.execute(statement)
+        dest.commit()
+
     def __init__(self, app_path):
         # make generated directory if necessary
         gen_folder = GEN_FOLDER.format(app_path=app_path)
@@ -40,8 +48,10 @@ class QueryCache:
             os.makedirs(gen_folder)
 
         db_file_location = QUERY_CACHE_DB_PATH.format(app_path=app_path)
-        self.connection = sqlite3.connect(db_file_location)
-        cursor = self.connection.cursor()
+        self.disk_connection = sqlite3.connect(db_file_location)
+        self.batch_write_size = int(os.environ.get("MM_QUERY_CACHE_WRITE_SIZE", "1000"))
+
+        cursor = self.disk_connection.cursor()
 
         if not self.compatible_version():
             cursor.execute("""
@@ -63,7 +73,40 @@ class QueryCache:
         cursor.execute("""
         INSERT OR IGNORE INTO version values (?);
         """, (ProcessedQuery.version,))
-        self.connection.commit()
+        self.disk_connection.commit()
+
+        in_memory = bool(strtobool(os.environ.get("MM_QUERY_CACHE_IN_MEMORY", "1").lower()))
+
+        if in_memory:
+            logger.info("Loading query cache into memory")
+            self.memory_connection = sqlite3.connect(":memory:")
+            self.copy_db(self.disk_connection, self.memory_connection)
+            self.batch_writes = []
+        else:
+            self.memory_connection = None
+            self.batch_writes = None
+
+    def flush_to_disk(self):
+        """
+        Flushes data from the in-memory cache into the disk-backed cache
+        """
+        logger.info("Flushing %s queries from in-memory cache to disk", len(self.batch_writes))
+        rows = self.memory_connection.execute(f"""
+        SELECT hash_id, query, raw_query, domain, intent FROM queries
+        WHERE rowid IN ({",".join(self.batch_writes)});
+        """)
+        self.disk_connection.executemany("""
+        INSERT OR IGNORE into queries values (?, ?, ?, ?, ?);
+        """, rows)
+        self.disk_connection.commit()
+        self.batch_writes = []
+
+    def __del__(self):
+        if self.memory_connection and self.batch_writes:
+            self.flush_to_disk()
+            self.memory_connection.close()
+
+        self.disk_connection.close()
 
     def compatible_version(self):
         """
@@ -71,10 +114,10 @@ class QueryCache:
         matches the current data version.
         """
 
-        cursor = self.connection.cursor()
+        cursor = self.disk_connection.cursor()
         try:
             cursor.execute("""
-            SELECT version_number FROM version WHERE version_number=(?)
+            SELECT version_number FROM version WHERE version_number=(?);
             """, (ProcessedQuery.version,))
             if len(cursor.fetchall()) == 0:
                 # version does not match
@@ -104,6 +147,10 @@ class QueryCache:
         h.update(query_text.encode())
         return h.hexdigest()
 
+    @property
+    def connection(self):
+        return self.memory_connection or self.disk_connection
+
     def key_to_row_id(self, key):
         """
         Args:
@@ -129,17 +176,29 @@ class QueryCache:
         Returns:
             integer: The unique id of the query in the cache.
         """
+        data = json.dumps(processed_query.to_cache())
 
-        cursor = self.connection.cursor()
-        cursor.execute("""
-        INSERT OR IGNORE into queries values (?, ?, ?, ?, ?)
-        """, (key,
-              json.dumps(processed_query.to_cache()),
-              processed_query.query.text,
-              processed_query.domain,
-              processed_query.intent,
-              ))
-        self.connection.commit()
+        def commit_to_db(connection):
+            cursor = connection.cursor()
+            cursor.execute("""
+            INSERT OR IGNORE into queries values (?, ?, ?, ?, ?);
+            """, (key,
+                  data,
+                  processed_query.query.text,
+                  processed_query.domain,
+                  processed_query.intent,
+                  ))
+            connection.commit()
+
+        if self.memory_connection:
+            commit_to_db(self.memory_connection)
+            rowid = self.key_to_row_id(key)
+            self.batch_writes.append(str(rowid))
+            if len(self.batch_writes) == self.batch_write_size:
+                self.flush_to_disk()
+        else:
+            commit_to_db(self.disk_connection)
+
         return self.key_to_row_id(key)
 
     @lru_cache(maxsize=1)
