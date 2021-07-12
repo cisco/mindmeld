@@ -21,13 +21,13 @@ import logging
 from collections import Counter
 from typing import Dict, List
 import numpy as np
-import matplotlib.pyplot as plt
-
+from ..components._util import _is_module_available, _get_module_or_attr
 from .classifiers import MindMeldALClassifier
 from ..path import (
     AL_ACCURACIES_PATH,
     AL_SELECTED_QUERIES_PATH,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,13 @@ class PlotManager:
         )
         self.accuracies_data = self.get_accuracies_json_data()
         self.queries_data = self.get_queries_json_data()
+
+        if not _is_module_available("matplotlib"):
+            raise ModuleNotFoundError(
+                "Library not found: 'matplotlib'. Run 'pip install mindmeld[active_learning]' to install."
+            )
+
+        self.plt = _get_module_or_attr("matplotlib.pyplot")
 
     # Get JSON Data
     def get_accuracies_json_data(self) -> Dict:
@@ -307,26 +314,26 @@ class PlotManager:
             y_values = PlotManager.get_across_iterations(
                 epoch_dict, ["accuracies"] + y_keys
             )
-            plt.plot(x_values, y_values)
+            self.plt.plot(x_values, y_values)
 
-        plt.xlabel("Number of selected queries")
+        self.plt.xlabel("Number of selected queries")
         y_label = (
             self.aggregate_statistic
             if use_aggregate_statistic
             else self.class_level_statistic
         )
-        plt.ylabel(y_label.capitalize())
+        self.plt.ylabel(y_label.capitalize())
         title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
-        plt.title(title)
-        plt.legend(self.strategies, loc="lower right")
-        plt.grid()
-        plt.tight_layout()
-        fig = plt.gcf()
+        self.plt.title(title)
+        self.plt.legend(self.strategies, loc="lower right")
+        self.plt.grid()
+        self.plt.tight_layout()
+        fig = self.plt.gcf()
         if display:
-            plt.show()
+            self.plt.show()
         if save:
             fig.savefig(self.get_img_path(y_keys, title))
-            plt.clf()
+            self.plt.clf()
 
     def plot_avg_across_epochs(
         self,
@@ -358,26 +365,26 @@ class PlotManager:
                 all_y_values.append(y_values)
             all_y_values = np.array(all_y_values)
             y_avg_values = all_y_values.mean(axis=0)
-            plt.plot(x_values, y_avg_values)
+            self.plt.plot(x_values, y_avg_values)
 
-        plt.xlabel("Number of selected queries")
+        self.plt.xlabel("Number of selected queries")
         y_label = (
             self.aggregate_statistic
             if use_aggregate_statistic
             else self.class_level_statistic
         )
-        plt.ylabel(y_label.capitalize())
+        self.plt.ylabel(y_label.capitalize())
         title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
-        plt.title(title)
-        plt.legend(self.strategies, loc="lower right")
-        plt.grid()
-        plt.tight_layout()
-        fig = plt.gcf()
+        self.plt.title(title)
+        self.plt.legend(self.strategies, loc="lower right")
+        self.plt.grid()
+        self.plt.tight_layout()
+        fig = self.plt.gcf()
         if display:
-            plt.show()
+            self.plt.show()
         if save:
             fig.savefig(self.get_img_path(y_keys, title))
-            plt.clf()
+            self.plt.clf()
 
     def plot_all_epochs(
         self,
@@ -406,7 +413,7 @@ class PlotManager:
                 y_values = PlotManager.get_across_iterations(
                     epoch_dict, ["accuracies"] + y_keys
                 )
-                plt.plot(x_values, y_values)
+                self.plt.plot(x_values, y_values)
                 all_y_values.append(y_values)
             max_len = max([len(i) for i in all_y_values])
             for y_values in all_y_values:
@@ -417,29 +424,29 @@ class PlotManager:
                     constant_values=(0, y_values[-1]),
                 )
             y_avg_values = np.array(all_y_values).mean(axis=0)
-            plt.plot(x_values, y_avg_values)
+            self.plt.plot(x_values, y_avg_values)
 
-            plt.xlabel("Number of selected queries")
+            self.plt.xlabel("Number of selected queries")
             y_label = (
                 self.aggregate_statistic
                 if use_aggregate_statistic
                 else self.class_level_statistic
             )
-            plt.ylabel(y_label.capitalize())
+            self.plt.ylabel(y_label.capitalize())
             title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
-            plt.title(title)
-            plt.legend(
+            self.plt.title(title)
+            self.plt.legend(
                 ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
                 loc="lower right",
             )
-            plt.grid()
-            plt.tight_layout()
-            fig = plt.gcf()
+            self.plt.grid()
+            self.plt.tight_layout()
+            fig = self.plt.gcf()
             if display:
-                plt.show()
+                self.plt.show()
             if save:
                 fig.savefig(self.get_img_path(y_keys, title))
-                plt.clf()
+                self.plt.clf()
 
     @staticmethod
     def get_unique_labels(all_counters: List) -> List:
@@ -532,7 +539,7 @@ class PlotManager:
             display (bool): Whether to show the plot.
             save (bool): Whether to save the plot.
         """
-        fig, ax = plt.subplots()
+        fig, ax = self.plt.subplots()
         total_bottom = np.zeros(num_iters)
         iterations = [str(i) for i in range(num_iters)]
         for label in label_set_counter:
@@ -546,16 +553,16 @@ class PlotManager:
         level = "Intent" if intent_level else "Domain"
         title = f"{strategy}_{level}_Selection_Distribution_Per_Iteration"
         ax.set_title(title)
-        plt.tight_layout()
+        self.plt.tight_layout()
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 2, box.height])
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
         if display:
-            plt.show()
+            self.plt.show()
         if save:
             img_dir_path = os.path.join(*[self.experiment_dir_path, "plots", "overall"])
             os.makedirs(img_dir_path, exist_ok=True)
             img_path = os.path.join(img_dir_path, f"{title}.png")
             fig.savefig(img_path, bbox_inches="tight")
-            plt.clf()
+            self.plt.clf()
