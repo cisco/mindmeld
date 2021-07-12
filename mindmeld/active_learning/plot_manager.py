@@ -21,7 +21,7 @@ import logging
 from collections import Counter
 from typing import Dict, List
 import numpy as np
-from mindmeld.components._util import _is_module_available, _get_module_or_attr
+from ..components._util import _is_module_available, _get_module_or_attr
 from .classifiers import MindMeldALClassifier
 from ..path import (
     AL_ACCURACIES_PATH,
