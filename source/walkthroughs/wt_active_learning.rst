@@ -10,7 +10,7 @@ Step 1: Setup a MindMeld App with Log Resources
 
 The first step for running active learning is to set up your MindMeld app with log data configured for the app. This log data can either be in the form of labelled text files (similar to the train and test files in the app), or an unlabelled text file containing raw text queries across all domains and intents.
 
-For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld :doc:`Data Augmentation <../userguide/augmentation>` pipeline. This means additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the data augmentation logs (files with the pattern ``train-augmented.txt``). Adding these queries to the train files of the assistant can improve performance of the classifers.
+For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld :doc:`Data Augmentation <../userguide/augmentation>` pipeline. These paraphrases will serve as additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best qureries from the data augmentation logs (files with the pattern ``train-augmented.txt``). Adding these queries to the train files of the assistant can improve performance of the classifiers.
 
 Step 2: Define Active Learning Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +61,7 @@ The ``"output_folder"`` refers to a directory that will house all saved results 
 Step 3: Run Strategy Tuning and Evaluate Hyperparameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before we jump into tuning, let's discuss the ``pre_tuning`` configurations. This section covers the data patterns that the active lerning pipeline ingests. The ``train_pattern`` is a regex field to provide the set of files across domains and intents that can be chosen as training files for the classifier. The ``test_pattern`` similarly represents the test files for the classfier that are used for iterative model evaluation and performance comparisons. The ``train_seed_pct`` is the percentage of training data that is used as the seed for training the initial model. This data is evenly sampled across domains and the rest is unsampled, to be used in the tuning process.
+Before we jump into tuning, let us discuss the ``pre_tuning`` configurations. This section covers the data patterns that the active learning pipeline ingests. The ``train_pattern`` is a regex field to provide the set of files across domains and intents that can be chosen as training files for the classifier. The ``test_pattern`` similarly represents the test files for the classifier that are used for iterative model evaluation and performance comparisons. The ``train_seed_pct`` is the percentage of training data that is used as the seed for training the initial model. This data is evenly sampled across domains and the rest is unsampled, to be used in the tuning process.
 
 For the :ref:`al_strategy_tuning` step, the following command is run:
 
