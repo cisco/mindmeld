@@ -28,7 +28,7 @@ Available Options in MindMeld
 +-----------------+------------------------------------------------------------------------+
 | --init          | Initializes DVC within a repository. Must be run before other options. |
 +-----------------+------------------------------------------------------------------------+
-| --setup_dagshub | Setup a central model registry with DAGsHub[1].                        |
+| --setup_dagshub | Setup a central model registry with DAGsHub[1][2].                     |
 +-----------------+------------------------------------------------------------------------+
 | --save          | Saves models using DVC. Run after model building finishes.             |
 +-----------------+------------------------------------------------------------------------+
@@ -42,7 +42,9 @@ Available Options in MindMeld
 | --help          | Show the available options and their descriptions.                     |
 +-----------------+------------------------------------------------------------------------+
 
-[1] The DAGsHub central repository requires you `sign up to DAGsHub <https://dagshub.com/user/sign_up>`_ (it's completely free), and create a project – you can `connect an existing GitHub project <https://dagshub.com/repo/connect>`_ or `create a project from scratch <https://dagshub.com/repo/create>`_.
+- [1] The DAGsHub central repository requires you `sign up to DAGsHub <https://dagshub.com/user/sign_up>`_ (it's free for personal projects), and create a project – you can `connect an existing GitHub project <https://dagshub.com/repo/connect>`_, `migrate a project from any git hosting <https://dagshub.com/repo/migrate>`_ or `create a project from scratch <https://dagshub.com/repo/create>`_.
+
+- [2] `--setup_dagshub` option only works after running `--init`.
 
 We will use the Home Assistant blueprint to demonstrate the various command options.
 
