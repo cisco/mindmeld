@@ -241,6 +241,10 @@ class BaseModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def _get_model_constructor(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
@@ -284,9 +288,9 @@ class BaseModel(ABC):
 
         if not isinstance(metadata, dict):
             # backwards compatability
-            #   when a serializable model is saved as-is & now has to be retrieved;
-            #   notably, the serialized model also consists of the model config;
-            #   in this case, metadata = model
+            #   this `if` condition is when a model is serialized and saved, and has to be loaded;
+            #   (1) the serialized model also consists of the model config;
+            #   (2) in this case, metadata = model
             metadata = {"model": metadata, "model_config": metadata.config}
 
         if 'model_config' not in metadata:
@@ -310,6 +314,17 @@ class BaseModel(ABC):
     def get_resource(self, name):
         return self._resources.get(name)
 
+    @property
+    def tokenizer(self):
+        tokenizer = self._resources.get("tokenizer")
+        if not tokenizer:
+            logger.error(
+                "The tokenizer resource has not been registered "
+                "to the model. Using default tokenizer."
+            )
+            tokenizer = Tokenizer()
+        return tokenizer
+
 
 class Model(BaseModel):
     """An abstract class upon which all models are based.
@@ -330,20 +345,6 @@ class Model(BaseModel):
 
     def _fit(self, examples, labels, params=None):
         raise NotImplementedError
-
-    def _get_model_constructor(self):
-        raise NotImplementedError
-
-    @property
-    def tokenizer(self):
-        tokenizer = self._resources.get("tokenizer")
-        if not tokenizer:
-            logger.error(
-                "The tokenizer resource has not been registered "
-                "to the model. Using default tokenizer."
-            )
-            tokenizer = Tokenizer()
-        return tokenizer
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
@@ -602,9 +603,9 @@ class Model(BaseModel):
                 return True
         return False
 
-    ##################
-    # abstract methods
-    ##################
+    ######################################
+    # ↓ abstract methods implementations ↓
+    ######################################
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses \
@@ -661,14 +662,14 @@ class PytorchModel(BaseModel):
         super().__init__(config)
         self._label_encoder = get_label_encoder(self.config)
         self._class_encoder = SKLabelEncoder()
-        self._clf = None  # need to edit this
+        self._clf = None
 
-    def _get_model_constructor(self):
-        raise NotImplementedError
+    ######################################
+    # ↓ abstract methods implementations ↓
+    ######################################
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        # Always initialize the global resource for tokenization, which is not a
-        # feature-specific resource
+        del examples, labels
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
     def dump(self, path, metadata=None):
@@ -676,11 +677,12 @@ class PytorchModel(BaseModel):
         metadata.update({
             "model_config": self.config,
             "serializable": False,
-            "sklearn_class_encoder": self._class_encoder,
+            "class_encoder": self._class_encoder,
         })
 
-        # dump clf
-        self._clf.dump(path)
+        # dump clf if required
+        if self._clf:  # entity recognizers or role classifiers might just need to dump metadata
+            self._clf.dump(path)
 
         # dump metadata
         super().dump(path, metadata)
@@ -690,11 +692,19 @@ class PytorchModel(BaseModel):
         # load metadata
         metadata = super().load(path)
         model_config = metadata.get("model_config")
+
+        # disambiguate model class name
         model = create_model(model_config)
 
-        # gets the class name and then loads
-        model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
-        model._class_encoder = metadata["sklearn_class_encoder"]
+        # load clf if required
+        try:
+            # disambiguate classifier type
+            model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+        except FileNotFoundError:
+            # entity recognizers or role classifiers might just need to load metadata
+            pass
+
+        model._class_encoder = metadata["class_encoder"]
         metadata["model"] = model
 
         return metadata

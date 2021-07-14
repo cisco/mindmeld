@@ -38,7 +38,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .pytorch_utils import modules as pyt_modules
+from .neural_models_utils import sequence_classification as nn_modules
 
 logger = logging.getLogger(__name__)
 
@@ -87,20 +87,6 @@ class TextModel(Model):
             ]
         }
         return attributes
-
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
-        try:
-            return {
-                TextModel.LOG_REG_TYPE: LogisticRegression,
-                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
-                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
-                TextModel.SVM_TYPE: SVC,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def _get_cv_scorer(self, selection_settings):
         """
@@ -387,9 +373,19 @@ class TextModel(Model):
         }.get(scale_type)
         return scaler
 
-    ##################
-    # abstract methods
-    ##################
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            return {
+                TextModel.LOG_REG_TYPE: LogisticRegression,
+                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
+                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
+                TextModel.SVM_TYPE: SVC,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -495,59 +491,30 @@ class PytorchTextModel(PytorchModel):
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
+
+        # dismabiguation between glove and bert embedder
+        def _resolve_and_return_embedder_class():
+            allowed_embedder_types = [None, "glove", "bert"]
+            embedder_type = self.config.params.get("embedder_type")
+            if embedder_type not in allowed_embedder_types:
+                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
+                      f"embedder type model. Allowed values are {allowed_embedder_types}"
+                raise ValueError(msg)
+            return {
+                None: nn_modules.EmbedderForSequenceClassification,
+                "glove": nn_modules.EmbedderForSequenceClassification,
+                "bert": nn_modules.BertForSequenceClassification
+            }[embedder_type]
+
         try:
             return {
-                "embedder": pyt_modules.EmbeddingForSequenceClassification,
-                "cnn": pyt_modules.SequenceCnnForSequenceClassification,
-                "lstm": pyt_modules.SequenceLstmForSequenceClassification,
+                "embedder": _resolve_and_return_embedder_class(),
+                "cnn": nn_modules.CnnForSequenceClassification,
+                "lstm": nn_modules.LstmForSequenceClassification,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
             raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
-
-    def fit(self, examples, labels, params=None):
-
-        params = params or self.config.params
-        examples = [ex.normalized_text for ex in examples]
-
-        if len(set(labels)) <= 1:
-            return self
-
-        # Encode classes
-        y = self._label_encoder.encode(labels)
-        encoded_y = self._class_encoder.fit_transform(y)
-        y = list(encoded_y)
-
-        self._clf = self._get_model_constructor()()  # gets the class name and then initializes
-        self._clf.fit(examples, y, **params)
-
-        return self
-
-    def predict(self, examples, dynamic_resource=None):
-        examples = [ex.normalized_text for ex in examples]
-
-        # snippet mostly re-used from text_model.py/TextModel/_predict_proba()
-        y = self._clf.predict(examples)
-        predictions = self._class_encoder.inverse_transform(y)
-        return self._label_encoder.decode(predictions)
-
-    def predict_proba(self, examples):
-        examples = [ex.normalized_text for ex in examples]
-
-        # snippet mostly re-used from text_model.py/TextModel/_predict_proba()
-        predictions = []
-        for row in self._clf.predict_proba(examples):
-            probabilities = {}
-            top_class = None
-            for class_index, proba in enumerate(row):
-                raw_class = self._class_encoder.inverse_transform([class_index])[0]
-                decoded_class = self._label_encoder.decode([raw_class])[0]
-                probabilities[decoded_class] = proba
-                if proba > probabilities.get(top_class, -1.0):
-                    top_class = decoded_class
-            predictions.append((top_class, probabilities))
-
-        return predictions
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -571,6 +538,49 @@ class PytorchTextModel(PytorchModel):
 
         model_eval = StandardModelEvaluation(self.config, evaluations)
         return model_eval
+
+    def fit(self, examples, labels, params=None):
+
+        if len(set(labels)) <= 1:
+            return self
+
+        # Encode classes
+        y = self._label_encoder.encode(labels)
+        encoded_y = self._class_encoder.fit_transform(y)
+        y = list(encoded_y)
+
+        params = params or self.config.params
+        examples = [ex.normalized_text for ex in examples]
+
+        self._clf = self._get_model_constructor()()  # gets the class name and then initializes
+        self._clf.fit(examples, y, **params)
+
+        return self
+
+    def predict(self, examples, dynamic_resource=None):
+        examples = [ex.normalized_text for ex in examples]
+
+        y = self._clf.predict(examples)
+        predictions = self._class_encoder.inverse_transform(y)
+        return self._label_encoder.decode(predictions)
+
+    def predict_proba(self, examples):
+        examples = [ex.normalized_text for ex in examples]
+
+        # snippet re-used from ./text_model.py/TextModel._predict_proba()
+        predictions = []
+        for row in self._clf.predict_proba(examples):
+            probabilities = {}
+            top_class = None
+            for class_index, proba in enumerate(row):
+                raw_class = self._class_encoder.inverse_transform([class_index])[0]
+                decoded_class = self._label_encoder.decode([raw_class])[0]
+                probabilities[decoded_class] = proba
+                if proba > probabilities.get(top_class, -1.0):
+                    top_class = decoded_class
+            predictions.append((top_class, probabilities))
+
+        return predictions
 
 
 class AutoTextModel:

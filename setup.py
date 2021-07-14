@@ -111,6 +111,11 @@ setup(
         ],
         "elasticsearch": [
             "elasticsearch>=5.0",
+        ],
+        "neural_models": [
+            'torch~=1.7.0; python_version>="3.6"',
+            'transformers~=3.5.1; python_version>="3.6"',
+            'pytorch-crf~=0.7.2'
         ]
     },
 )

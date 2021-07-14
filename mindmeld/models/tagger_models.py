@@ -28,7 +28,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .pytorch_utils import modules as pyt_modules
+from .neural_models_utils import token_classification as nn_modules
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -122,25 +122,6 @@ class TaggerModel(Model):
 
         return attributes
 
-    def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
-        try:
-            if classifier_type == TaggerModel.LSTM_TYPE and LstmModel is None:
-                msg = (
-                    "{}: Classifier type {!r} dependencies not found. Install the "
-                    "mindmeld[tensorflow] extra to use this classifier type."
-                )
-                raise ValueError(msg.format(self.__class__.__name__, classifier_type))
-            return {
-                TaggerModel.MEMM_TYPE: MemmModel,
-                TaggerModel.CRF_TYPE: ConditionalRandomFields,
-                TaggerModel.LSTM_TYPE: LstmModel,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
-
     def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
 
@@ -210,9 +191,24 @@ class TaggerModel(Model):
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
 
-    ##################
-    # abstract methods
-    ##################
+    def _get_model_constructor(self):
+        """Returns the python class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            if classifier_type == TaggerModel.LSTM_TYPE and LstmModel is None:
+                msg = (
+                    "{}: Classifier type {!r} dependencies not found. Install the "
+                    "mindmeld[tensorflow] extra to use this classifier type."
+                )
+                raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+            return {
+                TaggerModel.MEMM_TYPE: MemmModel,
+                TaggerModel.CRF_TYPE: ConditionalRandomFields,
+                TaggerModel.LSTM_TYPE: LstmModel,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def fit(self, examples, labels, params=None):
         """Trains the model.
@@ -443,48 +439,34 @@ class PytorchTaggerModel(PytorchModel):
     ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm", "cnn-lstm", "lstm-lstm"]
     REQUIRES_EXTRAS_INSTALLS = ["torch"]
 
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
-        try:
-            return {
-                "embedder": pyt_modules.EmbeddingForTokenClassification,
-                "lstm": pyt_modules.SequenceLstmForTokenClassification,
-                "cnn-lstm": pyt_modules.TokenCnnSequenceLstmForTokenClassification,
-                "lstm-lstm": pyt_modules.TokenLstmSequenceLstmForTokenClassification,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
+    def evaluate(self, examples, labels):
+        raise NotImplementedError
 
     def fit(self, examples, labels, params=None):
 
-        params = params or self.config.params
-        examples = [ex.normalized_text for ex in examples]
-
-        if len(set(labels)) <= 1:
+        types = [entity.entity.type for label in labels for entity in label]
+        self.types = types
+        if len(set(types)) == 0:
+            self._no_entities = True
+            logger.info(
+                "There are no labels in this label set, so we don't " "fit the model."
+            )
             return self
 
         # Encode classes
-        y = self._label_encoder.encode(labels)
-        try:
-            # runs without Error for tagger models
-            flat_y = sum(y, [])
-            is_flattened = True
-        except TypeError:
-            # meaning it is a text model
-            flat_y = y
-            is_flattened = False
-        encoded_flat_y = self._class_encoder.fit_transform(flat_y)
-        if is_flattened:
-            seq_lengths = [len(_y) for _y in y]
-            y = []
-            start_idx = 0
-            for seq_length in seq_lengths:
-                y.append(encoded_flat_y[start_idx: start_idx + seq_length])
-                start_idx += seq_length
-        else:
-            y = list(encoded_flat_y)
+        self._label_encoder = get_label_encoder(self.config)
+        y = self._label_encoder.encode(labels, examples=examples)
+        flat_y = sum(y, [])
+        encoded_flat_y = self._class_encoder.fit_transform(flat_y).tolist()
+        encoded_y = []
+        start_idx = 0
+        for seq_length in [len(_y) for _y in y]:
+            encoded_y.append(encoded_flat_y[start_idx: start_idx + seq_length])
+            start_idx += seq_length
+        y = list(encoded_y)
+
+        params = params or self.config.params
+        examples = [ex.normalized_text for ex in examples]
 
         self._clf = self._get_model_constructor()()  # gets the class name only
         self._clf.fit(examples, y, **params)
@@ -497,8 +479,19 @@ class PytorchTaggerModel(PytorchModel):
     def predict_proba(self, examples):
         raise NotImplementedError
 
-    def evaluate(self, examples, labels):
-        raise NotImplementedError
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            return {
+                "embedder": nn_modules.EmbedderForTokenClassification,
+                "lstm": nn_modules.SequenceLstmForTokenClassification,
+                "cnn-lstm": nn_modules.TokenCnnSequenceLstmForTokenClassification,
+                "lstm-lstm": nn_modules.TokenLstmSequenceLstmForTokenClassification,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
 
 class AutoTaggerModel:

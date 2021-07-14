@@ -14,7 +14,6 @@
 """
 This module contains the embedder model class.
 """
-import json
 import logging
 import os
 import pickle
@@ -24,26 +23,14 @@ from collections import OrderedDict
 import numpy as np
 from tqdm.autonotebook import trange
 
-from ._util import _is_module_available, _get_module_or_attr as _getattr
+from ._util import _is_module_available, _get_module_or_attr as _getattr, torch_op
+from .containers import SentenceTransformersContainer
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
 from .. import path
-from ..core import Bunch
-from ..resource_loader import Hasher
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
-
-
-def _torch(op, *args, sub="", **kwargs):
-    """
-    A safe function caller for torch module
-    Usage:
-        call ```_torch("normalize", arg1, arg2, sub="nn.functional", p=2, dim=1)```
-        instead of ```torch.nn.functional.normalize(arg1, arg2, p=2, dim=1)```
-    """
-
-    return _getattr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
 
 
 class Embedder(ABC):
@@ -279,8 +266,8 @@ class Embedder(ABC):
             as_numpy: If true, returns the cosine similarity as a numpy 2d array instead of tensor
         """
 
-        src_vecs = _torch("as_tensor", src_vecs)
-        tgt_vecs = _torch("as_tensor", tgt_vecs)
+        src_vecs = torch_op("as_tensor", src_vecs)
+        tgt_vecs = torch_op("as_tensor", tgt_vecs)
 
         if len(src_vecs.shape) == 1:
             src_vecs = src_vecs.view(1, -1)
@@ -294,23 +281,17 @@ class Embedder(ABC):
 
         # method specific to 2d tensors
         # [n_src, emb_dim] * [n_tgt, emb_dim] -> [n_src, n_tgt]
-        a_norm = _torch("normalize", src_vecs, sub="nn.functional", p=2, dim=1)
-        b_norm = _torch("normalize", tgt_vecs, sub="nn.functional", p=2, dim=1)
-        similarity_scores = _torch("mm", a_norm, b_norm.transpose(0, 1))
+        a_norm = torch_op("normalize", src_vecs, sub="nn.functional", p=2, dim=1)
+        b_norm = torch_op("normalize", tgt_vecs, sub="nn.functional", p=2, dim=1)
+        similarity_scores = torch_op("mm", a_norm, b_norm.transpose(0, 1))
 
         if as_numpy:
             return similarity_scores.numpy()
 
         return similarity_scores
 
-    def find_similarity(self,
-                        src_texts,
-                        tgt_texts=None,
-                        top_n=20,
-                        scores_normalizer=None,
-                        _sim_func=None,
-                        _return_as_dict=False,
-                        _no_sort=False):
+    def find_similarity(self, src_texts, tgt_texts=None, top_n=20, scores_normalizer=None,
+                        _sim_func=None, _return_as_dict=False, _no_sort=False):
         """Computes the cosine similarity
 
         Args:
@@ -405,11 +386,6 @@ class BertEmbedder(Embedder):
 
     DEFAULT_BERT = "bert-base-nli-mean-tokens"
 
-    # class variable to cache bert model(s);
-    #   helps to mitigate keeping duplicate sets of large weight matrices, especially
-    #   when creating mutliple BERT based Entity Resolvers
-    CACHE_MODELS = {}
-
     def __init__(self, app_path, **kwargs):
         """
         Args:
@@ -434,7 +410,8 @@ class BertEmbedder(Embedder):
         self._output_value = kwargs.get("output_value", 'sentence_embedding')
         self._convert_to_numpy = kwargs.get("convert_to_numpy", True)
         self._convert_to_tensor = kwargs.get("convert_to_tensor", False)
-        self.device = kwargs.get("device", "cuda" if _torch("is_available", sub="cuda") else "cpu")
+        self.device = kwargs.get("device",
+                                 "cuda" if torch_op("is_available", sub="cuda") else "cpu")
         self._concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
         self._normalize_token_embs = kwargs.get("normalize_token_embs", False)
 
@@ -467,76 +444,6 @@ class BertEmbedder(Embedder):
             raise ValueError(f"Not supported model {model} to obtain number of layers")
 
         return num_layers
-
-    @staticmethod
-    def get_hashid(**kwargs):
-        string = json.dumps(kwargs, sort_keys=True)
-        return Hasher(algorithm="sha1").hash(string=string)
-
-    @staticmethod
-    def _get_sentence_transformers_encoder(name_or_path,
-                                           output_type="mean",
-                                           quantize=True,
-                                           return_components=False):
-        """
-        Retrieves a sentence-transformer model and returns it along with its transformer and
-        pooling components.
-
-        Args:
-            name_or_path: name or path to load a huggingface model
-            output_type: type of pooling required
-            quantize: if the model needs to be qunatized or not
-            return_components: if True, returns the Transformer and Poooling components of the
-                                sentence-bert model in a Bunch data type,
-                                else just returns the sentence-bert model
-
-        Returns:
-            Union[
-                sentence_transformers.SentenceTransformer,
-                Bunch(sentence_transformers.Transformer,
-                      sentence_transformers.Pooling,
-                      sentence_transformers.SentenceTransformer)
-            ]
-        """
-
-        strans_models = _getattr("sentence_transformers.models")
-        strans = _getattr("sentence_transformers", "SentenceTransformer")
-
-        transformer_model = strans_models.Transformer(name_or_path,
-                                                      model_args={"output_hidden_states": True})
-        pooling_model = strans_models.Pooling(transformer_model.get_word_embedding_dimension(),
-                                              pooling_mode_cls_token=output_type == "cls",
-                                              pooling_mode_max_tokens=False,
-                                              pooling_mode_mean_tokens=output_type == "mean",
-                                              pooling_mode_mean_sqrt_len_tokens=False)
-        sbert_model = strans(modules=[transformer_model, pooling_model])
-
-        if quantize:
-            if not _is_module_available("torch"):
-                raise ImportError("`torch` library required to quantize models") from None
-
-            torch_qint8 = _getattr("torch", "qint8")
-            torch_nn_linear = _getattr("torch.nn", "Linear")
-            torch_quantize_dynamic = _getattr("torch.quantization", "quantize_dynamic")
-
-            transformer_model = torch_quantize_dynamic(
-                transformer_model, {torch_nn_linear}, dtype=torch_qint8
-            ) if transformer_model else None
-            pooling_model = torch_quantize_dynamic(
-                pooling_model, {torch_nn_linear}, dtype=torch_qint8
-            ) if pooling_model else None
-            sbert_model = torch_quantize_dynamic(
-                sbert_model, {torch_nn_linear}, dtype=torch_qint8
-            ) if sbert_model else None
-
-        if return_components:
-            return Bunch(
-                transformer_model=transformer_model,
-                pooling_model=pooling_model,
-                sbert_model=sbert_model
-            )
-
-        return sbert_model
 
     def _encode_local(self,
                       sentences,
@@ -587,15 +494,15 @@ class BertEmbedder(Embedder):
             features = self.transformer_model.tokenize(sentences_batch)
             features = self._batch_to_device(features, device)
 
-            with _torch("no_grad"):
+            with torch_op("no_grad"):
                 out_features_transformer = self.transformer_model.forward(features)
                 token_embeddings = out_features_transformer["token_embeddings"]
                 if concat_last_n_layers > 1:
                     _all_layer_embs = out_features_transformer["all_layer_embeddings"]
-                    token_embeddings = _torch(
+                    token_embeddings = torch_op(
                         "cat", _all_layer_embs[-concat_last_n_layers:], dim=-1)
                 if normalize_token_embs:
-                    _norm_token_embeddings = _torch(
+                    _norm_token_embeddings = torch_op(
                         "norm", token_embeddings, sub="linalg", dim=2, keepdim=True)
                     token_embeddings = token_embeddings.div(_norm_token_embeddings)
                 out_features_transformer.update({"token_embeddings": token_embeddings})
@@ -619,7 +526,7 @@ class BertEmbedder(Embedder):
         all_embeddings = [all_embeddings[idx] for idx in np.argsort(length_sorted_idx)]
 
         if convert_to_tensor:
-            all_embeddings = _torch("stack", all_embeddings)
+            all_embeddings = torch_op("stack", all_embeddings)
         elif convert_to_numpy:
             all_embeddings = np.asarray([emb.numpy() for emb in all_embeddings])
 
@@ -642,42 +549,11 @@ class BertEmbedder(Embedder):
         bert_output_type = kwargs.get("bert_output_type", "mean")
         quantize_model = kwargs.get("quantize_model", False)
 
-        model_hashid = self.get_hashid(pretrained_name_or_abspath=pretrained_name_or_abspath,
-                                       bert_output_type=bert_output_type,
-                                       quantize_model=quantize_model)
-        model = BertEmbedder.CACHE_MODELS.get(model_hashid, None)
+        strans_container = SentenceTransformersContainer(pretrained_name_or_abspath,
+                                                         bert_output_type, quantize_model)
+        model = strans_container.get_model_bunch()
 
-        if not model:
-
-            info_msg = ""
-            for name in [f"sentence-transformers/{pretrained_name_or_abspath}",
-                         pretrained_name_or_abspath]:
-                try:
-                    model = (
-                        self._get_sentence_transformers_encoder(name,
-                                                                output_type=bert_output_type,
-                                                                quantize=quantize_model,
-                                                                return_components=True)
-                    )
-                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-                except OSError:
-                    info_msg += f"Could not initialize name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-
-                if model:
-                    break
-
-            logger.info(info_msg)
-
-            if not model:
-                msg = f"Could not resolve the name/path `{pretrained_name_or_abspath}`. " \
-                      f"Please check the model name and retry."
-                raise Exception(msg)
-
-            BertEmbedder.CACHE_MODELS.update({model_hashid: model})
-
-        self.model_id = str(model_hashid)
+        self.model_id = strans_container.model_id
 
         return model
 
