@@ -48,6 +48,14 @@ class AllowedNlpClassesKeyError(MindMeldError):
     pass
 
 
+class UnconstrainedMaskError(MindMeldError):
+    pass
+
+
+class InvalidMaskError(MindMeldError):
+    pass
+
+
 class ClassifierLoadError(MindMeldError):
     pass
 

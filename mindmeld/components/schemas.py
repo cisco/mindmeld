@@ -12,7 +12,7 @@
 # limitations under the License.
 import logging
 import math
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 import immutables
 from marshmallow import EXCLUDE, Schema, fields, ValidationError
@@ -143,37 +143,65 @@ def validate_timestamp(value: Union[int, float, str]) -> int:
         )
         raise ValidationError(error_message) from exc
 
-    return result
 
+def _validate_mask_nlp(nlp: Any,
+                       list_of_allow_nlp: Optional[List[str]] = None,
+                       list_of_deny_nlp: Optional[List[str]] = None,
+                       ) -> Tuple[List[str], List[str]]:
 
-def _validate_allowed_intents(list_of_allowed_intents: List[str],
-                              nlp: Any) -> List[str]:
-    if not nlp or not list_of_allowed_intents:
-        return list_of_allowed_intents
+    if not nlp or not (list_of_allow_nlp or list_of_deny_nlp):
+        return list_of_allow_nlp, list_of_deny_nlp
 
-    for allowed_nlp_component in list_of_allowed_intents:
-        if not isinstance(allowed_nlp_component, str):
-            raise ValidationError(
-                f"Invalid allowed_intents param: {allowed_nlp_component} is not of type str"
-            )
+    for list_of_masked_nlp in [list_of_allow_nlp, list_of_deny_nlp]:
+        if not list_of_masked_nlp:
+            continue
 
-        nlp_entries = [None, None, None, None]
-        entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
-        for idx, entry in enumerate(entries):
-            nlp_entries[idx] = entry
+        for allowed_nlp_component in list_of_masked_nlp:
+            if not isinstance(allowed_nlp_component, str):
+                raise ValidationError(
+                    f"Invalid allow_nlp param: {allowed_nlp_component} is not of type str"
+                )
 
-        domain, intent, _, _ = nlp_entries
+            nlp_entries = [None, None, None, None]
+            entries = allowed_nlp_component.split(".")[:len(nlp_entries)]
+            for idx, entry in enumerate(entries):
+                nlp_entries[idx] = entry
 
-        if not domain or domain not in nlp.domains:
-            raise ValidationError(
-                f"Domain: {domain} is not in the NLP component hierarchy"
-            )
+            domain, intent, entity, role = nlp_entries
 
-        if not intent or (intent != "*" and intent not in nlp.domains[domain].intents):
-            raise ValidationError(
-                f"Intent: {intent} is not in the NLP component hierarchy"
-            )
-    return list_of_allowed_intents
+            if not domain or domain not in nlp.domains:
+                raise ValidationError(
+                    f"Domain: {domain} is not in the NLP component hierarchy"
+                )
+
+            if not intent:
+                continue
+
+            valid_intents = nlp.domains[domain].intents if intent == '*' else [intent]
+            for valid_intent in valid_intents:
+                if valid_intent not in nlp.domains[domain].intents:
+                    raise ValidationError(
+                        f"Intent: {valid_intent} is not in the NLP component hierarchy"
+                    )
+
+                # Ignore further validation if the star operator is present
+                if entity == '*':
+                    continue
+
+                if entity and entity != '*':
+                    if entity not in nlp.domains[domain].intents[valid_intent].entities:
+                        raise ValidationError(
+                            f"Entity: {entity} is not in the NLP component hierarchy"
+                        )
+
+                if role and role != '*':
+                    entities = nlp.domains[domain].intents[valid_intent].entities
+                    if role not in entities[entity].role_classifier.roles:
+                        raise ValidationError(
+                            f"Role: {role} is not in the NLP component hierarchy"
+                        )
+
+    return list_of_allow_nlp, list_of_deny_nlp
 
 
 def _validate_target_dialogue_state(target_dialogue_state: Optional[str],
@@ -332,10 +360,14 @@ class ParamsSchema(Schema):
                                           allow_none=True)
 
     def serialize_allowed_intents(self, params) -> List[str]:
-        return list(_validate_allowed_intents(params.allowed_intents, self.context.get('nlp')))
+        return list(_validate_mask_nlp(
+            self.context.get('nlp'),
+            list_of_allow_nlp=params.allowed_intents)[0])
 
     def deserialize_allowed_intents(self, allowed_intents: List[str]) -> List[str]:
-        return _validate_allowed_intents(allowed_intents, self.context.get('nlp'))
+        return _validate_mask_nlp(
+            self.context.get('nlp'),
+            list_of_allow_nlp=allowed_intents)[0]
 
     def serialize_target_dialogue_state(self, params) -> Optional[str]:
         return _validate_target_dialogue_state(
