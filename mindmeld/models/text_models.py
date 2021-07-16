@@ -17,10 +17,12 @@ of text.
 """
 import logging
 import operator
+import os
 import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -470,14 +472,13 @@ class TextModel(Model):
             example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
         )
 
-    def dump(self, path, metadata=None):
-        metadata = metadata or {}
-        metadata.update({
-            "model": self,
-            "model_config": self.config,
-            "serializable": True}
-        )
-        super().dump(path, metadata)
+    @classmethod
+    def load(cls, path):
+        return joblib.load(path)
+
+    def _dump(self, path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(self, path)
 
 
 class PytorchTextModel(PytorchModel):

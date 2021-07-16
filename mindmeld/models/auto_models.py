@@ -16,11 +16,10 @@ Contains classes that can resolve model types and create/load appropriate models
 """
 
 import logging
-import os
-from typing import Union
+from typing import Union, Type
 
 from .helpers import register_model
-from .model import ModelConfig, BaseModel
+from .model import ModelConfig, AbstractModel
 from .tagger_models import AutoTaggerModel
 from .text_models import AutoTextModel
 
@@ -32,18 +31,18 @@ class AutoModel:
     to load based on the inputted configs or from the loaded configs file.
 
     The .from_config() methods allows to load the appropriate model when passed in with ModelConfig.
-    The .from_path() method uses BaseModel's load method to load a dumped config, which is them used
-    to load appropriate model and return it through a metadata dictionary object.
+    The .from_path() method uses AbstractModel's load method to load a dumped config, which is them
+    used to load appropriate model and return it through a metadata dictionary object.
 
     """
     ALLOWED_MODEL_TYPES = ["text", "tagger"]
 
-    # method kept for backwards compatability
+    # method for backwards compatability in ./helpers/create_model()
     def __new__(cls, config: Union[dict, ModelConfig]):
         return cls.from_config(config)
 
     @classmethod
-    def from_config(cls, model_config: Union[dict, ModelConfig]):
+    def from_config(cls, model_config: Union[dict, ModelConfig]) -> Type[AbstractModel]:
 
         if not (model_config and isinstance(model_config, (ModelConfig, dict))):
             msg = f"Need a valid model config to create a text/tagger model in AutoModel. " \
@@ -51,7 +50,7 @@ class AutoModel:
             raise ValueError(msg)
 
         # get model type upon validation
-        model_config = cls._get_model_config(model_config)
+        model_config = cls._resolve_model_config(model_config)
         model_type = cls._get_model_type(model_config)
 
         # load metadata and return
@@ -63,7 +62,7 @@ class AutoModel:
         return model_class(model_config)
 
     @classmethod
-    def from_path(cls, path: str):
+    def from_path(cls, path: str) -> Type[AbstractModel]:
 
         if not (path and isinstance(path, str)):
             msg = f"Need a valid path to load a text/tagger model in AutoModel. " \
@@ -74,29 +73,30 @@ class AutoModel:
             msg = "Model Path must end with .pkl for AutoModel to be able to identify the model"
             raise ValueError(msg)
 
-        if not os.path.exists(path):
-            msg = f"Inputted path '{path}' is not found while trying to load model in AutoModel. " \
-                  f"Make sure the inputted path is a valid pickle file path ending with .pkl"
-            raise ValueError(msg)
+        try:
 
-        # if loading from a path, determine the xxxModel type and return after xxxModel.load()
-        metadata = BaseModel.load(path)
-        model_config = metadata["model_config"]
+            # if loading from path, determine the XxxModel type & return after doing xxxModel.load()
+            model_config = AbstractModel.load_model_config(path)
 
-        # get model type upon validation
-        model_config = cls._get_model_config(model_config)
-        model_type = cls._get_model_type(model_config)
+            # get model type upon validation
+            model_config = cls._resolve_model_config(model_config)
+            model_type = cls._get_model_type(model_config)
 
-        # load metadata and return
-        if model_type == "text":
-            model_class = AutoTextModel.get_model_class(model_config)
-        elif model_type == "tagger":
-            model_class = AutoTaggerModel.get_model_class(model_config)
+            # load metadata and return
+            if model_type == "text":
+                model_class = AutoTextModel.get_model_class(model_config)
+            elif model_type == "tagger":
+                model_class = AutoTaggerModel.get_model_class(model_config)
 
-        return model_class.load(path)
+            return model_class.load(path)
+
+        except FileNotFoundError:
+
+            # sometimes a model (and its config file) might not be dumped, eg. in role classifiers
+            return None
 
     @staticmethod
-    def _get_model_config(model_config: Union[dict, ModelConfig]):
+    def _resolve_model_config(model_config: Union[dict, ModelConfig]) -> ModelConfig:
 
         # format configs
         if isinstance(model_config, dict):
@@ -111,20 +111,21 @@ class AutoModel:
         return model_config
 
     @staticmethod
-    def _get_model_type(model_config: ModelConfig):
+    def _get_model_type(model_config: ModelConfig) -> str:
 
         # identify the model_type
         try:
             model_type = model_config.model_type
-        except KeyError as e:
+            assert model_type in AutoModel.ALLOWED_MODEL_TYPES
+        except (KeyError, AssertionError) as e:
             msg = f"Invalid model configuration: Unknown model type {model_type}. " \
                   f"Known types are: {AutoModel.ALLOWED_MODEL_TYPES}"
             raise ValueError(msg) from e
 
         return model_type
 
-    @classmethod
-    def register_models(cls):
+    @staticmethod
+    def register_models() -> None:
         for model_type in AutoModel.ALLOWED_MODEL_TYPES:
             register_model(model_type, AutoModel)
         register_model("auto", AutoModel)

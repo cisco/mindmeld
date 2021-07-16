@@ -15,6 +15,9 @@
 This module contains the entity recognizer component of the MindMeld natural language processor.
 """
 import logging
+import pickle
+
+from sklearn.externals import joblib
 
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
@@ -143,13 +146,21 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
-        er_metadata = {
+        # classifier specific dump
+        er_data = {
             "entity_types": self.entity_types,
             "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
             "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
             "model_config": self._model_config,
         }
-        super().dump(model_path, incremental_model_path, metadata=er_metadata)
+        pickle.dump(er_data, open(self._get_classifier_resources_save_path(model_path), "wb"))
+        if incremental_model_path:
+            pickle.dump(
+                er_data,
+                open(self._get_classifier_resources_save_path(incremental_model_path), "wb")
+            )
+        # underlying model specific dump
+        super().dump(model_path, incremental_model_path)
 
     def unload(self):
         logger.info(
@@ -169,12 +180,20 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-        er_metadata = load_model(model_path)
 
-        self.entity_types = er_metadata["entity_types"]
-        self._model_config = er_metadata.get("model_config")
-        self._model = er_metadata["model"]
+        # underlying model specific load
+        model = load_model(model_path)
+        self._model = model
 
+        # classifier specific load
+        try:
+            er_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
+            er_data = joblib.load(model_path)
+        self.entity_types = er_data["entity_types"]
+        self._model_config = er_data["model_config"]
+
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -195,8 +214,8 @@ class EntityRecognizer(Classifier):
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
 
-            w_ngram_freq = er_metadata.get("w_ngram_freq")
-            c_ngram_freq = er_metadata.get("c_ngram_freq")
+            w_ngram_freq = er_data.get("w_ngram_freq")
+            c_ngram_freq = er_data.get("c_ngram_freq")
 
             self._model.register_resources(
                 gazetteers=gazetteers,

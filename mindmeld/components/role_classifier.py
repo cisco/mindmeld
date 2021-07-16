@@ -15,6 +15,9 @@
 This module contains the role classifier component of the MindMeld natural language processor.
 """
 import logging
+import pickle
+
+from sklearn.externals import joblib
 
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
@@ -95,7 +98,6 @@ class RoleClassifier(Classifier):
 
         # create model with given params
         model_config = self._get_model_config(**kwargs)
-        model = create_model(model_config)
 
         label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
         queries = self._resolve_queries(queries, label_set)
@@ -121,18 +123,11 @@ class RoleClassifier(Classifier):
             for label in labels:
                 self.roles.add(label)
 
+            model = create_model(model_config)
             model.initialize_resources(self._resource_loader, examples, labels)
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
-        else:
-            # This _else_ conditional is created to support moving .dump() and .load()
-            # to self._model.dump() and self._model.load() respectively.
-            #
-            # Any calls to abstract methods other than .fit(), .load(), .unload(), and .dump() are
-            # to be carefully used by identifying if role classification is valid or not with the
-            # conditional`if len(self.role_classifier.roles) > 1: ...; else: ...`
-            self._model = model
 
         self.hash = new_hash
 
@@ -154,7 +149,16 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
-        super().dump(model_path, incremental_model_path, metadata={"roles": self.roles})
+        # classifier specific dump
+        rc_data = {"roles": self.roles}
+        pickle.dump(rc_data, open(self._get_classifier_resources_save_path(model_path), "wb"))
+        if incremental_model_path:
+            pickle.dump(
+                rc_data,
+                open(self._get_classifier_resources_save_path(incremental_model_path), "wb")
+            )
+        # underlying model specific dump
+        super().dump(model_path, incremental_model_path)
 
     def unload(self):
         self._model = None
@@ -173,19 +177,19 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
+
+        # underlying model specific load
+        model = load_model(model_path)
+        self._model = model
+
+        # classifier specific load
         try:
-            metadata = load_model(model_path)
-            self._model = metadata["model"]
-            self.roles = metadata["roles"]
-        except (OSError, IOError):
-            logger.error(
-                "Unable to load %s. Pickle file cannot be read from %r",
-                self.__class__.__name__,
-                model_path,
-            )
-            return
-            # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
-            # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+            rc_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
+            rc_data = joblib.load(model_path)
+        self.roles = rc_data["roles"]
+
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (

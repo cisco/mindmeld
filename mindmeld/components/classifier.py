@@ -420,7 +420,14 @@ class Classifier(ABC):
                 model_config.pop("params", None)
         return ModelConfig(**model_config)
 
-    def dump(self, model_path, incremental_model_path=None, metadata=None):
+    @staticmethod
+    def _get_classifier_resources_save_path(model_path):
+        head, ext = os.path.splitext(model_path)
+        classifier_resources_save_path = head + ".classifier_resources" + ext
+        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
+        return classifier_resources_save_path
+
+    def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
         Args:
@@ -432,7 +439,8 @@ class Classifier(ABC):
             if not path:
                 continue
 
-            self._model.dump(path, metadata=metadata)
+            if self._model:  # sometimes a model might not be instantiated, eg. in role classifiers
+                self._model.dump(path)
 
             hash_path = path + ".hash"
             with open(hash_path, "w") as hash_file:
@@ -457,9 +465,10 @@ class Classifier(ABC):
             model_path (str): The location on disk where the model is stored
         """
 
-        metadata = load_model(model_path)
-        self._model = metadata.pop("model")
+        model = load_model(model_path)
+        self._model = model
 
+        # validate and initialize resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (

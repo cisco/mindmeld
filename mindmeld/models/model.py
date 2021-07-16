@@ -17,9 +17,9 @@ import json
 import logging
 import math
 import os
+import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Any, Dict
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -46,13 +46,9 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .._version import get_mm_version
-from ..exceptions import ClassifierLoadError
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
-
-# model scoring type
-LIKELIHOOD_SCORING = "log_loss"
 
 
 class ModelConfig:
@@ -228,7 +224,7 @@ class ModelConfig:
         return required_resources
 
 
-class BaseModel(ABC):
+class AbstractModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
     """
@@ -258,67 +254,75 @@ class BaseModel(ABC):
     def evaluate(self, examples, labels):
         raise NotImplementedError
 
-    def dump(self, path, metadata=None):
-
-        metadata = metadata or {}
-
-        # every XxxModel derived from baseModel has one default .pkl dump file that contains a
-        #   dictionary with at least the key 'model_config' whose value is a dictionary of the
-        #   model configs
-        if 'model_config' not in metadata:
-            metadata.update({'model_config': self.config})
-
-        # make directory if necessary
-        folder = os.path.dirname(path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        joblib.dump(metadata, path)
-
     @classmethod
+    @abstractmethod
     def load(cls, path):
-
-        try:
-            metadata = joblib.load(path)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
-
-        if not isinstance(metadata, dict):
-            # backwards compatability
-            #   when a serializable model is saved as-is & now has to be retrieved;
-            #   notably, the serialized model also consists of the model config;
-            #   in this case, metadata = model
-            metadata = {"model": metadata, "model_config": metadata.config}
-
-        if 'model_config' not in metadata:
-            msg = f"Unable to obtain model_config from dump location- {path}." \
-                  f"Please re-build the models."
-            raise KeyError(msg)
-
-        return metadata
-
-    def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
 
-    def register_resources(self, **kwargs):
-        """Registers resources which are accessible to feature extractors
+    @classmethod
+    def load_model_config(cls, path):
+        try:
+            model_configs_save_path = cls._get_model_config_save_path(path)
+            model_config = pickle.load(open(model_configs_save_path, "rb"))
+        except FileNotFoundError:  # backwards compatability for sklearn model classes
+            metadata = joblib.load(path)
+            # metadata here can be a serialized model (TextModel) or a dict (TaggerModel)
+            if isinstance(metadata, dict):
+                model_config = metadata["model_config"]
+            else:
+                # in this case, metadata = model
+                model_config = metadata.config
+
+        return model_config
+
+    def _dump(self, path) -> None:
+        """
+        Dumps the model and calls the underlying algo to dump its state.
 
         Args:
-            **kwargs: dictionary of resources to register
+            path (str): The path to dump the model to
         """
-        self._resources.update(kwargs)
+        pass
+
+    def dump(self, path) -> None:
+
+        # every XxxModel derived from baseModel has one default .pkl dump file that contains a
+        #   dictionary with at least the key 'model_config' whose value is a model configs dict
+        #   this pickle file is sought in `load_model_config()` method
+        model_configs_save_path = self._get_model_config_save_path(path)
+        pickle.dump(self.config, open(model_configs_save_path, "wb"))
+
+        self._dump(path)
+
+    @staticmethod
+    def _get_model_config_save_path(path):
+        head, ext = os.path.splitext(path)
+        model_config_save_path = head + ".config" + ext
+        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
+        return model_config_save_path
+
+    def view_extracted_features(self, example, dynamic_resource=None):
+        # Not implemeneted for deep neural models
+        raise NotImplementedError
+
+    def register_resources(self, **kwargs):  # pylint: disable=no-self-use
+        # Resources for feature extractors are not required for deep neural models
+        del kwargs
+        pass
 
     def get_resource(self, name):
         return self._resources.get(name)
 
 
-class Model(BaseModel):
+class Model(AbstractModel):
     """An abstract class upon which all models are based.
 
     Attributes:
         config (ModelConfig): The configuration for the model
     """
+
+    # model scoring type
+    LIKELIHOOD_SCORING = "log_loss"
 
     def __init__(self, config):
         super().__init__(config)
@@ -400,14 +404,14 @@ class Model(BaseModel):
                 * model.cv_results_["std_test_score"][idx]
                 / math.sqrt(model.n_splits_)
             )
-            if scoring == LIKELIHOOD_SCORING:
+            if scoring == Model.LIKELIHOOD_SCORING:
                 msg = "Candidate average log likelihood: {:.4} ± {:.4}"
             else:
                 msg = "Candidate average accuracy: {:.2%} ± {:.2%}"
             # pylint: disable=logging-format-interpolation
             logger.debug(msg.format(model.cv_results_["mean_test_score"][idx], std_err))
 
-        if scoring == LIKELIHOOD_SCORING:
+        if scoring == Model.LIKELIHOOD_SCORING:
             msg = "Best log likelihood: {:.4}, params: {}"
             self.cv_loss_ = -model.best_score_
         else:
@@ -499,6 +503,14 @@ class Model(BaseModel):
         config_dict.pop("param_selection")
         config_dict["params"] = self._current_params
         return ModelConfig(**config_dict)
+
+    def register_resources(self, **kwargs):
+        """Registers resources which are accessible to feature extractors
+
+        Args:
+            **kwargs: dictionary of resources to register
+        """
+        self._resources.update(kwargs)
 
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
@@ -650,40 +662,18 @@ class Model(BaseModel):
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
 
-class PytorchModel(BaseModel):
+class PytorchModel(AbstractModel):
 
-    def __init__(self, config):
+    def __init__(self, config):  # pylint: disable=useless-super-delegation
         super().__init__(config)
-        config = self.config
-        # self._featurizer = AutoFeaturizer.from_config(config)
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        # self._featurizer.initialize_resources(examples, labels, params)
         raise NotImplementedError
 
     def fit(self, examples, labels, params=None):
-        # self._featurizer.train()  # this loads an optimizer, batches inputs,
-        # finds loss and backwards gradients and updates gradients and saves best checkpoint
-        raise NotImplementedError
-
-    def dump(self, path, metadata=None):
-        # do featurizer specific dumping
-
-        # dump model configs
-        # metadata = metadata or {}
-        # metadata.update({'model_config': self.featurizer.config})
-        super().dump(path)
-
-        raise NotImplementedError
-
-    @classmethod
-    def load(cls, *args, **kwargs) -> Dict[str, Any]:
-        # load featurizer
         raise NotImplementedError
 
     def predict(self, examples, dynamic_resource=None):
-        # self._featurizer.predict()  # batches and runs prediction and returns
-        #                             # results in labels format
         raise NotImplementedError
 
     def predict_proba(self, examples):
@@ -692,12 +682,6 @@ class PytorchModel(BaseModel):
     def evaluate(self, examples, labels):
         raise NotImplementedError
 
-    @staticmethod
-    def get_model_folder_from_model_path(model_path: str):
-        if not model_path.endswith(".pkl"):
-            msg = "Unsupported model_path provided to create a folder name in featurizers. " \
-                  "The supplied model path must end with '.pkl'. "
-            raise ValueError(msg)
-        model_folder = model_path.split(".pkl")[0]
-        os.makedirs(model_folder, exist_ok=True)
-        return model_folder
+    @classmethod
+    def load(cls, path):
+        raise NotImplementedError

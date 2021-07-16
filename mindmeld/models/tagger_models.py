@@ -357,40 +357,30 @@ class TaggerModel(Model):
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
-    def dump(self, path, metadata=None):
-        """
-        Dumps the model and call's the underlying model to dump its state.
-
-        Args:
-            path (str): The path to dump the model to
-            config (dict): The config containing the model configuration
-        """
+    def _dump(self, path):
 
         # In TaggerModel, unlike TextModel, two dumps happen,
-        # one, the underneath classifier and second, the model metadata
+        # one, the underneath classifier and two, the model metadata
 
-        metadata = metadata or {}
-        metadata.update({"model_config": self.config, "serializable": self._clf.is_serializable})
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        metadata = {"serializable": self._clf.is_serializable}
 
         if self._clf.is_serializable:
-            metadata.update({"model": self})
+            metadata.update({
+                "model": self
+            })
         else:
-            # underneath tagger dump
+            # underneath tagger dump (eg. LSTM)
             model_dir = self._clf.dump(path)
-            metadata.update({"model": model_dir})
-
-            # misc resources dump
-            tagger_vars = {
+            metadata.update({
+                "model": model_dir,
                 "current_params": self._current_params,
                 "label_encoder": self._label_encoder,
                 "no_entities": self._no_entities,
-            }
-            joblib.dump(
-                tagger_vars, os.path.join(model_dir, ".tagger_vars")
-            )
+            })
 
         # dump model metadata
-        super().dump(path, metadata)
+        joblib.dump(metadata, path)
 
     @classmethod
     def load(cls, path):
@@ -401,9 +391,8 @@ class TaggerModel(Model):
             path (str): The path to dump the model to
         """
 
-        # Note that we load in reverse chronological order in which they are dumped by .dump()
-
-        metadata = super().load(path)
+        # load model metadata
+        metadata = joblib.load(path)
 
         # The default is True since < MM 3.2.0 models are serializable by default
         is_serializable = metadata.get("serializable", True)
@@ -417,10 +406,15 @@ class TaggerModel(Model):
             model = create_model(model_config)
 
             # misc resources load
-            tagger_vars = joblib.load(model_dir, ".tagger_vars")
-            model._current_params = tagger_vars["current_params"]
-            model._label_encoder = tagger_vars["label_encoder"]
-            model._no_entities = tagger_vars["no_entities"]
+            try:
+                model._current_params = metadata["current_params"]
+                model._label_encoder = metadata["label_encoder"]
+                model._no_entities = metadata["no_entities"]
+            except KeyError:  # backwards compatability
+                tagger_vars = joblib.load(model_dir, ".tagger_vars")
+                model._current_params = tagger_vars["current_params"]
+                model._label_encoder = tagger_vars["label_encoder"]
+                model._no_entities = tagger_vars["no_entities"]
 
             # underneath tagger load
             model._clf.load(model_dir)
@@ -428,7 +422,7 @@ class TaggerModel(Model):
             # replace model dump directory with actual model
             metadata["model"] = model
 
-        return metadata
+        return metadata["model"]
 
 
 class PytorchTaggerModel(PytorchModel):
