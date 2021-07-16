@@ -206,10 +206,6 @@ class TaggerModel(Model):
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
 
-    ##################
-    # abstract methods
-    ##################
-
     def fit(self, examples, labels, params=None):
         """Trains the model.
 

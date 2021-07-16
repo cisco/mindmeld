@@ -601,10 +601,6 @@ class Model(BaseModel):
                 return True
         return False
 
-    ##################
-    # abstract methods
-    ##################
-
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses \
         @requires decorator to declare required resources. Based on feature list in model config \

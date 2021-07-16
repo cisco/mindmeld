@@ -189,9 +189,9 @@ class Tagger:
     @staticmethod
     def dump(model_path):
         """
-        Dumps the model to memory. This is a no-op since we do not
-        have to do anything special to dump default serializable models
-        for SKLearn.
+        Dumps any tagger specific data to disk and returns a model_path (modified if required).
+        This is a no-op since we do not have to do anything special to dump default serializable
+        models for SKLearn.
 
         Args:
             model_path (str): The path to dump the model to

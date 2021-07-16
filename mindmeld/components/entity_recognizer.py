@@ -143,13 +143,13 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
-        metadata = {
+        er_metadata = {
             "entity_types": self.entity_types,
             "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
             "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
             "model_config": self._model_config,
         }
-        super().dump(model_path, incremental_model_path, metadata=metadata)
+        super().dump(model_path, incremental_model_path, metadata=er_metadata)
 
     def unload(self):
         logger.info(
@@ -169,11 +169,11 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-        metadata = load_model(model_path)
+        er_metadata = load_model(model_path)
 
-        self.entity_types = metadata["entity_types"]
-        self._model_config = metadata.get("model_config")
-        self._model = metadata["model"]
+        self.entity_types = er_metadata["entity_types"]
+        self._model_config = er_metadata.get("model_config")
+        self._model = er_metadata["model"]
 
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
@@ -195,8 +195,8 @@ class EntityRecognizer(Classifier):
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
 
-            w_ngram_freq = metadata.get("w_ngram_freq")
-            c_ngram_freq = metadata.get("c_ngram_freq")
+            w_ngram_freq = er_metadata.get("w_ngram_freq")
+            c_ngram_freq = er_metadata.get("c_ngram_freq")
 
             self._model.register_resources(
                 gazetteers=gazetteers,

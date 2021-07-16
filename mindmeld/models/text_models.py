@@ -383,10 +383,6 @@ class TextModel(Model):
         }.get(scale_type)
         return scaler
 
-    ##################
-    # abstract methods
-    ##################
-
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
 
