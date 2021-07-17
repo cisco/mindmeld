@@ -20,7 +20,6 @@ from sklearn.externals import joblib
 
 from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (
-    create_model,
     get_label_encoder,
     get_seq_accuracy_scorer,
     get_seq_tag_accuracy_scorer,
@@ -360,9 +359,8 @@ class TaggerModel(Model):
     def _dump(self, path):
 
         # In TaggerModel, unlike TextModel, two dumps happen,
-        # one, the underneath classifier and two, the model metadata
+        # one, the underneath classifier and two, the tagger model's metadata
 
-        os.makedirs(os.path.dirname(path), exist_ok=True)
         metadata = {"serializable": self._clf.is_serializable}
 
         if self._clf.is_serializable:
@@ -370,16 +368,17 @@ class TaggerModel(Model):
                 "model": self
             })
         else:
-            # underneath tagger dump (eg. LSTM)
-            model_dir = self._clf.dump(path)
+            # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
+            self._clf.dump(path)
             metadata.update({
-                "model": model_dir,
                 "current_params": self._current_params,
                 "label_encoder": self._label_encoder,
                 "no_entities": self._no_entities,
+                "model_config": self.config
             })
 
         # dump model metadata
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         joblib.dump(metadata, path)
 
     @classmethod
@@ -400,10 +399,7 @@ class TaggerModel(Model):
         # If model is serializable, it can be loaded and used as-is. But if not serializable,
         #   it means we need to create an instance and load necessary details for it to be used.
         if not is_serializable:
-            model_config = metadata.get("model_config")
-            model_dir = metadata["model"]
-
-            model = create_model(model_config)
+            model = cls(metadata["model_config"])
 
             # misc resources load
             try:
@@ -411,6 +407,7 @@ class TaggerModel(Model):
                 model._label_encoder = metadata["label_encoder"]
                 model._no_entities = metadata["no_entities"]
             except KeyError:  # backwards compatability
+                model_dir = metadata["model"]
                 tagger_vars = joblib.load(model_dir, ".tagger_vars")
                 model._current_params = tagger_vars["current_params"]
                 model._label_encoder = tagger_vars["label_encoder"]

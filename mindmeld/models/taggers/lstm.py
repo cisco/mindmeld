@@ -958,6 +958,12 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
     def is_serializable(self):
         return False
 
+    @staticmethod
+    def _get_tagger_resources_save_path(model_path):
+        tagger_resources_save_path = model_path.split(".pkl")[0] + "_model_files"
+        os.makedirs(os.path.dirname(tagger_resources_save_path), exist_ok=True)
+        return tagger_resources_save_path
+
     def dump(self, path):
         """
         Saves the Tensorflow model
@@ -968,13 +974,13 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         Returns:
             path (str): entity model folder
         """
-        path = path.split(".pkl")[0] + "_model_files"
+        path = self._get_tagger_resources_save_path(path)
 
         if not os.path.isdir(path):
             os.makedirs(path)
 
         if not self.saver:
-            # This conditional happens when there are not entities for the associated model
+            # This conditional happens when there are no entities for the associated model
             return path
 
         self.saver.save(self.session, os.path.join(path, "lstm_model"))
@@ -991,8 +997,6 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         }
 
         joblib.dump(variables_to_dump, os.path.join(path, ".feature_extraction_vars"))
-
-        return path
 
     def unload(self):
         self.graph = None
@@ -1012,7 +1016,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         Args:
             path (str): the folder path for the entity model folder
         """
-        path = path.split(".pkl")[0] + "_model_files"
+        path = self._get_tagger_resources_save_path(path)
 
         if not os.path.exists(os.path.join(path, "lstm_model.meta")):
             # This conditional is for models with no labels where no TF graph was built

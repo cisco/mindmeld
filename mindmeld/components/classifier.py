@@ -427,6 +427,9 @@ class Classifier(ABC):
         os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
         return classifier_resources_save_path
 
+    def _create_and_dump_payload(self, path):
+        pass
+
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
@@ -439,6 +442,10 @@ class Classifier(ABC):
             if not path:
                 continue
 
+            # classifier specific dump
+            self._create_and_dump_payload(path)
+
+            # model specific dump
             if self._model:  # sometimes a model might not be instantiated, eg. in role classifiers
                 self._model.dump(path)
 

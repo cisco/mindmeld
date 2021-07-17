@@ -135,6 +135,15 @@ class EntityRecognizer(Classifier):
         self.dirty = True
         return True
 
+    def _create_and_dump_payload(self, path):
+        er_data = {
+            "entity_types": self.entity_types,
+            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            "model_config": self._model_config,
+        }
+        pickle.dump(er_data, open(self._get_classifier_resources_save_path(path), "wb"))
+
     def dump(self, model_path, incremental_model_path=None):
         """Save the model.
 
@@ -146,20 +155,6 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
-        # classifier specific dump
-        er_data = {
-            "entity_types": self.entity_types,
-            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
-            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
-            "model_config": self._model_config,
-        }
-        pickle.dump(er_data, open(self._get_classifier_resources_save_path(model_path), "wb"))
-        if incremental_model_path:
-            pickle.dump(
-                er_data,
-                open(self._get_classifier_resources_save_path(incremental_model_path), "wb")
-            )
-        # underlying model specific dump
         super().dump(model_path, incremental_model_path)
 
     def unload(self):
@@ -182,8 +177,7 @@ class EntityRecognizer(Classifier):
         )
 
         # underlying model specific load
-        model = load_model(model_path)
-        self._model = model
+        self._model = load_model(model_path)
 
         # classifier specific load
         try:

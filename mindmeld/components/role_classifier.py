@@ -135,6 +135,10 @@ class RoleClassifier(Classifier):
         self.dirty = True
         return True
 
+    def _create_and_dump_payload(self, path):
+        rc_data = {"roles": self.roles}
+        pickle.dump(rc_data, open(self._get_classifier_resources_save_path(path), "wb"))
+
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained role classification model to disk.
 
@@ -149,15 +153,6 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
-        # classifier specific dump
-        rc_data = {"roles": self.roles}
-        pickle.dump(rc_data, open(self._get_classifier_resources_save_path(model_path), "wb"))
-        if incremental_model_path:
-            pickle.dump(
-                rc_data,
-                open(self._get_classifier_resources_save_path(incremental_model_path), "wb")
-            )
-        # underlying model specific dump
         super().dump(model_path, incremental_model_path)
 
     def unload(self):
@@ -179,8 +174,7 @@ class RoleClassifier(Classifier):
         )
 
         # underlying model specific load
-        model = load_model(model_path)
-        self._model = model
+        self._model = load_model(model_path)
 
         # classifier specific load
         try:

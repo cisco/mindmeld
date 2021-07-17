@@ -74,8 +74,7 @@ class AutoModel:
             raise ValueError(msg)
 
         try:
-
-            # if loading from path, determine the XxxModel type & return after doing xxxModel.load()
+            # if loading from path, determine the ABCModel type & return after doing xxxModel.load()
             model_config = AbstractModel.load_model_config(path)
 
             # get model type upon validation
@@ -91,8 +90,8 @@ class AutoModel:
             return model_class.load(path)
 
         except FileNotFoundError:
-
             # sometimes a model (and its config file) might not be dumped, eg. in role classifiers
+            # or even if dumped, can be of NoneType enclosed in a dictionary
             return None
 
     @staticmethod

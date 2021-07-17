@@ -474,7 +474,14 @@ class TextModel(Model):
 
     @classmethod
     def load(cls, path):
-        return joblib.load(path)
+        metadata = joblib.load(path)
+
+        # backwards compatability check for RoleClassifiers
+        if isinstance(metadata, dict):
+            return metadata["model"]
+
+        # in this case, metadata = model which was serialized and dumped
+        return metadata
 
     def _dump(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)

@@ -48,6 +48,9 @@ from .helpers import (
 from .._version import get_mm_version
 from ..tokenizer import Tokenizer
 
+# for backwards compatability for sklearn models serialized and dumped in previous version
+from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
+
 logger = logging.getLogger(__name__)
 
 
@@ -264,16 +267,46 @@ class AbstractModel(ABC):
         try:
             model_configs_save_path = cls._get_model_config_save_path(path)
             model_config = pickle.load(open(model_configs_save_path, "rb"))
-        except FileNotFoundError:  # backwards compatability for sklearn model classes
+        except FileNotFoundError as e:  # backwards compatability for sklearn model classes
             metadata = joblib.load(path)
-            # metadata here can be a serialized model (TextModel) or a dict (TaggerModel)
+            # metadata here can be a serialized model (eg. TextModel) or a dict (eg. TaggerModel)
             if isinstance(metadata, dict):
-                model_config = metadata["model_config"]
+                # compatability with previously dumped EntityRecognizers and RoleClassifiers
+                try:
+                    # sklearn TaggerModel used by EntityRecognizer
+                    model_config = metadata["model_config"]
+                except KeyError:
+                    try:
+                        # sklearn TextModel used by RoleClassifier (w/ a non-NoneType "model")
+                        model_config = metadata["model"].config
+                    except AttributeError:
+                        # sklearn TextModel used by RoleClassifier (w/ a NoneType "model")
+                        #   in latest version, nothing gets dumped at the dump
+                        #       path: 'path/to/dump/<entity_name>-role.pkl' if the self._model in
+                        #       RoleClassifier is None because of a check in Classifier.dump()
+                        #   in previous version, a dictionary '{'model': None, 'roles': set()}'
+                        #       is dumped at the path: 'path/to/dump/<entity_name>-role.pkl'
+                        #       although the self._model in RoleClassifier is None
+                        msg = f"Model config data cold not be identified from existing dump at " \
+                              f"path: {path}. Assuming that the dumped model is NoneType and " \
+                              f"belongs to a role classifier"
+                        raise FileNotFoundError(msg) from e
             else:
-                # in this case, metadata = model
+                # compatability with previously dumped DomainClassifiers and IntentClassifiers
+                #   in this case, metadata = model which was serialized and dumped
                 model_config = metadata.config
 
         return model_config
+
+    def dump(self, path) -> None:
+
+        # every subclass of ABCModel has one .pkl dump file that contains a
+        #   dictionary with at least the key 'model_config' whose value is a model configs dict
+        #   this pickle file is sought in `load_model_config()` method
+        model_configs_save_path = self._get_model_config_save_path(path)
+        pickle.dump(self.config, open(model_configs_save_path, "wb"))
+
+        self._dump(path)
 
     def _dump(self, path) -> None:
         """
@@ -283,16 +316,6 @@ class AbstractModel(ABC):
             path (str): The path to dump the model to
         """
         pass
-
-    def dump(self, path) -> None:
-
-        # every XxxModel derived from baseModel has one default .pkl dump file that contains a
-        #   dictionary with at least the key 'model_config' whose value is a model configs dict
-        #   this pickle file is sought in `load_model_config()` method
-        model_configs_save_path = self._get_model_config_save_path(path)
-        pickle.dump(self.config, open(model_configs_save_path, "wb"))
-
-        self._dump(path)
 
     @staticmethod
     def _get_model_config_save_path(path):
