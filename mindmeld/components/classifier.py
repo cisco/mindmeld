@@ -446,7 +446,10 @@ class Classifier(ABC):
             self._create_and_dump_payload(path)
 
             # model specific dump
-            if self._model:  # sometimes a model might not be instantiated, eg. in role classifiers
+            if self._model:
+                # sometimes a model might be NoneType, eg. in role classifiers, in which case,
+                # no dumping is required. While loading such models, the model_path (.pkl)
+                # will not be found and the helpers.load_model() will return a NoneType model.
                 self._model.dump(path)
 
             hash_path = path + ".hash"
@@ -472,8 +475,7 @@ class Classifier(ABC):
             model_path (str): The location on disk where the model is stored
         """
 
-        model = load_model(model_path)
-        self._model = model
+        self._model = load_model(model_path)
 
         # validate and initialize resources
         if self._model is not None:
