@@ -115,11 +115,10 @@ class BaseQuestionAnswerer(ABC):
 
     @property
     def resource_loader(self) -> ResourceLoader:
-        self._resource_loader = (
+        return (
             self._resource_loader or
             ResourceLoader.create_resource_loader(self.app_path)
         )
-        return self._resource_loader
 
     @property
     def model_type(self) -> str:
