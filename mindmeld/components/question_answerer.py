@@ -103,9 +103,7 @@ class BaseQuestionAnswerer(ABC):
         app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
         self.app_path = os.path.abspath(app_path)
         self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self.app_path)
-        self.resource_loader = (
-            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self.app_path)
-        )
+        self._resource_loader = kwargs.get("resource_loader")
         self._qa_config = (
             kwargs.get("config") or
             get_classifier_config("question_answering", app_path=self.app_path)
@@ -114,6 +112,14 @@ class BaseQuestionAnswerer(ABC):
     def __repr__(self):
         return f"<{self.__class__.__name__} query_type: {self.query_type} " \
                f"app_path: {self.app_path} app_namespace: {self.app_namespace}>"
+
+    @property
+    def resource_loader(self) -> ResourceLoader:
+        self._resource_loader = (
+            self._resource_loader or
+            ResourceLoader.create_resource_loader(self.app_path)
+        )
+        return self._resource_loader
 
     @property
     def model_type(self) -> str:
