@@ -18,7 +18,7 @@ import re
 import unicodedata
 
 from .preprocessor import Preprocessor, PreprocessorFactory
-from .normalizers import Normalizer, NormalizerFactory, RegexNormalizer
+from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory, RegexNormalizer
 from .tokenizers import Tokenizer, TokenizerFactory
 from .stemmers import Stemmer, StemmerFactory
 
@@ -54,7 +54,7 @@ class TextPreparationPipeline:
         """Creates a Pipeline instance."""
         self.language = language
         self.preprocessors = preprocessors
-        self.normalizers = normalizers
+        self.normalizers = normalizers or [NoOpNormalizer()]
         self.tokenizer = tokenizer
         self.stemmer = stemmer
 
@@ -86,7 +86,7 @@ class TextPreparationPipeline:
             )
         return preprocessed_text
 
-    def normalize(self, text):
+    def normalize(self, raw_tokens):
         """
         Args:
             text (str): Input text.
@@ -98,10 +98,29 @@ class TextPreparationPipeline:
         if not self.normalizers:
             logger.warning(
                 "This instance of TextPreparationPipeline does not have normalizers."
-                "Returning the original text."
+                "Returning raw tokens."
             )
-            return text
+            return raw_tokens
 
+        normalized_tokens = []
+        print("Raw tokens", raw_tokens)
+        for i, raw_token in enumerate(raw_tokens):
+            print("Raw token", raw_token)
+            if not raw_token["text"] or len(raw_token["text"]) == 0:
+                continue
+            normalized_text = self._normalize_text(raw_token["text"])
+            if len(normalized_text) > 0:
+                for token in normalized_text.split():
+                    norm_token = {}
+                    norm_token["entity"] = token
+                    norm_token["raw_entity"] = raw_token["text"]
+                    norm_token["raw_token_index"] = i
+                    norm_token["raw_start"] = raw_token["start"]
+                    normalized_tokens.append(norm_token)
+        return normalized_tokens
+
+
+    def _normalize_text(self, text):
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = (
@@ -122,7 +141,7 @@ class TextPreparationPipeline:
             text=text, function=self.tokenizer.tokenize
         )
 
-    def stem_words(self, words):
+    def stem_word(self, word):
         """
         Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.
 
@@ -132,7 +151,7 @@ class TextPreparationPipeline:
         Returns:
             stemmed_words (List[str]): List of stemmed words.
         """
-        return [self.stemmer.stem_word(word) for word in words]
+        return self.stemmer.stem_word(word)
 
     @staticmethod
     def find_mindmeld_annotation_re_matches(text):
@@ -242,7 +261,9 @@ class TextPreparationPipeline:
             )
             tokens.extend(tokens_after_last_entity)
 
+        print("Tokens pre filter", tokens)
         tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
+        print("Tokens post filter", tokens)
         return tokens
 
     @staticmethod

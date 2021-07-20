@@ -80,7 +80,6 @@ class QueryFactory:
         Returns:
             Query: A newly constructed query
         """
-        # TODO: Should a text_preparation_pipeline be recreated based on the entered language?
         if not language and not locale:
             language = self.language
             locale = self.locale
@@ -102,23 +101,24 @@ class QueryFactory:
         else:
             processed_text = raw_text
 
-        # Step 2: Normalization
-        annotated_normalized_text = (
-            self.text_preparation_pipeline.normalize(processed_text)
-            if self.text_preparation_pipeline.normalizers
-            else processed_text
+        # Step 2: Tokenization
+        print("Processed Text", processed_text)
+        print(self.text_preparation_pipeline.tokenizer)
+        raw_tokens = self.text_preparation_pipeline.tokenize(
+            processed_text
         )
 
-        # Step 3: Tokenization
-        # TODO: Should space tokens be removed automatically?
-        normalized_tokens = self.text_preparation_pipeline.tokenize(
-            annotated_normalized_text
-        )
-        normalized_word_list = [t["text"] for t in normalized_tokens]
-        normalized_text = " ".join(normalized_word_list)
+        # Step 3: Normalization
+        normalized_tokens = self.text_preparation_pipeline.normalize(raw_tokens)
+
+        # TODO: Implement a function to rejoin normalized tokens into text (Not Space Based)
+        normalized_text = " ".join([t["entity"] for t in normalized_tokens])
 
         # Step 4: Stemming
-        stemmed_tokens = self.text_preparation_pipeline.stem_words(normalized_word_list)
+        stemmed_tokens = [
+            self.text_preparation_pipeline.stem_word(t["entity"]) for t in normalized_tokens
+        ]
+
 
         # Create Normalized Maps
         (

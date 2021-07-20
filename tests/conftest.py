@@ -26,6 +26,7 @@ from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.text_preparation.preprocessor import Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
+from mindmeld.text_preparation.normalizers import RegexNormalizer, Lowercase, ASCIIFold
 from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
 
 warnings.filterwarnings(
@@ -199,11 +200,53 @@ def duckling():
 
 
 @pytest.fixture
-def text_preparation_pipeline(preprocessor, tokenizer, stemmer):
+def regex_normalizer():
+    regex_norm_rules = [
+        {
+            "description": "Remove apostrophe at the end of possessive form",
+            "pattern": "^'(?=\S)|(?<=\S)'$",
+            "replacement": ""
+        },
+        {
+            "description": "Remove Apostrophes and Spaces Preceding or Proceding",
+            "pattern": " '|' ",
+            "replacement": "" 
+        },
+        {
+            "description": "Remove Beginning Spaces",
+            "pattern": "^\s+",
+            "replacement": "" 
+        },
+        {
+            "description": "Remove Trailing Spaces",
+            "pattern": "\s+$",
+            "replacement": "" 
+        },
+        {
+            "description": "Remove All Spaces",
+            "pattern": "\s+",
+            "replacement": "" 
+        },
+        {
+            "description": "Remove Underscores",
+            "pattern": "_",
+            "replacement": "" 
+        },
+        {
+            "description": "Separate 's to a separate word'",
+            "pattern": "(?<=[^\\s])'[sS]",
+            "replacement": " 's" 
+        }
+    ]
+    return RegexNormalizer(regex_norm_rules)
+
+
+@pytest.fixture
+def text_preparation_pipeline(preprocessor, tokenizer, stemmer, regex_normalizer):
     """The Text Preparation Pipeline Object"""
     return TextPreparationPipeline(
         preprocessors=[preprocessor],
-        #normalizers=[], TODO: Consider default normalization
+        normalizers=[regex_normalizer, Lowercase(), ASCIIFold()],
         tokenizer=tokenizer,
         stemmer=stemmer
     )

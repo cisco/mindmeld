@@ -24,7 +24,7 @@ def tokenizer():
 
 @pytest.fixture
 def custom_tokenizer():
-    return Tokenizer(app_path=APP_PATH)
+    return WhiteSpaceTokenizer()
 
 
 def test_tokenize(tokenizer):
