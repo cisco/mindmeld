@@ -29,7 +29,6 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from ._util import _is_module_available
 from .evaluation import EvaluatedExample, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
@@ -56,7 +55,6 @@ class TextModel(Model):
     _NEG_INF = -1e10
 
     ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
-    REQUIRES_EXTRAS_INSTALLS = []
 
     def __init__(self, config):
         super().__init__(config)
@@ -486,7 +484,6 @@ class TextModel(Model):
 
 class PytorchTextModel(PytorchModel):
     ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
-    REQUIRES_EXTRAS_INSTALLS = ["torch"]
 
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
@@ -558,6 +555,8 @@ class PytorchTextModel(PytorchModel):
         return self
 
     def predict(self, examples, dynamic_resource=None):
+        del dynamic_resource
+
         examples = [ex.normalized_text for ex in examples]
 
         y = self._clf.predict(examples)
@@ -593,9 +592,6 @@ class AutoTextModel:
 
         for _class in CLASSES:
             if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
-                for _module in _class.REQUIRES_EXTRAS_INSTALLS:
-                    if not _is_module_available(_module):
-                        raise ImportError("Install 'torch' library to use this classifier type")
                 return _class
 
         msg = f"Invalid 'classifier_type': {classifier_type}. " \

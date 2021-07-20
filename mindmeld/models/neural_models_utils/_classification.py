@@ -31,12 +31,16 @@ from ._layers import (
     get_disk_space_of_model,
     get_num_params_of_model
 )
+from .._util import _get_module_or_attr
 from ...path import USER_CONFIG_DIR
 
 try:
     import torch
     import torch.nn as nn
+
+    nn_module = _get_module_or_attr("torch.nn", "Module")
 except ImportError:
+    nn_module = object
     pass
 
 SEED = 6174
@@ -44,7 +48,7 @@ SEED = 6174
 logger = logging.getLogger(__name__)
 
 
-class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attributes
+class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         super().__init__()
@@ -77,7 +81,7 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
             logger.error(msg)
 
         # fit an encoder and update params
-        params = self._fit_encoder_and_update_params(examples, **params)
+        params = self.fit_encoder_and_update_params(examples, **params)
 
         # update number of labels and label pad idx
         try:
@@ -115,7 +119,7 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
         # dumping into a temp folder instead of keeping in memory to reduce memory usage
         temp_folder = os.path.join(USER_CONFIG_DIR, "pytorch_models", str(uuid.uuid4()))
         os.makedirs(temp_folder, exist_ok=True)
-        temp_save_path = os.path.join(temp_folder, "pytorch_model.bin")
+        temp_weights_save_path = os.path.join(temp_folder, "pytorch_model.bin")
 
         # split into train, dev splits and get data loaders
         indices = np.arange(len(examples))
@@ -143,6 +147,8 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
         best_dev_score, best_dev_epoch = -np.inf, -1
         msg = f"Beginning to train for {self.number_of_epochs} number of epochs"
         logger.info(msg)
+        if self.number_of_epochs < 1:
+            raise ValueError("Param 'number_of_epochs' must be a positive integer greater than 0")
         for epoch in range(1, self.number_of_epochs + 1):
             # patience before terminating due to no dev score improvements
             if epoch - best_dev_epoch > self.patience:
@@ -195,13 +201,14 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
                           f"not equal to number of targets ({len(this_labels_targetted)})"
                     logger.error(msg)
                     raise AssertionError(msg)
-                # flatten if required and discard unwanted predictions using label_padding_idx
+                # flatten if required
                 try:
                     this_labels_predicted = sum(this_labels_predicted, [])
                     this_labels_targetted = sum(this_labels_targetted, [])
                 except TypeError:
-                    # raised in cased on sequence classification, implies already flattened
+                    # raised in case of sequence classification; implies already flattened
                     pass
+                # discard unwanted predictions using label_padding_idx, if available
                 if hasattr(self, "label_padding_idx"):
                     this_labels_predicted, this_labels_targetted = zip(*[
                         (x, y) for x, y in zip(this_labels_predicted, this_labels_targetted)
@@ -222,15 +229,18 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
             # save model in a temp path if required
             if dev_score >= best_dev_score:
                 # save model weights in a temp folder; later move it to folder passed through dump()
-                torch.save(self.state_dict(), temp_save_path)
+                torch.save(self.state_dict(), temp_weights_save_path)
                 msg = f"\nModel weights saved after epoch: {epoch} when dev score improved " \
                       f"from '{best_dev_score:.4f}' to '{dev_score:.4f}'"
                 logger.info(msg)
                 best_dev_score, best_dev_epoch = dev_score, epoch
 
         # load the best model, delete the temp folder and return
-        self.load_state_dict(torch.load(
-            temp_save_path))  # because we are loading to same device, no `map_location` specified
+        msg = f"Setting the model weights to checkpoint whose dev score " \
+              f"('{self.validation_metric}') was {best_dev_score:.4f}"
+        logger.info(msg)
+        # because we are loading to same device, no `map_location` specified
+        self.load_state_dict(torch.load(temp_weights_save_path))
         shutil.rmtree(temp_folder)
 
         self.ready = True
@@ -285,12 +295,12 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
         if device != params.get("device"):
             msg = f"Model trained on '{params.get('device')}' but is being loaded on to {device}"
             logger.warning(msg)
-        module.load_state_dict(torch.load(
-            os.path.join(path, "pytorch_model.bin"), map_location=torch.device(device)))
+        module.load_state_dict(torch.load(os.path.join(path, "pytorch_model.bin"),
+                                          map_location=torch.device(device)))
         msg = f"{module.name} model weights are loaded successfully"
         logger.info(msg)
 
-        module.ready = True
+        # module.ready = True
         module.dirty = False
         return module
 
@@ -309,6 +319,10 @@ class ClassificationCore(nn.Module):  # pylint: disable=too-many-instance-attrib
         raise NotImplementedError
 
     @abstractmethod
-    def _fit_encoder_and_update_params(self, examples, **kwargs) -> Dict:
+    def predict_proba(self, examples) -> Union[List[List[int]], List[List[List[int]]]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def fit_encoder_and_update_params(self, examples, **kwargs) -> Dict:
         # return updated kwargs dict
         raise NotImplementedError

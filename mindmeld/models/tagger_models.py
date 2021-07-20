@@ -18,7 +18,6 @@ import random
 
 from sklearn.externals import joblib
 
-from ._util import _is_module_available
 from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (
     create_model,
@@ -90,7 +89,6 @@ class TaggerModel(Model):
     }
 
     ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
-    REQUIRES_EXTRAS_INSTALLS = []
 
     def __init__(self, config):
         if not config.features:
@@ -436,8 +434,7 @@ class TaggerModel(Model):
 
 
 class PytorchTaggerModel(PytorchModel):
-    ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm", "cnn-lstm", "lstm-lstm"]
-    REQUIRES_EXTRAS_INSTALLS = ["torch"]
+    ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm-pytorch", "cnn-lstm", "lstm-lstm"]
 
     def evaluate(self, examples, labels):
         raise NotImplementedError
@@ -445,13 +442,14 @@ class PytorchTaggerModel(PytorchModel):
     def fit(self, examples, labels, params=None):
 
         types = [entity.entity.type for label in labels for entity in label]
-        self.types = types
         if len(set(types)) == 0:
             self._no_entities = True
             logger.info(
                 "There are no labels in this label set, so we don't " "fit the model."
             )
             return self
+        else:
+            self._no_entities = False
 
         # Encode classes
         self._label_encoder = get_label_encoder(self.config)
@@ -474,9 +472,23 @@ class PytorchTaggerModel(PytorchModel):
         return self
 
     def predict(self, examples, dynamic_resource=None):
-        raise NotImplementedError
+        del dynamic_resource
+
+        if self._no_entities:
+            return [()]
+
+        predicted_tags = self._clf.predict(examples)
+        # Decode the tags to labels
+        labels = [
+            self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
+            for example_predicted_tags, example in zip(predicted_tags, examples)
+        ]
+        return labels
 
     def predict_proba(self, examples):
+        if self._no_entities:
+            return []
+
         raise NotImplementedError
 
     def _get_model_constructor(self):
@@ -485,7 +497,7 @@ class PytorchTaggerModel(PytorchModel):
         try:
             return {
                 "embedder": nn_modules.EmbedderForTokenClassification,
-                "lstm": nn_modules.SequenceLstmForTokenClassification,
+                "lstm-pytorch": nn_modules.SequenceLstmForTokenClassification,
                 "cnn-lstm": nn_modules.TokenCnnSequenceLstmForTokenClassification,
                 "lstm-lstm": nn_modules.TokenLstmSequenceLstmForTokenClassification,
             }[classifier_type]
@@ -504,9 +516,6 @@ class AutoTaggerModel:
 
         for _class in CLASSES:
             if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
-                for _module in _class.REQUIRES_EXTRAS_INSTALLS:
-                    if not _is_module_available(_module):
-                        raise ImportError("Install 'torch' library to use this classifier type")
                 return _class
 
         msg = f"Invalid 'classifier_type': {classifier_type}. " \

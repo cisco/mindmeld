@@ -246,6 +246,11 @@ class SentenceTransformersContainer:
             ]
         """
 
+        if not _is_module_available("sentence_transformers"):
+            msg = "Must install extra [bert] by running " \
+                  "'pip install mindmeld[bert]'"
+            raise ImportError(msg)
+
         strans_models = _getattr("sentence_transformers.models")
         strans = _getattr("sentence_transformers", "SentenceTransformer")
 
@@ -346,12 +351,17 @@ class HuggingfaceTransformersContainer:
 
     def _extract_model(self):
         if self.model_id not in HuggingfaceTransformersContainer.CONTAINER_LOOKUP or self._reload:
-            config = _getattr("transformers", "AutoConfig").from_pretrained(
-                self.pretrained_model_name_or_path)
-            tokenizer = _getattr("transformers", "AutoTokenizer").from_pretrained(
-                self.pretrained_model_name_or_path)
-            model = _getattr("transformers", "AutoModel").from_pretrained(
-                self.pretrained_model_name_or_path)
+            try:
+                config = _getattr("transformers", "AutoConfig").from_pretrained(
+                    self.pretrained_model_name_or_path)
+                tokenizer = _getattr("transformers", "AutoTokenizer").from_pretrained(
+                    self.pretrained_model_name_or_path)
+                model = _getattr("transformers", "AutoModel").from_pretrained(
+                    self.pretrained_model_name_or_path)
+            except ImportError as e:
+                msg = "Must install extra [transformers] by running " \
+                      "'pip install mindmeld[transformers]'"
+                raise ImportError(msg) from e
 
             model_bunch = Bunch(
                 config=config,

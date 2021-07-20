@@ -32,6 +32,7 @@ from sklearn.model_selection import (
 )
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 
+from ._util import _is_module_available
 from .helpers import (
     create_model,
     CHAR_NGRAM_FREQ_RSC,
@@ -603,10 +604,6 @@ class Model(BaseModel):
                 return True
         return False
 
-    ######################################
-    # ↓ abstract methods implementations ↓
-    ######################################
-
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses \
         @requires decorator to declare required resources. Based on feature list in model config \
@@ -659,14 +656,14 @@ class Model(BaseModel):
 class PytorchModel(BaseModel):
 
     def __init__(self, config):
+        if not _is_module_available('torch'):
+            raise ImportError("Install the extra 'torch' library by runnning "
+                              "'pip install mindmeld[torch]' to use pytorch based neural models")
+
         super().__init__(config)
         self._label_encoder = get_label_encoder(self.config)
         self._class_encoder = SKLabelEncoder()
         self._clf = None
-
-    ######################################
-    # ↓ abstract methods implementations ↓
-    ######################################
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         del examples, labels

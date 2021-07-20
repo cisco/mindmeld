@@ -40,7 +40,6 @@ requirements = [
     "mypy>=0.782",
     "marshmallow~=3.7.1",
     "matplotlib~=3.3.1",
-    "torch~=1.7.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -112,10 +111,12 @@ setup(
         "elasticsearch": [
             "elasticsearch>=5.0",
         ],
-        "neural_models": [
+        "torch": [
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=3.5.1; python_version>="3.6"',
             'pytorch-crf~=0.7.2'
+        ],
+        "transformers": [
+            'transformers~=3.5.1; python_version>="3.6"',
         ]
     },
 )

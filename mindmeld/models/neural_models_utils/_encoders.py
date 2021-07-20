@@ -20,26 +20,31 @@ import os
 from abc import abstractmethod
 from typing import Dict, List, Union, Any, Iterable
 
+from .._util import _get_module_or_attr
+from ..containers import GloVeEmbeddingsContainer, HuggingfaceTransformersContainer
+
 try:
     import torch
-    from torch import nn
+
+    nn_module = _get_module_or_attr("torch.nn", "Module")
 except ImportError:
+    nn_module = object
     pass
-from ..containers import GloVeEmbeddingsContainer, HuggingfaceTransformersContainer
 
 logger = logging.getLogger(__name__)
 
 LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 
-# base encoders
+# abstract encoder
 
-class AbstractEncoder(nn.Module):
+
+class AbstractEncoder(nn_module):
 
     def __init__(self):
         super().__init__()
         self.emb_dim = None
-        self.params_keys = set(["emb_dim"])
+        self.params_keys = {"emb_dim"}
 
     def forward(self, *args, **kwargs):
         self.batch_encode(*args, **kwargs)
@@ -97,6 +102,9 @@ class AbstractEncoder(nn.Module):
         return LABEL_PAD_TOKEN_IDX
 
 
+# base encoders
+
+
 class EncoderWithStaticEmbeddings(AbstractEncoder):
     """
     A base class for joint tokenization-encoding with the vocab derived from the training data and
@@ -112,7 +120,7 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
     in the .batch_encode() method of the derived class.
     """
 
-    ALLOWED_TOKENIZERS = ["whitespace-tokenizer", "char-tokenizer"]
+    ALLOWED_TOKENIZERS = ["whitespace-tokenizer", "char-tokenizer", None]
     ALLOWED_EMBEDDER_TYPES = ["glove"]
 
     BASIC_SPECIAL_VOCAB_DICT = {
@@ -120,13 +128,13 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
         "unk_token": "<UNK>",
         "start_token": "<START>",
         "end_token": "<END>",
-        "mask_token": "<MASK>",
     }
 
     def fit(
         self,
         # input data stream
         examples: List[str] = None,
+        tokens: List[str] = None,
         # params
         embedder_type=None,
         special_vocab_dict=None,
@@ -157,16 +165,35 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
             self.params_keys.update(["tokenizer_type"])
         elif self.embedder_type == "glove":
             self.tokenizer_type = params.get("tokenizer_type")
+            if self.tokenizer_type not in [None, "whitespace-tokenizer"]:
+                msg = f"Provided 'tokenizer_type':'{params.get('tokenizer_type')}' cannot be " \
+                      f"used with the provided 'embedder_type':'{self.embedder_type}'. " \
+                      f"Discarding 'tokenizer_type' information"
+                logger.warning(msg)
+                self.tokenizer_type = "whitespace-tokenizer"
             self._tokenizer = self._get_tokenizer(self.tokenizer_type)
             self.params_keys.update(["tokenizer_type"])
             if not _disable_loading_embedder:
                 glove_container = GloVeEmbeddingsContainer()
                 self.token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
-                self.emb_dim = glove_container.token_dimension
+                glove_emb_dim = glove_container.token_dimension
+                if self.emb_dim and self.emb_dim != glove_emb_dim:
+                    msg = f"Provided 'emb_dim':'{self.emb_dim}' cannot be used with the provided " \
+                          f"'embedder_type':'{self.embedder_type}'. " \
+                          f"Discarding 'emb_dim' information."
+                    logger.warning(msg)
+                self.emb_dim = glove_emb_dim
         else:
             msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
                   f"found. Supported names are only " \
                   f"{self.__class__.ALLOWED_EMBEDDER_TYPES}."
+            raise ValueError(msg)
+
+        # validate if emb_dim is valid
+        if not self.emb_dim:
+            msg = "Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
+                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
+                  "valid 'embedder_type' param."
             raise ValueError(msg)
 
         # Add special vocab before actual vocab
@@ -176,20 +203,22 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
         self.special_vocab_dict = dict(special_vocab_dict_)
         self._add_special_vocab(self.special_vocab_dict)
 
+        # add vocab from tokens inputted directly (useful when loading the encoder from a dump)
+        if tokens:
+            self._add_vocab(tokens)
+
         # add vocab from examples upon tokenizing each text item
         if examples:
             all_tokens = set(sum([self._tokenizer(text) for text in examples], []))
             self._add_vocab(all_tokens)
+
+        if tokens is None and examples is None:
+            msg = "At least one of 'examples' and 'tokens' must be inputted to create a vocab"
+            raise ValueError(msg)
+        else:
             msg = f"Vocab size: Number of unique tokens collected from training data: " \
                   f"{len(self.token2idx)}"
             logger.info(msg)
-
-        # some validations
-        if not self.emb_dim:
-            msg = "Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
-                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
-                  "valid 'embedder_type' param."
-            raise ValueError(msg)
 
     def dump(self, dump_folder):
         if os.path.isfile(dump_folder):
@@ -219,11 +248,10 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
             params = json.load(fp)
             setattr(encoder, "params_keys", set(params.keys()))
             fp.close()
-        encoder.fit(**params, _disable_loading_embedder=True)
         with open(os.path.join(load_folder, "text_encoder_vocab.txt"), "r") as fp:
-            for line in fp:
-                encoder._add_vocab([line.strip()])
+            all_tokens = [line.strip() for line in fp]
             fp.close()
+        encoder.fit(**params, tokens=all_tokens, _disable_loading_embedder=True)
 
         return encoder
 
@@ -231,6 +259,42 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
     def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
         msg = f"Subclass {self.__class__.__name__} need to implement this method"
         raise NotImplementedError(msg)
+
+    def encode(self, list_of_tokens, padding_length, add_terminals):
+        trimmed_list_of_tokens = (
+            list_of_tokens[:padding_length - 2] if add_terminals else
+            list_of_tokens[:padding_length]
+        )
+        bounded_list_of_tokens = (
+            [getattr(self, "start_token")] + trimmed_list_of_tokens + [getattr(self, "end_token")]
+        ) if add_terminals else trimmed_list_of_tokens
+        seq_length = len(bounded_list_of_tokens)
+        new_list_of_tokens = (
+            bounded_list_of_tokens + [getattr(self, "pad_token")] * (padding_length - seq_length)
+        )
+        list_of_ids = [
+            self.token2idx.get(token, getattr(self, "unk_token_idx"))
+            for token in new_list_of_tokens
+        ]
+        return list_of_ids, seq_length
+
+    def _reformat_and_validate(self, examples, labels=None):
+
+        # reformatting
+        if isinstance(examples, str):
+            examples = [examples]
+            if labels:
+                labels = [labels]
+
+        # validation for labels size
+        if labels:
+            if len(examples) != len(labels):
+                msg = f"Number of 'labels' ({len(labels)}) must be same as 'examples' " \
+                      f"({len(examples)}) when passing labels to " \
+                      f"{self.__class__.__name__}.batch_encode()"
+                raise AssertionError(msg)
+
+        return examples, labels
 
     def _get_tokenizer(self, tokenizer_type):
 
@@ -240,19 +304,18 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
         def char_tokenizer(text: str) -> List[str]:
             return list(text.strip())
 
-        if not tokenizer_type:
+        if tokenizer_type not in self.__class__.ALLOWED_TOKENIZERS:
+            msg = f"Unknown tokenizer type specified ('{tokenizer_type}'). Expected to be " \
+                  f"among {self.__class__.ALLOWED_TOKENIZERS}. "
+            raise ValueError(msg)
+        elif tokenizer_type is None:
             return whitespace_tokenizer
         elif tokenizer_type == "whitespace-tokenizer":
             return whitespace_tokenizer
         elif tokenizer_type == "char-tokenizer":
             return char_tokenizer
-        else:
-            msg = f"Unknown tokenizer type specified ('{tokenizer_type}'). Expected to be " \
-                  f"among {self.__class__.ALLOWED_TOKENIZERS}. "
-            raise ValueError(msg)
 
     def _add_special_vocab(self, special_tokens: Dict[str, str]):
-
         # Validate special tokens
         DUPLICATE_RECORD_WARNING = "Ignoring duplicate token {} from special vocab set with name {}"
         for name, token in special_tokens.items():
@@ -267,10 +330,12 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
             setattr(self, f"{name}", token)
             setattr(self, f"{name}_idx", self.token2idx[token])
 
-    def _add_vocab(self, vocab: Iterable[str]):
+    def _add_vocab(self, vocab: Iterable[str], target_dict=None):
+        if target_dict is None:
+            target_dict = self.token2idx
         for token in vocab:
-            if token not in self.token2idx:
-                self.token2idx.update({token: len(self.token2idx)})
+            if token not in target_dict:
+                target_dict.update({token: len(target_dict)})
 
 
 class EncoderWithPlmEmbeddings(AbstractEncoder):
@@ -306,6 +371,11 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
 
         # load tokenizer and embedder
         if self.embedder_type == "bert":
+            if params.get("tokenizer_type"):
+                msg = f"Provided 'tokenizer_type':'{params.get('tokenizer_type')}' cannot be " \
+                      f"used with the provided 'embedder_type':'{self.embedder_type}'. " \
+                      f"Discarding 'tokenizer_type' information"
+                logger.warning(msg)
             self.pretrained_model_name_or_path = params.get("pretrained_model_name_or_path")
             if not self.pretrained_model_name_or_path:
                 msg = "Must include a valid 'pretrained_model_name_or_path' param when using " \
@@ -314,7 +384,13 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
             self.params_keys.update(["pretrained_model_name_or_path"])
             if not _disable_loading_embedder:
                 self._load_bert_embedder_from_checkpoint(self.pretrained_model_name_or_path)
-                self.emb_dim = self._bert_config.hidden_size
+                bert_emb_dim = self._bert_config.hidden_size
+                if self.emb_dim and self.emb_dim != bert_emb_dim:
+                    msg = f"Provided 'emb_dim':'{self.emb_dim}' cannot be used with the provided " \
+                          f"'embedder_type':'{self.embedder_type}'. " \
+                          f"Discarding 'emb_dim' information."
+                    logger.warning(msg)
+                self.emb_dim = bert_emb_dim
         else:
             msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
                   f"found. Supported names are only " \
@@ -394,24 +470,6 @@ class SequenceClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddi
     The inputs can be singular or batched.
     """
 
-    def _reformat_and_validate(self, examples, labels=None):
-
-        # reformatting
-        if isinstance(examples, str):
-            examples = [examples]
-            if labels:
-                labels = [labels]
-
-        # validation for labels size
-        if labels:
-            if len(examples) != len(labels):
-                msg = f"Number of 'labels' ({len(labels)}) must be same as 'examples' " \
-                      f"({len(examples)}) when passing labels to " \
-                      f"{self.__class__.__name__}.batch_encode()"
-                raise AssertionError(msg)
-
-        return examples, labels
-
     def batch_encode(
         self,
         examples: Union[str, List[str]],
@@ -426,8 +484,8 @@ class SequenceClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddi
         examples, labels = self._reformat_and_validate(examples, labels)
 
         # convert to tokens and obtain sequence lengths
-        tokenized_sequences = [self._tokenizer(text) for text in examples]
-        sequence_lengths = [len(seq) for seq in tokenized_sequences]
+        examples = [self._tokenizer(text) for text in examples]
+        sequence_lengths = [len(seq) for seq in examples]
 
         # if padding_length is None, it is computed as max(length of all seqs from inputted text)
         padding_length = padding_length or self.padding_length
@@ -436,29 +494,14 @@ class SequenceClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddi
         curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
         padding_length = min(padding_length, curr_max) if padding_length else curr_max
 
-        # define local constants
-        pad_token_idx = getattr(self, "pad_token_idx")
-        unk_token_idx = getattr(self, "unk_token_idx")
-        start_token_idx = getattr(self, "start_token_idx")
-        end_token_idx = getattr(self, "end_token_idx")
-
-        # convert string tokens into ids
-        input_ids = [[self.token2idx.get(token, unk_token_idx) for token in seq]
-                     for seq in tokenized_sequences]
-
         # batchify by truncating or padding for each example
-        for i in range(len(examples)):
-            seq = input_ids[i]
-            new_seq = seq[:padding_length - 2] if add_terminals else seq[:padding_length]
-            new_seq = ([start_token_idx] + new_seq + [end_token_idx]) \
-                if add_terminals else new_seq
-            new_seq_length = len(new_seq)
-            input_ids[i] = new_seq + [pad_token_idx] * (padding_length - new_seq_length)
-            sequence_lengths[i] = new_seq_length
+        seq_ids, sequence_lengths = zip(*[
+            self.encode(example, padding_length, add_terminals) for example in examples
+        ])
 
         # create output dict
         return_dict = {
-            "seq_ids": torch.as_tensor(input_ids, dtype=torch.long),
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
             "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
         }
 
@@ -497,12 +540,28 @@ class TokenClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings
 
         return examples, labels
 
+    @staticmethod
+    def encode_labels(list_of_label_ids, padding_length, add_terminals):
+        trimmed_list_of_label_ids = (
+            list_of_label_ids[:padding_length - 2] if add_terminals else
+            list_of_label_ids[:padding_length]
+        )
+        bounded_list_of_label_ids = (
+            [LABEL_PAD_TOKEN_IDX] + trimmed_list_of_label_ids + [LABEL_PAD_TOKEN_IDX]
+        ) if add_terminals else trimmed_list_of_label_ids
+        new_list_of_label_ids = (
+            bounded_list_of_label_ids +
+            [LABEL_PAD_TOKEN_IDX] * (padding_length - len(bounded_list_of_label_ids))
+        )
+        return new_list_of_label_ids
+
     def batch_encode(
         self,
         examples: Union[str, List[str]],
         labels: Union[List[int], List[List[int]]] = None,
         padding_length: int = None,
         add_terminals: bool = False,
+        _return_tokenized_examples: bool = False
     ):
         """
         Returns batched encodings that can be used as an input to a featurizer
@@ -511,8 +570,8 @@ class TokenClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings
         examples, labels = self._reformat_and_validate(examples, labels)
 
         # convert to tokens and obtain sequence lengths
-        tokenized_sequences = [self._tokenizer(text) for text in examples]
-        sequence_lengths = [len(seq) for seq in tokenized_sequences]
+        examples = [self._tokenizer(text) for text in examples]
+        sequence_lengths = [len(seq) for seq in examples]
 
         # if padding_length is None, it is computed as max(length of all seqs from inputted text)
         padding_length = padding_length or self.padding_length
@@ -521,56 +580,213 @@ class TokenClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings
         curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
         padding_length = min(padding_length, curr_max) if padding_length else curr_max
 
-        # define local constants
-        pad_token_idx = getattr(self, "pad_token_idx")
-        unk_token_idx = getattr(self, "unk_token_idx")
-        start_token_idx = getattr(self, "start_token_idx")
-        end_token_idx = getattr(self, "end_token_idx")
-
-        # convert string tokens into ids
-        input_ids = [[self.token2idx.get(token, unk_token_idx) for token in seq]
-                     for seq in tokenized_sequences]
-
         # batchify by truncating or padding for each example
-        if labels:
-            new_labels = []
-        for i in range(len(examples)):
-            # batchify sequences of text
-            seq = input_ids[i]
-            new_seq = seq[:padding_length - 2] if add_terminals else seq[:padding_length]
-            new_seq = ([start_token_idx] + new_seq + [end_token_idx]) \
-                if add_terminals else new_seq
-            new_seq_length = len(new_seq)
-            input_ids[i] = new_seq + [pad_token_idx] * (padding_length - new_seq_length)
-            sequence_lengths[i] = new_seq_length
-            # batchify labels
-            if labels:
-                label_seq = labels[i]
-                new_label_seq = (
-                    label_seq[:padding_length - 2] if add_terminals else
-                    label_seq[:padding_length]
-                )
-                new_label_seq = (
-                    [LABEL_PAD_TOKEN_IDX] + new_label_seq + [LABEL_PAD_TOKEN_IDX] if add_terminals
-                    else new_label_seq
-                )
-                assert len(new_label_seq) == new_seq_length
-                new_label_seq = (
-                    new_label_seq + [LABEL_PAD_TOKEN_IDX] * (padding_length - new_seq_length)
-                )
-                new_labels.append(new_label_seq)
+        seq_ids, sequence_lengths = zip(*[
+            self.encode(example, padding_length, add_terminals) for example in examples
+        ])
 
         return_dict = {
-            "seq_ids": torch.as_tensor(input_ids, dtype=torch.long),
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
             "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
         }
 
+        if _return_tokenized_examples:
+            return_dict.update({
+                "seq_tokens": examples
+            })
+
         if labels:
+            new_labels = [self.encode_labels(label, padding_length, add_terminals) for label in
+                          labels]
             return_dict.update({
                 "labels": torch.as_tensor(new_labels, dtype=torch.long)
             })
 
         return return_dict
+
+
+class TokenClassificationDualEncoderWithStaticEmbeddings(
+    TokenClassificationEncoderWithStaticEmbeddings
+):
+    """Dual encoder that encodes both word level as well as character level tokens
+    """
+
+    ALLOWED_TOKENIZERS = ["whitespace-tokenizer", None]
+
+    BASIC_SPECIAL_CHAR_VOCAB_DICT = {
+        "char_pad_token": "<CHAR_PAD>",
+        "char_unk_token": "<CHAR_UNK>",
+        "char_start_token": "<CHAR_START>",
+        "char_end_token": "<CHAR_END>",
+    }
+
+    def fit(
+        self,
+        # input data stream
+        all_char_tokens: List[str] = None,
+        # this class specific params
+        char_emb_dim=None,
+        char_special_vocab_dict=None,
+        char_padding_length=None,
+        char_add_terminals=False,
+        # all other params
+        **params,
+    ):
+        self.char_emb_dim = char_emb_dim
+        self.char_special_vocab_dict = char_special_vocab_dict
+        self.char_padding_length = char_padding_length
+        self.char_add_terminals = char_add_terminals
+        self.params_keys.update([
+            "char_emb_dim", "char_special_vocab_dict", "char_padding_length", "char_add_terminals"
+        ])
+
+        self.char_token2idx = {}
+
+        # validate if char_emb_dim is valid
+        if not self.char_emb_dim:
+            msg = "Need a valid 'char_emb_dim' to initialize encoder resource. To specify a " \
+                  "particular dimension, either pass-in the 'char_emb_dim' param with a positive " \
+                  "integer value"
+            raise ValueError(msg)
+
+        # Add special vocab before actual vocab
+        special_vocab_dict_ = self.__class__.BASIC_SPECIAL_CHAR_VOCAB_DICT
+        if self.char_special_vocab_dict:
+            special_vocab_dict_.update(self.char_special_vocab_dict)
+        self.char_special_vocab_dict = dict(special_vocab_dict_)
+        for name, token in self.char_special_vocab_dict.items():
+            self._add_vocab([token], target_dict=self.char_token2idx)
+            setattr(self, f"{name}", token)
+            setattr(self, f"{name}_idx", self.char_token2idx[token])
+
+        # populate token lookup dictionary
+        super().fit(**params)
+
+        # populate char lookup dictionary
+        if not all_char_tokens:
+            all_char_tokens = set(c for token in self.token2idx for c in list(token))
+        self._add_vocab(all_char_tokens, target_dict=self.char_token2idx)
+
+    def dump(self, dump_folder):
+        super().dump(dump_folder)
+        with open(os.path.join(dump_folder, "char_text_encoder_vocab.txt"), "w") as fp:
+            for token in self.char_token2idx:
+                fp.write(token + "\n")
+            fp.close()
+
+    @classmethod
+    def load(cls, load_folder):
+        if os.path.isfile(load_folder):
+            msg = f"Path input to 'load' method must be a folder, " \
+                  f"not a file ({load_folder})"
+            raise ValueError(msg)
+
+        encoder = cls()
+        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
+            params = json.load(fp)
+            setattr(encoder, "params_keys", set(params.keys()))
+            fp.close()
+        with open(os.path.join(load_folder, "text_encoder_vocab.txt"), "r") as fp:
+            all_tokens = [line.strip() for line in fp]
+            fp.close()
+        with open(os.path.join(load_folder, "char_text_encoder_vocab.txt"), "r") as fp:
+            all_char_tokens = [line.strip() for line in fp]
+            fp.close()
+        encoder.fit(
+            **params, tokens=all_tokens, all_char_tokens=all_char_tokens,
+            _disable_loading_embedder=True
+        )
+
+        return encoder
+
+    def batch_encode(
+        self,
+        examples: Union[str, List[str]],
+        labels: Union[List[int], List[List[int]]] = None,
+        padding_length: int = None,
+        add_terminals: bool = False,
+        char_padding_length: int = None,
+        char_add_terminals: bool = False
+    ):
+        """
+        Returns batched encodings that can be used as an input to a featurizer
+        """
+
+        # validation
+        add_terminals = add_terminals or self.add_terminals
+        if add_terminals:
+            msg = "Setting param 'add_terminals' to True is not supported with dual token encoder"
+            raise NotImplementedError(msg)
+
+        return_dict = super().batch_encode(
+            examples, labels=labels, padding_length=padding_length, add_terminals=False,
+            _return_tokenized_examples=True
+        )
+
+        # use tokenize examples to obtain tokens for char tokenization
+        examples = return_dict.pop("seq_tokens")
+
+        char_seq_ids, char_sequence_lengths = [], []
+        for example in examples:
+            # compute padding length for character sequences
+            _char_padding_length = char_padding_length or self.char_padding_length
+            _char_add_terminals = char_add_terminals or self.char_add_terminals
+            _curr_max = max([len(word) for word in example])
+            _curr_max = _curr_max + 2 if _char_add_terminals else _curr_max
+            _char_padding_length = (
+                min(_char_padding_length, _curr_max) if _char_padding_length else _curr_max
+            )
+            # encode
+            _char_seq_ids, _char_sequence_lengths = zip(*[
+                self.encode_char(list(word), _char_padding_length, _char_add_terminals)
+                for word in example
+            ])
+            char_seq_ids.append(_char_seq_ids)
+            char_sequence_lengths.append(_char_sequence_lengths)
+
+        return_dict.update({
+            "char_seq_ids": [torch.as_tensor(_ids, dtype=torch.long) for _ids in char_seq_ids],
+            "char_seq_lengths": [
+                torch.as_tensor(_lens, dtype=torch.long) for _lens in char_sequence_lengths
+            ]
+        })
+
+        return return_dict
+
+    def encode_char(self, list_of_tokens, padding_length, add_terminals):
+        trimmed_list_of_tokens = (
+            list_of_tokens[:padding_length - 2] if add_terminals else
+            list_of_tokens[:padding_length]
+        )
+        bounded_list_of_tokens = (
+            [getattr(self, "char_start_token")] + trimmed_list_of_tokens + [
+            getattr(self, "char_end_token")]
+        ) if add_terminals else trimmed_list_of_tokens
+        seq_length = len(bounded_list_of_tokens)
+        new_list_of_tokens = (
+            bounded_list_of_tokens +
+            [getattr(self, "char_pad_token")] * (padding_length - seq_length)
+        )
+        list_of_ids = [
+            self.char_token2idx.get(token, getattr(self, "char_unk_token_idx"))
+            for token in new_list_of_tokens
+        ]
+        return list_of_ids, seq_length
+
+    # some `get` methods for char modeling
+
+    def get_char_num_tokens(self):
+        if not hasattr(self, "char_token2idx"):
+            return None
+        return len(self.char_token2idx)
+
+    def get_char_emb_dim(self):
+        return self.char_emb_dim
+
+    def get_char_pad_token_idx(self):
+        if not hasattr(self, "char_pad_token_idx"):
+            return None
+        return self.char_pad_token_idx
 
 
 class SequenceClassificationEncoderWithBert(EncoderWithPlmEmbeddings):

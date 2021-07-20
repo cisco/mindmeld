@@ -14,12 +14,17 @@
 import logging
 import os
 
+from .._util import _get_module_or_attr
+
 try:
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
     from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
+
+    nn_module = _get_module_or_attr("torch.nn", "Module")
 except ImportError:
+    nn_module = object
     pass
 
 SEED = 7246
@@ -29,18 +34,18 @@ logger = logging.getLogger(__name__)
 
 # utils
 
-def get_disk_space_of_model(nn_module: nn.Module):
+def get_disk_space_of_model(pytorch_module):
     filename = "temp.bin"
-    torch.save(nn_module.state_dict(), filename)
+    torch.save(pytorch_module.state_dict(), filename)
     size = os.path.getsize(filename) / 1e6
     os.remove(filename)
     return size
 
 
-def get_num_params_of_model(nn_module: nn.Module):
+def get_num_params_of_model(pytorch_module):
     n_total = 0
     n_requires_grad = 0
-    for param in list(nn_module.parameters()):
+    for param in list(pytorch_module.parameters()):
         t = 1
         for sz in list(param.size()):
             t *= sz
@@ -53,7 +58,7 @@ def get_num_params_of_model(nn_module: nn.Module):
 # Various nn layers
 
 
-class EmbeddingLayer(nn.Module):
+class EmbeddingLayer(nn_module):
     """A pytorch wrapper layer for embeddings that takes input as a batched sequence of ids
     and outputs embeddings correponding to those ids
     """
@@ -103,7 +108,7 @@ class EmbeddingLayer(nn.Module):
         return outputs
 
 
-class CnnLayer(nn.Module):
+class CnnLayer(nn_module):
 
     def __init__(self, emb_dim, kernel_sizes, num_kernels):
         super().__init__()
@@ -150,7 +155,7 @@ class CnnLayer(nn.Module):
         return outputs
 
 
-class LstmLayer(nn.Module):
+class LstmLayer(nn_module):
 
     def __init__(self, emb_dim, hidden_dim, num_layers, lstm_dropout, bidirectional):
         super().__init__()
@@ -174,7 +179,7 @@ class LstmLayer(nn.Module):
         return outputs
 
 
-class PoolingLayer(nn.Module):
+class PoolingLayer(nn_module):
 
     def __init__(self, pooling_type):
         super().__init__()
@@ -220,7 +225,7 @@ class PoolingLayer(nn.Module):
 
         return outputs
 
-# class TokenSpanPoolingLayer(nn.Module):
+# class TokenSpanPoolingLayer(nn_module):
 #
 #     def __init__(self, pooling_type):
 #         super().__init__()
