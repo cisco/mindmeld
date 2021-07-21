@@ -21,8 +21,8 @@ from typing import Dict
 
 from ._classification import ClassificationCore
 from ._encoders import (
-    SequenceClassificationEncoderWithStaticEmbeddings,
-    SequenceClassificationEncoderWithBert
+    SeqClsEncoderForEmbLayer,
+    SeqClsEncoderWithPlmLayer
 )
 from ._layers import (
     EmbeddingLayer,
@@ -52,7 +52,7 @@ class SequenceClassificationCore(ClassificationCore):
         super().__init__()
 
         # default encoder; have to either fit ot load to use it
-        self.encoder = SequenceClassificationEncoderWithStaticEmbeddings()
+        self.encoder = SeqClsEncoderForEmbLayer()
 
     # methods for training
 
@@ -60,8 +60,8 @@ class SequenceClassificationCore(ClassificationCore):
         use_character_embeddings = params.pop("use_character_embeddings", False)
         if use_character_embeddings:
             tokenizer_type = params.get("tokenizer_type", "char-tokenizer")
-            # Ensure that the params do not contain both
-            # `use_character_embeddings` as well as `tokenizer_type` in a contradicting way
+            # Ensure that the params do not contain both `use_character_embeddings` as well as
+            # `tokenizer_type` params and that they are contradicting
             if tokenizer_type != "char-tokenizer":
                 msg = "To use character embeddings, 'tokenizer_type' must be 'char-tokenizer'. " \
                       "Other values passed thorugh params are not allowed."
@@ -120,10 +120,7 @@ class SequenceClassificationCore(ClassificationCore):
 
     def forward(self, batch_data_dict):
 
-        for k, v in batch_data_dict.items():
-            if v is not None and isinstance(v, torch.Tensor):
-                batch_data_dict[k] = v.to(self.device)
-
+        batch_data_dict = self.inputs_to_device(batch_data_dict)
         batch_data_dict = self._forward(batch_data_dict)
 
         seq_embs = batch_data_dict["seq_embs"]
@@ -204,16 +201,17 @@ class EmbedderForSequenceClassification(SequenceClassificationCore):
         self.emb_dim = params["emb_dim"]
         self.padding_idx = params.get("padding_idx", None)
         self.update_embeddings = params.get("update_embeddings", True)
+        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
         self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "mean")
         self.params_keys.update([
             "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
-            "embedder_output_pooling_type"
+            "embedder_output_keep_prob", "embedder_output_pooling_type"
         ])
 
         # core layers
         self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         params.get("embedding_weights", None),
-                                        self.update_embeddings)
+                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
         self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
         self.out_dim = self.emb_dim
 
@@ -243,20 +241,23 @@ class CnnForSequenceClassification(SequenceClassificationCore):
         self.emb_dim = params["emb_dim"]
         self.padding_idx = params.get("padding_idx", None)
         self.update_embeddings = params.get("update_embeddings", True)
-        self.cnn_kernel_sizes = params.get("cnn_kernel_sizes", [1, 3, 5])
-        self.cnn_num_kernels = params.get("cnn_num_kernels", [100] * len(self.cnn_kernel_sizes))
-
+        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
+        self.window_sizes = params.get("window_sizes", [1, 3, 5])
+        self.number_of_windows = params.get("number_of_windows", [100] * len(self.window_sizes))
+        self.cnn_output_keep_prob = params.get("cnn_output_keep_prob", 0.5)
         self.params_keys.update([
             "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
-            "cnn_kernel_sizes", "cnn_num_kernels"
+            "embedder_output_keep_prob",
+            "window_sizes", "number_of_windows"
         ])
 
         # core layers
         self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         params.get("embedding_weights", None),
-                                        self.update_embeddings)
-        self.conv_layer = CnnLayer(self.emb_dim, self.cnn_kernel_sizes, self.cnn_num_kernels)
-        self.out_dim = sum(self.cnn_num_kernels)
+                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
+        self.conv_layer = CnnLayer(self.emb_dim, self.window_sizes, self.number_of_windows,
+                                   1 - self.cnn_output_keep_prob)
+        self.out_dim = sum(self.number_of_windows)
 
     def _forward(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -285,6 +286,7 @@ class LstmForSequenceClassification(SequenceClassificationCore):
         self.emb_dim = params["emb_dim"]
         self.padding_idx = params.get("padding_idx", None)
         self.update_embeddings = params.get("update_embeddings", True)
+        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
         self.lstm_hidden_dim = params.get("lstm_hidden_dim", 128)
         self.lstm_num_layers = params.get("lstm_num_layers", 2)
         self.lstm_output_keep_prob = params.get("lstm_output_keep_prob", 0.5)
@@ -292,13 +294,14 @@ class LstmForSequenceClassification(SequenceClassificationCore):
         self.lstm_output_pooling_type = params.get("lstm_output_pooling_type", "end")
         self.params_keys.update([
             "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
+            "embedder_output_keep_prob",
             "lstm_hidden_dim", "lstm_num_layers", "lstm_output_keep_prob", "lstm_bidirectional"
         ])
 
         # core layers
         self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
                                         params.get("embedding_weights", None),
-                                        self.update_embeddings)
+                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
         self.lstm_layer = LstmLayer(self.emb_dim, self.lstm_hidden_dim, self.lstm_num_layers,
                                     1 - self.lstm_output_keep_prob, self.lstm_bidirectional)
         self.lstm_layer_pooling = PoolingLayer(self.lstm_output_pooling_type)
@@ -323,14 +326,14 @@ class BertForSequenceClassification(SequenceClassificationCore):
         super().__init__()
 
         # overwrite default encoder
-        self.encoder = SequenceClassificationEncoderWithBert()
+        self.encoder = SeqClsEncoderWithPlmLayer()
 
     def fit(self, examples, labels, **params):  # overriding base class' method to set params
         # this class is based only on bert embedder and
         # hence no embedder info from params is expected in the inputted params
 
-        number_of_epochs = params.get("number_of_epochs", 5)
-        patience = params.get("patience", 2)
+        number_of_epochs = params.get("number_of_epochs", 10)
+        patience = params.get("patience", 4)
         embedder_type = params.get("embedder_type", "bert")
         if embedder_type != "bert":
             msg = f"{self.__class__.__name__} can only be used with 'embedder_type': 'bert'. " \
@@ -405,12 +408,14 @@ class BertForSequenceClassification(SequenceClassificationCore):
     def _init(self, **params):
         # params
         self.emb_dim = params["emb_dim"]
+        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.2)
         self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "start")
         self.params_keys.update(["emb_dim", "embedder_output_pooling_type"])
 
         # core layers
         if self.embedder_output_pooling_type != "start":
             self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
+        self.dropout = nn.Dropout(1 - self.embedder_output_keep_prob)
         self.out_dim = self.emb_dim
 
     def _forward(self, batch_data_dict):
@@ -422,6 +427,7 @@ class BertForSequenceClassification(SequenceClassificationCore):
         else:
             encodings = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
 
+        encodings = self.dropout(encodings)
         batch_data_dict.update({"seq_embs": encodings})
 
         return batch_data_dict

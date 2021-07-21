@@ -63,7 +63,7 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
     def __repr__(self):
         return f"<{self.name}> ready: {self.ready} dirty: {self.dirty}"
 
-    def model_description(self, log_it=True, return_it=False):
+    def who_am_i(self, log_it=True, return_it=False):
         msg = f"Who Am I: <{self.name}> ready: {self.ready} dirty: {self.dirty} \n" \
               f"\tNumber of weights (trainable, all): {get_num_params_of_model(self)} \n" \
               f"\tDisk Size (in MB): {get_disk_space_of_model(self):.4f}"
@@ -71,6 +71,12 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
             logger.info(msg)
         if return_it:
             return msg
+
+    def inputs_to_device(self, batch_data_dict):
+        for k, v in batch_data_dict.items():
+            if v is not None and isinstance(v, torch.Tensor):
+                batch_data_dict[k] = v.to(self.device)
+        return batch_data_dict
 
     # methods for training
 
@@ -134,7 +140,7 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
         self.to(self.device)
 
         # print model stats
-        self.model_description()
+        self.who_am_i()
 
         # create an optimizer and attach all model params to it
         num_training_steps = int(

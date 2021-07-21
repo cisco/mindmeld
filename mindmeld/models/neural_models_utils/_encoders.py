@@ -25,6 +25,7 @@ from ..containers import GloVeEmbeddingsContainer, HuggingfaceTransformersContai
 
 try:
     import torch
+    from torch.nn.utils.rnn import pad_sequence
 
     nn_module = _get_module_or_attr("torch.nn", "Module")
 except ImportError:
@@ -43,20 +44,21 @@ class AbstractEncoder(nn_module):
 
     def __init__(self):
         super().__init__()
+        self.name = self.__class__.__name__
         self.emb_dim = None
-        self.params_keys = {"emb_dim"}
+        self.params_keys = set(["name", "emb_dim"])
 
     def forward(self, *args, **kwargs):
-        self.batch_encode(*args, **kwargs)
+        return self.batch_encode(*args, **kwargs)
 
     @abstractmethod
     def fit(self, **kwargs):
-        msg = f"Subclass {self.__class__.__name__} need to implement this method"
+        msg = f"Subclass {self.name} need to implement this method"
         raise NotImplementedError(msg)
 
     @abstractmethod
     def dump(self, **kwargs):
-        msg = f"Subclass {self.__class__.__name__} need to implement this method"
+        msg = f"Subclass {self.name} need to implement this method"
         raise NotImplementedError(msg)
 
     @classmethod
@@ -67,7 +69,7 @@ class AbstractEncoder(nn_module):
 
     @abstractmethod
     def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.__class__.__name__} need to implement this method"
+        msg = f"Subclass {self.name} need to implement this method"
         raise NotImplementedError(msg)
 
     # common `get` methods
@@ -87,8 +89,7 @@ class AbstractEncoder(nn_module):
 
     def get_embedding_weights(self):
         if not hasattr(self, "token2emb") or not self.token2emb:
-            msg = f"Encoder instance ({self.__class__.__name__}) does not contain " \
-                  f"any token-to-embeddings mapping"
+            msg = f"Encoder instance ({self.name}) does not contain any token-to-embeddings mapping"
             logger.info(msg)
             return None
         embedding_weights = {}
@@ -100,6 +101,23 @@ class AbstractEncoder(nn_module):
     @staticmethod
     def get_pad_label_idx():
         return LABEL_PAD_TOKEN_IDX
+
+    def _reformat_and_validate(self, examples, labels=None):
+
+        # reformatting
+        if isinstance(examples, str):
+            examples = [examples]
+            if labels:
+                labels = [labels]
+
+        # validation for labels size
+        if labels:
+            if len(examples) != len(labels):
+                msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
+                      f"({len(examples)}) when passing labels to {self.name}.batch_encode()"
+                raise AssertionError(msg)
+
+        return examples, labels
 
 
 # base encoders
@@ -120,9 +138,8 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
     in the .batch_encode() method of the derived class.
     """
 
-    ALLOWED_TOKENIZERS = ["whitespace-tokenizer", "char-tokenizer", None]
-    ALLOWED_EMBEDDER_TYPES = ["glove"]
-
+    ALLOWED_TOKENIZERS = [None, "whitespace-tokenizer", "char-tokenizer"]
+    ALLOWED_EMBEDDER_TYPES = [None, "glove"]
     BASIC_SPECIAL_VOCAB_DICT = {
         "pad_token": "<PAD>",
         "unk_token": "<UNK>",
@@ -159,7 +176,12 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
         self.token2emb = {}
 
         # load tokenizer and embedder
-        if not self.embedder_type:
+        if self.embedder_type not in self.__class__.ALLOWED_EMBEDDER_TYPES:
+            msg = f"Unsupported name '{self.embedder_type}' for 'embedder_type' " \
+                  f"found. Supported names are only " \
+                  f"{self.__class__.ALLOWED_EMBEDDER_TYPES}."
+            raise ValueError(msg)
+        elif self.embedder_type is None:
             self.tokenizer_type = params.get("tokenizer_type")
             self._tokenizer = self._get_tokenizer(self.tokenizer_type)
             self.params_keys.update(["tokenizer_type"])
@@ -183,11 +205,6 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
                           f"Discarding 'emb_dim' information."
                     logger.warning(msg)
                 self.emb_dim = glove_emb_dim
-        else:
-            msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
-                  f"found. Supported names are only " \
-                  f"{self.__class__.ALLOWED_EMBEDDER_TYPES}."
-            raise ValueError(msg)
 
         # validate if emb_dim is valid
         if not self.emb_dim:
@@ -257,7 +274,7 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
 
     @abstractmethod
     def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.__class__.__name__} need to implement this method"
+        msg = f"Subclass {self.name} need to implement this method"
         raise NotImplementedError(msg)
 
     def encode(self, list_of_tokens, padding_length, add_terminals):
@@ -278,31 +295,13 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
         ]
         return list_of_ids, seq_length
 
-    def _reformat_and_validate(self, examples, labels=None):
-
-        # reformatting
-        if isinstance(examples, str):
-            examples = [examples]
-            if labels:
-                labels = [labels]
-
-        # validation for labels size
-        if labels:
-            if len(examples) != len(labels):
-                msg = f"Number of 'labels' ({len(labels)}) must be same as 'examples' " \
-                      f"({len(examples)}) when passing labels to " \
-                      f"{self.__class__.__name__}.batch_encode()"
-                raise AssertionError(msg)
-
-        return examples, labels
-
     def _get_tokenizer(self, tokenizer_type):
 
         def whitespace_tokenizer(text: str) -> List[str]:
-            return text.strip().split()
+            return text.split(" ")
 
         def char_tokenizer(text: str) -> List[str]:
-            return list(text.strip())
+            return list(text)
 
         if tokenizer_type not in self.__class__.ALLOWED_TOKENIZERS:
             msg = f"Unknown tokenizer type specified ('{tokenizer_type}'). Expected to be " \
@@ -338,7 +337,7 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
                 target_dict.update({token: len(target_dict)})
 
 
-class EncoderWithPlmEmbeddings(AbstractEncoder):
+class EncoderWithPretrainedLMs(AbstractEncoder):
     """
     A base class for joint tokenization-encoding with vocab of a Pretrained Language Model
     (aka. PLM embedders), i.e sentence embedders like BERT, Elmo, etc..
@@ -354,7 +353,7 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
         embedder_type=None,
         padding_length=None,
         emb_dim=None,
-        freeze_embedder=False,
+        update_embeddings=True,
         # non-params
         _disable_loading_embedder=False,
         # other params
@@ -364,8 +363,11 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
 
         self.embedder_type = embedder_type
         self.padding_length = padding_length
-        self.freeze_embedder = freeze_embedder
-        self.params_keys.update(["embedder_type", "padding_length", "freeze_embedder"])
+        self.update_embeddings = update_embeddings
+        self.params_keys.update(["embedder_type", "padding_length", "update_embeddings"])
+
+        self.device = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        self.params_keys.update(["device"])
 
         self.emb_dim = emb_dim
 
@@ -442,16 +444,16 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
 
     @abstractmethod
     def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.__class__.__name__} need to implement this method"
+        msg = f"Subclass {self.name} need to implement this method"
         raise NotImplementedError(msg)
 
     def _load_bert_embedder_from_checkpoint(self, pretrained_model_name_or_path):
-        model_bunch = HuggingfaceTransformersContainer(pretrained_model_name_or_path,
-                                                       reload=True).get_model_bunch()
+        model_bunch = HuggingfaceTransformersContainer(
+            pretrained_model_name_or_path, reload=True).get_model_bunch()
         self._bert_config = model_bunch.config
         self._bert_tokenizer = model_bunch.tokenizer
-        self._bert_model = model_bunch.model
-        if self.freeze_embedder:
+        self._bert_model = model_bunch.model.to(self.device)
+        if not self.update_embeddings:
             for param in self._bert_model:
                 param.requires_grad = False
 
@@ -465,7 +467,7 @@ class EncoderWithPlmEmbeddings(AbstractEncoder):
 # sub-classes that define a custom `batch_encode` on top of base encoders
 
 
-class SequenceClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings):
+class SeqClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
     """This class produces encoding for the given textual input as a sequence of ids.
     The inputs can be singular or batched.
     """
@@ -513,25 +515,15 @@ class SequenceClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddi
         return return_dict
 
 
-class TokenClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings):
+class TokenClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
 
     def _reformat_and_validate(self, examples, labels=None):
+        super()._reformat_and_validate(examples, labels)
 
-        # reformatting
-        if isinstance(examples, str):
-            examples = [examples]
-            if labels:
-                labels = [labels]
-
-        # validation for labels size
+        # validation for labels' lengths too
         if labels:
-            if len(examples) != len(labels):
-                msg = f"Number of 'labels' ({len(labels)}) must be same as 'examples' " \
-                      f"({len(examples)}) when passing labels to " \
-                      f"{self.__class__.__name__}.batch_encode()"
-                raise AssertionError(msg)
             for ex, label_tokens in zip(examples, labels):
-                ex_tokens = ex.split()
+                ex_tokens = ex.split(" ")
                 if len(ex_tokens) != len(label_tokens):
                     msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
                           f"number of tokens in the corresponding token labels " \
@@ -605,14 +597,159 @@ class TokenClassificationEncoderWithStaticEmbeddings(EncoderWithStaticEmbeddings
         return return_dict
 
 
-class TokenClassificationDualEncoderWithStaticEmbeddings(
-    TokenClassificationEncoderWithStaticEmbeddings
-):
+class SeqClsEncoderWithPlmLayer(EncoderWithPretrainedLMs):
+
+    def batch_encode(
+        self,
+        examples: Union[str, List[str]],
+        labels: Union[int, List[int]] = None,
+        padding_length: int = None,
+    ):
+        """
+        Returns batched encodings that can be used as an input to a featurizer
+        """
+
+        examples, labels = self._reformat_and_validate(examples, labels)
+
+        return_dict = {}
+        padding_length = padding_length or self.padding_length
+
+        if self.embedder_type == "bert":
+            # If padding_length is None, padding is done to the max length of the input batch
+            _inputs = self._bert_tokenizer(
+                examples, padding=True, truncation=True, max_length=padding_length,
+                return_tensors="pt"
+            ).to(self.device)
+            _outputs = self._bert_model(**_inputs, return_dict=True)
+
+            # last_hidden_state, pooler_output, seq_lengths are the keys being updated
+            return_dict.update({
+                **_outputs,
+                "seq_lengths": _inputs["attention_mask"].sum(dim=-1)
+            })
+
+        if labels:
+            return_dict.update({"labels": torch.as_tensor(labels, dtype=torch.long)})
+
+        return return_dict
+
+
+class TokenClsEncoderWithPlmLayer(EncoderWithPretrainedLMs):
+
+    # method similar to TokenClsEncoderForEmbLayer
+    def _reformat_and_validate(self, examples, labels=None):
+        super()._reformat_and_validate(examples, labels)
+
+        # validation for labels' lengths too
+        if labels:
+            for ex, label_tokens in zip(examples, labels):
+                ex_tokens = ex.split(" ")
+                if len(ex_tokens) != len(label_tokens):
+                    msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
+                          f"number of tokens in the corresponding token labels " \
+                          f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
+                    raise AssertionError(msg)
+
+        return examples, labels
+
+    @staticmethod
+    def _trim_combined(x: List[List[Any]], trim_len: int, y: List[Any] = None):
+        curr_len = 0
+        if y:
+            new_x, new_y = [], []
+            for _x, _y in zip(x, y):
+                if curr_len >= trim_len:
+                    return new_x, new_y
+                if curr_len + len(_x) > trim_len:
+                    new_x.append(_x[trim_len - curr_len])
+                    new_y.append(_y)
+                elif curr_len + len(_x) <= trim_len:
+                    new_x.append(_x)
+                    new_y.append(_y)
+            return new_x, new_y
+        else:
+            new_x = []
+            for _x in x:
+                if curr_len >= trim_len:
+                    return new_x
+                if curr_len + len(_x) > trim_len:
+                    new_x.append(_x[trim_len - curr_len])
+                elif curr_len + len(_x) <= trim_len:
+                    new_x.append(_x)
+            return new_x
+
+    def batch_encode(
+        self,
+        examples: Union[str, List[str]],
+        labels: Union[int, List[int]] = None,
+        padding_length: int = None,
+    ):
+        examples, labels = self._reformat_and_validate(examples, labels)
+
+        return_dict = {}
+        padding_length = padding_length or self.padding_length
+
+        if self.embedder_type == "bert":
+            # tokenize each word of each input seperately
+            tokenized_examples = [
+                [self._bert_tokenizer.tokenize(word) for word in example.split(" ")]
+                for example in examples
+            ]
+            # get maximum length of each example
+            max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2  # cls, sep
+            # If padding_length is None, padding has to be done to the max length of the input batch
+            padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
+
+            _trim_length = padding_length - 2  # -2 to sum upto padding_length after adding cls, sep
+            if labels:
+                trimmed_tokenized_examples, trimmed_labels = zip(*[
+                    self._trim_combined(t_ex, _trim_length, _labels)
+                    for t_ex, _labels in zip(tokenized_examples, labels)
+                ])
+            else:
+                trimmed_tokenized_examples = [
+                    self._trim_combined(t_ex, _trim_length) for t_ex in tokenized_examples
+                ]
+            split_lengths = [[len(x) for x in ex] for ex in trimmed_tokenized_examples]
+            trimmed_tokenized_examples = [" ".join(sum(ex, [])) for ex in
+                                          trimmed_tokenized_examples]
+            _inputs = self._bert_tokenizer(
+                trimmed_tokenized_examples, padding=True, truncation=True, max_length=None,
+                return_tensors="pt"
+            ).to(self.device)
+            # last_hidden_state, pooler_output, seq_lengths are the keys outputted
+            _outputs = self._bert_model(**_inputs, return_dict=True)
+
+            # discard [CLS] token, [SEP] token is anyway discarded as the sum of each split length
+            # item does not go as far as the SEP token
+            last_hidden_state = _outputs["last_hidden_state"][:, 1:]
+
+            return_dict.update({
+                "last_hidden_state": last_hidden_state,  # [BS, SEQ_LEN, EMD_DIM]
+                "split_lengths": split_lengths,  # List[List[Int]]
+                "seq_lengths": torch.as_tensor(
+                    [len(_split_lengths) for _split_lengths in split_lengths], dtype=torch.long
+                )
+            })
+
+            if labels:
+                trimmed_labels = pad_sequence(
+                    [torch.as_tensor(label) for label in trimmed_labels], batch_first=True,
+                    padding_value=LABEL_PAD_TOKEN_IDX
+                ).long()
+                return_dict.update({"labels": trimmed_labels})
+
+        return return_dict
+
+
+# sub-classes that define more complex custom `batch_encode` on top of derived encoders
+
+
+class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
     """Dual encoder that encodes both word level as well as character level tokens
     """
 
-    ALLOWED_TOKENIZERS = ["whitespace-tokenizer", None]
-
+    ALLOWED_TOKENIZERS = [None, "whitespace-tokenizer"]
     BASIC_SPECIAL_CHAR_VOCAB_DICT = {
         "char_pad_token": "<CHAR_PAD>",
         "char_unk_token": "<CHAR_UNK>",
@@ -787,66 +924,3 @@ class TokenClassificationDualEncoderWithStaticEmbeddings(
         if not hasattr(self, "char_pad_token_idx"):
             return None
         return self.char_pad_token_idx
-
-
-class SequenceClassificationEncoderWithBert(EncoderWithPlmEmbeddings):
-
-    def _reformat_and_validate(self, examples, labels=None):
-
-        # reformatting
-        if isinstance(examples, str):
-            examples = [examples]
-            if labels:
-                labels = [labels]
-
-        # validation for labels size
-        if labels:
-            if len(examples) != len(labels):
-                msg = f"Number of 'labels' ({len(labels)}) must be same as 'examples' " \
-                      f"({len(examples)}) when passing labels to " \
-                      f"{self.__class__.__name__}.batch_encode()"
-                raise AssertionError(msg)
-
-        return examples, labels
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[int, List[int]] = None,
-        padding_length: int = None,
-    ):
-        """
-        Returns batched encodings that can be used as an input to a featurizer
-        """
-
-        examples, labels = self._reformat_and_validate(examples, labels)
-
-        return_dict = {}
-        padding_length = padding_length or self.padding_length
-        if self.embedder_type == "bert":
-            # If padding_length is None, padding is done to the max length of the input batch
-            _inputs = self._bert_tokenizer(examples, padding=True, truncation=True,
-                                           max_length=padding_length, return_tensors="pt")
-            _outputs = self._bert_model(**_inputs, return_dict=True)
-
-            # last_hidden_state, pooler_output, seq_lengths are the keys being updated
-            return_dict.update({**_outputs, "seq_lengths": _inputs["attention_mask"].sum(dim=-1)})
-
-        if labels:
-            return_dict.update({"labels": torch.as_tensor(labels, dtype=torch.long)})
-
-        return return_dict
-
-
-class TokenClassificationEncoderWithBert(EncoderWithPlmEmbeddings):
-
-    def _reformat_and_validate(self, examples, labels=None):
-        raise NotImplementedError
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[int, List[int]] = None,
-        padding_length: int = None,
-    ):
-        raise NotImplementedError

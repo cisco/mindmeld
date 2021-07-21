@@ -65,7 +65,7 @@ class EmbeddingLayer(nn_module):
 
     def __init__(self, num_tokens, emb_dim, padding_idx=None,
                  embedding_weights=None, update_embeddings=True,
-                 coefficients=None, update_coefficients=True):
+                 embeddings_dropout=0.5, coefficients=None, update_coefficients=True):
         super().__init__()
 
         self.embeddings = nn.Embedding(num_tokens, emb_dim, padding_idx=padding_idx)
@@ -92,6 +92,8 @@ class EmbeddingLayer(nn_module):
             self.embedding_for_coefficients.load_state_dict({'weight': coefficients})
             self.embedding_for_coefficients.weight.requires_grad = update_coefficients
 
+        self.dropout = nn.Dropout(embeddings_dropout)
+
     def forward(self, padded_token_ids):
         # padded_token_ids: dim: [BS, SEQ_LEN]
         # returns:          dim: [BS, SEQ_LEN, EMB_DIM]
@@ -105,12 +107,14 @@ class EmbeddingLayer(nn_module):
             # [BS, SEQ_LEN, EMB_DIM] -> [BS, SEQ_LEN, EMB_DIM]
             outputs = torch.mul(outputs, coefficients)
 
+        outputs = self.dropout(outputs)
+
         return outputs
 
 
 class CnnLayer(nn_module):
 
-    def __init__(self, emb_dim, kernel_sizes, num_kernels):
+    def __init__(self, emb_dim, kernel_sizes, num_kernels, cnn_dropout):
         super().__init__()
 
         if isinstance(num_kernels, list) and len(num_kernels) != len(kernel_sizes):
@@ -135,6 +139,7 @@ class CnnLayer(nn_module):
                     nn.ReLU(),
                 )
             )
+        self.dropout = nn.Dropout(cnn_dropout)
 
     def forward(self, padded_token_embs):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
@@ -151,6 +156,7 @@ class CnnLayer(nn_module):
 
         # list([BS, n]) -> [BS, sum(n)]
         outputs = torch.cat(maxpool_conv_outputs, dim=1)
+        outputs = self.dropout(outputs)
 
         return outputs
 
@@ -164,6 +170,7 @@ class LstmLayer(nn_module):
             emb_dim, hidden_dim, num_layers=num_layers, dropout=lstm_dropout,
             bidirectional=bidirectional, batch_first=True
         )
+        self.dropout = nn.Dropout(lstm_dropout)
 
     def forward(self, padded_token_embs, lengths):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
@@ -175,6 +182,7 @@ class LstmLayer(nn_module):
                                       batch_first=True, enforce_sorted=False)
         lstm_outputs, _ = self.lstm(packed)
         outputs = pad_packed_sequence(lstm_outputs, batch_first=True)[0]
+        outputs = self.dropout(outputs)
 
         return outputs
 
@@ -225,50 +233,57 @@ class PoolingLayer(nn_module):
 
         return outputs
 
-# class TokenSpanPoolingLayer(nn_module):
-#
-#     def __init__(self, pooling_type):
-#         super().__init__()
-#
-#         pooling_type = pooling_type.lower()
-#
-#         ALLOWED_TYPES = ["start", "end", "max", "mean", "mean_sqrt"]
-#         assert pooling_type in ALLOWED_TYPES
-#
-#         self._requires_span_lengths = ["start", "end", "max", "mean", "mean_sqrt"]
-#
-#         self.pooling_type = pooling_type
-#
-#     def forward(self, padded_token_embs, span_lengths=None):
-#         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
-#         # span_lengths:      dim: List[List of Int summing up to <= SEQ_LEN]
-#         # returns:           dim: [BS, EMD_DIM]
-#
-#         if self.pooling_type in self._requires_length and lengths is None:
-#             msg = f"Missing required value 'lengths' for pooling_type: {self.pooling_type}"
-#             raise ValueError(msg)
-#
-#         if self.pooling_type == "start":
-#             outputs = padded_token_embs[:, 0, :]
-#         elif self.pooling_type == "end":
-#             last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
-#             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
-#         else:
-#             mask = pad_sequence(
-#                 [torch.as_tensor([1] * length_) for length_ in lengths], batch_first=True
-#             ).unsqueeze(-1).expand(padded_token_embs.size()).float()
-#             if self.pooling_type == "max":
-#                 padded_token_embs[mask == 0] = -1e9  # set to a large negative value
-#                 outputs, _ = torch.max(padded_token_embs, dim=1)[0]
-#             elif self.pooling_type == "mean":
-#                 summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
-#                 expanded_lengths = lengths.unsqueeze(dim=1).expand(
-#                     summed_padded_token_embs.size())
-#                 outputs = torch.div(summed_padded_token_embs, expanded_lengths)
-#             elif self.pooling_type == "mean_sqrt":
-#                 summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
-#                 expanded_lengths = lengths.unsqueeze(dim=1).expand(
-#                     summed_padded_token_embs.size())
-#                 outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
-#
-#         return outputs
+
+class TokenSpanPoolingLayer(nn_module):
+
+    def __init__(self, pooling_type):
+        super().__init__()
+
+        pooling_type = pooling_type.lower()
+
+        ALLOWED_TYPES = ["start", "end", "max", "mean", "mean_sqrt"]
+        assert pooling_type in ALLOWED_TYPES
+
+        self.pooling_type = pooling_type
+
+    def _split_and_pool(self, tensor_2d, list_of_chunk_lengths):
+        # tensor_2d:         dim: [SEQ_LEN, EMD_DIM]
+        # returns:           dim: [BS', EMD_DIM]
+
+        splits = torch.split(tensor_2d[:sum(list_of_chunk_lengths)], list_of_chunk_lengths, dim=0)
+        padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
+
+        if self.pooling_type == "start":
+            outputs = padded_token_embs[:, 0, :]
+        elif self.pooling_type == "end":
+            last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
+            outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
+        else:
+            mask = pad_sequence(
+                [torch.as_tensor([1] * length_) for length_ in lengths], batch_first=True
+            ).unsqueeze(-1).expand(padded_token_embs.size()).float()
+            if self.pooling_type == "max":
+                padded_token_embs[mask == 0] = -1e9  # set to a large negative value
+                outputs, _ = torch.max(padded_token_embs, dim=1)[0]
+            elif self.pooling_type == "mean":
+                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
+                expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
+                outputs = torch.div(summed_padded_token_embs, expanded_lengths)
+            elif self.pooling_type == "mean_sqrt":
+                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
+                expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
+                outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
+
+        return outputs
+
+    def forward(self, padded_token_embs, span_lengths):
+        # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
+        # span_lengths:      dim: List[List of Int summing up to SEQ_LEN' <= SEQ_LEN]
+        # returns:           dim: [BS, SEQ_LEN', EMD_DIM]
+
+        outputs = pad_sequence([
+            self._split_and_pool(_padded_token_embs, _span_lengths)
+            for _padded_token_embs, _span_lengths in zip(padded_token_embs, span_lengths)
+        ], batch_first=True)
+
+        return outputs

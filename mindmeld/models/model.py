@@ -690,18 +690,20 @@ class PytorchModel(BaseModel):
         metadata = super().load(path)
         model_config = metadata.get("model_config")
 
-        # disambiguate model class name
-        model = create_model(model_config)
-
-        # load clf if required
         try:
+            # disambiguate model class name
+            model = create_model(model_config)
             # disambiguate classifier type
             model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+            # other details of model
+            model._class_encoder = metadata["class_encoder"]
         except FileNotFoundError:
             # entity recognizers or role classifiers might just need to load metadata
+            #   ideally, some metadata needs to be loaded here for classifiers layer as well for
+            #   these two to work when their self._model=None
+            model = None
             pass
 
-        model._class_encoder = metadata["class_encoder"]
         metadata["model"] = model
 
         return metadata

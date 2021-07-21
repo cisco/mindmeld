@@ -436,8 +436,39 @@ class TaggerModel(Model):
 class PytorchTaggerModel(PytorchModel):
     ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm-pytorch", "cnn-lstm", "lstm-lstm"]
 
+    def __init__(self, config):
+        super().__init__(config)
+
+        self._no_entities = False
+        self.types = None
+
     def evaluate(self, examples, labels):
-        raise NotImplementedError
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the \
+                evaluation
+        """
+        if self._no_entities:
+            logger.info(
+                "There are no labels in this label set, so we don't "
+                "run model evaluation."
+            )
+            return
+
+        predictions = self.predict(examples)
+
+        evaluations = [
+            EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
+            for i, e in enumerate(examples)
+        ]
+
+        model_eval = EntityModelEvaluation(self.config, evaluations)
+        return model_eval
 
     def fit(self, examples, labels, params=None):
 
@@ -448,8 +479,6 @@ class PytorchTaggerModel(PytorchModel):
                 "There are no labels in this label set, so we don't " "fit the model."
             )
             return self
-        else:
-            self._no_entities = False
 
         # Encode classes
         self._label_encoder = get_label_encoder(self.config)
@@ -477,11 +506,20 @@ class PytorchTaggerModel(PytorchModel):
         if self._no_entities:
             return [()]
 
-        predicted_tags = self._clf.predict(examples)
+        y = self._clf.predict([ex.normalized_text for ex in examples])
+        flat_y = sum(y, [])
+        decoded_flat_y = self._class_encoder.inverse_transform(flat_y).tolist()
+        decoded_y = []
+        start_idx = 0
+        for seq_length in [len(_y) for _y in y]:
+            decoded_y.append(decoded_flat_y[start_idx: start_idx + seq_length])
+            start_idx += seq_length
+        y = list(decoded_y)
+
         # Decode the tags to labels
         labels = [
-            self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
-            for example_predicted_tags, example in zip(predicted_tags, examples)
+            self._label_encoder.decode([_y], examples=[example])[0]
+            for _y, example in zip(y, examples)
         ]
         return labels
 
@@ -494,12 +532,27 @@ class PytorchTaggerModel(PytorchModel):
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
+
+        # dismabiguation between glove and bert embedder
+        def _resolve_and_return_embedder_class():
+            allowed_embedder_types = [None, "glove", "bert"]
+            embedder_type = self.config.params.get("embedder_type")
+            if embedder_type not in allowed_embedder_types:
+                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
+                      f"embedder type model. Allowed values are {allowed_embedder_types}"
+                raise ValueError(msg)
+            return {
+                None: nn_modules.EmbedderForTokenClassification,
+                "glove": nn_modules.EmbedderForTokenClassification,
+                "bert": nn_modules.BertForTokenClassification
+            }[embedder_type]
+
         try:
             return {
-                "embedder": nn_modules.EmbedderForTokenClassification,
+                "embedder": _resolve_and_return_embedder_class(),
                 "lstm-pytorch": nn_modules.SequenceLstmForTokenClassification,
-                "cnn-lstm": nn_modules.TokenCnnSequenceLstmForTokenClassification,
-                "lstm-lstm": nn_modules.TokenLstmSequenceLstmForTokenClassification,
+                "cnn-lstm": nn_modules.CharCnnSequenceLstmForTokenClassification,
+                "lstm-lstm": nn_modules.CharLstmSequenceLstmForTokenClassification,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
